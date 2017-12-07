@@ -1,18 +1,17 @@
 //check whether the center is locked or not
 function checkCenterLock(box)
 {
-	rotatecamera = false;
-	//console.log(center, camerapos);
-	if (camerapos[2] != 0){
-        c0 = [0., 0., -1.*camerapos[2]];
-        rotate(c0, degToRad(xrot), degToRad(yrot), 0.);
-        center[0] -= c0[0];
-        center[1] -= c0[1];
-        center[2] += c0[2];
-	}
-	camerapos = [0.,0.,0.];
+
+	controls.dispose();
+
 	if (box.checked) {
+		xx = camera.getWorldDirection()
 		rotatecamera = true;
+		controls = new THREE.TrackballControls( camera, renderer.domElement );
+		controls.target = new THREE.Vector3(camera.position.x + xx.x, camera.position.y + xx.y, camera.position.z + xx.z);
+	} else {
+		rotatecamera = false;
+		controls = new THREE.FlyControls( camera , renderer.domElement);
 	}
 	updateUICenterText();
 	updateUICameraText();
@@ -466,9 +465,15 @@ function createDslider(){
 }
 function updateUICenterText()
 {
-    document.getElementById("CenterXText").value = controls.target.x + center.x;
-    document.getElementById("CenterYText").value = controls.target.y + center.y;
-    document.getElementById("CenterZText").value = controls.target.z + center.z;
+	if (rotatecamera){
+		document.getElementById("CenterXText").value = controls.target.x + center.x;
+		document.getElementById("CenterYText").value = controls.target.y + center.y;
+		document.getElementById("CenterZText").value = controls.target.z + center.z;
+	} else {
+		document.getElementById("CenterXText").value = 0;
+		document.getElementById("CenterYText").value = 0;
+		document.getElementById("CenterZText").value = 0;		
+	}
 }
 
 function updateUICameraText()
