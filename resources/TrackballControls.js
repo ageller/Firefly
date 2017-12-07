@@ -454,7 +454,6 @@ THREE.TrackballControls = function ( object, domElement ) {
 	function mouseup( event ) {
 
 		if ( _this.enabled === false ) return;
-
 		event.preventDefault();
 		event.stopPropagation();
 
@@ -605,6 +604,7 @@ THREE.TrackballControls = function ( object, domElement ) {
 
 	this.domElement.addEventListener( 'contextmenu', contextmenu, false );
 	this.domElement.addEventListener( 'mousedown', mousedown, false );
+        this.domElement.addEventListener( 'mouseup', mouseup, false );
 	this.domElement.addEventListener( 'wheel', mousewheel, false );
 
 	this.domElement.addEventListener( 'touchstart', touchstart, false );
