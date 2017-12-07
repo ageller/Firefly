@@ -115,7 +115,10 @@ function init() {
 
 	// renderer
 	if ( Detector.webgl )
-		renderer = new THREE.WebGLRenderer( {antialias:true} );
+		renderer = new THREE.WebGLRenderer( {
+			antialias:true,
+			//preserveDrawingBuffer: true , //so that we can save the image
+		} );
 	else
 		renderer = new THREE.CanvasRenderer(); 
 	renderer.setSize(screenWidth, screenHeight);

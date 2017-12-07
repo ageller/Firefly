@@ -71,51 +71,63 @@ function handleMouseUp(event) {
 }
 
 
-function renderImage() {
-    var buttonDiv = document.getElementById("button-div");
+function renderImage() {  
+//https://stackoverflow.com/questions/26193702/three-js-how-can-i-make-a-2d-snapshot-of-a-scene-as-a-jpg-image   
+//this sometimes breaks in Chrome when rendering takes too long
+//best to use Firefox to render images  
+    var imgData, imgNode;
+    var strDownloadMime = "image/octet-stream";
+    var strMime = "image/png";
+    var screenWidth = window.innerWidth;
+    var screenHeight = window.innerHeight;
+    var aspect = screenWidth / screenHeight;
 
-    saveWidth = canvas.width;
-    saveHeight = canvas.height;
-
-//resize
-
-    canvas.width = renderWidth;
-    canvas.height = renderHeight;
-    gl.viewportWidth = renderWidth;;
-    gl.viewportHeight = renderHeight;
-    applyFilterDecimate(reset=true);
-    mat4.perspective(fov, gl.viewportWidth / gl.viewportHeight, zmin, zmax, pMatrix);
-    drawScene();
-
-
-    //https://stackoverflow.com/questions/11112321/how-to-save-canvas-as-png-image
-    var w = window.open('about:blank','image from canvas');
-    w.onload = function() {
-        w.document.body.innerHTML = 'Loading image ... <br/> After the image loads, right click to download.'
-
-    };
-    
-    var i = setInterval(function(){
-        if (checkalldrawn()) {
-            //get the image and open in new browser tab
-            var d = canvas.toDataURL("image/png");
-            //var url = d.replace(/^data:image\/[^;]/, 'data:application/octet-stream');
-            //window.open(url);
-            w.document.write("<img src='" + d + "' alt='from canvas'/>");
-
-            //now reset the view
-            canvas.width = saveWidth;
-            canvas.height = saveHeight;
-            gl.viewportWidth = saveWidth;
-            gl.viewportHeight = saveHeight;
-            applyFilterDecimate(reset=true);
-            mat4.perspective(fov, gl.viewportWidth / gl.viewportHeight, zmin, zmax, pMatrix);
-            drawScene()
-
-            clearInterval(i);
+    var saveFile = function (strData, filename) {
+        var link = document.createElement('a');
+        if (typeof link.download === 'string') {
+            document.body.appendChild(link); //Firefox requires the link to be in the body
+            link.download = filename;
+            link.href = strData;
+            link.click();
+            document.body.removeChild(link); //remove the link when done
+        } else {
+            console.log("can't save image");
+            return;
+            //location.replace(uri);
         }
-    }, 200);
+
+    }
+
+
+    try {
+        //resize
+        renderer.setSize(renderWidth, renderHeight);
+        camera.aspect = renderWidth / renderHeight;
+        camera.updateProjectionMatrix();
+        renderer.render( scene, camera );
+
+        //save image
+        imgData = renderer.domElement.toDataURL(strMime);
+
+        saveFile(imgData.replace(strMime, strDownloadMime), "image.png");
+
+
+        //back to original size
+        renderer.setSize(screenWidth, screenHeight);
+        camera.aspect = aspect;
+        camera.updateProjectionMatrix();
+        renderer.render( scene, camera );
+
+    } catch (e) {
+        console.log(e);
+        return;
+    }
+
+
 
 
 }
+
+
+
 
