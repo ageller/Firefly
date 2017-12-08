@@ -388,7 +388,7 @@ function setDSliderHandle(i, value, parent) {
 function handleDSliderText(input, handle) 
 {
 	input.addEventListener('change', function(){
-		setPSliderHandle(handle, this.value, this.parent);
+		setDSliderHandle(handle, this.value, this.parent);
 	});
 	input.addEventListener('keydown', function( e ) {
 		var value = Number(input.parent.noUiSlider.get());
@@ -463,6 +463,88 @@ function createDslider(){
 	w = parseInt(d3.select("#DSlider").style("width").slice(0,-2));
 	d3.select("#DSlider").select('.noUi-base').style('width',w-10+"px");
 }
+
+
+/////////////////////////////////////////////
+// Friction slider
+function setCFSliderHandle(i, value, parent) {
+	value = Math.min(Math.max(0., parseFloat(value)),1.);
+
+	parent.noUiSlider.set(value);
+	if (rotatecamera){
+		controls.dynamicDampingFactor = value;
+	}
+	mouseDown = false; 
+
+}
+
+// Listen to keydown events on the input field.
+function handleCFSliderText(input, handle) 
+{
+	input.addEventListener('change', function(){
+		setCFSliderHandle(handle, this.value, this.parent);
+	});
+	input.addEventListener('keydown', function( e ) {
+		var value = Number(input.parent.noUiSlider.get());
+		var steps = input.parent.noUiSlider.options.steps;
+		var step = steps[handle];
+		//var max = max = document.getElementById(pID+"PRange").max;
+
+		switch ( e.which ) {
+			case 13:
+				setCFSliderHandle(handle, this.value, input.parent);
+				break;
+			case 38:
+				setCFSliderHandle(handle, value + step, input.parent);
+				break;
+			case 40:
+				setCFSliderHandle(handle, value - step, input.parent);
+				break;
+		}
+	});
+};
+
+function createCFslider(){
+
+	SliderCF = document.getElementById('CFSlider');
+	SliderCFmax = document.getElementById('CFMaxT');
+	if (SliderCF != null && SliderCFmax != null){
+		SliderCFInputs = [SliderCFmax];
+		SliderCFInputs[0].parent = SliderCF;
+		min = 0.;
+		max = 1.;
+
+		noUiSlider.create(SliderCF, {
+			start: [controls.dynamicDampingFactor],
+			connect: [true, false],
+			tooltips: false,
+			steps: [0.01],
+			range: {
+				'min': [min],
+				'max': [max]
+			},
+			format: wNumb({
+				decimals: 2
+			})
+		});
+
+		SliderCF.noUiSlider.on('mouseup', mouseDown=false); 
+		SliderCF.noUiSlider.on('update', function(values, handle) {
+
+			SliderCFInputs[handle].value = values[handle];
+			var value = Math.min(Math.max(0., parseFloat(values[handle])),1.);
+			if (rotatecamera){
+				controls.dynamicDampingFactor = value;
+			}
+			mouseDown = true;
+		});
+
+		SliderCFInputs.forEach(handleCFSliderText);
+	}
+	w = parseInt(d3.select("#CFSlider").style("width").slice(0,-2));
+	d3.select("#CFSlider").select('.noUi-base').style('width',w-10+"px");
+}
+
 function updateUICenterText()
 {
 	if (rotatecamera){
@@ -885,6 +967,7 @@ function createUI(){
 	createPsliders();
 	createNsliders();
 	createDslider();
+	createCFslider();
     createFilterSliders();
 
 
