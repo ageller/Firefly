@@ -65,7 +65,7 @@
 					<div class='pLabelDiv' style="width:215px"> Camera Controls </div>
 					<button id="CameraDropbtn" class="dropbtn" style="left:40px"onclick="showFunction(this)">▼</button>
 
-					<div id="CameraDropdown" class="dropdown-content" style="height:85px">
+					<div id="CameraDropdown" class="dropdown-content" style="height:120px">
 						<!-- Center -->
 						<div class='pLabelDiv' style="width:280px; margin-top:5px"> 
 							<div style="width:60px; display:inline-block"> Center </div>
@@ -91,6 +91,13 @@
 								<input id="RotYText" type="text" class="pTextInput" style="width:38px" value="0" autocomplete="off" onkeypress="checkText(this, event)">
 								<input id="RotZText" type="text" class="pTextInput" style="width:38px" value="0" autocomplete="off" onkeypress="checkText(this, event)">
 							</div>
+							<!-- Camera Friction -->
+							<div class="pLabelDiv" id="FrictionDiv" style="background-color:#808080; width:280px; padding-top:10px">
+								<div style="width:80px; display:inline-block"> Friction </div>
+								<div id='CFSlider' class='NSliderClass' style="margin-left:10px; width:170px"></div>
+								<input id='CFMaxT' class='NMaxTClass' type='text' style=" margin-top:-4px">
+							</div>	
+
 						</div>
 					</div>
 		

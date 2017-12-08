@@ -87,6 +87,10 @@ var SliderD;
 var SliderDmin;
 var SliderDmax;
 var SliderDInputs;
+var SliderCF;
+var SliderCFmin;
+var SliderCFmax;
+var SliderCFInputs;
 var keepAlpha = true;
 
 //help screen
@@ -108,7 +112,7 @@ function init() {
 	camera = new THREE.PerspectiveCamera( fov, aspect, zmin, zmax);
 	scene.add(camera);
 
-	camera.position.set(0,0,-100);//center.x, center.y, center.z); 
+	camera.position.set(0,0,-10);//center.x, center.y, center.z); 
 	camera.lookAt(scene.position);	
 
 	var dist = scene.position.distanceTo(camera.position);
@@ -137,6 +141,7 @@ function init() {
 	//Tcontrols = new THREE.TrackballControls( camera, renderer.domElement );
 	//Fcontrols = new THREE.FlyControls( camera , renderer.domElement);
 	controls = new THREE.TrackballControls( camera, renderer.domElement );
+	controls.dynamicDampingFactor = 0.1;
 
 	//controls = new THREE.FlyControls( camera , renderer.domElement);
 
