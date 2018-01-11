@@ -25,8 +25,9 @@ function drawScene()
 				SPHrad: {value: parts[p].doSPHrad},
 				uVertexScale: {value: PsizeMult[p]},
 				maxDistance: {value: boxSize},
-				cameraRot: {value: [0.,0.,0.]},
-
+				cameraNegZ: {value: [0.,0.,-1]},
+				cameraY: {value: [0.,1.,0.]},
+				cameraX: {value: [1.,0.,0.]},
 			},
 
 			vertexShader: myVertexShader,
@@ -52,7 +53,7 @@ function drawScene()
 		geo.addAttribute( 'alpha', new THREE.BufferAttribute( alphas, 1 ) );
 
 		//angles for velocities
-		var velVals = new Float32Array( parts[p].Coordinates.length * 3 ); // mag, angx, angy
+		var velVals = new Float32Array( parts[p].Coordinates.length * 3 ); // vx, vy, vz
 		geo.addAttribute( 'velVals', new THREE.BufferAttribute( velVals, 3 ) );
 
 		geo.setDrawRange( 0, parts[p].nMaxPlot );
@@ -63,17 +64,18 @@ function drawScene()
 		var positions = mesh.geometry.attributes.position.array;
 		var index = 0;
 		var vindex = 0;
-		for (var j=0; j<parts[p].Coordinates.length; j++){
 
+		for (var j=0; j<parts[p].Coordinates.length; j++){
 			//geo.vertices.push(new THREE.Vector3(parts[p].Coordinates[j][0], parts[p].Coordinates[j][1], parts[p].Coordinates[j][2] ))
+			
 			positions[index] = parts[p].Coordinates[j][0] - center.x;
-			velVals[index] = parts[p].VelVals[j][0];
+			velVals[index] = parts[p].VelVals[j][0]/parts[p].magVelocities[j];
 			index++;
 			positions[index] = parts[p].Coordinates[j][1] - center.y;
-			velVals[index] = parts[p].VelVals[j][1];
+			velVals[index] = parts[p].VelVals[j][1]/parts[p].magVelocities[j];
 			index++;
 			positions[index] = parts[p].Coordinates[j][2] - center.z;
-			velVals[index] = parts[p].VelVals[j][2];
+			velVals[index] = parts[p].VelVals[j][2]/parts[p].magVelocities[j];
 			index++;
 			alphas[j] = 1.;
 			

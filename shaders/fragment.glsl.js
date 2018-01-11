@@ -12,7 +12,9 @@ varying float vVertexScale;
 uniform vec4 color;
 
 uniform int SPHrad;
-uniform vec3 cameraRot;
+uniform vec3 cameraNegZ;
+uniform vec3 cameraX;
+uniform vec3 cameraY;
 
 const float PI = 3.1415926535897932384626433832795;
 
@@ -45,53 +47,37 @@ void main(void) {
         if (SPHrad == 1){
             float alpha_SPH =  -4.87537494*dist2*dist2 + 11.75074987*dist2*dist - 8.14117164*dist2 + 0.2657967*dist + 0.99328463;
             gl_FragColor.a *= alpha_SPH;
-
-        } else {
+        } 
+        else {
             gl_FragColor.a *= 1. - dist;
         }
-
-
- 
     } 
     if (vID == 1.){ //velocities, lines
-        vec2 pos = 2.*(gl_PointCoord - vec2(0.5));
-        //vec2 posRot;
-        //vec3 axis = vec3(1. - cos(cameraRot[1]), 0., cos(cameraRot[1]));
 
-        mat4 rot1 = rotationMatrix(cameraRot, vVelVals[1]);
-        mat4 rot2 = rotationMatrix(vec3(0., 0., 1.), vVelVals[1]);
-        vec2 posRot = (rot1 * vec4(pos, 0., 1.)).xy;
         
-        //vec2 maxSize = (rot2 * vec4(1., 0., 0., 1.)).xy;
+        float vyc = dot(vVelVals,cameraY);
+        // why is this negative? 
+        float vxc = -dot(vVelVals,cameraX); 
 
-        //posRot.x =     pos.x*cos(ang) + pos.y*sin(ang);
-        //posRot.y = -1.*pos.x*sin(ang) + pos.y*cos(ang);
-        float maxX = 1. - abs(cameraRot.x);
-        float maxY = 1. - abs(cameraRot.y);
-        //vec4 pos = mvMatrix * vec4(2.*(gl_PointCoord - vec2(0.5)), 0., 1.);
-        //vec2 center = vec2(0.5);
-        //vec2 pos = rotn * (gl_PointCoord - center) + center;
+        float vSize = sqrt(vyc*vyc+vxc*vxc)/sqrt(dot(vVelVals,vVelVals));
+        float theta = atan(vyc,vxc);
+        if (theta<0.0){
+            theta=theta+2.0*PI;
+        }
         
-        float fac = 1. - (length(cameraRot.yz) + 1.)/2.;
-        gl_FragColor.rgb +=  abs(fac - posRot.x );
+        mat4 rot1 = rotationMatrix(vec3(0,0,1), theta);
+        vec2 posRot = (rot1 * vec4(gl_PointCoord.x-0.5, gl_PointCoord.y-0.5,0., 1.)).xy;
+        posRot.x+=0.5;
 
-        //if (gl_PointCoord.x > maxSize.x){
-        //    discard;
-        //}
-
-        //if (gl_PointCoord.x > maxX){
-        //    discard;
-        //}
-
-        if (abs(posRot.y) > 0.2/vVertexScale || posRot.x < 0.){
+        if (abs(posRot.x) > vSize || abs(posRot.y)>0.05){
             discard;
         }
-        //if (abs(pos.y) > 0.05 || abs(pos.x) > 0.5){
-        //if (length(pos.xy) > length(size.xy)){
-        //    discard;
-        //}
 
-    }
+        gl_FragColor.r=1.;
+        gl_FragColor.g=1.-posRot.x/vSize;
+        gl_FragColor.b=1.-posRot.x/vSize;
+        gl_FragColor.a=posRot.x/vSize;
+}
 
     gl_FragColor.a *= vAlpha;
 }
