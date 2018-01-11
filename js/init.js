@@ -99,89 +99,89 @@ var helpMessage = 1;
 var incfoo = 0.;
 
 function init() {
-	// scene
-	scene = new THREE.Scene();
+    // scene
+    scene = new THREE.Scene();
 
-	// camera
-	var screenWidth = window.innerWidth;
-	var screenHeight = window.innerHeight;
-	var fov = 45;
-	var aspect = screenWidth / screenHeight;
-	var zmin = 1.;
-	var zmax = 5.e10;
-	camera = new THREE.PerspectiveCamera( fov, aspect, zmin, zmax);
-	scene.add(camera);
+    // camera
+    var screenWidth = window.innerWidth;
+    var screenHeight = window.innerHeight;
+    var fov = 45;
+    var aspect = screenWidth / screenHeight;
+    var zmin = 1.;
+    var zmax = 5.e10;
+    camera = new THREE.PerspectiveCamera( fov, aspect, zmin, zmax);
+    scene.add(camera);
 
-	camera.position.set(0,0,-10);//center.x, center.y, center.z); 
-	camera.lookAt(scene.position);	
+    camera.position.set(0,0,-10);//center.x, center.y, center.z); 
+    camera.lookAt(scene.position);  
 
-	var dist = scene.position.distanceTo(camera.position);
-	var vFOV = THREE.Math.degToRad( camera.fov ); // convert vertical fov to radians
-	height0 = 2 * Math.tan( vFOV / 2 ) * dist; // visible height
-	width0 = height0 * camera.aspect;           // visible width
+    var dist = scene.position.distanceTo(camera.position);
+    var vFOV = THREE.Math.degToRad( camera.fov ); // convert vertical fov to radians
+    height0 = 2 * Math.tan( vFOV / 2 ) * dist; // visible height
+    width0 = height0 * camera.aspect;           // visible width
 
-	// renderer
-	if ( Detector.webgl )
-		renderer = new THREE.WebGLRenderer( {
-			antialias:true,
-			//preserveDrawingBuffer: true , //so that we can save the image
-		} );
-	else
-		renderer = new THREE.CanvasRenderer(); 
-	renderer.setSize(screenWidth, screenHeight);
-	container = document.getElementById('WebGLContainer');
-	container.appendChild( renderer.domElement );
+    // renderer
+    if ( Detector.webgl )
+	renderer = new THREE.WebGLRenderer( {
+	    antialias:true,
+	    //preserveDrawingBuffer: true , //so that we can save the image
+	} );
+    else
+	renderer = new THREE.CanvasRenderer(); 
+    renderer.setSize(screenWidth, screenHeight);
+    container = document.getElementById('WebGLContainer');
+    container.appendChild( renderer.domElement );
 
-	// events
-	THREEx.WindowResize(renderer, camera);
-	THREEx.FullScreen.bindKey({ charCode : 'm'.charCodeAt(0) });
+    // events
+    THREEx.WindowResize(renderer, camera);
+    THREEx.FullScreen.bindKey({ charCode : 'm'.charCodeAt(0) });
 
-	// controls
+    // controls
 
-	//Tcontrols = new THREE.TrackballControls( camera, renderer.domElement );
-	//Fcontrols = new THREE.FlyControls( camera , renderer.domElement);
-	controls = new THREE.TrackballControls( camera, renderer.domElement );
-	controls.dynamicDampingFactor = 0.1;
+    //Tcontrols = new THREE.TrackballControls( camera, renderer.domElement );
+    //Fcontrols = new THREE.FlyControls( camera , renderer.domElement);
+    controls = new THREE.TrackballControls( camera, renderer.domElement );
+    controls.dynamicDampingFactor = 0.1;
 
-	//controls = new THREE.FlyControls( camera , renderer.domElement);
+    //controls = new THREE.FlyControls( camera , renderer.domElement);
 
-	//controls.dynamicDampingFactor = params.friction;
- 	//controls.zoomSpeed = params.zoomSpeed;
+    //controls.dynamicDampingFactor = params.friction;
+    //controls.zoomSpeed = params.zoomSpeed;
 
-	// light
-	//var light = new THREE.PointLight(0xffffff);
-	//light.position.set(100,250,100);
-	//scene.add(light);
+    // light
+    //var light = new THREE.PointLight(0xffffff);
+    //light.position.set(100,250,100);
+    //scene.add(light);
 
 
-	//stereo
-	effect = new THREE.StereoEffect( renderer );
-	effect.setAspect(1.);
-	//effect.setEyeSeparation(params.stereoSep);
+    //stereo
+    effect = new THREE.StereoEffect( renderer );
+    effect.setAspect(1.);
+    //effect.setEyeSeparation(params.stereoSep);
 
-	
-	camera.up.set(0, -1, 0);
+    
+    camera.up.set(0, -1, 0);
 
 }
 
 
 function calcFilterLimits(p, fkey){
 //calculate limits for the filters
-   	
-	var j=0;
-	if (parts[p][fkey] != null){
-	   	var i=0;
-	   	min = parts[p][fkey][i];
-	   	max = parts[p][fkey][i];
-	   	for (i=0; i< parts[p][fkey].length; i++){
-	   		min = Math.min(min, parts[p][fkey][i]);
-	   		max = Math.max(max, parts[p][fkey][i]);
-	   	}
-	   	//need to add a small factor here because of the precision of noUIslider
-	   	min -= 0.001;
-	   	max += 0.001;
-	   	filterLims[p][fkey] = [min, max];
+    
+    var j=0;
+    if (parts[p][fkey] != null){
+	var i=0;
+	min = parts[p][fkey][i];
+	max = parts[p][fkey][i];
+	for (i=0; i< parts[p][fkey].length; i++){
+	    min = Math.min(min, parts[p][fkey][i]);
+	    max = Math.max(max, parts[p][fkey][i]);
 	}
+	//need to add a small factor here because of the precision of noUIslider
+	min -= 0.001;
+	max += 0.001;
+	filterLims[p][fkey] = [min, max];
+    }
 }
 
 function calcVelVals(p){
@@ -201,28 +201,28 @@ function calcVelVals(p){
         if (mag < min){
             min = mag;
         }
-        parts[p].VelVals.push([mag, angx, angy]);
+        parts[p].VelVals.push([v[0],v[1],v[2]]);
         parts[p].magVelocities.push(mag);
     }
-    for (var i=0; i<parts[p].Velocities.length; i++){
-        parts[p].VelVals[i].push(parts[p].VelVals[i][0]/(max - min));
-    }
+    //for (var i=0; i<parts[p].Velocities.length; i++){
+    //    parts[p].VelVals[i].push(parts[p].VelVals[i][0]/(max - min));
+    //}
 
 }
 //initialize various values for the parts dict from the input data file, 
 function initPVals(){
-	for (var i=0; i<partsKeys.length; i++){
-		var p = partsKeys[i];
-		partsMesh[p] = [];
-		PsizeMult[p] = parts[p].sizeMult;
-		Pcolors[p] = parts[p].color;
-		updateFilter[p] = false;
-		filterLims[p] = {};
-		gtoggle[p] = true;
-		plotNmax[p] = parts[p].Coordinates.length;
-		plotParts[p] = true;
+    for (var i=0; i<partsKeys.length; i++){
+	var p = partsKeys[i];
+	partsMesh[p] = [];
+	PsizeMult[p] = parts[p].sizeMult;
+	Pcolors[p] = parts[p].color;
+	updateFilter[p] = false;
+	filterLims[p] = {};
+	gtoggle[p] = true;
+	plotNmax[p] = parts[p].Coordinates.length;
+	plotParts[p] = true;
 
-		parts[p].nMaxPlot = Math.min(parts[p].nMaxPlot, parts[p].Coordinates.length);
+	parts[p].nMaxPlot = Math.min(parts[p].nMaxPlot, parts[p].Coordinates.length);
 
         if (parts[p].Velocities != null){
             calcVelVals(p);
@@ -235,7 +235,7 @@ function initPVals(){
         for (var k=0; k<fkeys[p].length; k++){
             calcFilterLimits(p, fkeys[p][k]);
         }
-	}
+    }
 
 
 }
@@ -252,60 +252,60 @@ function setCenter(coords){
 
     var fee, foo;
     for( var i = 0; i < coords.length; i++ ){
-    	foo = new THREE.Vector3(coords[i][0], coords[i][0], coords[i][0]);
-    	fee = center.distanceTo(foo)
-    	if (fee > boxSize){
-    		boxSize = fee;
-    	}
+	foo = new THREE.Vector3(coords[i][0], coords[i][0], coords[i][0]);
+	fee = center.distanceTo(foo)
+	if (fee > boxSize){
+	    boxSize = fee;
 	}
+    }
 }
 
 
 function loadData(callback){
-	d3.json("data/filenames.json",  function(files) {
-	//d3.json("data/filenamesBox.json",  function(files) {
-		console.log(files)
-    	partsKeys = Object.keys(files);
-    	parts = {};
-    	partsKeys.forEach( function(p, i) {
-    		parts[p] = {};
-			d3.json("data/"+files[p],  function(foo) {
-		//	d3.json(files[p],  function(foo) {
-				parts[p] = foo;
-				if (i ==  partsKeys.length-1){
-					setTimeout(function(){ callback(); }, 100); //silly, but seems to fix the problem with loading
-				}
-			});
-    	});
-
-
+    d3.json("data/filenames.json",  function(files) {
+    //d3.json("data/filenamesBox.json",  function(files) {
+	console.log(files)
+	partsKeys = Object.keys(files);
+	parts = {};
+	partsKeys.forEach( function(p, i) {
+	    parts[p] = {};
+	    d3.json("data/"+files[p],  function(foo) {
+	//  d3.json(files[p],  function(foo) {
+		parts[p] = foo;
+		if (i ==  partsKeys.length-1){
+		    setTimeout(function(){ callback(); }, 1000); //silly, but seems to fix the problem with loading
+		}
+	    });
 	});
+
+
+    });
 
 }
 
 
 function WebGLStart(){
 
-	clearloading();
+    clearloading();
 
 //initialize
     setCenter(parts[partsKeys[0]].Coordinates);
-	initPVals();
+    initPVals();
 
-	document.addEventListener('mousedown', handleMouseDown);
-	document.addEventListener('mouseup', handleMouseUp);
+    document.addEventListener('mousedown', handleMouseDown);
+    document.addEventListener('mouseup', handleMouseUp);
 
-	init();
+    init();
     updateUICenterText();
 
-	createUI();
+    createUI();
     mouseDown = false;  //silly fix
 
 //draw everything
-	drawScene();
+    drawScene();
 
 //begin the animation
-	animate();
+    animate();
 }
 
 //////this will load the data, and then start the WebGL rendering
