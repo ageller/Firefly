@@ -1,6 +1,6 @@
 //all global variables
 
-var container, scene, MWscene, MWInnerScene, camera, renderer, controls, Tcontrols, Fcontrols, effect;
+var container, scene, MWscene, MWInnerScene, camera, renderer, controls, Tcontrols, Fcontrols, effect, normalRenderer;
 var keyboard = new KeyboardState();
 
 var partsMesh = {};
@@ -64,6 +64,9 @@ var filterLims = {};
 
 //camera controls
 rotatecamera = true;
+useStereo = false;
+stereoSep = 0.06;
+stereoSepMax = 2.;
 
 //for rendering to image
 var renderWidth = 1920;
@@ -129,6 +132,8 @@ function init() {
     else
 	renderer = new THREE.CanvasRenderer(); 
     renderer.setSize(screenWidth, screenHeight);
+    normalRenderer = renderer;
+
     container = document.getElementById('WebGLContainer');
     container.appendChild( renderer.domElement );
 
@@ -157,7 +162,7 @@ function init() {
     //stereo
     effect = new THREE.StereoEffect( renderer );
     effect.setAspect(1.);
-    //effect.setEyeSeparation(params.stereoSep);
+    effect.setEyeSeparation(stereoSep);
 
     
     camera.up.set(0, -1, 0);
