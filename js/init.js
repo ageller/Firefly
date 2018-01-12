@@ -66,7 +66,7 @@ var filterLims = {};
 rotatecamera = true;
 useStereo = false;
 stereoSep = 0.06;
-stereoSepMax = 2.;
+stereoSepMax = 1.;
 
 //for rendering to image
 var renderWidth = 1920;
