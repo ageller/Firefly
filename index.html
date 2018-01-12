@@ -65,7 +65,7 @@
 					<div class='pLabelDiv' style="width:215px"> Camera Controls </div>
 					<button id="CameraDropbtn" class="dropbtn" style="left:40px"onclick="showFunction(this)">▼</button>
 
-					<div id="CameraDropdown" class="dropdown-content" style="height:120px">
+					<div id="CameraDropdown" class="dropdown-content" style="height:140px">
 						<!-- Center -->
 						<div class='pLabelDiv' style="width:280px; margin-top:5px"> 
 							<div style="width:60px; display:inline-block"> Center </div>
@@ -93,9 +93,17 @@
 							</div>
 							<!-- Camera Friction -->
 							<div class="pLabelDiv" id="FrictionDiv" style="background-color:#808080; width:280px; padding-top:10px">
-								<div style="width:80px; display:inline-block"> Friction </div>
+								<div style="width:55px; display:inline-block"> Friction </div>
 								<div id='CFSlider' class='NSliderClass' style="margin-left:10px; width:170px"></div>
 								<input id='CFMaxT' class='NMaxTClass' type='text' style=" margin-top:-4px">
+							</div>	
+							<div class="pLabelDiv" id="StereoSepDiv" style="background-color:#808080; width:280px; padding-top:10px">
+								<div style="width:55px; display:inline-block"> Stereo </div>
+								<span style="width:10px; margin:0; padding:0;" id="StereoCheckDiv">
+									<input id="StereoCheckBox" type="checkbox" value="false" onchange="checkStereoLock(this)" autocomplete="off">
+								</span>
+								<div id='SSSlider' class='NSliderClass' style="margin-left:40px; width:140px"></div>
+								<input id='SSMaxT' class='NMaxTClass' type='text' style=" margin-top:-4px">
 							</div>	
 
 						</div>
