@@ -54,10 +54,9 @@ void main(void) {
     } 
     if (vID == 1.){ //velocities, lines
 
-        
-        float vyc = dot(vVelVals,cameraY);
         // why is this negative? 
-        float vxc = -dot(vVelVals,cameraX); 
+        float vyc = -dot(vVelVals,cameraY);
+        float vxc = dot(vVelVals,cameraX); 
 
         float vSize = sqrt(vyc*vyc+vxc*vxc)/sqrt(dot(vVelVals,vVelVals));
         float theta = atan(vyc,vxc);
