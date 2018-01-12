@@ -558,6 +558,106 @@ function updateUICenterText()
 	}
 }
 
+/////////////////////////////////////////////
+// Stereo Separation slider
+function checkStereoLock(box)
+{
+	if (box.checked) {
+		normalRenderer = renderer;
+		renderer = effect;
+		useStereo = true;
+	} else {
+		renderer = normalRenderer;
+		renderer.setSize(window.innerWidth, window.innerHeight);
+		useStereo = false;
+	}
+}
+function setSSSliderHandle(i, value, parent) {
+	var max = parent.noUiSlider.options.range.max[i];
+	if (value > max){
+		stereoSepMax = parseFloat(value);
+		parent.noUiSlider.updateOptions({
+			range: {
+				'min': [0],
+				'max': [parseFloat(value)]
+			}
+		});
+	}
+	value = Math.min(Math.max(0., parseFloat(value)),stereoSepMax);
+
+	parent.noUiSlider.set(value);
+	effect.setEyeSeparation(value);
+	
+	mouseDown = false; 
+
+}
+
+// Listen to keydown events on the input field.
+function handleSSSliderText(input, handle) 
+{
+	input.addEventListener('change', function(){
+		setSSSliderHandle(handle, this.value, this.parent);
+	});
+	input.addEventListener('keydown', function( e ) {
+		var value = Number(input.parent.noUiSlider.get());
+		var steps = input.parent.noUiSlider.options.steps;
+		var step = steps[handle];
+		//var max = max = document.getElementById(pID+"PRange").max;
+
+		switch ( e.which ) {
+			case 13:
+				setSSSliderHandle(handle, this.value, input.parent);
+				break;
+			case 38:
+				setSSSliderHandle(handle, value + step, input.parent);
+				break;
+			case 40:
+				setSSSliderHandle(handle, value - step, input.parent);
+				break;
+		}
+	});
+};
+
+function createSSslider(){
+
+	SliderSS = document.getElementById('SSSlider');
+	SliderSSmax = document.getElementById('SSMaxT');
+	if (SliderSS != null && SliderSSmax != null){
+		SliderSSInputs = [SliderSSmax];
+		SliderSSInputs[0].parent = SliderSS;
+		min = 0.;
+		max = stereoSepMax;
+
+		noUiSlider.create(SliderSS, {
+			start: [stereoSep],
+			connect: [true, false],
+			tooltips: false,
+			steps: [0.001],
+			range: {
+				'min': [min],
+				'max': [max]
+			},
+			format: wNumb({
+				decimals: 3
+			})
+		});
+
+		SliderSS.noUiSlider.on('mouseup', mouseDown=false); 
+		SliderSS.noUiSlider.on('update', function(values, handle) {
+
+			SliderSSInputs[handle].value = values[handle];
+
+			var value = Math.min(Math.max(0., parseFloat(values[handle])),stereoSepMax);
+			effect.setEyeSeparation(value);
+			mouseDown = true;
+		});
+
+		SliderSSInputs.forEach(handleSSSliderText);
+	}
+	w = parseInt(d3.select("#SSSlider").style("width").slice(0,-2));
+	d3.select("#SSSlider").select('.noUi-base').style('width',w-10+"px");
+}
+
 function updateUICameraText()
 {
     document.getElementById("CameraXText").value = camera.position.x + center.x;
@@ -968,6 +1068,7 @@ function createUI(){
 	createNsliders();
 	createDslider();
 	createCFslider();
+	createSSslider();
     createFilterSliders();
 
 
