@@ -8,10 +8,10 @@
 ehthumbs.db
 Thumbs.db
 
-#json files #
+# json files #
 ###################
 *.json
 
-#ipython checkpoints #
+# ipython checkpoints #
 ###################
 *ipynb_checkpoints*
