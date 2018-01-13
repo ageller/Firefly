@@ -10,4 +10,8 @@ Thumbs.db
 
 #json files #
 ###################
-.json
+*.json
+
+#ipython checkpoints #
+###################
+*ipynb_checkpoints$
