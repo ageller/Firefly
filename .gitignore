@@ -14,4 +14,4 @@ Thumbs.db
 
 #ipython checkpoints #
 ###################
-*ipynb_checkpoints$
+*ipynb_checkpoints*
