@@ -110,60 +110,63 @@ function createFilterSliders(){
 
 	var i = 0;
 	var j = 0;
-	var w = parseInt(d3.select('.FilterClass').style("width").slice(0,-2));
 	for (i=0; i<partsKeys.length; i++){
 		p = partsKeys[i];
-		SliderF[p] = {};
-		SliderFmin[p] = {};
-		SliderFmax[p] = {};
-		SliderFinputs[p] = {};
+		if (parts.options.UIdropdown[p] == 1){
 
-		for (j=0; j<fkeys[p].length; j++){
-			var fk = fkeys[p][j]
-			SliderF[p][fk] = document.getElementById(p+'_FK_'+fk+'_END_FilterSlider');
-			SliderFmin[p][fk] = document.getElementById(p+'_FK_'+fk+'_END_FilterMinT');
-			SliderFmax[p][fk] = document.getElementById(p+'_FK_'+fk+'_END_FilterMaxT');
-			if (SliderF[p][fk] != null && SliderFmin[p][fk] != null && SliderFmax[p][fk] != null && filterLims[p][fk] != null){
-				SliderFinputs[p][fk] = [SliderFmin[p][fk], SliderFmax[p][fk]];
-				SliderFinputs[p][fk][0].parent = SliderF[p][fk];
-				SliderFinputs[p][fk][1].parent = SliderF[p][fk];
-				min = filterLims[p][fk][0];
-				max = filterLims[p][fk][1];
+			SliderF[p] = {};
+			SliderFmin[p] = {};
+			SliderFmax[p] = {};
+			SliderFinputs[p] = {};
 
-				noUiSlider.create(SliderF[p][fk], {
-					start: [min, max],
-					connect: true,
-					tooltips: [false, false],
-					steps: [[0.001,0.001],[0.001,0.001]],
-					range: {
-						'min': [min],
-						'max': [max]
-					},
-					format: wNumb({
-					decimals: 3
-					})
-				});
-				SliderF[p][fk].noUiSlider.on('mouseup', mouseDown=false); 
-				SliderF[p][fk].noUiSlider.on('update', function(values, handle) {
-					var fpos = this.target.id.indexOf('_FK_');
-					var epos = this.target.id.indexOf('_END_');
-					var sl = this.target.id.length;
-					var pp = this.target.id.slice(0, fpos - sl);
-					var ffk = this.target.id.slice(fpos + 4, epos - sl);
-					SliderFinputs[pp][ffk][handle].value = values[handle];
-					filterLims[pp][ffk][handle] = values[handle];
-					updateFilter[pp] = true;
-					redraw = true;
-					mouseDown = true;
-					//keepAlpha = true;
-				});
+			for (j=0; j<fkeys[p].length; j++){
+				var fk = fkeys[p][j]
+				SliderF[p][fk] = document.getElementById(p+'_FK_'+fk+'_END_FilterSlider');
+				SliderFmin[p][fk] = document.getElementById(p+'_FK_'+fk+'_END_FilterMinT');
+				SliderFmax[p][fk] = document.getElementById(p+'_FK_'+fk+'_END_FilterMaxT');
+				if (SliderF[p][fk] != null && SliderFmin[p][fk] != null && SliderFmax[p][fk] != null && filterLims[p][fk] != null){
+					SliderFinputs[p][fk] = [SliderFmin[p][fk], SliderFmax[p][fk]];
+					SliderFinputs[p][fk][0].parent = SliderF[p][fk];
+					SliderFinputs[p][fk][1].parent = SliderF[p][fk];
+					min = filterLims[p][fk][0];
+					max = filterLims[p][fk][1];
 
-				SliderFinputs[p][fk].forEach(handleFSliderText);
+					noUiSlider.create(SliderF[p][fk], {
+						start: [min, max],
+						connect: true,
+						tooltips: [false, false],
+						steps: [[0.001,0.001],[0.001,0.001]],
+						range: {
+							'min': [min],
+							'max': [max]
+						},
+						format: wNumb({
+						decimals: 3
+						})
+					});
+					SliderF[p][fk].noUiSlider.on('mouseup', mouseDown=false); 
+					SliderF[p][fk].noUiSlider.on('update', function(values, handle) {
+						var fpos = this.target.id.indexOf('_FK_');
+						var epos = this.target.id.indexOf('_END_');
+						var sl = this.target.id.length;
+						var pp = this.target.id.slice(0, fpos - sl);
+						var ffk = this.target.id.slice(fpos + 4, epos - sl);
+						SliderFinputs[pp][ffk][handle].value = values[handle];
+						filterLims[pp][ffk][handle] = values[handle];
+						updateFilter[pp] = true;
+						redraw = true;
+						mouseDown = true;
+						//keepAlpha = true;
+					});
+
+					SliderFinputs[p][fk].forEach(handleFSliderText);
+				}
+				var w = parseInt(d3.select('.FilterClass').style("width").slice(0,-2));
+				d3.select('#'+p+'_FK_'+fk+'_END_FilterSlider').select('.noUi-base').style('width',w-10+"px");
+			 	d3.select('#'+p+'_FK_'+fk+'_END_FilterSlider').select('.noUi-connect').style('border-radius','6px 0px 0px 6px');
+			 	d3.select('#'+p+'_FK_'+fk+'_END_FilterSlider').select('.noUi-handle-lower').style('border-radius','6px 0px 0px 6px');
+
 			}
-			d3.select('#'+p+'_FK_'+fk+'_END_FilterSlider').select('.noUi-base').style('width',w-10+"px");
-		 	d3.select('#'+p+'_FK_'+fk+'_END_FilterSlider').select('.noUi-connect').style('border-radius','6px 0px 0px 6px');
-		 	d3.select('#'+p+'_FK_'+fk+'_END_FilterSlider').select('.noUi-handle-lower').style('border-radius','6px 0px 0px 6px');
-
 		}
 	}
 }
@@ -210,43 +213,46 @@ function createNsliders(){
 	var i = 0;
 	var j = 0;
 	for (i=0; i<partsKeys.length; i++){
+
 		p = partsKeys[i];
 
-		SliderN[p] = document.getElementById(p+'_NSlider');
-		SliderNmax[p] = document.getElementById(p+'_NMaxT');
-		if (SliderN[p] != null && SliderNmax[p] != null){
-			SliderNInputs[p] = [SliderNmax[p]];
-			SliderNInputs[p][0].parent = SliderN[p];
-			min = 0;
-			max = Math.round(parts[p].Coordinates.length/Decimate);
+		if (parts.options.UIdropdown[p] == 1){
 
-			noUiSlider.create(SliderN[p], {
-				start: [max],
-				connect: [true, false],
-				tooltips: [false],
-				steps: [1],
-				range: {
-					'min': [min],
-					'max': [max]
-				},
-				format: wNumb({
-				decimals: 0
-				})
-			});
-			SliderN[p].noUiSlider.on('mouseup', mouseDown=false); 
-			SliderN[p].noUiSlider.on('update', function(values, handle) {
-				var pp = this.target.id.slice(0, -8);
-				SliderNInputs[pp][handle].value = values[handle];
-				plotNmax[pp] = parseInt(values[handle]);
-				redraw = true;
-				mouseDown = true;
-			});
+			SliderN[p] = document.getElementById(p+'_NSlider');
+			SliderNmax[p] = document.getElementById(p+'_NMaxT');
+			if (SliderN[p] != null && SliderNmax[p] != null){
+				SliderNInputs[p] = [SliderNmax[p]];
+				SliderNInputs[p][0].parent = SliderN[p];
+				min = 0;
+				max = Math.round(parts[p].Coordinates.length/Decimate);
 
-			SliderNInputs[p].forEach(handleNSliderText);
+				noUiSlider.create(SliderN[p], {
+					start: [max],
+					connect: [true, false],
+					tooltips: [false],
+					steps: [1],
+					range: {
+						'min': [min],
+						'max': [max]
+					},
+					format: wNumb({
+					decimals: 0
+					})
+				});
+				SliderN[p].noUiSlider.on('mouseup', mouseDown=false); 
+				SliderN[p].noUiSlider.on('update', function(values, handle) {
+					var pp = this.target.id.slice(0, -8);
+					SliderNInputs[pp][handle].value = values[handle];
+					plotNmax[pp] = parseInt(values[handle]);
+					redraw = true;
+					mouseDown = true;
+				});
+
+				SliderNInputs[p].forEach(handleNSliderText);
+			}
+			w = parseInt(d3.select('#'+p+'_NSlider').style('width').slice(0,-2));
+			d3.select('#'+p+'_NSlider').select('.noUi-base').style('width',w-10+"px");
 		}
-		w = parseInt(d3.select('#'+p+'_NSlider').style('width').slice(0,-2));
-		d3.select('#'+p+'_NSlider').select('.noUi-base').style('width',w-10+"px");
-
 	}
 }
 
@@ -440,14 +446,16 @@ function createDslider(){
 			for (i=0; i<partsKeys.length; i++){
 				var p = partsKeys[i];
 				var max = Math.round(parts[p].Coordinates.length);
-				var val = parseFloat(SliderN[p].noUiSlider.get());
-				SliderN[p].noUiSlider.updateOptions({
-					range: {
-						'min': [0],
-						'max': [Math.round(max/parseFloat(values[handle]))]
-					}
-				});
-				SliderN[p].noUiSlider.set(Math.min(max, val*Decimate/parseFloat(values[handle])));
+				if (parts.options.UIdropdown[p] == 1){
+					var val = parseFloat(SliderN[p].noUiSlider.get());
+					SliderN[p].noUiSlider.updateOptions({
+						range: {
+							'min': [0],
+							'max': [Math.round(max/parseFloat(values[handle]))]
+						}
+					});
+					SliderN[p].noUiSlider.set(Math.min(max, val*Decimate/parseFloat(values[handle])));
+				}
 
 			}
 
@@ -908,140 +916,145 @@ function createUI(){
 		controls.append('input')
 			.attr('id',d+'ColorPicker');
 
-		controls.append('button')
-			.attr('id', d+'Dropbtn')
-			.attr('class', 'dropbtn')
-			.attr('onclick','showFunction(this)')
-			.html('&#x25BC');
+		if (parts.options.UIdropdown[d] == 1){
+			console.log(d, 'here')
+			controls.append('button')
+				.attr('id', d+'Dropbtn')
+				.attr('class', 'dropbtn')
+				.attr('onclick','showFunction(this)')
+				.html('&#x25BC');
 
-		dropdown = controls.append('div')
-			.attr('id',d+'Dropdown')
-			.attr('class','dropdown-content');
+			dropdown = controls.append('div')
+				.attr('id',d+'Dropdown')
+				.attr('class','dropdown-content');
 
-		dNcontent = dropdown.append('div')
-			.attr('class','NdDiv');
-
-		dNcontent.append('span')
-			.attr('class','pLabelDiv')
-			.attr('style','width:20px')
-			.text('N');
-
-		dNcontent.append('div')
-			.attr('id',d+'_NSlider')
-			.attr('class','NSliderClass');
-
-		dNcontent.append('input')
-			.attr('id',d+'_NMaxT')
-			.attr('class', 'NMaxTClass')
-			.attr('type','text');
-
-		var dheight = 30;
-
-//for velocity vectors
-
-		if (parts[d].Velocities != null){
-			dropdown.append('hr')
-				.style('margin','0')
-				.style('border','1px solid #909090')
-
-			dVcontent = dropdown.append('div')
+			dNcontent = dropdown.append('div')
 				.attr('class','NdDiv');
 
-			dVcontent.append('label')
-				.attr('for',d+'velCheckBox')
-				.text('Plot Velocity Vectors');
+			dNcontent.append('span')
+				.attr('class','pLabelDiv')
+				.attr('style','width:20px')
+				.text('N');
 
-			dVcontent.append('input')
-				.attr('id',d+'velCheckBox')
-				.attr('value','false')
-				.attr('type','checkbox')
-				.attr('autocomplete','off')
-				.attr('onchange','checkVelBox(this)');
+			dNcontent.append('div')
+				.attr('id',d+'_NSlider')
+				.attr('class','NSliderClass');
 
-			var selectVType = dVcontent.append('select')
-				.attr('class','selectVelType')
-				.attr('id',d+'_SelectVelType')
-				.on('change',selectVelType)
+			dNcontent.append('input')
+				.attr('id',d+'_NMaxT')
+				.attr('class', 'NMaxTClass')
+				.attr('type','text');
 
-			var options = selectVType.selectAll('option')
-				.data(velopts).enter()
-				.append('option')
-				.text(function (d) { return d; });
+			var dheight = 30;
 
-			dheight += 30;
-		}
+	//for velocity vectors
 
-//this is dynamic, depending on what is in the data
-//create the filters
-//first count the available filters
-		showfilts = [];
-		for (j=0; j<fkeys[d].length; j++){
-			var fk = fkeys[d][j]
-			if (parts[d][fk] != null){
-				showfilts.push(fk);
+			if (parts[d].Velocities != null){
+				dropdown.append('hr')
+					.style('margin','0')
+					.style('border','1px solid #909090')
+
+				dVcontent = dropdown.append('div')
+					.attr('class','NdDiv');
+
+				dVcontent.append('label')
+					.attr('for',d+'velCheckBox')
+					.text('Plot Velocity Vectors');
+
+				dVcontent.append('input')
+					.attr('id',d+'velCheckBox')
+					.attr('value','false')
+					.attr('type','checkbox')
+					.attr('autocomplete','off')
+					.attr('onchange','checkVelBox(this)');
+
+				var selectVType = dVcontent.append('select')
+					.attr('class','selectVelType')
+					.attr('id',d+'_SelectVelType')
+					.on('change',selectVelType)
+
+				var options = selectVType.selectAll('option')
+					.data(velopts).enter()
+					.append('option')
+					.text(function (d) { return d; });
+
+				dheight += 30;
 			}
-		}
-		nfilt = showfilts.length;
 
-		if (nfilt > 0){
-			dheight += 70;
-
-			dropdown.append('hr')
-				.style('margin','0')
-				.style('border','1px solid #909090')
-
-			var selectF = dropdown.append('div')
-				.attr('style','margin:0px;  padding:5px; height:20px')
-				.html('Filters &nbsp')	
-
-				.append('select')
-				.attr('class','selectFilter')
-				.attr('id',d+'_SelectFilter')
-				.on('change',selectFilter)
-
-			var options = selectF.selectAll('option')
-				.data(showfilts).enter()
-				.append('option')
-				.text(function (d) { return d; });
-
-
-			var filtn = 0;
+	//this is dynamic, depending on what is in the data
+	//create the filters
+	//first count the available filters
+			showfilts = [];
 			for (j=0; j<fkeys[d].length; j++){
 				var fk = fkeys[d][j]
 				if (parts[d][fk] != null){
-
-
-					dfilters = dropdown.append('div')
-						.attr('id',d+'_FK_'+fk+'_END_Filter')
-						.attr('class','FilterClass')
-
-					dfilters.append('div')
-						.attr('class','FilterClassLabel')
-
-					dfilters.append('div')
-						.attr('id',d+'_FK_'+fk+'_END_FilterSlider')
-						.style("margin-top","-1px")
-
-					dfilters.append('input')
-						.attr('id',d+'_FK_'+fk+'_END_FilterMinT')
-						.attr('class','FilterMinTClass')
-						.attr('type','text');
-
-					dfilters.append('input')
-						.attr('id',d+'_FK_'+fk+'_END_FilterMaxT')
-						.attr('class','FilterMaxTClass')
-						.attr('type','text');
-
-					filtn += 1;
-				}
-				if (filtn > 1){
-					d3.selectAll('#'+d+'_FK_'+fk+'_END_Filter')
-						.style('display','none');
+					showfilts.push(fk);
 				}
 			}
+			nfilt = showfilts.length;
 
-		} 
-		dropdown.style('height',dheight+'px');
+			if (nfilt > 0){
+				dheight += 70;
+
+				dropdown.append('hr')
+					.style('margin','0')
+					.style('border','1px solid #909090')
+
+				var selectF = dropdown.append('div')
+					.attr('style','margin:0px;  padding:5px; height:20px')
+					.html('Filters &nbsp')	
+
+					.append('select')
+					.attr('class','selectFilter')
+					.attr('id',d+'_SelectFilter')
+					.on('change',selectFilter)
+
+				var options = selectF.selectAll('option')
+					.data(showfilts).enter()
+					.append('option')
+					.text(function (d) { return d; });
+
+
+				var filtn = 0;
+				for (j=0; j<fkeys[d].length; j++){
+					var fk = fkeys[d][j]
+					if (parts[d][fk] != null){
+
+
+						dfilters = dropdown.append('div')
+							.attr('id',d+'_FK_'+fk+'_END_Filter')
+							.attr('class','FilterClass')
+
+						dfilters.append('div')
+							.attr('class','FilterClassLabel')
+
+						dfilters.append('div')
+							.attr('id',d+'_FK_'+fk+'_END_FilterSlider')
+							.style("margin-top","-1px")
+
+						dfilters.append('input')
+							.attr('id',d+'_FK_'+fk+'_END_FilterMinT')
+							.attr('class','FilterMinTClass')
+							.attr('type','text');
+
+						dfilters.append('input')
+							.attr('id',d+'_FK_'+fk+'_END_FilterMaxT')
+							.attr('class','FilterMaxTClass')
+							.attr('type','text');
+
+						filtn += 1;
+					}
+					if (filtn > 1){
+						d3.selectAll('#'+d+'_FK_'+fk+'_END_Filter')
+							.style('display','none');
+					}
+				}
+
+			} 
+			dropdown.style('height',dheight+'px');
+			dropdown.style('margin-top','-20px');
+
+		}
 
 /* for color pickers*/
 //can I write this in d3? I don't think so.  It needs a jquery object
