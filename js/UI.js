@@ -917,7 +917,6 @@ function createUI(){
 			.attr('id',d+'ColorPicker');
 
 		if (parts.options.UIdropdown[d] == 1){
-			console.log(d, 'here')
 			controls.append('button')
 				.attr('id', d+'Dropbtn')
 				.attr('class', 'dropbtn')
@@ -1058,21 +1057,28 @@ function createUI(){
 
 /* for color pickers*/
 //can I write this in d3? I don't think so.  It needs a jquery object
-	$("#"+d+"ColorPicker").spectrum({
-	    color: "rgba("+(Pcolors[d][0]*255)+","+(Pcolors[d][1]*255)+","+(Pcolors[d][2]*255)+","+Pcolors[d][3]+")",
-	    flat: false,
-	    showInput: true,
-	    showInitial: false,
-	    showAlpha: true,
-	    showPalette: false,
-	    showSelectionPalette: true,
-	    clickoutFiresChange: false,
-	    maxSelectionSize: 10,
-	    preferredFormat: "rgb",
-	    change: function(color) {
-	        checkColor(this, color);
-	    },
-    });
+		$("#"+d+"ColorPicker").spectrum({
+		    color: "rgba("+(Pcolors[d][0]*255)+","+(Pcolors[d][1]*255)+","+(Pcolors[d][2]*255)+","+Pcolors[d][3]+")",
+		    flat: false,
+		    showInput: true,
+		    showInitial: false,
+		    showAlpha: true,
+		    showPalette: false,
+		    showSelectionPalette: true,
+		    clickoutFiresChange: false,
+		    maxSelectionSize: 10,
+		    preferredFormat: "rgb",
+		    change: function(color) {
+		        checkColor(this, color);
+		    },
+		});
+
+		if (parts.options.UIcolorPicker[d] != 1){
+			$("#"+d+"ColorPicker").spectrum({
+			    color: "rgba("+(Pcolors[d][0]*255)+","+(Pcolors[d][1]*255)+","+(Pcolors[d][2]*255)+","+Pcolors[d][3]+")",
+			    disabled: true,
+			});		
+		}
 
 	}
 
