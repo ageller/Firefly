@@ -280,9 +280,13 @@ function loadData(callback){
 		if (i ==  partsKeys.length-1){
 		    setTimeout(function(){ callback(); }, 1000); //silly, but seems to fix the problem with loading
 		}
-	    });
+        });
 	});
 
+    var index = partsKeys.indexOf('options');
+    if (index > -1) {
+        partsKeys.splice(index, 1);
+    }
 
     });
 
@@ -292,6 +296,9 @@ function loadData(callback){
 function WebGLStart(){
 
     clearloading();
+
+//reset the window title
+    window.document.title = parts.options.title
 
 //initialize
     setCenter(parts[partsKeys[0]].Coordinates);

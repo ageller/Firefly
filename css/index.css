@@ -292,10 +292,11 @@ input:checked + .slideroo:before {
 
 /* dropdown menu */
 .dropbtn {
+	display:block;
 	position:relative;
-	left: 180px;
-	top: -5px;
-	height: 30px;
+	left: 260px;
+	top: -23px;
+	/*height: 30px; */
 	background-color: #d3d3d3;
 	padding: 2px;
 	padding-left:5px;
@@ -378,7 +379,7 @@ input:checked + .slideroo:before {
 
 .PSliderClass{
 	position:absolute;
-	margin-top:-31px;
+	margin-top:-23px;
 	left:100px;
 	width:110px;
 	height:20px;
