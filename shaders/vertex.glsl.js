@@ -1,14 +1,12 @@
 var myVertexShader = `
 
 attribute float alpha;
-attribute vec3 velVals;
+attribute vec4 velVals;
 
 varying float vID;
 varying float vAlpha;
 varying float glPointSize;
-varying mat4 mvMatrix;
-varying mat2 rotn;
-varying vec3 vVelVals;
+varying vec4 vVelVals;
 varying float vVertexScale;
 
 uniform float oID;
@@ -24,8 +22,6 @@ void main(void) {
     vAlpha = alpha;
     vVelVals = velVals;
     vVertexScale = uVertexScale;
-    mvMatrix = projectionMatrix;
-	rotn = mat2(cos(normal[0]), sin(normal[0]), -sin(normal[0]), cos(normal[0])); 
 
     vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
 

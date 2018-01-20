@@ -4,9 +4,7 @@ precision mediump float;
 varying float vID;
 varying float vAlpha;
 varying float glPointSize;
-varying mat4 mvMatrix;
-varying mat2 rotn;
-varying vec3 vVelVals;
+varying vec4 vVelVals;
 varying float vVertexScale;
 
 uniform vec4 color;
@@ -15,6 +13,7 @@ uniform int SPHrad;
 uniform vec3 cameraNegZ;
 uniform vec3 cameraX;
 uniform vec3 cameraY;
+uniform float velType; //0 = line, 1 = arrow, 2 = triangle
 
 const float PI = 3.1415926535897932384626433832795;
 
@@ -55,10 +54,12 @@ void main(void) {
     if (vID == 1.){ //velocities, lines
 
         // why is this negative? 
-        float vyc = -dot(vVelVals,cameraY);
-        float vxc = dot(vVelVals,cameraX); 
+        vec3 velVals = vVelVals.xyz;
 
-        float vSize = sqrt(vyc*vyc+vxc*vxc)/sqrt(dot(vVelVals,vVelVals));
+        float vyc = -dot(velVals,cameraY);
+        float vxc = dot(velVals,cameraX); 
+
+        float vSize = sqrt(vyc*vyc+vxc*vxc)/sqrt(dot(velVals,velVals))*vVelVals[3];
         float theta = atan(vyc,vxc);
         if (theta<0.0){
             theta=theta+2.0*PI;
@@ -67,15 +68,28 @@ void main(void) {
         mat4 rot1 = rotationMatrix(vec3(0,0,1), theta);
         vec2 posRot = (rot1 * vec4(gl_PointCoord.x-0.5, gl_PointCoord.y-0.5,0., 1.)).xy;
         posRot.x+=0.5;
-
-        if (abs(posRot.x) > vSize || abs(posRot.y)>0.05){
+ 
+        if (velType == 0.){ //line
+            if (abs(posRot.x) > vSize || abs(posRot.y) > 0.02 ){
+                discard;
+            } 
+        }
+        if (velType == 1.){ //arrow
             discard;
         }
+        float tH = 0.05; 
+        if (velType == 2.){ //triangle
+            if (abs(posRot.x) > vSize || abs(posRot.y) > abs(tH/vSize * posRot.x - tH)   ){
+                discard;
+            } 
+        } 
 
-        gl_FragColor.r=1.;
-        gl_FragColor.g=1.-posRot.x/vSize;
-        gl_FragColor.b=1.-posRot.x/vSize;
-        gl_FragColor.a=posRot.x/vSize;
+
+        //gl_FragColor.rgb +=  (1. - posRot.x/vSize); //white at tail
+        gl_FragColor.rgb +=  0.5*posRot.x/vSize; //white at head
+        gl_FragColor.a = posRot.x/vSize;
+
+        // maybe arrow?
 }
 
     gl_FragColor.a *= vAlpha;

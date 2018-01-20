@@ -62,6 +62,7 @@ function update(time){
 	for (var i=0; i<partsKeys.length; i++){
 		var p = partsKeys[i];
 		partsMesh[p].forEach( function( m, j ) {
+			m.material.uniforms.velType.value = velopts[velType[p]];
 			//m.material.uniforms.vrotMatrix.value = mm;
 			//m.material.uniforms.cameraRot.value = [Cangx, Cangy];
 			if (plotParts[p]) {
