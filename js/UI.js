@@ -35,8 +35,6 @@ function checkColor(event, color)
 	rgb = color.toRgb();
 	var pID = event.id.slice(0,-11); // remove  "ColorPicker" from id
 	Pcolors[pID] = [rgb.r/255., rgb.g/255., rgb.b/255., rgb.a];
-
-	redraw = true;	
 }
 
 
@@ -55,7 +53,6 @@ function setFSliderHandle(i, value, parent) {
 
 
 	filterLims[p][fk][i] = value;
-	redraw = true;
 	updateFilter[p] = true;
 	mouseDown = false; 
 }
@@ -154,7 +151,6 @@ function createFilterSliders(){
 						SliderFinputs[pp][ffk][handle].value = values[handle];
 						filterLims[pp][ffk][handle] = values[handle];
 						updateFilter[pp] = true;
-						redraw = true;
 						mouseDown = true;
 						//keepAlpha = true;
 					});
@@ -179,7 +175,6 @@ function setNSliderHandle(i, value, parent) {
 	parent.noUiSlider.set(value);
 	var p = parent.id.slice(0, -8);
 	plotNmax[p] = value;
-	redraw = true;
 	mouseDown = false; 
 }
 
@@ -244,7 +239,6 @@ function createNsliders(){
 					var pp = this.target.id.slice(0, -8);
 					SliderNInputs[pp][handle].value = values[handle];
 					plotNmax[pp] = parseInt(values[handle]);
-					redraw = true;
 					mouseDown = true;
 				});
 
@@ -273,7 +267,6 @@ function setPSliderHandle(i, value, parent) {
 	parent.noUiSlider.set(value);
 	var p = parent.id.slice(0, -8);
 	PsizeMult[p] = value;
-	redraw = true;
 	mouseDown = false; 
 
 }
@@ -340,7 +333,6 @@ function createPsliders(){
 				var pp = this.target.id.slice(0, -8);
 				SliderPInputs[pp][handle].value = values[handle];
 				PsizeMult[pp] = parseFloat(values[handle]);
-				redraw = true;
 				mouseDown = true;
 				//keepAlpha = true;
 
@@ -384,7 +376,6 @@ function setDSliderHandle(i, value, parent) {
 	r[i] = value;
 	parent.noUiSlider.set(value);
 	Decimate = value;
-	redraw = true;
 	mouseDown = false; 
 
 }
@@ -461,7 +452,6 @@ function createDslider(){
 
 			SliderDInputs[handle].value = values[handle];
 			Decimate = parseFloat(values[handle]);
-			redraw = true;
 			mouseDown = true;
 			//keepAlpha = true;
 		});
@@ -688,7 +678,6 @@ function checkText(input, event)
 	var key=event.keyCode || event.which;
   	if (key==13){
   		tickN = 1;
-		redraw = true;
 
 
         if (input.id == "CenterXText"){
@@ -742,7 +731,6 @@ function checkPlotParts(checkbox)
        		plotParts[pID] = true;
     	}
     } 
-    redraw = true;
 }
 
 
@@ -857,7 +845,6 @@ function selectVelType() {
 
 	var p = this.id.slice(0,-14)
 	velType[p] = selectValue;
-	redraw = true;
 };
 
 function createUI(){
@@ -973,7 +960,7 @@ function createUI(){
 					.on('change',selectVelType)
 
 				var options = selectVType.selectAll('option')
-					.data(velopts).enter()
+					.data(Object.keys(velopts)).enter()
 					.append('option')
 					.text(function (d) { return d; });
 

@@ -35,7 +35,6 @@ var Decimate = 1;
 var tickwait = 1;
 var addtickwait = 10;
 var drawit = true;
-var redraw = false;
 var tickN = 0
 
 //Filtering
@@ -74,8 +73,9 @@ var renderHeight = 1200;
 
 //for deciding whether to show velocity vectors
 var showVel = {};
-var velopts = ['line', 'arrow', 'cone']
+var velopts = {'line':0., 'arrow':1., 'triangle':2.};
 var velType = {};
+var maxVrange = 1000.; //maximum dynamic range for length of velocity vectors
 
 //for single sliders
 var SliderN = {};
@@ -195,6 +195,7 @@ function calcVelVals(p){
     var mag, angx, angy, v;
     var max = -1.;
     var min = 1.e20;
+    var vdif = 1.;
     for (var i=0; i<parts[p].Velocities.length; i++){
         v = parts[p].Velocities[i];
         mag = Math.sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
@@ -209,10 +210,10 @@ function calcVelVals(p){
         parts[p].VelVals.push([v[0],v[1],v[2]]);
         parts[p].magVelocities.push(mag);
     }
-    //for (var i=0; i<parts[p].Velocities.length; i++){
-    //    parts[p].VelVals[i].push(parts[p].VelVals[i][0]/(max - min));
-    //}
-
+    vdif = Math.min(max - min, maxVrange);
+    for (var i=0; i<parts[p].Velocities.length; i++){
+        parts[p].VelVals[i].push( THREE.Math.clamp((parts[p].magVelocities[i] - min) / vdif, 0., 1.));
+    }
 }
 //initialize various values for the parts dict from the input data file, 
 function initPVals(){
