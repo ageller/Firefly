@@ -91,13 +91,19 @@ class FIREreader(object):
                        'PartType1': [0],  
                        'PartType2': [0],  
                        'PartType4': [0] }  
-        
+
+
         #the name of the JSON file
         self.JSONfname = 'FIREdata.json'
         
         #a dictionary of options for the WebGL app
-        self.options = {'title':'WebGLonFIRE'}
-        
+        #a dictionary of options for the WebGL app
+        self.options = {'title':'WebGLonFIRE', #set the title of the webpage
+                       'UIdropdown':dict(), #do you want to enable the dropdown menus for particles in the user interface (default = 1 == True)
+                       'UIcolorPicker':dict(), #do you want to allow the user to change the color
+                       'center':None, #do you want to define the initial camera center (if not, the WebGL app will calculate the center as the mean of the coordinates of the first particle set loaded in)
+                       } 
+
         #in case you want to print the available keys to the screen
         self.showkeys = False
 
@@ -163,9 +169,11 @@ class FIREreader(object):
         
         #a dictionary of options for the WebGL app
         self.options = {'title':'WebGLonFIRE', #set the title of the webpage
-                       'UIdropdown':dict(), #do you want to enable the dropdown menus for particles in the user interface (default = 1 == True)
-                       'UIcolorPicker':dict(), #do you want to allow the user to change the color
-                       } 
+                        'UIdropdown':dict(), #do you want to enable the dropdown menus for particles in the user interface (default = 1 == True)
+                        'UIcolorPicker':dict(), #do you want to allow the user to change the color
+                        'center':None, #do you want to define the initial camera center (if not, the WebGL app will calculate the center as the mean of the coordinates of the first particle set loaded in)
+                        'cameraDistance':np.array([0., 0. -10]), #initial camera location, NOTE: the magnitude must be >0
+                      } 
         
         #the name of the JSON file
         self.JSONfname = 'FIREdata'
