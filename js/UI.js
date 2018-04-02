@@ -40,19 +40,47 @@ function checkColor(event, color)
 
 /////////////////////////////////////////////
 // Filter sliders
-function setFSliderHandle(i, value, parent) {
-	var r = [null,null];
-	r[i] = value;
-	parent.noUiSlider.set(r);
+function setFSliderHandle(i, value, parent, reset=false) {
+
 	// I need a better way to do this!
 	var fpos = parent.id.indexOf('_FK_');
 	var epos = parent.id.indexOf('_END_');
 	var sl = parent.id.length;
 	var p = parent.id.slice(0, fpos - sl);
 	var fk = parent.id.slice(fpos + 4, epos - sl);
-
-
 	params.filterLims[p][fk][i] = value;
+
+	//reset the filter limits if there is a text entry
+	if (reset){
+		var fmin = parseFloat(params.filterLims[p][fk][0]);
+		var fmax = parseFloat(params.filterLims[p][fk][1]);
+		var max = parseFloat(parent.noUiSlider.options.range.max[0]);
+		var min = parseFloat(parent.noUiSlider.options.range.min[0]);
+
+		if (i == 0){
+			parent.noUiSlider.updateOptions({
+				range: {
+					'min': [parseFloat(value)],
+					'max': [max]
+				}
+			});
+		}
+		if (i == 1){
+			parent.noUiSlider.updateOptions({
+				range: {
+					'min': [min],
+					'max': [parseFloat(value)]
+				}
+			});
+		}
+	}
+
+	var r = parent.noUiSlider.get()
+	r[i] = value;
+	parent.noUiSlider.set(r);
+
+
+
 	params.updateFilter[p] = true;
 	mouseDown = false; 
 }
@@ -76,7 +104,7 @@ function handleFSliderText(input, handle)
 		// 40 is key down.
 		switch ( e.which ) {
 			case 13:
-				setFSliderHandle(handle, this.value, input.parent);
+				setFSliderHandle(handle, this.value, input.parent, reset=true);
 				break;
 			case 38:
 				// Get step to go increase slider value (up)
@@ -87,7 +115,7 @@ function handleFSliderText(input, handle)
 				}
 				// null = edge of slider
 				if ( position !== null ) {
-					setFSliderHandle(handle, value + position, input.parent);
+					setFSliderHandle(handle, value + position, input.parent, reset=false);
 				}
 				break;
 			case 40:
@@ -96,7 +124,7 @@ function handleFSliderText(input, handle)
 					position = 1;
 				}
 				if ( position !== null ) {
-					setFSliderHandle(handle, value - position, input.parent);
+					setFSliderHandle(handle, value - position, input.parent, reset=false);
 				}
 				break;
 		}
@@ -252,7 +280,7 @@ function createNsliders(){
 /////////////////////////////////////////////
 // Psize sliders
 function setPSliderHandle(i, value, parent) {
-	var max = parent.noUiSlider.options.range.max[i];
+	var max = parent.noUiSlider.options.range.max[0];
 	if (value > max){
 		parent.noUiSlider.updateOptions({
 			range: {
