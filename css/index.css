@@ -319,6 +319,7 @@ input:checked + .slideroo:before {
 	width: 290px;
 	padding:0;
 	margin:-5px;
+	margin-top:-20px;
 	overflow: auto;
 	z-index: 2;
 	left:0;

@@ -19,8 +19,8 @@ function exitHandler(){
 }
 //hide the splash screen
 function hideSplash(){
-    if (loaded){
-        helpMessage = 0;
+    if (params.loaded){
+        params.helpMessage = 0;
         var fdur = 700.;
 
         var splash = d3.select("#splash");
@@ -38,8 +38,8 @@ function hideSplash(){
 
 //hide the splash screen
 function showSplash(){
-    if (loaded){
-        helpMessage = 1;
+    if (params.loaded){
+        params.helpMessage = 1;
         var fdur = 700.;
 
         var splash = d3.select("#splash");
@@ -101,10 +101,10 @@ function renderImage() {
 
     try {
         //resize
-        renderer.setSize(renderWidth, renderHeight);
-        camera.aspect = renderWidth / renderHeight;
-        camera.updateProjectionMatrix();
-        renderer.render( scene, camera );
+        params.renderer.setSize(params.renderWidth, params.renderHeight);
+        params.camera.aspect = params.renderWidth / params.renderHeight;
+        params.camera.updateProjectionMatrix();
+        params.renderer.render( params.scene, params.camera );
 
         //save image
         imgData = renderer.domElement.toDataURL(strMime);
@@ -113,10 +113,10 @@ function renderImage() {
 
 
         //back to original size
-        renderer.setSize(screenWidth, screenHeight);
-        camera.aspect = aspect;
-        camera.updateProjectionMatrix();
-        renderer.render( scene, camera );
+        params.renderer.setSize(screenWidth, screenHeight);
+        params.camera.aspect = aspect;
+        params.camera.updateProjectionMatrix();
+        params.renderer.render( params.scene, params.camera );
 
     } catch (e) {
         console.log(e);

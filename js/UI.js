@@ -2,16 +2,16 @@
 function checkCenterLock(box)
 {
 
-	controls.dispose();
+	params.controls.dispose();
 
 	if (box.checked) {
-		xx = camera.getWorldDirection()
-		rotatecamera = true;
-		controls = new THREE.TrackballControls( camera, renderer.domElement );
-		controls.target = new THREE.Vector3(camera.position.x + xx.x, camera.position.y + xx.y, camera.position.z + xx.z);
+		xx = params.camera.getWorldDirection()
+		params.rotatecamera = true;
+		params.controls = new THREE.TrackballControls( params.camera, params.renderer.domElement );
+		params.controls.target = new THREE.Vector3(params.camera.position.x + xx.x, params.camera.position.y + xx.y, params.camera.position.z + xx.z);
 	} else {
-		rotatecamera = false;
-		controls = new THREE.FlyControls( camera , renderer.domElement);
+		params.rotatecamera = false;
+		params.controls = new THREE.FlyControls( params.camera , params.renderer.domElement);
 	}
 	updateUICenterText();
 	updateUICameraText();
@@ -22,9 +22,9 @@ function checkCenterLock(box)
 function checkVelBox(box)
 {
 	var pID = box.id.slice(0, -11)
-	showVel[pID] = false;
+	params.showVel[pID] = false;
 	if (box.checked){
-		showVel[pID] = true;
+		params.showVel[pID] = true;
 	}
 
 }
@@ -34,7 +34,7 @@ function checkColor(event, color)
 {
 	rgb = color.toRgb();
 	var pID = event.id.slice(0,-11); // remove  "ColorPicker" from id
-	Pcolors[pID] = [rgb.r/255., rgb.g/255., rgb.b/255., rgb.a];
+	params.Pcolors[pID] = [rgb.r/255., rgb.g/255., rgb.b/255., rgb.a];
 }
 
 
@@ -52,8 +52,8 @@ function setFSliderHandle(i, value, parent) {
 	var fk = parent.id.slice(fpos + 4, epos - sl);
 
 
-	filterLims[p][fk][i] = value;
-	updateFilter[p] = true;
+	params.filterLims[p][fk][i] = value;
+	params.updateFilter[p] = true;
 	mouseDown = false; 
 }
 
@@ -107,28 +107,28 @@ function createFilterSliders(){
 
 	var i = 0;
 	var j = 0;
-	for (i=0; i<partsKeys.length; i++){
-		p = partsKeys[i];
-		if (parts.options.UIdropdown[p] == 1){
+	for (i=0; i<params.partsKeys.length; i++){
+		p = params.partsKeys[i];
+		if (params.parts.options.UIdropdown[p] == 1){
 
-			SliderF[p] = {};
-			SliderFmin[p] = {};
-			SliderFmax[p] = {};
-			SliderFinputs[p] = {};
+			params.SliderF[p] = {};
+			params.SliderFmin[p] = {};
+			params.SliderFmax[p] = {};
+			params.SliderFinputs[p] = {};
 
-			for (j=0; j<fkeys[p].length; j++){
-				var fk = fkeys[p][j]
-				SliderF[p][fk] = document.getElementById(p+'_FK_'+fk+'_END_FilterSlider');
-				SliderFmin[p][fk] = document.getElementById(p+'_FK_'+fk+'_END_FilterMinT');
-				SliderFmax[p][fk] = document.getElementById(p+'_FK_'+fk+'_END_FilterMaxT');
-				if (SliderF[p][fk] != null && SliderFmin[p][fk] != null && SliderFmax[p][fk] != null && filterLims[p][fk] != null){
-					SliderFinputs[p][fk] = [SliderFmin[p][fk], SliderFmax[p][fk]];
-					SliderFinputs[p][fk][0].parent = SliderF[p][fk];
-					SliderFinputs[p][fk][1].parent = SliderF[p][fk];
-					min = filterLims[p][fk][0];
-					max = filterLims[p][fk][1];
+			for (j=0; j<params.fkeys[p].length; j++){
+				var fk = params.fkeys[p][j]
+				params.SliderF[p][fk] = document.getElementById(p+'_FK_'+fk+'_END_FilterSlider');
+				params.SliderFmin[p][fk] = document.getElementById(p+'_FK_'+fk+'_END_FilterMinT');
+				params.SliderFmax[p][fk] = document.getElementById(p+'_FK_'+fk+'_END_FilterMaxT');
+				if (params.SliderF[p][fk] != null && params.SliderFmin[p][fk] != null && params.SliderFmax[p][fk] != null && params.filterLims[p][fk] != null){
+					params.SliderFinputs[p][fk] = [params.SliderFmin[p][fk], params.SliderFmax[p][fk]];
+					params.SliderFinputs[p][fk][0].parent = params.SliderF[p][fk];
+					params.SliderFinputs[p][fk][1].parent = params.SliderF[p][fk];
+					min = params.filterLims[p][fk][0];
+					max = params.filterLims[p][fk][1];
 
-					noUiSlider.create(SliderF[p][fk], {
+					noUiSlider.create(params.SliderF[p][fk], {
 						start: [min, max],
 						connect: true,
 						tooltips: [false, false],
@@ -141,21 +141,20 @@ function createFilterSliders(){
 						decimals: 3
 						})
 					});
-					SliderF[p][fk].noUiSlider.on('mouseup', mouseDown=false); 
-					SliderF[p][fk].noUiSlider.on('update', function(values, handle) {
+					params.SliderF[p][fk].noUiSlider.on('mouseup', mouseDown=false); 
+					params.SliderF[p][fk].noUiSlider.on('update', function(values, handle) {
 						var fpos = this.target.id.indexOf('_FK_');
 						var epos = this.target.id.indexOf('_END_');
 						var sl = this.target.id.length;
 						var pp = this.target.id.slice(0, fpos - sl);
 						var ffk = this.target.id.slice(fpos + 4, epos - sl);
-						SliderFinputs[pp][ffk][handle].value = values[handle];
-						filterLims[pp][ffk][handle] = values[handle];
-						updateFilter[pp] = true;
+						params.SliderFinputs[pp][ffk][handle].value = values[handle];
+						params.filterLims[pp][ffk][handle] = values[handle];
+						params.updateFilter[pp] = true;
 						mouseDown = true;
-						//keepAlpha = true;
 					});
 
-					SliderFinputs[p][fk].forEach(handleFSliderText);
+					params.SliderFinputs[p][fk].forEach(handleFSliderText);
 				}
 				var w = parseInt(d3.select('.FilterClass').style("width").slice(0,-2));
 				d3.select('#'+p+'_FK_'+fk+'_END_FilterSlider').select('.noUi-base').style('width',w-10+"px");
@@ -174,7 +173,7 @@ function setNSliderHandle(i, value, parent) {
 	r[i] = value;
 	parent.noUiSlider.set(value);
 	var p = parent.id.slice(0, -8);
-	plotNmax[p] = value;
+	params.plotNmax[p] = value;
 	mouseDown = false; 
 }
 
@@ -207,21 +206,21 @@ function createNsliders(){
 
 	var i = 0;
 	var j = 0;
-	for (i=0; i<partsKeys.length; i++){
+	for (i=0; i<params.partsKeys.length; i++){
 
-		p = partsKeys[i];
+		p = params.partsKeys[i];
 
-		if (parts.options.UIdropdown[p] == 1){
+		if (params.parts.options.UIdropdown[p] == 1){
 
-			SliderN[p] = document.getElementById(p+'_NSlider');
-			SliderNmax[p] = document.getElementById(p+'_NMaxT');
-			if (SliderN[p] != null && SliderNmax[p] != null){
-				SliderNInputs[p] = [SliderNmax[p]];
-				SliderNInputs[p][0].parent = SliderN[p];
+			params.SliderN[p] = document.getElementById(p+'_NSlider');
+			params.SliderNmax[p] = document.getElementById(p+'_NMaxT');
+			if (params.SliderN[p] != null && params.SliderNmax[p] != null){
+				params.SliderNInputs[p] = [params.SliderNmax[p]];
+				params.SliderNInputs[p][0].parent = params.SliderN[p];
 				min = 0;
-				max = Math.round(parts[p].Coordinates.length/Decimate);
+				max = Math.round(params.parts[p].Coordinates.length/params.Decimate);
 
-				noUiSlider.create(SliderN[p], {
+				noUiSlider.create(params.SliderN[p], {
 					start: [max],
 					connect: [true, false],
 					tooltips: [false],
@@ -234,15 +233,15 @@ function createNsliders(){
 					decimals: 0
 					})
 				});
-				SliderN[p].noUiSlider.on('mouseup', mouseDown=false); 
-				SliderN[p].noUiSlider.on('update', function(values, handle) {
+				params.SliderN[p].noUiSlider.on('mouseup', mouseDown=false); 
+				params.SliderN[p].noUiSlider.on('update', function(values, handle) {
 					var pp = this.target.id.slice(0, -8);
-					SliderNInputs[pp][handle].value = values[handle];
-					plotNmax[pp] = parseInt(values[handle]);
+					params.SliderNInputs[pp][handle].value = values[handle];
+					params.plotNmax[pp] = parseInt(values[handle]);
 					mouseDown = true;
 				});
 
-				SliderNInputs[p].forEach(handleNSliderText);
+				params.SliderNInputs[p].forEach(handleNSliderText);
 			}
 			w = parseInt(d3.select('#'+p+'_NSlider').style('width').slice(0,-2));
 			d3.select('#'+p+'_NSlider').select('.noUi-base').style('width',w-10+"px");
@@ -266,7 +265,7 @@ function setPSliderHandle(i, value, parent) {
 	r[i] = value;
 	parent.noUiSlider.set(value);
 	var p = parent.id.slice(0, -8);
-	PsizeMult[p] = value;
+	params.PsizeMult[p] = value;
 	mouseDown = false; 
 
 }
@@ -303,19 +302,19 @@ function createPsliders(){
 
 	var i = 0;
 	var j = 0;
-	for (i=0; i<partsKeys.length; i++){
-		p = partsKeys[i];
+	for (i=0; i<params.partsKeys.length; i++){
+		p = params.partsKeys[i];
 
-		SliderP[p] = document.getElementById(p+'_PSlider');
-		SliderPmax[p] = document.getElementById(p+'_PMaxT');
-		if (SliderP[p] != null && SliderPmax[p] != null){
-			SliderPInputs[p] = [SliderPmax[p]];
-			SliderPInputs[p][0].parent = SliderP[p];
+		params.SliderP[p] = document.getElementById(p+'_PSlider');
+		params.SliderPmax[p] = document.getElementById(p+'_PMaxT');
+		if (params.SliderP[p] != null && params.SliderPmax[p] != null){
+			params.SliderPInputs[p] = [params.SliderPmax[p]];
+			params.SliderPInputs[p][0].parent = params.SliderP[p];
 			min = 0.;
 			max = 5.;
 
-			noUiSlider.create(SliderP[p], {
-				start: [PsizeMult[p]],
+			noUiSlider.create(params.SliderP[p], {
+				start: [params.PsizeMult[p]],
 				connect: [true, false],
 				tooltips: false,
 				steps: [0.1],
@@ -328,17 +327,16 @@ function createPsliders(){
 				})
 			});
 
-			SliderP[p].noUiSlider.on('mouseup', mouseDown=false); 
-			SliderP[p].noUiSlider.on('update', function(values, handle) {
+			params.SliderP[p].noUiSlider.on('mouseup', mouseDown=false); 
+			params.SliderP[p].noUiSlider.on('update', function(values, handle) {
 				var pp = this.target.id.slice(0, -8);
-				SliderPInputs[pp][handle].value = values[handle];
-				PsizeMult[pp] = parseFloat(values[handle]);
+				params.SliderPInputs[pp][handle].value = values[handle];
+				params.PsizeMult[pp] = parseFloat(values[handle]);
 				mouseDown = true;
-				//keepAlpha = true;
 
 			});
 
-			SliderPInputs[p].forEach(handlePSliderText);
+			params.SliderPInputs[p].forEach(handlePSliderText);
 		}
 		w = parseInt(d3.select('#'+p+'_PSlider').style('width').slice(0,-2));
 		d3.select('#'+p+'_PSlider').select('.noUi-base').style('width',w-10+"px");
@@ -360,22 +358,22 @@ function setDSliderHandle(i, value, parent) {
 		});
 	}
 	var val;
-	for (i=0; i<partsKeys.length; i++){
-		var p = partsKeys[i];
-		max = Math.round(parts[p].Coordinates.length);
-	 	val = parseFloat(SliderN[p].noUiSlider.get());
-		SliderN[p].noUiSlider.updateOptions({
+	for (i=0; i<params.partsKeys.length; i++){
+		var p = params.partsKeys[i];
+		max = Math.round(params.parts[p].Coordinates.length);
+	 	val = parseFloat(params.SliderN[p].noUiSlider.get());
+		params.SliderN[p].noUiSlider.updateOptions({
 			range: {
 				'min': [0],
 				'max': [Math.round(max/value)]
 			},
 		});
-		SliderN[p].noUiSlider.set(Math.min(max, val*Decimate/parseFloat(value)));
+		params.SliderN[p].noUiSlider.set(Math.min(max, val*params.Decimate/parseFloat(value)));
 	}
 	var r = [null];
 	r[i] = value;
 	parent.noUiSlider.set(value);
-	Decimate = value;
+	params.Decimate = value;
 	mouseDown = false; 
 
 }
@@ -410,15 +408,15 @@ function handleDSliderText(input, handle)
 //need to allow this to update at large numbers
 function createDslider(){
 
-	SliderD = document.getElementById('DSlider');
-	SliderDmax = document.getElementById('DMaxT');
-	if (SliderD != null && SliderDmax != null){
-		SliderDInputs = [SliderDmax];
-		SliderDInputs[0].parent = SliderD;
+	params.SliderD = document.getElementById('DSlider');
+	params.SliderDmax = document.getElementById('DMaxT');
+	if (params.SliderD != null && params.SliderDmax != null){
+		params.SliderDInputs = [params.SliderDmax];
+		params.SliderDInputs[0].parent = params.SliderD;
 		min = 1.;
 		max = 100.;
 
-		noUiSlider.create(SliderD, {
+		noUiSlider.create(params.SliderD, {
 			start: [1],
 			connect: [true, false],
 			tooltips: false,
@@ -432,31 +430,30 @@ function createDslider(){
 			})
 		});
 
-		SliderD.noUiSlider.on('mouseup', mouseDown=false); 
-		SliderD.noUiSlider.on('update', function(values, handle) {
-			for (i=0; i<partsKeys.length; i++){
-				var p = partsKeys[i];
-				var max = Math.round(parts[p].Coordinates.length);
-				if (parts.options.UIdropdown[p] == 1){
-					var val = parseFloat(SliderN[p].noUiSlider.get());
-					SliderN[p].noUiSlider.updateOptions({
+		params.SliderD.noUiSlider.on('mouseup', mouseDown=false); 
+		params.SliderD.noUiSlider.on('update', function(values, handle) {
+			for (i=0; i<params.partsKeys.length; i++){
+				var p = params.partsKeys[i];
+				var max = Math.round(params.parts[p].Coordinates.length);
+				if (params.parts.options.UIdropdown[p] == 1){
+					var val = parseFloat(params.SliderN[p].noUiSlider.get());
+					params.SliderN[p].noUiSlider.updateOptions({
 						range: {
 							'min': [0],
 							'max': [Math.round(max/parseFloat(values[handle]))]
 						}
 					});
-					SliderN[p].noUiSlider.set(Math.min(max, val*Decimate/parseFloat(values[handle])));
+					params.SliderN[p].noUiSlider.set(Math.min(max, val*params.Decimate/parseFloat(values[handle])));
 				}
 
 			}
 
-			SliderDInputs[handle].value = values[handle];
-			Decimate = parseFloat(values[handle]);
+			params.SliderDInputs[handle].value = values[handle];
+			params.Decimate = parseFloat(values[handle]);
 			mouseDown = true;
-			//keepAlpha = true;
 		});
 
-		SliderDInputs.forEach(handleDSliderText);
+		params.SliderDInputs.forEach(handleDSliderText);
 	}
 	w = parseInt(d3.select("#DSlider").style("width").slice(0,-2));
 	d3.select("#DSlider").select('.noUi-base').style('width',w-10+"px");
@@ -469,8 +466,8 @@ function setCFSliderHandle(i, value, parent) {
 	value = Math.min(Math.max(0., parseFloat(value)),1.);
 
 	parent.noUiSlider.set(value);
-	if (rotatecamera){
-		controls.dynamicDampingFactor = value;
+	if (params.rotatecamera){
+		params.controls.dynamicDampingFactor = value;
 	}
 	mouseDown = false; 
 
@@ -504,16 +501,16 @@ function handleCFSliderText(input, handle)
 
 function createCFslider(){
 
-	SliderCF = document.getElementById('CFSlider');
-	SliderCFmax = document.getElementById('CFMaxT');
-	if (SliderCF != null && SliderCFmax != null){
-		SliderCFInputs = [SliderCFmax];
-		SliderCFInputs[0].parent = SliderCF;
+	params.SliderCF = document.getElementById('CFSlider');
+	params.SliderCFmax = document.getElementById('CFMaxT');
+	if (params.SliderCF != null && params.SliderCFmax != null){
+		params.SliderCFInputs = [params.SliderCFmax];
+		params.SliderCFInputs[0].parent = params.SliderCF;
 		min = 0.;
 		max = 1.;
 
-		noUiSlider.create(SliderCF, {
-			start: [controls.dynamicDampingFactor],
+		noUiSlider.create(params.SliderCF, {
+			start: [params.controls.dynamicDampingFactor],
 			connect: [true, false],
 			tooltips: false,
 			steps: [0.01],
@@ -526,18 +523,18 @@ function createCFslider(){
 			})
 		});
 
-		SliderCF.noUiSlider.on('mouseup', mouseDown=false); 
-		SliderCF.noUiSlider.on('update', function(values, handle) {
+		params.SliderCF.noUiSlider.on('mouseup', mouseDown=false); 
+		params.SliderCF.noUiSlider.on('update', function(values, handle) {
 
-			SliderCFInputs[handle].value = values[handle];
+			params.SliderCFInputs[handle].value = values[handle];
 			var value = Math.min(Math.max(0., parseFloat(values[handle])),1.);
-			if (rotatecamera){
-				controls.dynamicDampingFactor = value;
+			if (params.rotatecamera){
+				params.controls.dynamicDampingFactor = value;
 			}
 			mouseDown = true;
 		});
 
-		SliderCFInputs.forEach(handleCFSliderText);
+		params.SliderCFInputs.forEach(handleCFSliderText);
 	}
 	w = parseInt(d3.select("#CFSlider").style("width").slice(0,-2));
 	d3.select("#CFSlider").select('.noUi-base').style('width',w-10+"px");
@@ -545,10 +542,10 @@ function createCFslider(){
 
 function updateUICenterText()
 {
-	if (rotatecamera){
-		document.getElementById("CenterXText").value = controls.target.x + center.x;
-		document.getElementById("CenterYText").value = controls.target.y + center.y;
-		document.getElementById("CenterZText").value = controls.target.z + center.z;
+	if (params.rotatecamera){
+		document.getElementById("CenterXText").value = params.controls.target.x + params.center.x;
+		document.getElementById("CenterYText").value = params.controls.target.y + params.center.y;
+		document.getElementById("CenterZText").value = params.controls.target.z + params.center.z;
 	} else {
 		document.getElementById("CenterXText").value = 0;
 		document.getElementById("CenterYText").value = 0;
@@ -561,19 +558,19 @@ function updateUICenterText()
 function checkStereoLock(box)
 {
 	if (box.checked) {
-		normalRenderer = renderer;
-		renderer = effect;
-		useStereo = true;
+		params.normalRenderer = params.renderer;
+		params.renderer = params.effect;
+		params.useStereo = true;
 	} else {
-		renderer = normalRenderer;
-		renderer.setSize(window.innerWidth, window.innerHeight);
-		useStereo = false;
+		params.renderer = params.normalRenderer;
+		params.renderer.setSize(window.innerWidth, window.innerHeight);
+		params.useStereo = false;
 	}
 }
 function setSSSliderHandle(i, value, parent) {
 	var max = parent.noUiSlider.options.range.max[i];
 	if (value > max){
-		stereoSepMax = parseFloat(value);
+		params.stereoSepMax = parseFloat(value);
 		parent.noUiSlider.updateOptions({
 			range: {
 				'min': [0],
@@ -581,10 +578,10 @@ function setSSSliderHandle(i, value, parent) {
 			}
 		});
 	}
-	value = Math.min(Math.max(0., parseFloat(value)),stereoSepMax);
+	value = Math.min(Math.max(0., parseFloat(value)),params.stereoSepMax);
 
 	parent.noUiSlider.set(value);
-	effect.setEyeSeparation(value);
+	params.effect.setEyeSeparation(value);
 	
 	mouseDown = false; 
 
@@ -624,10 +621,10 @@ function createSSslider(){
 		SliderSSInputs = [SliderSSmax];
 		SliderSSInputs[0].parent = SliderSS;
 		min = 0.;
-		max = stereoSepMax;
+		max = params.stereoSepMax;
 
 		noUiSlider.create(SliderSS, {
-			start: [stereoSep],
+			start: [params.stereoSep],
 			connect: [true, false],
 			tooltips: false,
 			steps: [0.001],
@@ -645,8 +642,8 @@ function createSSslider(){
 
 			SliderSSInputs[handle].value = values[handle];
 
-			var value = Math.min(Math.max(0., parseFloat(values[handle])),stereoSepMax);
-			effect.setEyeSeparation(value);
+			var value = Math.min(Math.max(0., parseFloat(values[handle])),params.stereoSepMax);
+			params.effect.setEyeSeparation(value);
 			mouseDown = true;
 		});
 
@@ -658,16 +655,16 @@ function createSSslider(){
 
 function updateUICameraText()
 {
-    document.getElementById("CameraXText").value = camera.position.x + center.x;
-    document.getElementById("CameraYText").value = camera.position.y + center.y;
-    document.getElementById("CameraZText").value = camera.position.z + center.z;
+    document.getElementById("CameraXText").value = params.camera.position.x + params.center.x;
+    document.getElementById("CameraYText").value = params.camera.position.y + params.center.y;
+    document.getElementById("CameraZText").value = params.camera.position.z + params.center.z;
 }
 
 function updateUIRotText()
 {
-    document.getElementById("RotXText").value = camera.rotation.x;
-    document.getElementById("RotYText").value = camera.rotation.y;
-    document.getElementById("RotZText").value = camera.rotation.z;
+    document.getElementById("RotXText").value = params.camera.rotation.x;
+    document.getElementById("RotYText").value = params.camera.rotation.y;
+    document.getElementById("RotZText").value = params.camera.rotation.z;
 
 }
 
@@ -677,44 +674,42 @@ function checkText(input, event)
 
 	var key=event.keyCode || event.which;
   	if (key==13){
-  		tickN = 1;
-
 
         if (input.id == "CenterXText"){
-        	center.x = parseFloat(input.value);
+        	params.center.x = parseFloat(input.value);
 		}
         if (input.id == "CenterYText"){
-        	center.y = parseFloat(input.value);
+        	params.center.y = parseFloat(input.value);
  		}
         if (input.id == "CenterZText"){
-        	center.z = parseFloat(input.value);
+        	params.center.z = parseFloat(input.value);
  		}
 
         if (input.id == "CameraXText"){
-        	camera.position.x = parseFloat(input.value) - center.x;
+        	params.camera.position.x = parseFloat(input.value) - params.center.x;
  		}
         if (input.id == "CameraYText"){
-         	camera.position.y = parseFloat(input.value) - center.xy
+         	params.camera.position.y = parseFloat(input.value) - params.center.xy
  		}
         if (input.id == "CameraZText"){
-         	camera.position.z = parseFloat(input.value) - center.z;
+         	params.camera.position.z = parseFloat(input.value) - params.center.z;
  		}
 
 
         if (input.id == "RotXText"){
-        	camera.rotation.x = parseFloat(input.value)
+        	params.camera.rotation.x = parseFloat(input.value)
  		}
         if (input.id == "RotYText"){
-        	camera.rotation.y = parseFloat(input.value)
+        	params.camera.rotation.y = parseFloat(input.value)
  		}
         if (input.id == "RotZText"){
-        	camera.rotation.z = parseFloat(input.value)
+        	params.camera.rotation.z = parseFloat(input.value)
  		}
 		if (input.id == "RenderXText"){
-			renderWidth = parseInt(input.value);
+			params.renderWidth = parseInt(input.value);
 		}
 		if (input.id == "RenderYText"){
-			renderHeight = parseInt(input.value);
+			params.renderHeight = parseInt(input.value);
 		}
 	}
 
@@ -726,9 +721,9 @@ function checkPlotParts(checkbox)
 	var type = checkbox.id.slice(-5); 
 	if (type == 'Check'){	
 		var pID = checkbox.id.slice(0,-5); // remove  "Check" from id
-    	plotParts[pID] = false;
+    	params.plotParts[pID] = false;
     	if (checkbox.checked){
-       		plotParts[pID] = true;
+       		params.plotParts[pID] = true;
     	}
     } 
 }
@@ -755,8 +750,8 @@ function hideUI(x){
 
 function getPi(pID){
 	var i=0;
-	for (i=0; i<partsKeys.length; i++){
-		if (pID == partsKeys[i]){
+	for (i=0; i<params.partsKeys.length; i++){
+		if (pID == params.partsKeys[i]){
 			break;
 		}
 	}
@@ -776,37 +771,37 @@ function showFunction(handle) {
 	var ht = parseFloat(ddiv.style.height.slice(0,-2)) + offset; //to take of "px"
 	var pb = 0.;
 
-    if (i < partsKeys.length-1){
-	    pdiv = document.getElementsByClassName(partsKeys[i+1]+'Div')[0];
-		if (gtoggle[pID]){
+    if (i < params.partsKeys.length-1){
+	    pdiv = document.getElementsByClassName(params.partsKeys[i+1]+'Div')[0];
+		if (params.gtoggle[pID]){
 	    	pdiv.setAttribute("style","margin-top: "+ht + "px; ");
-	    	gtoggle[pID] = false;	
+	    	params.gtoggle[pID] = false;	
 	 	} else {
 	 		pdiv.setAttribute("style","margin-top: 0 px; ");	
-			gtoggle[pID] = true;
+			params.gtoggle[pID] = true;
 		}
 	} else { // a bit clunky, but works with the current setup
 		if (pID == "Camera"){
 	    	c = document.getElementById("DecimationDiv");
 	    	pb = 5;
-			if (gtoggle[pID]){
+			if (params.gtoggle[pID]){
 				c.setAttribute('style','margin-top:'+(pb+ht-5)+'px');
-				gtoggle[pID] = false;	
+				params.gtoggle[pID] = false;	
 
 			} else {
 				c.setAttribute('style','margin-top:'+pb+'px');	
-				gtoggle[pID] = true;	
+				params.gtoggle[pID] = true;	
 			}	
 		} else { //for the last particle (to move the bottom of the container)
 			c = document.getElementsByClassName("UIcontainer")[0];
 
-			if (gtoggle[pID]){
+			if (params.gtoggle[pID]){
 				c.setAttribute('style','padding-bottom:'+(pb+ht-5)+'px');
-				gtoggle[pID] = false;	
+				params.gtoggle[pID] = false;	
 
 			} else {
 				c.setAttribute('style','padding-bottom:'+pb+'px');	
-				gtoggle[pID] = true;		
+				params.gtoggle[pID] = true;		
 			}
 		}
 	}
@@ -823,9 +818,9 @@ function selectFilter() {
 	var p = this.id.slice(0,-13)
 
 	//console.log("in selectFilter", selectValue, this.id, p)
-	for (var i=0; i<fkeys[p].length; i+=1){
-		//console.log('hiding','#'+p+'_FK_'+fkeys[p][i]+'_END_Filter')
-		d3.selectAll('#'+p+'_FK_'+fkeys[p][i]+'_END_Filter')
+	for (var i=0; i<params.fkeys[p].length; i+=1){
+		//console.log('hiding','#'+p+'_FK_'+params.fkeys[p][i]+'_END_Filter')
+		d3.selectAll('#'+p+'_FK_'+params.fkeys[p][i]+'_END_Filter')
 			.style('display','none');
 	}
 	//console.log('showing', '#'+p+'_FK_'+selectValue+'_END_Filter')
@@ -844,7 +839,7 @@ function selectVelType() {
 	selectValue = option.property('value');
 
 	var p = this.id.slice(0,-14)
-	velType[p] = selectValue;
+	params.velType[p] = selectValue;
 };
 
 function createUI(){
@@ -858,18 +853,18 @@ function createUI(){
 
 
 
-	console.log(partsKeys)
+	console.log(params.partsKeys)
 	var UI = d3.select('#particleUI')
 	    .selectAll('div')
-		.data(partsKeys).enter()
+		.data(params.partsKeys).enter()
 		.append('div')
 		.attr('class', function (d) { return "particleDiv "+d+"Div" }) //+ dropdown
 
 
 	var i=0;
 	var j=0;
-	for (i=0; i<partsKeys.length; i++){
-		d = partsKeys[i];
+	for (i=0; i<params.partsKeys.length; i++){
+		d = params.partsKeys[i];
 
 		var controls = d3.selectAll('div.'+d+'Div');
 
@@ -903,7 +898,7 @@ function createUI(){
 		controls.append('input')
 			.attr('id',d+'ColorPicker');
 
-		if (parts.options.UIdropdown[d] == 1){
+		if (params.parts.options.UIdropdown[d] == 1){
 			controls.append('button')
 				.attr('id', d+'Dropbtn')
 				.attr('class', 'dropbtn')
@@ -935,7 +930,7 @@ function createUI(){
 
 	//for velocity vectors
 
-			if (parts[d].Velocities != null){
+			if (params.parts[d].Velocities != null){
 				dropdown.append('hr')
 					.style('margin','0')
 					.style('border','1px solid #909090')
@@ -960,7 +955,7 @@ function createUI(){
 					.on('change',selectVelType)
 
 				var options = selectVType.selectAll('option')
-					.data(Object.keys(velopts)).enter()
+					.data(Object.keys(params.velopts)).enter()
 					.append('option')
 					.text(function (d) { return d; });
 
@@ -971,9 +966,9 @@ function createUI(){
 	//create the filters
 	//first count the available filters
 			showfilts = [];
-			for (j=0; j<fkeys[d].length; j++){
-				var fk = fkeys[d][j]
-				if (parts[d][fk] != null){
+			for (j=0; j<params.fkeys[d].length; j++){
+				var fk = params.fkeys[d][j]
+				if (params.parts[d][fk] != null){
 					showfilts.push(fk);
 				}
 			}
@@ -1002,9 +997,9 @@ function createUI(){
 
 
 				var filtn = 0;
-				for (j=0; j<fkeys[d].length; j++){
-					var fk = fkeys[d][j]
-					if (parts[d][fk] != null){
+				for (j=0; j<params.fkeys[d].length; j++){
+					var fk = params.fkeys[d][j]
+					if (params.parts[d][fk] != null){
 
 
 						dfilters = dropdown.append('div')
@@ -1038,14 +1033,13 @@ function createUI(){
 
 			} 
 			dropdown.style('height',dheight+'px');
-			dropdown.style('margin-top','-20px');
 
 		}
 
 /* for color pickers*/
 //can I write this in d3? I don't think so.  It needs a jquery object
 		$("#"+d+"ColorPicker").spectrum({
-		    color: "rgba("+(Pcolors[d][0]*255)+","+(Pcolors[d][1]*255)+","+(Pcolors[d][2]*255)+","+Pcolors[d][3]+")",
+		    color: "rgba("+(params.Pcolors[d][0]*255)+","+(params.Pcolors[d][1]*255)+","+(params.Pcolors[d][2]*255)+","+params.Pcolors[d][3]+")",
 		    flat: false,
 		    showInput: true,
 		    showInitial: false,
@@ -1060,9 +1054,9 @@ function createUI(){
 		    },
 		});
 
-		if (parts.options.UIcolorPicker[d] != 1){
+		if (params.parts.options.UIcolorPicker[d] != 1){
 			$("#"+d+"ColorPicker").spectrum({
-			    color: "rgba("+(Pcolors[d][0]*255)+","+(Pcolors[d][1]*255)+","+(Pcolors[d][2]*255)+","+Pcolors[d][3]+")",
+			    color: "rgba("+(params.Pcolors[d][0]*255)+","+(params.Pcolors[d][1]*255)+","+(params.Pcolors[d][2]*255)+","+params.Pcolors[d][3]+")",
 			    disabled: true,
 			});		
 		}
