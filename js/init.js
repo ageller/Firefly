@@ -1,152 +1,147 @@
-//all global variables
+//all "global" variables are contained within params object
+function defineParams(){
+    ParamsInit = function() {
 
-var container, scene, MWscene, MWInnerScene, camera, renderer, controls, Tcontrols, Fcontrols, effect, normalRenderer;
-var keyboard = new KeyboardState();
+        this.container = null;
+        this.scene = null;
+        this.camera = null;
+        this.renderer = null;
+        this.controls = null
+        this.effect = null;
+        this.normalRenderer = null;
 
-var partsMesh = {};
-var parts = null;
+        this.keyboard = null;
 
-var camDist = 1.;
-var camDist0 = 1.;
-var camPrev = 1.;
-var width0 = 1.;
-var height0 = 1.;
+        this.parts = null;
+        this.partsKeys;
+        this.partsMesh = {};
 
-var loaded = false;
+        this.loaded = false;
 
-//positions, will be rest below ()
-var center;
-var centerMag;
-var boxSize = 0.;
+        //positions, will be rest below ()
+        this.center;
+        this.boxSize = 0.;
 
-//plotting fields
-var plotParts = {};
+        //plotting fields
+        this.plotParts = {};
 
-//particle size multiplicative factor
-var PsizeMult = {};
+        //particle size multiplicative factor
+        this.PsizeMult = {};
 
-//particle default colors;
-var Pcolors = {};
-//Decimation
-var pposMin = [0, 0, 0, 0];
-var pposMax = [0, 0, 0, 0];
-var partsLength = [0, 0, 0, 0];
-var Decimate = 1;
-var tickwait = 1;
-var addtickwait = 10;
-var drawit = true;
-var tickN = 0
+        //particle default colors;
+        this.Pcolors = {};
 
-//Filtering
-//I need to add a small factor because the precision of the noUiSlider effects the filtering
-var fkeys = {};
-var SliderF = {};
-var SliderFmin = {};
-var SliderFmax = {};
-var SliderFinputs = {};
+        //Decimation
+        this.Decimate = 1;
+        this.plotNmax = {};
 
-var partsKeys;
-var partsUse = {};
-var updateFilter = {};
+        //Filtering
+        //I need to add a small factor because the precision of the noUiSlider effects the filtering
+        this.fkeys = {};
+        this.SliderF = {};
+        this.SliderFmin = {};
+        this.SliderFmax = {};
+        this.SliderFinputs = {};
+        this.updateFilter = {};
+        this.filterLims = {};
 
-//for frustum
-var zmax = 10000;
-var zmin = 1;
-var fov = 45.
+        //for frustum      
+        this.zmax = 5.e10;
+        this.zmin = 1;
+        this.fov = 45.
 
-var loaded = false;
+        // for dropdowns
+        this.gtoggle = {"Camera":true};
 
-// for dropdowns
-var gtoggle = {"Camera":true};
-var plotNmax = {};
-var filterLims = {};
+        //camera controls
+        this.rotatecamera = true;
+        this.useStereo = false;
+        this.stereoSep = 0.06;
+        this.stereoSepMax = 1.;
 
-//camera controls
-rotatecamera = true;
-useStereo = false;
-stereoSep = 0.06;
-stereoSepMax = 1.;
+        //for rendering to image
+        this.renderWidth = 1920;
+        this.renderHeight = 1200;
 
-//for rendering to image
-var renderWidth = 1920;
-var renderHeight = 1200;
+        //for deciding whether to show velocity vectors
+        this.showVel = {};
+        this.velopts = {'line':0., 'arrow':1., 'triangle':2.};
+        this.velType = {};
+        this.maxVrange = 1000.; //maximum dynamic range for length of velocity vectors
 
-//for deciding whether to show velocity vectors
-var showVel = {};
-var velopts = {'line':0., 'arrow':1., 'triangle':2.};
-var velType = {};
-var maxVrange = 1000.; //maximum dynamic range for length of velocity vectors
+        //for single sliders
+        this.SliderN = {};
+        this.SliderNmin = {};
+        this.SliderNmax = {};
+        this.SliderNInputs = {};
+        this.SliderP = {};
+        this.SliderPmin = {};
+        this.SliderPmax = {};
+        this.SliderPInputs = {};
+        this.SliderD;
+        this.SliderDmin;
+        this.SliderDmax;
+        this.SliderDInputs;
+        this.SliderCF;
+        this.SliderCFmin;
+        this.SliderCFmax;
+        this.SliderCFInputs;
 
-//for single sliders
-var SliderN = {};
-var SliderNmin = {};
-var SliderNmax = {};
-var SliderNInputs = {};
-var SliderP = {};
-var SliderPmin = {};
-var SliderPmax = {};
-var SliderPInputs = {};
-var SliderD;
-var SliderDmin;
-var SliderDmax;
-var SliderDInputs;
-var SliderCF;
-var SliderCFmin;
-var SliderCFmax;
-var SliderCFInputs;
-var keepAlpha = true;
+        //help screen
+        this.helpMessage = 1;
 
-//help screen
-var helpMessage = 1;
+    };
 
-var incfoo = 0.;
+
+    params = new ParamsInit();
+}
+
 
 function init() {
+    //keyboard
+    params.keyboard = new KeyboardState();
+
     // scene
-    scene = new THREE.Scene();
+    params.scene = new THREE.Scene();
 
     // camera
     var screenWidth = window.innerWidth;
     var screenHeight = window.innerHeight;
-    var fov = 45;
     var aspect = screenWidth / screenHeight;
-    var zmin = 1.;
-    var zmax = 5.e10;
-    camera = new THREE.PerspectiveCamera( fov, aspect, zmin, zmax);
-    scene.add(camera);
+    params.camera = new THREE.PerspectiveCamera( params.fov, aspect, params.zmin, params.zmax);
+    params.scene.add(params.camera);
 
-    camera.position.set(0,0,-10);//center.x, center.y, center.z); 
-    camera.lookAt(scene.position);  
+    params.camera.position.set(0,0,-10);
+    params.camera.lookAt(params.scene.position);  
 
-    var dist = scene.position.distanceTo(camera.position);
-    var vFOV = THREE.Math.degToRad( camera.fov ); // convert vertical fov to radians
-    height0 = 2 * Math.tan( vFOV / 2 ) * dist; // visible height
-    width0 = height0 * camera.aspect;           // visible width
+    var dist = params.scene.position.distanceTo(params.camera.position);
+    var vFOV = THREE.Math.degToRad( params.camera.fov ); // convert vertical fov to radians
 
     // renderer
-    if ( Detector.webgl )
-	renderer = new THREE.WebGLRenderer( {
-	    antialias:true,
-	    //preserveDrawingBuffer: true , //so that we can save the image
-	} );
-    else
-	renderer = new THREE.CanvasRenderer(); 
-    renderer.setSize(screenWidth, screenHeight);
-    normalRenderer = renderer;
+    if ( Detector.webgl ) {
+        params.renderer = new THREE.WebGLRenderer( {
+            antialias:true,
+    	    //preserveDrawingBuffer: true , //so that we can save the image
+    	} );
+    } else {
+    	params.renderer = new THREE.CanvasRenderer(); 
+    }
+    params.renderer.setSize(screenWidth, screenHeight);
+    params.normalRenderer = params.renderer;
 
-    container = document.getElementById('WebGLContainer');
-    container.appendChild( renderer.domElement );
+    params.container = document.getElementById('WebGLContainer');
+    params.container.appendChild( params.renderer.domElement );
 
     // events
-    THREEx.WindowResize(renderer, camera);
+    THREEx.WindowResize(params.renderer, params.camera);
     THREEx.FullScreen.bindKey({ charCode : 'm'.charCodeAt(0) });
 
     // controls
 
     //Tcontrols = new THREE.TrackballControls( camera, renderer.domElement );
     //Fcontrols = new THREE.FlyControls( camera , renderer.domElement);
-    controls = new THREE.TrackballControls( camera, renderer.domElement );
-    controls.dynamicDampingFactor = 0.1;
+    params.controls = new THREE.TrackballControls( params.camera, params.renderer.domElement );
+    params.controls.dynamicDampingFactor = 0.1;
 
     //controls = new THREE.FlyControls( camera , renderer.domElement);
 
@@ -160,12 +155,12 @@ function init() {
 
 
     //stereo
-    effect = new THREE.StereoEffect( renderer );
-    effect.setAspect(1.);
-    effect.setEyeSeparation(stereoSep);
+    params.effect = new THREE.StereoEffect( params.renderer );
+    params.effect.setAspect(1.);
+    params.effect.setEyeSeparation(params.stereoSep);
 
     
-    camera.up.set(0, -1, 0);
+    params.camera.up.set(0, -1, 0);
 
 }
 
@@ -174,30 +169,30 @@ function calcFilterLimits(p, fkey){
 //calculate limits for the filters
     
     var j=0;
-    if (parts[p][fkey] != null){
+    if (params.parts[p][fkey] != null){
 	var i=0;
-	min = parts[p][fkey][i];
-	max = parts[p][fkey][i];
-	for (i=0; i< parts[p][fkey].length; i++){
-	    min = Math.min(min, parts[p][fkey][i]);
-	    max = Math.max(max, parts[p][fkey][i]);
+	min = params.parts[p][fkey][i];
+	max = params.parts[p][fkey][i];
+	for (i=0; i< params.parts[p][fkey].length; i++){
+	    min = Math.min(min, params.parts[p][fkey][i]);
+	    max = Math.max(max, params.parts[p][fkey][i]);
 	}
 	//need to add a small factor here because of the precision of noUIslider
 	min -= 0.001;
 	max += 0.001;
-	filterLims[p][fkey] = [min, max];
+	params.filterLims[p][fkey] = [min, max];
     }
 }
 
 function calcVelVals(p){
-    parts[p].VelVals = [];
-    parts[p].magVelocities = [];
+    params.parts[p].VelVals = [];
+    params.parts[p].magVelocities = [];
     var mag, angx, angy, v;
     var max = -1.;
     var min = 1.e20;
     var vdif = 1.;
-    for (var i=0; i<parts[p].Velocities.length; i++){
-        v = parts[p].Velocities[i];
+    for (var i=0; i<params.parts[p].Velocities.length; i++){
+        v = params.parts[p].Velocities[i];
         mag = Math.sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
         angx = Math.atan2(v[1],v[0]);
         angy = Math.acos(v[2]/mag);
@@ -207,39 +202,39 @@ function calcVelVals(p){
         if (mag < min){
             min = mag;
         }
-        parts[p].VelVals.push([v[0],v[1],v[2]]);
-        parts[p].magVelocities.push(mag);
+        params.parts[p].VelVals.push([v[0],v[1],v[2]]);
+        params.parts[p].magVelocities.push(mag);
     }
-    vdif = Math.min(max - min, maxVrange);
-    for (var i=0; i<parts[p].Velocities.length; i++){
-        parts[p].VelVals[i].push( THREE.Math.clamp((parts[p].magVelocities[i] - min) / vdif, 0., 1.));
+    vdif = Math.min(max - min, params.maxVrange);
+    for (var i=0; i<params.parts[p].Velocities.length; i++){
+        params.parts[p].VelVals[i].push( THREE.Math.clamp((params.parts[p].magVelocities[i] - min) / vdif, 0., 1.));
     }
 }
 //initialize various values for the parts dict from the input data file, 
 function initPVals(){
-    for (var i=0; i<partsKeys.length; i++){
-	var p = partsKeys[i];
-	partsMesh[p] = [];
-	PsizeMult[p] = parts[p].sizeMult;
-	Pcolors[p] = parts[p].color;
-	updateFilter[p] = false;
-	filterLims[p] = {};
-	gtoggle[p] = true;
-	plotNmax[p] = parts[p].Coordinates.length;
-	plotParts[p] = true;
+    for (var i=0; i<params.partsKeys.length; i++){
+	var p = params.partsKeys[i];
+	params.partsMesh[p] = [];
+	params.PsizeMult[p] = params.parts[p].sizeMult;
+	params.Pcolors[p] = params.parts[p].color;
+	params.updateFilter[p] = false;
+	params.filterLims[p] = {};
+	params.gtoggle[p] = true;
+	params.plotNmax[p] = params.parts[p].Coordinates.length;
+	params.plotParts[p] = true;
 
-	parts[p].nMaxPlot = Math.min(parts[p].nMaxPlot, parts[p].Coordinates.length);
+	params.parts[p].nMaxPlot = Math.min(params.parts[p].nMaxPlot, params.parts[p].Coordinates.length);
 
-        if (parts[p].Velocities != null){
+        if (params.parts[p].Velocities != null){
             calcVelVals(p);
-            parts[p].filterKeys.push("magVelocities");
-            velType[p] = 'line';
-            //console.log(p, parts[p].VelVals, parts[p].Velocities)
+            params.parts[p].filterKeys.push("magVelocities");
+            params.velType[p] = 'line';
+            //console.log(p, params.parts[p].VelVals, params.parts[p].Velocities)
         }
-        showVel[p] = false;
-        fkeys[p] = parts[p].filterKeys;
-        for (var k=0; k<fkeys[p].length; k++){
-            calcFilterLimits(p, fkeys[p][k]);
+        params.showVel[p] = false;
+        params.fkeys[p] = params.parts[p].filterKeys;
+        for (var k=0; k<params.fkeys[p].length; k++){
+            calcFilterLimits(p, params.fkeys[p][k]);
         }
     }
 
@@ -253,56 +248,74 @@ function setCenter(coords){
         sum[1] += coords[i][1];
         sum[2] += coords[i][2];
     }
-    center = new THREE.Vector3(sum[0]/coords.length, sum[1]/coords.length, sum[2]/coords.length);
-    centerMag = Math.sqrt(center[0]*center[0] + center[1]*center[1] + center[2]*center[2]);
+    params.center = new THREE.Vector3(sum[0]/coords.length, sum[1]/coords.length, sum[2]/coords.length);
 
     var fee, foo;
     for( var i = 0; i < coords.length; i++ ){
-	foo = new THREE.Vector3(coords[i][0], coords[i][0], coords[i][0]);
-	fee = center.distanceTo(foo)
-	if (fee > boxSize){
-	    boxSize = fee;
-	}
+    	foo = new THREE.Vector3(coords[i][0], coords[i][0], coords[i][0]);
+    	fee = params.center.distanceTo(foo)
+    	if (fee > params.boxSize){
+    	    params.boxSize = fee;
+    	}
     }
 }
 
 
 function loadData(callback){
+
+    defineParams();
+
+
     d3.json("data/filenames.json",  function(files) {
     //d3.json("data/filenamesBox.json",  function(files) {
 	console.log(files)
-	partsKeys = Object.keys(files);
-	parts = {};
-	partsKeys.forEach( function(p, i) {
-	    parts[p] = {};
+	params.partsKeys = Object.keys(files);
+	params.parts = {};
+	params.partsKeys.forEach( function(p, i) {
+	    params.parts[p] = {};
 	    d3.json("data/"+files[p],  function(foo) {
 	//  d3.json(files[p],  function(foo) {
-		parts[p] = foo;
-		if (i ==  partsKeys.length-1){
+		params.parts[p] = foo;
+		if (i ==  params.partsKeys.length-1){
 		    setTimeout(function(){ callback(); }, 1000); //silly, but seems to fix the problem with loading
 		}
         });
 	});
 
-    var index = partsKeys.indexOf('options');
+    var index = params.partsKeys.indexOf('options');
     if (index > -1) {
-        partsKeys.splice(index, 1);
+        params.partsKeys.splice(index, 1);
     }
 
     });
 
 }
 
+//check if the data is loaded
+function clearloading(){
+    params.loaded = true;
+    // stop spin.js loader
+    spinner.stop();
+
+    //show the rest of the page
+    d3.select("#ContentContainer").style("visibility","visible")
+
+    console.log("loaded")
+    d3.select("#loader").style("display","none")
+    d3.select("#splashdiv5").text("Click to begin.");
+
+}
 
 function WebGLStart(){
+
 
     clearloading();
 
 //reset the window title
-    window.document.title = parts.options.title
+    window.document.title = params.parts.options.title
 
 //initialize
-    setCenter(parts[partsKeys[0]].Coordinates);
+    setCenter(params.parts[params.partsKeys[0]].Coordinates);
     initPVals();
 
     document.addEventListener('mousedown', handleMouseDown);
@@ -321,5 +334,5 @@ function WebGLStart(){
     animate();
 }
 
-//////this will load the data, and then start the WebGL rendering
+//////this will define the params object (that contains all "global" variables), then load the data, and then start the WebGL rendering
 loadData(WebGLStart);
