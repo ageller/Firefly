@@ -47,7 +47,7 @@ void main(void) {
         vec3 velVals = vVelVals.xyz;
         float vyc = -dot(velVals,cameraY);
         float vxc = dot(velVals,cameraX); 
-        float vSize = sqrt(vyc*vyc+vxc*vxc)/sqrt(dot(velVals,velVals))*vVelVals[3];
+        float vSize = sqrt(vyc*vyc+vxc*vxc)/sqrt(dot(velVals,velVals))*vVelVals[3] * 0.5;
         float theta = atan(vyc,vxc);
         if (theta<0.0){
             theta=theta+2.0*PI;
@@ -56,29 +56,41 @@ void main(void) {
         mat4 rot1 = rotationMatrix(vec3(0,0,1), theta);
         vec2 posRot = (rot1 * vec4(gl_PointCoord.x-0.5, gl_PointCoord.y-0.5,0., 1.)).xy;
         
-        // puts tail of vector at -0.02 (half-width offset helps with head-on view)
-        if (posRot.x < -0.02){
+        float lW = 0.02;
+
+        // puts tail of vector at -1*lW (half-width offset helps with head-on view)
+        if (posRot.x < -1.*lW){
             discard;
         }
-        //impose minimum size, it will never be shorter than it is thick
-        vSize=max(vSize,0.02);
 
-        if (velType == 0.){ //line
-            if (posRot.x > vSize || abs(posRot.y) > 0.02 ){
+        //impose minimum size, it will never be shorter than it is thick
+        vSize = max(vSize,lW);
+
+        //line
+        if (velType == 0.){ 
+            if (posRot.x > vSize || abs(posRot.y) > lW ){
                 discard;
             } 
         }
+
+        //arrow
+        float aH = 0.2;
+        float aL = 0.75;
         if (velType == 1.){ //arrow
-            discard;
+            if (posRot.x > vSize || (posRot.x < vSize*aL && abs(posRot.y) > lW) || (posRot.x > vSize*aL && abs(posRot.y) > (-1.*aH/vSize * posRot.x + aH) )   ){
+                discard;
+            } 
         }
+
+        //triangle
         float tH = 0.05; 
-        if (velType == 2.){ //triangle
-            if (posRot.x > vSize || abs(posRot.y) > abs(tH/vSize * posRot.x - tH)   ){
+        if (velType == 2.){ 
+            if (posRot.x > vSize || abs(posRot.y) > (-1.*tH/(vSize) * posRot.x + tH)    ){
                 discard;
             } 
         } 
         //gl_FragColor.rgb +=  (1. - posRot.x/vSize); //white at tail
-        gl_FragColor.rgb +=  0.5*posRot.x/vSize; //white at head
+        gl_FragColor.rgb +=  0.6*posRot.x/vSize; //whiter at head
         gl_FragColor.a = posRot.x/vSize;
         // maybe arrow?
 }
