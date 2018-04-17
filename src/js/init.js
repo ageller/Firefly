@@ -111,8 +111,11 @@ function init() {
     params.camera = new THREE.PerspectiveCamera( params.fov, aspect, params.zmin, params.zmax);
     params.scene.add(params.camera);
 
-    params.camera.position.set(0,0,-10);
+    params.camera.position.set(params.parts.options.camera[0], params.parts.options.camera[1], params.parts.options.camera[2]);
     params.camera.lookAt(params.scene.position);  
+    console.log(params.parts.options);
+    params.camera.rotation.set(params.parts.options.cameraRotation[0], params.parts.options.cameraRotation[1], params.parts.options.cameraRotation[2]);
+    //params.parts.options.cameraRotation = new THREE.Vector3(params.camera.rotation.x, params.camera.rotation.y, params.camera.rotation.z);
 
     var dist = params.scene.position.distanceTo(params.camera.position);
     var vFOV = THREE.Math.degToRad( params.camera.fov ); // convert vertical fov to radians
@@ -142,6 +145,7 @@ function init() {
     //Fcontrols = new THREE.FlyControls( camera , renderer.domElement);
     params.controls = new THREE.TrackballControls( params.camera, params.renderer.domElement );
     params.controls.dynamicDampingFactor = 0.1;
+    //params.controls.noRotate = true;
 
     //controls = new THREE.FlyControls( camera , renderer.domElement);
 
@@ -250,16 +254,20 @@ function setCenter(coords){
     }
     params.center = new THREE.Vector3(sum[0]/coords.length, sum[1]/coords.length, sum[2]/coords.length);
 
-    var fee, foo;
-    for( var i = 0; i < coords.length; i++ ){
-    	foo = new THREE.Vector3(coords[i][0], coords[i][0], coords[i][0]);
-    	fee = params.center.distanceTo(foo)
-    	if (fee > params.boxSize){
-    	    params.boxSize = fee;
-    	}
-    }
+    setBoxSize(coords);
+
 }
 
+function setBoxSize(coords){
+    var fee, foo;
+    for( var i = 0; i < coords.length; i++ ){
+        foo = new THREE.Vector3(coords[i][0], coords[i][0], coords[i][0]);
+        fee = params.center.distanceTo(foo)
+        if (fee > params.boxSize){
+            params.boxSize = fee;
+        }
+    }
+}
 
 function loadData(callback){
 
@@ -315,7 +323,13 @@ function WebGLStart(){
     window.document.title = params.parts.options.title
 
 //initialize
-    setCenter(params.parts[params.partsKeys[0]].Coordinates);
+    if (params.parts.options.center == null){
+        setCenter(params.parts[params.partsKeys[0]].Coordinates);
+    } else {
+        params.center = new THREE.Vector3(params.parts.options.center[0], params.parts.options.center[1], params.parts.options.center[2]);
+        setBoxSize(params.parts[params.partsKeys[0]].Coordinates);
+    }
+
     initPVals();
 
     document.addEventListener('mousedown', handleMouseDown);
@@ -323,13 +337,15 @@ function WebGLStart(){
 
     init();
     updateUICenterText();
+    updateUIRotText();
 
     createUI();
     mouseDown = false;  //silly fix
 
 //draw everything
     drawScene();
-
+    resetCamera();
+    
 //begin the animation
     animate();
 }

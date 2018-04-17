@@ -18,7 +18,23 @@ function checkCenterLock(box)
 	updateUIRotText();
 
 }
+function resetCamera() //does this always give the same rotation? It would be good for the user to set the rotation...
+{
 
+    var screenWidth = window.innerWidth;
+    var screenHeight = window.innerHeight;
+    var aspect = screenWidth / screenHeight;
+    params.camera = new THREE.PerspectiveCamera( params.fov, aspect, params.zmin, params.zmax);
+    params.scene.add(params.camera);
+
+    params.camera.position.set(params.parts.options.camera[0], params.parts.options.camera[1], params.parts.options.camera[2]);
+    params.camera.lookAt(params.scene.position);  
+    params.camera.rotation.set(params.parts.options.cameraRotation[0], params.parts.options.cameraRotation[1], params.parts.options.cameraRotation[2]);
+
+    params.controls = new THREE.TrackballControls( params.camera, params.renderer.domElement );
+
+
+}
 function checkVelBox(box)
 {
 	var pID = box.id.slice(0, -11)
