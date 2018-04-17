@@ -163,7 +163,7 @@ canvas{
 	transition: 0.15s;
 }
 
-.button span:after {
+/*.button span:after {
 	content: '\00bb';
 	position: absolute;
 	opacity: 0;
@@ -171,7 +171,7 @@ canvas{
 	right: -20px;
 	transition: 0.15s;
 }
-
+*/
 .button:active span {
 	padding-left: 10px;
 }
@@ -462,6 +462,8 @@ select{
 	left:55px;
 	width:230px;
 }
+
+
 
 a{
 	color: #339999;

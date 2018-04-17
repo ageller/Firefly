@@ -76,6 +76,7 @@
 									<input id="CenterCheckBox" type="checkbox" value="true" onchange="checkCenterLock(this)" autocomplete="off" checked>
 									<label for="CenterCheckBox" id="CenterCheckLabel" style="font-size:10pt">Lock</label>
 								</span>
+
 							</div>
 							<!-- Camera -->
 							<div class='pLabelDiv' style="width:280px"> 
@@ -83,6 +84,9 @@
 								<input id="CameraXText" type="text" class="pTextInput" style="width:38px" value="0" autocomplete="off" onkeypress="checkText(this, event)">
 								<input id="CameraYText" type="text" class="pTextInput" style="width:38px" value="0" autocomplete="off" onkeypress="checkText(this, event)">
 								<input id="CameraZText" type="text" class="pTextInput" style="width:38px" value="0" autocomplete="off" onkeypress="checkText(this, event)">
+								<span id="CameraResetDiv" style="margin:-7px 0 0 20px;; margin-top:-7px; padding:0; position:absolute">
+									<button id="CameraReset" class="button" style="width:65px; height:45px; padding:5px; border:2px solid black;" onclick="resetCamera();"><span>Reset</span>
+								</span>
 							</div>
 							<!-- Rotation -->
 							<div class='pLabelDiv' style="width:280px">  
@@ -127,52 +131,52 @@
 		</div>
 
 <!-- three.js resources -->		
-		<script src="resources/three.min.js"></script>
-		<script src="resources/Detector.js"></script>
-		<script src="resources/TrackballControls.js"></script>
-		<script src="resources/three-fly-controls.js"></script>
-		<script src="resources/KeyboardState.js"></script>
-		<script src="resources/THREEx.FullScreen.js"></script>
-		<script src="resources/THREEx.WindowResize.js"></script>
-		<script src="resources/THREE.ConstantSpline.js"></script>
-		<script src="resources/THREE.MeshLine.js"></script>
-		<script src="resources/StereoEffect.js"></script>
+		<script src="src/resources/three.min.js"></script>
+		<script src="src/resources/Detector.js"></script>
+		<script src="src/resources/TrackballControls.js"></script>
+		<script src="src/resources/three-fly-controls.js"></script>
+		<script src="src/resources/KeyboardState.js"></script>
+		<script src="src/resources/THREEx.FullScreen.js"></script>
+		<script src="src/resources/THREEx.WindowResize.js"></script>
+		<script src="src/resources/THREE.ConstantSpline.js"></script>
+		<script src="src/resources/THREE.MeshLine.js"></script>
+		<script src="src/resources/StereoEffect.js"></script>
 
 		<!-- loading spinner -->
-		<script src="resources/spin.min.js"></script>
+		<script src="src/resources/spin.min.js"></script>
 
 		<!-- for the color picker = spectrum : https://github.com/bgrins/spectrum -->
-		<link rel="stylesheet" href="resources/spectrum.css" />
-		<script src="resources/jquery-3.2.1.min.js"></script> 
-		<script src="resources/spectrum.js"></script>
+		<link rel="stylesheet" href="src/resources/spectrum.css" />
+		<script src="src/resources/jquery-3.2.1.min.js"></script> 
+		<script src="src/resources/spectrum.js"></script>
 
 		<!-- noUIslider for filtering -->
-		<link href="resources/nouislider.min.css" rel="stylesheet">
-		<script src="resources/nouislider.min.js"></script>
+		<link href="src/resources/nouislider.min.css" rel="stylesheet">
+		<script src="src/resources/nouislider.min.js"></script>
 
 		<!-- wNumb number formatter -->
-		<script src="resources/wNumb.js"></script>
+		<script src="src/resources/wNumb.js"></script>
 
 		<!-- d3 -->
-		<script src="resources/d3.v4.10.2.min.js"></script>
+		<script src="src/resources/d3.v4.10.2.min.js"></script>
 
 		<!-- the main attraction -->
 
 		<!-- shaders -->
-		<script src="shaders/vertex.glsl.js"></script>
-		<script src="shaders/fragment.glsl.js"></script>
+		<script src="src/shaders/vertex.glsl.js"></script>
+		<script src="src/shaders/fragment.glsl.js"></script>
 
-		<link rel="stylesheet" type="text/css" href="css/index.css" />
-		<script src="js/window_events.js"></script>
-		<script src="js/UI.js"></script>
-		<script src="js/draw.js"></script>
-		<script src="js/renderAll.js"></script>
-		<script src="js/init.js"></script>
+		<link rel="stylesheet" type="text/css" href="src/css/index.css" />
+		<script src="src/js/window_events.js"></script>
+		<script src="src/js/UI.js"></script>
+		<script src="src/js/draw.js"></script>
+		<script src="src/js/renderAll.js"></script>
+		<script src="src/js/init.js"></script>
 
 
 	</body>
 
 	<!-- the data -->
-	<script src="js/startspinner.js"></script>
+	<script src="src/js/startspinner.js"></script>
 
 </html>
