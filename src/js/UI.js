@@ -199,7 +199,7 @@ function createFilterSliders(){
 	var j = 0;
 	for (i=0; i<params.partsKeys.length; i++){
 		p = params.partsKeys[i];
-		if (params.parts.options.UIdropdown[p] == 1){
+		if (params.parts.options.UIdropdown[p]){
 
 			params.SliderF[p] = {};
 			params.SliderFmin[p] = {};
@@ -303,7 +303,7 @@ function createNsliders(){
 
 		p = params.partsKeys[i];
 
-		if (params.parts.options.UIdropdown[p] == 1){
+		if (params.parts.options.UIdropdown[p]){
 
 			params.SliderN[p] = document.getElementById(p+'_NSlider');
 			params.SliderNmax[p] = document.getElementById(p+'_NMaxT');
@@ -538,7 +538,7 @@ function createDslider(){
 			for (i=0; i<params.partsKeys.length; i++){
 				var p = params.partsKeys[i];
 				var max = Math.round(params.parts[p].Coordinates.length);
-				if (params.parts.options.UIdropdown[p] == 1){
+				if (params.parts.options.UIdropdown[p]){
 					var val = parseFloat(params.SliderN[p].noUiSlider.get());
 					params.SliderN[p].noUiSlider.updateOptions({
 						range: {
@@ -955,27 +955,335 @@ function selectVelType() {
 function createUI(reset = false){
 	console.log("Creating UI");
 
+
+
 //change the hamburger to the X to start
 	if (! reset){
+
+ 		var UIcontainer = d3.select('.UIcontainer');
+
+		var UIt = UIcontainer.append('div')
+			.attr('class','UItopbar')
+			.attr('id','UItopbar')
+			.attr('onclick','hideUI(this);');
+		UIt.append('table');
+		var UIr1 = UIt.append('tr')
+		var UIc1 = UIr1.append('td').attr('id','Hamburger');
+		UIc1.append('div').attr('class','bar1')
+		UIc1.append('div').attr('class','bar2')
+		UIc1.append('div').attr('class','bar3')
+		var UIc2 = UIr1.append('td').append('span').append('b').attr('id','ControlsText').style('font-size','16pt').text('Controls')
+
+		var hider = UIcontainer.append('div').attr('id','UIhider');
+		hider.append('div').attr('id','particleUI');
+
 	 	var hamburger = document.getElementById('UItopbar');
 	 	//hide the UI
 		hideUI(hamburger);
 	 	hamburger.classList.toggle("change");
+
 	 }
 
-
 	console.log(params.partsKeys)
+
 	var UI = d3.select('#particleUI')
-	    .selectAll('div')
-		.data(params.partsKeys).enter()
+	var UIparts = UI.selectAll('div');
+
+	//fullscreen button
+	UI.append('div')
+		.append('button')
+		.attr('id','fullScreenButton')
+		.attr('class','button')
+		.attr('onclick','fullscreen();')
+		.append('span')
+			.text('Fullscreen');
+
+	//snapshots
+	var snap = UI.append('div')
+		.attr('class', 'button-div');
+	snap.append('button')
+		.attr('class','button')
+		.attr('onclick','renderImage();')
+		.style('width','150px')
+		.style('padding','5px')
+		.style('margin',0)
+		.append('span')
+			.text('Take Snapshot');
+	snap.append('input')
+		.attr('id','RenderXText')
+		.attr('type', 'text')
+		.attr('value', '1920')
+		.attr('autocomplete','off')
+		.attr('onkeypress','checkText(this, event)')
+		.attr('class','pTextInput')
+		.style('width','50px')
+		.style('margin-top','5px')
+	snap.append('input')
+		.attr('id','RenderYText')
+		.attr('type', 'text')
+		.attr('value', '1200')
+		.attr('autocomplete','off')
+		.attr('onkeypress','checkText(this, event)')
+		.attr('class','pTextInput')
+		.style('width','50px')
+		.style('margin-top','5px');
+
+
+	//reset button
+	UI.append('div')
+		.append('button')
+		.attr('id','resetButton')
+		.attr('class','button')
+		.attr('onclick','resetToOptions();')
+		.append('span')
+			.text('Reset');
+
+
+	//camera
+	params.gtoggle.Camera = true;
+	var c1 = UI.append('div')
+		.attr('class','particleDiv');
+	c1.append('div')
+		.attr('class','pLabelDiv')
+		.style('width', '215px')
+		.text('Camera Controls')
+	c1.append('button')
+		.attr('class','dropbtn')
+		.attr('id','CameraDropbtn')
+		.attr('onclick','showFunction(this);')
+		.html('&#x25BC');
+	var c2 = c1.append('div')
+		.attr('class','dropdown-content')
+		.attr('id','CameraDropdown')
+		.style('height','190px');
+	//center text boxes
+	var c3 = c2.append('div')
+		.attr('class','pLabelDiv')
+		.style('width','280px')
+		.style('margin-top','5px') 
+	c3.append('div')
+		.style('width','60px')
+		.style('display','inline-block')
+		.text('Center');
+	c3.append('input')
+		.attr('class','pTextInput')
+		.attr('id','CenterXText')
+		.attr('value','1')
+		.attr('autocomplete','off')
+		.attr('onkeypress','checkText(this, event);')
+		.style('width','40px')
+		.style('margin-right','8px');
+	c3.append('input')
+		.attr('class','pTextInput')
+		.attr('id','CenterYText')
+		.attr('value','1')
+		.attr('autocomplete','off')
+		.attr('onkeypress','checkText(this, event);')
+		.style('width','40px')
+		.style('margin-right','8px');
+	c3.append('input')
+		.attr('class','pTextInput')
+		.attr('id','CenterZText')
+		.attr('value','1')
+		.attr('autocomplete','off')
+		.attr('onkeypress','checkText(this, event);')
+		.style('width','40px')
+	//center lock checkbox
+	var c4 = c3.append('span')
+		.attr('id','CenterCheckDiv')
+		.style('width','45px')
+		.style('margin',0)
+		.style('margin-left','10px')
+		.style('padding',0);
+	c4.append('input')
+		.attr('id','CenterCheckBox')
+		.attr('type','checkbox')
+		.attr('value','true')
+		.attr('autocomplete','off')
+		.attr('onchange','checkCenterLock(this);')
+		.attr('checked');
+	c4.append('label')
+		.attr('for','CenterCheckBox')
+		.attr('id','CenterCheckLabel')
+		.style('font-size','10pt')
+		.text('Lock');
+	//camera text boxes
+	c3 = c2.append('div')
+		.attr('class','pLabelDiv')
+		.style('width','280px')
+		.style('margin-top','5px') 
+	c3.append('div')
+		.style('width','60px')
+		.style('display','inline-block')
+		.text('Camera');
+	c3.append('input')
+		.attr('class','pTextInput')
+		.attr('id','CameraXText')
+		.attr('value','1')
+		.attr('autocomplete','off')
+		.attr('onkeypress','checkText(this, event);')
+		.style('width','40px')
+		.style('margin-right','8px');
+	c3.append('input')
+		.attr('class','pTextInput')
+		.attr('id','CameraYText')
+		.attr('value','1')
+		.attr('autocomplete','off')
+		.attr('onkeypress','checkText(this, event);')
+		.style('width','40px')
+		.style('margin-right','8px');
+	c3.append('input')
+		.attr('class','pTextInput')
+		.attr('id','CameraZText')
+		.attr('value','1')
+		.attr('autocomplete','off')
+		.attr('onkeypress','checkText(this, event);')
+		.style('width','40px');
+	//rotation text boxes
+	c3 = c2.append('div')
+		.attr('class','pLabelDiv')
+		.style('width','280px')
+		.style('margin-top','5px') 
+	c3.append('div')
+		.style('width','60px')
+		.style('display','inline-block')
+		.text('Rotation');
+	c3.append('input')
+		.attr('class','pTextInput')
+		.attr('id','RotXText')
+		.attr('value','1')
+		.attr('autocomplete','off')
+		.attr('onkeypress','checkText(this, event);')
+		.style('width','40px')
+		.style('margin-right','8px');
+	c3.append('input')
+		.attr('class','pTextInput')
+		.attr('id','RotYText')
+		.attr('value','1')
+		.attr('autocomplete','off')
+		.attr('onkeypress','checkText(this, event);')
+		.style('width','40px')
+		.style('margin-right','8px');
+	c3.append('input')
+		.attr('class','pTextInput')
+		.attr('id','RotZText')
+		.attr('value','1')
+		.attr('autocomplete','off')
+		.attr('onkeypress','checkText(this, event);')
+		.style('width','40px');
+	//buttons
+	c3 = c2.append('div')
+		.attr('class','pLabelDiv')
+		.style('width','280px');
+	c3.append('button')
+		.attr('id','CameraSave')
+		.attr('class','button centerButton')
+		.attr('onclick','saveCamera();')
+		.style('margin',0)
+		.style('margin-right','8px')
+		.style('padding','2px')
+		.append('span')
+			.text('Save');
+	c3.append('button')
+		.attr('id','CameraReset')
+		.attr('class','button centerButton')
+		.attr('onclick','resetCamera();')
+		.style('margin',0)
+		.style('margin-right','8px')
+		.style('padding','2px')
+		.append('span')
+			.text('Reset');
+		c3.append('button')
+		.attr('id','CameraRecenter')
+		.attr('class','button centerButton')
+		.attr('onclick','recenterCamera();')
+		.style('margin',0)
+		.style('padding','2px')
+		.append('span')
+			.text('Recenter');
+	//camera friction
+	c3 = c2.append('div')
+		.attr('class','pLabelDiv')
+		.attr('id','FrictionDiv')
+		.style('background-color','#808080')
+		.style('width','280px')
+		.style('padding-top','10px');
+	c3.append('div')
+		.style('width','55px')
+		.style('display','inline-block')
+		.text('Friction');
+	c3.append('div')
+		.attr('class','NSliderClass')
+		.attr('id','CFSlider')
+		.style('margin-left','10px')
+		.style('width','170px');
+	c3.append('input')
+		.attr('class','NMaxTClass')
+		.attr('id','CFMaxT')
+		.attr('type','text')
+		.style('margin-top','-4px');
+	//camera stereo separation
+	c3 = c2.append('div')
+		.attr('class','pLabelDiv')
+		.attr('id','StereoSepDiv')
+		.style('background-color','#808080')
+		.style('width','280px')
+		.style('padding-top','10px');
+	c3.append('div')
+		.style('width','55px')
+		.style('display','inline-block')
+		.text('Stereo');
+	c3.append('input')
+		.attr('id','StereoCheckBox')
+		.attr('type','checkbox')
+		.attr('value','false')
+		.attr('onchange','checkStereoLock(this);')
+		.attr('autocomplete','false');
+	c3.append('div')
+		.attr('class','NSliderClass')
+		.attr('id','SSSlider')
+		.style('margin-left','40px')
+		.style('width','140px');
+	c3.append('input')
+		.attr('class','NMaxTClass')
+		.attr('id','SSMaxT')
+		.attr('type','text')
+		.style('margin-top','-4px');
+
+	//decimation
+	var dec = UI.append('div')
+		.attr('class','particleDiv')
+		.attr('id', 'DecimationDiv');
+	dec.append('div')
+		.attr('class','pLabelDiv')
+		.style('width','85px')
+		.text('Decimation');
+	dec.append('div')
+		.attr('class','PSliderClass')
+		.attr('id','DSlider')
+		.style('margin-top','-22px')
+		.style('width','145px');
+	dec.append('input')
+		.attr('class','PMaxTClass')
+		.attr('id','DMaxT')
+		.attr('type','text')
+		.style('left','245px')
+		.style('width','40px');
+
+
+	//setup for all the particle UI bits 
+	UIparts.data(params.partsKeys).enter()
 		.append('div')
 		.attr('class', function (d) { return "particleDiv "+d+"Div" }) //+ dropdown
 
+
+				//		<button id = "fullScreenButton" class="button" onclick="fullscreen();"><span>Fullscreen</span></button>
 
 	var i=0;
 	var j=0;
 	for (i=0; i<params.partsKeys.length; i++){
 		d = params.partsKeys[i];
+		params.gtoggle[d] = true;
 
 		var controls = d3.selectAll('div.'+d+'Div');
 
@@ -1009,7 +1317,7 @@ function createUI(reset = false){
 		controls.append('input')
 			.attr('id',d+'ColorPicker');
 
-		if (params.parts.options.UIdropdown[d] == 1){
+		if (params.parts.options.UIdropdown[d]){
 			controls.append('button')
 				.attr('id', d+'Dropbtn')
 				.attr('class', 'dropbtn')
