@@ -153,6 +153,13 @@ canvas{
 	transition: opacity: 0.15s;
 
 }
+.centerButton{
+	margin-left:0px;
+	width:88px; 
+	height:24px; 
+	padding:2px; 
+	border:1px solid black;
+}
 .button:hover {
 	opacity: 1;
 }

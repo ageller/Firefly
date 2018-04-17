@@ -3,6 +3,7 @@ function animate(time) {
 	requestAnimationFrame( animate );
 	update(time);
 	render();
+
 }
 
 function update(time){
@@ -42,14 +43,15 @@ function update(time){
 	}
 
 
-
 	for (var i=0; i<params.partsKeys.length; i++){
 		var p = params.partsKeys[i];
 		params.partsMesh[p].forEach( function( m, j ) {
 			m.material.uniforms.velType.value = params.velopts[params.velType[p]];
 			if (params.plotParts[p]) {
+
 				m.geometry.setDrawRange( 0, params.plotNmax[p]*(1./params.Decimate) )
 				m.material.uniforms.uVertexScale.value = params.PsizeMult[p];
+
 				m.material.uniforms.color.value = new THREE.Vector4( params.Pcolors[p][0], params.Pcolors[p][1], params.Pcolors[p][2], params.Pcolors[p][3]);
 				if (params.showVel[p]){
 					// pass camera orientation to the shader

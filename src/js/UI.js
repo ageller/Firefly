@@ -1,24 +1,35 @@
+//reset to the initial Options file
+function resetToOptions()
+{
+	//reset all the parts specific values to the initial ones
+	initPVals(reset = true);
+	
+	//redo init, but only the camera bits (maybe could streamline this and init by using the functions below?)
+    init(reset = true);
+
+    //destroy the particle portion of the UI and recreate it (simplest option)
+	d3.select('#particleUI').html("");
+    createUI(reset = true);
+
+}
+
 //check whether the center is locked or not
 function checkCenterLock(box)
 {
 
 	params.controls.dispose();
-
 	if (box.checked) {
-		xx = params.camera.getWorldDirection()
 		params.rotatecamera = true;
-		params.controls = new THREE.TrackballControls( params.camera, params.renderer.domElement );
-		params.controls.target = new THREE.Vector3(params.camera.position.x + xx.x, params.camera.position.y + xx.y, params.camera.position.z + xx.z);
 	} else {
 		params.rotatecamera = false;
-		params.controls = new THREE.FlyControls( params.camera , params.renderer.domElement);
 	}
-	updateUICenterText();
-	updateUICameraText();
-	updateUIRotText();
+	initControls();
 
 }
-function resetCamera() //does this always give the same rotation? It would be good for the user to set the rotation...
+
+//reset the camera position to whatever is saved in the options parameters
+//NOTE: if the cameraRotation is set, then the controls become fly controls
+function resetCamera() 
 {
 
     var screenWidth = window.innerWidth;
@@ -29,12 +40,47 @@ function resetCamera() //does this always give the same rotation? It would be go
 
     params.camera.position.set(params.parts.options.camera[0], params.parts.options.camera[1], params.parts.options.camera[2]);
     params.camera.lookAt(params.scene.position);  
-    params.camera.rotation.set(params.parts.options.cameraRotation[0], params.parts.options.cameraRotation[1], params.parts.options.cameraRotation[2]);
+    if (params.parts.options.hasOwnProperty('cameraRotation')){
+        params.rotatecamera = false;
+        elm = document.getElementById("CenterCheckBox");
+        elm.checked = false;
+        params.camera.rotation.set(params.parts.options.cameraRotation[0], params.parts.options.cameraRotation[1], params.parts.options.cameraRotation[2]);
+    }
 
-    params.controls = new THREE.TrackballControls( params.camera, params.renderer.domElement );
+	params.controls.dispose();
+    initControls(center = params.center);
 
 
 }
+
+//reset the camera center.  Can be useful when switching back and forth between trackball and fly controls
+function recenterCamera() 
+{
+	initControls(center = params.center);
+}
+
+//replace the current camera settings in options with the current camera position and rotation (to return here upon clicking reset)
+//NOTE: with a reset, this will set the controls to fly controls
+function saveCamera() 
+{
+
+    if (!params.parts.options.hasOwnProperty('camera')){
+		params.parts.options.camera = [0,0,0];
+	}
+	params.parts.options.camera[0] = params.camera.position.x;
+	params.parts.options.camera[1] = params.camera.position.y;
+	params.parts.options.camera[2] = params.camera.position.z;
+
+ //    if (!params.parts.options.hasOwnProperty('cameraRotation')){
+	// 	params.parts.options.cameraRotation = [0,0,0];
+	// }
+	if (params.parts.options.hasOwnProperty('cameraRotation')){
+	    params.parts.options.cameraRotation[0] = params.camera.rotation.x;
+	    params.parts.options.cameraRotation[1] = params.camera.rotation.y;
+	    params.parts.options.cameraRotation[2] = params.camera.rotation.z;
+	}
+}
+
 function checkVelBox(box)
 {
 	var pID = box.id.slice(0, -11)
@@ -166,11 +212,14 @@ function createFilterSliders(){
 				params.SliderFmin[p][fk] = document.getElementById(p+'_FK_'+fk+'_END_FilterMinT');
 				params.SliderFmax[p][fk] = document.getElementById(p+'_FK_'+fk+'_END_FilterMaxT');
 				if (params.SliderF[p][fk] != null && params.SliderFmin[p][fk] != null && params.SliderFmax[p][fk] != null && params.filterLims[p][fk] != null){
+					if (params.SliderF[p][fk].noUiSlider) {
+						params.SliderF[p][fk].noUiSlider.destroy();
+					}
 					params.SliderFinputs[p][fk] = [params.SliderFmin[p][fk], params.SliderFmax[p][fk]];
 					params.SliderFinputs[p][fk][0].parent = params.SliderF[p][fk];
 					params.SliderFinputs[p][fk][1].parent = params.SliderF[p][fk];
-					min = params.filterLims[p][fk][0];
-					max = params.filterLims[p][fk][1];
+					min = parseFloat(params.filterLims[p][fk][0]);
+					max = parseFloat(params.filterLims[p][fk][1]);
 
 					noUiSlider.create(params.SliderF[p][fk], {
 						start: [min, max],
@@ -344,6 +393,8 @@ function handlePSliderText(input, handle)
 //need to allow this to update at large numbers
 function createPsliders(){
 
+
+
 	var i = 0;
 	var j = 0;
 	for (i=0; i<params.partsKeys.length; i++){
@@ -352,6 +403,11 @@ function createPsliders(){
 		params.SliderP[p] = document.getElementById(p+'_PSlider');
 		params.SliderPmax[p] = document.getElementById(p+'_PMaxT');
 		if (params.SliderP[p] != null && params.SliderPmax[p] != null){
+
+			if (params.SliderP[p].noUiSlider) {
+				params.SliderP[p].noUiSlider.destroy();
+			}
+
 			params.SliderPInputs[p] = [params.SliderPmax[p]];
 			params.SliderPInputs[p][0].parent = params.SliderP[p];
 			min = 0.;
@@ -392,12 +448,12 @@ function createPsliders(){
 function setDSliderHandle(i, value, parent) {
 	value = Math.max(1, parseFloat(value));
 
-	var max = parent.noUiSlider.options.range.max[i];
+	var max = parseFloat(parent.noUiSlider.options.range.max[i]);
 	if (value > max){
 		parent.noUiSlider.updateOptions({
 			range: {
 				'min': [1],
-				'max': [value]
+				'max': [parseFloat(value)]
 			}
 		});
 	}
@@ -455,6 +511,9 @@ function createDslider(){
 	params.SliderD = document.getElementById('DSlider');
 	params.SliderDmax = document.getElementById('DMaxT');
 	if (params.SliderD != null && params.SliderDmax != null){
+		if (params.SliderD.noUiSlider) {
+			params.SliderD.noUiSlider.destroy();
+		}
 		params.SliderDInputs = [params.SliderDmax];
 		params.SliderDInputs[0].parent = params.SliderD;
 		min = 1.;
@@ -548,6 +607,9 @@ function createCFslider(){
 	params.SliderCF = document.getElementById('CFSlider');
 	params.SliderCFmax = document.getElementById('CFMaxT');
 	if (params.SliderCF != null && params.SliderCFmax != null){
+		if (params.SliderCF.noUiSlider) {
+			params.SliderCF.noUiSlider.destroy();
+		}
 		params.SliderCFInputs = [params.SliderCFmax];
 		params.SliderCFInputs[0].parent = params.SliderCF;
 		min = 0.;
@@ -659,15 +721,18 @@ function handleSSSliderText(input, handle)
 
 function createSSslider(){
 
-	SliderSS = document.getElementById('SSSlider');
-	SliderSSmax = document.getElementById('SSMaxT');
-	if (SliderSS != null && SliderSSmax != null){
-		SliderSSInputs = [SliderSSmax];
-		SliderSSInputs[0].parent = SliderSS;
+	params.sliderSS = document.getElementById('SSSlider');
+	params.sliderSSmax = document.getElementById('SSMaxT');
+	if (params.sliderSS != null && params.sliderSSmax != null){
+		if (params.sliderSS.noUiSlider) {
+			params.sliderSS.noUiSlider.destroy();
+		}
+		params.sliderSSInputs = [params.sliderSSmax];
+		params.sliderSSInputs[0].parent = params.sliderSS;
 		min = 0.;
-		max = params.stereoSepMax;
+		max = parseFloat(params.stereoSepMax);
 
-		noUiSlider.create(SliderSS, {
+		noUiSlider.create(params.sliderSS, {
 			start: [params.stereoSep],
 			connect: [true, false],
 			tooltips: false,
@@ -681,17 +746,17 @@ function createSSslider(){
 			})
 		});
 
-		SliderSS.noUiSlider.on('mouseup', mouseDown=false); 
-		SliderSS.noUiSlider.on('update', function(values, handle) {
+		params.sliderSS.noUiSlider.on('mouseup', mouseDown=false); 
+		params.sliderSS.noUiSlider.on('update', function(values, handle) {
 
-			SliderSSInputs[handle].value = values[handle];
+			params.sliderSSInputs[handle].value = values[handle];
 
 			var value = Math.min(Math.max(0., parseFloat(values[handle])),params.stereoSepMax);
 			params.effect.setEyeSeparation(value);
 			mouseDown = true;
 		});
 
-		SliderSSInputs.forEach(handleSSSliderText);
+		params.sliderSSInputs.forEach(handleSSSliderText);
 	}
 	w = parseInt(d3.select("#SSSlider").style("width").slice(0,-2));
 	d3.select("#SSSlider").select('.noUi-base').style('width',w-10+"px");
@@ -886,15 +951,17 @@ function selectVelType() {
 	params.velType[p] = selectValue;
 };
 
-function createUI(){
+
+function createUI(reset = false){
 	console.log("Creating UI");
 
 //change the hamburger to the X to start
- 	var hamburger = document.getElementById('UItopbar');
- 	//hide the UI
-	hideUI(hamburger);
- 	hamburger.classList.toggle("change");
-
+	if (! reset){
+	 	var hamburger = document.getElementById('UItopbar');
+	 	//hide the UI
+		hideUI(hamburger);
+	 	hamburger.classList.toggle("change");
+	 }
 
 
 	console.log(params.partsKeys)
@@ -1115,5 +1182,10 @@ function createUI(){
 	createSSslider();
     createFilterSliders();
 
+    updateUICenterText();
+    updateUICameraText();
+    updateUIRotText();
+
+    params.haveUI = true;
 
 };

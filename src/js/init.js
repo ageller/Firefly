@@ -36,7 +36,6 @@ function defineParams(){
         this.plotNmax = {};
 
         //Filtering
-        //I need to add a small factor because the precision of the noUiSlider effects the filtering
         this.fkeys = {};
         this.SliderF = {};
         this.SliderFmin = {};
@@ -86,85 +85,125 @@ function defineParams(){
         this.SliderCFmin;
         this.SliderCFmax;
         this.SliderCFInputs;
+        this.SliderSS;
+        this.SliderSSmin;
+        this.SliderSSmax;
+        this.SliderSSInputs;
 
         //help screen
         this.helpMessage = 1;
 
+        //check to see if the UI exists
+        this.haveUI = false;
     };
 
 
     params = new ParamsInit();
 }
 
+function initControls(center = null){
 
-function init() {
-    //keyboard
-    params.keyboard = new KeyboardState();
+    if (params.rotatecamera) {
+        xx = params.camera.getWorldDirection()
+        params.controls = new THREE.TrackballControls( params.camera, params.renderer.domElement );
+        if (center == null){
+            params.controls.target = new THREE.Vector3(params.camera.position.x + xx.x, params.camera.position.y + xx.y, params.camera.position.z + xx.z);
+        } else {
+            params.controls.target = center;
 
-    // scene
-    params.scene = new THREE.Scene();
-
-    // camera
-    var screenWidth = window.innerWidth;
-    var screenHeight = window.innerHeight;
-    var aspect = screenWidth / screenHeight;
-    params.camera = new THREE.PerspectiveCamera( params.fov, aspect, params.zmin, params.zmax);
-    params.scene.add(params.camera);
-
-    params.camera.position.set(params.parts.options.camera[0], params.parts.options.camera[1], params.parts.options.camera[2]);
-    params.camera.lookAt(params.scene.position);  
-    console.log(params.parts.options);
-    params.camera.rotation.set(params.parts.options.cameraRotation[0], params.parts.options.cameraRotation[1], params.parts.options.cameraRotation[2]);
-    //params.parts.options.cameraRotation = new THREE.Vector3(params.camera.rotation.x, params.camera.rotation.y, params.camera.rotation.z);
-
-    var dist = params.scene.position.distanceTo(params.camera.position);
-    var vFOV = THREE.Math.degToRad( params.camera.fov ); // convert vertical fov to radians
-
-    // renderer
-    if ( Detector.webgl ) {
-        params.renderer = new THREE.WebGLRenderer( {
-            antialias:true,
-    	    //preserveDrawingBuffer: true , //so that we can save the image
-    	} );
+        }
+        params.controls.dynamicDampingFactor = 0.1;
     } else {
-    	params.renderer = new THREE.CanvasRenderer(); 
+        params.controls = new THREE.FlyControls( params.camera , params.renderer.domElement);
     }
-    params.renderer.setSize(screenWidth, screenHeight);
-    params.normalRenderer = params.renderer;
 
-    params.container = document.getElementById('WebGLContainer');
-    params.container.appendChild( params.renderer.domElement );
+    if (params.haveUI){
+        updateUICenterText();
+        updateUICameraText();
+        updateUIRotText();
+    }
+}
 
-    // events
-    THREEx.WindowResize(params.renderer, params.camera);
-    THREEx.FullScreen.bindKey({ charCode : 'm'.charCodeAt(0) });
+function init(reset = false) {
+    if (reset){
+        params.parts.options = params.parts.options0;
+    } else {
+         //keyboard
+        params.keyboard = new KeyboardState();
+
+        // scene
+        params.scene = new THREE.Scene();     
+
+        // camera
+        var screenWidth = window.innerWidth;
+        var screenHeight = window.innerHeight;
+        var aspect = screenWidth / screenHeight;
+        params.camera = new THREE.PerspectiveCamera( params.fov, aspect, params.zmin, params.zmax);
+        params.camera.up.set(0, -1, 0);
+        params.scene.add(params.camera);  
+
+        // renderer
+        if ( Detector.webgl ) {
+            params.renderer = new THREE.WebGLRenderer( {
+                antialias:true,
+                //preserveDrawingBuffer: true , //so that we can save the image
+            } );
+        } else {
+            params.renderer = new THREE.CanvasRenderer(); 
+        }
+        params.renderer.setSize(screenWidth, screenHeight);
+        params.normalRenderer = params.renderer;
+
+        params.container = document.getElementById('WebGLContainer');
+        params.container.appendChild( params.renderer.domElement );
+
+        // events
+        THREEx.WindowResize(params.renderer, params.camera);
+        THREEx.FullScreen.bindKey({ charCode : 'm'.charCodeAt(0) });
+
+        //stereo
+        params.effect = new THREE.StereoEffect( params.renderer );
+        params.effect.setAspect(1.);
+        params.effect.setEyeSeparation(params.stereoSep);
+    }
+
+
+    //console.log(params.parts.options);
+
+
+    //initialize center
+    if (params.parts.options.hasOwnProperty('center')){
+        if (params.parts.options.center == null){
+            setCenter(params.parts[params.partsKeys[0]].Coordinates);
+        } else {
+            params.center = new THREE.Vector3(params.parts.options.center[0], params.parts.options.center[1], params.parts.options.center[2]);
+            setBoxSize(params.parts[params.partsKeys[0]].Coordinates);
+        }
+    } else {
+        setCenter(params.parts[params.partsKeys[0]].Coordinates);
+    }
+
+
+    //change location of camera
+    if (params.parts.options.hasOwnProperty('camera')){
+        params.camera.position.set(params.parts.options.camera[0], params.parts.options.camera[1], params.parts.options.camera[2]);
+    } else {
+        params.camera.position.set(0,0,-10);
+    }
+
+    params.camera.lookAt(params.scene.position);  
+    if (params.parts.options.hasOwnProperty('cameraRotation')){
+        params.rotatecamera = false;
+        elm = document.getElementById("CenterCheckBox");
+        elm.checked = false;
+        params.camera.rotation.set(params.parts.options.cameraRotation[0], params.parts.options.cameraRotation[1], params.parts.options.cameraRotation[2]);
+    }
+
 
     // controls
-
-    //Tcontrols = new THREE.TrackballControls( camera, renderer.domElement );
-    //Fcontrols = new THREE.FlyControls( camera , renderer.domElement);
-    params.controls = new THREE.TrackballControls( params.camera, params.renderer.domElement );
-    params.controls.dynamicDampingFactor = 0.1;
-    //params.controls.noRotate = true;
-
-    //controls = new THREE.FlyControls( camera , renderer.domElement);
-
-    //controls.dynamicDampingFactor = params.friction;
-    //controls.zoomSpeed = params.zoomSpeed;
-
-    // light
-    //var light = new THREE.PointLight(0xffffff);
-    //light.position.set(100,250,100);
-    //scene.add(light);
-
-
-    //stereo
-    params.effect = new THREE.StereoEffect( params.renderer );
-    params.effect.setAspect(1.);
-    params.effect.setEyeSeparation(params.stereoSep);
+    initControls(center = params.center);
 
     
-    params.camera.up.set(0, -1, 0);
 
 }
 
@@ -215,19 +254,21 @@ function calcVelVals(p){
     }
 }
 //initialize various values for the parts dict from the input data file, 
-function initPVals(){
+function initPVals(reset = false){
     for (var i=0; i<params.partsKeys.length; i++){
-	var p = params.partsKeys[i];
-	params.partsMesh[p] = [];
-	params.PsizeMult[p] = params.parts[p].sizeMult;
-	params.Pcolors[p] = params.parts[p].color;
-	params.updateFilter[p] = false;
-	params.filterLims[p] = {};
-	params.gtoggle[p] = true;
-	params.plotNmax[p] = params.parts[p].Coordinates.length;
-	params.plotParts[p] = true;
+    	var p = params.partsKeys[i];
+        if (! reset){
+        	params.partsMesh[p] = [];
+        }
+    	params.PsizeMult[p] = params.parts[p].sizeMult;
+    	params.Pcolors[p] = params.parts[p].color;
+    	params.updateFilter[p] = false;
+    	params.filterLims[p] = {};
+    	params.gtoggle[p] = true;
+    	params.plotNmax[p] = params.parts[p].Coordinates.length;
+    	params.plotParts[p] = true;
 
-	params.parts[p].nMaxPlot = Math.min(params.parts[p].nMaxPlot, params.parts[p].Coordinates.length);
+    	params.parts[p].nMaxPlot = Math.min(params.parts[p].nMaxPlot, params.parts[p].Coordinates.length);
 
         if (params.parts[p].Velocities != null){
             calcVelVals(p);
@@ -285,16 +326,19 @@ function loadData(callback){
 	//  d3.json(files[p],  function(foo) {
 		params.parts[p] = foo;
 		if (i ==  params.partsKeys.length-1){
-		    setTimeout(function(){ callback(); }, 1000); //silly, but seems to fix the problem with loading
+            setTimeout(function(){ 
+                var index = params.partsKeys.indexOf('options');
+                if (index > -1) {
+                    params.partsKeys.splice(index, 1);
+                    params.parts.options0 = JSON.parse(JSON.stringify(params.parts.options));
+                }
+                callback(); 
+            }, 1000); //silly, but seems to fix the problem with loading
 		}
         });
 	});
 
-    var index = params.partsKeys.indexOf('options');
-    if (index > -1) {
-        params.partsKeys.splice(index, 1);
-    }
-
+ 
     });
 
 }
@@ -320,31 +364,22 @@ function WebGLStart(){
     clearloading();
 
 //reset the window title
-    window.document.title = params.parts.options.title
-
-//initialize
-    if (params.parts.options.center == null){
-        setCenter(params.parts[params.partsKeys[0]].Coordinates);
-    } else {
-        params.center = new THREE.Vector3(params.parts.options.center[0], params.parts.options.center[1], params.parts.options.center[2]);
-        setBoxSize(params.parts[params.partsKeys[0]].Coordinates);
+    if (params.parts.options.hasOwnProperty('title')){
+        window.document.title = params.parts.options.title
     }
-
-    initPVals();
 
     document.addEventListener('mousedown', handleMouseDown);
     document.addEventListener('mouseup', handleMouseUp);
 
+    initPVals();
+
     init();
-    updateUICenterText();
-    updateUIRotText();
 
     createUI();
     mouseDown = false;  //silly fix
 
 //draw everything
     drawScene();
-    resetCamera();
     
 //begin the animation
     animate();
