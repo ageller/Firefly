@@ -117,6 +117,7 @@ canvas{
 	width:290px;
 	padding: 0px;
 	margin:5px;
+	margin-bottom:0px;
 	cursor: pointer;
 	font-size:15px;
 	text-align: left;

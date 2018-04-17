@@ -17,42 +17,6 @@ function exitHandler(){
     }
 
 }
-//hide the splash screen
-function hideSplash(){
-    if (params.loaded){
-        params.helpMessage = 0;
-        var fdur = 700.;
-
-        var splash = d3.select("#splash");
-
-        splash.transition()
-            .ease(d3.easeLinear)
-            .duration(fdur)
-            .style("opacity", 0)
-
-            .on("end", function(d){
-                splash.style("display","none");
-            })
-    }
-}
-
-//hide the splash screen
-function showSplash(){
-    if (params.loaded){
-        params.helpMessage = 1;
-        var fdur = 700.;
-
-        var splash = d3.select("#splash");
-        splash.style("display","block");
-
-        splash.transition()
-            .ease(d3.easeLinear)
-            .duration(fdur)
-            .style("opacity", 0.8);
-    }
-    
-}
-
 
 
 //handle Mouse events
@@ -69,65 +33,4 @@ function handleMouseDown(event) {
 function handleMouseUp(event) {
     mouseDown = false;
 }
-
-
-function renderImage() {  
-//https://stackoverflow.com/questions/26193702/three-js-how-can-i-make-a-2d-snapshot-of-a-scene-as-a-jpg-image   
-//this sometimes breaks in Chrome when rendering takes too long
-//best to use Firefox to render images  
-    var imgData, imgNode;
-    var strDownloadMime = "image/octet-stream";
-    var strMime = "image/png";
-    var screenWidth = window.innerWidth;
-    var screenHeight = window.innerHeight;
-    var aspect = screenWidth / screenHeight;
-
-    var saveFile = function (strData, filename) {
-        var link = document.createElement('a');
-        if (typeof link.download === 'string') {
-            document.body.appendChild(link); //Firefox requires the link to be in the body
-            link.download = filename;
-            link.href = strData;
-            link.click();
-            document.body.removeChild(link); //remove the link when done
-        } else {
-            console.log("can't save image");
-            return;
-            //location.replace(uri);
-        }
-
-    }
-
-
-    try {
-        //resize
-        params.renderer.setSize(params.renderWidth, params.renderHeight);
-        params.camera.aspect = params.renderWidth / params.renderHeight;
-        params.camera.updateProjectionMatrix();
-        params.renderer.render( params.scene, params.camera );
-
-        //save image
-        imgData = renderer.domElement.toDataURL(strMime);
-
-        saveFile(imgData.replace(strMime, strDownloadMime), "image.png");
-
-
-        //back to original size
-        params.renderer.setSize(screenWidth, screenHeight);
-        params.camera.aspect = aspect;
-        params.camera.updateProjectionMatrix();
-        params.renderer.render( params.scene, params.camera );
-
-    } catch (e) {
-        console.log(e);
-        return;
-    }
-
-
-
-
-}
-
-
-
 

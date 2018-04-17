@@ -50,7 +50,7 @@ function defineParams(){
         this.fov = 45.
 
         // for dropdowns
-        this.gtoggle = {"Camera":true};
+        this.gtoggle = {};
 
         //camera controls
         this.rotatecamera = true;
@@ -264,15 +264,16 @@ function initPVals(reset = false){
     	params.Pcolors[p] = params.parts[p].color;
     	params.updateFilter[p] = false;
     	params.filterLims[p] = {};
-    	params.gtoggle[p] = true;
     	params.plotNmax[p] = params.parts[p].Coordinates.length;
     	params.plotParts[p] = true;
 
     	params.parts[p].nMaxPlot = Math.min(params.parts[p].nMaxPlot, params.parts[p].Coordinates.length);
 
         if (params.parts[p].Velocities != null){
-            calcVelVals(p);
-            params.parts[p].filterKeys.push("magVelocities");
+            if (!reset){
+                calcVelVals(p);
+                params.parts[p].filterKeys.push("magVelocities");
+            }
             params.velType[p] = 'line';
             //console.log(p, params.parts[p].VelVals, params.parts[p].Velocities)
         }
