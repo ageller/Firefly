@@ -172,7 +172,7 @@ class FIREreader(object):
                         'UIdropdown':dict(), #do you want to enable the dropdown menus for particles in the user interface (default = 1 == True)
                         'UIcolorPicker':dict(), #do you want to allow the user to change the color
                         'center':None, #do you want to define the initial camera center (if not, the WebGL app will calculate the center as the mean of the coordinates of the first particle set loaded in)
-                        'cameraDistance':np.array([0., 0. -10]), #initial camera location, NOTE: the magnitude must be >0
+                        'camera':np.array([0., 0. -10]), #initial camera location, NOTE: the magnitude must be >0
                       } 
         
         #the name of the JSON file
