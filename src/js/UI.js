@@ -578,6 +578,7 @@ function setCFSliderHandle(i, value, parent) {
 	} else {
 		params.controls.movementSpeed = 1. - value;
 	}
+	params.friction = value;
 	mouseDown = false; 
 
 }
@@ -645,6 +646,7 @@ function createCFslider(){
 			} else {
 				params.controls.movementSpeed = 1. -value;
 			}
+			params.friction = value;
 			mouseDown = true;
 		});
 
