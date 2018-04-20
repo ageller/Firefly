@@ -979,6 +979,7 @@ function createUI(reset = false){
 		UIt.append('table');
 		var UIr1 = UIt.append('tr');
 		var UIc1 = UIr1.append('td')
+			.style('padding-left','5px')
 			.attr('id','Hamburger')
 		UIc1.append('div').attr('class','bar1');
 		UIc1.append('div').attr('class','bar2');
