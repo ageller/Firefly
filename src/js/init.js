@@ -335,19 +335,21 @@ function loadData(callback){
 	params.partsKeys.forEach( function(p, i) {
 	    params.parts[p] = {};
 	    d3.json("data/"+files[p],  function(foo) {
-	//  d3.json(files[p],  function(foo) {
-		params.parts[p] = foo;
-		if (i ==  params.partsKeys.length-1){
-            setTimeout(function(){ 
-                var index = params.partsKeys.indexOf('options');
-                if (index > -1) {
-                    params.partsKeys.splice(index, 1);
-                    params.parts.options0 = JSON.parse(JSON.stringify(params.parts.options));
-                }
-                callback(); 
-            }, 1000); //silly, but seems to fix the problem with loading
-		}
-        });
+    	//  d3.json(files[p],  function(foo) {
+    		params.parts[p] = foo;
+            console.log(i)
+    		if (i ==  params.partsKeys.length-1){
+                console.log("here")
+                setTimeout(function(){ 
+                    var index = params.partsKeys.indexOf('options');
+                    if (index > -1) {
+                        params.partsKeys.splice(index, 1);
+                        params.parts.options0 = JSON.parse(JSON.stringify(params.parts.options));
+                    }
+                    callback(); 
+                }, 1000); //silly, but seems to fix the problem with loading
+    		}
+            });
 	});
 
  
