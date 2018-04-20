@@ -575,6 +575,8 @@ function setCFSliderHandle(i, value, parent) {
 	parent.noUiSlider.set(value);
 	if (params.rotatecamera){
 		params.controls.dynamicDampingFactor = value;
+	} else {
+		params.controls.movementSpeed = 1. - value;
 	}
 	mouseDown = false; 
 
@@ -640,6 +642,8 @@ function createCFslider(){
 			var value = Math.min(Math.max(0., parseFloat(values[handle])),1.);
 			if (params.rotatecamera){
 				params.controls.dynamicDampingFactor = value;
+			} else {
+				params.controls.movementSpeed = 1. -value;
 			}
 			mouseDown = true;
 		});
@@ -1114,10 +1118,11 @@ function createUI(reset = false){
 		.attr('value','true')
 		.attr('autocomplete','off')
 		.attr('onchange','checkCenterLock(this);');
+	console.log(params.rotatecamera)
 	if (params.rotatecamera){
-		c4.attr('checked', 'true');
+		d3.selectAll('#CenterCheckBox').attr('checked', true);
 	} else {
-		c4.attr('checked', 'false');
+		d3.selectAll('#CenterCheckBox').attr('checked', false);
 	}
 	c4.append('label')
 		.attr('for','CenterCheckBox')

@@ -93,6 +93,9 @@ function defineParams(){
         //help screen
         this.helpMessage = 1;
 
+        //initial friction value
+        this.friction = 0.1;
+
         //check to see if the UI exists
         this.haveUI = false;
 
@@ -119,9 +122,10 @@ function initControls(center = null){
             params.controls.target = center;
 
         }
-        params.controls.dynamicDampingFactor = 0.1;
+        params.controls.dynamicDampingFactor = params.friction;
     } else {
         params.controls = new THREE.FlyControls( params.camera , params.renderer.domElement);
+        params.controls.movementSpeed = 1. - params.friction;
     }
 
     if (params.haveUI){
