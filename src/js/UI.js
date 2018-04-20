@@ -967,12 +967,19 @@ function createUI(reset = false){
 			.attr('id','UItopbar')
 			.attr('onclick','hideUI(this);');
 		UIt.append('table');
-		var UIr1 = UIt.append('tr')
-		var UIc1 = UIr1.append('td').attr('id','Hamburger');
-		UIc1.append('div').attr('class','bar1')
-		UIc1.append('div').attr('class','bar2')
-		UIc1.append('div').attr('class','bar3')
-		var UIc2 = UIr1.append('td').append('span').append('b').attr('id','ControlsText').style('font-size','16pt').text('Controls')
+		var UIr1 = UIt.append('tr');
+		var UIc1 = UIr1.append('td')
+			.attr('id','Hamburger')
+		UIc1.append('div').attr('class','bar1');
+		UIc1.append('div').attr('class','bar2');
+		UIc1.append('div').attr('class','bar3');
+		var UIc2 = UIr1.append('td').append('div')
+			.attr('id','ControlsText')
+			.style('font-size','16pt')
+			.style('padding-left','5px')
+			.style('top','6px')
+			.style('position','absolute')
+			.append('b').text('Controls')
 
 		var hider = UIcontainer.append('div').attr('id','UIhider');
 		hider.append('div').attr('id','particleUI');
