@@ -9,7 +9,6 @@ class FIREreader(object):
 
         #directory that contains all the hdf5 data files
         self.directory = './' 
-        
 
         #particles to return
         self.returnParts = ['PartType0', 'PartType1', 'PartType2', 'PartType4']
@@ -19,90 +18,66 @@ class FIREreader(object):
                       'PartType1':'HRDM', 
                       'PartType2':'LRDM', 
                       'PartType4':'Stars' }
-
-        #amount to decimate the data (==1 means no decimates, >1 factor by which to reduce the amount of data)
-        self.decimate = {'PartType0':1., 
-                      'PartType1':1., 
-                      'PartType2':1., 
-                      'PartType4':1. }
-                      
-        #keys from the hdf5 file to include in the JSON file for WebGLonFIRE (must at least include Coordinates)
-        self.returnKeys = {'PartType0': ['Coordinates'],  
-                           'PartType1': ['Coordinates'],  
-                           'PartType2': ['Coordinates'],  
-                           'PartType4': ['Coordinates'] }         
         
+        #flag to check if user has already defined the default values
+        self.defined = False
+        
+        #amount to decimate the data (==1 means no decimates, >1 factor by which to reduce the amount of data)
+        self.decimate = dict()
+        
+        #keys from the hd5 file to include in the JSON file for WebGLonFIRE (must at least include Coordinates)
+        self.returnKeys = dict()
         
         #set the default colors = rgba.  The alpha value here becomes a multiplier if weights are provided. 
-        self.colors = {'PartType0': [1., 0., 0., 0.1],  
-                       'PartType1': [1., 1., 0., 0.1],  
-                       'PartType2': [1., 1., 0., 0.1],  
-                       'PartType4': [0., 0., 1., 0.1] } 
-
+        self.colors = dict()
+        
         #set the weight of the particles (to define the alpha value). This is a function that will calculate the weights
-        self.weightFunction = {'PartType0': None, 
-                      'PartType1': None, 
-                      'PartType2': None, 
-                      'PartType4': None}
+        self.weightFunction = dict()
         
         #set the radii of the particles. This is a function that will calculate the radii
-        self.radiusFunction = {'PartType0': None, 
-                      'PartType1': None, 
-                      'PartType2': None, 
-                      'PartType4': None}
+        self.radiusFunction = dict()
         
         #set the default point size multiplier 
-        self.sizeMult = {'PartType0':0.1, 
-                      'PartType1':0.1, 
-                      'PartType2':0.1, 
-                      'PartType4':0.1 }
-                      
+        self.sizeMult = dict()
+
         #set the number of points to plot during each draw (larger numbers will make the visualization run more slowly)
-        self.nMaxPlot = {'PartType0':1e4, 
-                      'PartType1':1e4, 
-                      'PartType2':1e4, 
-                      'PartType4':1e4 }
-                      
+        self.nMaxPlot = dict()
+        
         #decide whether you want to use the key from returnKeys as a filter item in the UI
         #NOTE: each of these must be the same length as self.returnKeys
-        self.addFilter = {'PartType0': [False],  
-                           'PartType1': [False],  
-                           'PartType2': [False],  
-                           'PartType4': [False] }        
+        self.addFilter = dict()
   
         #should we use the log of these values?  
         #NOTE: this must be the same length as self.returnKeys
-        self.dolog = {'PartType0': [False],  
-                       'PartType1': [False],  
-                       'PartType2': [False],  
-                       'PartType4': [False] }          
+        self.dolog = dict()
 
         #should we use the magnitude of these values?   
         #NOTE: this must be the same length as self.returnKeys
         #NOTE: setting any of these to true will significantly slow down the file creation
-        self.domag = {'PartType0': [False],  
-                       'PartType1': [False],  
-                       'PartType2': [False],  
-                       'PartType4': [False] }  
+        self.domag = dict()
  
         #should we plot using Alex Gurvich's radial profile fit to the SPH particles (==1), or a simple symmetric radial profile?   
         #NOTE: this must be the same length as self.returnKeys
-        self.doSPHrad = {'PartType0': [1],
-                       'PartType1': [0],  
-                       'PartType2': [0],  
-                       'PartType4': [0] }  
-
-
-        #the name of the JSON file
-        self.JSONfname = 'FIREdata.json'
+        self.doSPHrad = dict()
         
-        #a dictionary of options for the WebGL app
+        #a dictionary of  for the WebGL app
         self.options = {'title':'WebGLonFIRE', #set the title of the webpage
-                       'UIdropdown':dict(), #do you want to enable the dropdown menus for particles in the user interface (default = 1 == True)
-                       'UIcolorPicker':dict(), #do you want to allow the user to change the color
-                       'center':None, #do you want to define the initial camera center (if not, the WebGL app will calculate the center as the mean of the coordinates of the first particle set loaded in)
-                       } 
+                        'UIdropdown':dict(), #do you want to enable the dropdown menus for particles in the user interface (default = True)
+                        'UIcolorPicker':dict(), #do you want to allow the user to change the color (defulat = True)
+                        'UIfullscreen':True, #do you want to show the fullscreen button?
+                        'UIsnapshot':True, #do you want to show the snapshot button?
+                        'UIreset':True, #do you want to show the reset button?
+                        'UIcameraControls':True, #do you want to show the camera controls
+                        'center':None, #do you want to define the initial camera center (if not, the WebGL app will calculate the center as the mean of the coordinates of the first particle set loaded in)
+                        'camera':np.array([0., 0. -10]), #initial camera location, NOTE: the magnitude must be >0
 
+                      } 
+        
+        #the name of the JSON file
+        self.JSONfname = 'FIREdata'
+        
+
+        
         #in case you want to print the available keys to the screen
         self.showkeys = False
 
@@ -182,6 +157,8 @@ class FIREreader(object):
         #the name of the JSON file
         self.JSONfname = 'FIREdata'
         
+
+        
         #in case you want to print the available keys to the screen
         self.showkeys = False
         
@@ -197,6 +174,9 @@ class FIREreader(object):
         #keys for filtering (will be defined below)
         self.filterKeys = {}
         
+        #will store all the file names that are produced (will be defined below in defineFilenames)
+        self.filenames = dict()
+
 ################################################## 
 ################################################## 
 ################################################## 
@@ -263,7 +243,7 @@ class FIREreader(object):
             ukey = "mag"+ukey
             vals = [np.linalg.norm(v) for v in vals]
          
-        if ukey in d[part].keys():
+        if ukey in list(d[part].keys()):
             d[part][ukey] = np.append(vals, d[part][ukey], axis=0)
         else:
             d[part][ukey] = vals
@@ -274,7 +254,8 @@ class FIREreader(object):
         for fname in os.listdir(self.directory):
             print(fname)
             with h5py.File(self.directory + '/' + fname,'r') as snap:
-                parts = snap.keys()[1:]
+                foo = list(snap.keys())
+                parts = foo[1:]
                 for p in parts:
                     if p in self.returnParts:
                         if p not in self.partsDict:
@@ -294,7 +275,7 @@ class FIREreader(object):
                             
         #and add on the colors and point size defaults
         #also calculate the magnitude where necessary
-        for p in self.partsDict.keys():
+        for p in list(self.partsDict.keys()):
             self.partsDict[p]['color'] = self.colors[p]
             self.partsDict[p]['sizeMult'] = self.sizeMult[p]
             self.partsDict[p]['filterKeys'] = self.filterKeys[p]
@@ -311,12 +292,12 @@ class FIREreader(object):
                 N = int(len(self.partsDict[p][self.returnKeys[p][0]]))
                 indices = np.arange(N )
                 dindices = np.random.choice(indices, size = int(round(N/self.decimate[p])))
-                for k in self.partsDict[p].keys():
+                for k in list(self.partsDict[p].keys()):
                     if (k not in self.nodecimate):
                         self.partsDict[p][k] = self.partsDict[p][k][dindices]
 
         #swap the names
-        for p in self.partsDict.keys():
+        for p in list(self.partsDict.keys()):
             pp = self.swapnames(p)
             self.partsDict[pp] = self.partsDict.pop(p)
             
@@ -324,19 +305,27 @@ class FIREreader(object):
     #create the JSON file, and then add the name of the variable (parts) that we want in WebGLonFIRE
     def createJSON(self):
         print("writing JSON files ...")
-        #first create the dict of file names and write that to a JSON file
-        filenames = dict()
+        self.defineFilenames()
         for p in self.partsDict:
-            filenames[p] = self.JSONfname+p+'.json'
-            print(filenames[p])
-            pd.Series(self.partsDict[p]).to_json(filenames[p], orient='index') 
+            print(self.filenames[p])
+            pd.Series(self.partsDict[p]).to_json(self.filenames[p], orient='index') 
         #for the options
-        filenames['options'] = self.JSONfname+'Options.json'
-        print(filenames['options'])
-        pd.Series(self.options).to_json(filenames['options'], orient='index') 
+        print(self.filenames['options'])
+        self.createOptionsJSON()
         #the list of files
-        pd.Series(filenames).to_json('filenames.json', orient='index') 
+        pd.Series(self.filenames).to_json('filenames.json', orient='index') 
         
+    def defineFilenames(self):
+        #first create the dict of file names and write that to a JSON file
+        for p in self.partsDict:
+            self.filenames[p] = self.JSONfname+p+'.json'
+        #for the options
+        self.filenames['options'] = self.JSONfname+'Options.json'
+
+    def createOptionsJSON(self):
+        #separated this out incase user wants to only write the options file
+        pd.Series(self.options).to_json(self.filenames['options'], orient='index') 
+ 
     
     def defineFilterKeys(self):
         for p in self.returnParts:
