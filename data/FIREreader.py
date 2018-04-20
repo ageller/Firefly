@@ -90,6 +90,9 @@ class FIREreader(object):
 
         #directory that contains all the hdf5 data files
         self.directory = './' 
+        
+        #snapshot number to open
+        self.snapnum = None
 
         #particles to return
         self.returnParts = ['PartType0', 'PartType1', 'PartType2', 'PartType4']
@@ -253,29 +256,72 @@ class FIREreader(object):
         else:
             d[part][ukey] = vals
 
-                                   
+    def check_if_filename_exists(self,sdir,snum,snapshot_name='snapshot',extension='.hdf5',four_char=0):
+        for extension_touse in [extension,'.bin','']:
+            fname=sdir+'/'+snapshot_name+'_'
+            ext='00'+str(snum);
+            if (snum>=10): ext='0'+str(snum)
+            if (snum>=100): ext=str(snum)
+            if (four_char==1): ext='0'+ext
+            if (snum>=1000): ext=str(snum)
+            fname+=ext
+            fname_base=fname
+
+            s0=sdir.split("/"); snapdir_specific=s0[len(s0)-1];
+            if(len(snapdir_specific)<=1): snapdir_specific=s0[len(s0)-2];
+
+            ## try several common notations for the directory/filename structure
+            fname=fname_base+extension_touse;
+            if not os.path.exists(fname): 
+                ## is it a multi-part file?
+                fname=fname_base+'.0'+extension_touse;
+            if not os.path.exists(fname): 
+                ## is the filename 'snap' instead of 'snapshot'?
+                fname_base=sdir+'/snap_'+ext; 
+                fname=fname_base+extension_touse;
+            if not os.path.exists(fname): 
+                ## is the filename 'snap' instead of 'snapshot', AND its a multi-part file?
+                fname=fname_base+'.0'+extension_touse;
+            if not os.path.exists(fname): 
+                ## is the filename 'snap(snapdir)' instead of 'snapshot'?
+                fname_base=sdir+'/snap_'+snapdir_specific+'_'+ext; 
+                fname=fname_base+extension_touse;
+            if not os.path.exists(fname): 
+                ## is the filename 'snap' instead of 'snapshot', AND its a multi-part file?
+                fname=fname_base+'.0'+extension_touse;
+            if not os.path.exists(fname): 
+                ## is it in a snapshot sub-directory? (we assume this means multi-part files)
+                fname_base=sdir+'/snapdir_'+ext+'/'+snapshot_name+'_'+ext; 
+                fname=fname_base+'.0'+extension_touse;
+            if not os.path.exists(fname): 
+                ## is it in a snapshot sub-directory AND named 'snap' instead of 'snapshot'?
+                fname_base=sdir+'/snapdir_'+ext+'/'+'snap_'+ext; 
+                fname=fname_base+'.0'+extension_touse;
+            if not os.path.exists(fname): 
+                ## wow, still couldn't find it... ok, i'm going to give up!
+                fname_found = 'NULL'
+                fname_base_found = 'NULL'
+                fname_ext = 'NULL'
+                continue;
+            fname_found = fname;
+            fname_base_found = fname_base;
+            fname_ext = extension_touse
+            break; # filename does exist! 
+        return fname_found, fname_base_found, fname_ext                   
+
     #populate the dict
     def populate_dict(self):
-        for fname in os.listdir(self.directory):
-            print(fname)
-            with h5py.File(self.directory + '/' + fname,'r') as snap:
-                foo = list(snap.keys())
-                parts = foo[1:]
-                for p in parts:
-                    if p in self.returnParts:
-                        if p not in self.partsDict:
-                            self.partsDict[p] = dict()
-                        vals = snap[p].keys()
-                        #This shows the available keys
-                        if (self.showkeys):
-                            print(p,self.swapnames(p), vals)
-                        if (self.radiusFunction[p] != None):
-                            self.radiusFunction[p](self, self.partsDict, snap, p)
-                        if (self.weightFunction[p] != None):
-                            self.weightFunction[p](self, self.partsDict, snap, p)
-                        for i,k in enumerate(self.returnKeys[p]):
-                            if (k in vals):
-                                self.addtodict(self.partsDict, snap, p, k, self.dolog[p][i], self.domag[p][i])
+        if self.snapnum is None:
+            for fname in os.listdir(self.directory):
+                self.openHDF5File(self.directory+'/'+fname,'r') 
+        else:   
+            fname_found,fname_base_found,fname_ext  = self.check_if_filename_exists(self.directory,self.snapnum)
+            if (len(fname_found.split('/')) - len(self.directory.split('/')))>1:
+                new_directory = '/'+os.path.join(*fname_found.split('/')[:-1])
+                for fname in os.listdir(new_directory):
+                    self.openHDF5File(new_directory + '/' + fname)
+            else:
+               self.openHDF5File(fname_found) 
 
                             
         #and add on the colors and point size defaults
@@ -306,6 +352,28 @@ class FIREreader(object):
             pp = self.swapnames(p)
             self.partsDict[pp] = self.partsDict.pop(p)
             
+    def openHDF5File(self,fname):
+        print fname
+        with h5py.File(fname,'r') as snap:
+            foo = list(snap.keys())
+            parts = foo[1:]
+            for p in parts:
+                if p in self.returnParts:
+                    if p not in self.partsDict:
+                        self.partsDict[p] = dict()
+                    vals = snap[p].keys()
+                    #This shows the available keys
+                    if (self.showkeys):
+                        print(p,self.swapnames(p), vals)
+                    if (self.radiusFunction[p] != None):
+                        self.radiusFunction[p](self, self.partsDict, snap, p)
+                    if (self.weightFunction[p] != None):
+                        self.weightFunction[p](self, self.partsDict, snap, p)
+                    for i,k in enumerate(self.returnKeys[p]):
+                        if (k in vals):
+                            self.addtodict(
+                                self.partsDict, snap, p, k, 
+                                self.dolog[p][i], self.domag[p][i])
             
     #create the JSON file, and then add the name of the variable (parts) that we want in WebGLonFIRE
     def createJSON(self):
