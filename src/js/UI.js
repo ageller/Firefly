@@ -235,7 +235,7 @@ function createFilterSliders(){
 							'max': [max]
 						},
 						format: wNumb({
-						decimals: 3
+							decimals: 3
 						})
 					});
 					params.SliderF[p][fk].noUiSlider.on('mouseup', mouseDown=false); 
@@ -421,13 +421,13 @@ function createPsliders(){
 				start: [params.PsizeMult[p]],
 				connect: [true, false],
 				tooltips: false,
-				steps: [0.1],
+				steps: [0.001],
 				range: {
 					'min': [min],
 					'max': [max]
 				},
 				format: wNumb({
-				decimals: 1
+					decimals: 3
 				})
 			});
 
