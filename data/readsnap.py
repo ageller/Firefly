@@ -146,7 +146,7 @@ class FIREreader(object):
                         'UI':True, #do you want to show the UI?
                         'UIparticle':dict(), #do you want to show the particles in the user interface (default = True)
                         'UIdropdown':dict(), #do you want to enable the dropdown menus for particles in the user interface (default = True)
-                        'UIcolorPicker':dict(), #do you want to allow the user to change the color (defualt = True)
+                        'UIcolorPicker':dict(), #do you want to allow the user to change the color (default = True)
                         'UIfullscreen':True, #do you want to show the fullscreen button?
                         'UIsnapshot':True, #do you want to show the snapshot button?
                         'UIreset':True, #do you want to show the reset button?
@@ -154,6 +154,7 @@ class FIREreader(object):
                         'UIdecimation':True, #do you want to show the decimation slider
                         'center':None, #do you want to define the initial camera center (if not, the WebGL app will calculate the center as the mean of the coordinates of the first particle set loaded in)
                         'camera':np.array([0., 0. -10]), #initial camera location, NOTE: the magnitude must be >0
+                        'cameraRotation':None, #can set camera rotation if you want
 
                       } 
         

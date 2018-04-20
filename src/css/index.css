@@ -66,7 +66,12 @@ canvas{
 	padding:0;
 	padding-top:15vmin;
 }
-
+#splashdivLoader {
+	margin:0;
+	padding:0;
+	position:absolute;
+	left:0;
+}
 
 
 .UIcontainer{
