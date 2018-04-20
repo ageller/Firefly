@@ -891,7 +891,7 @@ function showFunction(handle) {
 		}
 	} else { // a bit clunky, but works with the current setup
 		if (pID == "Camera"){
-	    	c = document.getElementById("DecimationDiv");
+	    	c = document.getElementById("decimationDiv");
 	    	pb = 5;
 			if (params.gtoggle[pID]){
 				c.setAttribute('style','margin-top:'+(pb+ht-5)+'px');
@@ -990,7 +990,7 @@ function createUI(reset = false){
 	var UIparts = UI.selectAll('div');
 
 	//fullscreen button
-	UI.append('div')
+	UI.append('div').attr('id','fullScreenDiv')
 		.append('button')
 		.attr('id','fullScreenButton')
 		.attr('class','button')
@@ -1000,6 +1000,7 @@ function createUI(reset = false){
 
 	//snapshots
 	var snap = UI.append('div')
+		.attr('id','snapshotDiv')
 		.attr('class', 'button-div');
 	snap.append('button')
 		.attr('class','button')
@@ -1030,7 +1031,7 @@ function createUI(reset = false){
 
 
 	//reset button
-	UI.append('div')
+	UI.append('div').attr('id','resetDiv')
 		.append('button')
 		.attr('id','resetButton')
 		.attr('class','button')
@@ -1042,6 +1043,7 @@ function createUI(reset = false){
 	//camera
 	params.gtoggle.Camera = true;
 	var c1 = UI.append('div')
+		.attr('id','cameraControlsDiv')
 		.attr('class','particleDiv');
 	c1.append('div')
 		.attr('class','pLabelDiv')
@@ -1253,7 +1255,7 @@ function createUI(reset = false){
 	//decimation
 	var dec = UI.append('div')
 		.attr('class','particleDiv')
-		.attr('id', 'DecimationDiv');
+		.attr('id', 'decimationDiv');
 	dec.append('div')
 		.attr('class','pLabelDiv')
 		.style('width','85px')
@@ -1276,8 +1278,6 @@ function createUI(reset = false){
 		.append('div')
 		.attr('class', function (d) { return "particleDiv "+d+"Div" }) //+ dropdown
 
-
-				//		<button id = "fullScreenButton" class="button" onclick="fullscreen();"><span>Fullscreen</span></button>
 
 	var i=0;
 	var j=0;
@@ -1496,6 +1496,47 @@ function createUI(reset = false){
 
     params.haveUI = true;
 
+// now check if we need to hide any of this
+    if (params.parts.options.hasOwnProperty('UI')){
+		if (!params.parts.options.UI){
+			d3.select('.UIcontainer').style('display','none');
+		}
+	}
+    if (params.parts.options.hasOwnProperty('UIfullscreen')){
+		if (!params.parts.options.UIfullscreen){
+			d3.select('#fullScreenDiv').style('display','none');
+		}
+	}
+    if (params.parts.options.hasOwnProperty('UIsnapshot')){
+		if (!params.parts.options.UIsnapshot){
+			d3.select('#snapshotDiv').style('display','none');
+		}
+	}
+    if (params.parts.options.hasOwnProperty('UIreset')){
+		if (!params.parts.options.UIreset){
+			d3.select('#resetDiv').style('display','none');
+		}
+	}
+    if (params.parts.options.hasOwnProperty('UIcameraControls')){
+		if (!params.parts.options.UIcameraControls){
+			d3.select('#cameraControlsDiv').style('display','none');
+		}
+	}
+    if (params.parts.options.hasOwnProperty('UIdecimation')){
+		if (!params.parts.options.UIdecimation){
+			d3.select('#decimationDiv').style('display','none');
+		}
+	}	
+    if (params.parts.options.hasOwnProperty('UIparticle')){
+		for (i=0; i<params.partsKeys.length; i++){
+			d = params.partsKeys[i];    	
+			if (params.parts.options.UIparticle.hasOwnProperty(d)){
+				if (!params.parts.options.UIparticle[d]){
+					d3.selectAll('div.'+d+'Div').style('display','none');
+				}
+			}
+		}
+	}
 };
 
 //hide the splash screen

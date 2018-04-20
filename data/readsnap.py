@@ -143,12 +143,15 @@ class FIREreader(object):
         
         #a dictionary of  for the WebGL app
         self.options = {'title':'WebGLonFIRE', #set the title of the webpage
+                        'UI':True, #do you want to show the UI?
+                        'UIparticle':dict(), #do you want to show the particles in the user interface (default = True)
                         'UIdropdown':dict(), #do you want to enable the dropdown menus for particles in the user interface (default = True)
-                        'UIcolorPicker':dict(), #do you want to allow the user to change the color (defulat = True)
+                        'UIcolorPicker':dict(), #do you want to allow the user to change the color (defualt = True)
                         'UIfullscreen':True, #do you want to show the fullscreen button?
                         'UIsnapshot':True, #do you want to show the snapshot button?
                         'UIreset':True, #do you want to show the reset button?
                         'UIcameraControls':True, #do you want to show the camera controls
+                        'UIdecimation':True, #do you want to show the decimation slider
                         'center':None, #do you want to define the initial camera center (if not, the WebGL app will calculate the center as the mean of the coordinates of the first particle set loaded in)
                         'camera':np.array([0., 0. -10]), #initial camera location, NOTE: the magnitude must be >0
 
@@ -220,6 +223,7 @@ class FIREreader(object):
             #options
             #dropdown menus
             pp = self.swapnames(p) 
+            self.options['UIparticle'][pp] = True
             self.options['UIdropdown'][pp] = True
             self.options['UIcolorPicker'][pp] = True
             
