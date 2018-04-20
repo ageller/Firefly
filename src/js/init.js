@@ -321,36 +321,47 @@ function setBoxSize(coords){
     }
 }
 
+function countParts(){
+    var num = 0.;
+    params.partsKeys.forEach( function(p, i) {
+        if (params.parts[p].hasOwnProperty('Coordinates')){
+            num += params.parts[p].Coordinates.length;
+        }
+    })
+    return num;
+}
 function loadData(callback){
 
     defineParams();
-    drawLoadingBar();
+    //drawLoadingBar();
 
+    params.parts = {};
+    params.parts.totalSize = 0.;
 
     d3.json("data/filenames.json",  function(files) {
-    //d3.json("data/filenamesBox.json",  function(files) {
-	console.log(files)
-	params.partsKeys = Object.keys(files);
-	params.parts = {};
-	params.partsKeys.forEach( function(p, i) {
-	    params.parts[p] = {};
-	    d3.json("data/"+files[p],  function(foo) {
-    	//  d3.json(files[p],  function(foo) {
-    		params.parts[p] = foo;
-            console.log(i)
-    		if (i ==  params.partsKeys.length-1){
-                console.log("here")
-                setTimeout(function(){ 
+    	console.log(files)
+    	params.partsKeys = Object.keys(files);
+        params.partsKeys.forEach( function(p, i) {
+            params.parts.totalSize += parseFloat(files[p][1]);
+        });
+
+    	params.partsKeys.forEach( function(p, i) {
+    	    params.parts[p] = {};
+    	    d3.json("data/"+files[p][0],  function(foo) {
+        	//  d3.json(files[p],  function(foo) {
+        		params.parts[p] = foo;
+                console.log(countParts(), params.parts.totalSize)
+        		if (countParts() ==  params.parts.totalSize){
+                    console.log("here")
                     var index = params.partsKeys.indexOf('options');
                     if (index > -1) {
                         params.partsKeys.splice(index, 1);
                         params.parts.options0 = JSON.parse(JSON.stringify(params.parts.options));
                     }
                     callback(); 
-                }, 1000); //silly, but seems to fix the problem with loading
-    		}
+        		}
             });
-	});
+    	});
 
  
     });

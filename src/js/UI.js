@@ -421,13 +421,13 @@ function createPsliders(){
 				start: [params.PsizeMult[p]],
 				connect: [true, false],
 				tooltips: false,
-				steps: [0.001],
+				steps: [0.0001],
 				range: {
 					'min': [min],
 					'max': [max]
 				},
 				format: wNumb({
-					decimals: 3
+					decimals: 4
 				})
 			});
 
