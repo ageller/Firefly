@@ -15,4 +15,4 @@ Thumbs.db
 # ipython checkpoints #
 ###################
 *ipynb_checkpoints*
-__pychace__
+__pycache__
