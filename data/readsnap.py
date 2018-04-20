@@ -312,10 +312,11 @@ class FIREreader(object):
         print("writing JSON files ...")
         self.defineFilenames()
         for p in self.partsDict:
-            print(self.filenames[p])
-            pd.Series(self.partsDict[p]).to_json(self.filenames[p], orient='index') 
+            print(self.filenames[p][0])
+            self.filenames[p][1] = len(self.partsDict[p]['Coordinates'])
+            pd.Series(self.partsDict[p]).to_json(self.filenames[p][0], orient='index') 
         #for the options
-        print(self.filenames['options'])
+        print(self.filenames['options'][0])
         self.createOptionsJSON()
         #the list of files
         pd.Series(self.filenames).to_json('filenames.json', orient='index') 
@@ -323,13 +324,13 @@ class FIREreader(object):
     def defineFilenames(self):
         #first create the dict of file names and write that to a JSON file
         for p in self.partsDict:
-            self.filenames[p] = self.JSONfname+p+'.json'
+            self.filenames[p] = np.array([self.JSONfname+p+'.json', 0])
         #for the options
-        self.filenames['options'] = self.JSONfname+'Options.json'
+        self.filenames['options'] = np.array([self.JSONfname+'Options.json',0])
 
     def createOptionsJSON(self):
         #separated this out incase user wants to only write the options file
-        pd.Series(self.options).to_json(self.filenames['options'], orient='index') 
+        pd.Series(self.options).to_json(self.filenames['options'][0], orient='index') 
  
     
     def defineFilterKeys(self):
