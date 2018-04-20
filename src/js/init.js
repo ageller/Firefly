@@ -104,7 +104,7 @@ function defineParams(){
         var screenHeight = window.innerHeight;
         this.loadingSizeX = screenWidth*0.5;
         this.loadingSizeY = screenHeight*0.1;
-        this.loadfrac = 1.;
+        this.loadfrac = 0.;
     };
 
 
@@ -333,7 +333,7 @@ function countParts(){
 function loadData(callback){
 
     defineParams();
-    //drawLoadingBar();
+    drawLoadingBar();
 
     params.parts = {};
     params.parts.totalSize = 0.;
@@ -350,7 +350,10 @@ function loadData(callback){
     	    d3.json("data/"+files[p][0],  function(foo) {
         	//  d3.json(files[p],  function(foo) {
         		params.parts[p] = foo;
-                console.log(countParts(), params.parts.totalSize)
+                params.loadfrac = countParts()/params.parts.totalSize;
+                d3.selectAll('#loadingRect').attr("width", params.loadingSizeX*params.loadfrac);
+
+                console.log(countParts(), params.parts.totalSize, params.loadfrac)
         		if (countParts() ==  params.parts.totalSize){
                     console.log("here")
                     var index = params.partsKeys.indexOf('options');
@@ -378,24 +381,22 @@ function drawLoadingBar(){
         .attr("height", params.loadingSizeY);
 
 
-    // var r1 = svgContainer.append("rect")
-    //     .attr('id','loadingRect')
-    //     .attr("x", (screenWidth - params.loadingSizeX)/2)
-    //     .attr("y", 0)//(screenHeight - sizeY)/2)
-    //     .attr("width",params.loadingSizeX)
-    //     .attr("height",params.loadingSizeY)
-    //     .attr('fill','#4E2A84');
+    var r1 = svgContainer.append("rect")
+        .attr("x", (screenWidth - params.loadingSizeX)/2)
+        .attr("y", 0)
+        .attr("width",params.loadingSizeX)
+        .attr("height",params.loadingSizeY)
+        .attr('fill','rgba(0,0,0,0)')
+        .attr('stroke','#4E2A84');
 
-    var r2 = svgContainer
-        .data(params.loadfrac)
-        .enter()
-        .append("rect")
+    var r2 = svgContainer.append("rect")
         .attr('id','loadingRect')
         .attr("x", (screenWidth - params.loadingSizeX)/2)
         .attr("y", 0)//(screenHeight - sizeY)/2)
-        .attr("width",function(d, i){return params.loadingSizeX*params.loadfrac;})
         .attr("height",params.loadingSizeY)
-        .attr('fill','#4E2A84');
+        .attr('fill','#4E2A84')
+        .attr("width",params.loadingSizeX*params.loadfrac)
+
 
 
     window.addEventListener('resize', moveLoadingBar);
