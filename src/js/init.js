@@ -95,6 +95,13 @@ function defineParams(){
 
         //check to see if the UI exists
         this.haveUI = false;
+
+        //for the loading bar
+        var screenWidth = window.innerWidth;
+        var screenHeight = window.innerHeight;
+        this.loadingSizeX = screenWidth*0.5;
+        this.loadingSizeY = screenHeight*0.1;
+        this.loadfrac = 1.;
     };
 
 
@@ -193,12 +200,11 @@ function init(reset = false) {
 
     params.camera.lookAt(params.scene.position);  
     if (params.parts.options.hasOwnProperty('cameraRotation')){
-        params.rotatecamera = false;
-        elm = document.getElementById("CenterCheckBox");
-        elm.checked = false;
-        params.camera.rotation.set(params.parts.options.cameraRotation[0], params.parts.options.cameraRotation[1], params.parts.options.cameraRotation[2]);
+        if (params.parts.options.cameraRotation != null){
+            params.rotatecamera = false;
+            params.camera.rotation.set(params.parts.options.cameraRotation[0], params.parts.options.cameraRotation[1], params.parts.options.cameraRotation[2]);
+        }
     }
-
 
     // controls
     initControls(center = params.center);
@@ -314,6 +320,7 @@ function setBoxSize(coords){
 function loadData(callback){
 
     defineParams();
+    drawLoadingBar();
 
 
     d3.json("data/filenames.json",  function(files) {
@@ -344,6 +351,44 @@ function loadData(callback){
 
 }
 
+function drawLoadingBar(){
+
+    var screenWidth = parseFloat(window.innerWidth);
+
+    //Make an SVG Container
+    var svgContainer = d3.select("#splashdivLoader").append("svg")
+        .attr("width", screenWidth)
+        .attr("height", params.loadingSizeY);
+
+
+    // var r1 = svgContainer.append("rect")
+    //     .attr('id','loadingRect')
+    //     .attr("x", (screenWidth - params.loadingSizeX)/2)
+    //     .attr("y", 0)//(screenHeight - sizeY)/2)
+    //     .attr("width",params.loadingSizeX)
+    //     .attr("height",params.loadingSizeY)
+    //     .attr('fill','#4E2A84');
+
+    var r2 = svgContainer
+        .data(params.loadfrac)
+        .enter()
+        .append("rect")
+        .attr('id','loadingRect')
+        .attr("x", (screenWidth - params.loadingSizeX)/2)
+        .attr("y", 0)//(screenHeight - sizeY)/2)
+        .attr("width",function(d, i){return params.loadingSizeX*params.loadfrac;})
+        .attr("height",params.loadingSizeY)
+        .attr('fill','#4E2A84');
+
+
+    window.addEventListener('resize', moveLoadingBar);
+
+}
+function moveLoadingBar(){
+    var screenWidth = parseFloat(window.innerWidth);
+    d3.selectAll('#loadingRect').attr('x', (screenWidth - params.loadingSizeX)/2);
+}
+
 //check if the data is loaded
 function clearloading(){
     params.loaded = true;
@@ -358,6 +403,7 @@ function clearloading(){
     d3.select("#splashdiv5").text("Click to begin.");
 
 }
+
 
 function WebGLStart(){
 

@@ -41,10 +41,12 @@ function resetCamera()
     params.camera.position.set(params.parts.options.camera[0], params.parts.options.camera[1], params.parts.options.camera[2]);
     params.camera.lookAt(params.scene.position);  
     if (params.parts.options.hasOwnProperty('cameraRotation')){
-        params.rotatecamera = false;
-        elm = document.getElementById("CenterCheckBox");
-        elm.checked = false;
-        params.camera.rotation.set(params.parts.options.cameraRotation[0], params.parts.options.cameraRotation[1], params.parts.options.cameraRotation[2]);
+		if (params.parts.options.cameraRotation != null){
+			params.rotatecamera = false;
+	        elm = document.getElementById("CenterCheckBox");
+	        elm.checked = false;
+	        params.camera.rotation.set(params.parts.options.cameraRotation[0], params.parts.options.cameraRotation[1], params.parts.options.cameraRotation[2]);
+	    }
     }
 
 	params.controls.dispose();
@@ -75,9 +77,11 @@ function saveCamera()
 	// 	params.parts.options.cameraRotation = [0,0,0];
 	// }
 	if (params.parts.options.hasOwnProperty('cameraRotation')){
-	    params.parts.options.cameraRotation[0] = params.camera.rotation.x;
-	    params.parts.options.cameraRotation[1] = params.camera.rotation.y;
-	    params.parts.options.cameraRotation[2] = params.camera.rotation.z;
+        if (params.parts.options.cameraRotation != null){
+		    params.parts.options.cameraRotation[0] = params.camera.rotation.x;
+		    params.parts.options.cameraRotation[1] = params.camera.rotation.y;
+		    params.parts.options.cameraRotation[2] = params.camera.rotation.z;
+		}
 	}
 }
 
@@ -979,7 +983,7 @@ function createUI(reset = false){
 			.style('padding-left','5px')
 			.style('top','6px')
 			.style('position','absolute')
-			.append('b').text('Controls')
+			.append('b').text('Controls');
 
 		var hider = UIcontainer.append('div').attr('id','UIhider');
 		hider.append('div').attr('id','particleUI');
@@ -1109,8 +1113,12 @@ function createUI(reset = false){
 		.attr('type','checkbox')
 		.attr('value','true')
 		.attr('autocomplete','off')
-		.attr('onchange','checkCenterLock(this);')
-		.attr('checked');
+		.attr('onchange','checkCenterLock(this);');
+	if (params.rotatecamera){
+		c4.attr('checked', 'true');
+	} else {
+		c4.attr('checked', 'false');
+	}
 	c4.append('label')
 		.attr('for','CenterCheckBox')
 		.attr('id','CenterCheckLabel')
