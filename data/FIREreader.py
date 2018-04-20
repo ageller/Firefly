@@ -313,7 +313,7 @@ class FIREreader(object):
     def populate_dict(self):
         if self.snapnum is None:
             for fname in os.listdir(self.directory):
-                self.openHDF5File(self.directory+'/'+fname,'r') 
+                self.openHDF5File(self.directory+'/'+fname) 
         else:   
             fname_found,fname_base_found,fname_ext  = self.check_if_filename_exists(self.directory,self.snapnum)
             if (len(fname_found.split('/')) - len(self.directory.split('/')))>1:
@@ -353,7 +353,7 @@ class FIREreader(object):
             self.partsDict[pp] = self.partsDict.pop(p)
             
     def openHDF5File(self,fname):
-        print fname
+        print(fname)
         with h5py.File(fname,'r') as snap:
             foo = list(snap.keys())
             parts = foo[1:]
