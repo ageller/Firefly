@@ -156,7 +156,7 @@ class FIREreader(object):
                         'UIcameraControls':True, #do you want to show the camera controls
                         'UIdecimation':True, #do you want to show the decimation slider
                         'center':None, #do you want to define the initial camera center (if not, the WebGL app will calculate the center as the mean of the coordinates of the first particle set loaded in)
-                        'camera':np.array([0., 0. -10]), #initial camera location, NOTE: the magnitude must be >0
+                        'camera':np.array([0., 0., -10]), #initial camera location, NOTE: the magnitude must be >0
                         'cameraRotation':None, #can set camera rotation if you want
 
                       } 

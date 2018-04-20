@@ -387,7 +387,8 @@ function drawLoadingBar(){
         .attr("width",params.loadingSizeX)
         .attr("height",params.loadingSizeY)
         .attr('fill','rgba(0,0,0,0)')
-        .attr('stroke','#4E2A84');
+        .attr('stroke','#4E2A84')
+        .attr('stroke-width', '3')
 
     var r2 = svgContainer.append("rect")
         .attr('id','loadingRect')
@@ -410,8 +411,6 @@ function moveLoadingBar(){
 //check if the data is loaded
 function clearloading(){
     params.loaded = true;
-    // stop spin.js loader
-    spinner.stop();
 
     //show the rest of the page
     d3.select("#ContentContainer").style("visibility","visible")
