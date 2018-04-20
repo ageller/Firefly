@@ -1,3 +1,3 @@
-# WebGLonFIRE_threejs
+# Firefly
 
-A start toward a three.js version of WebGLonFIRE
+A start toward a three.js version of Firefly
