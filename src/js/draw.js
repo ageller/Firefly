@@ -18,7 +18,7 @@ function drawScene()
 {
 	for (var i=0; i<params.partsKeys.length; i++){
 		var p = params.partsKeys[i];
-      	var material = new THREE.ShaderMaterial( {
+		var material = new THREE.ShaderMaterial( {
 			uniforms: {
 				color: {value: new THREE.Vector4( params.Pcolors[p][0], params.Pcolors[p][1], params.Pcolors[p][2], params.Pcolors[p][3])},
 				oID: {value: 0},
@@ -38,9 +38,9 @@ function drawScene()
 			transparent:true,
 			alphaTest: false,
 			blending:THREE.AdditiveBlending,
-        } );
+		} );
 
-      	//geometry
+		//geometry
 		//var geo = new THREE.Geometry();
 		var geo = new THREE.BufferGeometry();
 
@@ -59,7 +59,7 @@ function drawScene()
 
 		geo.setDrawRange( 0, params.parts[p].nMaxPlot );
 
-    	var mesh = new THREE.Points(geo, material);
+		var mesh = new THREE.Points(geo, material);
 		params.scene.add(mesh)
 
 		var positions = mesh.geometry.attributes.position.array;
@@ -88,10 +88,10 @@ function drawScene()
 			
 		}
 
-        mesh.position.set(0,0,0);
+		mesh.position.set(0,0,0);
 
 
-        params.partsMesh[p].push(mesh)
+		params.partsMesh[p].push(mesh)
 
 	}
 	console.log("done drawing")
