@@ -10,14 +10,14 @@ function update(time){
 	params.keyboard.update();
 	
 	if (params.keyboard.down("H")){
-        params.helpMessage=!params.helpMessage;
-        if (params.helpMessage){
-            showSplash();
-        }
-        else{
-            hideSplash()
-        }
-    }
+		params.helpMessage=!params.helpMessage;
+		if (params.helpMessage){
+			showSplash();
+		}
+		else{
+			hideSplash()
+		}
+	}
 	
 	params.controls.update();
 
@@ -25,19 +25,19 @@ function update(time){
 	updateUICameraText();
 	updateUIRotText();
 
-    // camera's -z direction
-    var cameraDir = params.camera.getWorldDirection();
+	// camera's -z direction
+	var cameraDir = params.camera.getWorldDirection();
 
-    
-    // find the camera's x and y axes 
-    // quaternion is orientation of the camera WRT data space
-    var cameraX =  new THREE.Vector3(1,0,0);
-    var cameraY =  new THREE.Vector3(0,1,0);
-    cameraX.applyQuaternion(params.camera.quaternion);
-    cameraY.applyQuaternion(params.camera.quaternion);
+	
+	// find the camera's x and y axes 
+	// quaternion is orientation of the camera WRT data space
+	var cameraX =  new THREE.Vector3(1,0,0);
+	var cameraY =  new THREE.Vector3(0,1,0);
+	cameraX.applyQuaternion(params.camera.quaternion);
+	cameraY.applyQuaternion(params.camera.quaternion);
 
-    if (params.keyboard.down("C")){
-    	console.log("xy")	  
+	if (params.keyboard.down("C")){
+		console.log("xy")	  
 		console.log(cameraX);
 		console.log(cameraY);
 	}
@@ -55,9 +55,9 @@ function update(time){
 				m.material.uniforms.color.value = new THREE.Vector4( params.Pcolors[p][0], params.Pcolors[p][1], params.Pcolors[p][2], params.Pcolors[p][3]);
 				if (params.showVel[p]){
 					// pass camera orientation to the shader
-				    m.material.uniforms.cameraNegZ.value = [cameraDir.x,cameraDir.y,cameraDir.z];
-				    m.material.uniforms.cameraX.value = [cameraX.x,cameraX.y,cameraX.z];
-				    m.material.uniforms.cameraY.value = [cameraY.x,cameraY.y,cameraY.z];
+					m.material.uniforms.cameraNegZ.value = [cameraDir.x,cameraDir.y,cameraDir.z];
+					m.material.uniforms.cameraX.value = [cameraX.x,cameraX.y,cameraX.z];
+					m.material.uniforms.cameraY.value = [cameraY.x,cameraY.y,cameraY.z];
 					m.material.uniforms.oID.value = 1;
 				} else {
 					m.material.uniforms.oID.value = 0;

@@ -5,11 +5,11 @@ function resetToOptions()
 	initPVals(reset = true);
 
 	//redo init, but only the camera bits (maybe could streamline this and init by using the functions below?)
-    init(reset = true);
+	init(reset = true);
 
-    //destroy the particle portion of the UI and recreate it (simplest option)
+	//destroy the particle portion of the UI and recreate it (simplest option)
 	d3.select('#particleUI').html("");
-    createUI(reset = true);
+	createUI(reset = true);
 
 }
 
@@ -32,25 +32,25 @@ function checkCenterLock(box)
 function resetCamera() 
 {
 
-    var screenWidth = window.innerWidth;
-    var screenHeight = window.innerHeight;
-    var aspect = screenWidth / screenHeight;
-    params.camera = new THREE.PerspectiveCamera( params.fov, aspect, params.zmin, params.zmax);
-    params.scene.add(params.camera);
+	var screenWidth = window.innerWidth;
+	var screenHeight = window.innerHeight;
+	var aspect = screenWidth / screenHeight;
+	params.camera = new THREE.PerspectiveCamera( params.fov, aspect, params.zmin, params.zmax);
+	params.scene.add(params.camera);
 
-    params.camera.position.set(params.parts.options.camera[0], params.parts.options.camera[1], params.parts.options.camera[2]);
-    params.camera.lookAt(params.scene.position);  
-    if (params.parts.options.hasOwnProperty('cameraRotation')){
+	params.camera.position.set(params.parts.options.camera[0], params.parts.options.camera[1], params.parts.options.camera[2]);
+	params.camera.lookAt(params.scene.position);  
+	if (params.parts.options.hasOwnProperty('cameraRotation')){
 		if (params.parts.options.cameraRotation != null){
 			params.rotatecamera = false;
-	        elm = document.getElementById("CenterCheckBox");
-	        elm.checked = false;
-	        params.camera.rotation.set(params.parts.options.cameraRotation[0], params.parts.options.cameraRotation[1], params.parts.options.cameraRotation[2]);
-	    }
-    }
+			elm = document.getElementById("CenterCheckBox");
+			elm.checked = false;
+			params.camera.rotation.set(params.parts.options.cameraRotation[0], params.parts.options.cameraRotation[1], params.parts.options.cameraRotation[2]);
+		}
+	}
 
 	params.controls.dispose();
-    initControls(center = params.center);
+	initControls(center = params.center);
 
 
 }
@@ -66,7 +66,7 @@ function recenterCamera()
 function saveCamera() 
 {
 
-    if (!params.parts.options.hasOwnProperty('camera')){
+	if (!params.parts.options.hasOwnProperty('camera')){
 		params.parts.options.camera = [0,0,0];
 	}
 	params.parts.options.camera[0] = params.camera.position.x;
@@ -77,10 +77,10 @@ function saveCamera()
 	// 	params.parts.options.cameraRotation = [0,0,0];
 	// }
 	if (params.parts.options.hasOwnProperty('cameraRotation')){
-        if (params.parts.options.cameraRotation != null){
-		    params.parts.options.cameraRotation[0] = params.camera.rotation.x;
-		    params.parts.options.cameraRotation[1] = params.camera.rotation.y;
-		    params.parts.options.cameraRotation[2] = params.camera.rotation.z;
+		if (params.parts.options.cameraRotation != null){
+			params.parts.options.cameraRotation[0] = params.camera.rotation.x;
+			params.parts.options.cameraRotation[1] = params.camera.rotation.y;
+			params.parts.options.cameraRotation[2] = params.camera.rotation.z;
 		}
 	}
 }
@@ -255,8 +255,8 @@ function createFilterSliders(){
 				}
 				var w = parseInt(d3.select('.FilterClass').style("width").slice(0,-2));
 				d3.select('#'+p+'_FK_'+fk+'_END_FilterSlider').select('.noUi-base').style('width',w-10+"px");
-			 	d3.select('#'+p+'_FK_'+fk+'_END_FilterSlider').select('.noUi-connect').style('border-radius','6px 0px 0px 6px');
-			 	d3.select('#'+p+'_FK_'+fk+'_END_FilterSlider').select('.noUi-handle-lower').style('border-radius','6px 0px 0px 6px');
+				d3.select('#'+p+'_FK_'+fk+'_END_FilterSlider').select('.noUi-connect').style('border-radius','6px 0px 0px 6px');
+				d3.select('#'+p+'_FK_'+fk+'_END_FilterSlider').select('.noUi-handle-lower').style('border-radius','6px 0px 0px 6px');
 
 			}
 		}
@@ -465,7 +465,7 @@ function setDSliderHandle(i, value, parent) {
 	for (i=0; i<params.partsKeys.length; i++){
 		var p = params.partsKeys[i];
 		max = Math.round(params.parts[p].Coordinates.length);
-	 	val = parseFloat(params.SliderN[p].noUiSlider.get());
+		val = parseFloat(params.SliderN[p].noUiSlider.get());
 		params.SliderN[p].noUiSlider.updateOptions({
 			range: {
 				'min': [0],
@@ -576,7 +576,7 @@ function setCFSliderHandle(i, value, parent) {
 	if (params.rotatecamera){
 		params.controls.dynamicDampingFactor = value;
 	} else {
-		params.controls.movementSpeed = 1. - value;
+		params.controls.movementSpeed = 1. - Math.pow(value, params.flyffac);
 	}
 	params.friction = value;
 	mouseDown = false; 
@@ -644,7 +644,7 @@ function createCFslider(){
 			if (params.rotatecamera){
 				params.controls.dynamicDampingFactor = value;
 			} else {
-				params.controls.movementSpeed = 1. -value;
+				params.controls.movementSpeed = 1. - Math.pow(value, params.flyffac);
 			}
 			params.friction = value;
 			mouseDown = true;
@@ -774,16 +774,16 @@ function createSSslider(){
 
 function updateUICameraText()
 {
-    document.getElementById("CameraXText").value = params.camera.position.x + params.center.x;
-    document.getElementById("CameraYText").value = params.camera.position.y + params.center.y;
-    document.getElementById("CameraZText").value = params.camera.position.z + params.center.z;
+	document.getElementById("CameraXText").value = params.camera.position.x + params.center.x;
+	document.getElementById("CameraYText").value = params.camera.position.y + params.center.y;
+	document.getElementById("CameraZText").value = params.camera.position.z + params.center.z;
 }
 
 function updateUIRotText()
 {
-    document.getElementById("RotXText").value = params.camera.rotation.x;
-    document.getElementById("RotYText").value = params.camera.rotation.y;
-    document.getElementById("RotZText").value = params.camera.rotation.z;
+	document.getElementById("RotXText").value = params.camera.rotation.x;
+	document.getElementById("RotYText").value = params.camera.rotation.y;
+	document.getElementById("RotZText").value = params.camera.rotation.z;
 
 }
 
@@ -792,38 +792,38 @@ function checkText(input, event)
 {
 
 	var key=event.keyCode || event.which;
-  	if (key==13){
+	if (key==13){
 
-        if (input.id == "CenterXText"){
-        	params.center.x = parseFloat(input.value);
+		if (input.id == "CenterXText"){
+			params.center.x = parseFloat(input.value);
 		}
-        if (input.id == "CenterYText"){
-        	params.center.y = parseFloat(input.value);
- 		}
-        if (input.id == "CenterZText"){
-        	params.center.z = parseFloat(input.value);
- 		}
+		if (input.id == "CenterYText"){
+			params.center.y = parseFloat(input.value);
+		}
+		if (input.id == "CenterZText"){
+			params.center.z = parseFloat(input.value);
+		}
 
-        if (input.id == "CameraXText"){
-        	params.camera.position.x = parseFloat(input.value) - params.center.x;
- 		}
-        if (input.id == "CameraYText"){
-         	params.camera.position.y = parseFloat(input.value) - params.center.xy
- 		}
-        if (input.id == "CameraZText"){
-         	params.camera.position.z = parseFloat(input.value) - params.center.z;
- 		}
+		if (input.id == "CameraXText"){
+			params.camera.position.x = parseFloat(input.value) - params.center.x;
+		}
+		if (input.id == "CameraYText"){
+			params.camera.position.y = parseFloat(input.value) - params.center.xy
+		}
+		if (input.id == "CameraZText"){
+			params.camera.position.z = parseFloat(input.value) - params.center.z;
+		}
 
 
-        if (input.id == "RotXText"){
-        	params.camera.rotation.x = parseFloat(input.value)
- 		}
-        if (input.id == "RotYText"){
-        	params.camera.rotation.y = parseFloat(input.value)
- 		}
-        if (input.id == "RotZText"){
-        	params.camera.rotation.z = parseFloat(input.value)
- 		}
+		if (input.id == "RotXText"){
+			params.camera.rotation.x = parseFloat(input.value)
+		}
+		if (input.id == "RotYText"){
+			params.camera.rotation.y = parseFloat(input.value)
+		}
+		if (input.id == "RotZText"){
+			params.camera.rotation.z = parseFloat(input.value)
+		}
 		if (input.id == "RenderXText"){
 			params.renderWidth = parseInt(input.value);
 		}
@@ -840,11 +840,11 @@ function checkPlotParts(checkbox)
 	var type = checkbox.id.slice(-5); 
 	if (type == 'Check'){	
 		var pID = checkbox.id.slice(0,-5); // remove  "Check" from id
-    	params.plotParts[pID] = false;
-    	if (checkbox.checked){
-       		params.plotParts[pID] = true;
-    	}
-    } 
+		params.plotParts[pID] = false;
+		if (checkbox.checked){
+			params.plotParts[pID] = true;
+		}
+	} 
 }
 
 
@@ -883,26 +883,26 @@ function showFunction(handle) {
 //find the position in the partsKeys list
 	var pID = handle.id.slice(0,-7); // remove  "Dropbtn" from id
 	i = getPi(pID);
-    document.getElementById(pID+"Dropdown").classList.toggle("show");
+	document.getElementById(pID+"Dropdown").classList.toggle("show");
 
-    var pdiv;
-   	var ddiv = document.getElementById(pID+'Dropdown');
+	var pdiv;
+	var ddiv = document.getElementById(pID+'Dropdown');
 	var ht = parseFloat(ddiv.style.height.slice(0,-2)) + offset; //to take of "px"
 	var pb = 0.;
 
-    if (i < params.partsKeys.length-1){
-	    pdiv = document.getElementsByClassName(params.partsKeys[i+1]+'Div')[0];
+	if (i < params.partsKeys.length-1){
+		pdiv = document.getElementsByClassName(params.partsKeys[i+1]+'Div')[0];
 		if (params.gtoggle[pID]){
-	    	pdiv.setAttribute("style","margin-top: "+ht + "px; ");
-	    	params.gtoggle[pID] = false;	
-	 	} else {
-	 		pdiv.setAttribute("style","margin-top: 0 px; ");	
+			pdiv.setAttribute("style","margin-top: "+ht + "px; ");
+			params.gtoggle[pID] = false;	
+		} else {
+			pdiv.setAttribute("style","margin-top: 0 px; ");	
 			params.gtoggle[pID] = true;
 		}
 	} else { // a bit clunky, but works with the current setup
 		if (pID == "Camera"){
-	    	c = document.getElementById("decimationDiv");
-	    	pb = 5;
+			c = document.getElementById("decimationDiv");
+			pb = 5;
 			if (params.gtoggle[pID]){
 				c.setAttribute('style','margin-top:'+(pb+ht-5)+'px');
 				params.gtoggle[pID] = false;	
@@ -928,10 +928,10 @@ function showFunction(handle) {
 
 function selectFilter() {
 	var option = d3.select(this)
-	    .selectAll("option")
-	    .filter(function (d, i) { 
-	        return this.selected; 
-    });
+		.selectAll("option")
+		.filter(function (d, i) { 
+			return this.selected; 
+	});
 	selectValue = option.property('value');
 
 	var p = this.id.slice(0,-13)
@@ -951,10 +951,10 @@ function selectFilter() {
 
 function selectVelType() {
 	var option = d3.select(this)
-	    .selectAll("option")
-	    .filter(function (d, i) { 
-	        return this.selected; 
-    });
+		.selectAll("option")
+		.filter(function (d, i) { 
+			return this.selected; 
+	});
 	selectValue = option.property('value');
 
 	var p = this.id.slice(0,-14)
@@ -970,7 +970,7 @@ function createUI(reset = false){
 //change the hamburger to the X to start
 	if (! reset){
 
- 		var UIcontainer = d3.select('.UIcontainer');
+		var UIcontainer = d3.select('.UIcontainer');
 
 		var UIt = UIcontainer.append('div')
 			.attr('class','UItopbar')
@@ -995,10 +995,10 @@ function createUI(reset = false){
 		var hider = UIcontainer.append('div').attr('id','UIhider');
 		hider.append('div').attr('id','particleUI');
 
-	 	var hamburger = document.getElementById('UItopbar');
-	 	//hide the UI
+		var hamburger = document.getElementById('UItopbar');
+		//hide the UI
 		hideUI(hamburger);
-	 	hamburger.classList.toggle("change");
+		hamburger.classList.toggle("change");
 
 	 }
 
@@ -1481,25 +1481,25 @@ function createUI(reset = false){
 /* for color pickers*/
 //can I write this in d3? I don't think so.  It needs a jquery object
 		$("#"+d+"ColorPicker").spectrum({
-		    color: "rgba("+(params.Pcolors[d][0]*255)+","+(params.Pcolors[d][1]*255)+","+(params.Pcolors[d][2]*255)+","+params.Pcolors[d][3]+")",
-		    flat: false,
-		    showInput: true,
-		    showInitial: false,
-		    showAlpha: true,
-		    showPalette: false,
-		    showSelectionPalette: true,
-		    clickoutFiresChange: false,
-		    maxSelectionSize: 10,
-		    preferredFormat: "rgb",
-		    change: function(color) {
-		        checkColor(this, color);
-		    },
+			color: "rgba("+(params.Pcolors[d][0]*255)+","+(params.Pcolors[d][1]*255)+","+(params.Pcolors[d][2]*255)+","+params.Pcolors[d][3]+")",
+			flat: false,
+			showInput: true,
+			showInitial: false,
+			showAlpha: true,
+			showPalette: false,
+			showSelectionPalette: true,
+			clickoutFiresChange: false,
+			maxSelectionSize: 10,
+			preferredFormat: "rgb",
+			change: function(color) {
+				checkColor(this, color);
+			},
 		});
 
 		if (params.parts.options.UIcolorPicker[d] != 1){
 			$("#"+d+"ColorPicker").spectrum({
-			    color: "rgba("+(params.Pcolors[d][0]*255)+","+(params.Pcolors[d][1]*255)+","+(params.Pcolors[d][2]*255)+","+params.Pcolors[d][3]+")",
-			    disabled: true,
+				color: "rgba("+(params.Pcolors[d][0]*255)+","+(params.Pcolors[d][1]*255)+","+(params.Pcolors[d][2]*255)+","+params.Pcolors[d][3]+")",
+				disabled: true,
 			});		
 		}
 
@@ -1511,46 +1511,46 @@ function createUI(reset = false){
 	createDslider();
 	createCFslider();
 	createSSslider();
-    createFilterSliders();
+	createFilterSliders();
 
-    updateUICenterText();
-    updateUICameraText();
-    updateUIRotText();
+	updateUICenterText();
+	updateUICameraText();
+	updateUIRotText();
 
-    params.haveUI = true;
+	params.haveUI = true;
 
 // now check if we need to hide any of this
-    if (params.parts.options.hasOwnProperty('UI')){
+	if (params.parts.options.hasOwnProperty('UI')){
 		if (!params.parts.options.UI){
 			d3.select('.UIcontainer').style('display','none');
 		}
 	}
-    if (params.parts.options.hasOwnProperty('UIfullscreen')){
+	if (params.parts.options.hasOwnProperty('UIfullscreen')){
 		if (!params.parts.options.UIfullscreen){
 			d3.select('#fullScreenDiv').style('display','none');
 		}
 	}
-    if (params.parts.options.hasOwnProperty('UIsnapshot')){
+	if (params.parts.options.hasOwnProperty('UIsnapshot')){
 		if (!params.parts.options.UIsnapshot){
 			d3.select('#snapshotDiv').style('display','none');
 		}
 	}
-    if (params.parts.options.hasOwnProperty('UIreset')){
+	if (params.parts.options.hasOwnProperty('UIreset')){
 		if (!params.parts.options.UIreset){
 			d3.select('#resetDiv').style('display','none');
 		}
 	}
-    if (params.parts.options.hasOwnProperty('UIcameraControls')){
+	if (params.parts.options.hasOwnProperty('UIcameraControls')){
 		if (!params.parts.options.UIcameraControls){
 			d3.select('#cameraControlsDiv').style('display','none');
 		}
 	}
-    if (params.parts.options.hasOwnProperty('UIdecimation')){
+	if (params.parts.options.hasOwnProperty('UIdecimation')){
 		if (!params.parts.options.UIdecimation){
 			d3.select('#decimationDiv').style('display','none');
 		}
 	}	
-    if (params.parts.options.hasOwnProperty('UIparticle')){
+	if (params.parts.options.hasOwnProperty('UIparticle')){
 		for (i=0; i<params.partsKeys.length; i++){
 			d = params.partsKeys[i];    	
 			if (params.parts.options.UIparticle.hasOwnProperty(d)){
