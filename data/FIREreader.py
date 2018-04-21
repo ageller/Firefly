@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-import h5py,os
+import h5py,os, shutil
 
 class FIREreader(object):
 	"""
@@ -164,8 +164,12 @@ class FIREreader(object):
 		#the name of the JSON file
 		self.JSONfname = 'FIREdata'
 		
-
+		#remove the data files in the dataDir directory before adding more?
+		self.cleanDataDir = True
 		
+		#set the maximum number of particles per data file
+		self.maxppFile = 1e4
+
 		#in case you want to print the available keys to the screen
 		self.showkeys = False
 		
@@ -184,11 +188,12 @@ class FIREreader(object):
 		#will store all the file names that are produced (will be defined below in defineFilenames)
 		self.filenames = dict()
 
-		#set the maximum number of particles per data file
-		self.maxppFile = 1e4
+
 
 		#directory to place all the data files in
 		self.dataDir = None
+
+
 
 ################################################## 
 ################################################## 
@@ -388,7 +393,10 @@ class FIREreader(object):
 	#create the JSON file, and then add the name of the variable (parts) that we want in Firefly
 	def createJSON(self):
 		print("writing JSON files ...")
-		if not os.path.exists(self.dataDir): 
+		if (os.path.exists(self.dataDir) and self.cleanDataDir):
+				shutil.rmtree(self.dataDir)
+
+		if (not os.path.exists(self.dataDir)):
 		    os.makedirs(self.dataDir)
 
 		self.defineFilenames()
