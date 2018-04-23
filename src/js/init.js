@@ -112,22 +112,26 @@ function defineParams(){
 	params = new ParamsInit();
 }
 
-function initControls(center = null){
+function initControls(){
 
 	if (params.rotatecamera) {
 		xx = params.camera.getWorldDirection()
 		params.controls = new THREE.TrackballControls( params.camera, params.renderer.domElement );
-		if (center == null){
-			params.controls.target = new THREE.Vector3(params.camera.position.x + xx.x, params.camera.position.y + xx.y, params.camera.position.z + xx.z);
-		} else {
-			params.controls.target = center;
+		params.controls.target = new THREE.Vector3(params.camera.position.x + xx.x, params.camera.position.y + xx.y, params.camera.position.z + xx.z);
+		if (params.parts.options.hasOwnProperty('center')){
+			if (params.parts.options.center != null){
+				params.controls.target = new THREE.Vector3(params.parts.options.center[0], params.parts.options.center[1], params.parts.options.center[2]);
 
-		}
+			}
+		} 
+
+
 		params.controls.dynamicDampingFactor = params.friction;
 	} else {
 		params.controls = new THREE.FlyControls( params.camera , params.renderer.domElement);
 		params.controls.movementSpeed = 1. - Math.pow(params.friction, params.flyffac);
 	}
+
 
 	if (params.haveUI){
 		updateUICenterText();
@@ -212,7 +216,7 @@ function init(reset = false) {
 	}
 
 	// controls
-	initControls(center = params.center);
+	initControls();
 
 	
 
