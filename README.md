@@ -37,7 +37,7 @@ Note: For very large amounts of data, you may need to increase the memory allowe
 
 ## Additional Docs
 
-Additional documentation is available on the wiki page associated with this repository.
+Additional documentation is available on the [wiki page](https://github.com/ageller/Firefly/wiki/Documentation) associated with this repository.
 
 This tool builds off of a [previous version developed by Alessandro Febretti](https://github.com/nuitrcs/firefly). 
 
