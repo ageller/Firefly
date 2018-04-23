@@ -1,6 +1,6 @@
 # Firefly
 
-![Firefly snapshot](https://github.com/ageller/Firefly/tree/master/src/docs/screenGrab.png)
+![alt text](https://github.com/ageller/Firefly/tree/master/src/docs/screenGrab.png)
 
 An interactive particle viewer designed for FIRE data. A live version is available [here](https://ageller.github.io/Firefly/).
 
