@@ -50,7 +50,7 @@ function resetCamera()
 	}
 
 	params.controls.dispose();
-	initControls(center = params.center);
+	initControls();
 
 
 }
@@ -58,7 +58,7 @@ function resetCamera()
 //reset the camera center.  Can be useful when switching back and forth between trackball and fly controls
 function recenterCamera() 
 {
-	initControls(center = params.center);
+	initControls();
 }
 
 //replace the current camera settings in options with the current camera position and rotation (to return here upon clicking reset)
@@ -808,7 +808,7 @@ function checkText(input, event)
 			params.camera.position.x = parseFloat(input.value) - params.center.x;
 		}
 		if (input.id == "CameraYText"){
-			params.camera.position.y = parseFloat(input.value) - params.center.xy
+			params.camera.position.y = parseFloat(input.value) - params.center.y
 		}
 		if (input.id == "CameraZText"){
 			params.camera.position.z = parseFloat(input.value) - params.center.z;
