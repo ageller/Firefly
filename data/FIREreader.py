@@ -221,7 +221,7 @@ class FIREreader(object):
 			self.sizeMult[p] = 1.
 
 			#set the number of points to plot during each draw (larger numbers will make the visualization run more slowly)
-			self.nMaxPlot[p] = 1e4
+			self.nMaxPlot[p] = 1e10
 
 			#decide whether you want to use the key from returnKeys as a filter item in the UI
 			self.addFilter[p] = [False]   
