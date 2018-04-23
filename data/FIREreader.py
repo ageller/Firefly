@@ -366,8 +366,12 @@ class FIREreader(object):
 	def openHDF5File(self,fname):
 		print(fname)
 		if (self.dataDir == None):
+			self.dataDir = ""
 			xx = fname.split('/')
-			self.dataDir = xx[-2]
+			ntry = 2
+			while (len(self.dataDir) == 0 and ntry < len(xx)):
+				self.dataDir = xx[-ntry]
+				ntry += 1
 
 		with h5py.File(fname,'r') as snap:
 			foo = list(snap.keys())
@@ -394,7 +398,8 @@ class FIREreader(object):
 	def createJSON(self):
 		print("writing JSON files ...")
 		if (os.path.exists(self.dataDir) and self.cleanDataDir):
-				shutil.rmtree(self.dataDir)
+			print("REMOVING FILES FROM data/"+self.dataDir)	
+			shutil.rmtree(self.dataDir)
 
 		if (not os.path.exists(self.dataDir)):
 		    os.makedirs(self.dataDir)
