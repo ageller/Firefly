@@ -165,7 +165,7 @@ class FIREreader(object):
 		self.JSONfname = 'FIREdata'
 		
 		#remove the data files in the dataDir directory before adding more?
-		self.cleanDataDir = True
+		self.cleanDataDir = False
 		
 		#set the maximum number of particles per data file
 		self.maxppFile = 1e4
