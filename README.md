@@ -27,7 +27,7 @@ To start Firefly, you can simply open the index.html file with your browser.  We
 
 Once this SimpleHTTPServer is running, you can open Chrome, and enter the url : http://localhost:8000/ .  (This python step should not be necessary with Firefox, but may be necessary with other browsers.)
 
-This will open the data set included within this repository.  If you want to use your own data, you will first need to convert your data to the format needed by Firefly.  You can do this with the python tools in the data directory.  Please see the wiki page for more details.  
+This will open the data set included within this repository.  If you want to use your own data, you will first need to convert your data to the format needed by Firefly.  You can do this with the python tools in the data directory.  Please see the [wiki page](https://github.com/ageller/Firefly/wiki/Documentation) for more details.  
 
 Note: For very large amounts of data, you may need to increase the memory allowed in your Chrome browser.  To do so, you can launch Chrome from the command line as (and change the numerical size value to something appropriate to your needs) :
 
