@@ -14,7 +14,7 @@ To install Firefly (on any operating system), please clone this GitHub repositor
 
 Or, if you prefer, you can download the zip file and unpack it.  
 
-You will also require a browser; we recommend Firefox or Google Chrome. To import your own data into Firefly, you will also require python; we recommend installing [Anaconda](https://www.anaconda.com/download/) Python version 3.x .
+You will also need a browser; we recommend Firefox or Google Chrome. To import your own data into Firefly, you will also need Python; we recommend installing [Anaconda](https://www.anaconda.com/download/) Python version 3.x .
 
 ## Running Firefly
 
