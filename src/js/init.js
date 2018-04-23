@@ -279,6 +279,7 @@ function initPVals(reset = false){
 		params.Pcolors[p] = params.parts[p].color;
 		params.updateFilter[p] = false;
 		params.filterLims[p] = {};
+		params.fkeys[p] = [];
 		params.plotNmax[p] = params.parts[p].Coordinates.length;
 		params.plotParts[p] = true;
 
@@ -292,10 +293,11 @@ function initPVals(reset = false){
 			params.velType[p] = 'line';
 			//console.log(p, params.parts[p].VelVals, params.parts[p].Velocities)
 		}
-		params.showVel[p] = false;
-		params.fkeys[p] = params.parts[p].filterKeys;
-		for (var k=0; k<params.fkeys[p].length; k++){
-			calcFilterLimits(p, params.fkeys[p][k]);
+		if (params.parts[p].hasOwnProperty("filterKeys")){
+			params.fkeys[p] = params.parts[p].filterKeys;
+			for (var k=0; k<params.fkeys[p].length; k++){
+				calcFilterLimits(p, params.fkeys[p][k]);
+			}
 		}
 	}
 

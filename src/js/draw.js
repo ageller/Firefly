@@ -70,20 +70,23 @@ function drawScene()
 			//geo.vertices.push(new THREE.Vector3(params.parts[p].Coordinates[j][0], params.parts[p].Coordinates[j][1], params.parts[p].Coordinates[j][2] ))
 			
 			positions[index] = params.parts[p].Coordinates[j][0] - params.center.x;
-			velVals[vindex] = params.parts[p].VelVals[j][0]/params.parts[p].magVelocities[j];
 			index++;
-			vindex++;
 			positions[index] = params.parts[p].Coordinates[j][1] - params.center.y;
-			velVals[vindex] = params.parts[p].VelVals[j][1]/params.parts[p].magVelocities[j];
 			index++;
-			vindex++;
 			positions[index] = params.parts[p].Coordinates[j][2] - params.center.z;
-			velVals[vindex] = params.parts[p].VelVals[j][2]/params.parts[p].magVelocities[j];
 			index++;
-			vindex++;
-			velVals[vindex] = params.parts[p].VelVals[j][3];
-			vindex++;
 
+			if (params.parts[p].Velocities != null){
+				velVals[vindex] = params.parts[p].VelVals[j][0]/params.parts[p].magVelocities[j];
+				vindex++;
+				velVals[vindex] = params.parts[p].VelVals[j][1]/params.parts[p].magVelocities[j];
+				vindex++;
+				velVals[vindex] = params.parts[p].VelVals[j][2]/params.parts[p].magVelocities[j];
+				vindex++;
+				velVals[vindex] = params.parts[p].VelVals[j][3];
+				vindex++;
+			}
+			
 			alphas[j] = 1.;
 			
 		}
