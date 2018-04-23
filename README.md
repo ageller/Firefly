@@ -2,9 +2,7 @@
 
 ![Firefly snapshot](src/docs/screenGrab.png)
 
-Firefly is an interactive particle viewer designed for [FIRE](http://galaxies.northwestern.edu/fire-simulations/) data. A live version is available [here](https://ageller.github.io/Firefly/).
-
-This tool is written in WebGL using the three.js library, and builds off of a [previous version developed by Alessandro Febretti](https://github.com/nuitrcs/firefly).
+Firefly is an interactive particle viewer designed for [FIRE](http://galaxies.northwestern.edu/fire-simulations/) data, written in WebGL using the three.js library. A live version is available [here](https://ageller.github.io/Firefly/).
 
 
 ## Installation
@@ -31,7 +29,7 @@ Once this SimpleHTTPServer is running, you can open Chrome, and enter the url : 
 
 This will open the data set included within this repository.  If you want to use your own data, you will first need to convert your data to the format needed by Firefly.  You can do this with the python tools in the data directory.  Please see the wiki page for more details.  
 
-Note: For very large amounts of data, you may need to increase the memory allowed in your Chrome browser.  To do so, you can launch Chrome from the command line as :
+Note: For very large amounts of data, you may need to increase the memory allowed in your Chrome browser.  To do so, you can launch Chrome from the command line as (and change the numerical size value to something appropriate to your needs) :
 
 ```
 > /Applications/Google\ Chrome.app/Contents/MacOS/./Google\ Chrome --args --js-flags="--max_old_space_size=8192"
@@ -41,4 +39,5 @@ Note: For very large amounts of data, you may need to increase the memory allowe
 
 Additional documentation is available on the wiki page associated with this repository.
 
+This tool builds off of a [previous version developed by Alessandro Febretti](https://github.com/nuitrcs/firefly). 
 
