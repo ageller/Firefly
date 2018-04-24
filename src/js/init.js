@@ -274,9 +274,9 @@ function calcVelVals(p){
 }
 //initialize various values for the parts dict from the input data file, 
 function initPVals(reset = false){
-	if (params.parts.Options.hasOwnProperty("maxVrange")){
-		if (params.parts.Options.maxVrange != null){
-			params.maxVrange = params.parts.Options.maxVrange; //maximum dynamic range for length of velocity vectors
+	if (params.parts.options.hasOwnProperty("maxVrange")){
+		if (params.parts.options.maxVrange != null){
+			params.maxVrange = params.parts.options.maxVrange; //maximum dynamic range for length of velocity vectors
 		}
 	}
 
