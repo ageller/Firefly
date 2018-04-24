@@ -28,7 +28,7 @@ mat4 rotationMatrix(vec3 axis, float angle)
 void main(void) {
     gl_FragColor = color;
     float dist = 0.;
-    if (vID == 0.){ //normal mode, plotting points
+    if (vID < 0.5){ //normal mode, plotting points (should be vID == 0, but this may be safer)
         // Get the distance vector from the center
         vec2 fromCenter = abs(gl_PointCoord - vec2(0.5));
         dist = 2.*length(fromCenter) ;
@@ -41,8 +41,7 @@ void main(void) {
         else {
             gl_FragColor.a *= 1. - dist;
         }
-    } 
-    if (vID == 1.){ //velocities, lines
+    } else { //velocities, lines (Note: requiring vID == 1. breaks in windows for some reason)
         // why is this negative? 
         vec3 velVals = vVelVals.xyz;
         float vyc = -dot(velVals,cameraY);
@@ -92,7 +91,6 @@ void main(void) {
         //gl_FragColor.rgb +=  (1. - posRot.x/vSize); //white at tail
         gl_FragColor.rgb +=  0.6*posRot.x/vSize; //whiter at head
         gl_FragColor.a = posRot.x/vSize;
-        // maybe arrow?
 }
     gl_FragColor.a *= vAlpha;
 }

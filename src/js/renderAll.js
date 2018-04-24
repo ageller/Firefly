@@ -58,9 +58,11 @@ function update(time){
 					m.material.uniforms.cameraNegZ.value = [cameraDir.x,cameraDir.y,cameraDir.z];
 					m.material.uniforms.cameraX.value = [cameraX.x,cameraX.y,cameraX.z];
 					m.material.uniforms.cameraY.value = [cameraY.x,cameraY.y,cameraY.z];
-					m.material.uniforms.oID.value = 1;
+					m.material.uniforms.oID.value = 1.;
+					m.material.uniforms.uVertexScale.value *= params.vSizeMult;
+
 				} else {
-					m.material.uniforms.oID.value = 0;
+					m.material.uniforms.oID.value = 0.;
 				}
 				if (params.updateFilter[p]){
 					var alphas = m.geometry.attributes.alpha.array;

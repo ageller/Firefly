@@ -428,7 +428,7 @@ function createPsliders(){
 			params.SliderPInputs[p] = [params.SliderPmax[p]];
 			params.SliderPInputs[p][0].parent = params.SliderP[p];
 			min = 0.;
-			max = 5.;
+			max = 1.;
 
 			noUiSlider.create(params.SliderP[p], {
 				start: [params.PsizeMult[p]],
