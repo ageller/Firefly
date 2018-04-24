@@ -106,6 +106,8 @@ function defineParams(){
 		this.loadingSizeX = screenWidth*0.5;
 		this.loadingSizeY = screenHeight*0.1;
 		this.loadfrac = 0.;
+		this.drawfrac = 0.;
+		this.svgContainer = null;
 	};
 
 
@@ -390,16 +392,23 @@ function loadData(callback){
 
 
 						params.loadfrac = countParts()/params.parts.totalSize;
-						d3.selectAll('#loadingRect').transition().attr("width", params.loadingSizeX*params.loadfrac);
+						//console.log("loading", params.loadfrac)
+						if (10. * params.loadfrac % 1 < 0.1 || params.loadfrac == 1){
+							updateLoadingBar();
+						}
 						//console.log(d3.selectAll('#loadingRect').node().getBoundingClientRect().width)
 						//console.log("counting", countParts(), params.parts.totalSize, params.loadfrac)
 						if (countParts() ==  params.parts.totalSize && params.parts.options.loaded){
 							//console.log("here")
+
 							var index = params.partsKeys.indexOf('options');
 							if (index > -1) {
 								params.partsKeys.splice(index, 1);
 								params.parts.options0 = JSON.parse(JSON.stringify(params.parts.options));
 							}
+
+
+
 							callback(); 
 						}
 
@@ -418,13 +427,15 @@ function drawLoadingBar(){
 	var screenWidth = parseFloat(window.innerWidth);
 
 	//Make an SVG Container
-	var svgContainer = d3.select("#splashdivLoader").append("svg")
+	var svg = d3.select("#splashdivLoader").append("svg")
 		.attr("width", screenWidth)
 		.attr("height", params.loadingSizeY);
 
+	params.svgContainer = svg.append("g")
 
-	var r1 = svgContainer.append("rect")
-		.attr('id','loadingRect1')
+
+	params.svgContainer.append("rect")
+		.attr('id','loadingRectOutline')
 		.attr("x", (screenWidth - params.loadingSizeX)/2)
 		.attr("y", 0)
 		.attr("width",params.loadingSizeX)
@@ -433,23 +444,29 @@ function drawLoadingBar(){
 		.attr('stroke','#4E2A84')
 		.attr('stroke-width', '3')
 
-	var r2 = svgContainer.append("rect")
+	params.svgContainer.append("rect")
 		.attr('id','loadingRect')
 		.attr("x", (screenWidth - params.loadingSizeX)/2)
 		.attr("y", 0)//(screenHeight - sizeY)/2)
 		.attr("height",params.loadingSizeY)
 		.attr('fill','#4E2A84')
-		.attr("width",params.loadingSizeX*params.loadfrac)
-
+		.attr("width",params.loadingSizeX*params.loadfrac);
 
 
 	window.addEventListener('resize', moveLoadingBar);
 
 }
+function updateLoadingBar(){
+
+	//console.log(params.loadfrac, params.loadingSizeX*params.loadfrac)
+	d3.selectAll('#loadingRect').transition().attr("width", params.loadingSizeX*params.loadfrac);
+
+}
+
 function moveLoadingBar(){
 	var screenWidth = parseFloat(window.innerWidth);
+	d3.selectAll('#loadingRectOutline').attr('x', (screenWidth - params.loadingSizeX)/2);
 	d3.selectAll('#loadingRect').attr('x', (screenWidth - params.loadingSizeX)/2);
-	d3.selectAll('#loadingRect1').attr('x', (screenWidth - params.loadingSizeX)/2);
 }
 
 //check if the data is loaded
@@ -469,7 +486,6 @@ function clearloading(){
 function WebGLStart(){
 
 
-	clearloading();
 
 //reset the window title
 	if (params.parts.options.hasOwnProperty('title')){
