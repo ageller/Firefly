@@ -2,9 +2,9 @@ var myFragmentShader = `
 precision mediump float;
 varying float vID;
 varying float vAlpha;
-varying float glPointSize;
+//varying float glPointSize;
 varying vec4 vVelVals;
-varying float vVertexScale;
+//varying float vVertexScale;
 uniform vec4 color;
 uniform int SPHrad;
 uniform vec3 cameraNegZ;

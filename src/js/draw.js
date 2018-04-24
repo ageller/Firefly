@@ -1,7 +1,7 @@
 
-function clearPartsMesh() {
-	for (var i=0; i<params.partsKeys.length; i++){
-		var p = params.partsKeys[i];
+function clearPartsMesh(pClear = params.partsKeys) {
+	for (var i=0; i<pClear.length; i++){
+		var p = pClear[i];
 
 		params.partsMesh[p].forEach( function( e, i ) {
 			e.geometry.dispose();
@@ -14,10 +14,18 @@ function clearPartsMesh() {
 	}
 }
 
-function drawScene()
+function drawScene(pdraw = params.partsKeys)
 {
-	for (var i=0; i<params.partsKeys.length; i++){
-		var p = params.partsKeys[i];
+	clearPartsMesh(pClear = pdraw);
+	console.log("drawing", pdraw, params.plotNmax,params.Decimate)
+
+	//d3.select("#splashdiv5").text("Drawing...");
+	params.drawfrac = 0.;
+	var ndraw = 0.;
+	var ndiv = Math.round(params.parts.totalSize / 10.);
+
+	for (var i=0; i<pdraw.length; i++){
+		var p = pdraw[i];
 		var material = new THREE.ShaderMaterial( {
 			uniforms: {
 				color: {value: new THREE.Vector4( params.Pcolors[p][0], params.Pcolors[p][1], params.Pcolors[p][2], params.Pcolors[p][3])},
@@ -66,7 +74,8 @@ function drawScene()
 		var index = 0;
 		var vindex = 0;
 
-		for (var j=0; j<params.parts[p].Coordinates.length; j++){
+		//for (var j=0; j<params.parts[p].Coordinates.length/params.Decimate; j++){
+		for (var j=0; j<params.plotNmax[p]; j++){
 			//geo.vertices.push(new THREE.Vector3(params.parts[p].Coordinates[j][0], params.parts[p].Coordinates[j][1], params.parts[p].Coordinates[j][2] ))
 			
 			positions[index] = params.parts[p].Coordinates[j][0] - params.center.x;
@@ -86,8 +95,13 @@ function drawScene()
 				velVals[vindex] = params.parts[p].VelVals[j][3];
 				vindex++;
 			}
-			
+
 			alphas[j] = 1.;
+			ndraw += 1;
+			if (ndraw % ndiv < 1 || ndraw == params.parts.totalSize){
+				params.drawfrac = (1 + ndraw/params.parts.totalSize)*0.5;
+				//updateDrawingBar();
+			}
 			
 		}
 
@@ -97,6 +111,12 @@ function drawScene()
 		params.partsMesh[p].push(mesh)
 
 	}
-	console.log("done drawing")
+
+	//this will not be printed if you change the N value in the slider, and therefore only redraw one particle type
+	//because ndraw will not be large enough, but I don't think this will cause a problem
+	if (ndraw >= Math.floor(params.parts.totalSize/params.Decimate)){
+		console.log("done drawing")
+		clearloading();
+	}
 }
 

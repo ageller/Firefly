@@ -1,15 +1,18 @@
 //reset to the initial Options file
 function resetToOptions()
 {
+	console.log("resetting")
 	//reset all the parts specific values to the initial ones
 	initPVals(reset = true);
 
 	//redo init, but only the camera bits (maybe could streamline this and init by using the functions below?)
 	init(reset = true);
 
-	//destroy the particle portion of the UI and recreate it (simplest option)
+	//destroy the particle portion of the UI and recreate it (simplest option, but not really destroying all elements...)
 	d3.select('#particleUI').html("");
 	createUI(reset = true);
+
+	drawScene();
 
 }
 
@@ -154,9 +157,9 @@ function setFSliderHandle(i, value, parent, reset=false) {
 // Listen to keydown events on the input field.
 function handleFSliderText(input, handle) 
 {
-	input.addEventListener('change', function(){
-		setFSliderHandle(handle, this.value, this.parent);
-	});
+	// input.addEventListener('change', function(){
+	// 	setFSliderHandle(handle, this.value, this.parent);
+	// });
 	input.addEventListener('keydown', function( e ) {
 		var values = input.parent.noUiSlider.get();
 		var value = Number(values[handle]);
@@ -278,9 +281,9 @@ function setNSliderHandle(i, value, parent) {
 // can I just use the same functions as for the filters?
 function handleNSliderText(input, handle) 
 {
-	input.addEventListener('change', function(){
-		setNSliderHandle(handle, this.value, this.parent);
-	});
+	// input.addEventListener('change', function(){
+	// 	setNSliderHandle(handle, this.value, this.parent);
+	// });
 	input.addEventListener('keydown', function( e ) {
 		var value = Number(input.parent.noUiSlider.get());
 		var steps = input.parent.noUiSlider.options.steps;
@@ -299,7 +302,7 @@ function handleNSliderText(input, handle)
 	});
 };
 
-function createNsliders(){
+function createNsliders(reset = false){
 
 	var i = 0;
 	var j = 0;
@@ -332,9 +335,18 @@ function createNsliders(){
 				});
 				params.SliderN[p].noUiSlider.on('mouseup', mouseDown=false); 
 				params.SliderN[p].noUiSlider.on('update', function(values, handle) {
+
+
+
 					var pp = this.target.id.slice(0, -8);
 					params.SliderNInputs[pp][handle].value = values[handle];
+
+					var nf = parseFloat(values[handle])/params.plotNmax[pp];
 					params.plotNmax[pp] = parseInt(values[handle]);
+					if (nf != 1 && ! reset){
+						drawScene(pDraw = [pp]);
+
+					}
 					mouseDown = true;
 				});
 
@@ -371,9 +383,9 @@ function setPSliderHandle(i, value, parent) {
 // can I just use the same functions as for the filters?
 function handlePSliderText(input, handle) 
 {
-	input.addEventListener('change', function(){
-		setPSliderHandle(handle, this.value, this.parent);
-	});
+	// input.addEventListener('change', function(){
+	// 	setPSliderHandle(handle, this.value, this.parent);
+	// });
 	input.addEventListener('keydown', function( e ) {
 		var value = Number(input.parent.noUiSlider.get());
 		var steps = input.parent.noUiSlider.options.steps;
@@ -461,19 +473,7 @@ function setDSliderHandle(i, value, parent) {
 			}
 		});
 	}
-	var val;
-	for (i=0; i<params.partsKeys.length; i++){
-		var p = params.partsKeys[i];
-		max = Math.round(params.parts[p].Coordinates.length);
-		val = parseFloat(params.SliderN[p].noUiSlider.get());
-		params.SliderN[p].noUiSlider.updateOptions({
-			range: {
-				'min': [0],
-				'max': [Math.round(max/value)]
-			},
-		});
-		params.SliderN[p].noUiSlider.set(Math.min(max, val*params.Decimate/parseFloat(value)));
-	}
+
 	var r = [null];
 	r[i] = value;
 	parent.noUiSlider.set(value);
@@ -486,9 +486,9 @@ function setDSliderHandle(i, value, parent) {
 // can I just use the same functions as for the filters?
 function handleDSliderText(input, handle) 
 {
-	input.addEventListener('change', function(){
-		setDSliderHandle(handle, this.value, this.parent);
-	});
+	// input.addEventListener('change', function(){
+	// 	setDSliderHandle(handle, this.value, this.parent);
+	// });
 	input.addEventListener('keydown', function( e ) {
 		var value = Number(input.parent.noUiSlider.get());
 		var steps = input.parent.noUiSlider.options.steps;
@@ -539,25 +539,36 @@ function createDslider(){
 
 		params.SliderD.noUiSlider.on('mouseup', mouseDown=false); 
 		params.SliderD.noUiSlider.on('update', function(values, handle) {
+
+			params.SliderDInputs[handle].value = values[handle];
+
+			var decf = params.Decimate/parseFloat(values[handle]);
+			if (decf != 1){
+				params.Decimate = parseFloat(values[handle]);
+				//drawScene();
+			}
+
 			for (i=0; i<params.partsKeys.length; i++){
 				var p = params.partsKeys[i];
 				var max = Math.round(params.parts[p].Coordinates.length);
 				if (params.parts.options.UIdropdown[p]){
 					var val = parseFloat(params.SliderN[p].noUiSlider.get());
+
 					params.SliderN[p].noUiSlider.updateOptions({
 						range: {
 							'min': [0],
 							'max': [Math.round(max/parseFloat(values[handle]))]
 						}
 					});
-					params.SliderN[p].noUiSlider.set(Math.min(max, val*params.Decimate/parseFloat(values[handle])));
+					params.SliderN[p].noUiSlider.set(Math.min(max, val*decf));
+
 				}
 
 			}
 
-			params.SliderDInputs[handle].value = values[handle];
-			params.Decimate = parseFloat(values[handle]);
+
 			mouseDown = true;
+
 		});
 
 		params.SliderDInputs.forEach(handleDSliderText);
@@ -586,9 +597,9 @@ function setCFSliderHandle(i, value, parent) {
 // Listen to keydown events on the input field.
 function handleCFSliderText(input, handle) 
 {
-	input.addEventListener('change', function(){
-		setCFSliderHandle(handle, this.value, this.parent);
-	});
+	// input.addEventListener('change', function(){
+	// 	setCFSliderHandle(handle, this.value, this.parent);
+	// });
 	input.addEventListener('keydown', function( e ) {
 		var value = Number(input.parent.noUiSlider.get());
 		var steps = input.parent.noUiSlider.options.steps;
@@ -706,9 +717,9 @@ function setSSSliderHandle(i, value, parent) {
 // Listen to keydown events on the input field.
 function handleSSSliderText(input, handle) 
 {
-	input.addEventListener('change', function(){
-		setSSSliderHandle(handle, this.value, this.parent);
-	});
+	// input.addEventListener('change', function(){
+	// 	setSSSliderHandle(handle, this.value, this.parent);
+	// });
 	input.addEventListener('keydown', function( e ) {
 		var value = Number(input.parent.noUiSlider.get());
 		var steps = input.parent.noUiSlider.options.steps;
@@ -1507,7 +1518,7 @@ function createUI(reset = false){
 
 // create all the noUISliders
 	createPsliders();
-	createNsliders();
+	createNsliders(reset = reset);
 	createDslider();
 	createCFslider();
 	createSSslider();

@@ -5,9 +5,9 @@ attribute vec4 velVals;
 
 varying float vID;
 varying float vAlpha;
-varying float glPointSize;
+//varying float glPointSize;
 varying vec4 vVelVals;
-varying float vVertexScale;
+//varying float vVertexScale;
 
 uniform float oID;
 uniform float uVertexScale;
@@ -21,7 +21,7 @@ void main(void) {
     vID = oID;
     vAlpha = alpha;
     vVelVals = velVals;
-    vVertexScale = uVertexScale;
+    //vVertexScale = uVertexScale;
 
     vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
 
@@ -30,7 +30,7 @@ void main(void) {
     pointScale = clamp(pointScale, minPointScale, maxPointScale);
     
     gl_PointSize = uVertexScale * pointScale;
-    glPointSize = gl_PointSize;
+    //glPointSize = gl_PointSize;
 
     gl_Position = projectionMatrix * mvPosition;
 
