@@ -56,7 +56,7 @@ void main(void) {
         mat4 rot1 = rotationMatrix(vec3(0,0,1), theta);
         vec2 posRot = (rot1 * vec4(gl_PointCoord.x-0.5, gl_PointCoord.y-0.5,0., 1.)).xy;
         
-        float lW = 0.02;
+        float lW = 0.02*vVelVals[3];
 
         // puts tail of vector at -1*lW (half-width offset helps with head-on view)
         if (posRot.x < -1.*lW){
@@ -74,7 +74,7 @@ void main(void) {
         }
 
         //arrow
-        float aH = 0.2;
+        float aH = 0.2*vVelVals[3];
         float aL = 0.75;
         if (velType == 1.){ //arrow
             if (posRot.x > vSize || (posRot.x < vSize*aL && abs(posRot.y) > lW) || (posRot.x > vSize*aL && abs(posRot.y) > (-1.*aH/vSize * posRot.x + aH) )   ){
@@ -83,7 +83,7 @@ void main(void) {
         }
 
         //triangle
-        float tH = 0.05; 
+        float tH = 0.1*vVelVals[3]; 
         if (velType == 2.){ 
             if (posRot.x > vSize || abs(posRot.y) > (-1.*tH/(vSize) * posRot.x + tH)    ){
                 discard;

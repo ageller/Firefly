@@ -66,7 +66,7 @@ function defineParams(){
 		this.showVel = {};
 		this.velopts = {'line':0., 'arrow':1., 'triangle':2.};
 		this.velType = {};
-		this.maxVrange = 1000.; //maximum dynamic range for length of velocity vectors
+		this.maxVrange = 2000.; //maximum dynamic range for length of velocity vectors (can be reset in options file)
 
 		//for single sliders
 		this.SliderN = {};
@@ -274,6 +274,12 @@ function calcVelVals(p){
 }
 //initialize various values for the parts dict from the input data file, 
 function initPVals(reset = false){
+	if (params.parts.Options.hasOwnProperty("maxVrange"))
+		if (params.parts.Options.maxVrange != null){
+			params.maxVrange = params.parts.Options.maxVrange; //maximum dynamic range for length of velocity vectors
+		}
+	}
+
 	for (var i=0; i<params.partsKeys.length; i++){
 		var p = params.partsKeys[i];
 		if (! reset){
