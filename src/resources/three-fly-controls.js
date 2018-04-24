@@ -4,6 +4,7 @@
  * @author paulirish / http://paulirish.com/
  */
 
+//edited by Aaron Geller to only allow WASDRF movements, and enable the movementSpeedMultiplier
 
 
     THREE.FlyControls = function ( object, domElement, opts ) {
@@ -19,6 +20,8 @@
 
         this.movementSpeed = (opts.movementSpeed === undefined) ? 1.0 : opts.movementSpeed;
         this.rollSpeed = (opts.rollSpeed === undefined) ? 0.005 : opts.rollSpeed;
+
+        this.movementSpeedMultiplier = 1.
 
         this.dragToLook = true;
         this.autoForward = false;
@@ -71,14 +74,14 @@
                 case 82: /*R*/ this.moveState.up = 1; break;
                 case 70: /*F*/ this.moveState.down = 1; break;
 
-                case 38: /*up*/ this.moveState.pitchUp = 1; break;
-                case 40: /*down*/ this.moveState.pitchDown = 1; break;
+                //case 38: /*up*/ this.moveState.pitchUp = 1; break;
+                //case 40: /*down*/ this.moveState.pitchDown = 1; break;
 
-                case 37: /*left*/ this.moveState.yawLeft = 1; break;
-                case 39: /*right*/ this.moveState.yawRight = 1; break;
+                //case 37: /*left*/ this.moveState.yawLeft = 1; break;
+                //case 39: /*right*/ this.moveState.yawRight = 1; break;
 
-                case 81: /*Q*/ this.moveState.rollLeft = 1; break;
-                case 69: /*E*/ this.moveState.rollRight = 1; break;
+                //case 81: /*Q*/ this.moveState.rollLeft = 1; break;
+                //case 69: /*E*/ this.moveState.rollRight = 1; break;
 
             }
             
@@ -214,8 +217,8 @@
             var time = Date.now();
             var delta = ( time - prevTime ) / 10;
 
-            var moveMult = delta * this.movementSpeed;
-            var rotMult = delta * this.rollSpeed;
+            var moveMult = delta * this.movementSpeed * this.movementSpeedMultiplier;
+            var rotMult = delta * this.rollSpeed * this.movementSpeedMultiplier;
 
             this.object.translateX( this.moveVector.x * moveMult );
             this.object.translateY( this.moveVector.y * moveMult );
@@ -288,10 +291,10 @@
 
             this.domElement.removeEventListener( 'contextmenu', function ( event ) { event.preventDefault(); }, false );
 
-            this.domElement.removeEventListener( 'mousemove', bind( this, this.mousemove ), false );
-            this.domElement.removeEventListener( 'mousedown', bind( this, this.mousedown ), false );
-            this.domElement.removeEventListener( 'mouseup',   bind( this, this.mouseup ), false );
-            this.domElement.removeEventListener( 'mouseout',   bind( this, this.mouseout ), false );
+            //this.domElement.removeEventListener( 'mousemove', bind( this, this.mousemove ), false );
+            //this.domElement.removeEventListener( 'mousedown', bind( this, this.mousedown ), false );
+            //this.domElement.removeEventListener( 'mouseup',   bind( this, this.mouseup ), false );
+            //this.domElement.removeEventListener( 'mouseout',   bind( this, this.mouseout ), false );
 
             this.domElement.removeEventListener( 'keydown', bind( this, this.keydown ), false );
             this.domElement.removeEventListener( 'keyup',   bind( this, this.keyup ), false );
@@ -307,10 +310,10 @@
 
         this.domElement.addEventListener( 'contextmenu', function ( event ) { event.preventDefault(); }, false );
 
-        this.domElement.addEventListener( 'mousemove', bind( this, this.mousemove ), false );
-        this.domElement.addEventListener( 'mousedown', bind( this, this.mousedown ), false );
-        this.domElement.addEventListener( 'mouseup',   bind( this, this.mouseup ), false );
-        this.domElement.addEventListener( 'mouseout',   bind( this, this.mouseout ), false );
+        //this.domElement.addEventListener( 'mousemove', bind( this, this.mousemove ), false );
+        //this.domElement.addEventListener( 'mousedown', bind( this, this.mousedown ), false );
+        //this.domElement.addEventListener( 'mouseup',   bind( this, this.mouseup ), false );
+        //this.domElement.addEventListener( 'mouseout',   bind( this, this.mouseout ), false );
 
         this.domElement.addEventListener( 'keydown', bind( this, this.keydown ), false );
         this.domElement.addEventListener( 'keyup',   bind( this, this.keyup ), false );
