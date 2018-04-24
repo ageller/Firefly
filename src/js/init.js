@@ -27,6 +27,7 @@ function defineParams(){
 
 		//particle size multiplicative factor
 		this.PsizeMult = {};
+		this.vSizeMult = 10.; //factor to multiply velocities vectors by, so we don't always have to increase particle size
 
 		//particle default colors;
 		this.Pcolors = {};
