@@ -7,8 +7,12 @@ class FIREreader(object):
 	#These are the defaults that can be redefined by the user at runtime.  
 	#These defaults are only applied after running self.defineDefaults().
 
+
 		#directory that contains all the hdf5 data files
 		self.directory = './' 
+		
+		#snapshot number to open
+		self.snapnum = None
 
 		#particles to return
 		self.returnParts = ['PartType0', 'PartType1', 'PartType2', 'PartType4']
@@ -62,22 +66,31 @@ class FIREreader(object):
 		
 		#a dictionary of  for the WebGL app
 		self.options = {'title':'Firefly', #set the title of the webpage
+						'UI':True, #do you want to show the UI?
+						'UIparticle':dict(), #do you want to show the particles in the user interface (default = True)
 						'UIdropdown':dict(), #do you want to enable the dropdown menus for particles in the user interface (default = True)
-						'UIcolorPicker':dict(), #do you want to allow the user to change the color (defulat = True)
+						'UIcolorPicker':dict(), #do you want to allow the user to change the color (default = True)
 						'UIfullscreen':True, #do you want to show the fullscreen button?
 						'UIsnapshot':True, #do you want to show the snapshot button?
 						'UIreset':True, #do you want to show the reset button?
 						'UIcameraControls':True, #do you want to show the camera controls
+						'UIdecimation':True, #do you want to show the decimation slider
 						'center':None, #do you want to define the initial camera center (if not, the WebGL app will calculate the center as the mean of the coordinates of the first particle set loaded in)
-						'camera':np.array([0., 0. -10]), #initial camera location, NOTE: the magnitude must be >0
-
+						'camera':np.array([0., 0., -10]), #initial camera location, NOTE: the magnitude must be >0
+						'cameraRotation':None, #can set camera rotation if you want
+						'loaded':True, #used in the web app to check if the options have been read in
+						'maxVrange':2000., #maximum range in velocities to use in deciding the length of the velocity vectors (making maxVrange larger will enhance the difference between small and large velocities)
 					  } 
 		
 		#the name of the JSON file
 		self.JSONfname = 'FIREdata'
 		
-
+		#remove the data files in the dataDir directory before adding more?
+		self.cleanDataDir = False
 		
+		#set the maximum number of particles per data file
+		self.maxppFile = 1e4
+
 		#in case you want to print the available keys to the screen
 		self.showkeys = False
 
@@ -159,6 +172,7 @@ class FIREreader(object):
 						'camera':np.array([0., 0., -10]), #initial camera location, NOTE: the magnitude must be >0
 						'cameraRotation':None, #can set camera rotation if you want
 						'loaded':True, #used in the web app to check if the options have been read in
+						'maxVrange':2000., #maximum range in velocities to use in deciding the length of the velocity vectors (making maxVrange larger will enhance the difference between small and large velocities)
 					  } 
 		
 		#the name of the JSON file
