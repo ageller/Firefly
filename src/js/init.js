@@ -131,13 +131,12 @@ function initControls(){
 
 		params.controls.dynamicDampingFactor = params.friction;
 	} else {
-		console.log("in fly controls")
 		params.controls = new THREE.FlyControls( params.camera , params.renderer.domElement);
 		params.controls.movementSpeed = 1. - Math.pow(params.friction, params.flyffac);
 	}
 
 	params.switchControls = false;
-	
+
 	if (params.haveUI){
 		updateUICenterText();
 		updateUICameraText();
