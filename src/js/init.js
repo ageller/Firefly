@@ -96,6 +96,7 @@ function defineParams(){
 		//initial friction value
 		this.friction = 0.1;
 		this.flyffac = 0.2;
+		this.switchControls = false;
 
 		//check to see if the UI exists
 		this.haveUI = false;
@@ -120,7 +121,7 @@ function initControls(){
 		xx = params.camera.getWorldDirection()
 		params.controls = new THREE.TrackballControls( params.camera, params.renderer.domElement );
 		params.controls.target = new THREE.Vector3(params.camera.position.x + xx.x, params.camera.position.y + xx.y, params.camera.position.z + xx.z);
-		if (params.parts.options.hasOwnProperty('center')){
+		if (params.parts.options.hasOwnProperty('center') && !params.switchControls){
 			if (params.parts.options.center != null){
 				params.controls.target = new THREE.Vector3(params.parts.options.center[0], params.parts.options.center[1], params.parts.options.center[2]);
 
@@ -130,11 +131,13 @@ function initControls(){
 
 		params.controls.dynamicDampingFactor = params.friction;
 	} else {
+		console.log("in fly controls")
 		params.controls = new THREE.FlyControls( params.camera , params.renderer.domElement);
 		params.controls.movementSpeed = 1. - Math.pow(params.friction, params.flyffac);
 	}
 
-
+	params.switchControls = false;
+	
 	if (params.haveUI){
 		updateUICenterText();
 		updateUICameraText();

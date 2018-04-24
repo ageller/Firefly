@@ -21,6 +21,7 @@ function checkCenterLock(box)
 {
 
 	params.controls.dispose();
+	params.switchControls = true;
 	if (box.checked) {
 		params.rotatecamera = true;
 	} else {
