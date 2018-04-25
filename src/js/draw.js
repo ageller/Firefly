@@ -114,9 +114,9 @@ function drawScene(pdraw = params.partsKeys)
 
 	//this will not be printed if you change the N value in the slider, and therefore only redraw one particle type
 	//because ndraw will not be large enough, but I don't think this will cause a problem
-	if (ndraw >= Math.floor(params.parts.totalSize/params.decimate)){
+	//if (ndraw >= Math.floor(params.parts.totalSize/params.decimate)){
 		console.log("done drawing")
 		clearloading();
-	}
+	//}
 }
 

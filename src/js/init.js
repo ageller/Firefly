@@ -102,6 +102,8 @@ function defineParams(){
 		//check to see if the UI exists
 		this.haveUI = false;
 
+		this.reset = false;
+
 		//for the loading bar
 		var screenWidth = window.innerWidth;
 		var screenHeight = window.innerHeight;
@@ -132,10 +134,14 @@ function initControls(){
 		params.controls.dynamicDampingFactor = params.friction;
 
 	} else {
-		elm = document.getElementById("CenterCheckBox");
-		elm.checked = false;
+		if (params.haveUI){
+			elm = document.getElementById("CenterCheckBox");
+			elm.checked = false;
+			elm.value = false;
+		}
 		params.controls = new THREE.FlyControls( params.camera , params.renderer.domElement);
 		params.controls.movementSpeed = 1. - Math.pow(params.friction, params.flyffac);
+
 	}
 
 	params.switchControls = false;
@@ -148,8 +154,8 @@ function initControls(){
 	}
 }
 
-function init(reset = false) {
-	if (reset){
+function init() {
+	if (params.reset){
 		params.parts.options = params.parts.options0;
 	} else {
 		 //keyboard
@@ -250,8 +256,11 @@ function applyOptions(){
 			params.normalRenderer = params.renderer;
 			params.renderer = params.effect;
 			params.useStereo = true;
-			elm = document.getElementById("StereoCheckBox");
-			elm.checked = true;
+			if (params.haveUI){
+				elm = document.getElementById("StereoCheckBox");
+				elm.checked = true;
+				elm.value = true;
+			}
 		}
 	}
 
@@ -340,8 +349,11 @@ function applyOptions(){
 				if (params.parts.options.showVel.hasOwnProperty(p)){
 					if (params.parts.options.showVel[p] == true){
 						params.showVel[p] = true;
-						elm = document.getElementById(p+'velCheckBox');
-						elm.checked = true;
+						if (params.haveUI){
+							elm = document.getElementById(p+'velCheckBox');
+							elm.checked = true;
+							elm.value = true;
+						}
 					}
 				}
 			}
@@ -379,7 +391,7 @@ function applyOptions(){
 			}
 		}
 
-		
+
 	}
 
 
@@ -432,21 +444,21 @@ function calcVelVals(p){
 	}
 }
 //initialize various values for the parts dict from the input data file, 
-function initPVals(reset = false){
+function initPVals(){
 
 
 	for (var i=0; i<params.partsKeys.length; i++){
 		var p = params.partsKeys[i];
-		if (! reset){
+		if (! params.reset){
 			params.partsMesh[p] = [];
 		}
 		params.updateFilter[p] = false;
 		params.filterLims[p] = {};
 		params.fkeys[p] = [];
 		params.plotNmax[p] = params.parts[p].Coordinates.length;
-
+		
 		if (params.parts[p].Velocities != null){
-			if (!reset){
+			if (!params.reset){
 				calcVelVals(p);
 				params.parts[p].filterKeys.push("magVelocities");
 			}
@@ -662,7 +674,7 @@ function WebGLStart(){
 
 //draw everything
 	drawScene();
-	
+
 //begin the animation
 	animate();
 }

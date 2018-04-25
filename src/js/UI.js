@@ -1,18 +1,20 @@
 //reset to the initial Options file
 function resetToOptions()
 {
-	console.log("resetting")
+	console.log("resetting");
+	params.reset = true;
 	//reset all the parts specific values to the initial ones
-	initPVals(reset = true);
+	initPVals();
 
 	//redo init, but only the camera bits (maybe could streamline this and init by using the functions below?)
-	init(reset = true);
+	init();
 
 	//destroy the particle portion of the UI and recreate it (simplest option, but not really destroying all elements...)
 	d3.select('#particleUI').html("");
-	createUI(reset = true);
+	createUI();
 
 	drawScene();
+	params.reset = false;
 
 }
 
@@ -337,7 +339,7 @@ function handleNSliderText(input, handle)
 	});
 };
 
-function createNsliders(reset = false){
+function createNsliders(){
 
 	var i = 0;
 	var j = 0;
@@ -353,7 +355,7 @@ function createNsliders(reset = false){
 				params.SliderNInputs[p] = [params.SliderNmax[p]];
 				params.SliderNInputs[p][0].parent = params.SliderN[p];
 				min = 0;
-				max = Math.round(params.parts[p].Coordinates.length/params.decimate);
+				max = params.plotNmax[p]
 				noUiSlider.create(params.SliderN[p], {
 					start: [max],
 					connect: [true, false],
@@ -377,7 +379,7 @@ function createNsliders(reset = false){
 
 					var nf = parseFloat(values[handle])/params.plotNmax[pp];
 					params.plotNmax[pp] = parseInt(values[handle]);
-					if (nf != 1 && ! reset){
+					if (nf != 1 && ! params.reset){
 						drawScene(pDraw = [pp]);
 
 					}
@@ -558,7 +560,7 @@ function createDslider(){
 		max = 100.;
 
 		noUiSlider.create(params.SliderD, {
-			start: [1],
+			start: [params.decimate],
 			connect: [true, false],
 			tooltips: false,
 			steps: [1],
@@ -622,6 +624,7 @@ function setCFSliderHandle(i, value, parent) {
 		params.controls.dynamicDampingFactor = value;
 	} else {
 		params.controls.movementSpeed = 1. - Math.pow(value, params.flyffac);
+
 	}
 	params.friction = value;
 	mouseDown = false; 
@@ -668,7 +671,7 @@ function createCFslider(){
 		max = 1.;
 
 		noUiSlider.create(params.SliderCF, {
-			start: [params.controls.dynamicDampingFactor],
+			start: [params.friction],
 			connect: [true, false],
 			tooltips: false,
 			steps: [0.01],
@@ -683,7 +686,6 @@ function createCFslider(){
 
 		params.SliderCF.noUiSlider.on('mouseup', mouseDown=false); 
 		params.SliderCF.noUiSlider.on('update', function(values, handle) {
-
 			params.SliderCFInputs[handle].value = values[handle];
 			var value = Math.min(Math.max(0., parseFloat(values[handle])),1.);
 			if (params.useTrackball){
@@ -819,6 +821,7 @@ function createSSslider(){
 
 function updateUICameraText()
 {
+
 	document.getElementById("CameraXText").value = params.camera.position.x + params.center.x;
 	document.getElementById("CameraYText").value = params.camera.position.y + params.center.y;
 	document.getElementById("CameraZText").value = params.camera.position.z + params.center.z;
@@ -1007,13 +1010,13 @@ function selectVelType() {
 };
 
 
-function createUI(reset = false){
+function createUI(){
 	console.log("Creating UI");
 
 
 
 //change the hamburger to the X to start
-	if (! reset){
+	if (! params.reset){
 
 		var UIcontainer = d3.select('.UIcontainer');
 
@@ -1164,14 +1167,16 @@ function createUI(reset = false){
 	c4.append('input')
 		.attr('id','CenterCheckBox')
 		.attr('type','checkbox')
-		.attr('value','true')
 		.attr('autocomplete','off')
 		.attr('onchange','checkCenterLock(this);');
-	console.log(params.useTrackball)
 	if (params.useTrackball){
-		d3.selectAll('#CenterCheckBox').attr('checked', true);
+		elm = document.getElementById("CenterCheckBox");
+		elm.value = true
+		elm.checked = true;
 	} else {
-		d3.selectAll('#CenterCheckBox').attr('checked', false);
+		elm = document.getElementById("CenterCheckBox");
+		elm.value = false
+		elm.checked = false;
 	}
 	c4.append('label')
 		.attr('for','CenterCheckBox')
@@ -1307,9 +1312,17 @@ function createUI(reset = false){
 	c3.append('input')
 		.attr('id','StereoCheckBox')
 		.attr('type','checkbox')
-		.attr('value','false')
 		.attr('onchange','checkStereoLock(this);')
 		.attr('autocomplete','false');
+	if (params.useStereo){
+		elm = document.getElementById("StereoCheckBox");
+		elm.value = true
+		elm.checked = true;
+	} else {
+		elm = document.getElementById("StereoCheckBox");
+		elm.value = false
+		elm.checked = false;
+	}
 	c3.append('div')
 		.attr('class','NSliderClass')
 		.attr('id','SSSlider')
@@ -1553,7 +1566,7 @@ function createUI(reset = false){
 
 // create all the noUISliders
 	createPsliders();
-	createNsliders(reset = reset);
+	createNsliders();
 	createDslider();
 	createCFslider();
 	createSSslider();
