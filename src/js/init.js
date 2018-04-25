@@ -33,7 +33,7 @@ function defineParams(){
 		this.Pcolors = {};
 
 		//Decimation
-		this.Decimate = 1;
+		this.decimate = 1;
 		this.plotNmax = {};
 
 		//Filtering
@@ -54,7 +54,7 @@ function defineParams(){
 		this.gtoggle = {};
 
 		//camera controls
-		this.rotatecamera = true;
+		this.useTrackball = true;
 		this.useStereo = false;
 		this.stereoSep = 0.06;
 		this.stereoSepMax = 1.;
@@ -118,7 +118,7 @@ function defineParams(){
 
 function initControls(){
 
-	if (params.rotatecamera) {
+	if (params.useTrackball) {
 		xx = params.camera.getWorldDirection()
 		params.controls = new THREE.TrackballControls( params.camera, params.renderer.domElement );
 		params.controls.target = new THREE.Vector3(params.camera.position.x + xx.x, params.camera.position.y + xx.y, params.camera.position.z + xx.z);
@@ -129,14 +129,17 @@ function initControls(){
 			}
 		} 
 
-
 		params.controls.dynamicDampingFactor = params.friction;
+
 	} else {
+		elm = document.getElementById("CenterCheckBox");
+		elm.checked = false;
 		params.controls = new THREE.FlyControls( params.camera , params.renderer.domElement);
 		params.controls.movementSpeed = 1. - Math.pow(params.friction, params.flyffac);
 	}
 
 	params.switchControls = false;
+
 
 	if (params.haveUI){
 		updateUICenterText();
@@ -190,40 +193,195 @@ function init(reset = false) {
 
 
 	//console.log(params.parts.options);
-
-
-	//initialize center
-	if (params.parts.options.hasOwnProperty('center')){
-		if (params.parts.options.center == null){
-			setCenter(params.parts[params.partsKeys[0]].Coordinates);
-		} else {
-			params.center = new THREE.Vector3(params.parts.options.center[0], params.parts.options.center[1], params.parts.options.center[2]);
-			setBoxSize(params.parts[params.partsKeys[0]].Coordinates);
-		}
-	} else {
-		setCenter(params.parts[params.partsKeys[0]].Coordinates);
-	}
-
-
-	//change location of camera
-	if (params.parts.options.hasOwnProperty('camera')){
-		params.camera.position.set(params.parts.options.camera[0], params.parts.options.camera[1], params.parts.options.camera[2]);
-	} else {
-		params.camera.position.set(0,0,-10);
-	}
-
+	setCenter(params.parts[params.partsKeys[0]].Coordinates);
+	params.camera.position.set(0,0,-10);
 	params.camera.lookAt(params.scene.position);  
-	if (params.parts.options.hasOwnProperty('cameraRotation')){
-		if (params.parts.options.cameraRotation != null){
-			params.rotatecamera = false;
-			params.camera.rotation.set(params.parts.options.cameraRotation[0], params.parts.options.cameraRotation[1], params.parts.options.cameraRotation[2]);
-		}
-	}
+
+	//apply presets from the options file
+	applyOptions();
 
 	// controls
 	initControls();
 
-	
+}
+
+function applyOptions(){
+
+	//initialize center
+	if (params.parts.options.hasOwnProperty('center')){
+		if (params.parts.options.center != null){
+			params.center = new THREE.Vector3(params.parts.options.center[0], params.parts.options.center[1], params.parts.options.center[2]);
+			setBoxSize(params.parts[params.partsKeys[0]].Coordinates);
+		}
+	} 
+
+	//change location of camera
+	if (params.parts.options.hasOwnProperty('camera')){
+		if (params.parts.options.camera != null){
+			params.camera.position.set(params.parts.options.camera[0], params.parts.options.camera[1], params.parts.options.camera[2]);
+		}
+	} 
+
+	//change the rotation of the camera (which requires Fly controls)
+	if (params.parts.options.hasOwnProperty('cameraRotation')){
+		if (params.parts.options.cameraRotation != null){
+			params.useTrackball = false;
+			params.camera.rotation.set(params.parts.options.cameraRotation[0], params.parts.options.cameraRotation[1], params.parts.options.cameraRotation[2]);
+		}
+	}
+
+	//check if we are starting in Fly controls
+	if (params.parts.options.hasOwnProperty('startFly')){
+		if (params.parts.options.startFly == true){
+			params.useTrackball = false;
+		}
+	}
+
+	//modify the initial friction
+	if (params.parts.options.hasOwnProperty('friction')){
+		if (params.parts.options.friction != null){
+			params.friction = params.parts.options.friction;
+		}
+	}
+
+	//check if we are starting in Stereo
+	if (params.parts.options.hasOwnProperty('stereo')){
+		if (params.parts.options.stereo == true){
+			params.normalRenderer = params.renderer;
+			params.renderer = params.effect;
+			params.useStereo = true;
+			elm = document.getElementById("StereoCheckBox");
+			elm.checked = true;
+		}
+	}
+
+	//modify the initial stereo separation
+	if (params.parts.options.hasOwnProperty('stereoSep')){
+		if (params.parts.options.stereoSep != null){
+			params.stereoSep = params.parts.options.stereoSep;
+			params.effect.setEyeSeparation(params.stereoSep);
+
+		}
+	}
+
+	//modify the initial decimation
+	if (params.parts.options.hasOwnProperty('decimate')){
+		if (params.parts.options.decimate != null){
+			params.decimate = params.parts.options.decimate;
+		}
+	}
+
+	//maximum range in calculating the length the velocity vectors
+	if (params.parts.options.hasOwnProperty("maxVrange")){
+		if (params.parts.options.maxVrange != null){
+			params.maxVrange = params.parts.options.maxVrange; //maximum dynamic range for length of velocity vectors
+			for (var i=0; i<params.partsKeys.length; i++){
+				var p = params.partsKeys[i];
+				if (params.parts[p].Velocities != null){
+					calcVelVals(p);		
+				}
+			}
+		}
+	}
+
+	//particle specific options
+	for (var i=0; i<params.partsKeys.length; i++){
+		var p = params.partsKeys[i];
+
+		//on/off
+		if (params.parts.options.hasOwnProperty("plotParts")){
+			if (params.parts.options.plotParts != null){
+				if (params.parts.options.plotParts.hasOwnProperty(p)){
+					if (params.parts.options.plotParts[p] != null){
+						params.plotParts[p] = params.parts.options.plotParts[p];
+					}
+				}
+			}
+		}
+
+		//size
+		if (params.parts.options.hasOwnProperty("sizeMult")){
+			if (params.parts.options.sizeMult != null){
+				if (params.parts.options.sizeMult.hasOwnProperty(p)){
+					if (params.parts.options.sizeMult[p] != null){
+						params.PsizeMult[p] = params.parts.options.sizeMult[p];
+					}
+				}
+			}
+		}
+
+		//color
+		if (params.parts.options.hasOwnProperty("color")){
+			if (params.parts.options.color != null){
+				if (params.parts.options.color.hasOwnProperty(p)){
+					if (params.parts.options.color[p] != null){
+						params.Pcolors[p] = params.parts.options.color[p];
+					}
+				}
+			}
+		}
+
+
+
+		//maximum number of particles to plot
+		if (params.parts.options.hasOwnProperty("plotNmax")){
+			if (params.parts.options.plotNmax != null){
+				if (params.parts.options.plotNmax.hasOwnProperty(p)){
+					if (params.parts.options.plotNmax[p] != null){
+						params.plotNmax[p] = params.parts.options.plotNmax[p];
+					}
+				}
+			}
+		}
+
+		//start plotting the velocity vectors
+		if (params.parts.options.hasOwnProperty("showVel")){
+			if (params.parts.options.showVel != null){
+				if (params.parts.options.showVel.hasOwnProperty(p)){
+					if (params.parts.options.showVel[p] == true){
+						params.showVel[p] = true;
+						elm = document.getElementById(p+'velCheckBox');
+						elm.checked = true;
+					}
+				}
+			}
+		}
+
+		//type of velocity vectors
+		if (params.parts.options.hasOwnProperty("velType")){
+			if (params.parts.options.velType != null){
+				if (params.parts.options.velType.hasOwnProperty(p)){
+					if (params.parts.options.velType[p] == 'line' || params.parts.options.velType[p] == 'arrow' || params.parts.options.velType[p] == 'triangle'){
+						params.velType[p] = params.parts.options.velType[p];
+					}
+				}
+			}
+		}
+
+		//filters
+		if (params.parts.options.hasOwnProperty("filter")){
+			if (params.parts.options.filter != null){
+				if (params.parts.options.filter.hasOwnProperty(p)){
+					if (params.parts.options.filter[p] != null){
+						params.updateFilter[p] = true
+
+						for (k=0; k<params.fkeys[p].length; k++){
+							var fkey = params.fkeys[p][k]
+							if (params.parts.options.filter[p].hasOwnProperty(fkey)){
+								if (params.parts.options.filter[p][fkey] != null){
+									params.filterLims[p][fkey] = params.parts.options.filter[p][fkey]
+								}
+							}
+						}
+
+					}
+				}
+			}
+		}
+
+		
+	}
+
 
 }
 
@@ -275,26 +433,17 @@ function calcVelVals(p){
 }
 //initialize various values for the parts dict from the input data file, 
 function initPVals(reset = false){
-	if (params.parts.options.hasOwnProperty("maxVrange")){
-		if (params.parts.options.maxVrange != null){
-			params.maxVrange = params.parts.options.maxVrange; //maximum dynamic range for length of velocity vectors
-		}
-	}
+
 
 	for (var i=0; i<params.partsKeys.length; i++){
 		var p = params.partsKeys[i];
 		if (! reset){
 			params.partsMesh[p] = [];
 		}
-		params.PsizeMult[p] = params.parts[p].sizeMult;
-		params.Pcolors[p] = params.parts[p].color;
 		params.updateFilter[p] = false;
 		params.filterLims[p] = {};
 		params.fkeys[p] = [];
 		params.plotNmax[p] = params.parts[p].Coordinates.length;
-		params.plotParts[p] = true;
-
-		params.parts[p].nMaxPlot = Math.min(params.parts[p].nMaxPlot, params.parts[p].Coordinates.length);
 
 		if (params.parts[p].Velocities != null){
 			if (!reset){
