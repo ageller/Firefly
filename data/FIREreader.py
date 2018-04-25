@@ -32,20 +32,12 @@ class FIREreader(object):
 		#keys from the hd5 file to include in the JSON file for Firefly (must at least include Coordinates)
 		self.returnKeys = dict()
 		
-		#set the default colors = rgba.  The alpha value here becomes a multiplier if weights are provided. 
-		self.colors = dict()
-		
 		#set the weight of the particles (to define the alpha value). This is a function that will calculate the weights
 		self.weightFunction = dict()
 		
 		#set the radii of the particles. This is a function that will calculate the radii
 		self.radiusFunction = dict()
 		
-		#set the default point size multiplier 
-		self.sizeMult = dict()
-
-		#set the number of points to plot during each draw (larger numbers will make the visualization run more slowly)
-		self.nMaxPlot = dict()
 		
 		#decide whether you want to use the key from returnKeys as a filter item in the UI
 		#NOTE: each of these must be the same length as self.returnKeys
@@ -111,34 +103,25 @@ class FIREreader(object):
 		self.returnParts = ['PartType0', 'PartType1', 'PartType2', 'PartType4']
  
 		#set names for the particle sets (note: these will be used in the UI of Firefly; 4 characters or less is best)
-		self.names = {'PartType0':'Gas', 
-					  'PartType1':'HRDM', 
-					  'PartType2':'LRDM', 
-					  'PartType4':'Stars' }
+		self.names = {'PartType0':'PartType0', 
+					  'PartType1':'PartType1', 
+					  'PartType2':'PartType2', 
+					  'PartType4':'PartType4' }
 		
 		#flag to check if user has already defined the default values
 		self.defined = False
 		
-		#amount to decimate the data (==1 means no decimates, >1 factor by which to reduce the amount of data)
+		#amount to decimate the data before creating the json files (==1 means no decimates, >1 factor by which to reduce the amount of data)
 		self.decimate = dict()
 		
 		#keys from the hd5 file to include in the JSON file for Firefly (must at least include Coordinates)
 		self.returnKeys = dict()
-		
-		#set the default colors = rgba.  The alpha value here becomes a multiplier if weights are provided. 
-		self.colors = dict()
-		
+				
 		#set the weight of the particles (to define the alpha value). This is a function that will calculate the weights
 		self.weightFunction = dict()
 		
 		#set the radii of the particles. This is a function that will calculate the radii
 		self.radiusFunction = dict()
-		
-		#set the default point size multiplier 
-		self.sizeMult = dict()
-
-		#set the number of points to plot during each draw (larger numbers will make the visualization run more slowly)
-		self.nMaxPlot = dict()
 		
 		#decide whether you want to use the key from returnKeys as a filter item in the UI
 		#NOTE: each of these must be the same length as self.returnKeys
@@ -151,6 +134,7 @@ class FIREreader(object):
 		#should we use the magnitude of these values?   
 		#NOTE: this must be the same length as self.returnKeys
 		#NOTE: setting any of these to true will significantly slow down the file creation
+		#NOTE: I calculate magnitude of velocity, if Velocities is supplied, in the web app.  No need to do it here for Velocities.
 		self.domag = dict()
  
 		#should we plot using Alex Gurvich's radial profile fit to the SPH particles (==1), or a simple symmetric radial profile?   
@@ -159,20 +143,40 @@ class FIREreader(object):
 		
 		#a dictionary of  for the WebGL app
 		self.options = {'title':'Firefly', #set the title of the webpage
+						########################
+						#these settings are to turn on/off different bits of the user interface
 						'UI':True, #do you want to show the UI?
-						'UIparticle':dict(), #do you want to show the particles in the user interface (default = True)
-						'UIdropdown':dict(), #do you want to enable the dropdown menus for particles in the user interface (default = True)
-						'UIcolorPicker':dict(), #do you want to allow the user to change the color (default = True)
+						'UIparticle':None, #do you want to show the particles in the user interface (default = True). This is a dict with keys of the particle swapnames (as defined in self.names), and is boolean.
+						'UIdropdown':None, #do you want to enable the dropdown menus for particles in the user interface (default = True).This is a dict with keys of the particle swapnames (as defined in self.names), and is boolean.
+						'UIcolorPicker':None, #do you want to allow the user to change the color (default = True).This is a dict with keys of the particle swapnames (as defined in self.names), and is boolean.
 						'UIfullscreen':True, #do you want to show the fullscreen button?
 						'UIsnapshot':True, #do you want to show the snapshot button?
 						'UIreset':True, #do you want to show the reset button?
 						'UIcameraControls':True, #do you want to show the camera controls
 						'UIdecimation':True, #do you want to show the decimation slider
-						'center':None, #do you want to define the initial camera center (if not, the WebGL app will calculate the center as the mean of the coordinates of the first particle set loaded in)
-						'camera':np.array([0., 0., -10]), #initial camera location, NOTE: the magnitude must be >0
-						'cameraRotation':None, #can set camera rotation if you want
-						'loaded':True, #used in the web app to check if the options have been read in
+						########################
+						#these settings affect how the data are displayed
+						'center':None, #do you want to define the initial camera center (if not, the WebGL app will calculate the center as the mean of the coordinates of the first particle set loaded in) (should be an np.array of length 3: x,y,z)
+						'camera':None, #initial camera location, NOTE: the magnitude must be >0 (should be an np.array of length 3: x,y,z)
+						'cameraRotation':None, #can set camera rotation if you want (should be an np.array of length 3: xrot, yrot, zrot, in radians)
 						'maxVrange':2000., #maximum range in velocities to use in deciding the length of the velocity vectors (making maxVrange larger will enhance the difference between small and large velocities)
+						'startFly':False, #start in Fly controls? (if False, then start in the default Trackball controls)
+						'friction':None, #set the initial friction for the controls (default is 0.1)
+						'stereo':False, #start in stereo mode?
+						'stereoSep':None, #camera (eye) separation in the stereo mode (default is 0.06, should be < 1)
+						'decimate':None, #set the initial decimation (e.g, you could load in all the data, but setting self.decimate to 1 above, but only display some fraction by setting self.options.decimate > 1 here).  This is a single value (not a dict)
+						'plotNmax':None, #maximum initial number of particles to plot (can be used to decimate on a per particle basis).  This is a dict with keys of the particle swapnames (as defined in self.names)
+						'showVel':None, #start by showing the velocity vectors?  This is a dict with keys of the particle swapnames (as defined in self.names), and is boolean
+						'velType':None, #default type of velocity vectors to plot.  This is a dict with keys of the particle swapnames (as defined in self.names), and must be either 'line', 'arrow', or 'triangle'.  (default is 'line')
+						'color':None, #set the default color, This is a dict with keys of the particle swapnames (as defined in self.names), must contain 4-element lists with rgba. (default is random colors with a = 1)
+						'sizeMult':None, #set the default point size multiplier. This is a dict with keys of the particle swapnames (as defined in self.names), default for all sizes is 1.
+						'plotParts':None, #show particles by default. This is a dict with keys of the particle swapnames (as defined in self.names), boolean, default is true.
+						'filter':None, #initial filtering selection. This is a dict with initial keys of the particle swapnames (as defined in self.names), then for each filter the [min, max] range (e.g., 'filter':{'Gas':{'log10Density':[0,1],'magVelocities':[20, 100]}} )
+
+						########################
+						#this should not be modified
+						'loaded':True, #used in the web app to check if the options have been read in
+
 					  } 
 		
 		#the name of the JSON file
@@ -194,15 +198,13 @@ class FIREreader(object):
 		self.partsDict = dict()
 		
 		#keys that shouldn't be shuffled or decimated
-		self.nodecimate = ['color','sizeMult','filterKeys','doSPHrad', 'nMaxPlot']
+		self.nodecimate = ['filterKeys','doSPHrad']
 		
 		#keys for filtering (will be defined below)
 		self.filterKeys = {}
 		
 		#will store all the file names that are produced (will be defined below in defineFilenames)
 		self.filenames = dict()
-
-
 
 		#directory to place all the data files in
 		self.dataDir = None
@@ -215,6 +217,12 @@ class FIREreader(object):
 		
 	def defineDefaults(self):
 		self.defined = True
+		self.options['color'] = dict()
+		self.options['sizeMult'] = dict()
+		self.options['plotParts'] = dict()
+		self.options['UIparticle'] = dict()
+		self.options['UIdropdown'] = dict()
+		self.options['UIcolorPicker'] = dict()
 		for p in self.returnParts:
 			#amount to decimate the data (==1 means no decimates, >1 factor by which to reduce the amount of data)
 			self.decimate[p] = 1.
@@ -222,20 +230,12 @@ class FIREreader(object):
 			#keys from the hdf5 file to include in the JSON file for Firefly (must at least include Coordinates)
 			self.returnKeys[p] = ['Coordinates']      
 
-			#set the default colors = rgba.  The alpha value here becomes a multiplier if weights are provided. 
-			self.colors[p] = [np.random.random(), np.random.random(), np.random.random(), 1.]
 
 			#set the weight of the particles (to define the alpha value). This is a function that will calculate the weights
 			self.weightFunction[p] = None
 
 			#set the radii of the particles. This is a function that will calculate the radii
 			self.radiusFunction[p] = None
-
-			#set the default point size multiplier 
-			self.sizeMult[p] = 1.
-
-			#set the number of points to plot during each draw (larger numbers will make the visualization run more slowly)
-			self.nMaxPlot[p] = 1e10
 
 			#decide whether you want to use the key from returnKeys as a filter item in the UI
 			self.addFilter[p] = [False]   
@@ -255,6 +255,9 @@ class FIREreader(object):
 			self.options['UIparticle'][pp] = True
 			self.options['UIdropdown'][pp] = True
 			self.options['UIcolorPicker'][pp] = True
+			self.options['color'][pp] = [np.random.random(), np.random.random(), np.random.random(), 1.] #set the default color = rgba.  
+			self.options['sizeMult'][pp] = 1. #set the default point size multiplier 
+			self.options['plotParts'][pp] = True
 			
 	#used self.names to swap the dictionary keys
 	def swapnames(self, pin):
@@ -352,11 +355,8 @@ class FIREreader(object):
 		#and add on the colors and point size defaults
 		#also calculate the magnitude where necessary
 		for p in list(self.partsDict.keys()):
-			self.partsDict[p]['color'] = self.colors[p]
-			self.partsDict[p]['sizeMult'] = self.sizeMult[p]
 			self.partsDict[p]['filterKeys'] = self.filterKeys[p]
 			self.partsDict[p]['doSPHrad'] = self.doSPHrad[p]
-			self.partsDict[p]['nMaxPlot'] = self.nMaxPlot[p]
 
 					
 			#should we decimate the data? (NOTE: even if decimate = 1, it is wise to shuffle the data so it doesn't display in blocks)
@@ -474,6 +474,14 @@ class FIREreader(object):
 		for p in self.returnParts:
 			self.filterKeys[p] = []
 			j = 0
+
+			if (len(self.addFilter[p]) < len(self.returnKeys[p])):
+				self.addFilter[p] = np.full(len(self.returnKeys[p]), self.addFilter[p][0])
+			if (len(self.dolog[p]) < len(self.returnKeys[p])):
+				self.dolog[p] = np.full(len(self.returnKeys[p]), self.dolog[p][0])
+			if (len(self.domag[p]) < len(self.returnKeys[p])):
+				self.domag[p] = np.full(len(self.returnKeys[p]), self.domag[p][0])
+
 			for i,k in enumerate(self.returnKeys[p]):
 				if (self.addFilter[p][i]):
 					self.filterKeys[p].append(k)

@@ -49,7 +49,7 @@ function update(time){
 			m.material.uniforms.velType.value = params.velopts[params.velType[p]];
 			if (params.plotParts[p]) {
 
-				m.geometry.setDrawRange( 0, params.plotNmax[p]*(1./params.Decimate) )
+				m.geometry.setDrawRange( 0, params.plotNmax[p]*(1./params.decimate) )
 				m.material.uniforms.uVertexScale.value = params.PsizeMult[p];
 
 				m.material.uniforms.color.value = new THREE.Vector4( params.Pcolors[p][0], params.Pcolors[p][1], params.Pcolors[p][2], params.Pcolors[p][3]);

@@ -23,9 +23,9 @@ function checkCenterLock(box)
 	params.controls.dispose();
 	params.switchControls = true;
 	if (box.checked) {
-		params.rotatecamera = true;
+		params.useTrackball = true;
 	} else {
-		params.rotatecamera = false;
+		params.useTrackball = false;
 	}
 	initControls();
 
@@ -40,18 +40,36 @@ function resetCamera()
 	var screenHeight = window.innerHeight;
 	var aspect = screenWidth / screenHeight;
 	params.camera = new THREE.PerspectiveCamera( params.fov, aspect, params.zmin, params.zmax);
-	params.scene.add(params.camera);
+	params.camera.up.set(0, -1, 0);
+	params.scene.add(params.camera); 
 
-	params.camera.position.set(params.parts.options.camera[0], params.parts.options.camera[1], params.parts.options.camera[2]);
+	setCenter(params.parts[params.partsKeys[0]].Coordinates);
+	params.camera.position.set(0,0,-10);
 	params.camera.lookAt(params.scene.position);  
+
+	//change the center?
+	if (params.parts.options.hasOwnProperty('center')){
+		if (params.parts.options.center != null){
+			params.center = new THREE.Vector3(params.parts.options.center[0], params.parts.options.center[1], params.parts.options.center[2]);
+			setBoxSize(params.parts[params.partsKeys[0]].Coordinates);
+		}
+	} 
+
+	//change location of camera?
+	if (params.parts.options.hasOwnProperty('camera')){
+		if (params.parts.options.camera != null){
+			params.camera.position.set(params.parts.options.camera[0], params.parts.options.camera[1], params.parts.options.camera[2]);
+		}
+	} 
+
+	//change the rotation of the camera (which requires Fly controls)
 	if (params.parts.options.hasOwnProperty('cameraRotation')){
 		if (params.parts.options.cameraRotation != null){
-			params.rotatecamera = false;
-			elm = document.getElementById("CenterCheckBox");
-			elm.checked = false;
+			params.useTrackball = false;
 			params.camera.rotation.set(params.parts.options.cameraRotation[0], params.parts.options.cameraRotation[1], params.parts.options.cameraRotation[2]);
 		}
 	}
+
 
 	params.controls.dispose();
 	initControls();
@@ -70,16 +88,32 @@ function recenterCamera()
 function saveCamera() 
 {
 
-	if (!params.parts.options.hasOwnProperty('camera')){
+	if (params.parts.options.hasOwnProperty('camera')){
+		if (params.parts.options.camera == null){
+			params.parts.options.camera = [0,0,0];
+		}
+	} else {
 		params.parts.options.camera = [0,0,0];
 	}
 	params.parts.options.camera[0] = params.camera.position.x;
 	params.parts.options.camera[1] = params.camera.position.y;
 	params.parts.options.camera[2] = params.camera.position.z;
 
- //    if (!params.parts.options.hasOwnProperty('cameraRotation')){
-	// 	params.parts.options.cameraRotation = [0,0,0];
-	// }
+
+	if (params.parts.options.hasOwnProperty('center')){
+		if (params.parts.options.center == null){
+			params.parts.options.center = [0,0,0];
+		}
+	} else {
+		params.parts.options.center = [0,0,0];
+	}
+
+	if (params.useTrackball){
+		params.parts.options.center[0] = params.controls.target.x;
+		params.parts.options.center[1] = params.controls.target.y;
+		params.parts.options.center[2] = params.controls.target.z;
+	} 
+
 	if (params.parts.options.hasOwnProperty('cameraRotation')){
 		if (params.parts.options.cameraRotation != null){
 			params.parts.options.cameraRotation[0] = params.camera.rotation.x;
@@ -319,8 +353,7 @@ function createNsliders(reset = false){
 				params.SliderNInputs[p] = [params.SliderNmax[p]];
 				params.SliderNInputs[p][0].parent = params.SliderN[p];
 				min = 0;
-				max = Math.round(params.parts[p].Coordinates.length/params.Decimate);
-
+				max = Math.round(params.parts[p].Coordinates.length/params.decimate);
 				noUiSlider.create(params.SliderN[p], {
 					start: [max],
 					connect: [true, false],
@@ -331,7 +364,7 @@ function createNsliders(reset = false){
 						'max': [max]
 					},
 					format: wNumb({
-					decimals: 0
+						decimals: 0
 					})
 				});
 				params.SliderN[p].noUiSlider.on('mouseup', mouseDown=false); 
@@ -478,7 +511,7 @@ function setDSliderHandle(i, value, parent) {
 	var r = [null];
 	r[i] = value;
 	parent.noUiSlider.set(value);
-	params.Decimate = value;
+	params.decimate = value;
 	mouseDown = false; 
 
 }
@@ -543,9 +576,9 @@ function createDslider(){
 
 			params.SliderDInputs[handle].value = values[handle];
 
-			var decf = params.Decimate/parseFloat(values[handle]);
+			var decf = params.decimate/parseFloat(values[handle]);
 			if (decf != 1){
-				params.Decimate = parseFloat(values[handle]);
+				params.decimate = parseFloat(values[handle]);
 				//drawScene();
 			}
 
@@ -585,7 +618,7 @@ function setCFSliderHandle(i, value, parent) {
 	value = Math.min(Math.max(0., parseFloat(value)),1.);
 
 	parent.noUiSlider.set(value);
-	if (params.rotatecamera){
+	if (params.useTrackball){
 		params.controls.dynamicDampingFactor = value;
 	} else {
 		params.controls.movementSpeed = 1. - Math.pow(value, params.flyffac);
@@ -653,7 +686,7 @@ function createCFslider(){
 
 			params.SliderCFInputs[handle].value = values[handle];
 			var value = Math.min(Math.max(0., parseFloat(values[handle])),1.);
-			if (params.rotatecamera){
+			if (params.useTrackball){
 				params.controls.dynamicDampingFactor = value;
 			} else {
 				params.controls.movementSpeed = 1. - Math.pow(value, params.flyffac);
@@ -670,7 +703,7 @@ function createCFslider(){
 
 function updateUICenterText()
 {
-	if (params.rotatecamera){
+	if (params.useTrackball){
 		document.getElementById("CenterXText").value = params.controls.target.x + params.center.x;
 		document.getElementById("CenterYText").value = params.controls.target.y + params.center.y;
 		document.getElementById("CenterZText").value = params.controls.target.z + params.center.z;
@@ -1049,6 +1082,7 @@ function createUI(reset = false){
 		.attr('class','pTextInput')
 		.style('width','50px')
 		.style('margin-top','5px')
+		.style('margin-right','5px')
 	snap.append('input')
 		.attr('id','RenderYText')
 		.attr('type', 'text')
@@ -1133,8 +1167,8 @@ function createUI(reset = false){
 		.attr('value','true')
 		.attr('autocomplete','off')
 		.attr('onchange','checkCenterLock(this);');
-	console.log(params.rotatecamera)
-	if (params.rotatecamera){
+	console.log(params.useTrackball)
+	if (params.useTrackball){
 		d3.selectAll('#CenterCheckBox').attr('checked', true);
 	} else {
 		d3.selectAll('#CenterCheckBox').attr('checked', false);
@@ -1529,8 +1563,12 @@ function createUI(reset = false){
 	updateUICameraText();
 	updateUIRotText();
 
-	params.haveUI = true;
+	applyUIoptions();
 
+	params.haveUI = true;
+}
+
+function applyUIoptions(){
 // now check if we need to hide any of this
 	if (params.parts.options.hasOwnProperty('UI')){
 		if (!params.parts.options.UI){
