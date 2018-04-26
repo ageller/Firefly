@@ -156,22 +156,17 @@ function initControls(){
 }
 
 function init() {
+	var screenWidth = window.innerWidth;
+	var screenHeight = window.innerHeight;
+	var aspect = screenWidth / screenHeight;
+
 	if (params.reset){
-		params.parts.options = params.parts.options0;
-	} else {
+		params.scene = null;
+		params.camera = null;
+	} else{
+
 		 //keyboard
 		params.keyboard = new KeyboardState();
-
-		// scene
-		params.scene = new THREE.Scene();     
-
-		// camera
-		var screenWidth = window.innerWidth;
-		var screenHeight = window.innerHeight;
-		var aspect = screenWidth / screenHeight;
-		params.camera = new THREE.PerspectiveCamera( params.fov, aspect, params.zmin, params.zmax);
-		params.camera.up.set(0, -1, 0);
-		params.scene.add(params.camera);  
 
 		// renderer
 		if ( Detector.webgl ) {
@@ -188,17 +183,25 @@ function init() {
 		params.container = document.getElementById('WebGLContainer');
 		params.container.appendChild( params.renderer.domElement );
 
-		// events
-		THREEx.WindowResize(params.renderer, params.camera);
-		THREEx.FullScreen.bindKey({ charCode : 'm'.charCodeAt(0) });
-
 		//stereo
 		params.effect = new THREE.StereoEffect( params.renderer );
 		params.effect.setAspect(1.);
 		params.effect.setEyeSeparation(params.stereoSep);
-
-
 	}
+
+
+	// scene
+	params.scene = new THREE.Scene();     
+
+	// camera
+	params.camera = new THREE.PerspectiveCamera( params.fov, aspect, params.zmin, params.zmax);
+	params.camera.up.set(0, -1, 0);
+	params.scene.add(params.camera);  
+
+	// events
+	THREEx.WindowResize(params.renderer, params.camera);
+	//THREEx.FullScreen.bindKey({ charCode : 'm'.charCodeAt(0) });
+
 
 	params.useTrackball = true;
 
@@ -385,7 +388,9 @@ function applyOptions(){
 							var fkey = params.fkeys[p][k]
 							if (params.parts.options.filterLims[p].hasOwnProperty(fkey)){
 								if (params.parts.options.filterLims[p][fkey] != null){
-									params.filterLims[p][fkey] = params.parts.options.filterLims[p][fkey]
+									params.filterLims[p][fkey] = []
+									params.filterLims[p][fkey].push(params.parts.options.filterLims[p][fkey][0]);
+									params.filterLims[p][fkey].push(params.parts.options.filterLims[p][fkey][1]);
 								}
 							}
 						}
@@ -406,7 +411,9 @@ function applyOptions(){
 							var fkey = params.fkeys[p][k]
 							if (params.parts.options.filterVals[p].hasOwnProperty(fkey)){
 								if (params.parts.options.filterVals[p][fkey] != null){
-									params.filterVals[p][fkey] = params.parts.options.filterVals[p][fkey]
+									params.filterVals[p][fkey] = []
+									params.filterVals[p][fkey].push(params.parts.options.filterVals[p][fkey][0]);
+									params.filterVals[p][fkey].push(params.parts.options.filterVals[p][fkey][1]);
 								}
 							}
 						}
@@ -426,17 +433,18 @@ function calcFilterLimits(p, fkey){
 	
 	var j=0;
 	if (params.parts[p][fkey] != null){
-	var i=0;
-	min = params.parts[p][fkey][i];
-	max = params.parts[p][fkey][i];
-	for (i=0; i< params.parts[p][fkey].length; i++){
-		min = Math.min(min, params.parts[p][fkey][i]);
-		max = Math.max(max, params.parts[p][fkey][i]);
-	}
-	//need to add a small factor here because of the precision of noUIslider
-	min -= 0.001;
-	max += 0.001;
-	params.filterLims[p][fkey] = [min, max];
+		var i=0;
+		min = params.parts[p][fkey][i];
+		max = params.parts[p][fkey][i];
+		for (i=0; i< params.parts[p][fkey].length; i++){
+			min = Math.min(min, params.parts[p][fkey][i]);
+			max = Math.max(max, params.parts[p][fkey][i]);
+		}
+		//need to add a small factor here because of the precision of noUIslider
+		min -= 0.001;
+		max += 0.001;
+		params.filterLims[p][fkey] = [min, max];
+		params.filterVals[p][fkey] = [min, max];
 	}
 }
 

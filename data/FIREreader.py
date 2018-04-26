@@ -60,12 +60,13 @@ class FIREreader(object):
 						########################
 						#these settings are to turn on/off different bits of the user interface
 						'UI':True, #do you want to show the UI?
-						'UIparticle':None, #do you want to show the particles in the user interface (default = True). This is a dict with keys of the particle swapnames (as defined in self.names), and is boolean.
-						'UIdropdown':None, #do you want to enable the dropdown menus for particles in the user interface (default = True).This is a dict with keys of the particle swapnames (as defined in self.names), and is boolean.
-						'UIcolorPicker':None, #do you want to allow the user to change the color (default = True).This is a dict with keys of the particle swapnames (as defined in self.names), and is boolean.
+						'UIparticle':dict(), #do you want to show the particles in the user interface (default = True). This is a dict with keys of the particle swapnames (as defined in self.names), and is boolean.
+						'UIdropdown':dict(), #do you want to enable the dropdown menus for particles in the user interface (default = True).This is a dict with keys of the particle swapnames (as defined in self.names), and is boolean.
+						'UIcolorPicker':dict(), #do you want to allow the user to change the color (default = True).This is a dict with keys of the particle swapnames (as defined in self.names), and is boolean.
 						'UIfullscreen':True, #do you want to show the fullscreen button?
 						'UIsnapshot':True, #do you want to show the snapshot button?
 						'UIreset':True, #do you want to show the reset button?
+						'UIsavepreset':True, #do you want to show the save preset button?
 						'UIcameraControls':True, #do you want to show the camera controls
 						'UIdecimation':True, #do you want to show the decimation slider
 						########################
@@ -79,13 +80,14 @@ class FIREreader(object):
 						'stereo':False, #start in stereo mode?
 						'stereoSep':None, #camera (eye) separation in the stereo mode (default is 0.06, should be < 1)
 						'decimate':None, #set the initial decimation (e.g, you could load in all the data, but setting self.decimate to 1 above, but only display some fraction by setting self.options.decimate > 1 here).  This is a single value (not a dict)
-						'plotNmax':None, #maximum initial number of particles to plot (can be used to decimate on a per particle basis).  This is a dict with keys of the particle swapnames (as defined in self.names)
-						'showVel':None, #start by showing the velocity vectors?  This is a dict with keys of the particle swapnames (as defined in self.names), and is boolean
-						'velType':None, #default type of velocity vectors to plot.  This is a dict with keys of the particle swapnames (as defined in self.names), and must be either 'line', 'arrow', or 'triangle'.  (default is 'line')
-						'color':None, #set the default color, This is a dict with keys of the particle swapnames (as defined in self.names), must contain 4-element lists with rgba. (default is random colors with a = 1)
-						'sizeMult':None, #set the default point size multiplier. This is a dict with keys of the particle swapnames (as defined in self.names), default for all sizes is 1.
-						'showParts':None, #show particles by default. This is a dict with keys of the particle swapnames (as defined in self.names), boolean, default is true.
-						'filter':None, #initial filtering selection. This is a dict with initial keys of the particle swapnames (as defined in self.names), then for each filter the [min, max] range (e.g., 'filter':{'Gas':{'log10Density':[0,1],'magVelocities':[20, 100]}} )
+						'plotNmax':dict(), #maximum initial number of particles to plot (can be used to decimate on a per particle basis).  This is a dict with keys of the particle swapnames (as defined in self.names)
+						'showVel':dict(), #start by showing the velocity vectors?  This is a dict with keys of the particle swapnames (as defined in self.names), and is boolean
+						'velType':dict(), #default type of velocity vectors to plot.  This is a dict with keys of the particle swapnames (as defined in self.names), and must be either 'line', 'arrow', or 'triangle'.  (default is 'line')
+						'color':dict(), #set the default color, This is a dict with keys of the particle swapnames (as defined in self.names), must contain 4-element lists with rgba. (default is random colors with a = 1)
+						'sizeMult':dict(), #set the default point size multiplier. This is a dict with keys of the particle swapnames (as defined in self.names), default for all sizes is 1.
+						'showParts':dict(), #show particles by default. This is a dict with keys of the particle swapnames (as defined in self.names), boolean, default is true.
+						'filterVals':dict(), #initial filtering selection. This is a dict with initial keys of the particle swapnames (as defined in self.names), then for each filter the [min, max] range (e.g., 'filter':{'Gas':{'log10Density':[0,1],'magVelocities':[20, 100]}} )
+						'filterLims':dict(), #initial [min, max] limits to the filters. This is a dict with initial keys of the particle swapnames (as defined in self.names), then for each filter the [min, max] range (e.g., 'filter':{'Gas':{'log10Density':[0,1],'magVelocities':[20, 100]}} )
 
 						########################
 						#this should not be modified
@@ -171,6 +173,7 @@ class FIREreader(object):
 						'UIfullscreen':True, #do you want to show the fullscreen button?
 						'UIsnapshot':True, #do you want to show the snapshot button?
 						'UIreset':True, #do you want to show the reset button?
+						'UIsavePreset':True, #do you want to show the save preset button?
 						'UIcameraControls':True, #do you want to show the camera controls
 						'UIdecimation':True, #do you want to show the decimation slider
 						########################
@@ -478,9 +481,11 @@ class FIREreader(object):
 		#for the options
 		self.filenames['options'] = np.array([self.dataDir + '/' + self.JSONfname+'Options.json',0])
 		
-	def createOptionsJSON(self):
+	def createOptionsJSON(self, file = None):
 		#separated this out incase user wants to only write the options file
-		pd.Series(self.options).to_json(self.filenames['options'][0], orient='index') 
+		if (file == None):
+			file = self.filenames['options'][0]
+		pd.Series(self.options).to_json(file, orient='index') 
  
 	
 	def defineFilterKeys(self):

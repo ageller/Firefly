@@ -1,7 +1,63 @@
 //reset to the initial Options file
 function resetToOptions()
 {
-	console.log("resetting");
+	console.log("Resetting to Default");
+	params.parts.options = params.parts.options0;
+
+	params.reset = true;
+	//reset all the parts specific values to the initial ones
+	initPVals();
+
+	//redo init, but only the camera bits (maybe could streamline this and init by using the functions below?)
+	init();
+
+	//destroy the particle portion of the UI and recreate it (simplest option, but not really destroying all elements...)
+	d3.select('#particleUI').html("");
+	createUI();
+
+	drawScene();
+	params.reset = false;
+
+}
+
+function loadPreset()
+{
+	var file = null
+	var getFile = document.getElementById("presetFile");
+	getFile.onchange = function(e){
+		file = this.files[0];
+		if (file != null){
+			readPreset(file);
+		}
+	};
+	getFile.click();
+
+}
+function readPreset(file)
+{
+	//get the new options JSON
+	var preset = {};
+	preset.loaded = false;
+
+    var reader = new FileReader();
+    reader.readAsText(file, 'UTF-8');
+    reader.onload = function(){
+    	console.log("loaded file", file.name);
+    	preset = JSON.parse(this.result);
+		if (preset.loaded){
+			resetToPreset(preset);
+		}
+    }
+
+
+	
+
+}
+function resetToPreset(preset)
+{
+	console.log("Resetting to Preset");
+	params.parts.options = preset;
+
 	params.reset = true;
 	//reset all the parts specific values to the initial ones
 	initPVals();
@@ -135,7 +191,7 @@ function checkVelBox(box)
 
 }
 
-//functions to check sizes of particles
+//functions to check color of particles
 function checkColor(event, color)
 {
 	rgb = color.toRgb();
@@ -154,10 +210,11 @@ function setFSliderHandle(i, value, parent, reset=false) {
 	var sl = parent.id.length;
 	var p = parent.id.slice(0, fpos - sl);
 	var fk = parent.id.slice(fpos + 4, epos - sl);
-	params.filterLims[p][fk][i] = value;
+	params.filterVals[p][fk][i] = parseFloat(value);
 
 	//reset the filter limits if there is a text entry
 	if (reset){
+		params.filterLims[p][fk][i] = params.filterVals[p][fk][i];
 		var fmin = parseFloat(params.filterLims[p][fk][0]);
 		var fmax = parseFloat(params.filterLims[p][fk][1]);
 		var max = parseFloat(parent.noUiSlider.options.range.max[0]);
@@ -286,7 +343,7 @@ function createFilterSliders(){
 						var pp = this.target.id.slice(0, fpos - sl);
 						var ffk = this.target.id.slice(fpos + 4, epos - sl);
 						params.SliderFinputs[pp][ffk][handle].value = values[handle];
-						params.filterLims[pp][ffk][handle] = values[handle];
+						params.filterVals[pp][ffk][handle] = parseFloat(values[handle]);
 						params.updateFilter[pp] = true;
 						mouseDown = true;
 					});
@@ -734,7 +791,8 @@ function setSSSliderHandle(i, value, parent) {
 
 	parent.noUiSlider.set(value);
 	params.effect.setEyeSeparation(value);
-	
+	params.stereoSep = value;
+
 	mouseDown = false; 
 
 }
@@ -799,6 +857,7 @@ function createSSslider(){
 
 			var value = Math.min(Math.max(0., parseFloat(values[handle])),params.stereoSepMax);
 			params.effect.setEyeSeparation(value);
+			params.stereoSep = value;
 			mouseDown = true;
 		});
 
@@ -815,10 +874,10 @@ function updateUICenterText()
 		document.getElementById("CenterYText").value = params.controls.target.y;// + params.center.y;
 		document.getElementById("CenterZText").value = params.controls.target.z;// + params.center.z;
 	} else {
-		xx = params.camera.getWorldDirection()
-		document.getElementById("CenterXText").value = params.camera.position.x + xx.x;
-		document.getElementById("CenterYText").value = params.camera.position.y + xx.y;
-		document.getElementById("CenterZText").value = params.camera.position.z + xx.z;		
+		xx = params.camera.getWorldDirection();
+		document.getElementById("CenterXText").value = xx.x + params.camera.position.x;
+		document.getElementById("CenterYText").value = xx.y + params.camera.position.y;
+		document.getElementById("CenterZText").value = xx.z + params.camera.position.z;		
 	}
 }
 function updateUICameraText()
@@ -1054,8 +1113,12 @@ function createUI(){
 
 	console.log(params.partsKeys)
 
+	d3.select('body').append('input').attr('type','file').attr('id','presetFile').style('display','None');
+
+
 	var UI = d3.select('#particleUI')
 	var UIparts = UI.selectAll('div');
+
 
 	//fullscreen button
 	UI.append('div').attr('id','fullScreenDiv')
@@ -1098,15 +1161,35 @@ function createUI(){
 		.style('width','50px')
 		.style('margin-top','5px');
 
+	//save preset button
+	UI.append('div').attr('id','savePresetDiv')
+		.append('button')
+		.attr('id','savePresetButton')
+		.attr('class','button')
+		.attr('onclick','savePreset();')
+		.append('span')
+			.text('Save Preset');
 
-	//reset button
+	//reset to default button
 	UI.append('div').attr('id','resetDiv')
 		.append('button')
 		.attr('id','resetButton')
 		.attr('class','button')
+		.style('width','142px')
 		.attr('onclick','resetToOptions();')
 		.append('span')
-			.text('Reset');
+			.text('Reset to Default');
+	//reset to preset button
+	d3.select('#resetDiv')
+		.append('button')
+		.attr('id','resetPButton')
+		.attr('class','button')
+		.style('width','143px')
+		.style('left','147px')
+		.style('margin-left','0px')
+		.attr('onclick','loadPreset();')
+		.append('span')
+			.text('Reset to Preset');
 
 
 	//camera
@@ -1567,7 +1650,7 @@ function createUI(){
 			},
 		});
 
-		if (params.parts.options.UIcolorPicker[d] != 1){
+		if (!params.parts.options.UIcolorPicker[d]){
 			$("#"+d+"ColorPicker").spectrum({
 				color: "rgba("+(params.Pcolors[d][0]*255)+","+(params.Pcolors[d][1]*255)+","+(params.Pcolors[d][2]*255)+","+params.Pcolors[d][3]+")",
 				disabled: true,
@@ -1613,6 +1696,11 @@ function applyUIoptions(){
 	if (params.parts.options.hasOwnProperty('UIreset')){
 		if (!params.parts.options.UIreset){
 			d3.select('#resetDiv').style('display','none');
+		}
+	}
+	if (params.parts.options.hasOwnProperty('UIsavePreset')){
+		if (!params.parts.options.UIsavePreset){
+			d3.select('#savePresetDiv').style('display','none');
 		}
 	}
 	if (params.parts.options.hasOwnProperty('UIcameraControls')){
@@ -1701,6 +1789,22 @@ function showSplash(){
 }
 
 
+function saveFile(strData, filename) {
+	var link = document.createElement('a');
+	if (typeof link.download === 'string') {
+		document.body.appendChild(link); //Firefox requires the link to be in the body
+		link.download = filename;
+		link.href = strData;
+		link.click();
+		document.body.removeChild(link); //remove the link when done
+	} else {
+		console.log("can't save file");
+		return;
+		//location.replace(uri);
+	}
+
+}
+
 function renderImage() {  
 //https://stackoverflow.com/questions/26193702/three-js-how-can-i-make-a-2d-snapshot-of-a-scene-as-a-jpg-image   
 //this sometimes breaks in Chrome when rendering takes too long
@@ -1712,21 +1816,7 @@ function renderImage() {
 	var screenHeight = window.innerHeight;
 	var aspect = screenWidth / screenHeight;
 
-	var saveFile = function (strData, filename) {
-		var link = document.createElement('a');
-		if (typeof link.download === 'string') {
-			document.body.appendChild(link); //Firefox requires the link to be in the body
-			link.download = filename;
-			link.href = strData;
-			link.click();
-			document.body.removeChild(link); //remove the link when done
-		} else {
-			console.log("can't save image");
-			return;
-			//location.replace(uri);
-		}
 
-	}
 
 
 	try {
@@ -1754,10 +1844,84 @@ function renderImage() {
 	}
 
 
-
-
 }
 
+function savePreset()
+{
+	var preset = {};
+	if (params.useTrackball){
+		preset.center = [params.controls.target.x, params.controls.target.y, params.controls.target.z];
+	} else {
+		xx = params.camera.getWorldDirection();
+		preset.center = [xx.x + params.camera.position.x, xx.y + params.camera.position.y, xx.z + params.camera.position.z];
+	}
+	preset.camera = [params.camera.position.x, params.camera.position.y, params.camera.position.z];
+	preset.startFly = !params.useTrackball;
+	if (params.parts.options.hasOwnProperty('cameraRotation')){
+		if (params.parts.options.cameraRotation != null){
+			preset.cameraRotation = [params.camera.rotation.x, params.camera.rotation.y, params.camera.rotation.z];
+		}
+	}
+	preset.friction = params.friction;
+	preset.stereo = params.useStereo;
+	preset.stereoSep = params.stereoSep;
+	preset.decimate = params.decimate;
+	preset.maxVrange = params.maxVrange;
+
+	//for the UI
+	preset.UI = params.parts.options.UI;
+	preset.UIfullscreen = params.parts.options.UIfullscreen;
+	preset.UIsnapshot = params.parts.options.UIsnapshot;
+	preset.UIreset = params.parts.options.UIreset;
+	preset.UIsavePreset = params.parts.options.UIsavePreset;
+	preset.UIcameraControls = params.parts.options.UIcameraControls;
+	preset.UIdecimation = params.parts.options.UIdecimation;
+
+
+	//particle specific options
+	preset.showParts = {};
+	preset.sizeMult = {};
+	preset.color = {};
+	preset.plotNmax = {};
+	preset.showVel = {};
+	preset.velType = {};
+	preset.filterLims = {};
+	preset.filterVals = {};
+	preset.UIparticle = {};
+	preset.UIdropdown = {};
+	preset.UIcolorPicker = {};
+	for (var i=0; i<params.partsKeys.length; i++){
+		var p = params.partsKeys[i];
+
+		preset.showParts[p] = params.showParts[p];
+		preset.sizeMult[p] = params.PsizeMult[p];
+		preset.color[p] = params.Pcolors[p];
+		preset.plotNmax[p] = params.plotNmax[p];
+		preset.showVel[p] = params.showVel[p];
+		preset.velType[p] = params.velType[p];
+
+		preset.UIparticle[p] = params.parts.options.UIparticle[p];
+		preset.UIdropdown[p] = params.parts.options.UIdropdown[p];
+		preset.UIcolorPicker[p] = params.parts.options.UIcolorPicker[p];
+		preset.filterLims[p] = {}
+		preset.filterVals[p] = {}
+		for (k=0; k<params.fkeys[p].length; k++){
+			var fkey = params.fkeys[p][k]
+			preset.filterLims[p][fkey] = params.filterLims[p][fkey];
+			preset.filterVals[p][fkey] = params.filterVals[p][fkey];
+		}
+	}
+
+	preset.loaded = true;
+
+	//https://stackoverflow.com/questions/33780271/export-a-json-object-to-a-text-file
+	var str = JSON.stringify(preset)
+	//Save the file contents as a DataURI
+ 	var dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(str);
+
+	saveFile(dataUri,'preset.json');
+
+}
 
 
 
