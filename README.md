@@ -31,7 +31,7 @@ This will open the data set included within this repository.  If you want to use
 
 ## Additional Docs
 
-Additional documentation is available on the [wiki page](https://github.com/ageller/Firefly/wiki/Documentation) associated with this repository.
+Additional documentation is available on the [wiki page](https://github.com/ageller/Firefly/wiki) associated with this repository.
 
 This tool builds off of a [previous version developed by Alessandro Febretti](https://github.com/nuitrcs/firefly). 
 
