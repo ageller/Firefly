@@ -196,8 +196,11 @@ function init() {
 		params.effect = new THREE.StereoEffect( params.renderer );
 		params.effect.setAspect(1.);
 		params.effect.setEyeSeparation(params.stereoSep);
+
+
 	}
 
+	params.useTrackball = true;
 
 	//console.log(params.parts.options);
 	setCenter(params.parts[params.partsKeys[0]].Coordinates);

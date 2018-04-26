@@ -79,11 +79,11 @@ function drawScene(pdraw = params.partsKeys)
 		for (var j=0; j<params.plotNmax[p]; j++){
 			//geo.vertices.push(new THREE.Vector3(params.parts[p].Coordinates[j][0], params.parts[p].Coordinates[j][1], params.parts[p].Coordinates[j][2] ))
 			
-			positions[index] = params.parts[p].Coordinates[j][0] - params.center.x;
+			positions[index] = params.parts[p].Coordinates[j][0];
 			index++;
-			positions[index] = params.parts[p].Coordinates[j][1] - params.center.y;
+			positions[index] = params.parts[p].Coordinates[j][1];
 			index++;
-			positions[index] = params.parts[p].Coordinates[j][2] - params.center.z;
+			positions[index] = params.parts[p].Coordinates[j][2];
 			index++;
 
 			if (params.parts[p].Velocities != null){
