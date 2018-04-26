@@ -207,7 +207,7 @@ function init() {
 
 	//console.log(params.parts.options);
 	setCenter(params.parts[params.partsKeys[0]].Coordinates);
-	params.camera.position.set(0,0,-10);
+	params.camera.position.set(params.center.x, params.center.y, params.center.z - params.boxSize/2.);
 	params.camera.lookAt(params.scene.position);  
 
 	//apply presets from the options file
@@ -225,8 +225,12 @@ function applyOptions(){
 		if (params.parts.options.center != null){
 			params.center = new THREE.Vector3(params.parts.options.center[0], params.parts.options.center[1], params.parts.options.center[2]);
 			setBoxSize(params.parts[params.partsKeys[0]].Coordinates);
+		} else {
+			params.parts.options.center = [params.center.x, params.center.y, params.center.z];
 		}
-	} 
+	} else {
+		params.parts.options.center = [params.center.x, params.center.y, params.center.z];
+	}
 
 	//change location of camera
 	if (params.parts.options.hasOwnProperty('camera')){
