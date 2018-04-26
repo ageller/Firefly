@@ -291,15 +291,15 @@
 
             this.domElement.removeEventListener( 'contextmenu', function ( event ) { event.preventDefault(); }, false );
 
-            //this.domElement.removeEventListener( 'mousemove', bind( this, this.mousemove ), false );
-            //this.domElement.removeEventListener( 'mousedown', bind( this, this.mousedown ), false );
-            //this.domElement.removeEventListener( 'mouseup',   bind( this, this.mouseup ), false );
-            //this.domElement.removeEventListener( 'mouseout',   bind( this, this.mouseout ), false );
+            // this.domElement.removeEventListener( 'mousemove', bind( this, this.mousemove ), false );
+            this.domElement.removeEventListener( 'mousedown', bind( this, this.mousedown ), false );
+            this.domElement.removeEventListener( 'mouseup',   bind( this, this.mouseup ), false );
+            this.domElement.removeEventListener( 'mouseout',   bind( this, this.mouseout ), false );
 
             this.domElement.removeEventListener( 'keydown', bind( this, this.keydown ), false );
             this.domElement.removeEventListener( 'keyup',   bind( this, this.keyup ), false );
 
-            document.removeEventListener( 'mousemove', bind( this, this.mousemove ), false );
+            // document.removeEventListener( 'mousemove', bind( this, this.mousemove ), false );
             document.removeEventListener( 'mouseup', bind( this, this.mouseup ), false );
 
             window.removeEventListener( 'keydown', bind( this, this.keydown ), false );
@@ -310,10 +310,10 @@
 
         this.domElement.addEventListener( 'contextmenu', function ( event ) { event.preventDefault(); }, false );
 
-        //this.domElement.addEventListener( 'mousemove', bind( this, this.mousemove ), false );
-        //this.domElement.addEventListener( 'mousedown', bind( this, this.mousedown ), false );
-        //this.domElement.addEventListener( 'mouseup',   bind( this, this.mouseup ), false );
-        //this.domElement.addEventListener( 'mouseout',   bind( this, this.mouseout ), false );
+        // this.domElement.addEventListener( 'mousemove', bind( this, this.mousemove ), false );
+        this.domElement.addEventListener( 'mousedown', bind( this, this.mousedown ), false );
+        this.domElement.addEventListener( 'mouseup',   bind( this, this.mouseup ), false );
+        this.domElement.addEventListener( 'mouseout',   bind( this, this.mouseout ), false );
 
         this.domElement.addEventListener( 'keydown', bind( this, this.keydown ), false );
         this.domElement.addEventListener( 'keyup',   bind( this, this.keyup ), false );

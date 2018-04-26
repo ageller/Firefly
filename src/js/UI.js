@@ -703,18 +703,7 @@ function createCFslider(){
 	d3.select("#CFSlider").select('.noUi-base').style('width',w-10+"px");
 }
 
-function updateUICenterText()
-{
-	if (params.useTrackball){
-		document.getElementById("CenterXText").value = params.controls.target.x + params.center.x;
-		document.getElementById("CenterYText").value = params.controls.target.y + params.center.y;
-		document.getElementById("CenterZText").value = params.controls.target.z + params.center.z;
-	} else {
-		document.getElementById("CenterXText").value = 0;
-		document.getElementById("CenterYText").value = 0;
-		document.getElementById("CenterZText").value = 0;		
-	}
-}
+
 
 /////////////////////////////////////////////
 // Stereo Separation slider
@@ -819,12 +808,25 @@ function createSSslider(){
 	d3.select("#SSSlider").select('.noUi-base').style('width',w-10+"px");
 }
 
+function updateUICenterText()
+{
+	if (params.useTrackball){
+		document.getElementById("CenterXText").value = params.controls.target.x;// + params.center.x;
+		document.getElementById("CenterYText").value = params.controls.target.y;// + params.center.y;
+		document.getElementById("CenterZText").value = params.controls.target.z;// + params.center.z;
+	} else {
+		xx = params.camera.getWorldDirection()
+		document.getElementById("CenterXText").value = params.camera.position.x + xx.x;
+		document.getElementById("CenterYText").value = params.camera.position.y + xx.y;
+		document.getElementById("CenterZText").value = params.camera.position.z + xx.z;		
+	}
+}
 function updateUICameraText()
 {
 
-	document.getElementById("CameraXText").value = params.camera.position.x + params.center.x;
-	document.getElementById("CameraYText").value = params.camera.position.y + params.center.y;
-	document.getElementById("CameraZText").value = params.camera.position.z + params.center.z;
+	document.getElementById("CameraXText").value = params.camera.position.x;// + params.center.x;
+	document.getElementById("CameraYText").value = params.camera.position.y;// + params.center.y;
+	document.getElementById("CameraZText").value = params.camera.position.z;// + params.center.z;
 }
 
 function updateUIRotText()
