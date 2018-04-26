@@ -66,7 +66,7 @@ function update(time){
 						for (k=0; k<params.fkeys[p].length; k++){
 							if (params.parts[p][params.fkeys[p][k]] != null) {
 								val = params.parts[p][params.fkeys[p][k]][ii]; 
-								if ( val < params.filterLims[p][params.fkeys[p][k]][0] || val > params.filterLims[p][params.fkeys[p][k]][1] ){
+								if ( val < params.filterVals[p][params.fkeys[p][k]][0] || val > params.filterVals[p][params.fkeys[p][k]][1] ){
 									alphas[ii] = 0.;
 								} 
 							}
