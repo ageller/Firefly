@@ -23,7 +23,7 @@ function defineParams(){
 		this.boxSize = 0.;
 
 		//plotting fields
-		this.plotParts = {};
+		this.showParts = {};
 
 		//particle size multiplicative factor
 		this.PsizeMult = {};
@@ -44,6 +44,7 @@ function defineParams(){
 		this.SliderFinputs = {};
 		this.updateFilter = {};
 		this.filterLims = {};
+		this.filterVals = {};
 
 		//for frustum      
 		this.zmax = 5.e10;
@@ -298,11 +299,11 @@ function applyOptions(){
 		var p = params.partsKeys[i];
 
 		//on/off
-		if (params.parts.options.hasOwnProperty("plotParts")){
-			if (params.parts.options.plotParts != null){
-				if (params.parts.options.plotParts.hasOwnProperty(p)){
-					if (params.parts.options.plotParts[p] != null){
-						params.plotParts[p] = params.parts.options.plotParts[p];
+		if (params.parts.options.hasOwnProperty("showParts")){
+			if (params.parts.options.showParts != null){
+				if (params.parts.options.showParts.hasOwnProperty(p)){
+					if (params.parts.options.showParts[p] != null){
+						params.showParts[p] = params.parts.options.showParts[p];
 					}
 				}
 			}
@@ -370,18 +371,18 @@ function applyOptions(){
 			}
 		}
 
-		//filters
-		if (params.parts.options.hasOwnProperty("filter")){
-			if (params.parts.options.filter != null){
-				if (params.parts.options.filter.hasOwnProperty(p)){
-					if (params.parts.options.filter[p] != null){
+		//filter limits
+		if (params.parts.options.hasOwnProperty("filterLims")){
+			if (params.parts.options.filterLims != null){
+				if (params.parts.options.filterLims.hasOwnProperty(p)){
+					if (params.parts.options.filterLims[p] != null){
 						params.updateFilter[p] = true
 
 						for (k=0; k<params.fkeys[p].length; k++){
 							var fkey = params.fkeys[p][k]
-							if (params.parts.options.filter[p].hasOwnProperty(fkey)){
-								if (params.parts.options.filter[p][fkey] != null){
-									params.filterLims[p][fkey] = params.parts.options.filter[p][fkey]
+							if (params.parts.options.filterLims[p].hasOwnProperty(fkey)){
+								if (params.parts.options.filterLims[p][fkey] != null){
+									params.filterLims[p][fkey] = params.parts.options.filterLims[p][fkey]
 								}
 							}
 						}
@@ -391,7 +392,26 @@ function applyOptions(){
 			}
 		}
 
+		//filter values
+		if (params.parts.options.hasOwnProperty("filterVals")){
+			if (params.parts.options.filterVals != null){
+				if (params.parts.options.filterVals.hasOwnProperty(p)){
+					if (params.parts.options.filterVals[p] != null){
+						params.updateFilter[p] = true
 
+						for (k=0; k<params.fkeys[p].length; k++){
+							var fkey = params.fkeys[p][k]
+							if (params.parts.options.filterVals[p].hasOwnProperty(fkey)){
+								if (params.parts.options.filterVals[p][fkey] != null){
+									params.filterVals[p][fkey] = params.parts.options.filterVals[p][fkey]
+								}
+							}
+						}
+
+					}
+				}
+			}
+		}
 	}
 
 
@@ -454,10 +474,12 @@ function initPVals(){
 		}
 		params.updateFilter[p] = false;
 		params.filterLims[p] = {};
+		params.filterVals[p] = {};
 		params.fkeys[p] = [];
 		params.plotNmax[p] = params.parts[p].Coordinates.length;
 		
 		if (params.parts[p].Velocities != null){
+			params.showVel[p] = false;
 			if (!params.reset){
 				calcVelVals(p);
 				params.parts[p].filterKeys.push("magVelocities");
