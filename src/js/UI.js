@@ -883,14 +883,14 @@ function checkText(input, event)
 }
 
 //function to check which types to plot
-function checkPlotParts(checkbox)
+function checkshowParts(checkbox)
 {
 	var type = checkbox.id.slice(-5); 
 	if (type == 'Check'){	
 		var pID = checkbox.id.slice(0,-5); // remove  "Check" from id
-		params.plotParts[pID] = false;
+		params.showParts[pID] = false;
 		if (checkbox.checked){
-			params.plotParts[pID] = true;
+			params.showParts[pID] = true;
 		}
 	} 
 }
@@ -1381,8 +1381,12 @@ function createUI(){
 			.attr('type','checkbox')
 			.attr('autocomplete','off')
 			.attr('checked','true')
-			.attr('onchange','checkPlotParts(this)');
-
+			.attr('onchange','checkshowParts(this)');
+		if (!params.showParts[d]){
+			elm = document.getElementById(d+'Check');
+			elm.checked = false;
+			elm.value = false;
+		} 
 		onoff.append('span')
 			.attr('class','slideroo');
 
@@ -1449,7 +1453,11 @@ function createUI(){
 					.attr('type','checkbox')
 					.attr('autocomplete','off')
 					.attr('onchange','checkVelBox(this)');
-
+				if (params.showVel[d]){
+					elm = document.getElementById(d+'velCheckBox');
+					elm.checked = true;
+					elm.value = true;
+				} 
 				var selectVType = dVcontent.append('select')
 					.attr('class','selectVelType')
 					.attr('id',d+'_SelectVelType')
@@ -1459,6 +1467,8 @@ function createUI(){
 					.data(Object.keys(params.velopts)).enter()
 					.append('option')
 					.text(function (d) { return d; });
+				elm = document.getElementById(d+'_SelectVelType');
+				elm.value = params.velType[d];
 
 				dheight += 30;
 			}
@@ -1619,6 +1629,33 @@ function applyUIoptions(){
 			if (params.parts.options.UIparticle.hasOwnProperty(d)){
 				if (!params.parts.options.UIparticle[d]){
 					d3.selectAll('div.'+d+'Div').style('display','none');
+				}
+			}
+		}
+	}
+
+
+	//particle specific options
+	for (var i=0; i<params.partsKeys.length; i++){
+		var p = params.partsKeys[i];
+
+		//filter values
+		if (params.parts.options.hasOwnProperty("filterVals")){
+			if (params.parts.options.filterVals != null){
+				if (params.parts.options.filterVals.hasOwnProperty(p)){
+					if (params.parts.options.filterVals[p] != null){
+						params.updateFilter[p] = true
+
+						for (k=0; k<params.fkeys[p].length; k++){
+							var fkey = params.fkeys[p][k]
+							if (params.parts.options.filterVals[p].hasOwnProperty(fkey)){
+								if (params.parts.options.filterVals[p][fkey] != null){
+									params.SliderF[p][fkey].noUiSlider.set(params.parts.options.filterVals[p][fkey]);
+								}
+							}
+						}
+
+					}
 				}
 			}
 		}

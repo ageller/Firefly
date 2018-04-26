@@ -84,7 +84,7 @@ class FIREreader(object):
 						'velType':None, #default type of velocity vectors to plot.  This is a dict with keys of the particle swapnames (as defined in self.names), and must be either 'line', 'arrow', or 'triangle'.  (default is 'line')
 						'color':None, #set the default color, This is a dict with keys of the particle swapnames (as defined in self.names), must contain 4-element lists with rgba. (default is random colors with a = 1)
 						'sizeMult':None, #set the default point size multiplier. This is a dict with keys of the particle swapnames (as defined in self.names), default for all sizes is 1.
-						'plotParts':None, #show particles by default. This is a dict with keys of the particle swapnames (as defined in self.names), boolean, default is true.
+						'showParts':None, #show particles by default. This is a dict with keys of the particle swapnames (as defined in self.names), boolean, default is true.
 						'filter':None, #initial filtering selection. This is a dict with initial keys of the particle swapnames (as defined in self.names), then for each filter the [min, max] range (e.g., 'filter':{'Gas':{'log10Density':[0,1],'magVelocities':[20, 100]}} )
 
 						########################
@@ -165,9 +165,9 @@ class FIREreader(object):
 						########################
 						#these settings are to turn on/off different bits of the user interface
 						'UI':True, #do you want to show the UI?
-						'UIparticle':None, #do you want to show the particles in the user interface (default = True). This is a dict with keys of the particle swapnames (as defined in self.names), and is boolean.
-						'UIdropdown':None, #do you want to enable the dropdown menus for particles in the user interface (default = True).This is a dict with keys of the particle swapnames (as defined in self.names), and is boolean.
-						'UIcolorPicker':None, #do you want to allow the user to change the color (default = True).This is a dict with keys of the particle swapnames (as defined in self.names), and is boolean.
+						'UIparticle':dict(), #do you want to show the particles in the user interface (default = True). This is a dict with keys of the particle swapnames (as defined in self.names), and is boolean.
+						'UIdropdown':dict(), #do you want to enable the dropdown menus for particles in the user interface (default = True).This is a dict with keys of the particle swapnames (as defined in self.names), and is boolean.
+						'UIcolorPicker':dict(), #do you want to allow the user to change the color (default = True).This is a dict with keys of the particle swapnames (as defined in self.names), and is boolean.
 						'UIfullscreen':True, #do you want to show the fullscreen button?
 						'UIsnapshot':True, #do you want to show the snapshot button?
 						'UIreset':True, #do you want to show the reset button?
@@ -184,13 +184,14 @@ class FIREreader(object):
 						'stereo':False, #start in stereo mode?
 						'stereoSep':None, #camera (eye) separation in the stereo mode (default is 0.06, should be < 1)
 						'decimate':None, #set the initial decimation (e.g, you could load in all the data, but setting self.decimate to 1 above, but only display some fraction by setting self.options.decimate > 1 here).  This is a single value (not a dict)
-						'plotNmax':None, #maximum initial number of particles to plot (can be used to decimate on a per particle basis).  This is a dict with keys of the particle swapnames (as defined in self.names)
-						'showVel':None, #start by showing the velocity vectors?  This is a dict with keys of the particle swapnames (as defined in self.names), and is boolean
-						'velType':None, #default type of velocity vectors to plot.  This is a dict with keys of the particle swapnames (as defined in self.names), and must be either 'line', 'arrow', or 'triangle'.  (default is 'line')
-						'color':None, #set the default color, This is a dict with keys of the particle swapnames (as defined in self.names), must contain 4-element lists with rgba. (default is random colors with a = 1)
-						'sizeMult':None, #set the default point size multiplier. This is a dict with keys of the particle swapnames (as defined in self.names), default for all sizes is 1.
-						'plotParts':None, #show particles by default. This is a dict with keys of the particle swapnames (as defined in self.names), boolean, default is true.
-						'filter':None, #initial filtering selection. This is a dict with initial keys of the particle swapnames (as defined in self.names), then for each filter the [min, max] range (e.g., 'filter':{'Gas':{'log10Density':[0,1],'magVelocities':[20, 100]}} )
+						'plotNmax':dict(), #maximum initial number of particles to plot (can be used to decimate on a per particle basis).  This is a dict with keys of the particle swapnames (as defined in self.names)
+						'showVel':dict(), #start by showing the velocity vectors?  This is a dict with keys of the particle swapnames (as defined in self.names), and is boolean
+						'velType':dict(), #default type of velocity vectors to plot.  This is a dict with keys of the particle swapnames (as defined in self.names), and must be either 'line', 'arrow', or 'triangle'.  (default is 'line')
+						'color':dict(), #set the default color, This is a dict with keys of the particle swapnames (as defined in self.names), must contain 4-element lists with rgba. (default is random colors with a = 1)
+						'sizeMult':dict(), #set the default point size multiplier. This is a dict with keys of the particle swapnames (as defined in self.names), default for all sizes is 1.
+						'showParts':dict(), #show particles by default. This is a dict with keys of the particle swapnames (as defined in self.names), boolean, default is true.
+						'filterVals':dict(), #initial filtering selection. This is a dict with initial keys of the particle swapnames (as defined in self.names), then for each filter the [min, max] range (e.g., 'filter':{'Gas':{'log10Density':[0,1],'magVelocities':[20, 100]}} )
+						'filterLims':dict(), #initial [min, max] limits to the filters. This is a dict with initial keys of the particle swapnames (as defined in self.names), then for each filter the [min, max] range (e.g., 'filter':{'Gas':{'log10Density':[0,1],'magVelocities':[20, 100]}} )
 
 						########################
 						#this should not be modified
@@ -236,20 +237,12 @@ class FIREreader(object):
 		
 	def defineDefaults(self):
 		self.defined = True
-		self.options['color'] = dict()
-		self.options['sizeMult'] = dict()
-		self.options['plotParts'] = dict()
-		self.options['plotNmax'] = dict()
-		self.options['UIparticle'] = dict()
-		self.options['UIdropdown'] = dict()
-		self.options['UIcolorPicker'] = dict()
 		for p in self.returnParts:
 			#amount to decimate the data (==1 means no decimates, >1 factor by which to reduce the amount of data)
 			self.decimate[p] = 1.
 
 			#keys from the hdf5 file to include in the JSON file for Firefly (must at least include Coordinates)
 			self.returnKeys[p] = ['Coordinates']      
-
 
 			#set the weight of the particles (to define the alpha value). This is a function that will calculate the weights
 			self.weightFunction[p] = None
@@ -277,7 +270,7 @@ class FIREreader(object):
 			self.options['UIcolorPicker'][pp] = True
 			self.options['color'][pp] = [np.random.random(), np.random.random(), np.random.random(), 1.] #set the default color = rgba.  
 			self.options['sizeMult'][pp] = 1. #set the default point size multiplier 
-			self.options['plotParts'][pp] = True
+			self.options['showParts'][pp] = True
 			
 	#used self.names to swap the dictionary keys
 	def swapnames(self, pin):
@@ -493,6 +486,9 @@ class FIREreader(object):
 	def defineFilterKeys(self):
 		for p in self.returnParts:
 			self.filterKeys[p] = []
+			pp = self.swapnames(p) 
+			self.options['filterVals'][pp] = dict()
+			self.options['filterLims'][pp] = dict()
 			j = 0
 
 			if (len(self.addFilter[p]) < len(self.returnKeys[p])):
@@ -509,10 +505,13 @@ class FIREreader(object):
 						self.filterKeys[p][j] = 'log10' + self.filterKeys[p][j]
 					if self.domag[p][i]:
 						self.filterKeys[p][j] = 'mag' + self.filterKeys[p][j]
+					self.options['filterVals'][pp][self.filterKeys[p][j]] = None
+					self.options['filterLims'][pp][self.filterKeys[p][j]] = None
 					j += 1
-		#print "filters = ", self.filterKeys
-		
-
+				#init.js will automatically add this to the filters if Velocities are provided in the data
+				if (k == "Velocities"):
+					self.options['filterVals'][pp]['magVelocities'] = None
+					self.options['filterLims'][pp]['magVelocities'] = None
 
 	def run(self):
 		if (not self.defined):

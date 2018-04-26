@@ -36,18 +36,13 @@ function update(time){
 	cameraX.applyQuaternion(params.camera.quaternion);
 	cameraY.applyQuaternion(params.camera.quaternion);
 
-	if (params.keyboard.down("C")){
-		console.log("xy")	  
-		console.log(cameraX);
-		console.log(cameraY);
-	}
 
 
 	for (var i=0; i<params.partsKeys.length; i++){
 		var p = params.partsKeys[i];
 		params.partsMesh[p].forEach( function( m, j ) {
 			m.material.uniforms.velType.value = params.velopts[params.velType[p]];
-			if (params.plotParts[p]) {
+			if (params.showParts[p]) {
 
 				m.geometry.setDrawRange( 0, params.plotNmax[p]*(1./params.decimate) )
 				m.material.uniforms.uVertexScale.value = params.PsizeMult[p];
