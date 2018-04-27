@@ -556,74 +556,78 @@ function loadData(callback){
 	params.parts = {};
 	params.parts.totalSize = 0.;
 
-	d3.json("data/filenames.json",  function(files) {
-		//console.log(files)
-		params.partsKeys = Object.keys(files);
-		params.partsKeys.forEach( function(p, i) {
-			files[p].forEach( function(f, j) {
-				if (f.constructor == Array){ 
-					params.parts.totalSize += parseFloat(f[1]);
-				} else if (j == 1){
-					params.parts.totalSize += parseFloat(f);
-				}
+	d3.json("data/startup.json",  function(dir) {
+		console.log(dir[0]+"/filenames.json")
+		d3.json(dir[0] + "/filenames.json",  function(files) {
+
+			//console.log(files)
+			params.partsKeys = Object.keys(files);
+			params.partsKeys.forEach( function(p, i) {
+				files[p].forEach( function(f, j) {
+					if (f.constructor == Array){ 
+						params.parts.totalSize += parseFloat(f[1]);
+					} else if (j == 1){
+						params.parts.totalSize += parseFloat(f);
+					}
+				});
 			});
-		});
 
-		params.partsKeys.forEach( function(p, i) {
-			params.parts[p] = {};
+			params.partsKeys.forEach( function(p, i) {
+				params.parts[p] = {};
 
 
-			files[p].forEach( function(f, j) {
-				var readf = null;
-				if (f.constructor == Array){
-					readf = "data/"+f[0];
-				} else if (j == 0){
-					readf = "data/"+f
-				}
-				//console.log(readf)
-				if (readf != null){
-					//console.log("f = ", f)
-					d3.json(readf,  function(foo) {
-						//console.log("keys", Object.keys(foo), f[0])
-						Object.keys(foo).forEach(function(k, jj) {
-							//console.log("k = ", k, jj)
-							if (params.parts[p].hasOwnProperty(k)){
-								params.parts[p][k] = params.parts[p][k].concat(foo[k]);
-								//console.log('appending', k, p, params.parts[p])
+				files[p].forEach( function(f, j) {
+					var readf = null;
+					if (f.constructor == Array){
+						readf = "data/"+f[0];
+					} else if (j == 0){
+						readf = "data/"+f
+					}
+					//console.log(readf)
+					if (readf != null){
+						//console.log("f = ", f)
+						d3.json(readf,  function(foo) {
+							//console.log("keys", Object.keys(foo), f[0])
+							Object.keys(foo).forEach(function(k, jj) {
+								//console.log("k = ", k, jj)
+								if (params.parts[p].hasOwnProperty(k)){
+									params.parts[p][k] = params.parts[p][k].concat(foo[k]);
+									//console.log('appending', k, p, params.parts[p])
 
-							} else {
-								params.parts[p][k] = foo[k];
-								//console.log('creating', k, p, params.parts[p], foo[k])
+								} else {
+									params.parts[p][k] = foo[k];
+									//console.log('creating', k, p, params.parts[p], foo[k])
+								}
+							});
+
+
+							params.loadfrac = countParts()/params.parts.totalSize;
+							//console.log("loading", params.loadfrac)
+							if (10. * params.loadfrac % 1 < 0.1 || params.loadfrac == 1){
+								updateLoadingBar();
 							}
+							//console.log(d3.selectAll('#loadingRect').node().getBoundingClientRect().width)
+							//console.log("counting", countParts(), params.parts.totalSize, params.loadfrac)
+							if (countParts() ==  params.parts.totalSize && params.parts.options.loaded){
+								//console.log("here")
+
+								var index = params.partsKeys.indexOf('options');
+								if (index > -1) {
+									params.partsKeys.splice(index, 1);
+									params.parts.options0 = JSON.parse(JSON.stringify(params.parts.options));
+								}
+
+
+
+								callback(); 
+							}
+
 						});
-
-
-						params.loadfrac = countParts()/params.parts.totalSize;
-						//console.log("loading", params.loadfrac)
-						if (10. * params.loadfrac % 1 < 0.1 || params.loadfrac == 1){
-							updateLoadingBar();
-						}
-						//console.log(d3.selectAll('#loadingRect').node().getBoundingClientRect().width)
-						//console.log("counting", countParts(), params.parts.totalSize, params.loadfrac)
-						if (countParts() ==  params.parts.totalSize && params.parts.options.loaded){
-							//console.log("here")
-
-							var index = params.partsKeys.indexOf('options');
-							if (index > -1) {
-								params.partsKeys.splice(index, 1);
-								params.parts.options0 = JSON.parse(JSON.stringify(params.parts.options));
-							}
-
-
-
-							callback(); 
-						}
-
-					});
-				}
+					}
+				});
 			});
-		});
 
+		});
  
 	});
 
