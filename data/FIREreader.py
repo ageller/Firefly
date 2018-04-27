@@ -66,7 +66,7 @@ class FIREreader(object):
 						'UIfullscreen':True, #do you want to show the fullscreen button?
 						'UIsnapshot':True, #do you want to show the snapshot button?
 						'UIreset':True, #do you want to show the reset button?
-						'UIsavepreset':True, #do you want to show the save preset button?
+						'UIsavePreset':True, #do you want to show the save preset button?
 						'UIcameraControls':True, #do you want to show the camera controls
 						'UIdecimation':True, #do you want to show the decimation slider
 						########################
@@ -95,7 +95,7 @@ class FIREreader(object):
 
 					  } 
 		
-		#the name of the JSON file
+		#the prefix of the the JSON files
 		self.JSONfname = 'FIREdata'
 		
 		#remove the data files in the dataDir directory before adding more?
@@ -106,6 +106,9 @@ class FIREreader(object):
 
 		#in case you want to print the available keys to the screen
 		self.showkeys = False
+		
+		#directory to place all the data files in (assumed to be within the current directory)
+		self.dataDir = None
 
 	"""
 
@@ -202,7 +205,7 @@ class FIREreader(object):
 
 					  } 
 		
-		#the name of the JSON file
+		#the prefix of the the JSON files
 		self.JSONfname = 'FIREdata'
 		
 		#remove the data files in the dataDir directory before adding more?
@@ -214,6 +217,10 @@ class FIREreader(object):
 		#in case you want to print the available keys to the screen
 		self.showkeys = False
 		
+		#directory to place all the data files in (assumed to be within the current directory)
+		self.dataDir = None
+
+
 ################################################## 
 #don't modify these
 
@@ -229,8 +236,7 @@ class FIREreader(object):
 		#will store all the file names that are produced (will be defined below in defineFilenames)
 		self.filenames = dict()
 
-		#directory to place all the data files in
-		self.dataDir = None
+
 
 
 
@@ -458,7 +464,9 @@ class FIREreader(object):
 		print(self.filenames['options'][0])
 		self.createOptionsJSON()
 		#the list of files
-		pd.Series(self.filenames).to_json('filenames.json', orient='index') 
+		pd.Series(self.filenames).to_json(self.dataDir + '/' + 'filenames.json', orient='index') 
+		#the startup file
+		pd.Series({"0":"data/" + self.dataDir}).to_json('startup.json', orient='index') 
 
 		
 	def defineFilenames(self):

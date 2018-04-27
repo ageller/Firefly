@@ -20,18 +20,12 @@ function resetToOptions()
 
 }
 
+//for loading, reading and resetting to a preset file
 function loadPreset()
 {
 	var file = null
 	var getFile = document.getElementById("presetFile");
-	getFile.onchange = function(e){
-		file = this.files[0];
-		if (file != null){
-			readPreset(file);
-		}
-	};
 	getFile.click();
-
 }
 function readPreset(file)
 {
@@ -42,20 +36,16 @@ function readPreset(file)
     var reader = new FileReader();
     reader.readAsText(file, 'UTF-8');
     reader.onload = function(){
-    	console.log("loaded file", file.name);
     	preset = JSON.parse(this.result);
 		if (preset.loaded){
 			resetToPreset(preset);
 		}
     }
-
-
-	
-
 }
 function resetToPreset(preset)
 {
 	console.log("Resetting to Preset");
+	document.getElementById("presetFile").value = "";
 	params.parts.options = preset;
 
 	params.reset = true;
@@ -1113,7 +1103,15 @@ function createUI(){
 
 	console.log(params.partsKeys)
 
-	d3.select('body').append('input').attr('type','file').attr('id','presetFile').style('display','None');
+	d3.select('body').append('input')
+		.attr('type','file')
+		.attr('id','presetFile')
+		.on('change', function(e){
+			file = this.files[0];
+			if (file != null){
+				readPreset(file);
+			}})
+		.style('display','None');
 
 
 	var UI = d3.select('#particleUI')

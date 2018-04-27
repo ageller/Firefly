@@ -10,9 +10,10 @@ Thumbs.db
 
 # json files #
 ###################
-*.json
+#*.json
 
-# ipython checkpoints #
+# python #
 ###################
 *ipynb_checkpoints*
 __pycache__
+*.pyc
