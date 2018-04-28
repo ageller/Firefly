@@ -67,6 +67,7 @@ class FIREreader(object):
 						'UIsnapshot':True, #do you want to show the snapshot button?
 						'UIreset':True, #do you want to show the reset button?
 						'UIsavePreset':True, #do you want to show the save preset button?
+						'UIloadNewData':True, #do you want to show the load new data button?
 						'UIcameraControls':True, #do you want to show the camera controls
 						'UIdecimation':True, #do you want to show the decimation slider
 						########################
