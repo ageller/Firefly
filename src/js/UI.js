@@ -20,12 +20,28 @@ function resetToOptions()
 
 }
 
+//to load in a new data set
+function loadNewData(){
+
+	d3.select('#particleUI').html("");
+	d3.select('.UIcontainer').html("");
+	d3.select("#splashdivLoader").selectAll('svg').remove();
+	d3.select("#splashdiv5").text("Loading...");
+	showLoadingButton()
+	d3.select("#loader").style("display","visible");
+	params.loadfrac = 0.;
+	showSplash();
+
+	params.loaded = false;
+	params.pauseAnimation = true;
+
+	document.getElementById("inputFilenames").click();
+}
+
 //for loading, reading and resetting to a preset file
 function loadPreset()
 {
-	var file = null
-	var getFile = document.getElementById("presetFile");
-	getFile.click();
+	document.getElementById("presetFile").click();
 }
 function readPreset(file)
 {
@@ -33,14 +49,14 @@ function readPreset(file)
 	var preset = {};
 	preset.loaded = false;
 
-    var reader = new FileReader();
-    reader.readAsText(file, 'UTF-8');
-    reader.onload = function(){
-    	preset = JSON.parse(this.result);
+	var reader = new FileReader();
+	reader.readAsText(file, 'UTF-8');
+	reader.onload = function(){
+		preset = JSON.parse(this.result);
 		if (preset.loaded){
 			resetToPreset(preset);
 		}
-    }
+	}
 }
 function resetToPreset(preset)
 {
@@ -1189,6 +1205,14 @@ function createUI(){
 		.append('span')
 			.text('Reset to Preset');
 
+	//load new data button
+	UI.append('div').attr('id','loadNewDataDiv')
+		.append('button')
+		.attr('id','loadNewDataButton')
+		.attr('class','button')
+		.attr('onclick','loadNewData();')
+		.append('span')
+			.text('Load New Data');
 
 	//camera
 	params.gtoggle.Camera = true;
@@ -1701,6 +1725,11 @@ function applyUIoptions(){
 			d3.select('#savePresetDiv').style('display','none');
 		}
 	}
+	if (params.parts.options.hasOwnProperty('UIloadNewData')){
+		if (!params.parts.options.UIloadNewData){
+			d3.select('#loadNewDataDiv').style('display','none');
+		}
+	}
 	if (params.parts.options.hasOwnProperty('UIcameraControls')){
 		if (!params.parts.options.UIcameraControls){
 			d3.select('#cameraControlsDiv').style('display','none');
@@ -1872,6 +1901,7 @@ function savePreset()
 	preset.UIsnapshot = params.parts.options.UIsnapshot;
 	preset.UIreset = params.parts.options.UIreset;
 	preset.UIsavePreset = params.parts.options.UIsavePreset;
+	preset.UIloadNewData = params.parts.options.UIloadNewData;
 	preset.UIcameraControls = params.parts.options.UIcameraControls;
 	preset.UIdecimation = params.parts.options.UIdecimation;
 
@@ -1915,7 +1945,7 @@ function savePreset()
 	//https://stackoverflow.com/questions/33780271/export-a-json-object-to-a-text-file
 	var str = JSON.stringify(preset)
 	//Save the file contents as a DataURI
- 	var dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(str);
+	var dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(str);
 
 	saveFile(dataUri,'preset.json');
 
