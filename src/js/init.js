@@ -113,6 +113,14 @@ function defineParams(){
 		this.loadfrac = 0.;
 		this.drawfrac = 0.;
 		this.svgContainer = null;
+
+		//the startup file
+		this.startup = "data/startup.json";
+		this.filenames = null;
+
+		//animation
+		this.pauseAnimation = false;
+
 	};
 
 
@@ -179,6 +187,8 @@ function init() {
 		}
 		params.renderer.setSize(screenWidth, screenHeight);
 		params.normalRenderer = params.renderer;
+
+		d3.select('#WebGLContainer').selectAll("canvas").remove();
 
 		params.container = document.getElementById('WebGLContainer');
 		params.container.appendChild( params.renderer.domElement );
@@ -548,97 +558,132 @@ function countParts(){
 	})
 	return num;
 }
-function loadData(callback){
 
+//for loading and reading the startup file
+function loadStartup(){
+	document.getElementById("inputFilenames").click();
+}			
+function getFilenames(){
+	defineParams();
+
+	d3.json(params.startup,  function(dir) {
+		if (dir != null){
+			d3.json(dir[0] + "/filenames.json",  function(files) {
+				if (files != null){
+					callLoadData(files);
+				} else {
+					showLoadingButton();
+					alert("Cannot load data. Please select another directory.");
+				}
+			});
+		} else {
+			showLoadingButton();
+		}
+	});
+}
+function showLoadingButton(){
+	var screenWidth = parseFloat(window.innerWidth);
+	var width = parseFloat(d3.select('#loadDataButton').style('width'));
+	d3.select('#loadDataButton')
+		.style('display','inline')
+		.style('margin-left',(screenWidth - width)/2);
+}
+function callLoadData(files){
 	defineParams();
 	drawLoadingBar();
+	params.filenames = files;
+	loadData(WebGLStart);
+}
+function loadData(callback){
+
+	document.getElementById("inputFilenames").value = "";
 
 	params.parts = {};
 	params.parts.totalSize = 0.;
 
-	d3.json("data/startup.json",  function(dir) {
-		console.log(dir[0]+"/filenames.json")
-		d3.json(dir[0] + "/filenames.json",  function(files) {
 
-			//console.log(files)
-			params.partsKeys = Object.keys(files);
-			params.partsKeys.forEach( function(p, i) {
-				files[p].forEach( function(f, j) {
-					if (f.constructor == Array){ 
-						params.parts.totalSize += parseFloat(f[1]);
-					} else if (j == 1){
-						params.parts.totalSize += parseFloat(f);
-					}
-				});
-			});
-
-			params.partsKeys.forEach( function(p, i) {
-				params.parts[p] = {};
-
-
-				files[p].forEach( function(f, j) {
-					var readf = null;
-					if (f.constructor == Array){
-						readf = "data/"+f[0];
-					} else if (j == 0){
-						readf = "data/"+f
-					}
-					//console.log(readf)
-					if (readf != null){
-						//console.log("f = ", f)
-						d3.json(readf,  function(foo) {
-							//console.log("keys", Object.keys(foo), f[0])
-							Object.keys(foo).forEach(function(k, jj) {
-								//console.log("k = ", k, jj)
-								if (params.parts[p].hasOwnProperty(k)){
-									params.parts[p][k] = params.parts[p][k].concat(foo[k]);
-									//console.log('appending', k, p, params.parts[p])
-
-								} else {
-									params.parts[p][k] = foo[k];
-									//console.log('creating', k, p, params.parts[p], foo[k])
-								}
-							});
-
-
-							params.loadfrac = countParts()/params.parts.totalSize;
-							//console.log("loading", params.loadfrac)
-							if (10. * params.loadfrac % 1 < 0.1 || params.loadfrac == 1){
-								updateLoadingBar();
-							}
-							//console.log(d3.selectAll('#loadingRect').node().getBoundingClientRect().width)
-							//console.log("counting", countParts(), params.parts.totalSize, params.loadfrac)
-							if (countParts() ==  params.parts.totalSize && params.parts.options.loaded){
-								//console.log("here")
-
-								var index = params.partsKeys.indexOf('options');
-								if (index > -1) {
-									params.partsKeys.splice(index, 1);
-									params.parts.options0 = JSON.parse(JSON.stringify(params.parts.options));
-								}
-
-
-
-								callback(); 
-							}
-
-						});
-					}
-				});
-			});
-
+	//console.log(files)
+	params.partsKeys = Object.keys(params.filenames);
+	params.partsKeys.forEach( function(p, i) {
+		params.filenames[p].forEach( function(f, j) {
+			if (f.constructor == Array){ 
+				params.parts.totalSize += parseFloat(f[1]);
+			} else if (j == 1){
+				params.parts.totalSize += parseFloat(f);
+			}
 		});
- 
 	});
+
+	params.partsKeys.forEach( function(p, i) {
+		params.parts[p] = {};
+
+
+		params.filenames[p].forEach( function(f, j) {
+			var readf = null;
+			if (f.constructor == Array){
+				readf = "data/"+f[0];
+			} else if (j == 0){
+				readf = "data/"+f
+			}
+			//console.log(readf)
+			if (readf != null){
+				//console.log("f = ", f)
+				d3.json(readf,  function(foo) {
+					//console.log("keys", Object.keys(foo), f[0])
+					Object.keys(foo).forEach(function(k, jj) {
+						//console.log("k = ", k, jj)
+						if (params.parts[p].hasOwnProperty(k)){
+							params.parts[p][k] = params.parts[p][k].concat(foo[k]);
+							//console.log('appending', k, p, params.parts[p])
+
+						} else {
+							params.parts[p][k] = foo[k];
+							//console.log('creating', k, p, params.parts[p], foo[k])
+						}
+					});
+
+
+					params.loadfrac = countParts()/params.parts.totalSize;
+					//console.log("loading", params.loadfrac)
+					if (10. * params.loadfrac % 1 < 0.1 || params.loadfrac == 1){
+						updateLoadingBar();
+					}
+					//console.log(d3.selectAll('#loadingRect').node().getBoundingClientRect().width)
+					//console.log("counting", countParts(), params.parts.totalSize, params.loadfrac)
+					if (countParts() ==  params.parts.totalSize && params.parts.options.loaded){
+						//console.log("here")
+
+						var index = params.partsKeys.indexOf('options');
+						if (index > -1) {
+							params.partsKeys.splice(index, 1);
+							params.parts.options0 = JSON.parse(JSON.stringify(params.parts.options));
+						}
+
+
+
+						callback(); 
+					}
+
+				});
+			}
+		});
+	});
+
+ 
 
 }
 
 function drawLoadingBar(){
+	d3.select('#loadDataButton').style('display','none');
 
 	var screenWidth = parseFloat(window.innerWidth);
 
 	//Make an SVG Container
-	var svg = d3.select("#splashdivLoader").append("svg")
+	var splash = d3.select("#splashdivLoader")
+
+	splash.selectAll('svg').remove();
+
+	var svg = splash.append("svg")
 		.attr("width", screenWidth)
 		.attr("height", params.loadingSizeY);
 
@@ -683,6 +728,7 @@ function moveLoadingBar(){
 //check if the data is loaded
 function clearloading(){
 	params.loaded = true;
+	params.reset = false;
 
 	//show the rest of the page
 	d3.select("#ContentContainer").style("visibility","visible")
@@ -695,8 +741,6 @@ function clearloading(){
 
 
 function WebGLStart(){
-
-
 
 //reset the window title
 	if (params.parts.options.hasOwnProperty('title')){
@@ -716,9 +760,47 @@ function WebGLStart(){
 //draw everything
 	drawScene();
 
+
 //begin the animation
+	params.pauseAnimation = false;
 	animate();
 }
 
-//////this will define the params object (that contains all "global" variables), then load the data, and then start the WebGL rendering
-loadData(WebGLStart);
+/////////////////////
+//this is an input file that will fire if there is no startup.json in the data directory
+d3.select('body').append('input')
+	.attr('type','file')
+	.attr('id','inputFilenames')
+	.attr('webkitdirectory', true)
+	.attr('directory', true)
+	.attr('mozdirectory', true)
+	.attr('msdirectory', true)
+	.attr('odirectory', true)
+	.attr('multiple', true)
+	.on('change', function(e){
+		var foundFile = false;
+		for (i=0; i<this.files.length; i++){
+			if (this.files[i].name == "filenames.json"){
+				foundFile = true;
+				var file = this.files[i];
+				var reader = new FileReader();
+				reader.readAsText(file, 'UTF-8');
+				reader.onload = function(){
+					var foo = JSON.parse(this.result);
+					if (foo != null){
+						callLoadData(foo);
+					} else {
+						alert("Cannot load data. Please select another directory.");
+					}
+				}
+			}
+		}
+		if (i == this.files.length && !foundFile){
+			alert("Cannot load data. Please select another directory.");
+		}
+	})
+	.style('display','None');
+
+
+//This will define the params object (that contains all "global" variables), then load the data, and then start the WebGL rendering
+getFilenames();

@@ -117,6 +117,7 @@ function drawScene(pdraw = params.partsKeys)
 	//if (ndraw >= Math.floor(params.parts.totalSize/params.decimate)){
 		console.log("done drawing")
 		clearloading();
+
 	//}
 }
 

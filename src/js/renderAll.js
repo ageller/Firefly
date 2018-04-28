@@ -1,14 +1,15 @@
 
 function animate(time) {
-	requestAnimationFrame( animate );
-	update(time);
-	render();
+	if (!params.pauseAnimation){
+		requestAnimationFrame( animate );
+		update(time);
+		render();
+	}
 
 }
 
 function update(time){
 	params.keyboard.update();
-	
 	if (params.keyboard.down("H")){
 		params.helpMessage=!params.helpMessage;
 		if (params.helpMessage){
