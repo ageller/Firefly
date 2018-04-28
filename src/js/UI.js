@@ -963,20 +963,30 @@ function checkshowParts(checkbox)
 }
 
 
-var UIhidden = false;
 function hideUI(x){
-	x.classList.toggle("change");
+	if (!params.movingUI){
 
-	var UI = document.getElementById("UIhider");
-	var UIc = document.getElementsByClassName("UIcontainer")[0];
-	if (UIhidden){
-		UI.setAttribute("style","visibility: visible;");
-		UIc.setAttribute("style","border-style: solid;");
-		UIhidden = false;
-	} else {
-		UI.setAttribute("style","visibility: hidden;");	
-		UIc.setAttribute("style","border-style: none; margin-left:2px; margin-top:2px");
-		UIhidden = true;	
+		x.classList.toggle("change");
+
+		var UI = document.getElementById("UIhider");
+		var UIc = document.getElementsByClassName("UIcontainer")[0];
+		if (params.UIhidden){
+			UI.style.display = 'inline';
+			//UI.style.visibility = 'visible';
+			UIc.style.borderStyle = 'solid';
+			UIc.style.marginLeft = '0';
+			UIc.style.marginTop = '0';
+			params.UIhidden = false;
+		} else {
+			UI.style.display = 'none';
+			//UI.style.visibility = 'hidden';
+			UIc.style.borderStyle = 'none';
+			UIc.style.marginLeft = '2px';
+			UIc.style.marginTop = '2px';
+			params.UIhidden = true;	
+		}
+		var UIt = document.getElementById("UItopbar");
+		//UIt.style.display = 'inline';
 	}
 }
 
@@ -1087,10 +1097,14 @@ function createUI(){
 
 		var UIcontainer = d3.select('.UIcontainer');
 
+		UIcontainer.attr('style','position:absolute; top:10px; left:10px; width:300px');
+
 		var UIt = UIcontainer.append('div')
 			.attr('class','UItopbar')
 			.attr('id','UItopbar')
-			.attr('onclick','hideUI(this);');
+			.attr('onmouseup','hideUI(this);')
+			.attr('onmousedown','dragElement();');
+
 		UIt.append('table');
 		var UIr1 = UIt.append('tr');
 		var UIc1 = UIr1.append('td')
@@ -1951,5 +1965,48 @@ function savePreset()
 
 }
 
+//from https://www.w3schools.com/howto/howto_js_draggable.asp
+function dragElement() {
+	var elmnt = document.getElementsByClassName("UIcontainer")[0];
+
+	var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+	dragMouseDown();
+
+
+	function dragMouseDown(e) {
+		e = e || window.event;
+		// get the mouse cursor position at startup:
+		pos3 = e.clientX;
+		pos4 = e.clientY;
+		document.addEventListener('mouseup', closeDragElement);
+		document.addEventListener('mousemove', elementDrag);
+
+	}
+
+	function elementDrag(e) {
+		params.movingUI = true;
+		e = e || window.event;
+		// calculate the new cursor position:
+		pos1 = pos3 - e.clientX;
+		pos2 = pos4 - e.clientY;
+		pos3 = e.clientX;
+		pos4 = e.clientY;
+
+		// set the element's new position:
+		var top = parseInt(elmnt.style.top);
+		var left = parseInt(elmnt.style.left);
+		elmnt.style.top = (top - pos2) + "px";
+		elmnt.style.left = (left - pos1) + "px";
+	}
+
+	function closeDragElement(e) {
+		/* stop moving when mouse button is released:*/
+		e.stopPropagation();
+		params.movingUI = false;
+		document.removeEventListener('mouseup', closeDragElement);
+		document.removeEventListener('mousemove', elementDrag);
+
+	}
+}
 
 
