@@ -99,6 +99,9 @@ class FIREreader(object):
 		#the prefix of the the JSON files
 		self.JSONfname = 'FIREdata'
 		
+		#write the startup file?
+		self.writeStartup = True
+
 		#remove the data files in the dataDir directory before adding more?
 		self.cleanDataDir = False
 		
@@ -210,6 +213,9 @@ class FIREreader(object):
 		#the prefix of the the JSON files
 		self.JSONfname = 'FIREdata'
 		
+		#write the startup file?
+		self.writeStartup = True
+
 		#remove the data files in the dataDir directory before adding more?
 		self.cleanDataDir = False
 		
@@ -468,7 +474,8 @@ class FIREreader(object):
 		#the list of files
 		pd.Series(self.filenames).to_json(self.dataDir + '/' + 'filenames.json', orient='index') 
 		#the startup file
-		pd.Series({"0":"data/" + self.dataDir}).to_json('startup.json', orient='index') 
+		if (self.writeStartup):
+			pd.Series({"0":"data/" + self.dataDir}).to_json('startup.json', orient='index') 
 
 		
 	def defineFilenames(self):
