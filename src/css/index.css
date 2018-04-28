@@ -77,9 +77,6 @@ canvas{
 .UIcontainer{
 	z-index:2; 
 	display:inline-block; 
-	position:absolute;
-	top:10px;
-	left:10px;
 	border-color:#505050;
 	border-style:solid;
 	border-width: 2px 2px 2px 2px;

@@ -104,7 +104,9 @@ function defineParams(){
 		this.haveUI = false;
 
 		this.reset = false;
-
+		this.movingUI = false;
+		this.UIhidden = false;
+		
 		//for the loading bar
 		var screenWidth = window.innerWidth;
 		var screenHeight = window.innerHeight;
@@ -503,8 +505,8 @@ function initPVals(){
 		params.fkeys[p] = [];
 		params.plotNmax[p] = params.parts[p].Coordinates.length;
 		
+		params.showVel[p] = false;
 		if (params.parts[p].Velocities != null){
-			params.showVel[p] = false;
 			if (!params.reset){
 				calcVelVals(p);
 				params.parts[p].filterKeys.push("magVelocities");
