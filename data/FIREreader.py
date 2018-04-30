@@ -244,6 +244,8 @@ class FIREreader(object):
 		#will store all the file names that are produced (will be defined below in defineFilenames)
 		self.filenames = dict()
 
+		#will contain a list of the files in the order they are read
+		self.loadedHDF5Files = []
 
 
 
@@ -294,13 +296,17 @@ class FIREreader(object):
 		return self.names[pin]
 
 	#adds an array to the dict for a given particle set and data file 
-	def addtodict(self, d, snap, part, dkey, sendlog, sendmag, usekey = None, mfac = 1.):
-		if (usekey == None):
+	def addtodict(self, d, snap, part, dkey, sendlog, sendmag, usekey = None, mfac = 1., vals = None, filterFlag = False):
+		if (usekey is None):
 			ukey = dkey
 		else:
 			ukey = usekey
-			
-		vals = snap[part + '/' + dkey][...] * mfac      
+		
+		if (vals is None):
+			vals = snap[part + '/' + dkey][...] * mfac
+		else:
+			self.returnKeys[part].append(ukey)
+
 		if (sendlog):
 			ukey = "log10"+ukey
 			vals = np.log10(vals)
@@ -310,9 +316,12 @@ class FIREreader(object):
 			vals = [np.linalg.norm(v) for v in vals]
 		 
 		if ukey in list(d[part].keys()):
-			d[part][ukey] = np.append(vals, d[part][ukey], axis=0)
+			d[part][ukey] = np.append(d[part][ukey], vals,  axis=0)
 		else:
 			d[part][ukey] = vals
+
+		if (filterFlag):
+			d[part]['filterKeys'].append(ukey)
 
 	def check_if_filename_exists(self,sdir,snum,snapshot_name='snapshot',extension='.hdf5',four_char=0):
 		for extension_touse in [extension,'.bin','']:
@@ -413,7 +422,8 @@ class FIREreader(object):
 			
 	def openHDF5File(self,fname):
 		print(fname)
-		if (self.dataDir == None):
+		self.loadedHDF5Files.append(fname)
+		if (self.dataDir is None):
 			self.dataDir = ""
 			xx = fname.split('/')
 			ntry = 2
@@ -504,7 +514,7 @@ class FIREreader(object):
 		
 	def createOptionsJSON(self, file = None):
 		#separated this out incase user wants to only write the options file
-		if (file == None):
+		if (file is None):
 			file = self.filenames['options'][0]
 		pd.Series(self.options).to_json(file, orient='index') 
  
