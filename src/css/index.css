@@ -204,7 +204,7 @@ canvas{
 	transition: opacity .15s;
 }
 .particleDiv:hover {
-    opacity: 1;
+	opacity: 1;
 }
 .pLabelDiv {
 	display: inline-block;
@@ -287,11 +287,11 @@ input:checked + .slideroo:before {
 	z-index:2;
 	position:absolute;
 	left:240px;
- 	margin:0;
- 	margin-top:-5px;
- 	height:20px;
- 	width:27px;
- 	background:#d3d3d3;
+	margin:0;
+	margin-top:-5px;
+	height:20px;
+	width:27px;
+	background:#d3d3d3;
 }
 .sp-replacer:hover, .sp-replacer.sp-active  {
 	border:0;
@@ -473,6 +473,82 @@ select{
 	width:230px;
 }
 
+/* https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_modal_bottom */
+/* The Modal (background) */
+.modal {
+	display:none;
+	position: fixed; /* Stay in place */
+	z-index: 1; /* Sit on top */
+	left: 0;
+	top: 0;
+	width: 100%; /* Full width */
+	height: 100%; /* Full height */
+	overflow: auto; /* Enable scroll if needed */
+	background-color: rgb(0,0,0); /* Fallback color */
+	background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+	-webkit-animation-name: fadeIn; /* Fade in the background */
+	-webkit-animation-duration: 0.4s;
+	animation-name: fadeIn;
+	animation-duration: 0.4s
+}
+
+/* Modal Content */
+.modal-content {
+	position: fixed;
+	margin:0;
+	padding:0;
+	left:0;
+	bottom: 0;
+	background-color: #fefefe;
+	height:220px;
+	width: 100%;
+	-webkit-animation-name: slideIn;
+	-webkit-animation-duration: 0.4s;
+	animation-name: slideIn;
+	animation-duration: 0.4s
+}
+.modal-header {
+	padding:20px;
+	height:40px;
+	background-color: #4E2A84;
+	color: white;
+	margin-bottom:10px;
+
+}
+
+.modal-body {
+	padding:20px;
+	height:40px;
+}
+
+.modal-footer {
+	padding:20px;
+	height:40px;
+	background-color: #4E2A84;
+	color: white;
+	margin-top:10px;
+}
+
+/* Add Animation */
+@-webkit-keyframes slideIn {
+	from {bottom: -300px; opacity: 0} 
+	to {bottom: 0; opacity: 1}
+}
+
+@keyframes slideIn {
+	from {bottom: -300px; opacity: 0}
+	to {bottom: 0; opacity: 1}
+}
+
+@-webkit-keyframes fadeIn {
+	from {opacity: 0} 
+	to {opacity: 1}
+}
+
+@keyframes fadeIn {
+	from {opacity: 0} 
+	to {opacity: 1}
+}
 
 
 a{

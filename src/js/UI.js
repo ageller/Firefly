@@ -27,7 +27,12 @@ function loadNewData(){
 	d3.select('.UIcontainer').html("");
 	d3.select("#splashdivLoader").selectAll('svg').remove();
 	d3.select("#splashdiv5").text("Loading...");
-	showLoadingButton()
+	console.log('here', params.dir, Object.keys(params.dir).length)
+	if (Object.keys(params.dir).length > 1){
+		showLoadingButton('#selectStartupButton');
+	} else {
+		showLoadingButton('#loadDataButton');
+	}
 	d3.select("#loader").style("display","visible");
 	params.loadfrac = 0.;
 	showSplash();
@@ -351,7 +356,6 @@ function createFilterSliders(){
 
 
 						var nf = parseFloat(values[handle])/params.filterVals[pp][ffk][handle];
-						console.log("in filter", Math.abs(1. - nf))
 						if (Math.abs(1. - nf) > 0.001 && ! params.reset){
 							drawScene(pDraw = [pp]);
 						}
@@ -1595,7 +1599,7 @@ function createUI(){
 				var options = selectVType.selectAll('option')
 					.data(Object.keys(params.velopts)).enter()
 					.append('option')
-					.text(function (d) { return d; });
+						.text(function (d) { return d; });
 				elm = document.getElementById(d+'_SelectVelType');
 				elm.value = params.velType[d];
 
