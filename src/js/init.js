@@ -1,4 +1,5 @@
 //all "global" variables are contained within params object
+var params;
 function defineParams(){
 	ParamsInit = function() {
 
@@ -119,6 +120,7 @@ function defineParams(){
 		//the startup file
 		this.startup = "data/startup.json";
 		this.filenames = null;
+		this.dir = {};
 
 		//animation
 		this.pauseAnimation = false;
@@ -127,6 +129,7 @@ function defineParams(){
 
 
 	params = new ParamsInit();
+
 }
 
 function initControls(){
@@ -561,37 +564,137 @@ function countParts(){
 	return num;
 }
 
-//for loading and reading the startup file
-function loadStartup(){
-	document.getElementById("inputFilenames").click();
-}			
+//if startup.json exists, this is called first
 function getFilenames(){
 	defineParams();
 
 	d3.json(params.startup,  function(dir) {
 		if (dir != null){
-			d3.json(dir[0] + "/filenames.json",  function(files) {
-				if (files != null){
-					callLoadData(files);
-				} else {
-					showLoadingButton();
-					alert("Cannot load data. Please select another directory.");
-				}
-			});
+			var i = 0;
+			params.dir = dir;
+			if (Object.keys(params.dir).length > 1){
+				i = null
+				console.log("multiple file options in startup:", Object.keys(params.dir).length, params.dir);
+				showLoadingButton('#selectStartupButton');
+				selectFromStartup();
+
+			} 
+			if (i != null && i < Object.keys(params.dir).length){
+				d3.json(params.dir[i] + "/filenames.json",  function(files) {
+					if (files != null){
+						callLoadData(files);
+					} else {
+						showLoadingButton('#loadDataButton');
+						alert("Cannot load data. Please select another directory.");
+					}
+				});
+			}
 		} else {
-			showLoadingButton();
+			showLoadingButton('#loadDataButton');
 		}
 	});
 }
-function showLoadingButton(){
+//for loading and reading a new data directory
+function loadStartup(){
+	document.getElementById("inputFilenames").click();
+}
+//for loading and reading a startup file with multiple entries
+function selectFromStartup(){
 	var screenWidth = parseFloat(window.innerWidth);
-	var width = parseFloat(d3.select('#loadDataButton').style('width'));
-	d3.select('#loadDataButton')
+
+	var dirs = [];
+	Object.keys(params.dir).forEach(function(d, i) {
+		dirs.push(params.dir[i]);
+	});
+
+//https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dialog
+//https://www.w3schools.com/howto/howto_css_modals.asp
+	var dialog = d3.select('#splashdivLoader').append('div');
+	dialog.attr('id','startupModal').attr('class','modal');
+
+	var form = dialog.append('div')
+		.attr('class','modal-content')
+
+	var section = form.append('div')
+	section.append('div')
+		.attr('class','modal-header')
+		.style('font-size','20pt')
+		.html('Select the startup directory : <br />');
+
+	var select = section.append('select')
+		.attr('id','selectedStartup')
+		.attr('class','modal-body');
+	var options = select.selectAll('option')
+		.data(dirs).enter()
+			.append('option')
+				.text(function (d) { return d; });
+
+	var menu = form.append('div').attr('class','modal-footer');
+	menu.append('button')
+		.attr('id','cancelSelection')
+		.attr('class', 'button')
+		.style('width','100px')
+		.append('span')
+			.text('Cancel');
+	menu.append('button')
+		.attr('id','submitSelection')
+		.attr('class', 'button')
+		.style('width','100px')
+		.append('span')
+			.text('Confirm');
+
+
+	var updateButton = document.getElementById('selectStartupButton');
+	var cancelButton = document.getElementById('cancelSelection');
+	var submitButton = document.getElementById('submitSelection');
+	var startupModal = document.getElementById('startupModal');
+	var selection = document.getElementById('selectedStartup');
+
+	selection.value = dirs[0]
+	
+	// Update button opens a modal dialog
+	updateButton.addEventListener('click', function() {
+		startupModal.style.display = "block";
+	});
+
+	// Form cancel button closes the modal box
+	cancelButton.addEventListener('click', function() {
+		startupModal.style.display = "none";
+	});
+
+	// submit fires the loader
+	submitButton.addEventListener('click', function() {
+		startupModal.style.display = "none";
+		var f = selection.value+'/filenames.json';
+		d3.json(f,  function(files) {
+			if (files != null){
+				callLoadData(files);
+			} else {
+				alert("Cannot load data. Please select another directory.");
+			}
+		});
+
+	});
+
+}
+//show the button on the splash screen
+function showLoadingButton(id){
+	var screenWidth = parseFloat(window.innerWidth);
+	var width = parseFloat(d3.select(id).style('width'));
+	d3.select(id)
 		.style('display','inline')
 		.style('margin-left',(screenWidth - width)/2);
 }
+//once a data directory is identified, this will define the parameters, draw the loading bar and, load in the data
 function callLoadData(files){
+	var dir = {};
+	if (params.hasOwnProperty('dir')){
+		dir = params.dir;
+
+	}
 	defineParams();
+	params.dir = dir;
+
 	drawLoadingBar();
 	params.filenames = files;
 	loadData(WebGLStart);
@@ -677,6 +780,7 @@ function loadData(callback){
 
 function drawLoadingBar(){
 	d3.select('#loadDataButton').style('display','none');
+	d3.select('#selectStartupButton').style('display','none');
 
 	var screenWidth = parseFloat(window.innerWidth);
 
