@@ -1018,10 +1018,10 @@ function showFunction(handle) {
 	if (i < params.partsKeys.length-1){
 		pdiv = document.getElementsByClassName(params.partsKeys[i+1]+'Div')[0];
 		if (params.gtoggle[pID]){
-			pdiv.setAttribute("style","margin-top: "+ht + "px; ");
+			pdiv.style.marginTop = ht + "px";
 			params.gtoggle[pID] = false;	
 		} else {
-			pdiv.setAttribute("style","margin-top: 0 px; ");	
+			pdiv.style.marginTop = "0px";
 			params.gtoggle[pID] = true;
 		}
 	} else { // a bit clunky, but works with the current setup
@@ -1029,22 +1029,22 @@ function showFunction(handle) {
 			c = document.getElementById("decimationDiv");
 			pb = 5;
 			if (params.gtoggle[pID]){
-				c.setAttribute('style','margin-top:'+(pb+ht-5)+'px');
+				c.style.marginTop = (pb+ht-5)+'px';
 				params.gtoggle[pID] = false;	
 
 			} else {
-				c.setAttribute('style','margin-top:'+pb+'px');	
+				c.style.marginTop = pb+'px';	
 				params.gtoggle[pID] = true;	
 			}	
 		} else { //for the last particle (to move the bottom of the container)
 			c = document.getElementsByClassName("UIcontainer")[0];
 
 			if (params.gtoggle[pID]){
-				c.setAttribute('style','padding-bottom:'+(pb+ht-5)+'px');
+				c.style.paddingBottom = (pb+ht-5)+'px';
 				params.gtoggle[pID] = false;	
 
 			} else {
-				c.setAttribute('style','padding-bottom:'+pb+'px');	
+				c.style.paddingBottom = pb+'px';	
 				params.gtoggle[pID] = true;		
 			}
 		}
@@ -1968,7 +1968,6 @@ function savePreset()
 //from https://www.w3schools.com/howto/howto_js_draggable.asp
 function dragElement() {
 	var elmnt = document.getElementsByClassName("UIcontainer")[0];
-
 	var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
 	dragMouseDown();
 
