@@ -382,14 +382,17 @@ class FIREreader(object):
 			   self.openHDF5File(fname_found) 
 
 
-		#and add on the colors and point size defaults
-		#also calculate the magnitude where necessary
+		#and on some of the options here
 		for p in list(self.partsDict.keys()):
 			self.partsDict[p]['filterKeys'] = self.filterKeys[p]
 			self.partsDict[p]['doSPHrad'] = self.doSPHrad[p]
 
-					
-			#should we decimate the data? (NOTE: even if decimate = 1, it is wise to shuffle the data so it doesn't display in blocks)
+
+	def shuffle_dict(self):
+		#should we decimate the data? (NOTE: even if decimate = 1, it is wise to shuffle the data so it doesn't display in blocks)
+
+		for p in list(self.partsDict.keys()):
+	
 			if (self.decimate[p] > 0): 
 				if (self.decimate[p] > 1):
 					print("decimating and shuffling ...")
@@ -402,6 +405,7 @@ class FIREreader(object):
 					if (k not in self.nodecimate):
 						self.partsDict[p][k] = self.partsDict[p][k][dindices]
 
+	def swap_dict_names(self):
 		#swap the names
 		for p in list(self.partsDict.keys()):
 			pp = self.swapnames(p)
@@ -541,5 +545,7 @@ class FIREreader(object):
 			
 		self.defineFilterKeys()
 		self.populate_dict()
+		self.shuffle_dict()
+		self.swap_dict_names()
 		self.createJSON()
 		print("done")
