@@ -348,6 +348,14 @@ function createFilterSliders(){
 						var sl = this.target.id.length;
 						var pp = this.target.id.slice(0, fpos - sl);
 						var ffk = this.target.id.slice(fpos + 4, epos - sl);
+
+
+						var nf = parseFloat(values[handle])/params.filterVals[pp][ffk][handle];
+						console.log("in filter", Math.abs(1. - nf))
+						if (Math.abs(1. - nf) > 0.001 && ! params.reset){
+							drawScene(pDraw = [pp]);
+						}
+
 						params.SliderFinputs[pp][ffk][handle].value = values[handle];
 						params.filterVals[pp][ffk][handle] = parseFloat(values[handle]);
 						params.updateFilter[pp] = true;
