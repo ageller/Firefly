@@ -21,7 +21,9 @@ You will also need a browser; we recommend Firefox or Google Chrome. To import y
 To start Firefly, you can simply open the index.html file with your browser.  We recommend Firefox or Chrome.  If you prefer Chrome, you may need to host your own server.  This is easy to do by executing the following python command within the directory that contains your index.html file:
 
 ```
-$ python -m SimpleHTTPServer
+$ python2 -m SimpleHTTPServer
+or
+$ python3 -m http.server
 ```
 
 Once this SimpleHTTPServer is running, you can open Chrome, and enter the url : http://localhost:8000/ .  (This SimpleHTTPServer step should not be necessary with Firefox, but may be necessary with other browsers.)
