@@ -621,9 +621,13 @@ function selectFromStartup(){
 		.style('font-size','20pt')
 		.html('Select the startup directory : <br />');
 
-	var select = section.append('select')
-		.attr('id','selectedStartup')
-		.attr('class','modal-body');
+	var mid = section.append('div')
+		.attr('class','modal-body')
+		.style('height','20px')
+
+	var select = mid.append('select')
+		.attr('id','selectedStartup');
+
 	var options = select.selectAll('option')
 		.data(dirs).enter()
 			.append('option')
@@ -651,7 +655,8 @@ function selectFromStartup(){
 	var selection = document.getElementById('selectedStartup');
 
 	selection.value = dirs[0]
-	
+	selection.defaultValue = dirs[0]
+
 	// Update button opens a modal dialog
 	updateButton.addEventListener('click', function() {
 		startupModal.style.display = "block";
