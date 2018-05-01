@@ -26,8 +26,7 @@ function drawScene(pdraw = params.partsKeys)
 
 	for (var i=0; i<pdraw.length; i++){
 		var p = pdraw[i];
-		params.updateFilter[p] = true;
-		
+
 		var material = new THREE.ShaderMaterial( {
 			uniforms: {
 				color: {value: new THREE.Vector4( params.Pcolors[p][0], params.Pcolors[p][1], params.Pcolors[p][2], params.Pcolors[p][3])},
@@ -76,33 +75,49 @@ function drawScene(pdraw = params.partsKeys)
 		var index = 0;
 		var vindex = 0;
 
+		var includePoint = true;
 		//for (var j=0; j<params.parts[p].Coordinates.length/params.decimate; j++){
 		for (var j=0; j<params.plotNmax[p]; j++){
-			//geo.vertices.push(new THREE.Vector3(params.parts[p].Coordinates[j][0], params.parts[p].Coordinates[j][1], params.parts[p].Coordinates[j][2] ))
-			
-			positions[index] = params.parts[p].Coordinates[j][0];
-			index++;
-			positions[index] = params.parts[p].Coordinates[j][1];
-			index++;
-			positions[index] = params.parts[p].Coordinates[j][2];
-			index++;
 
-			if (params.parts[p].Velocities != null){
-				velVals[vindex] = params.parts[p].VelVals[j][0]/params.parts[p].magVelocities[j];
-				vindex++;
-				velVals[vindex] = params.parts[p].VelVals[j][1]/params.parts[p].magVelocities[j];
-				vindex++;
-				velVals[vindex] = params.parts[p].VelVals[j][2]/params.parts[p].magVelocities[j];
-				vindex++;
-				velVals[vindex] = params.parts[p].VelVals[j][3];
-				vindex++;
+			//we are now including the filtering here instead of simply changing the alpha value during rendering
+			includePoint = true;
+			for (k=0; k<params.fkeys[p].length; k++){
+				if (params.parts[p][params.fkeys[p][k]] != null) {
+					val = params.parts[p][params.fkeys[p][k]][j]; 
+					if ( val < params.filterVals[p][params.fkeys[p][k]][0] || val > params.filterVals[p][params.fkeys[p][k]][1] ){
+						includePoint = false;
+					} 
+				}
 			}
 
-			alphas[j] = 1.;
-			ndraw += 1;
-			if (ndraw % ndiv < 1 || ndraw == params.parts.totalSize){
-				params.drawfrac = (1 + ndraw/params.parts.totalSize)*0.5;
-				//updateDrawingBar();
+			if (includePoint){
+
+				//geo.vertices.push(new THREE.Vector3(params.parts[p].Coordinates[j][0], params.parts[p].Coordinates[j][1], params.parts[p].Coordinates[j][2] ))
+				
+				positions[index] = params.parts[p].Coordinates[j][0];
+				index++;
+				positions[index] = params.parts[p].Coordinates[j][1];
+				index++;
+				positions[index] = params.parts[p].Coordinates[j][2];
+				index++;
+
+				if (params.parts[p].Velocities != null){
+					velVals[vindex] = params.parts[p].VelVals[j][0]/params.parts[p].magVelocities[j];
+					vindex++;
+					velVals[vindex] = params.parts[p].VelVals[j][1]/params.parts[p].magVelocities[j];
+					vindex++;
+					velVals[vindex] = params.parts[p].VelVals[j][2]/params.parts[p].magVelocities[j];
+					vindex++;
+					velVals[vindex] = params.parts[p].VelVals[j][3];
+					vindex++;
+				}
+
+				alphas[j] = 1.;
+				ndraw += 1;
+				if (ndraw % ndiv < 1 || ndraw == params.parts.totalSize){
+					params.drawfrac = (1 + ndraw/params.parts.totalSize)*0.5;
+					//updateDrawingBar();
+				}
 			}
 		}
 

@@ -60,22 +60,24 @@ function update(time){
 				} else {
 					m.material.uniforms.oID.value = 0.;
 				}
-				if (params.updateFilter[p]){
-					var alphas = m.geometry.attributes.alpha.array;
-					for( var ii = 0; ii < alphas.length; ii ++ ) {
-						alphas[ii] = 1.;
-						for (k=0; k<params.fkeys[p].length; k++){
-							if (params.parts[p][params.fkeys[p][k]] != null) {
-								val = params.parts[p][params.fkeys[p][k]][ii]; 
-								if ( val < params.filterVals[p][params.fkeys[p][k]][0] || val > params.filterVals[p][params.fkeys[p][k]][1] ){
-									alphas[ii] = 0.;
-								} 
-							}
-						}
-					}
-					m.geometry.attributes.alpha.needsUpdate = true;
-					params.updateFilter[p] = false;
-				}
+				//this should not be needed because we now redraw every time we filter
+				// but I will leave it here, in case we want to revert back to this method
+				// if (params.updateFilter[p]){
+				// 	var alphas = m.geometry.attributes.alpha.array;
+				// 	for( var ii = 0; ii < alphas.length; ii ++ ) {
+				// 		alphas[ii] = 1.;
+				// 		for (k=0; k<params.fkeys[p].length; k++){
+				// 			if (params.parts[p][params.fkeys[p][k]] != null) {
+				// 				val = params.parts[p][params.fkeys[p][k]][ii]; 
+				// 				if ( val < params.filterVals[p][params.fkeys[p][k]][0] || val > params.filterVals[p][params.fkeys[p][k]][1] ){
+				// 					alphas[ii] = 0.;
+				// 				} 
+				// 			}
+				// 		}
+				// 	}
+				// 	m.geometry.attributes.alpha.needsUpdate = true;
+				// 	params.updateFilter[p] = false;
+				// }
 			} else { 
 				m.material.uniforms.color.value = new THREE.Vector4(0);
 				m.material.uniforms.oID.value = -1;

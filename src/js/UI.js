@@ -255,7 +255,8 @@ function setFSliderHandle(i, value, parent, reset=false) {
 
 
 
-	params.updateFilter[p] = true;
+	//because we are now redrawing each time, we do not need to do this
+	//params.updateFilter[p] = true;
 	mouseDown = false; 
 }
 
@@ -362,7 +363,8 @@ function createFilterSliders(){
 
 						params.SliderFinputs[pp][ffk][handle].value = values[handle];
 						params.filterVals[pp][ffk][handle] = parseFloat(values[handle]);
-						params.updateFilter[pp] = true;
+						//because we are now redrawing each time, we do not need to do this
+						//params.updateFilter[pp] = true;
 						mouseDown = true;
 					});
 
@@ -1787,7 +1789,8 @@ function applyUIoptions(){
 			if (params.parts.options.filterVals != null){
 				if (params.parts.options.filterVals.hasOwnProperty(p)){
 					if (params.parts.options.filterVals[p] != null){
-						params.updateFilter[p] = true
+						//because we are now redrawing each time, we do not need to do this
+						//params.updateFilter[p] = true
 
 						for (k=0; k<params.fkeys[p].length; k++){
 							var fkey = params.fkeys[p][k]
