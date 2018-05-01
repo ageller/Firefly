@@ -248,6 +248,9 @@ class FIREreader(object):
 		self.loadedHDF5Files = []
 
 
+		self.slash = '/'
+		if os.name == 'nt':
+			self.slash = '\\'
 
 
 ################################################## 
@@ -324,8 +327,9 @@ class FIREreader(object):
 			d[part]['filterKeys'].append(ukey)
 
 	def check_if_filename_exists(self,sdir,snum,snapshot_name='snapshot',extension='.hdf5',four_char=0):
+
 		for extension_touse in [extension,'.bin','']:
-			fname=sdir+'/'+snapshot_name+'_'
+			fname=sdir+self.slash+snapshot_name+'_'
 			ext='00'+str(snum);
 			if (snum>=10): ext='0'+str(snum)
 			if (snum>=100): ext=str(snum)
@@ -334,7 +338,7 @@ class FIREreader(object):
 			fname+=ext
 			fname_base=fname
 
-			s0=sdir.split("/"); snapdir_specific=s0[len(s0)-1];
+			s0=sdir.split(self.slash); snapdir_specific=s0[len(s0)-1];
 			if(len(snapdir_specific)<=1): snapdir_specific=s0[len(s0)-2];
 
 			## try several common notations for the directory/filename structure
@@ -344,25 +348,25 @@ class FIREreader(object):
 				fname=fname_base+'.0'+extension_touse;
 			if not os.path.exists(fname): 
 				## is the filename 'snap' instead of 'snapshot'?
-				fname_base=sdir+'/snap_'+ext; 
+				fname_base=sdir+self.slash+'snap_'+ext; 
 				fname=fname_base+extension_touse;
 			if not os.path.exists(fname): 
 				## is the filename 'snap' instead of 'snapshot', AND its a multi-part file?
 				fname=fname_base+'.0'+extension_touse;
 			if not os.path.exists(fname): 
 				## is the filename 'snap(snapdir)' instead of 'snapshot'?
-				fname_base=sdir+'/snap_'+snapdir_specific+'_'+ext; 
+				fname_base=sdir+self.slash+'snap_'+snapdir_specific+'_'+ext; 
 				fname=fname_base+extension_touse;
 			if not os.path.exists(fname): 
 				## is the filename 'snap' instead of 'snapshot', AND its a multi-part file?
 				fname=fname_base+'.0'+extension_touse;
 			if not os.path.exists(fname): 
 				## is it in a snapshot sub-directory? (we assume this means multi-part files)
-				fname_base=sdir+'/snapdir_'+ext+'/'+snapshot_name+'_'+ext; 
+				fname_base=sdir+self.slash+'snapdir_'+ext+self.slash+snapshot_name+'_'+ext; 
 				fname=fname_base+'.0'+extension_touse;
 			if not os.path.exists(fname): 
 				## is it in a snapshot sub-directory AND named 'snap' instead of 'snapshot'?
-				fname_base=sdir+'/snapdir_'+ext+'/'+'snap_'+ext; 
+				fname_base=sdir+self.slash+'snapdir_'+ext+self.slash+'snap_'+ext; 
 				fname=fname_base+'.0'+extension_touse;
 			if not os.path.exists(fname): 
 				## wow, still couldn't find it... ok, i'm going to give up!
@@ -378,15 +382,16 @@ class FIREreader(object):
 
 	#populate the dict
 	def populate_dict(self):
+
 		if self.snapnum is None:
 			for fname in os.listdir(self.directory):
-				self.openHDF5File(self.directory+'/'+fname) 
+				self.openHDF5File(self.directory+self.slash+fname) 
 		else:   
 			fname_found,fname_base_found,fname_ext  = self.check_if_filename_exists(self.directory,self.snapnum)
-			if (len(fname_found.split('/')) - len(self.directory.split('/')))>1:
-				new_directory = '/'+os.path.join(*fname_found.split('/')[:-1])
+			if (len(fname_found.split(self.slash)) - len(self.directory.split(self.slash)))>1:
+				new_directory = self.slash+os.path.join(*fname_found.split(self.slash)[:-1])
 				for fname in os.listdir(new_directory):
-					self.openHDF5File(new_directory + '/' + fname)
+					self.openHDF5File(new_directory + self.slash + fname)
 			else:
 			   self.openHDF5File(fname_found) 
 
@@ -425,7 +430,7 @@ class FIREreader(object):
 		self.loadedHDF5Files.append(fname)
 		if (self.dataDir is None):
 			self.dataDir = ""
-			xx = fname.split('/')
+			xx = fname.split(self.slash)
 			ntry = 2
 			while (len(self.dataDir) == 0 and ntry < len(xx)):
 				self.dataDir = xx[-ntry]
@@ -456,7 +461,7 @@ class FIREreader(object):
 	def createJSON(self):
 		print("writing JSON files ...")
 		if (os.path.exists(self.dataDir) and self.cleanDataDir):
-			print("REMOVING FILES FROM data/"+self.dataDir)	
+			print("REMOVING FILES FROM data"+self.slash+self.dataDir)	
 			shutil.rmtree(self.dataDir)
 
 		if (not os.path.exists(self.dataDir)):
@@ -486,10 +491,10 @@ class FIREreader(object):
 		print(self.filenames['options'][0])
 		self.createOptionsJSON()
 		#the list of files
-		pd.Series(self.filenames).to_json(self.dataDir + '/' + 'filenames.json', orient='index') 
+		pd.Series(self.filenames).to_json(self.dataDir + self.slash + 'filenames.json', orient='index') 
 		#the startup file
 		if (self.writeStartup):
-			pd.Series({"0":"data/" + self.dataDir}).to_json('startup.json', orient='index') 
+			pd.Series({"0":"data" +self.slash+ self.dataDir}).to_json('startup.json', orient='index') 
 
 		
 	def defineFilenames(self):
@@ -501,7 +506,7 @@ class FIREreader(object):
 			while nused < nparts:
 				ninfile = min(self.maxppFile, nparts - nused)
 				nused += ninfile
-				foo = [self.dataDir + '/' + self.JSONfname+p+str(i).zfill(3)+'.json', ninfile]
+				foo = [self.dataDir + self.slash + self.JSONfname+p+str(i).zfill(3)+'.json', ninfile]
 				if (i == 0):
 					self.filenames[p] = [foo]
 				else:
@@ -510,7 +515,7 @@ class FIREreader(object):
 			self.filenames[p] = np.array(self.filenames[p])
 
 		#for the options
-		self.filenames['options'] = np.array([self.dataDir + '/' + self.JSONfname+'Options.json',0])
+		self.filenames['options'] = np.array([self.dataDir + self.slash + self.JSONfname+'Options.json',0])
 		
 	def createOptionsJSON(self, file = None):
 		#separated this out incase user wants to only write the options file
