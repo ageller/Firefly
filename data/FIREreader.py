@@ -389,7 +389,10 @@ class FIREreader(object):
 		else:   
 			fname_found,fname_base_found,fname_ext  = self.check_if_filename_exists(self.directory,self.snapnum)
 			if (len(fname_found.split(self.slash)) - len(self.directory.split(self.slash)))>1:
-				new_directory = self.slash+os.path.join(*fname_found.split(self.slash)[:-1])
+				if os.name == 'nt':
+					new_directory = fname_found[0:fname_found.rfind(self.slash)]
+				else:
+					new_directory = self.slash+os.path.join(*fname_found.split(self.slash)[:-1])
 				for fname in os.listdir(new_directory):
 					self.openHDF5File(new_directory + self.slash + fname)
 			else:
