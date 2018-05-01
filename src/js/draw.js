@@ -26,7 +26,8 @@ function drawScene(pdraw = params.partsKeys)
 
 	for (var i=0; i<pdraw.length; i++){
 		var p = pdraw[i];
-
+		params.updateFilter[p] = true;
+		
 		var material = new THREE.ShaderMaterial( {
 			uniforms: {
 				color: {value: new THREE.Vector4( params.Pcolors[p][0], params.Pcolors[p][1], params.Pcolors[p][2], params.Pcolors[p][3])},
