@@ -11,6 +11,13 @@ function resetToOptions()
 	//redo init, but only the camera bits (maybe could streamline this and init by using the functions below?)
 	init();
 
+	//resize the bottom of the UI if necessary
+	var i = params.partsKeys.length-1;
+	var pID = params.partsKeys[i];
+	if (!params.gtoggle[pID]){
+		var elm = document.getElementById(pID+'Dropbtn');
+		showFunction(elm);
+	}
 	//destroy the particle portion of the UI and recreate it (simplest option, but not really destroying all elements...)
 	d3.select('#particleUI').html("");
 	createUI();
@@ -76,6 +83,13 @@ function resetToPreset(preset)
 	//redo init, but only the camera bits (maybe could streamline this and init by using the functions below?)
 	init();
 
+	//resize the bottom of the UI if necessary
+	var i = params.partsKeys.length-1;
+	var pID = params.partsKeys[i];
+	if (!params.gtoggle[pID]){
+		var elm = document.getElementById(pID+'Dropbtn');
+		showFunction(elm);
+	}	
 	//destroy the particle portion of the UI and recreate it (simplest option, but not really destroying all elements...)
 	d3.select('#particleUI').html("");
 	createUI();
