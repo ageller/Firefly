@@ -225,11 +225,22 @@ function setFSliderHandle(i, value, parent, reset=false) {
 
 	//reset the filter limits if there is a text entry
 	if (reset){
-		params.filterLims[p][fk][i] = params.filterVals[p][fk][i];
-		var fmin = parseFloat(params.filterLims[p][fk][0]);
-		var fmax = parseFloat(params.filterLims[p][fk][1]);
+		var check = []
+		console.log(params.filterLims[p][fk])
+		check.push(params.filterLims[p][fk][0]);
+		check.push(params.filterLims[p][fk][1]);
+		check[i] = parseFloat(value);
+		var fmin = parseFloat(check[0]);
+		var fmax = parseFloat(check[1]);
 		var max = parseFloat(parent.noUiSlider.options.range.max[0]);
 		var min = parseFloat(parent.noUiSlider.options.range.min[0]);
+
+		var nf = parseFloat(value)/params.filterLims[p][fk][i];
+		params.SliderFinputs[p][fk][i].value = value;
+		params.filterVals[p][fk][i] = parseFloat(value);
+		if (Math.abs(1. - nf) > 0.001 && ! params.reset){
+			drawScene(pDraw = [p]);
+		}
 
 		if (i == 0){
 			parent.noUiSlider.updateOptions({
@@ -357,12 +368,13 @@ function createFilterSliders(){
 
 
 						var nf = parseFloat(values[handle])/params.filterVals[pp][ffk][handle];
+						params.SliderFinputs[pp][ffk][handle].value = values[handle];
+						params.filterVals[pp][ffk][handle] = parseFloat(values[handle]);
 						if (Math.abs(1. - nf) > 0.001 && ! params.reset){
 							drawScene(pDraw = [pp]);
 						}
 
-						params.SliderFinputs[pp][ffk][handle].value = values[handle];
-						params.filterVals[pp][ffk][handle] = parseFloat(values[handle]);
+
 						//because we are now redrawing each time, we do not need to do this
 						//params.updateFilter[pp] = true;
 						mouseDown = true;
