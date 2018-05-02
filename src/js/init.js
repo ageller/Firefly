@@ -512,10 +512,10 @@ function initPVals(){
 		if (params.parts[p].Velocities != null){
 			if (!params.reset){
 				calcVelVals(p);
-			if(!params.parts[p].hasOwnProperty("filterKeys")){
-				params.parts[p].filterKeys = [];
-			}
-			params.parts[p].filterKeys.push("magVelocities");
+				if(!params.parts[p].hasOwnProperty("filterKeys")){
+					params.parts[p].filterKeys = [];
+				}
+				params.parts[p].filterKeys.push("magVelocities");
 			 
 			}
 			params.velType[p] = 'line';

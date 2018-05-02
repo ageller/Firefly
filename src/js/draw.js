@@ -24,6 +24,8 @@ function drawScene(pdraw = params.partsKeys)
 	var ndraw = 0.;
 	var ndiv = Math.round(params.parts.totalSize / 10.);
 
+	//params.octree = new THREE.Octree({scene:params.scene});
+
 	for (var i=0; i<pdraw.length; i++){
 		var p = pdraw[i];
 
@@ -125,7 +127,7 @@ function drawScene(pdraw = params.partsKeys)
 
 
 		params.partsMesh[p].push(mesh)
-
+		//params.octree.add( mesh, { useVertices: true } );
 	}
 
 	//this will not be printed if you change the N value in the slider, and therefore only redraw one particle type
@@ -135,5 +137,6 @@ function drawScene(pdraw = params.partsKeys)
 		clearloading();
 
 	//}
+
 }
 
