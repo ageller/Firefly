@@ -324,6 +324,8 @@ class FIREreader(object):
 			d[part][ukey] = vals
 
 		if (filterFlag):
+			if ('filterKeys') not in d[part]:
+				d[part]['filterKeys'] = []
 			d[part]['filterKeys'].append(ukey)
 
 	def check_if_filename_exists(self,sdir,snum,snapshot_name='snapshot',extension='.hdf5',four_char=0):
