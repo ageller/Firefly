@@ -1,17 +1,17 @@
 var myFragmentShader = `
+
 precision mediump float;
+
 varying float vID;
 varying float vAlpha;
-//varying float glPointSize;
-varying vec4 vVelVals;
+varying float vTheta;
 //varying float vVertexScale;
+//varying float glPointSize;
+
 uniform vec4 color;
 uniform int SPHrad;
-uniform vec3 cameraNegZ;
-uniform vec3 cameraX;
-uniform vec3 cameraY;
 uniform float velType; //0 = line, 1 = arrow, 2 = triangle
-const float PI = 3.1415926535897932384626433832795;
+
 //http://www.neilmendoza.com/glsl-rotation-about-an-arbitrary-axis/
 mat4 rotationMatrix(vec3 axis, float angle)
 {
@@ -42,20 +42,12 @@ void main(void) {
             gl_FragColor.a *= 1. - dist;
         }
     } else { //velocities, lines (Note: requiring vID == 1. breaks in windows for some reason)
-        // why is this negative? 
-        vec3 velVals = vVelVals.xyz;
-        float vyc = -dot(velVals,cameraY);
-        float vxc = dot(velVals,cameraX); 
-        float vSize = sqrt(vyc*vyc+vxc*vxc)/sqrt(dot(velVals,velVals))*vVelVals[3] * 0.5;
-        float theta = atan(vyc,vxc);
-        if (theta<0.0){
-            theta=theta+2.0*PI;
-        }
+
         
-        mat4 rot1 = rotationMatrix(vec3(0,0,1), theta);
+        mat4 rot1 = rotationMatrix(vec3(0,0,1), vTheta);
         vec2 posRot = (rot1 * vec4(gl_PointCoord.x-0.5, gl_PointCoord.y-0.5,0., 1.)).xy;
         
-        float lW = 0.02*vVelVals[3];
+        float lW = 0.02;
 
         // puts tail of vector at -1*lW (half-width offset helps with head-on view)
         if (posRot.x < -1.*lW){
@@ -63,7 +55,7 @@ void main(void) {
         }
 
         //impose minimum size, it will never be shorter than it is thick
-        vSize = max(vSize,lW);
+        float vSize = max(0.5,lW);
 
         //line
         if (velType == 0.){ 
@@ -73,7 +65,7 @@ void main(void) {
         }
 
         //arrow
-        float aH = 0.2*vVelVals[3];
+        float aH = 0.2;
         float aL = 0.75;
         if (velType == 1.){ //arrow
             if (posRot.x > vSize || (posRot.x < vSize*aL && abs(posRot.y) > lW) || (posRot.x > vSize*aL && abs(posRot.y) > (-1.*aH/vSize * posRot.x + aH) )   ){
@@ -82,7 +74,7 @@ void main(void) {
         }
 
         //triangle
-        float tH = 0.1*vVelVals[3]; 
+        float tH = 0.1; 
         if (velType == 2.){ 
             if (posRot.x > vSize || abs(posRot.y) > (-1.*tH/(vSize) * posRot.x + tH)    ){
                 discard;
