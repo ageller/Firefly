@@ -19,6 +19,12 @@ function update(time){
 			hideSplash()
 		}
 	}
+	if (params.keyboard.down("space")){
+		params.useTrackball = !params.useTrackball;
+		params.switchControls = true;
+		params.controls.dispose();
+		initControls();
+	}
 	
 	params.controls.update();
 
