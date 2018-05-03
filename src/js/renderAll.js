@@ -51,7 +51,6 @@ function update(time){
 				m.material.uniforms.color.value = new THREE.Vector4( params.Pcolors[p][0], params.Pcolors[p][1], params.Pcolors[p][2], params.Pcolors[p][3]);
 				if (params.showVel[p]){
 					// pass camera orientation to the shader
-					m.material.uniforms.cameraNegZ.value = [cameraDir.x,cameraDir.y,cameraDir.z];
 					m.material.uniforms.cameraX.value = [cameraX.x,cameraX.y,cameraX.z];
 					m.material.uniforms.cameraY.value = [cameraY.x,cameraY.y,cameraY.z];
 					m.material.uniforms.oID.value = 1.;

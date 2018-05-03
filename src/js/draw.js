@@ -36,7 +36,6 @@ function drawScene(pdraw = params.partsKeys)
 				SPHrad: {value: params.parts[p].doSPHrad},
 				uVertexScale: {value: params.PsizeMult[p]},
 				maxDistance: {value: params.boxSize},
-				cameraNegZ: {value: [0.,0.,-1.]},
 				cameraY: {value: [0.,1.,0.]},
 				cameraX: {value: [1.,0.,0.]},
 				velType: {value: 0.},
