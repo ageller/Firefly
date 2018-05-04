@@ -28,6 +28,10 @@ function drawScene(pdraw = params.partsKeys)
 
 	for (var i=0; i<pdraw.length; i++){
 		var p = pdraw[i];
+		
+		params.scene.remove(params.partsMesh[p]);
+
+		params.partsMesh[p] = [];
 
 		var material = new THREE.ShaderMaterial( {
 			uniforms: {
@@ -72,9 +76,10 @@ function drawScene(pdraw = params.partsKeys)
 		var mesh = new THREE.Points(geo, material);
 		params.scene.add(mesh)
 
-		var positions = mesh.geometry.attributes.position.array;
+		//var positions = mesh.geometry.attributes.position.array;
 		var index = 0;
 		var vindex = 0;
+		var aindex = 0;
 
 		var includePoint = true;
 		//for (var j=0; j<params.parts[p].Coordinates.length/params.decimate; j++){
@@ -113,7 +118,9 @@ function drawScene(pdraw = params.partsKeys)
 					vindex++;
 				}
 
-				alphas[j] = 1.;
+				alphas[aindex] = 1.;
+				aindex++;
+				
 				ndraw += 1;
 				if (ndraw % ndiv < 1 || ndraw == params.parts.totalSize){
 					params.drawfrac = (1 + ndraw/params.parts.totalSize)*0.5;

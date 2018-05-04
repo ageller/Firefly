@@ -87,7 +87,6 @@ function update(time){
 				m.material.uniforms.color.value = new THREE.Vector4(0);
 				m.material.uniforms.oID.value = -1;
 			}
-			//for filtering
 
 		});
 	}

@@ -240,7 +240,6 @@ function setFSliderHandle(i, value, parent, reset=false) {
 	//reset the filter limits if there is a text entry
 	if (reset){
 		var check = []
-		console.log(params.filterLims[p][fk])
 		check.push(params.filterLims[p][fk][0]);
 		check.push(params.filterLims[p][fk][1]);
 		check[i] = parseFloat(value);
@@ -251,7 +250,7 @@ function setFSliderHandle(i, value, parent, reset=false) {
 
 		var nf = parseFloat(value)/params.filterLims[p][fk][i];
 		params.SliderFinputs[p][fk][i].value = value;
-		params.filterVals[p][fk][i] = parseFloat(value);
+		params.filterLims[p][fk][i] = parseFloat(value);
 		if (Math.abs(1. - nf) > 0.001 && ! params.reset){
 			drawScene(pDraw = [p]);
 		}
@@ -281,7 +280,7 @@ function setFSliderHandle(i, value, parent, reset=false) {
 
 
 	//because we are now redrawing each time, we do not need to do this
-	//params.updateFilter[p] = true;
+	params.updateFilter[p] = true;
 	mouseDown = false; 
 }
 
@@ -390,7 +389,7 @@ function createFilterSliders(){
 
 
 						//because we are now redrawing each time, we do not need to do this
-						//params.updateFilter[pp] = true;
+						params.updateFilter[pp] = true;
 						mouseDown = true;
 					});
 
@@ -1816,7 +1815,7 @@ function applyUIoptions(){
 				if (params.parts.options.filterVals.hasOwnProperty(p)){
 					if (params.parts.options.filterVals[p] != null){
 						//because we are now redrawing each time, we do not need to do this
-						//params.updateFilter[p] = true
+						params.updateFilter[p] = true
 
 						for (k=0; k<params.fkeys[p].length; k++){
 							var fkey = params.fkeys[p][k]
