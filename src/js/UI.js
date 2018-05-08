@@ -248,7 +248,7 @@ function setFSliderHandle(i, value, parent, reset=false) {
 		var max = parseFloat(parent.noUiSlider.options.range.max[0]);
 		var min = parseFloat(parent.noUiSlider.options.range.min[0]);
 
-		var nf = parseFloat(value)/params.filterLims[p][fk][i];
+		var nf = parseFloat(value)/ (Math.round(1000.*params.filterLims[p][fk][i])/1000.);
 		params.SliderFinputs[p][fk][i].value = value;
 		params.filterLims[p][fk][i] = parseFloat(value);
 		if (Math.abs(1. - nf) > 0.001 && ! params.reset){
@@ -380,7 +380,7 @@ function createFilterSliders(){
 						var ffk = this.target.id.slice(fpos + 4, epos - sl);
 
 
-						var nf = parseFloat(values[handle])/params.filterVals[pp][ffk][handle];
+						var nf = parseFloat(values[handle])/ (Math.round(1000.*params.filterVals[pp][ffk][handle])/1000.);
 						params.SliderFinputs[pp][ffk][handle].value = values[handle];
 						params.filterVals[pp][ffk][handle] = parseFloat(values[handle]);
 						if (Math.abs(1. - nf) > 0.001 && ! params.reset){
