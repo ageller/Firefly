@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 import h5py,os, shutil
+from snapshot_utils import openSnapshot
 
 class FIREreader(object):
 	"""
@@ -311,7 +312,7 @@ class FIREreader(object):
 		
 		#directory to place all the data files in (assumed to be within the current directory)
 		self.dataDir = None
-
+		
 
 ################################################## 
 #don't modify these
@@ -336,6 +337,7 @@ class FIREreader(object):
 		if os.name == 'nt':
 			self.slash = '\\'
 
+	    
 
 ################################################## 
 ################################################## 
@@ -419,84 +421,36 @@ class FIREreader(object):
 				d[part]['filterKeys'] = []
 			d[part]['filterKeys'].append(ukey)
 
-	def check_if_filename_exists(self,sdir,snum,snapshot_name='snapshot',extension='.hdf5',four_char=0):
-
-		for extension_touse in [extension,'.bin','']:
-			fname=sdir+self.slash+snapshot_name+'_'
-			ext='00'+str(snum);
-			if (snum>=10): ext='0'+str(snum)
-			if (snum>=100): ext=str(snum)
-			if (four_char==1): ext='0'+ext
-			if (snum>=1000): ext=str(snum)
-			fname+=ext
-			fname_base=fname
-
-			s0=sdir.split(self.slash); snapdir_specific=s0[len(s0)-1];
-			if(len(snapdir_specific)<=1): snapdir_specific=s0[len(s0)-2];
-
-			## try several common notations for the directory/filename structure
-			fname=fname_base+extension_touse;
-			if not os.path.exists(fname): 
-				## is it a multi-part file?
-				fname=fname_base+'.0'+extension_touse;
-			if not os.path.exists(fname): 
-				## is the filename 'snap' instead of 'snapshot'?
-				fname_base=sdir+self.slash+'snap_'+ext; 
-				fname=fname_base+extension_touse;
-			if not os.path.exists(fname): 
-				## is the filename 'snap' instead of 'snapshot', AND its a multi-part file?
-				fname=fname_base+'.0'+extension_touse;
-			if not os.path.exists(fname): 
-				## is the filename 'snap(snapdir)' instead of 'snapshot'?
-				fname_base=sdir+self.slash+'snap_'+snapdir_specific+'_'+ext; 
-				fname=fname_base+extension_touse;
-			if not os.path.exists(fname): 
-				## is the filename 'snap' instead of 'snapshot', AND its a multi-part file?
-				fname=fname_base+'.0'+extension_touse;
-			if not os.path.exists(fname): 
-				## is it in a snapshot sub-directory? (we assume this means multi-part files)
-				fname_base=sdir+self.slash+'snapdir_'+ext+self.slash+snapshot_name+'_'+ext; 
-				fname=fname_base+'.0'+extension_touse;
-			if not os.path.exists(fname): 
-				## is it in a snapshot sub-directory AND named 'snap' instead of 'snapshot'?
-				fname_base=sdir+self.slash+'snapdir_'+ext+self.slash+'snap_'+ext; 
-				fname=fname_base+'.0'+extension_touse;
-			if not os.path.exists(fname): 
-				## wow, still couldn't find it... ok, i'm going to give up!
-				fname_found = 'NULL'
-				fname_base_found = 'NULL'
-				fname_ext = 'NULL'
-				continue;
-			fname_found = fname;
-			fname_base_found = fname_base;
-			fname_ext = extension_touse
-			break; # filename does exist! 
-		return fname_found, fname_base_found, fname_ext                   
-
 	#populate the dict
 	def populate_dict(self):
+		## fill the parts dict with values
+		for ptype in self.returnParts:
+			self.partsDict[ptype]={}
+			snapdict = openSnapshot(
+				self.directory,
+				self.snapnum,
+				int(ptype[-1]),## PartType%d <-- final character is number
+				keys_to_extract = self.returnKeys[ptype],
+				header_only=0)
+			for i,key in enumerate(self.returnKeys[ptype]):
+				try:
+					snapvals = snapdict[key]
+				except KeyError:
+					print("%s has no %s"%(ptype,key))
+				if self.dolog[ptype][i]:
+				    snapvals=np.log10(snapvals)
+				    key = 'log10%s'%key
+				self.partsDict[ptype][key]=snapvals
 
-		if self.snapnum is None:
-			for fname in os.listdir(self.directory):
-				self.openHDF5File(self.directory+self.slash+fname) 
-		else:   
-			fname_found,fname_base_found,fname_ext  = self.check_if_filename_exists(self.directory,self.snapnum)
-			if (len(fname_found.split(self.slash)) - len(self.directory.split(self.slash)))>1:
-				if os.name == 'nt':
-					new_directory = fname_found[0:fname_found.rfind(self.slash)]
-				else:
-					new_directory = self.slash+os.path.join(*fname_found.split(self.slash)[:-1])
-				for fname in os.listdir(new_directory):
-					self.openHDF5File(new_directory + self.slash + fname)
-			else:
-			   self.openHDF5File(fname_found) 
-
-
+		## return the ordering of the files, so we can reopen them outside of the reader
+		##  if we want...
+		self.loadedHDF5Files = snapdict['fnames']
 		#and on some of the options here
 		for p in list(self.partsDict.keys()):
 			self.partsDict[p]['filterKeys'] = self.filterKeys[p]
 			self.partsDict[p]['doSPHrad'] = self.doSPHrad[p]
 
+		return self.loadedHDF5Files
 
 	def shuffle_dict(self):
 		#should we decimate the data? (NOTE: even if decimate = 1, it is wise to shuffle the data so it doesn't display in blocks)
@@ -521,40 +475,16 @@ class FIREreader(object):
 			pp = self.swapnames(p)
 			self.partsDict[pp] = self.partsDict.pop(p)
 			
-	def openHDF5File(self,fname):
-		print(fname)
-		self.loadedHDF5Files.append(fname)
-		if (self.dataDir is None):
-			self.dataDir = ""
-			xx = fname.split(self.slash)
-			ntry = 2
-			while (len(self.dataDir) == 0 and ntry < len(xx)):
-				self.dataDir = xx[-ntry]
-				ntry += 1
-
-		with h5py.File(fname,'r') as snap:
-			foo = list(snap.keys())
-			parts = foo[1:]
-			for p in parts:
-				if p in self.returnParts:
-					if p not in self.partsDict:
-						self.partsDict[p] = dict()
-					vals = snap[p].keys()
-					#This shows the available keys
-					if (self.showkeys):
-						print(p,self.swapnames(p), vals)
-					if (self.radiusFunction[p] != None):
-						self.radiusFunction[p](self, self.partsDict, snap, p)
-					if (self.weightFunction[p] != None):
-						self.weightFunction[p](self, self.partsDict, snap, p)
-					for i,k in enumerate(self.returnKeys[p]):
-						if (k in vals):
-							self.addtodict(
-								self.partsDict, snap, p, k, 
-								self.dolog[p][i], self.domag[p][i])
-			
 	#create the JSON file, and then add the name of the variable (parts) that we want in Firefly
 	def createJSON(self):
+
+		## NOTE ABG: added here default dataDirectory parsing
+		self.dataDir = (
+		    self.slash.join(os.path.realpath(__file__).split(self.slash)[:-1]) if 
+		    self.dataDir is None else self.dataDir)
+		self.dataDir = os.path.join(self.dataDir,
+		    "%s_%d"%(self.directory.split(self.slash)[-2],self.snapnum))
+
 		print("writing JSON files ...")
 		if (os.path.exists(self.dataDir) and self.cleanDataDir):
 			print("REMOVING FILES FROM data"+self.slash+self.dataDir)	
