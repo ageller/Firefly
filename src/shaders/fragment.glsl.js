@@ -5,12 +5,15 @@ precision mediump float;
 varying float vID;
 varying float vAlpha;
 varying float vTheta;
+varying float VariableMag;
 //varying float vVertexScale;
 //varying float glPointSize;
 
+uniform float colormap;
 uniform vec4 color;
 uniform int SPHrad;
 uniform float velType; //0 = line, 1 = arrow, 2 = triangle
+uniform sampler2D texture;
 
 //http://www.neilmendoza.com/glsl-rotation-about-an-arbitrary-axis/
 mat4 rotationMatrix(vec3 axis, float angle)
@@ -27,6 +30,16 @@ mat4 rotationMatrix(vec3 axis, float angle)
 }
 void main(void) {
     gl_FragColor = color;
+    
+    // if colormap is requested, apply appropriate colormap to appropriate variable
+    if (colormap > 0.){
+        if (vID > -1.){
+            vec2 pos = vec2(VariableMag, colormap);
+            vec3 c = texture2D(texture, pos).rgb;
+            gl_FragColor.rgb = c;
+        }
+    }
+
     float dist = 0.;
     if (vID < 0.5){ //normal mode, plotting points (should be vID == 0, but this may be safer)
         // Get the distance vector from the center

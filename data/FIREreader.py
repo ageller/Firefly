@@ -464,6 +464,7 @@ class FIREreader(object):
 			
 	#create the JSON file, and then add the name of the variable (parts) that we want in Firefly
 	def createJSON(self):
+		print(self.dataDir)
 		print("writing JSON files ...")
 		if (os.path.exists(self.dataDir) and self.cleanDataDir):
 			print("REMOVING FILES FROM data"+self.slash+self.dataDir)	
