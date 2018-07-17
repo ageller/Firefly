@@ -2,7 +2,6 @@
 var params;
 function defineParams(){
 	ParamsInit = function() {
-
 		this.container = null;
 		this.scene = null;
 		this.camera = null;
@@ -125,8 +124,19 @@ function defineParams(){
 		//animation
 		this.pauseAnimation = false;
 
-	};
+		// initializes colormap texture
+		this.texture;
 
+		// determines which colormap is applied to each particle type
+		this.colormap = {};
+
+		// determines which colormap variable is activated for each particle type
+		this.colormapVariable = {};
+
+		// list of possible colormap variables for each particle type
+		// this will eventually be produced by Python code
+		this.ckeys = {};
+	};
 
 	params = new ParamsInit();
 
@@ -159,7 +169,6 @@ function initControls(){
 	}
 
 	params.switchControls = false;
-
 
 	if (params.haveUI){
 		updateUICenterText();
@@ -204,7 +213,6 @@ function init() {
 		params.effect.setEyeSeparation(params.stereoSep);
 	}
 
-
 	// scene
 	params.scene = new THREE.Scene();     
 
@@ -216,7 +224,6 @@ function init() {
 	// events
 	THREEx.WindowResize(params.renderer, params.camera);
 	//THREEx.FullScreen.bindKey({ charCode : 'm'.charCodeAt(0) });
-
 
 	params.useTrackball = true;
 
@@ -231,6 +238,29 @@ function init() {
 	// controls
 	initControls();
 
+}
+
+// establishes initial conditions for the colormap
+function initializeColorMap(){
+
+	// load colormap
+	params.texture = new THREE.TextureLoader().load( "textures/colormap.png" );
+	console.log('colormap loaded', params.texture)
+
+	// loop through each particle type
+	for (var i = 0; i < params.partsKeys.length; i++){
+		var p = params.partsKeys[i];
+
+		// normalize log10Temperature
+		if (params.parts[p].log10Temperature != null){
+			calcNormTemp(p);
+		}
+
+		// initialize dictionaries
+		params.colormapVariable[p] = 0;
+		params.colormap[p] = -4/256;
+		params.ckeys[p] = [params.parts[p].NormVel, params.parts[p].NormTemp];
+	}
 }
 
 function applyOptions(){
@@ -318,7 +348,7 @@ function applyOptions(){
 			}
 		}
 	}
-
+	console.log("keys", params.partsKeys)
 	//particle specific options
 	for (var i=0; i<params.partsKeys.length; i++){
 		var p = params.partsKeys[i];
@@ -441,6 +471,7 @@ function applyOptions(){
 				}
 			}
 		}
+
 	}
 
 
@@ -470,6 +501,7 @@ function calcFilterLimits(p, fkey){
 function calcVelVals(p){
 	params.parts[p].VelVals = [];
 	params.parts[p].magVelocities = [];
+	params.parts[p].NormVel = [];
 	var mag, angx, angy, v;
 	var max = -1.;
 	var min = 1.e20;
@@ -490,12 +522,32 @@ function calcVelVals(p){
 	}
 	vdif = Math.min(max - min, params.maxVrange);
 	for (var i=0; i<params.parts[p].Velocities.length; i++){
-		params.parts[p].VelVals[i].push( THREE.Math.clamp((params.parts[p].magVelocities[i] - min) / vdif, 0., 1.));
+		params.parts[p].NormVel.push( THREE.Math.clamp((params.parts[p].magVelocities[i] - min) / vdif, 0., 1.));
 	}
 }
+
+// calculate normalized temperature values
+function calcNormTemp(p){
+	params.parts[p].NormTemp = [];
+	var max = -1;
+	var min = 1.e20;
+	for (var i=0; i<params.parts[p].log10Temperature.length; i++){
+		t = params.parts[p].log10Temperature[i];
+		if (t > max){
+			max = t;
+		}
+		if (t < min){
+			min = t;
+		}
+	}
+	var tdif = max - min;
+	for (var i=0; i<params.parts[p].log10Temperature.length; i++){
+		params.parts[p].NormTemp.push( THREE.Math.clamp((params.parts[p].log10Temperature[i] - min) / tdif, 0., 1.));
+	}	
+}
+
 //initialize various values for the parts dict from the input data file, 
 function initPVals(){
-
 
 	for (var i=0; i<params.partsKeys.length; i++){
 		var p = params.partsKeys[i];
@@ -521,6 +573,7 @@ function initPVals(){
 			params.velType[p] = 'line';
 			//console.log(p, params.parts[p].VelVals, params.parts[p].Velocities)
 		}
+		
 		if (params.parts[p].hasOwnProperty("filterKeys")){
 			params.fkeys[p] = params.parts[p].filterKeys;
 			for (var k=0; k<params.fkeys[p].length; k++){
@@ -651,7 +704,6 @@ function selectFromStartup(){
 		.append('span')
 			.text('Confirm');
 
-
 	var updateButton = document.getElementById('selectStartupButton');
 	var cancelButton = document.getElementById('cancelSelection');
 	var submitButton = document.getElementById('submitSelection');
@@ -773,8 +825,6 @@ function loadData(callback){
 							params.parts.options0 = JSON.parse(JSON.stringify(params.parts.options));
 						}
 
-
-
 						callback(); 
 					}
 
@@ -854,7 +904,6 @@ function clearloading(){
 
 }
 
-
 function WebGLStart(){
 
 //reset the window title
@@ -869,14 +918,15 @@ function WebGLStart(){
 
 	init();
 
+	initializeColorMap();
+
 	createUI();
 	mouseDown = false;  //silly fix
 
-//draw everything
+	//draw everything
 	drawScene();
 
-
-//begin the animation
+	//begin the animation
 	params.pauseAnimation = false;
 	animate();
 }
@@ -915,7 +965,6 @@ d3.select('body').append('input')
 		}
 	})
 	.style('display','None');
-
 
 //This will define the params object (that contains all "global" variables), then load the data, and then start the WebGL rendering
 getFilenames();

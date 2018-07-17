@@ -1,4 +1,3 @@
-
 function clearPartsMesh(pClear = params.partsKeys) {
 	for (var i=0; i<pClear.length; i++){
 		var p = pClear[i];
@@ -34,7 +33,8 @@ function drawScene(pdraw = params.partsKeys)
 		params.partsMesh[p] = [];
 
 		var material = new THREE.ShaderMaterial( {
-			uniforms: {
+
+			uniforms: { //add uniform variable here
 				color: {value: new THREE.Vector4( params.Pcolors[p][0], params.Pcolors[p][1], params.Pcolors[p][2], params.Pcolors[p][3])},
 				oID: {value: 0},
 				SPHrad: {value: params.parts[p].doSPHrad},
@@ -43,6 +43,8 @@ function drawScene(pdraw = params.partsKeys)
 				cameraY: {value: [0.,1.,0.]},
 				cameraX: {value: [1.,0.,0.]},
 				velType: {value: 0.},
+				texture: {value: params.texture},
+				colormap: {value: params.colormap[p]},
 			},
 
 			vertexShader: myVertexShader,
@@ -76,10 +78,14 @@ function drawScene(pdraw = params.partsKeys)
 		var mesh = new THREE.Points(geo, material);
 		params.scene.add(mesh)
 
+		// create array to hold colormap variable values
+		var colormapVariable_array = new Float32Array( params.plotNmax[p]); 
+		geo.addAttribute('ColorMapVariable_Array', new THREE.BufferAttribute( colormapVariable_array, 1));
+
 		//var positions = mesh.geometry.attributes.position.array;
 		var index = 0;
+		var pindex = 0;
 		var vindex = 0;
-		var aindex = 0;
 
 		var includePoint = true;
 		//for (var j=0; j<params.parts[p].Coordinates.length/params.decimate; j++){
@@ -100,12 +106,12 @@ function drawScene(pdraw = params.partsKeys)
 
 				//geo.vertices.push(new THREE.Vector3(params.parts[p].Coordinates[j][0], params.parts[p].Coordinates[j][1], params.parts[p].Coordinates[j][2] ))
 				
-				positions[index] = params.parts[p].Coordinates[j][0];
-				index++;
-				positions[index] = params.parts[p].Coordinates[j][1];
-				index++;
-				positions[index] = params.parts[p].Coordinates[j][2];
-				index++;
+				positions[pindex] = params.parts[p].Coordinates[j][0];
+				pindex++;
+				positions[pindex] = params.parts[p].Coordinates[j][1];
+				pindex++;
+				positions[pindex] = params.parts[p].Coordinates[j][2];
+				pindex++;
 
 				if (params.parts[p].Velocities != null){
 					velVals[vindex] = params.parts[p].VelVals[j][0]/params.parts[p].magVelocities[j];
@@ -114,12 +120,24 @@ function drawScene(pdraw = params.partsKeys)
 					vindex++;
 					velVals[vindex] = params.parts[p].VelVals[j][2]/params.parts[p].magVelocities[j];
 					vindex++;
-					velVals[vindex] = params.parts[p].VelVals[j][3];
+					velVals[vindex] = params.parts[p].NormVel[j];
 					vindex++;
 				}
 
-				alphas[aindex] = 1.;
-				aindex++;
+				// fill colormap array with appropriate variable values
+				if (params.colormap[p] > 0.){
+					if (params.ckeys[p][params.colormapVariable[p]] != null){
+						colormapVariable_array[index] = params.ckeys[p][params.colormapVariable[p]][j];
+					}
+					// if variable is not applicable to particle type, set to 0
+					// temporary fix, in UI user will not be able to select this as an option at all
+					else{
+						colormapVariable_array[index] = 0;
+					}
+				}
+
+				alphas[index] = 1.;
+				index++;
 				
 				ndraw += 1;
 				if (ndraw % ndiv < 1 || ndraw == params.parts.totalSize){
@@ -130,7 +148,6 @@ function drawScene(pdraw = params.partsKeys)
 		}
 
 		mesh.position.set(0,0,0);
-
 
 		params.partsMesh[p].push(mesh)
 		//params.octree.add( mesh, { useVertices: true } );
@@ -145,4 +162,3 @@ function drawScene(pdraw = params.partsKeys)
 	//}
 
 }
-
