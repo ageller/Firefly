@@ -12,16 +12,16 @@ def getTemperature(U_code,helium_mass_fraction,ElectronAbundance):
 	m_proton=1.67e-24 # g
 	y_helium = helium_mass_fraction / (4*(1-helium_mass_fraction))
 
-    	mu = (1.0 + 4*y_helium) / (1+y_helium+ElectronAbundance) 
-    	mean_molecular_weight=mu*m_proton
-    	return mean_molecular_weight * (gamma-1) * U_cgs / kB
+	mu = (1.0 + 4*y_helium) / (1+y_helium+ElectronAbundance) 
+	mean_molecular_weight=mu*m_proton
+	return mean_molecular_weight * (gamma-1) * U_cgs / kB
 
 def getAgesGyrs(open_snapshot):
-    	cosmo_sfts=open_snapshot['StellarFormationTime']
-    	cur_time = open_snapshot['Time']
-    	HubbleParam = open_snapshot['HubbleParam']
-    	Omega0 = open_snapshot['Omega0']
-    	return convertStellarAges(HubbleParam,Omega0,cosmo_sfts,cur_time)
+	cosmo_sfts=open_snapshot['StellarFormationTime']
+	cur_time = open_snapshot['Time']
+	HubbleParam = open_snapshot['HubbleParam']
+	Omega0 = open_snapshot['Omega0']
+	return convertStellarAges(HubbleParam,Omega0,cosmo_sfts,cur_time)
 
 def get_fnames(snapdir,snapnum):
 	fnames = [os.path.join(snapdir,fname) for fname in os.listdir(snapdir) if "_%03d"%snapnum in fname]
@@ -137,13 +137,12 @@ def openSnapshot(
 					for pkey in handle['PartType%d'%ptype].keys():
 						if keys_to_extract is None or pkey in keys_to_extract or pkey in temperature_keys:
 							unit_fact = get_unit_conversion(new_dictionary,pkey,cosmological)
-						## handle potentially double precision coordinates
-						if pkey == 'Coordinates':
-							value = np.array(handle['PartType%d/%s'%(ptype,pkey)],dtype=coord_dtype)*unit_fact
-						else:
-							value = np.array(handle['PartType%d/%s'%(ptype,pkey)])*unit_fact
-
-						new_dictionary[pkey] = value
+							## handle potentially double precision coordinates
+							if pkey == 'Coordinates':
+								value = np.array(handle['PartType%d/%s'%(ptype,pkey)],dtype=coord_dtype)*unit_fact
+							else:
+								value = np.array(handle['PartType%d/%s'%(ptype,pkey)])*unit_fact
+							new_dictionary[pkey] = value
 
 				if ( (ptype == 0) and ('ChimesAbundances' in handle['PartType0'].keys())):
 					for chimes_species in chimes_keys:
@@ -155,12 +154,12 @@ def openSnapshot(
 					for pkey in handle['PartType%d'%ptype].keys():
 						if keys_to_extract is None or pkey in keys_to_extract or pkey in temperature_keys:
 							unit_fact = get_unit_conversion(new_dictionary,pkey,cosmological)
-						## handle potentially double precision coordinates
-						if pkey == 'Coordinates':
-							value = np.array(handle['PartType%d/%s'%(ptype,pkey)],dtype=coord_dtype)*unit_fact
-						else:
-							value = np.array(handle['PartType%d/%s'%(ptype,pkey)])*unit_fact
-						new_dictionary[pkey] = np.append(new_dictionary[pkey],value,axis=0) 
+							## handle potentially double precision coordinates
+							if pkey == 'Coordinates':
+								value = np.array(handle['PartType%d/%s'%(ptype,pkey)],dtype=coord_dtype)*unit_fact
+							else:
+								value = np.array(handle['PartType%d/%s'%(ptype,pkey)])*unit_fact
+							new_dictionary[pkey] = np.append(new_dictionary[pkey],value,axis=0) 
 
 	## get temperatures if this is a gas particle dataset
 	if ( (ptype == 0) and 
