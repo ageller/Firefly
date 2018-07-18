@@ -1,5 +1,4 @@
 import h5py,sys,os
-from readsnap import readsnap
 import numpy as np
 from abg_python.all_utils import getTemperature
 from abg_python.cosmo_utils import getAgesGyrs
@@ -8,12 +7,12 @@ from abg_python.cosmo_utils import getAgesGyrs
 def makeHeader(snapshot,build_snapshot):
 	ref_header = dict(zip(['Flag_IC_Info','NumFilesPerSnapshot','MassTable','Time',
 							'HubbleParam','Flag_Metals','BoxSize','NumPart_Total',
-						   'NumPart_ThisFile',"NumPart_Total_HighWord",'Redshift','Omega0',
-						   'OmegaLambda','Flag_Sfr','Flag_Cooling','Flag_StellarAge',
-						  'Flag_Feedback', 'Flag_DoublePrecision'],
-						 [2,1,np.array([0,0,0,0,0]),0,1,17,100,
-						  np.array([0,0,0,0,0]),np.array([0,0,0,0,0]),
-						 np.array([0,0,0,0,0]),0,0,0,1,1,1,1,0]))
+							'NumPart_ThisFile',"NumPart_Total_HighWord",'Redshift','Omega0',
+							'OmegaLambda','Flag_Sfr','Flag_Cooling','Flag_StellarAge',
+							'Flag_Feedback', 'Flag_DoublePrecision'],
+							[2,1,np.array([0,0,0,0,0]),0,1,17,100,
+							np.array([0,0,0,0,0]),np.array([0,0,0,0,0]),
+							np.array([0,0,0,0,0]),0,0,0,1,1,1,1,0]))
 	print('ref header created',ref_header.keys())
 	with h5py.File(snapshot,'r') as snap:
 		with h5py.File(build_snapshot,'w') as build_snap:
