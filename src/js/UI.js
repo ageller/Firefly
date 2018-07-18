@@ -11,6 +11,8 @@ function resetToOptions()
 	//redo init, but only the camera bits (maybe could streamline this and init by using the functions below?)
 	init();
 
+	initializeColorMap();
+
 	//resize the bottom of the UI if necessary
 	var i = params.partsKeys.length-1;
 	var pID = params.partsKeys[i];
