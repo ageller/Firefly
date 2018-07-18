@@ -23,6 +23,21 @@ def getAgesGyrs(open_snapshot):
 	Omega0 = open_snapshot['Omega0']
 	return convertStellarAges(HubbleParam,Omega0,cosmo_sfts,cur_time)
 
+def convertStellarAges(HubbleParam,Omega0,stellar_tform,Time):
+	""" Assumes a flat cosmology"""
+    	km_per_kpc = 3.086e16
+    	UnitTime_in_seconds = km_per_kpc / HubbleParam #/ 1 kms suppressed
+    	UnitTime_in_Megayears = UnitTime_in_seconds/3.1536e13
+    	Hubble_H0_CodeUnits = 3.2407789e-18 * UnitTime_in_seconds 
+    	a0 = stellar_tform
+    	a2 = Time
+    	x0 = (Omega0/(1-Omega0))/(a0*a0*a0)
+    	x2 = (Omega0/(1-Omega0))/(a2*a2*a2)
+    	age = (2./(3.*np.sqrt(1-Omega0)))*np.log(np.sqrt(x0*x2)/((np.sqrt(1+x2)-1)*(np.sqrt(1+x0)+1)))
+    	age *= 1./Hubble_H0_CodeUnits
+    	age *= 0.001*UnitTime_in_Megayears/HubbleParam
+    	return age
+
 def get_fnames(snapdir,snapnum):
 	fnames = [os.path.join(snapdir,fname) for fname in os.listdir(snapdir) if "_%03d"%snapnum in fname]
 	if len(fnames) > 1:
@@ -115,6 +130,8 @@ def openSnapshot(
 	'InternalEnergy',
 	'Metallicity',
 	'ElectronAbundance']*((keys_to_extract is not None) and ('Temperature' in keys_to_extract))
+	age_keys = ['StellarFormationTime']*((keys_to_extract is not None) and ('AgeGyr' in keys_to_extract))
+
 
 	for i,fname in enumerate(sorted(fnames)):
 	## let the user know what snapshot file we're trying to open
@@ -135,7 +152,7 @@ def openSnapshot(
 
 					## initialize particle arrays
 					for pkey in handle['PartType%d'%ptype].keys():
-						if keys_to_extract is None or pkey in keys_to_extract or pkey in temperature_keys:
+						if (keys_to_extract is None or pkey in keys_to_extract or pkey in temperature_keys or pkey in age_keys):
 							unit_fact = get_unit_conversion(new_dictionary,pkey,cosmological)
 							## handle potentially double precision coordinates
 							if pkey == 'Coordinates':
@@ -152,7 +169,7 @@ def openSnapshot(
 				if not header_only:
 					## append particle array for each file
 					for pkey in handle['PartType%d'%ptype].keys():
-						if keys_to_extract is None or pkey in keys_to_extract or pkey in temperature_keys:
+						if (keys_to_extract is None or pkey in keys_to_extract or pkey in temperature_keys or pkey in age_keys):
 							unit_fact = get_unit_conversion(new_dictionary,pkey,cosmological)
 							## handle potentially double precision coordinates
 							if pkey == 'Coordinates':
@@ -188,6 +205,11 @@ def openSnapshot(
 		else:
 			## isolated galaxy -> SFT is in Gyr, just need the age then
 			new_dictionary['AgeGyr']=(new_dictionary['Time']-new_dictionary['StellarFormationTime'])/0.978 #Gyr
+
+		## remove the keys in temperature keys that are not in keys_to_extract, if it is not None
+		subtract_set = set(age_keys) if keys_to_extract is None else set(keys_to_extract)
+		for key in (set(age_keys) - subtract_set):
+			new_dictionary.pop(key)
 	
 	return new_dictionary
 
