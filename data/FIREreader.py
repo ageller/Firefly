@@ -107,7 +107,7 @@ class FIREreader(object):
 			'stereoSep':None, #camera (eye) separation in the stereo 
 			#	mode (default is 0.06, should be < 1)
 			'decimate':None, #set the initial decimation (e.g, 
-			#	you could load in all the data, but setting self.decimate to 
+			#	you could load in all the data by setting self.decimate to 
 			#	1 above, but only display some fraction by setting 
 			#	self.options.decimate > 1 here).  This is a single value (not a dict)
 			'plotNmax':dict(), #maximum initial number of particles to plot 
@@ -259,7 +259,7 @@ class FIREreader(object):
 			'stereoSep':None, #camera (eye) separation in the stereo 
 			#	mode (default is 0.06, should be < 1)
 			'decimate':None, #set the initial decimation (e.g, 
-			#	you could load in all the data, but setting self.decimate to 
+			#	you could load in all the data by setting self.decimate to 
 			#	1 above, but only display some fraction by setting 
 			#	self.options.decimate > 1 here).  This is a single value (not a dict)
 			'plotNmax':dict(), #maximum initial number of particles to plot 
@@ -435,12 +435,13 @@ class FIREreader(object):
 			for i,key in enumerate(self.returnKeys[ptype]):
 				try:
 					snapvals = snapdict[key]
+					if self.dolog[ptype][i]:
+						snapvals=np.log10(snapvals)
+						key = 'log10%s'%key
+					self.partsDict[ptype][key]=snapvals
 				except KeyError:
 					print("%s has no %s"%(ptype,key))
-				if self.dolog[ptype][i]:
-					snapvals=np.log10(snapvals)
-					key = 'log10%s'%key
-				self.partsDict[ptype][key]=snapvals
+
 
 		## return the ordering of the files, so we can reopen them outside of the reader
 		##  if we want...
@@ -479,11 +480,12 @@ class FIREreader(object):
 	def createJSON(self):
 
 		## NOTE ABG: added here default dataDirectory parsing
-		self.dataDir = (
-			self.slash.join(os.path.realpath(__file__).split(self.slash)[:-1]) if 
-			self.dataDir is None else self.dataDir)
-		self.dataDir = os.path.join(self.dataDir,
-			"%s_%d"%(self.directory.split(self.slash)[-2],self.snapnum))
+		print("dataDir",self.dataDir)
+		if (self.dataDir == None):
+			self.dataDir = self.slash.join(os.path.realpath(__file__).split(self.slash)[:-1]) 
+			self.dataDir = os.path.join(self.dataDir, "%s_%d"%(self.directory.split(self.slash)[-2],self.snapnum))
+
+
 
 		print("writing JSON files ...")
 		if (os.path.exists(self.dataDir) and self.cleanDataDir):
