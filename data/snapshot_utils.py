@@ -192,27 +192,6 @@ def openSnapshot(
 	
 	return new_dictionary
 
-## pandas dataframe stuff
-def readsnapToDF(snapdir,snapnum,parttype):
-	res = readsnap(snapdir,snapnum,parttype,cosmological='m12i' in snapdir)
-	
-	ids = res.pop('id')
-
-	vels = res.pop('v')
-	coords = res.pop('p')
-
-	res['xs'],res['vxs'] = coords[:,0],vels[:,0]
-	res['ys'],res['vys'] = coords[:,1],vels[:,1]
-	res['zs'],res['vzs'] = coords[:,2],vels[:,2]
-
-
-	metallicity = res.pop('z')
-	for i,zarray in enumerate(metallicity.T):
-		res['met%d'%i]=zarray
-	
-	snap_df = pd.DataFrame(res,index=ids)
-	return snap_df
-
 ## thanks Alex Richings!
 def read_chimes(filename, chimes_species): 
 	''' filename - string containing the name of the HDF5 file to read in. 
