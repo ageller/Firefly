@@ -25,18 +25,18 @@ def getAgesGyrs(open_snapshot):
 
 def convertStellarAges(HubbleParam,Omega0,stellar_tform,Time):
 	""" Assumes a flat cosmology"""
-    	km_per_kpc = 3.086e16
-    	UnitTime_in_seconds = km_per_kpc / HubbleParam #/ 1 kms suppressed
-    	UnitTime_in_Megayears = UnitTime_in_seconds/3.1536e13
-    	Hubble_H0_CodeUnits = 3.2407789e-18 * UnitTime_in_seconds 
-    	a0 = stellar_tform
-    	a2 = Time
-    	x0 = (Omega0/(1-Omega0))/(a0*a0*a0)
-    	x2 = (Omega0/(1-Omega0))/(a2*a2*a2)
-    	age = (2./(3.*np.sqrt(1-Omega0)))*np.log(np.sqrt(x0*x2)/((np.sqrt(1+x2)-1)*(np.sqrt(1+x0)+1)))
-    	age *= 1./Hubble_H0_CodeUnits
-    	age *= 0.001*UnitTime_in_Megayears/HubbleParam
-    	return age
+	km_per_kpc = 3.086e16
+	UnitTime_in_seconds = km_per_kpc / HubbleParam #/ 1 kms suppressed
+	UnitTime_in_Megayears = UnitTime_in_seconds/3.1536e13
+	Hubble_H0_CodeUnits = 3.2407789e-18 * UnitTime_in_seconds 
+	a0 = stellar_tform
+	a2 = Time
+	x0 = (Omega0/(1-Omega0))/(a0*a0*a0)
+	x2 = (Omega0/(1-Omega0))/(a2*a2*a2)
+	age = (2./(3.*np.sqrt(1-Omega0)))*np.log(np.sqrt(x0*x2)/((np.sqrt(1+x2)-1)*(np.sqrt(1+x0)+1)))
+	age *= 1./Hubble_H0_CodeUnits
+	age *= 0.001*UnitTime_in_Megayears/HubbleParam
+	return age
 
 def get_fnames(snapdir,snapnum):
 	fnames = [os.path.join(snapdir,fname) for fname in os.listdir(snapdir) if "_%03d"%snapnum in fname]
