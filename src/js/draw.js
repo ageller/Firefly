@@ -76,7 +76,7 @@ function drawScene(pdraw = params.partsKeys)
 		geo.setDrawRange( 0, params.plotNmax[p] );
 
 		var mesh = new THREE.Points(geo, material);
-		params.scene.add(mesh)
+		params.scene.add(mesh);
 
 		// create array to hold colormap variable values
 		var colormapVariable_array = new Float32Array( params.plotNmax[p]); 
