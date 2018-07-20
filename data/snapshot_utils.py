@@ -2,7 +2,11 @@ import h5py,sys,os
 import numpy as np
 
 ## physics helper functions
-def getTemperature(U_code, helium_mass_fraction, ElectronAbundance):
+def getTemperature(
+	U_code,
+	helium_mass_fraction=None,
+	ElectronAbundance=None,
+	mu = None):
 	"""U_code = snapdict['InternalEnergy']
 	helium_mass_fraction = snapdict['Metallicity'][:,1]
 	ElectronAbundance= snapdict['ElectronAbundance']"""
@@ -10,8 +14,17 @@ def getTemperature(U_code, helium_mass_fraction, ElectronAbundance):
 	gamma=5/3.
 	kB=1.38e-16 #erg /K
 	m_proton=1.67e-24 # g
-	y_helium = helium_mass_fraction / (4*(1-helium_mass_fraction))
-	mu = (1.0 + 4*y_helium) / (1+y_helium+ElectronAbundance) 
+	if mu is None:
+		## not provided from chimes, hopefully you sent me helium_mass_fraction and
+		##	electron abundance!
+		try: 
+			assert helium_mass_fraction is not None
+			assert ElectronAbundance is not None
+		except AssertionError:
+			raise ValueError(
+				"You need to either provide mu or send helium mass fractions and electron abundances to calculate it!")
+		y_helium = helium_mass_fraction / (4*(1-helium_mass_fraction))
+		mu = (1.0 + 4*y_helium) / (1+y_helium+ElectronAbundance) 
 	mean_molecular_weight=mu*m_proton
 	return mean_molecular_weight * (gamma-1) * U_cgs / kB
 
@@ -114,9 +127,13 @@ def openSnapshot(
 	for i,key in enumerate(keys_to_extract):
 		## if the key was put into keys_to_extract instead of chimes_key
 		##	which is a uSER ERROR(!!)
-		if key in chimes_dict:
+		if key in chimes_dict or 'Abundance' in key:
 		## transfer the key to the chimes_keys, WHERE IT BELONGS
-			chimes_keys+=[keys_to_extract.pop(i-popped)]
+			ckey = keys_to_extract.pop(i-popped)
+			if 'Abundance' in ckey:
+				ckey = ckey[:-len('Abundance')]
+			chimes_keys+=[ckey]
+			popped+=1
 	
 	new_dictionary = {}
 
@@ -128,7 +145,8 @@ def openSnapshot(
 	temperature_keys = [
 	'InternalEnergy',
 	'Metallicity',
-	'ElectronAbundance']*((keys_to_extract is not None) and ('Temperature' in keys_to_extract))
+	'ElectronAbundance',
+	'ChimesMu']*((keys_to_extract is not None) and ('Temperature' in keys_to_extract))
 	age_keys = ['StellarFormationTime']*((keys_to_extract is not None) and ('AgeGyr' in keys_to_extract))
 
 
@@ -182,17 +200,26 @@ def openSnapshot(
 	 (not header_only) and 
 		 (keys_to_extract is None or 'Temperature' in keys_to_extract)):
 
-		new_dictionary['Temperature']=getTemperature(
-			new_dictionary['InternalEnergy'],
-			new_dictionary['Metallicity'][:,1],
-			new_dictionary['ElectronAbundance'])
+		if 'ChimesMu' in new_dictionary:
+			new_dictionary['Temperature']=getTemperature(
+				new_dictionary['InternalEnergy'],
+				mu = new_dictionary['ChimesMu'])
+		else:
+			new_dictionary['Temperature']=getTemperature(
+				new_dictionary['InternalEnergy'],
+				new_dictionary['Metallicity'][:,1],
+				new_dictionary['ElectronAbundance'])
 
 		## remove the keys in temperature keys that are not in keys_to_extract, if it is not None
 		##  in case we wanted the metallicity and the temperature, but not the electron abundance 
 		##  and internal energy, for instance
 		subtract_set = set(temperature_keys) if keys_to_extract is None else set(keys_to_extract)
 		for key in (set(temperature_keys) - subtract_set):
-			new_dictionary.pop(key)
+			try:
+				new_dictionary.pop(key)
+			except KeyError:
+				## well it wasn't in there anyway!
+				pass
 	
 	## get stellar ages if this is a star particle dataset
 	if ( (ptype == 4) and 

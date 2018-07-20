@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import copy
 import h5py,os, shutil
 from snapshot_utils import openSnapshot
 
@@ -7,11 +8,13 @@ class FIREreader(object):
 	"""
 	#These are the defaults that can be redefined by the user at runtime.  
 	#These defaults are only applied after running self.defineDefaults().
+
 		#directory that contains all the hdf5 data files
 		self.directory = './' 
 		
 		#snapshot number to open
 		self.snapnum = None
+
 		#particles to return
 		self.returnParts = ['PartType0', 'PartType1', 'PartType2', 'PartType4']
  
@@ -49,6 +52,7 @@ class FIREreader(object):
 		#should we use the log of these values?  
 		#NOTE: this must be the same length as self.returnKeys
 		self.dolog = dict()
+
 		#should we use the magnitude of these values?   
 		#NOTE: this must be the same length as self.returnKeys
 		#NOTE: setting any of these to true will significantly slow down the file creation
@@ -133,9 +137,11 @@ class FIREreader(object):
 			#	This is a dict with initial keys of the particle swapnames 
 			#	(as defined in self.names), then for each filter the [min, max] range 
 			#	(e.g., 'filter':{'Gas':{'log10Density':[0,1],'magVelocities':[20, 100]}} )
+
 			########################
 			#this should not be modified
 			'loaded':True, #used in the web app to check if the options have been read in
+
 		  } 
 		
 		#the prefix of the the JSON files
@@ -143,16 +149,19 @@ class FIREreader(object):
 		
 		#write the startup file?
 		self.writeStartup = True
+
 		#remove the data files in the dataDir directory before adding more?
 		self.cleanDataDir = False
 		
 		#set the maximum number of particles per data file
 		self.maxppFile = 1e4
+
 		#in case you want to print the available keys to the screen
 		self.showkeys = False
 		
 		#directory to place all the data files in (assumed to be within the current directory)
 		self.dataDir = None
+
 	"""
 
 
@@ -422,10 +431,11 @@ class FIREreader(object):
 				self.directory,
 				self.snapnum,
 				int(ptype[-1]),## PartType%d <-- final character is number
-				keys_to_extract = self.returnKeys[ptype],
+				keys_to_extract = copy.copy(self.returnKeys[ptype]),
 				header_only=0)
 			for i,key in enumerate(self.returnKeys[ptype]):
 				try:
+					
 					snapvals = snapdict[key]
 					if self.dolog[ptype][i]:
 						snapvals=np.log10(snapvals)
@@ -442,7 +452,6 @@ class FIREreader(object):
 		for p in list(self.partsDict.keys()):
 			self.partsDict[p]['filterKeys'] = self.filterKeys[p]
 			self.partsDict[p]['doSPHrad'] = self.doSPHrad[p]
-
 		return self.loadedHDF5Files
 
 	def shuffle_dict(self):
@@ -474,7 +483,7 @@ class FIREreader(object):
 		## NOTE ABG: added here default dataDirectory parsing
 		print("dataDir",self.dataDir)
 		if (self.dataDir == None):
-			self.dataDir = self.slash.join(os.path.realpath(__file__).split(self.slash)[:-1]) 
+			self.dataDir = ""#self.slash.join(os.path.realpath(__file__).split(self.slash)[:-1]) 
 			self.dataDir = os.path.join(self.dataDir, "%s_%d"%(self.directory.split(self.slash)[-2],self.snapnum))
 
 
