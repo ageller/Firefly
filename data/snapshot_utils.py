@@ -2,7 +2,7 @@ import h5py,sys,os
 import numpy as np
 
 ## physics helper functions
-def getTemperature(U_code,helium_mass_fraction,ElectronAbundance):
+def getTemperature(U_code, helium_mass_fraction, ElectronAbundance):
 	"""U_code = snapdict['InternalEnergy']
 	helium_mass_fraction = snapdict['Metallicity'][:,1]
 	ElectronAbundance= snapdict['ElectronAbundance']"""
@@ -11,7 +11,6 @@ def getTemperature(U_code,helium_mass_fraction,ElectronAbundance):
 	kB=1.38e-16 #erg /K
 	m_proton=1.67e-24 # g
 	y_helium = helium_mass_fraction / (4*(1-helium_mass_fraction))
-
 	mu = (1.0 + 4*y_helium) / (1+y_helium+ElectronAbundance) 
 	mean_molecular_weight=mu*m_proton
 	return mean_molecular_weight * (gamma-1) * U_cgs / kB
