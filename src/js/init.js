@@ -528,23 +528,23 @@ function calcVelVals(p){
 
 // calculate normalized temperature values
 function calcNormTemp(p){
-	params.parts[p].NormTemp = params.parts[p].log10Temperature;
-	// params.parts[p].NormTemp = [];
-	// var max = -1;
-	// var min = 1.e20;
-	// for (var i=0; i<params.parts[p].log10Temperature.length; i++){
-	// 	t = params.parts[p].log10Temperature[i];
-	// 	if (t > max){
-	// 		max = t;
-	// 	}
-	// 	if (t < min){
-	// 		min = t;
-	// 	}
-	// }
-	// var tdif = max - min;
-	// for (var i=0; i<params.parts[p].log10Temperature.length; i++){
-	// 	params.parts[p].NormTemp.push( THREE.Math.clamp((params.parts[p].log10Temperature[i] - min) / tdif, 0., 1.));
-	// }	
+	//params.parts[p].NormTemp = params.parts[p].log10Temperature;
+	params.parts[p].NormTemp = [];
+	var max = -1;
+	var min = 1.e20;
+	for (var i=0; i<params.parts[p].log10Temperature.length; i++){
+		t = params.parts[p].log10Temperature[i];
+		if (t > max){
+			max = t;
+		}
+		if (t < min){
+			min = t;
+		}
+	}
+	var tdif = max - min;
+	for (var i=0; i<params.parts[p].log10Temperature.length; i++){
+		params.parts[p].NormTemp.push( THREE.Math.clamp((params.parts[p].log10Temperature[i] - min) / tdif, 0., 1.));
+	}	
 }
 
 // calculate normalized temperature values
