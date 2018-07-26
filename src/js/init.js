@@ -251,15 +251,22 @@ function initializeColorMap(){
 	for (var i = 0; i < params.partsKeys.length; i++){
 		var p = params.partsKeys[i];
 
-		// normalize log10Temperature
-		if (params.parts[p].log10Temperature != null){
-			calcNormTemp(p);
-		}
-
 		// initialize dictionaries
 		params.colormapVariable[p] = 0;
 		params.colormap[p] = -4/256;
-		params.ckeys[p] = [params.parts[p].NormVel, params.parts[p].NormTemp];
+		params.ckeys[p] = ["magVelocities", "log10Temperature", "HIIAbundance", "log10Density"];
+
+		// calculate the max/min for each colormappable variable
+		for (var j=0; j<params.ckeys[p].length; j++){
+			if (params.parts[p][params.ckeys[p][j]] != null){
+				calcMaxMin(p, params.ckeys[p][j]);
+				var k = j;
+			}
+			else{
+				// temporary fix to fill params.ckeys[p] with only valid variables
+				params.ckeys[p][j] = params.ckeys[p][k];
+			}
+		}
 	}
 }
 
@@ -547,24 +554,63 @@ function calcNormTemp(p){
 	}	
 }
 
-// calculate normalized temperature values
-function calcNorm(p, array){
-	params.parts[p].Norm = [];
-	params.parts[p].max = -1;
-	params.parts[p].min = 1.e20;
-	for (var i=0; i<array.length; i++){
-		t = array[i];
-		if (t > params.parts[p].max){
-			params.parts[p].max = t;
+// calculate normalized HII values
+function calcNormHII(p){
+	//params.parts[p].NormTemp = params.parts[p].log10Temperature;
+	params.parts[p].NormHII = [];
+	var max = -1;
+	var min = 1.e20;
+	for (var i=0; i<params.parts[p].HIIAbundance.length; i++){
+		t = params.parts[p].HIIAbundance[i];
+		if (t > max){
+			max = t;
 		}
-		if (t < params.parts[p].min){
-			params.parts[p].min = t;
+		if (t < min){
+			min = t;
 		}
 	}
-	var tdif = params.parts[p].max - params.parts[p].min;
-	for (var i=0; i<array.length; i++){
-		params.parts[p].Norm.push( THREE.Math.clamp((array[i] - params.parts[p].min) / tdif, 0., 1.));
+	var tdif = max - min;
+	for (var i=0; i<params.parts[p].HIIAbundance.length; i++){
+		params.parts[p].NormHII.push( THREE.Math.clamp((params.parts[p].HIIAbundance[i] - min) / tdif, 0., 1.));
 	}	
+}
+
+// calculate normalized density values
+function calcNormDens(p){
+	//params.parts[p].NormTemp = params.parts[p].log10Temperature;
+	params.parts[p].NormDens = [];
+	var max = -1;
+	var min = 1.e20;
+	for (var i=0; i<params.parts[p].log10Density.length; i++){
+		t = params.parts[p].log10Density[i];
+		if (t > max){
+			max = t;
+		}
+		if (t < min){
+			min = t;
+		}
+	}
+	var tdif = max - min;
+	for (var i=0; i<params.parts[p].log10Density.length; i++){
+		params.parts[p].NormDens.push( THREE.Math.clamp((params.parts[p].log10Density[i] - min) / tdif, 0., 1.));
+	}	
+}
+
+// calculate normalized values of an attribute
+function calcMaxMin(p, arrayname){
+	//params.parts[p][arrayname].Norm = [];
+	params.parts[p][arrayname].max = -1;
+	params.parts[p][arrayname].min = 1.e20;
+	for (var i=0; i<params.parts[p][arrayname].length; i++){
+		t = params.parts[p][arrayname][i];
+		if (t > params.parts[p][arrayname].max){
+			params.parts[p][arrayname].max = t;
+		}
+		if (t < params.parts[p][arrayname].min){
+			params.parts[p][arrayname].min = t;
+		}
+	}
+	//put in initializecolormap and loop through and calc in shaders	
 }
 
 //initialize various values for the parts dict from the input data file, 

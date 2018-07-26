@@ -31,7 +31,7 @@ function drawScene(pdraw = params.partsKeys)
 		params.scene.remove(params.partsMesh[p]);
 
 		params.partsMesh[p] = [];
-
+	
 		var material = new THREE.ShaderMaterial( {
 
 			uniforms: { //add uniform variable here
@@ -45,6 +45,8 @@ function drawScene(pdraw = params.partsKeys)
 				velType: {value: 0.},
 				texture: {value: params.texture},
 				colormap: {value: params.colormap[p]},
+				max: {value: params.parts[p][params.ckeys[p][params.colormapVariable[p]]].max},
+				min: {value: params.parts[p][params.ckeys[p][params.colormapVariable[p]]].min}
 			},
 
 			vertexShader: myVertexShader,
@@ -81,9 +83,6 @@ function drawScene(pdraw = params.partsKeys)
 		// create array to hold colormap variable values
 		var colormapVariable_array = new Float32Array( params.plotNmax[p]); 
 		geo.addAttribute('ColorMapVariable_Array', new THREE.BufferAttribute( colormapVariable_array, 1));
-
-		// normalize attribute
-		//calcNorm(p, params.ckeys[p][params.colormapVariable[p]]);
 
 		//var positions = mesh.geometry.attributes.position.array;
 		var index = 0;
@@ -129,14 +128,8 @@ function drawScene(pdraw = params.partsKeys)
 
 				// fill colormap array with appropriate variable values
 				if (params.colormap[p] > 0.){
-					if (params.ckeys[p][params.colormapVariable[p]] != null){
-						colormapVariable_array[index] = params.ckeys[p][params.colormapVariable[p]][j];
-						//colormapVariable_array[index] = params.parts[p].Norm[j];
-					}
-					// if variable is not applicable to particle type, set to 0
-					// temporary fix, in UI user will not be able to select this as an option at all
-					else{
-						colormapVariable_array[index] = 0;
+					if (params.parts[p][params.ckeys[p][params.colormapVariable[p]]] != null){
+						colormapVariable_array[index] = params.parts[p][params.ckeys[p][params.colormapVariable[p]]][j];
 					}
 				}
 
