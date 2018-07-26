@@ -427,6 +427,8 @@ class FIREreader(object):
 		## fill the parts dict with values
 		for ptype in self.returnParts:
 			self.partsDict[ptype]={}
+			if len(self.returnKeys[ptype]) == 0:
+				continue
 			snapdict = openSnapshot(
 				self.directory,
 				self.snapnum,
@@ -447,7 +449,10 @@ class FIREreader(object):
 
 		## return the ordering of the files, so we can reopen them outside of the reader
 		##  if we want...
-		self.loadedHDF5Files = snapdict['fnames']
+		try:
+			self.loadedHDF5Files = snapdict['fnames']
+		except NameError:
+			pass
 		#and on some of the options here
 		for p in list(self.partsDict.keys()):
 			self.partsDict[p]['filterKeys'] = self.filterKeys[p]
