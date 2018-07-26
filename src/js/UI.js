@@ -1635,6 +1635,29 @@ function createUI(){
 				dheight += 30;
 			}
 
+						// for colormap
+			showcolor = [];
+
+			for (j=0; j<params.ckeys[d].length; j++){
+				var ck = params.ckeys[d][j]
+				if (params.parts[d][ck] != null){
+					showcolor.push(ck);
+				}
+			}
+			ncolor = showcolor.length;
+
+			if (ncolor > 0){
+				dheight += 30;
+
+				dropdown.append('hr')
+					.style('margin','0')
+					.style('border','1px solid #909090')
+
+				var selectC = dropdown.append('div')
+					.attr('style','margin:0px;  padding:5px; height:20px')
+					.html('Colormap &nbsp');
+			}
+
 	//this is dynamic, depending on what is in the data
 	//create the filters
 	//first count the available filters
@@ -1703,8 +1726,38 @@ function createUI(){
 							.style('display','none');
 					}
 				}
-
 			} 
+
+			// // for colormap
+			// showcolor = [];
+
+			// for (j=0; j<params.ckeys[d].length; j++){
+			// 	var ck = params.ckeys[d][j]
+			// 	if (params.parts[d][ck] != null){
+			// 		showcolor.push(ck);
+			// 	}
+			// }
+			// ncolor = showcolor.length;
+
+			// if (ncolor > 0){
+			// 	dheight += 70;
+
+			// 	dropdown.append('hr')
+			// 		.style('margin','0')
+			// 		.style('border','1px solid #909090')
+
+			// 	var selectC = dropdown.append('div')
+			// 		.attr('style','margin:0px;  padding:5px; height:20px')
+			// 		.html('Colormap &nbsp');
+
+			// 	// dCcontent = dropdown.append('div')
+			// 	// 	.attr('class','NdDiv');
+
+			// 	// dCcontent.append('label')
+			// 	// 	.attr('for',d+'velCheckBox')
+			// 	// 	.text('Plot Velocity Vectors');
+			// }
+			
 			dropdown.style('height',dheight+'px');
 
 		}
