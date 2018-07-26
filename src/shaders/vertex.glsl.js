@@ -11,6 +11,8 @@ varying float VariableMag;
 //varying float vVertexScale;
 //varying float glPointSize;
 
+uniform float max;
+uniform float min;
 uniform float oID;
 uniform float uVertexScale;
 uniform float maxDistance;
@@ -20,8 +22,6 @@ uniform vec3 cameraY;
 const float minPointScale = 0.01;
 const float maxPointScale = 1000.;
 const float PI = 3.1415926535897932384626433832795;
-const float max = -1.;
-const float min = 1.e20;
 
 
 void main(void) {
@@ -40,8 +40,8 @@ void main(void) {
     gl_PointSize = uVertexScale * pointScale;
     
     // send colormap array to fragment shader
-    VariableMag = ColorMapVariable_Array;
-    //VariableMag = clamp(((ColorMapVariable_Array - min) / (max - min)), 0., 1.);
+    //VariableMag = ColorMapVariable_Array;
+    VariableMag = clamp(((ColorMapVariable_Array - min) / (max - min)), 0., 1.);
 
     if (vID > 0.5){ //velocities (==1, but safer this way)
         float vyc= -dot(velVals.xyz,cameraY);
