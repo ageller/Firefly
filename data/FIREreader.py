@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import copy
 import h5py,os, shutil
 from snapshot_utils import openSnapshot
 
@@ -426,14 +427,17 @@ class FIREreader(object):
 		## fill the parts dict with values
 		for ptype in self.returnParts:
 			self.partsDict[ptype]={}
+			if len(self.returnKeys[ptype]) == 0:
+				continue
 			snapdict = openSnapshot(
 				self.directory,
 				self.snapnum,
 				int(ptype[-1]),## PartType%d <-- final character is number
-				keys_to_extract = self.returnKeys[ptype],
+				keys_to_extract = copy.copy(self.returnKeys[ptype]),
 				header_only=0)
 			for i,key in enumerate(self.returnKeys[ptype]):
 				try:
+					
 					snapvals = snapdict[key]
 					if self.dolog[ptype][i]:
 						snapvals=np.log10(snapvals)
@@ -445,12 +449,14 @@ class FIREreader(object):
 
 		## return the ordering of the files, so we can reopen them outside of the reader
 		##  if we want...
-		self.loadedHDF5Files = snapdict['fnames']
+		try:
+			self.loadedHDF5Files = snapdict['fnames']
+		except NameError:
+			pass
 		#and on some of the options here
 		for p in list(self.partsDict.keys()):
 			self.partsDict[p]['filterKeys'] = self.filterKeys[p]
 			self.partsDict[p]['doSPHrad'] = self.doSPHrad[p]
-
 		return self.loadedHDF5Files
 
 	def shuffle_dict(self):
@@ -482,7 +488,7 @@ class FIREreader(object):
 		## NOTE ABG: added here default dataDirectory parsing
 		print("dataDir",self.dataDir)
 		if (self.dataDir == None):
-			self.dataDir = self.slash.join(os.path.realpath(__file__).split(self.slash)[:-1]) 
+			self.dataDir = ""#self.slash.join(os.path.realpath(__file__).split(self.slash)[:-1]) 
 			self.dataDir = os.path.join(self.dataDir, "%s_%d"%(self.directory.split(self.slash)[-2],self.snapnum))
 
 
