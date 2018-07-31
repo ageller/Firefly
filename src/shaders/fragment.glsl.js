@@ -9,6 +9,7 @@ varying float VariableMag;
 //varying float vVertexScale;
 //varying float glPointSize;
 
+uniform bool showcolormap;
 uniform float colormap;
 uniform vec4 color;
 uniform int SPHrad;
@@ -32,7 +33,7 @@ void main(void) {
     gl_FragColor = color;
     
     // if colormap is requested, apply appropriate colormap to appropriate variable
-    if (colormap > 0.){
+    if (showcolormap){
         if (vID > -1.){
             vec2 pos = vec2(VariableMag, colormap);
             vec3 c = texture2D(texture, pos).rgb;

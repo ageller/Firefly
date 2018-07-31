@@ -136,6 +136,18 @@ function defineParams(){
 		// list of possible colormap variables for each particle type
 		// this will eventually be produced by Python code
 		this.ckeys = {};
+
+		// determines if colormap is on or off
+		this.showColorMap = {};
+
+		// list of all colormaps
+		this.colormaps = ['viridis', 'plasma', 'inferno', 'magma', 
+		'Greys', 'Purples', 'Blues', 'Greens', 'Oranges',
+	   'binary', 'gist_yarg', 'gist_gray', 'gray', 'afmhot',
+	   'PiYG', 'PRGn', 'BrBG', 'RdGy', 'coolwarm', 'bwr',
+	   'Pastel1', 'Pastel2', 'Paired', 'Accent', 'Dark2', 'Set1',
+	   'flag', 'prism', 'ocean', 'gist_earth', 'terrain', 'gist_stern'];
+
 	};
 
 	params = new ParamsInit();
@@ -253,18 +265,15 @@ function initializeColorMap(){
 
 		// initialize dictionaries
 		params.colormapVariable[p] = 0;
-		params.colormap[p] = -4/256;
-		params.ckeys[p] = ["magVelocities", "log10Temperature", "HIIAbundance", "log10Density"];
-
+		params.colormap[p] = 4/256;
+		params.ckeys['Gas'] = ["magVelocities", "log10Temperature", "HIIAbundance", "log10Density"];
+		params.ckeys['Stars'] = ["magVelocities"];
+		params.showColorMap[p] = false;
+		
 		// calculate the max/min for each colormappable variable
 		for (var j=0; j<params.ckeys[p].length; j++){
 			if (params.parts[p][params.ckeys[p][j]] != null){
 				calcMaxMin(p, params.ckeys[p][j]);
-				var k = j;
-			}
-			else{
-				// temporary fix to fill params.ckeys[p] with only valid variables
-				params.ckeys[p][j] = params.ckeys[p][k];
 			}
 		}
 	}
@@ -986,7 +995,7 @@ function WebGLStart(){
 	init();
 
 	initializeColorMap();
-
+	console.log(params.ckeys)
 	createUI();
 	mouseDown = false;  //silly fix
 
