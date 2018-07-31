@@ -11,6 +11,7 @@ function resetToOptions()
 	//redo init, but only the camera bits (maybe could streamline this and init by using the functions below?)
 	init();
 
+	//reset colormap
 	initializeColorMap();
 
 	//resize the bottom of the UI if necessary
@@ -84,6 +85,9 @@ function resetToPreset(preset)
 
 	//redo init, but only the camera bits (maybe could streamline this and init by using the functions below?)
 	init();
+
+	// reset colormap
+	initializeColorMap();
 
 	//resize the bottom of the UI if necessary
 	var i = params.partsKeys.length-1;
@@ -216,6 +220,18 @@ function checkVelBox(box)
 		params.showVel[pID] = true;
 	}
 
+}
+
+function checkColorMapBox(box)
+{
+	var p = box.id.slice(0, -13)
+	params.showColorMap[p] = false;
+	if (box.checked){
+		params.showColorMap[p] = true;
+	}
+	
+	console.log(p, "colormap:", params.showColorMap[p])
+	drawScene();
 }
 
 //functions to check color of particles
@@ -1115,6 +1131,47 @@ function selectFilter() {
 
 };
 
+function selectColorMapVariable() {
+	var option = d3.select(this)
+		.selectAll("option")
+		.filter(function (d, i) { 
+			return this.selected; 
+	});
+	selectValue = option.property('value');
+
+	var p = this.id.slice(0,-14)
+
+	// update colormap variable
+	params.colormapVariable[p] = params.ckeys[p].indexOf(selectValue);
+	console.log(p, "colormap variable:", params.ckeys[p][params.colormapVariable[p]])
+
+	// redraw scene if colormap is on
+	if (params.showColorMap[p]){
+		drawScene();
+	}
+};
+
+function selectColorMap() {
+	var option = d3.select(this)
+		.selectAll("option")
+		.filter(function (d, i) { 
+			return this.selected; 
+	});
+	selectValue = option.property('value');
+
+	var p = this.id.slice(0,-11)
+
+	// update colormap
+	params.colormap[p] = ((params.colormaps.indexOf(selectValue)) + 0.5) * (8/256);
+	console.log(p, "colormap:", params.colormaps[params.colormap[p] * (256/8) - 0.5])
+
+	// redraw scene if colormap is on
+	if (params.showColorMap[p]){
+		drawScene();
+	}
+};
+
+
 function selectVelType() {
 	var option = d3.select(this)
 		.selectAll("option")
@@ -1635,7 +1692,7 @@ function createUI(){
 				dheight += 30;
 			}
 
-						// for colormap
+			// colormap functionality
 			showcolor = [];
 
 			for (j=0; j<params.ckeys[d].length; j++){
@@ -1653,9 +1710,50 @@ function createUI(){
 					.style('margin','0')
 					.style('border','1px solid #909090')
 
-				var selectC = dropdown.append('div')
+				var ColorDiv = dropdown.append('div')
 					.attr('style','margin:0px;  padding:5px; height:20px')
-					.html('Colormap &nbsp');
+
+				ColorDiv.append('label')
+				.attr('for',d+'colorCheckBox')
+				.text('Colormap');
+
+				ColorDiv.append('input')
+					.attr('id',d+'colorCheckBox')
+					.attr('value','false')
+					.attr('type','checkbox')
+					.attr('autocomplete','off')
+					.attr('onchange','checkColorMapBox(this)');
+
+				if (params.showColorMap[d]){
+					elm = document.getElementById(d+'colorCheckBox');
+					elm.checked = true;
+					elm.value = true;
+				} 
+
+				// dropdown to select colormap
+				var selectCMap = ColorDiv.append('select')
+					// .attr('class','selectVelType')
+					.attr('id',d+'_SelectCMap')
+					.on('change', selectColorMap)
+
+				var options = selectCMap.selectAll('option')
+					.data(params.colormaps).enter()
+					.append('option')
+						.text(function (x) { return x; });
+				elm = document.getElementById(d+'_SelectCMap');
+
+				// dropdown to select colormap variable
+				var selectCMapVar = ColorDiv.append('select')
+					// .attr('class','selectVelType')
+					.attr('style','width:100px; margin-left:9px')
+					.attr('id',d+'_SelectCMapVar')
+					.on('change',selectColorMapVariable)
+
+				var options = selectCMapVar.selectAll('option')
+					.data(params.ckeys[d]).enter()
+					.append('option')
+						.text(function (x) { return x; });
+				elm = document.getElementById(d+'_SelectCMapVar');
 			}
 
 	//this is dynamic, depending on what is in the data
@@ -1677,8 +1775,11 @@ function createUI(){
 					.style('margin','0')
 					.style('border','1px solid #909090')
 
-				var selectF = dropdown.append('div')
-					.attr('style','margin:0px;  padding:5px; height:20px')
+				var FilterDiv = dropdown.append('div')
+					.attr('style','margin:0px;  padding:5px; height:45px')
+
+				var selectF = FilterDiv.append('div')
+					.attr('style', 'height:20px')
 					.html('Filters &nbsp')	
 
 					.append('select')
@@ -1698,7 +1799,7 @@ function createUI(){
 					if (params.parts[d][fk] != null){
 
 
-						dfilters = dropdown.append('div')
+						dfilters = FilterDiv.append('div')
 							.attr('id',d+'_FK_'+fk+'_END_Filter')
 							.attr('class','FilterClass')
 
@@ -1749,13 +1850,6 @@ function createUI(){
 			// 	var selectC = dropdown.append('div')
 			// 		.attr('style','margin:0px;  padding:5px; height:20px')
 			// 		.html('Colormap &nbsp');
-
-			// 	// dCcontent = dropdown.append('div')
-			// 	// 	.attr('class','NdDiv');
-
-			// 	// dCcontent.append('label')
-			// 	// 	.attr('for',d+'velCheckBox')
-			// 	// 	.text('Plot Velocity Vectors');
 			// }
 			
 			dropdown.style('height',dheight+'px');

@@ -45,6 +45,7 @@ function drawScene(pdraw = params.partsKeys)
 				velType: {value: 0.},
 				texture: {value: params.texture},
 				colormap: {value: params.colormap[p]},
+				showcolormap: {value: params.showColorMap[p]},
 				max: {value: params.parts[p][params.ckeys[p][params.colormapVariable[p]]].max},
 				min: {value: params.parts[p][params.ckeys[p][params.colormapVariable[p]]].min}
 			},
