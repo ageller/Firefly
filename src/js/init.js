@@ -507,7 +507,9 @@ function initPVals(){
 		params.filterVals[p] = {};
 		params.fkeys[p] = [];
 		params.plotNmax[p] = params.parts[p].Coordinates.length;
-		
+		params.PsizeMult[p] = 1.;
+
+
 		params.showVel[p] = false;
 		if (params.parts[p].Velocities != null){
 			if (!params.reset){
