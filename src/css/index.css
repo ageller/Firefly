@@ -372,6 +372,36 @@ input:checked + .slideroo:before {
 	padding:2px;
 }
 
+.CMapClass{
+	position:absolute;
+	margin-top:5px;
+	left:55px;
+	width:180px;
+	height:20px;
+}
+.CMapClassLabel{
+	position:absolute; 
+	left:-100px;
+	top:0px;
+}
+.CMapMinTClass{
+	position:absolute;
+	top:0px;
+	left:-52px;
+	width:40px;
+	height:22px;
+	padding:2px;
+	color:black;
+}
+.CMapMaxTClass{
+	position:absolute;
+	top:0px;
+	left:182px;
+	width:40px;
+	height:22px;
+	padding:2px;
+}
+
 .NSliderClass{
 	position:absolute;
 	margin-top:-22px;

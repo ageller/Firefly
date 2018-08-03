@@ -146,7 +146,20 @@ function defineParams(){
 	   'binary', 'gist_yarg', 'gist_gray', 'gray', 'afmhot',
 	   'PiYG', 'PRGn', 'BrBG', 'RdGy', 'coolwarm', 'bwr',
 	   'Pastel1', 'Pastel2', 'Paired', 'Accent', 'Dark2', 'Set1',
-	   'flag', 'prism', 'ocean', 'gist_earth', 'terrain', 'gist_stern'];
+	   'flag', 'prism', 'ocean', 'gist_earth', 'terrain', 'gist_stern'].reverse();
+
+	   // slider limits for colormap
+	   this.colormapVals = {};
+
+	   // textbox limits for colormap
+	   this.colormapLims = {};
+
+	   // colormap sliders
+	   this.SliderCMapinputs = {};
+	   this.updateColorMap = {};
+	   this.SliderCMap = {};
+	   this.SliderCMapmin = {};
+	   this.SliderCMapmax = {};
 
 	};
 
@@ -269,10 +282,15 @@ function initializeColorMap(){
 		params.ckeys['Gas'] = ["magVelocities", "log10Temperature", "HIIAbundance", "log10Density"];
 		params.ckeys['Stars'] = ["magVelocities"];
 		params.showColorMap[p] = false;
-		
+		params.updateColorMap[p] = false;
+		params.colormapVals[p] = {};
+		params.colormapLims[p] = {};
+
 		// calculate the max/min for each colormappable variable
 		for (var j=0; j<params.ckeys[p].length; j++){
 			if (params.parts[p][params.ckeys[p][j]] != null){
+				params.colormapVals[p][params.ckeys[p][j]] = [];
+				params.colormapLims[p][params.ckeys[p][j]] = [];
 				calcMaxMin(p, params.ckeys[p][j]);
 			}
 		}
@@ -542,84 +560,21 @@ function calcVelVals(p){
 	}
 }
 
-// calculate normalized temperature values
-function calcNormTemp(p){
-	//params.parts[p].NormTemp = params.parts[p].log10Temperature;
-	params.parts[p].NormTemp = [];
-	var max = -1;
-	var min = 1.e20;
-	for (var i=0; i<params.parts[p].log10Temperature.length; i++){
-		t = params.parts[p].log10Temperature[i];
-		if (t > max){
-			max = t;
-		}
-		if (t < min){
-			min = t;
-		}
-	}
-	var tdif = max - min;
-	for (var i=0; i<params.parts[p].log10Temperature.length; i++){
-		params.parts[p].NormTemp.push( THREE.Math.clamp((params.parts[p].log10Temperature[i] - min) / tdif, 0., 1.));
-	}	
-}
-
-// calculate normalized HII values
-function calcNormHII(p){
-	//params.parts[p].NormTemp = params.parts[p].log10Temperature;
-	params.parts[p].NormHII = [];
-	var max = -1;
-	var min = 1.e20;
-	for (var i=0; i<params.parts[p].HIIAbundance.length; i++){
-		t = params.parts[p].HIIAbundance[i];
-		if (t > max){
-			max = t;
-		}
-		if (t < min){
-			min = t;
-		}
-	}
-	var tdif = max - min;
-	for (var i=0; i<params.parts[p].HIIAbundance.length; i++){
-		params.parts[p].NormHII.push( THREE.Math.clamp((params.parts[p].HIIAbundance[i] - min) / tdif, 0., 1.));
-	}	
-}
-
-// calculate normalized density values
-function calcNormDens(p){
-	//params.parts[p].NormTemp = params.parts[p].log10Temperature;
-	params.parts[p].NormDens = [];
-	var max = -1;
-	var min = 1.e20;
-	for (var i=0; i<params.parts[p].log10Density.length; i++){
-		t = params.parts[p].log10Density[i];
-		if (t > max){
-			max = t;
-		}
-		if (t < min){
-			min = t;
-		}
-	}
-	var tdif = max - min;
-	for (var i=0; i<params.parts[p].log10Density.length; i++){
-		params.parts[p].NormDens.push( THREE.Math.clamp((params.parts[p].log10Density[i] - min) / tdif, 0., 1.));
-	}	
-}
-
 // calculate normalized values of an attribute
 function calcMaxMin(p, arrayname){
-	//params.parts[p][arrayname].Norm = [];
-	params.parts[p][arrayname].max = -1;
-	params.parts[p][arrayname].min = 1.e20;
+	params.colormapVals[p][arrayname][0] = 1.e20;
+	params.colormapVals[p][arrayname][1] = -1;
 	for (var i=0; i<params.parts[p][arrayname].length; i++){
 		t = params.parts[p][arrayname][i];
-		if (t > params.parts[p][arrayname].max){
-			params.parts[p][arrayname].max = t;
+		if (t > params.colormapVals[p][arrayname][1]){
+			params.colormapVals[p][arrayname][1] = t;
 		}
-		if (t < params.parts[p][arrayname].min){
-			params.parts[p][arrayname].min = t;
+		if (t < params.colormapVals[p][arrayname][0]){
+			params.colormapVals[p][arrayname][0] = t;
 		}
 	}
-	//put in initializecolormap and loop through and calc in shaders	
+	params.colormapLims[p][arrayname][0] = params.colormapVals[p][arrayname][0];
+	params.colormapLims[p][arrayname][1] = params.colormapVals[p][arrayname][1];	
 }
 
 //initialize various values for the parts dict from the input data file, 
@@ -993,9 +948,9 @@ function WebGLStart(){
 	initPVals();
 
 	init();
-
+	
 	initializeColorMap();
-	console.log(params.ckeys)
+
 	createUI();
 	mouseDown = false;  //silly fix
 

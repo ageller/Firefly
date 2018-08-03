@@ -40,7 +40,6 @@ void main(void) {
     gl_PointSize = uVertexScale * pointScale;
     
     // send colormap array to fragment shader
-    //VariableMag = ColorMapVariable_Array;
     VariableMag = clamp(((ColorMapVariable_Array - min) / (max - min)), 0., 1.);
 
     if (vID > 0.5){ //velocities (==1, but safer this way)
