@@ -46,8 +46,10 @@ function drawScene(pdraw = params.partsKeys)
 				texture: {value: params.texture},
 				colormap: {value: params.colormap[p]},
 				showcolormap: {value: params.showColorMap[p]},
-				max: {value: params.parts[p][params.ckeys[p][params.colormapVariable[p]]].max},
-				min: {value: params.parts[p][params.ckeys[p][params.colormapVariable[p]]].min}
+				// max: {value: params.parts[p][params.ckeys[p][params.colormapVariable[p]]].max},
+				// min: {value: params.parts[p][params.ckeys[p][params.colormapVariable[p]]].min}
+				min: {value: params.colormapVals[p][params.ckeys[p][params.colormapVariable[p]]][0]},
+				max: {value: params.colormapVals[p][params.ckeys[p][params.colormapVariable[p]]][1]}
 			},
 
 			vertexShader: myVertexShader,
