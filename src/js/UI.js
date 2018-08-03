@@ -443,8 +443,6 @@ function setCMapSliderHandle(i, value, parent, reset=false) {
 		check.push(params.colormapLims[p][ck][0]);
 		check.push(params.colormapLims[p][ck][1]);
 		check[i] = parseFloat(value);
-		var cmin = parseFloat(check[0]);
-		var cmax = parseFloat(check[1]);
 		var max = parseFloat(parent.noUiSlider.options.range.max[0]);
 		var min = parseFloat(parent.noUiSlider.options.range.min[0]);
 
@@ -487,9 +485,6 @@ function setCMapSliderHandle(i, value, parent, reset=false) {
 // Listen to keydown events on the input field.
 function handleCMapSliderText(input, handle) 
 {
-	// input.addEventListener('change', function(){
-	// 	setFSliderHandle(handle, this.value, this.parent);
-	// });
 	input.addEventListener('keydown', function( e ) {
 		var values = input.parent.noUiSlider.get();
 		var value = Number(values[handle]);
@@ -557,7 +552,6 @@ function createCMapSliders(){
 					params.SliderCMapinputs[p][ck][1].parent = params.SliderCMap[p][ck];
 					min = parseFloat(params.colormapLims[p][ck][0].toFixed(3));
 					max = parseFloat(params.colormapLims[p][ck][1].toFixed(3));
-					console.log(min, max)
 
 					noUiSlider.create(params.SliderCMap[p][ck], {
 						start: [min, max],
@@ -583,15 +577,6 @@ function createCMapSliders(){
 
 						var nf = parseFloat(values[handle])/ (Math.round(1000.*params.colormapVals[pp][ffk][handle])/1000.);
 						params.SliderCMapinputs[pp][ffk][handle].value = values[handle];
-						console.log(parseFloat(params.colormapVals[pp][ffk][handle]))
-						console.log(values[handle])
-						console.log(values)
-						console.log(params.SliderCMapinputs[pp][ffk][handle].value)
-						params.colormapVals[pp][ffk][handle] = parseFloat(values[handle]);
-						//params.colormapVals[pp][ffk][handle] = parseFloat(params.colormapVals[pp][ffk][handle].toFixed(3));
-						console.log(params.colormapVals[pp][ffk][handle])
-						console.log(p, nf)
-						console.log(Math.abs(1. - nf) > 0.001)
 						if (Math.abs(1. - nf) > 0.001 && ! params.reset){
 							drawScene(pDraw = [pp]);
 						}
@@ -1333,19 +1318,16 @@ function selectColorMapVariable() {
 
 	var p = this.id.slice(0,-14)
 
-	//console.log("in selectFilter", selectValue, this.id, p)
 	for (var i=0; i<params.ckeys[p].length; i+=1){
-		//console.log('hiding','#'+p+'_FK_'+params.fkeys[p][i]+'_END_Filter')
 		d3.selectAll('#'+p+'_CK_'+params.ckeys[p][i]+'_END_CMap')
 			.style('display','none');
 	}
-	//console.log('showing', '#'+p+'_FK_'+selectValue+'_END_Filter')
 	d3.selectAll('#'+p+'_CK_'+selectValue+'_END_CMap')
 		.style('display','block');
 
 	// update colormap variable
 	params.colormapVariable[p] = params.ckeys[p].indexOf(selectValue);
-	console.log(p, "colormap variable:", params.ckeys[p][params.colormapVariable[p]])
+	console.log(p, "colored by:", params.ckeys[p][params.colormapVariable[p]])
 
 	// redraw particle type if colormap is on
 	if (params.showColorMap[p]){
@@ -1934,7 +1916,6 @@ function createUI(){
 
 				// dropdown to select colormap
 				var selectCMap = ColorDiv.append('select')
-					// .attr('class','selectVelType')
 					.attr('id',d+'_SelectCMap')
 					.on('change', selectColorMap)
 
@@ -1946,7 +1927,6 @@ function createUI(){
 
 				// dropdown to select colormap variable
 				var selectCMapVar = ColorDiv.append('select')
-					// .attr('class','selectVelType')
 					.attr('style','width:100px; margin-left:8px')
 					.attr('id',d+'_SelectCMapVar')
 					.on('change',selectColorMapVariable)
@@ -2065,29 +2045,6 @@ function createUI(){
 					}
 				}
 			} 
-
-			// // for colormap
-			// showcolor = [];
-
-			// for (j=0; j<params.ckeys[d].length; j++){
-			// 	var ck = params.ckeys[d][j]
-			// 	if (params.parts[d][ck] != null){
-			// 		showcolor.push(ck);
-			// 	}
-			// }
-			// ncolor = showcolor.length;
-
-			// if (ncolor > 0){
-			// 	dheight += 70;
-
-			// 	dropdown.append('hr')
-			// 		.style('margin','0')
-			// 		.style('border','1px solid #909090')
-
-			// 	var selectC = dropdown.append('div')
-			// 		.attr('style','margin:0px;  padding:5px; height:20px')
-			// 		.html('Colormap &nbsp');
-			// }
 			
 			dropdown.style('height',dheight+'px');
 
@@ -2380,7 +2337,6 @@ function savePreset()
 		preset.UIparticle[p] = params.parts.options.UIparticle[p];
 		preset.UIdropdown[p] = params.parts.options.UIdropdown[p];
 		preset.UIcolorPicker[p] = params.parts.options.UIcolorPicker[p];
-		//Preset('fkeys', 'filterLims', 'filterVals');
 		preset.filterLims[p] = {};
 		preset.filterVals[p] = {};
 		preset.colormapLims[p] = {};
@@ -2406,16 +2362,6 @@ function savePreset()
 
 	saveFile(dataUri,'preset.json');
 
-}
-
-function Preset(keys, Lims, Vals) {
-	preset[Lims][p] = {};
-	preset[Vals][p] = {};
-	for (k=0; k<params[keys][p].length; k++){
-		var key = params[key][p][k]
-		preset[Lims][p][key] = params[Lims][p][key];
-		preset[Vals][p][key] = params[Vals][p][key];
-	}
 }
 
 //from https://www.w3schools.com/howto/howto_js_draggable.asp
