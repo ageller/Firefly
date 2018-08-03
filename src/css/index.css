@@ -557,6 +557,23 @@ select{
 	color: white;
 }
 
+.colorbar_label{
+	background-color:#808080;
+}
+
+#colorbar_container{
+	background-color:#808080;
+	position: absolute;
+
+	user-select:none;
+	-moz-user-select: none; 
+	-webkit-user-select: none; 
+	-ms-user-select:none; 
+	-o-user-select:none;
+	unselectable="on"
+ 	onselectstart="return false;" 
+}
+
 /* Add Animation */
 @-webkit-keyframes slideIn {
 	from {bottom: -300px; opacity: 0} 

@@ -1332,6 +1332,7 @@ function selectColorMapVariable() {
 	// redraw particle type if colormap is on
 	if (params.showColorMap[p]){
 		drawScene(pDraw = [p]);
+		fillColorbarContainer();
 	}
 };
 
@@ -1352,6 +1353,7 @@ function selectColorMap() {
 	// redraw particle type if colormap is on
 	if (params.showColorMap[p]){
 		drawScene(pDraw = [p]);
+		fillColorbarContainer();
 	}
 };
 
@@ -1912,6 +1914,7 @@ function createUI(){
 					elm = document.getElementById(d+'colorCheckBox');
 					elm.checked = true;
 					elm.value = true;
+					fillColorbarContainer();
 				} 
 
 				// dropdown to select colormap
@@ -2091,6 +2094,8 @@ function createUI(){
 	updateUIRotText();
 
 	applyUIoptions();
+
+	fillColorbarContainer();
 
 	params.haveUI = true;
 }
@@ -2405,6 +2410,138 @@ function dragElement(elm, e) {
 		document.removeEventListener('mousemove', elementDrag);
 
 	}
+}
+
+/////////////////////////// COLOR SCALE
+//from https://www.w3schools.com/howto/howto_js_draggable.asp
+function dragColorbarElement(elm, e) {
+	var elmnt = document.getElementById("colorbar_container");
+	var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+	dragMouseDown(e);
+
+	function dragMouseDown(e) {
+		e = e || window.event;
+		// get the mouse cursor position at startup:
+		pos3 = e.clientX;
+		pos4 = e.clientY;
+		document.addEventListener('mouseup', closeDragElement);
+		document.addEventListener('mousemove', elementDrag);
+
+	}
+
+	function elementDrag(e) {
+		params.movingUI = true;
+		e = e || window.event;
+		// calculate the new cursor position:
+		pos1 = pos3 - e.clientX;
+		pos2 = pos4 - e.clientY;
+		pos3 = e.clientX;
+		pos4 = e.clientY;
+
+		// set the element's new position:
+		var top = parseInt(elmnt.style.top);
+		var left = parseInt(elmnt.style.left);
+		elmnt.style.top = (top - pos2) + "px";
+		elmnt.style.left = (left - pos1) + "px";
+	}
+
+	function closeDragElement(e) {
+		/* stop moving when mouse button is released:*/
+		e.stopPropagation();
+		params.movingUI = false;
+		document.removeEventListener('mouseup', closeDragElement);
+		document.removeEventListener('mousemove', elementDrag);
+
+	}
+}
+
+
+function fillColorbarContainer(){
+	var n_colormap = 31-params.colormapVariable['Gas']
+	var minmax = params.colormapLims['Gas'][params.ckeys['Gas'][params.colormapVariable['Gas']]]
+	var xmin = minmax[0]
+	var xmax = minmax[1]
+	var colorbar_label = params.ckeys['Gas'][params.colormapVariable['Gas']]
+
+    var text_height = 40;
+    var container_margin = {"top":10,"side":15}
+    var container_width = 600 
+    var container_height = 150
+    var cbar_bounds = {'width':container_width,'height':container_height}
+
+    var colorbar_container = d3.select("#colorbar_container")
+    colorbar_container.html("");
+
+    colorbar_container.style("height",cbar_bounds.height+container_margin.top*2+text_height+"px")
+    // contianer_margin : +*2 for the margins themselves, +1 for the offset of the content...?
+    colorbar_container.style("width",cbar_bounds.width+container_margin.side*2+container_margin.side+"px")
+    	.attr('onmousedown','dragColorbarElement(this, event);')
+    	.style("top","25px")
+    	.style("left","25px")
+
+    // this is the box that contains the colorbar image node, which fills this div
+    var this_colorbar_box = colorbar_container.append('div')
+        .style("background-color","red")
+        .attr("width",cbar_bounds.width+container_margin.side)
+        .attr("height",cbar_bounds.height)
+        .style("left",container_margin.side+"px")
+        .style("background-color","red") // debug background from image
+
+    this_colorbar_box
+        .style("width",this_colorbar_box.attr('width')+"px")
+        .style("height",this_colorbar_box.attr('height')+"px")
+        .style("position","relative")
+        .style("top","10px")
+        .style("overflow","hidden")
+
+    this_colorbar_box.html("<img src=textures/colormap.png"+ 
+    	" height="+ this_colorbar_box.attr("height")*32 +
+    	" width="+ this_colorbar_box.attr("width") +
+    	' style="'+
+    	' position:relative;'+
+    	' top:'+'-'+n_colormap*this_colorbar_box.attr("height")+'px;'+
+    	'pointer-events: none' + // literally why
+    	'"' + 
+    	'draggable="false"'+ // is it so hard
+    	+'onmousedown="if (event.preventDefault) event.preventDefault()"'+ // to make it not drag the image
+    	"></img>")
+
+    svg = colorbar_container.append("svg")
+        .attr("width", +this_colorbar_box.attr("width")+2*container_margin.side) 
+        .attr("height",text_height)
+        //.style("background-color","green") // debug background from the axis ticks
+        .style("position","relative")
+        .style("top",container_margin.top+"px")
+        .append("g")
+        .attr("class",".cbar_svg")
+
+
+    // set the ranges
+    var x = d3.scaleLinear().range([0+container_margin.side, +this_colorbar_box.attr("width")+container_margin.side]);
+
+    // Scale the range of the data
+    x.domain([xmin,xmax]);
+
+    // Add the X Axis
+    svg.append("g")
+      .attr("class", "axis")
+      .call(d3.axisBottom(x).ticks(10))
+      .selectAll("text")    
+        .style("text-anchor", "end")
+        .attr("transform", "translate("+container_margin.side+",0)")
+        .attr("dx", "-.8em")
+        .attr("dy", ".15em")
+        .attr("transform", "rotate(-65)")
+
+    colorbar_container.append('div')
+        .html(colorbar_label)
+        .style("text-align","center")
+        .style("font-size","16pt")
+        .style("position",'relative')
+        .style("height",text_height + "px")
+	    .style("top","16px") // why do I need this... ? 
+	    .attr('class','colorbar_label') // hardcode background color in index.css, why isn't this inherited??
+	    .attr('background-color','inherited')
 }
 
 
