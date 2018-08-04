@@ -2500,8 +2500,7 @@ function fillColorbarContainer(){
         .style("left",container_margin.side+"px")
         .style("background-color","red") // debug background from image
 
-    this_colorbar_box
-        .style("width",this_colorbar_box.attr('width')+"px")
+	this_colorbar_box.style("width",this_colorbar_box.attr('width')+"px")
         .style("height",this_colorbar_box.attr('height')+"px")
         .style("position","relative")
         .style("top","10px")
