@@ -234,6 +234,14 @@ function checkColorMapBox(box)
 
 	// redraw particle type
 	drawScene(pDraw = [p]);
+	if ( p == 'Gas' && !params.showColorMap[p]){
+		// empty the colorbar_container!
+		var colorbar_container = d3.select("#colorbar_container")
+	    colorbar_container.html("")
+	    	.style('width','0px')
+	    	.style('height','0px');
+
+	}
 }
 
 //functions to check color of particles
@@ -437,7 +445,7 @@ function setCMapSliderHandle(i, value, parent, reset=false) {
 	var ck = parent.id.slice(cpos + 4, epos - sl);
 	params.colormapVals[p][ck][i] = parseFloat(value);
 
-	//reset the filter limits if there is a text entry
+	//reset the color limits if there is a text entry
 	if (reset){
 		var check = []
 		check.push(params.colormapLims[p][ck][0]);
@@ -480,6 +488,7 @@ function setCMapSliderHandle(i, value, parent, reset=false) {
 	//because we are now redrawing each time, we do not need to do this
 	params.updateColorMap[p] = true;
 	mouseDown = false; 
+	fillColorbarContainer()
 }
 
 // Listen to keydown events on the input field.
@@ -577,6 +586,9 @@ function createCMapSliders(){
 
 						var nf = parseFloat(values[handle])/ (Math.round(1000.*params.colormapVals[pp][ffk][handle])/1000.);
 						params.SliderCMapinputs[pp][ffk][handle].value = values[handle];
+						params.colormapVals[pp][ffk][handle] = parseFloat(values[handle]);
+						fillColorbarContainer();
+
 						if (Math.abs(1. - nf) > 0.001 && ! params.reset){
 							drawScene(pDraw = [pp]);
 						}
@@ -2457,8 +2469,9 @@ function dragColorbarElement(elm, e) {
 
 
 function fillColorbarContainer(){
-	var n_colormap = 31-params.colormapVariable['Gas']
-	var minmax = params.colormapLims['Gas'][params.ckeys['Gas'][params.colormapVariable['Gas']]]
+	var n_colormap = 31-(params.colormap['Gas']*32-0.5)
+	console.log(n_colormap,params.colormap['Gas'])
+	var minmax = params.colormapVals['Gas'][params.ckeys['Gas'][params.colormapVariable['Gas']]]
 	var xmin = minmax[0]
 	var xmax = minmax[1]
 	var colorbar_label = params.ckeys['Gas'][params.colormapVariable['Gas']]
