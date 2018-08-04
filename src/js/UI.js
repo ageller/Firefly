@@ -2490,7 +2490,7 @@ function fillColorbarContainer(){
     colorbar_container.style("width",cbar_bounds.width+container_margin.side*2+container_margin.side+"px")
     	.attr('onmousedown','dragColorbarElement(this, event);')
     	.style("top","25px")
-    	.style("left","25px")
+    	.style("left","500px")
 
     // this is the box that contains the colorbar image node, which fills this div
     var this_colorbar_box = colorbar_container.append('div')
