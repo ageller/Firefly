@@ -471,7 +471,7 @@ class FIREreader(object):
 					print("shuffling ... ")
 				N = int(len(self.partsDict[p][self.returnKeys[p][0]]))
 				indices = np.arange(N )
-				dindices = np.random.choice(indices, size = int(round(N/self.decimate[p])))
+				dindices = np.random.choice(indices, size = int(round(N/self.decimate[p])), replace=False)
 				for k in list(self.partsDict[p].keys()):
 					if (k not in self.nodecimate):
 						self.partsDict[p][k] = self.partsDict[p][k][dindices]
