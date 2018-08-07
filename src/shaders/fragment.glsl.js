@@ -3,8 +3,8 @@ var myFragmentShader = `
 precision mediump float;
 
 varying float vID;
-varying float vAlpha;
 varying float vTheta;
+varying float vAlpha;
 //varying float vVertexScale;
 //varying float glPointSize;
 
@@ -83,7 +83,7 @@ void main(void) {
         //gl_FragColor.rgb +=  (1. - posRot.x/vSize); //white at tail
         gl_FragColor.rgb +=  0.6*posRot.x/vSize; //whiter at head
         gl_FragColor.a = posRot.x/vSize;
-}
+    }
     gl_FragColor.a *= vAlpha;
 }
 `;

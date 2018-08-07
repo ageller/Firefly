@@ -1,11 +1,12 @@
 var myVertexShader = `
 
+attribute float radiusScale;
 attribute float alpha;
 attribute vec4 velVals;
 
 varying float vID;
-varying float vAlpha;
 varying float vTheta;
+varying float vAlpha;
 //varying float vVertexScale;
 //varying float glPointSize;
 
@@ -22,9 +23,9 @@ const float PI = 3.1415926535897932384626433832795;
 
 void main(void) {
     vID = oID;
-    vAlpha = alpha;
     vTheta = 0.;
-
+    vAlpha = alpha;
+    
     //vVertexScale = uVertexScale;
 
     vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
@@ -33,7 +34,7 @@ void main(void) {
     float pointScale = maxDistance/cameraDist;
     pointScale = clamp(pointScale, minPointScale, maxPointScale);
     
-    gl_PointSize = uVertexScale * pointScale;
+    gl_PointSize = uVertexScale * pointScale * radiusScale;
 
     if (vID > 0.5){ //velocities (==1, but safer this way)
         float vyc = -dot(velVals.xyz,cameraY);

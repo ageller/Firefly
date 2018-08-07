@@ -63,9 +63,13 @@ function drawScene(pdraw = params.partsKeys)
 		var positions = new Float32Array( params.plotNmax[p] * 3 ); // 3 vertices per point
 		geo.addAttribute( 'position', new THREE.BufferAttribute( positions, 3 ) );
 
-		//alphas for filtering
-		var alphas = new Float32Array( params.plotNmax[p] ); 
-		geo.addAttribute( 'alpha', new THREE.BufferAttribute( alphas, 1 ) );
+		//radiusScaling (e.g., for filtering and on/off)
+		var radiusScale = new Float32Array( params.plotNmax[p] ); 
+		geo.addAttribute( 'radiusScale', new THREE.BufferAttribute( radiusScale, 1 ) );
+
+		//alphas (e.g., for filtering and on/off)
+		var alpha = new Float32Array( params.plotNmax[p] ); 
+		geo.addAttribute( 'alpha', new THREE.BufferAttribute( alpha, 1 ) );
 
 		//angles for velocities
 		var velVals = new Float32Array( params.plotNmax[p] * 4); // unit vector (vx, vy, vz), scaled magnitude
@@ -79,22 +83,23 @@ function drawScene(pdraw = params.partsKeys)
 		//var positions = mesh.geometry.attributes.position.array;
 		var index = 0;
 		var vindex = 0;
+		var rindex = 0;
 		var aindex = 0;
 
 		var includePoint = true;
 		//for (var j=0; j<params.parts[p].Coordinates.length/params.decimate; j++){
 		for (var j=0; j<params.plotNmax[p]; j++){
 
-			//we are now including the filtering here instead of simply changing the alpha value during rendering
 			includePoint = true;
-			for (k=0; k<params.fkeys[p].length; k++){
-				if (params.parts[p][params.fkeys[p][k]] != null) {
-					val = params.parts[p][params.fkeys[p][k]][j]; 
-					if ( val < params.filterVals[p][params.fkeys[p][k]][0] || val > params.filterVals[p][params.fkeys[p][k]][1] ){
-						includePoint = false;
-					} 
-				}
-			}
+			//if we redraw upon filtering, then we would include the filtering here 
+			// for (k=0; k<params.fkeys[p].length; k++){
+			// 	if (params.parts[p][params.fkeys[p][k]] != null) {
+			// 		val = params.parts[p][params.fkeys[p][k]][j]; 
+			// 		if ( val < params.filterVals[p][params.fkeys[p][k]][0] || val > params.filterVals[p][params.fkeys[p][k]][1] ){
+			// 			includePoint = false;
+			// 		} 
+			// 	}
+			// }
 
 			if (includePoint){
 
@@ -118,7 +123,10 @@ function drawScene(pdraw = params.partsKeys)
 					vindex++;
 				}
 
-				alphas[aindex] = 1.;
+				radiusScale[rindex] = 1.;
+				rindex++;
+				
+				alpha[rindex] = 1.;
 				aindex++;
 				
 				ndraw += 1;

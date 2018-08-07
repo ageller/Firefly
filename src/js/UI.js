@@ -251,9 +251,9 @@ function setFSliderHandle(i, value, parent, reset=false) {
 		var nf = parseFloat(value)/ (Math.round(1000.*params.filterLims[p][fk][i])/1000.);
 		params.SliderFinputs[p][fk][i].value = value;
 		params.filterLims[p][fk][i] = parseFloat(value);
-		if (Math.abs(1. - nf) > 0.001 && ! params.reset){
-			drawScene(pDraw = [p]);
-		}
+		// if (Math.abs(1. - nf) > 0.001 && ! params.reset){
+		// 	//drawScene(pDraw = [p]);
+		// }
 
 		if (i == 0){
 			parent.noUiSlider.updateOptions({
@@ -383,12 +383,11 @@ function createFilterSliders(){
 						var nf = parseFloat(values[handle])/ (Math.round(1000.*params.filterVals[pp][ffk][handle])/1000.);
 						params.SliderFinputs[pp][ffk][handle].value = values[handle];
 						params.filterVals[pp][ffk][handle] = parseFloat(values[handle]);
-						if (Math.abs(1. - nf) > 0.001 && ! params.reset){
-							drawScene(pDraw = [pp]);
-						}
+						// if (Math.abs(1. - nf) > 0.001 && ! params.reset){
+						// 	drawScene(pDraw = [pp]);
+						// }
 
 
-						//because we are now redrawing each time, we do not need to do this
 						params.updateFilter[pp] = true;
 						mouseDown = true;
 					});
@@ -481,10 +480,9 @@ function createNsliders(){
 
 					var nf = parseFloat(values[handle])/params.plotNmax[pp];
 					params.plotNmax[pp] = parseInt(values[handle]);
-					if (nf != 1 && ! params.reset){
-						drawScene(pDraw = [pp]);
-
-					}
+					// if (nf != 1 && ! params.reset){
+					// 	drawScene(pDraw = [pp]);
+					// }
 					mouseDown = true;
 				});
 
@@ -994,6 +992,7 @@ function checkshowParts(checkbox)
 	var type = checkbox.id.slice(-5); 
 	if (type == 'Check'){	
 		var pID = checkbox.id.slice(0,-5); // remove  "Check" from id
+		params.updateOnOff[pID] = true;
 		params.showParts[pID] = false;
 		if (checkbox.checked){
 			params.showParts[pID] = true;
