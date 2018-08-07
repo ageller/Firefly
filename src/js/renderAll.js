@@ -65,27 +65,39 @@ function update(time){
 				} else {
 					m.material.uniforms.oID.value = 0.;
 				}
-				//this should not be needed because we now redraw every time we filter
-				// but I will leave it here, in case we want to revert back to this method
-				// if (params.updateFilter[p]){
-				// 	var alphas = m.geometry.attributes.alpha.array;
-				// 	for( var ii = 0; ii < alphas.length; ii ++ ) {
-				// 		alphas[ii] = 1.;
-				// 		for (k=0; k<params.fkeys[p].length; k++){
-				// 			if (params.parts[p][params.fkeys[p][k]] != null) {
-				// 				val = params.parts[p][params.fkeys[p][k]][ii]; 
-				// 				if ( val < params.filterVals[p][params.fkeys[p][k]][0] || val > params.filterVals[p][params.fkeys[p][k]][1] ){
-				// 					alphas[ii] = 0.;
-				// 				} 
-				// 			}
-				// 		}
-				// 	}
-				// 	m.geometry.attributes.alpha.needsUpdate = true;
-				// 	params.updateFilter[p] = false;
-				// }
+				//switching back to previous method of filtering, but now setting radii to zero, and also setting to sizes back to 1 for all particles (in case turned off below)
+				if (params.updateFilter[p] || params.updateOnOff[p]){
+					var radiusScale = m.geometry.attributes.radiusScale.array;
+					var alpha = m.geometry.attributes.alpha.array;
+					for( var ii = 0; ii < radiusScale.length; ii ++ ) {
+						radiusScale[ii] = 1.;
+						alpha[ii] = 1.;
+						if (params.updateFilter[p]){
+							for (k=0; k<params.fkeys[p].length; k++){
+								if (params.parts[p][params.fkeys[p][k]] != null) {
+									val = params.parts[p][params.fkeys[p][k]][ii]; 
+									if ( val < params.filterVals[p][params.fkeys[p][k]][0] || val > params.filterVals[p][params.fkeys[p][k]][1] ){
+										radiusScale[ii] = 0.;
+										alpha[ii] = 0.;
+									} 
+								}
+							}
+						}
+					}
+					params.updateFilter[p] = false;
+					params.updateOnOff[p] = false;
+					m.geometry.attributes.radiusScale.needsUpdate = true;
+					m.geometry.attributes.alpha.needsUpdate = true;
+				}
 			} else { 
+				//don't need to set alphas here because I am setting the entire color to 0 (RGBA)
 				m.material.uniforms.color.value = new THREE.Vector4(0);
 				m.material.uniforms.oID.value = -1;
+				var radiusScale = m.geometry.attributes.radiusScale.array;
+				for( var ii = 0; ii < radiusScale.length; ii ++ ) {
+					radiusScale[ii] = 0.;
+				}
+				m.geometry.attributes.radiusScale.needsUpdate = true;
 			}
 
 		});
