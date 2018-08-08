@@ -216,6 +216,22 @@ function checkVelBox(box)
 
 }
 
+function checkInvertFilterBox(box)
+{
+	var fpos = box.id.indexOf('_FK_');
+	var epos = box.id.indexOf('_END_');
+	var sl = box.id.length;
+	var pID = box.id.slice(0, fpos - sl);
+	var fk = box.id.slice(fpos + 4, epos - sl);
+	params.invertFilter[pID][fk] = false;
+	if (box.checked){
+		params.invertFilter[pID][fk] = true;
+	}
+	params.updateFilter[pID] = true;
+
+
+}
+
 //functions to check color of particles
 function checkColor(event, color)
 {
@@ -1104,12 +1120,18 @@ function selectFilter() {
 		//console.log('hiding','#'+p+'_FK_'+params.fkeys[p][i]+'_END_Filter')
 		d3.selectAll('#'+p+'_FK_'+params.fkeys[p][i]+'_END_Filter')
 			.style('display','none');
+		d3.selectAll('#'+p+'_FK_'+params.fkeys[p][i]+'_END_InvertFilterCheckBox')
+			.style('display','none');
+		d3.selectAll('#'+p+'_FK_'+params.fkeys[p][i]+'_END_InvertFilterCheckBoxLabel')
+			.style('display','none');
 	}
 	//console.log('showing', '#'+p+'_FK_'+selectValue+'_END_Filter')
 	d3.selectAll('#'+p+'_FK_'+selectValue+'_END_Filter')
-		.style('display','inline');
-
-
+		.style('display','block');
+	d3.selectAll('#'+p+'_FK_'+selectValue+'_END_InvertFilterCheckBox')
+		.style('display','inline-block');
+	d3.selectAll('#'+p+'_FK_'+selectValue+'_END_InvertFilterCheckBoxLabel')
+		.style('display','inline-block');
 };
 
 function selectVelType() {
@@ -1652,13 +1674,13 @@ function createUI(){
 					.style('border','1px solid #909090')
 
 				var filterDiv = dropdown.append('div')
-					.attr('style','margin:0px; padding:5px; height:40px');
+					.attr('style','margin:0px; padding:5px; height:40px;');
 
 				var selectF = filterDiv.append('div')
-					.attr('style','height:20px')
+					.attr('style','height:20px; display:inline-block')
 					.html('Filters &nbsp')	
-
 					.append('select')
+					.attr('style','width:160px')
 					.attr('class','selectFilter')
 					.attr('id',d+'_SelectFilter')
 					.on('change',selectFilter)
@@ -1668,16 +1690,29 @@ function createUI(){
 					.append('option')
 					.text(function (d) { return d; });
 
-
 				var filtn = 0;
 				for (j=0; j<params.fkeys[d].length; j++){
 					var fk = params.fkeys[d][j]
 					if (params.parts[d][fk] != null){
 
+						invFilter = filterDiv.append('label')
+							.attr('for',d+'_FK_'+fk+'_'+'InvertFilterCheckBox')
+							.attr('id',d+'_FK_'+fk+'_END_InvertFilterCheckBoxLabel')
+							.style('display','inline-block')
+							.style('margin-left','160px')
+							.text('Invert');
+
+						invFilter.append('input')
+							.attr('id',d+'_FK_'+fk+'_END_InvertFilterCheckBox')
+							.attr('value','false')
+							.attr('type','checkbox')
+							.attr('autocomplete','off')
+							.attr('onchange','checkInvertFilterBox(this)');
 
 						dfilters = filterDiv.append('div')
 							.attr('id',d+'_FK_'+fk+'_END_Filter')
 							.attr('class','FilterClass')
+							.style('display','block');
 
 						dfilters.append('div')
 							.attr('class','FilterClassLabel')
@@ -1700,6 +1735,10 @@ function createUI(){
 					}
 					if (filtn > 1){
 						d3.selectAll('#'+d+'_FK_'+fk+'_END_Filter')
+							.style('display','none');
+						d3.selectAll('#'+d+'_FK_'+fk+'_END_InvertFilterCheckBox')
+							.style('display','none');
+						d3.selectAll('#'+d+'_FK_'+fk+'_END_InvertFilterCheckBoxLabel')
 							.style('display','none');
 					}
 				}

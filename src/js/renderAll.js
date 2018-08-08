@@ -69,14 +69,17 @@ function update(time){
 				if (params.updateFilter[p] || params.updateOnOff[p]){
 					var radiusScale = m.geometry.attributes.radiusScale.array;
 					var alpha = m.geometry.attributes.alpha.array;
+					var fk;
 					for( var ii = 0; ii < radiusScale.length; ii ++ ) {
 						radiusScale[ii] = 1.;
 						alpha[ii] = 1.;
 						if (params.updateFilter[p]){
 							for (k=0; k<params.fkeys[p].length; k++){
-								if (params.parts[p][params.fkeys[p][k]] != null) {
-									val = params.parts[p][params.fkeys[p][k]][ii]; 
-									if ( val < params.filterVals[p][params.fkeys[p][k]][0] || val > params.filterVals[p][params.fkeys[p][k]][1] ){
+								fk = params.fkeys[p][k];
+								if (params.parts[p][fk] != null) {
+									val = params.parts[p][fk][ii]; 
+									//if ( val < params.filterVals[p][fk][0] || val > params.filterVals[p][fk][1] ){
+									if ( (!params.invertFilter[p][fk] && (val < params.filterVals[p][fk][0] || val > params.filterVals[p][fk][1])) || ( (params.invertFilter[p][fk] && (val > params.filterVals[p][fk][0] && val < params.filterVals[p][fk][1])))   ){
 										radiusScale[ii] = 0.;
 										alpha[ii] = 0.;
 									} 
