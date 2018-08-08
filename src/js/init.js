@@ -47,6 +47,7 @@ function defineParams(){
 		this.updateFilter = {};
 		this.filterLims = {};
 		this.filterVals = {};
+		this.invertFilter = {};
 
 		//for frustum      
 		this.zmax = 5.e10;
@@ -465,6 +466,7 @@ function calcFilterLimits(p, fkey){
 		max += 0.001;
 		params.filterLims[p][fkey] = [min, max];
 		params.filterVals[p][fkey] = [min, max];
+		params.invertFilter[p][fkey] = false;
 	}
 }
 
@@ -506,6 +508,7 @@ function initPVals(){
 		params.updateFilter[p] = false;
 		params.filterLims[p] = {};
 		params.filterVals[p] = {};
+		params.invertFilter[p] = {};
 		params.fkeys[p] = [];
 		params.plotNmax[p] = params.parts[p].Coordinates.length;
 		params.PsizeMult[p] = 1.;
