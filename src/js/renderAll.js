@@ -26,6 +26,14 @@ function update(time){
 		initControls();
 	}
 	
+	if (params.keyboard.down("C")) {
+		console.log(params.camera.position, params.camera.rotation);
+	}
+	if (params.keyboard.down("T")) {
+		console.log("tweening")	
+		runTweens()
+	}
+
 	params.controls.update();
 
 	updateUICenterText();
