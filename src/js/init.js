@@ -127,6 +127,9 @@ function defineParams(){
 		//animation
 		this.pauseAnimation = false;
 
+		//tweening
+		this.inTween = false;
+
 	};
 
 

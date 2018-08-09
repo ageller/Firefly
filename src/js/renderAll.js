@@ -9,6 +9,7 @@ function animate(time) {
 }
 
 function update(time){
+	TWEEN.update(time);
 	params.keyboard.update();
 	if (params.keyboard.down("H")){
 		params.helpMessage=!params.helpMessage;
@@ -30,8 +31,10 @@ function update(time){
 		console.log(params.camera.position, params.camera.rotation);
 	}
 	if (params.keyboard.down("T")) {
-		console.log("tweening")	
-		runTweens()
+		if (!params.inTween){
+			console.log("tweening")	
+			runTweens();
+		}
 	}
 
 	params.controls.update();
