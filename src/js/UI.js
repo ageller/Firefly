@@ -228,6 +228,7 @@ function checkColorMapBox(box)
 	params.showColorMap[p] = false;
 	if (box.checked){
 		params.showColorMap[p] = true;
+		fillColorbarContainer();
 	}
 	
 	console.log(p, "colormap:", params.showColorMap[p])
@@ -488,6 +489,9 @@ function setCMapSliderHandle(i, value, parent, reset=false) {
 	//because we are now redrawing each time, we do not need to do this
 	params.updateColorMap[p] = true;
 	mouseDown = false; 
+	// if (params.showColorMap[p]){
+	// 	fillColorbarContainer();
+	// }
 	fillColorbarContainer()
 }
 
@@ -587,6 +591,9 @@ function createCMapSliders(){
 						var nf = parseFloat(values[handle])/ (Math.round(1000.*params.colormapVals[pp][ffk][handle])/1000.);
 						params.SliderCMapinputs[pp][ffk][handle].value = values[handle];
 						params.colormapVals[pp][ffk][handle] = parseFloat(values[handle]);
+						// if (params.showColorMap[p]){
+						// 	fillColorbarContainer();
+						// }
 						fillColorbarContainer();
 
 						if (Math.abs(1. - nf) > 0.001 && ! params.reset){
@@ -2100,14 +2107,16 @@ function createUI(){
 	createSSslider();
 	createFilterSliders();
 	createCMapSliders();
-	console.log(params.colormapVals)
 	updateUICenterText();
 	updateUICameraText();
 	updateUIRotText();
 
 	applyUIoptions();
 
-	fillColorbarContainer();
+	if (params.showColorMap[d]){
+		fillColorbarContainer();
+	}
+	//fillColorbarContainer();
 
 	params.haveUI = true;
 }
@@ -2470,7 +2479,7 @@ function dragColorbarElement(elm, e) {
 
 function fillColorbarContainer(){
 	var n_colormap = 31-(params.colormap['Gas']*32-0.5)
-	console.log(n_colormap,params.colormap['Gas'])
+	//console.log(n_colormap,params.colormap['Gas'])
 	var minmax = params.colormapVals['Gas'][params.ckeys['Gas'][params.colormapVariable['Gas']]]
 	var xmin = minmax[0]
 	var xmax = minmax[1]
