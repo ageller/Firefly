@@ -146,7 +146,11 @@ function initControls(){
 
 			}
 		} 
-
+		if (params.haveUI){
+			elm = document.getElementById("CenterCheckBox");
+			elm.checked = true;
+			elm.value = true;
+		}
 		params.controls.dynamicDampingFactor = params.friction;
 
 	} else {
