@@ -673,7 +673,7 @@ function createDslider(){
 		params.SliderDInputs = [params.SliderDmax];
 		params.SliderDInputs[0].parent = params.SliderD;
 		min = 1.;
-		max = 100.;
+		max = 20.;
 
 		noUiSlider.create(params.SliderD, {
 			start: [params.decimate],
@@ -1223,6 +1223,30 @@ function createUI(){
 		.attr('id','dataControlsDropdown')
 		.style('height','220px');
 
+	//decimation
+	var dec = m2.append('div')
+		.attr('id', 'decimationDiv')
+		.style('width','270px')
+		.style('margin-left','5px')
+		.style('margin-top','10px')
+		.style('display','inline-block')
+	dec.append('div')
+		.attr('class','pLabelDiv')
+		.style('width','85')
+		.style('display','inline-block')
+		.text('Decimation');
+	dec.append('div')
+		.attr('class','NSliderClass')
+		.attr('id','DSlider')
+		.style('margin-left','40px')
+		.style('width','158px');
+	dec.append('input')
+		.attr('class','NMaxTClass')
+		.attr('id','DMaxT')
+		.attr('type','text')
+		.style('left','255px')
+		.style('width','30px');
+
 	//fullscreen button
 	m2.append('div').attr('id','fullScreenDiv')
 		.append('button')
@@ -1309,28 +1333,6 @@ function createUI(){
 		.append('span')
 			.text('Load New Data');
 
-	//decimation
-	var dec = m2.append('div')
-		.attr('class','particleDiv')
-		.attr('id', 'decimationDiv')
-		.style('width','270px')
-		.style('display','inline-block')
-	dec.append('div')
-		.attr('class','pLabelDiv')
-		.style('width','85px')
-		.style('display','inline-block')
-		.text('Decimation');
-	dec.append('div')
-		.attr('class','PSliderClass')
-		.attr('id','DSlider')
-		.style('margin-top','-22px')
-		.style('width','130px');
-	dec.append('input')
-		.attr('class','PMaxTClass')
-		.attr('id','DMaxT')
-		.attr('type','text')
-		.style('left','235px')
-		.style('width','30px');
 
 	/////////////////////////
 	//camera
