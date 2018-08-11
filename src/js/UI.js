@@ -1048,8 +1048,10 @@ function hideUI(x){
 
 function getPi(pID){
 	var i=0;
-	for (i=0; i<params.partsKeys.length; i++){
-		if (pID == params.partsKeys[i]){
+	keys = Object.keys(params.gtoggle)
+	// for (i=0; i<params.partsKeys.length; i++){
+	for (i=0; i<keys.length; i++){
+		if (pID == keys[i]){
 			break;
 		}
 	}
@@ -1066,43 +1068,29 @@ function showFunction(handle) {
 
 	var pdiv;
 	var ddiv = document.getElementById(pID+'Dropdown');
-	var ht = parseFloat(ddiv.style.height.slice(0,-2)) + offset; //to take of "px"
+	var ht = parseFloat(ddiv.style.height.slice(0,-2)) + offset; //to take off "px"
 	var pb = 0.;
 
-	if (i < params.partsKeys.length-1){
-		pdiv = document.getElementsByClassName(params.partsKeys[i+1]+'Div')[0];
+	keys = Object.keys(params.gtoggle)
+	pdiv = document.getElementById(keys[i+1]+'Div');
+	if (i < keys.length-1){
 		if (params.gtoggle[pID]){
 			pdiv.style.marginTop = ht + "px";
-			params.gtoggle[pID] = false;	
 		} else {
 			pdiv.style.marginTop = "0px";
-			params.gtoggle[pID] = true;
 		}
-	} else { // a bit clunky, but works with the current setup
-		if (pID == "Camera"){
-			c = document.getElementById("decimationDiv");
-			pb = 5;
-			if (params.gtoggle[pID]){
-				c.style.marginTop = (pb+ht-5)+'px';
-				params.gtoggle[pID] = false;	
-
-			} else {
-				c.style.marginTop = pb+'px';	
-				params.gtoggle[pID] = true;	
-			}	
-		} else { //for the last particle (to move the bottom of the container)
-			c = document.getElementsByClassName("UIcontainer")[0];
-
-			if (params.gtoggle[pID]){
-				c.style.paddingBottom = (pb+ht-5)+'px';
-				params.gtoggle[pID] = false;	
-
-			} else {
-				c.style.paddingBottom = pb+'px';	
-				params.gtoggle[pID] = true;		
-			}
+	} else {
+		//handle the last one differently
+		c = document.getElementsByClassName("UIcontainer")[0];
+		if (params.gtoggle[pID]){
+			c.style.paddingBottom = (pb+ht-5)+'px';
+		} else {
+			c.style.paddingBottom = pb+'px';	
 		}
 	}
+
+	params.gtoggle[pID] =! params.gtoggle[pID];	
+
 }
 
 function selectFilter() {
@@ -1192,6 +1180,15 @@ function createUI(){
 	 }
 
 	console.log(params.partsKeys)
+	//set the gtoggle Object (in correct order)
+	params.gtoggle.dataControls = true;
+	params.gtoggle.cameraControls = true;
+	for (i=0; i<params.partsKeys.length; i++){
+		d = params.partsKeys[i];
+		params.gtoggle[d] = true;
+	}
+
+
 
 	d3.select('body').append('input')
 		.attr('type','file')
@@ -1207,32 +1204,53 @@ function createUI(){
 	var UI = d3.select('#particleUI')
 	var UIparts = UI.selectAll('div');
 
+	////////////////////////
+	//generic dropdown for "data" controls"
+	var m1 = UI.append('div')
+		.attr('id','dataControlsDiv')
+		.attr('class','particleDiv');
+	m1.append('div')
+		.attr('class','pLabelDiv')
+		.style('width', '215px')
+		.text('Data Controls')
+	m1.append('button')
+		.attr('class','dropbtn')
+		.attr('id','dataControlsDropbtn')
+		.attr('onclick','showFunction(this);')
+		.html('&#x25BC');
+	var m2 = m1.append('div')
+		.attr('class','dropdown-content')
+		.attr('id','dataControlsDropdown')
+		.style('height','220px');
 
 	//fullscreen button
-	UI.append('div').attr('id','fullScreenDiv')
+	m2.append('div').attr('id','fullScreenDiv')
 		.append('button')
 		.attr('id','fullScreenButton')
 		.attr('class','button')
+		.style('width','280px')
 		.attr('onclick','fullscreen();')
 		.append('span')
 			.text('Fullscreen');
 
 	//snapshots
-	var snap = UI.append('div')
+	var snap = m2.append('div')
 		.attr('id','snapshotDiv')
-		.attr('class', 'button-div');
+		.attr('class', 'button-div')
+		.style('width','280px')
 	snap.append('button')
 		.attr('class','button')
 		.attr('onclick','renderImage();')
-		.style('width','150px')
+		.style('width','140px')
 		.style('padding','5px')
 		.style('margin',0)
 		.append('span')
 			.text('Take Snapshot');
+
 	snap.append('input')
 		.attr('id','RenderXText')
 		.attr('type', 'text')
-		.attr('value', '1920')
+		.attr('value',window.innerWidth)
 		.attr('autocomplete','off')
 		.attr('onkeypress','checkText(this, event)')
 		.attr('class','pTextInput')
@@ -1242,7 +1260,7 @@ function createUI(){
 	snap.append('input')
 		.attr('id','RenderYText')
 		.attr('type', 'text')
-		.attr('value', '1200')
+		.attr('value',window.innerHeight)
 		.attr('autocomplete','off')
 		.attr('onkeypress','checkText(this, event)')
 		.attr('class','pTextInput')
@@ -1250,20 +1268,21 @@ function createUI(){
 		.style('margin-top','5px');
 
 	//save preset button
-	UI.append('div').attr('id','savePresetDiv')
+	m2.append('div').attr('id','savePresetDiv')
 		.append('button')
 		.attr('id','savePresetButton')
 		.attr('class','button')
+		.style('width','280px')
 		.attr('onclick','savePreset();')
 		.append('span')
 			.text('Save Preset');
 
 	//reset to default button
-	UI.append('div').attr('id','resetDiv')
+	m2.append('div').attr('id','resetDiv')
 		.append('button')
 		.attr('id','resetButton')
 		.attr('class','button')
-		.style('width','142px')
+		.style('width','134px')
 		.attr('onclick','resetToOptions();')
 		.append('span')
 			.text('Reset to Default');
@@ -1272,24 +1291,49 @@ function createUI(){
 		.append('button')
 		.attr('id','resetPButton')
 		.attr('class','button')
-		.style('width','143px')
-		.style('left','147px')
+		.style('width','140px')
+		.style('left','134px')
 		.style('margin-left','0px')
 		.attr('onclick','loadPreset();')
 		.append('span')
 			.text('Reset to Preset');
 
 	//load new data button
-	UI.append('div').attr('id','loadNewDataDiv')
+	m2.append('div').attr('id','loadNewDataDiv')
 		.append('button')
 		.attr('id','loadNewDataButton')
 		.attr('class','button')
+		.style('width','280px')
+
 		.attr('onclick','loadNewData();')
 		.append('span')
 			.text('Load New Data');
 
+	//decimation
+	var dec = m2.append('div')
+		.attr('class','particleDiv')
+		.attr('id', 'decimationDiv')
+		.style('width','270px')
+		.style('display','inline-block')
+	dec.append('div')
+		.attr('class','pLabelDiv')
+		.style('width','85px')
+		.style('display','inline-block')
+		.text('Decimation');
+	dec.append('div')
+		.attr('class','PSliderClass')
+		.attr('id','DSlider')
+		.style('margin-top','-22px')
+		.style('width','130px');
+	dec.append('input')
+		.attr('class','PMaxTClass')
+		.attr('id','DMaxT')
+		.attr('type','text')
+		.style('left','235px')
+		.style('width','30px');
+
+	/////////////////////////
 	//camera
-	params.gtoggle.Camera = true;
 	var c1 = UI.append('div')
 		.attr('id','cameraControlsDiv')
 		.attr('class','particleDiv');
@@ -1299,12 +1343,12 @@ function createUI(){
 		.text('Camera Controls')
 	c1.append('button')
 		.attr('class','dropbtn')
-		.attr('id','CameraDropbtn')
+		.attr('id','cameraControlsDropbtn')
 		.attr('onclick','showFunction(this);')
 		.html('&#x25BC');
 	var c2 = c1.append('div')
 		.attr('class','dropdown-content')
-		.attr('id','CameraDropdown')
+		.attr('id','cameraControlsDropdown')
 		.style('height','190px');
 	//center text boxes
 	var c3 = c2.append('div')
@@ -1462,7 +1506,7 @@ function createUI(){
 	c3 = c2.append('div')
 		.attr('class','pLabelDiv')
 		.attr('id','FrictionDiv')
-		.style('background-color','#808080')
+		// .style('background-color','#808080')
 		.style('width','280px')
 		.style('padding-top','10px');
 	c3.append('div')
@@ -1483,7 +1527,7 @@ function createUI(){
 	c3 = c2.append('div')
 		.attr('class','pLabelDiv')
 		.attr('id','StereoSepDiv')
-		.style('background-color','#808080')
+		// .style('background-color','#808080')
 		.style('width','280px')
 		.style('padding-top','10px');
 	c3.append('div')
@@ -1515,38 +1559,20 @@ function createUI(){
 		.attr('type','text')
 		.style('margin-top','-4px');
 
-	//decimation
-	var dec = UI.append('div')
-		.attr('class','particleDiv')
-		.attr('id', 'decimationDiv');
-	dec.append('div')
-		.attr('class','pLabelDiv')
-		.style('width','85px')
-		.text('Decimation');
-	dec.append('div')
-		.attr('class','PSliderClass')
-		.attr('id','DSlider')
-		.style('margin-top','-22px')
-		.style('width','145px');
-	dec.append('input')
-		.attr('class','PMaxTClass')
-		.attr('id','DMaxT')
-		.attr('type','text')
-		.style('left','245px')
-		.style('width','40px');
 
 
+	///////////////////////
 	//setup for all the particle UI bits 
 	UIparts.data(params.partsKeys).enter()
 		.append('div')
 		.attr('class', function (d) { return "particleDiv "+d+"Div" }) //+ dropdown
+		.attr('id', function (d) { return d+"Div" }) //+ dropdown
 
 
 	var i=0;
 	var j=0;
 	for (i=0; i<params.partsKeys.length; i++){
 		d = params.partsKeys[i];
-		params.gtoggle[d] = true;
 
 		var controls = d3.selectAll('div.'+d+'Div');
 
@@ -2089,4 +2115,9 @@ function dragElement(elm, e) {
 	}
 }
 
+function changeSnapSizes(){
+	document.getElementById("RenderXText").value = window.innerWidth;
+	document.getElementById("RenderYText").value = window.innerHeight;
+}
+window.addEventListener('resize', changeSnapSizes);
 
