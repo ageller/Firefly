@@ -1,5 +1,5 @@
 :root {
-	--main-foreground-color: #FFDD33;
+	--main-foreground-color: #a6fd56;
 	--main-background-color: rgba(0, 0, 0, 0.5);
 	--main-dropdown-background-color: ; 
 }
@@ -12,6 +12,8 @@
 	border-style:solid;
 	border-width: 2px 2px 2px 2px;
 	font-family: Sans-Serif;
+	-webkit-transition: width 0.4s;
+	transition: width 0.4s;
 }
 .UItopbar{
 	color:var(--main-foreground-color);
@@ -123,7 +125,8 @@
 	margin:5px;
 	height:20px;
 	opacity: 0.8;
-	transition: opacity .15s;
+	-webkit-transition: width 0.4s, opacity 0.15s;
+	transition: width 0.4s, opacity .15s;
 }
 .particleDiv:hover {
 	opacity: 1;

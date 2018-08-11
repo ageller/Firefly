@@ -1024,23 +1024,31 @@ function hideUI(x){
 
 		var UI = document.getElementById("UIhider");
 		var UIc = document.getElementsByClassName("UIcontainer")[0];
+		var UIt = document.getElementById("ControlsText");
+		//var UIp = document.getElementsByClassName("particleDiv");
+		var UIp = d3.selectAll('.particleDiv');
 		if (params.UIhidden){
 			UI.style.display = 'inline';
 			//UI.style.visibility = 'visible';
 			UIc.style.borderStyle = 'solid';
 			UIc.style.marginLeft = '0';
 			UIc.style.marginTop = '0';
-			params.UIhidden = false;
+			UIc.style.width = '300px';
+			//UIp.style('width', '280px');
+			UIt.style.color = 'rgb(0,0,0,1)';
 		} else {
 			UI.style.display = 'none';
 			//UI.style.visibility = 'hidden';
 			UIc.style.borderStyle = 'none';
 			UIc.style.marginLeft = '2px';
 			UIc.style.marginTop = '2px';
-			params.UIhidden = true;	
+			UIc.style.width = '35px';
+			//UIp.style('width', '35px');
+			UIt.style.color = 'rgb(0,0,0,0)';
 		}
 		var UIt = document.getElementById("UItopbar");
 		//UIt.style.display = 'inline';
+		params.UIhidden = !params.UIhidden
 	}
 }
 
@@ -1171,11 +1179,6 @@ function createUI(){
 
 		var hider = UIcontainer.append('div').attr('id','UIhider');
 		hider.append('div').attr('id','particleUI');
-
-		var hamburger = document.getElementById('UItopbar');
-		//hide the UI
-		hideUI(hamburger);
-		hamburger.classList.toggle("change");
 
 	 }
 
@@ -1818,6 +1821,13 @@ function createUI(){
 	applyUIoptions();
 
 	params.haveUI = true;
+
+	//hide the UI initially
+	if (!params.reset){
+		var hamburger = document.getElementById('UItopbar');
+		hideUI(hamburger);
+		hamburger.classList.toggle("change");
+	}
 }
 
 function applyUIoptions(){
