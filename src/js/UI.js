@@ -1006,9 +1006,9 @@ function checkText(input, event)
 function checkshowParts(checkbox)
 {
 	var type = checkbox.id.slice(-5); 
+	params.updateOnOff[pID] = true;
 	if (type == 'Check'){	
 		var pID = checkbox.id.slice(0,-5); // remove  "Check" from id
-		params.updateOnOff[pID] = true;
 		params.showParts[pID] = false;
 		if (checkbox.checked){
 			params.showParts[pID] = true;
@@ -1021,7 +1021,6 @@ function hideUI(x){
 	if (!params.movingUI){
 
 		x.classList.toggle("change");
-
 		var UI = document.getElementById("UIhider");
 		var UIc = document.getElementsByClassName("UIcontainer")[0];
 		var UIt = document.getElementById("ControlsText");
@@ -1035,7 +1034,7 @@ function hideUI(x){
 			UIc.style.marginTop = '0';
 			UIc.style.width = '300px';
 			//UIp.style('width', '280px');
-			UIt.style.color = 'rgb(0,0,0,1)';
+			UIt.style.opacity = 1;
 		} else {
 			UI.style.display = 'none';
 			//UI.style.visibility = 'hidden';
@@ -1044,7 +1043,7 @@ function hideUI(x){
 			UIc.style.marginTop = '2px';
 			UIc.style.width = '35px';
 			//UIp.style('width', '35px');
-			UIt.style.color = 'rgb(0,0,0,0)';
+			UIt.style.opacity = 0;
 		}
 		var UIt = document.getElementById("UItopbar");
 		//UIt.style.display = 'inline';
