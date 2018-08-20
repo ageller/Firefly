@@ -242,7 +242,7 @@ function checkPlaybackFilterBox(box)
 	this_label.innerText = "Playback: "
 	if (box.checked){
 		this_label = document.getElementById(pID+'_PlaybackLabel');
-		this_label.innerText += " " + params.parts[pID]['currentlyShownFilter']
+		this_label.innerText += " " + "under development"//params.parts[pID]['currentlyShownFilter']
 		console.log("checked!")
 	}
 
@@ -1807,7 +1807,7 @@ function createUI(){
 					.attr('id',d+'_PlaybackLabel')
 					.style('display','inline-block')
 					.style('margin-top','30px')
-					.text('Playback');
+					.text('Playback:');
 
 				
 
