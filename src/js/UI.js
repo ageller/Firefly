@@ -1938,6 +1938,7 @@ function createUI(){
 
 				// dropdown to select colormap
 				var selectCMap = ColorDiv.append('select')
+					.attr('class','selectCMap')
 					.attr('id',d+'_SelectCMap')
 					.on('change', selectColorMap)
 
@@ -1949,7 +1950,7 @@ function createUI(){
 
 				// dropdown to select colormap variable
 				var selectCMapVar = ColorDiv.append('select')
-					.attr('style','width:98px; margin-left:8px')
+					.attr('class','selectCMapVar')
 					.attr('id',d+'_SelectCMapVar')
 					.on('change',selectColorMapVariable)
 
