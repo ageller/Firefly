@@ -457,10 +457,8 @@ function applyOptions(){
 function calcFilterLimits(p, fkey){
 //calculate limits for the filters
 	
-	//TODO this should not be here!!
-	// set the currently shown filter for each part type at startup
-	// so the first click isn't broken
-	params.parts[p]['currentlyShownFilter']=params.fkeys[p][0];
+	
+	
 
 	var j=0;
 	if (params.parts[p][fkey] != null){
@@ -477,6 +475,13 @@ function calcFilterLimits(p, fkey){
 		params.filterLims[p][fkey] = [min, max];
 		params.filterVals[p][fkey] = [min, max];
 		params.invertFilter[p][fkey] = false;
+		//TODO this should not be here!!
+		// set the currently shown filter for each part type at startup
+		// so the first click isn't broken
+		console.log(params.parts[p]['currentlyShownFilter']==undefined,'check if undefined')
+		if (params.parts[p]['currentlyShownFilter'] == undefined){
+			params.parts[p]['currentlyShownFilter']=fkey;	
+		}
 	}
 }
 
