@@ -279,7 +279,6 @@ function initializeColorMap(){
 		// initialize dictionaries
 		params.colormapVariable[p] = 0;
 		params.colormap[p] = 4/256;
-		// params.ckeys['Gas'] = ["magVelocities", "log10Temperature", "HIIAbundance", "log10Density"];
 		params.ckeys['Gas'] = ["magVelocities", "log10Density"];
 		params.ckeys['Stars'] = ["magVelocities"];
 		params.ckeys['DarkMatter'] = ["magVelocities"];
