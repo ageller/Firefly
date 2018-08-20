@@ -232,6 +232,22 @@ function checkInvertFilterBox(box)
 
 }
 
+function checkPlaybackFilterBox(box)
+{
+	// figure out which checkbox was checked by slicing the ID, clever move Aaron!
+	var playback_index = box.id.indexOf('_Playback');
+	var pID = box.id.slice(0, playback_index);
+	//console.log(params.parts[pID])
+	this_label = document.getElementById(pID+'_PlaybackLabel');
+	this_label.innerText = "Playback: "
+	if (box.checked){
+		this_label = document.getElementById(pID+'_PlaybackLabel');
+		this_label.innerText += " " + "under development"//params.parts[pID]['currentlyShownFilter']
+		console.log("checked!")
+	}
+
+}
+
 //functions to check color of particles
 function checkColor(event, color)
 {
@@ -1110,6 +1126,10 @@ function selectFilter() {
 
 	var p = this.id.slice(0,-13)
 
+	// store the "currently shown" filter for later use
+	console.log("setting the current filter value to",selectValue)
+	params.parts[p]['currentlyShownFilter']=selectValue
+
 	//console.log("in selectFilter", selectValue, this.id, p)
 	for (var i=0; i<params.fkeys[p].length; i+=1){
 		//console.log('hiding','#'+p+'_FK_'+params.fkeys[p][i]+'_END_Filter')
@@ -1697,7 +1717,7 @@ function createUI(){
 			nfilt = showfilts.length;
 
 			if (nfilt > 0){
-				dheight += 70;
+				dheight += 80;
 
 				dropdown.append('hr')
 					.style('margin','0')
@@ -1762,6 +1782,7 @@ function createUI(){
 							.attr('type','text');
 
 						filtn += 1;
+
 					}
 					if (filtn > 1){
 						d3.selectAll('#'+d+'_FK_'+fk+'_END_Filter')
@@ -1772,6 +1793,23 @@ function createUI(){
 							.style('display','none');
 					}
 				}
+
+				playbackCheckbox = filterDiv.append('input')
+					.attr('id',d+'_PlaybackCheckbox')
+					.attr('value','false')
+					.attr('type','checkbox')
+					.attr('autocomplete','off')
+					.attr('onchange','checkPlaybackFilterBox(this)')
+					.style('display','inline-block')
+
+				playbackLabel = filterDiv.append('label')
+					.attr('for',d+'_'+'PlaybackLabel')
+					.attr('id',d+'_PlaybackLabel')
+					.style('display','inline-block')
+					.style('margin-top','30px')
+					.text('Playback:');
+
+				
 
 			} 
 			dropdown.style('height',dheight+'px');
