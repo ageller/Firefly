@@ -9,7 +9,9 @@ function animate(time) {
 }
 
 function update(time){
-	TWEEN.update(time);
+	if (params.updateTween){
+		TWEEN.update(time);
+	}
 	params.keyboard.update();
 	if (params.keyboard.down("H")){
 		params.helpMessage=!params.helpMessage;
@@ -31,9 +33,13 @@ function update(time){
 		console.log(params.camera.position, params.camera.rotation);
 	}
 	if (params.keyboard.down("T")) {
-		if (!params.inTween){
-			console.log("tweening")	
-			runTweens();
+		if (params.inTween){
+			params.updateTween = false
+			params.inTween = false
+		} else {
+			console.log("tweening")
+			params.updateTween = true	
+			setTweenParams();
 		}
 	}
 
