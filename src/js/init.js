@@ -129,6 +129,12 @@ function defineParams(){
 
 		//tweening
 		this.inTween = false;
+		this.updateTween = false;
+		this.tweenFile = null;
+		this.tweenParams = {};
+		this.tweenPos = [];
+		this.tweenRot = [];
+		this.tweenFileName = "tweenParams.json"
 
 	};
 

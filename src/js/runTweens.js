@@ -1,90 +1,104 @@
-function runTweens(){
-	
+function setTweenParams(){
 	params.inTween = true;
+	params.tweenParams = {};
 
+	params.tweenFile = params.dir[0]+"/"+params.tweenFileName
+	d3.json(params.tweenFile,  function(val) {
+		Object.keys(val).forEach(function(k, jj) {
+			params.tweenParams[k] = val[k]
+			if (k == "duration"){ //this should always be the last key
+				createTweens()
+			}
+		});
+	});
+}
+
+//these are not necessary, but could be modified if we want a more complex tween
+// function makePosTween(p1, p2, dur, ease){
+// 	var pT = new TWEEN.Tween(p1).to(p2, dur).easing(ease)
+// 		.onUpdate(function(object){
+// 			params.camera.position.x = object.x;
+// 			params.camera.position.y = object.y;
+// 			params.camera.position.z = object.z;
+// 		});
+// 	return pT;
+// }
+// function makeRotTween(r1, r2, dur, ease){
+// 	var rT = new TWEEN.Tween(r1).to(r2, dur).easing(ease)
+// 		.onUpdate(function(object){
+// 			console.log(params.camera.rotation)
+// 			params.camera.rotation.x = object.x;
+// 			params.camera.rotation.y = object.y;
+// 			params.camera.rotation.z = object.z;
+// 		});
+// 	return rT;
+// }
+function createTweens(loop = true){
 	//some initial conditions
 	//this gets updated in the tween unfortunately, 
-	var Rot0 = {x:params.camera.rotation.x, y:params.camera.rotation.y, z:params.camera.rotation.z };
-	var Pos0 = {x:params.camera.position.x, y:params.camera.position.y, z:params.camera.position.z };
-	var dur4 = 3000;
+	var cRot = {"x":params.camera.rotation.x, "y":params.camera.rotation.y, "z":params.camera.rotation.z };
+	var cPos = {"x":params.camera.position.x, "y":params.camera.position.y, "z":params.camera.position.z };
+	//these should not be overwritten
+	var savePos = Object.assign({}, cPos); 
+	var saveRot = Object.assign({}, cRot); 
+	var cdur = 3000;
 
-	var Pos1 = {x: -19.744956838173927, y: 15.455853916693579, z: -16.277443897768208 };
-	var Rot1 = {x: -2.6170443904060248, y: -0.23596432285678665, z: 0.022431492272463913};
-	var dur1 = 5000;
 
-	var Pos2 = {x: -3.0133393793838064, y: 1.9573575609821188, z: -35.29382116766788};
-	var Rot2 = {x: -3.086190477009067, y: -0.0850420619130238, z: 0.21704567689878831};
-	var dur2 = 10000;
+	params.tweenParams.position.unshift(cPos)
+	params.tweenParams.rotation.unshift(cRot)
+	params.tweenParams.duration.push(cdur)
 
-	var Pos3 = {x: 22.30222309308597, y: -42.86419581562794, z: -6.174430674062557};
-	var Rot3 = {x: 1.7138586035003753, y: 0.47556299870784857, z: 0.7042020284793505};
-	var dur3 = 1000;
 
-	var savePos0 = Object.assign({}, Pos0);
-	var saveRot0 = Object.assign({}, Rot0);
-	console.log(Pos0)
+	//for now, all tweens will have this same easing function
+	//could define this outside, or in the tween file
+	var ease = TWEEN.Easing.Quintic.InOut
+
 	//set up the tweens
-	var rotTween1 = new TWEEN.Tween(Rot0).to(Rot1,dur1).easing(TWEEN.Easing.Quintic.InOut)
-		.onUpdate(function(object){
-			params.camera.rotation.x = object.x;
-			params.camera.rotation.y = object.y;
-			params.camera.rotation.z = object.z;
-		})
-	var posTween1 = new TWEEN.Tween(params.camera.position).to(Pos1, dur1).easing(TWEEN.Easing.Quintic.InOut)
-		.onUpdate(function(object){
-			params.camera.position.x = object.x;
-			params.camera.position.y = object.y;
-			params.camera.position.z = object.z;
-		})
-		.onStart(function(){
-			rotTween1.start();
-		});
 
-	var rotTween2 = new TWEEN.Tween(Rot1).to(Rot2,dur2).easing(TWEEN.Easing.Quintic.InOut)
-		.onUpdate(function(object){
-			params.camera.rotation.x = object.x;
-			params.camera.rotation.y = object.y;
-			params.camera.rotation.z = object.z;
-		});
-	var posTween2 = new TWEEN.Tween(Pos1).to(Pos2, dur2).easing(TWEEN.Easing.Quintic.InOut)
-		.onUpdate(function(object){
-			params.camera.position.x = object.x;
-			params.camera.position.y = object.y;
-			params.camera.position.z = object.z;
-		});
+	//first one starts at the current camera location
+	var Ntweens = params.tweenParams.position.length
 
-	var rotTween3 = new TWEEN.Tween(Rot2).to(Rot3,dur3).easing(TWEEN.Easing.Quintic.InOut)
-		.onUpdate(function(object){
-			params.camera.rotation.x = object.x;
-			params.camera.rotation.y = object.y;
-			params.camera.rotation.z = object.z;
-		});
-	var posTween3 = new TWEEN.Tween(Pos2).to(Pos3, dur3).easing(TWEEN.Easing.Quintic.InOut)
-		.onUpdate(function(object){
-			params.camera.position.x = object.x;
-			params.camera.position.y = object.y;
-			params.camera.position.z = object.z;
-		});
+	//now go through all the tweens
+	for (var i=0; i<Ntweens-1; i++){
+		var rotTween = new TWEEN.Tween(params.camera.rotation).to(params.tweenParams.rotation[i+1], params.tweenParams.duration[i]).easing(ease)
+		params.tweenRot.push(rotTween)
+		var posTween = new TWEEN.Tween(params.camera.position).to(params.tweenParams.position[i+1], params.tweenParams.duration[i]).easing(ease)
+		params.tweenPos.push(posTween)
+		// params.tweenRot[i].onComplete(function(){
+		// 	console.log(params.camera.rotation)
+		// });
 
-	var rotTween4 = new TWEEN.Tween(Rot3).to(saveRot0,dur4).easing(TWEEN.Easing.Quintic.InOut)
-		.onUpdate(function(object){
-			params.camera.rotation.x = object.x;
-			params.camera.rotation.y = object.y;
-			params.camera.rotation.z = object.z;
-		});
-	var posTween4 = new TWEEN.Tween(Pos3).to(savePos0, dur4).easing(TWEEN.Easing.Quintic.InOut)
-		.onUpdate(function(object){
-			params.camera.position.x = object.x;
-			params.camera.position.y = object.y;
-			params.camera.position.z = object.z;
-		})
-		.onComplete(function(){
-			params.inTween = false;
-		})
+	}
+	//the first one will need to start the rotation automatically (the rest will be chained together)
+	params.tweenPos[0].onStart(function(){
+		params.tweenRot[0].start();
+	});
 
-	//chain the tweens together
-	posTween1.chain(posTween2, rotTween2);
-	posTween2.chain(posTween3, rotTween3);
-	posTween3.chain(posTween4, rotTween4);
-	posTween1.start();
+	if (!loop){
+
+		//the last one goes back to the starting point
+		//and cancels the inTween boolean
+		var rotTween1 = new TWEEN.Tween(params.camera.rotation).to(saveRot, params.tweenParams.duration[Ntweens - 1]).easing(ease)
+		params.tweenRot.push(rotTween1)
+		var posTween1 = new TWEEN.Tween(params.camera.position).to(savePos, params.tweenParams.duration[Ntweens - 1]).easing(ease)
+		params.tweenPos.push(posTween1)
+		params.tweenPos[Ntweens-1].onComplete(function(){
+			if (!loop){
+				params.inTween = false;
+				console.log("finished with tween");
+			} 
+		});
+	}  
+
+	var Ntweens = params.tweenPos.length
+	for (var i=0; i<Ntweens-1; i++){
+		params.tweenPos[i].chain(params.tweenPos[i+1], params.tweenRot[i+1]);
+	}
+	//loop back to the first entry from the user (recall that I prepended a tween from the current camera position; this will get us back to the first location)
+	if (loop){
+		params.tweenPos[Ntweens-1].chain(params.tweenPos[0], params.tweenRot[0]);	
+	}
+	//start the tweens
+	params.tweenPos[0].start();
+
 }
