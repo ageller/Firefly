@@ -237,13 +237,21 @@ function checkPlaybackFilterBox(box)
 	// figure out which checkbox was checked by slicing the ID, clever move Aaron!
 	var playback_index = box.id.indexOf('_Playback');
 	var pID = box.id.slice(0, playback_index);
-	//console.log(params.parts[pID])
 	this_label = document.getElementById(pID+'_PlaybackLabel');
+
+	//reset the text/appstate to default values
 	this_label.innerText = "Playback: "
+	params.parts[pID]["playbackEnabled"]=false;
 	if (box.checked){
+		// read which fkey is currently shown 
 		this_label = document.getElementById(pID+'_PlaybackLabel');
-		this_label.innerText += " " + "under development"//params.parts[pID]['currentlyShownFilter']
-		console.log("checked!")
+		// update the playback text in the UI
+		this_label.innerText += " " + params.parts[pID]['currentlyShownFilter']//"under development"//
+
+		//flag that we should run playback
+		params.parts[pID]["playbackEnabled"]=true;
+		// todo remove time because we don't *really* use it 
+		params.parts[pID]['playbackTime']=0.0;
 	}
 
 }
