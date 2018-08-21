@@ -13,24 +13,26 @@ function setTweenParams(){
 	});
 }
 
-function makePosTween(p1, p2, dur, ease){
-	var pT = new TWEEN.Tween(p1).to(p2, dur).easing(ease)
-		.onUpdate(function(object){
-			params.camera.position.x = object.x;
-			params.camera.position.y = object.y;
-			params.camera.position.z = object.z;
-		});
-	return pT;
-}
-function makeRotTween(r1, r2, dur, ease){
-	var rT = new TWEEN.Tween(r1).to(r2, dur).easing(ease)
-		.onUpdate(function(object){
-			params.camera.rotation.x = object.x;
-			params.camera.rotation.y = object.y;
-			params.camera.rotation.z = object.z;
-		});
-	return rT;
-}
+//these are not necessary, but could be modified if we want a more complex tween
+// function makePosTween(p1, p2, dur, ease){
+// 	var pT = new TWEEN.Tween(p1).to(p2, dur).easing(ease)
+// 		.onUpdate(function(object){
+// 			params.camera.position.x = object.x;
+// 			params.camera.position.y = object.y;
+// 			params.camera.position.z = object.z;
+// 		});
+// 	return pT;
+// }
+// function makeRotTween(r1, r2, dur, ease){
+// 	var rT = new TWEEN.Tween(r1).to(r2, dur).easing(ease)
+// 		.onUpdate(function(object){
+// 			console.log(params.camera.rotation)
+// 			params.camera.rotation.x = object.x;
+// 			params.camera.rotation.y = object.y;
+// 			params.camera.rotation.z = object.z;
+// 		});
+// 	return rT;
+// }
 function createTweens(loop = true){
 	//some initial conditions
 	//this gets updated in the tween unfortunately, 
@@ -58,11 +60,13 @@ function createTweens(loop = true){
 
 	//now go through all the tweens
 	for (var i=0; i<Ntweens-1; i++){
-		var rotTween = makeRotTween(params.tweenParams.rotation[i], params.tweenParams.rotation[i+1], params.tweenParams.duration[i], ease)
+		var rotTween = new TWEEN.Tween(params.camera.rotation).to(params.tweenParams.rotation[i+1], params.tweenParams.duration[i]).easing(ease)
 		params.tweenRot.push(rotTween)
-		// var posTween = makePosTween(params.tweenParams.position[i], params.tweenParams.position[i+1], params.tweenParams.duration[i], ease)
-		var posTween = makePosTween(params.camera.position, params.tweenParams.position[i+1], params.tweenParams.duration[i], ease)
+		var posTween = new TWEEN.Tween(params.camera.position).to(params.tweenParams.position[i+1], params.tweenParams.duration[i]).easing(ease)
 		params.tweenPos.push(posTween)
+		// params.tweenRot[i].onComplete(function(){
+		// 	console.log(params.camera.rotation)
+		// });
 
 	}
 	//the first one will need to start the rotation automatically (the rest will be chained together)
@@ -74,9 +78,9 @@ function createTweens(loop = true){
 
 		//the last one goes back to the starting point
 		//and cancels the inTween boolean
-		var rotTween1 = makeRotTween(params.tweenParams.rotation[Ntweens - 1], saveRot, params.tweenParams.duration[Ntweens - 1], ease)
+		var rotTween1 = new TWEEN.Tween(params.camera.rotation).to(saveRot, params.tweenParams.duration[Ntweens - 1]).easing(ease)
 		params.tweenRot.push(rotTween1)
-		var posTween1 = makePosTween(params.camera.position, savePos, params.tweenParams.duration[Ntweens - 1], ease)
+		var posTween1 = new TWEEN.Tween(params.camera.position).to(savePos, params.tweenParams.duration[Ntweens - 1]).easing(ease)
 		params.tweenPos.push(posTween1)
 		params.tweenPos[Ntweens-1].onComplete(function(){
 			if (!loop){
@@ -90,7 +94,7 @@ function createTweens(loop = true){
 	for (var i=0; i<Ntweens-1; i++){
 		params.tweenPos[i].chain(params.tweenPos[i+1], params.tweenRot[i+1]);
 	}
-	//loop back to the first entry from the user (recall that I prepended the initial camera position, but for some reason I still need to go back to position 0??)
+	//loop back to the first entry from the user (recall that I prepended a tween from the current camera position; this will get us back to the first location)
 	if (loop){
 		params.tweenPos[Ntweens-1].chain(params.tweenPos[0], params.tweenRot[0]);	
 	}

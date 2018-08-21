@@ -43,7 +43,10 @@ function update(time){
 		}
 	}
 
-	params.controls.update();
+	//this is affecting the rotation of the camera somehow, I would have thought that I should turn this off for the tweens to work as expected, but it appears that this helps (at least in this example)
+	// if (!params.inTween){
+		params.controls.update();
+	// }
 
 	updateUICenterText();
 	updateUICameraText();
