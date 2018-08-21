@@ -58,37 +58,39 @@ function update(time){
 		var p = params.partsKeys[i];
 		//change filter limits if playback is enabled
 		if (params.parts[p]['playbackEnabled']){
-			// which parts do we want? 
-			this_parts = params.parts[p];
-			// here are the edges of the bar
-			hard_limits = params.filterLims[p][this_parts['currentlyShownFilter']]
-			soft_limits = params.filterVals[p][this_parts['currentlyShownFilter']]
+			params.parts[p]['playbackTicks']++;
+			if (!(params.parts[p]['playbackTicks']%params.parts[p]['playbackTickRate'])){
+				params.updateFilter[p]=true;
+				// which parts do we want? 
+				this_parts = params.parts[p];
+				// here are the edges of the bar
+				hard_limits = params.filterLims[p][this_parts['currentlyShownFilter']]
+				soft_limits = params.filterVals[p][this_parts['currentlyShownFilter']]
 
-			// how wide is the slider? 
-			dfilter = soft_limits[1]-soft_limits[0]
+				// how wide is the slider? 
+				dfilter = soft_limits[1]-soft_limits[0]
 
-			console.log(dfilter,soft_limits[0]+dfilter,soft_limits[1]+dfilter,hard_limits)
-			// conditional statement to decide how to move the filter
-			if ((soft_limits[0]+dfilter) >= hard_limits[1]){
-				// moving the slider to the right would put the lower limit over the edge
-				// set the soft left edge to the hard left edge, the soft right edge to that plus dfilter
-				params.filterVals[p][this_parts['currentlyShownFilter']][0]=hard_limits[0]
-				params.filterVals[p][this_parts['currentlyShownFilter']][1]=hard_limits[0]+dfilter
+				console.log(dfilter,soft_limits[0]+dfilter,soft_limits[1]+dfilter,hard_limits)
+				// conditional statement to decide how to move the filter
+				if ((soft_limits[0]+dfilter) >= hard_limits[1]){
+					// moving the slider to the right would put the lower limit over the edge
+					// set the soft left edge to the hard left edge, the soft right edge to that plus dfilter
+					params.filterVals[p][this_parts['currentlyShownFilter']][0]=hard_limits[0]
+					params.filterVals[p][this_parts['currentlyShownFilter']][1]=hard_limits[0]+dfilter
+				}
+				else if ((soft_limits[1]+dfilter) >= hard_limits[1]){
+					// moving the slider to the right would put the upper limit over the edge, but not the lower
+					// move the left edge but clip the right edge at the hard limit
+					params.filterVals[p][this_parts['currentlyShownFilter']][0]=hard_limits[1]-dfilter
+					params.filterVals[p][this_parts['currentlyShownFilter']][1]=hard_limits[1]
+				}
+				else{
+					// moving the slider will fit within hard limits
+					// move the slider over by dfilter
+					params.filterVals[p][this_parts['currentlyShownFilter']][0]=soft_limits[0]+dfilter
+					params.filterVals[p][this_parts['currentlyShownFilter']][1]=soft_limits[1]+dfilter
+				}
 			}
-			else if ((soft_limits[1]+dfilter) >= hard_limits[1]){
-				// moving the slider to the right would put the upper limit over the edge, but not the lower
-				// move the left edge but clip the right edge at the hard limit
-				params.filterVals[p][this_parts['currentlyShownFilter']][0]=hard_limits[1]-dfilter
-				params.filterVals[p][this_parts['currentlyShownFilter']][1]=hard_limits[1]
-			}
-			else{
-				// moving the slider will fit within hard limits
-				// move the slider over by dfilter
-				params.filterVals[p][this_parts['currentlyShownFilter']][0]=soft_limits[0]+dfilter
-				params.filterVals[p][this_parts['currentlyShownFilter']][1]=soft_limits[1]+dfilter
-			}
-			//console.log(params.filterVals[p][this_parts['currentlyShownFilter']])
-			//console.log(params.parts[p]['playbackTime'])
 		}
 		params.partsMesh[p].forEach( function( m, j ) {
 			m.material.uniforms.velType.value = params.velopts[params.velType[p]];
