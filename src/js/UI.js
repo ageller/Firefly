@@ -250,8 +250,6 @@ function checkPlaybackFilterBox(box)
 
 		//flag that we should run playback
 		params.parts[pID]["playbackEnabled"]=true;
-		// todo remove time because we don't *really* use it 
-		params.parts[pID]['playbackTime']=0.0;
 	}
 
 }

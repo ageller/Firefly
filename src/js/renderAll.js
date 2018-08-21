@@ -58,9 +58,8 @@ function update(time){
 		var p = params.partsKeys[i];
 		//change filter limits if playback is enabled
 		if (params.parts[p]['playbackEnabled']){
+			// which parts do we want? 
 			this_parts = params.parts[p];
-			var dt = 5.0;
-			params.parts[p]['playbackTime']+=dt;
 			// here are the edges of the bar
 			hard_limits = params.filterLims[p][this_parts['currentlyShownFilter']]
 			soft_limits = params.filterVals[p][this_parts['currentlyShownFilter']]
