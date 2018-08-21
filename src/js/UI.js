@@ -253,6 +253,8 @@ function checkPlaybackFilterBox(box)
 		//flag that we should run playback
 		params.parts[pID]["playbackEnabled"]=true;
 		params.updateFilter[pID]=true;
+		params.parts[pID]['playbackFilter']=params.parts[pID][['currentlyShownFilter']]
+		console.log(params.parts[pID]['playbackFilter'])
 	}
 
 }
