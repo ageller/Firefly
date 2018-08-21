@@ -9,7 +9,9 @@ function animate(time) {
 }
 
 function update(time){
-	TWEEN.update(time);
+	if (params.updateTween){
+		TWEEN.update(time);
+	}
 	params.keyboard.update();
 	if (params.keyboard.down("H")){
 		params.helpMessage=!params.helpMessage;
@@ -31,13 +33,20 @@ function update(time){
 		console.log(params.camera.position, params.camera.rotation);
 	}
 	if (params.keyboard.down("T")) {
-		if (!params.inTween){
-			console.log("tweening")	
-			runTweens();
+		if (params.inTween){
+			params.updateTween = false
+			params.inTween = false
+		} else {
+			console.log("tweening")
+			params.updateTween = true	
+			setTweenParams();
 		}
 	}
 
-	params.controls.update();
+	//this is affecting the rotation of the camera somehow, I would have thought that I should turn this off for the tweens to work as expected, but it appears that this helps (at least in this example)
+	// if (!params.inTween){
+		params.controls.update();
+	// }
 
 	updateUICenterText();
 	updateUICameraText();
