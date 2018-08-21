@@ -478,7 +478,6 @@ function calcFilterLimits(p, fkey){
 		//TODO this should not be here!!
 		// set the currently shown filter for each part type at startup
 		// so the first click isn't broken
-		console.log(params.parts[p]['currentlyShownFilter']==undefined,'check if undefined')
 		if (params.parts[p]['currentlyShownFilter'] == undefined){
 			params.parts[p]['currentlyShownFilter']=fkey;	
 		}
