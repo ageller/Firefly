@@ -242,6 +242,8 @@ function checkPlaybackFilterBox(box)
 	//reset the text/appstate to default values
 	this_label.innerText = "Playback: "
 	params.parts[pID]["playbackEnabled"]=false;
+	params.updateFilter[pID]=false;
+	params.parts[p]['playbackTicks']=0;
 	if (box.checked){
 		// read which fkey is currently shown 
 		this_label = document.getElementById(pID+'_PlaybackLabel');
@@ -250,6 +252,7 @@ function checkPlaybackFilterBox(box)
 
 		//flag that we should run playback
 		params.parts[pID]["playbackEnabled"]=true;
+		params.updateFilter[pID]=true;
 	}
 
 }

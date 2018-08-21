@@ -479,7 +479,9 @@ function calcFilterLimits(p, fkey){
 		// set the currently shown filter for each part type at startup
 		// so the first click isn't broken
 		if (params.parts[p]['currentlyShownFilter'] == undefined){
-			params.parts[p]['currentlyShownFilter']=fkey;	
+			params.parts[p]['currentlyShownFilter']=fkey;
+			params.parts[p]['playbackTicks']=0;
+			params.parts[p]['playbackTickRate']=10;	
 		}
 	}
 }
