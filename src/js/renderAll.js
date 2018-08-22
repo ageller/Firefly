@@ -63,6 +63,16 @@ function update(time){
 	cameraX.applyQuaternion(params.camera.quaternion);
 	cameraY.applyQuaternion(params.camera.quaternion);
 
+	var currentTime = new Date();
+	var seconds = currentTime.getTime()/1000;
+	
+	//console.log((seconds-params.currentTime))
+	// if we spent more than 1 seconds drawing the last frame crash the app
+	if ( (seconds-params.currentTime) > 1){
+		console.log("Crashing the app, taking too long!")
+		params.pauseAnimation=true;
+	}
+
 	for (var i=0; i<params.partsKeys.length; i++){
 		var p = params.partsKeys[i];
 		//change filter limits if playback is enabled
@@ -82,9 +92,9 @@ function update(time){
 				dfilter = (soft_limits[1]-soft_limits[0])
 				// TODO this could be editable
 				filter_step = dfilter/4
-
 				// conditional statement to decide how to move the filter
-				if (((soft_limits[0]+filter_step) >= hard_limits[1]) || (soft_limits[1]>=hard_limits[1])){
+				if (((soft_limits[0]+filter_step) >= hard_limits[1]) || 
+					((soft_limits[1]-hard_limits[1])*(soft_limits[1]-hard_limits[1]) <=1e-6)){
 					// moving the slider to the right would put the lower limit over the edge
 					// set the soft left edge to the hard left edge, the soft right edge to that plus dfilter
 					params.filterVals[p][fkey][0]=hard_limits[0]
@@ -165,6 +175,8 @@ function update(time){
 
 		});
 	}
+	// update the current time
+	params.currentTime=seconds;
 
 }
 
