@@ -6,7 +6,7 @@ function setTweenParams(){
 	d3.json(params.tweenFile,  function(val) {
 		Object.keys(val).forEach(function(k, jj) {
 			params.tweenParams[k] = val[k]
-			if (k == "duration"){ //this should always be the last key
+			if (k == "loop"){ //this should always be the last key
 				createTweens()
 			}
 		});
@@ -33,7 +33,7 @@ function setTweenParams(){
 // 		});
 // 	return rT;
 // }
-function createTweens(loop = true){
+function createTweens(){
 	//some initial conditions
 	//this gets updated in the tween unfortunately, 
 	var cRot = {"x":params.camera.rotation.x, "y":params.camera.rotation.y, "z":params.camera.rotation.z };
@@ -74,8 +74,7 @@ function createTweens(loop = true){
 		params.tweenRot[0].start();
 	});
 
-	if (!loop){
-
+	if (!params.tweenParams.loop){
 		//the last one goes back to the starting point
 		//and cancels the inTween boolean
 		var rotTween1 = new TWEEN.Tween(params.camera.rotation).to(saveRot, params.tweenParams.duration[Ntweens - 1]).easing(ease)
@@ -83,10 +82,8 @@ function createTweens(loop = true){
 		var posTween1 = new TWEEN.Tween(params.camera.position).to(savePos, params.tweenParams.duration[Ntweens - 1]).easing(ease)
 		params.tweenPos.push(posTween1)
 		params.tweenPos[Ntweens-1].onComplete(function(){
-			if (!loop){
-				params.inTween = false;
-				console.log("finished with tween");
-			} 
+			params.inTween = false;
+			console.log("finished with tween");
 		});
 	}  
 
@@ -95,7 +92,7 @@ function createTweens(loop = true){
 		params.tweenPos[i].chain(params.tweenPos[i+1], params.tweenRot[i+1]);
 	}
 	//loop back to the first entry from the user (recall that I prepended a tween from the current camera position; this will get us back to the first location)
-	if (loop){
+	if (params.tweenParams.loop){
 		params.tweenPos[Ntweens-1].chain(params.tweenPos[0], params.tweenRot[0]);	
 	}
 	//start the tweens
