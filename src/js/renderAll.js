@@ -63,10 +63,49 @@ function update(time){
 	cameraX.applyQuaternion(params.camera.quaternion);
 	cameraY.applyQuaternion(params.camera.quaternion);
 
-
-
 	for (var i=0; i<params.partsKeys.length; i++){
 		var p = params.partsKeys[i];
+		//change filter limits if playback is enabled
+		if (params.parts[p]['playbackEnabled']){
+			params.parts[p]['playbackTicks']++;
+			// TODO would be nice to be able to edit the tick rate
+			if (!(params.parts[p]['playbackTicks']%params.parts[p]['playbackTickRate'])){
+				params.updateFilter[p]=true;
+				// which parts do we want? 
+				this_parts = params.parts[p];
+				fkey = this_parts['playbackFilter']
+				// here are the edges of the bar
+				hard_limits = params.filterLims[p][fkey]
+				soft_limits = params.filterVals[p][fkey]
+
+				// how wide is the slider? 
+				dfilter = (soft_limits[1]-soft_limits[0])
+				// TODO this could be editable
+				filter_step = dfilter/4
+
+				// conditional statement to decide how to move the filter
+				if (((soft_limits[0]+filter_step) >= hard_limits[1]) || (soft_limits[1]>=hard_limits[1])){
+					// moving the slider to the right would put the lower limit over the edge
+					// set the soft left edge to the hard left edge, the soft right edge to that plus dfilter
+					params.filterVals[p][fkey][0]=hard_limits[0]
+					params.filterVals[p][fkey][1]=hard_limits[0]+dfilter
+				}
+				else if ((soft_limits[1]+filter_step) >= hard_limits[1]){
+					// moving the slider to the right would put the upper limit over the edge, but not the lower
+					// move the left edge but clip the right edge at the hard limit
+					params.filterVals[p][fkey][0]=hard_limits[1]-dfilter
+					params.filterVals[p][fkey][1]=hard_limits[1]
+				}
+				else{
+					// moving the slider will fit within hard limits
+					// move the slider over by dfilter
+					params.filterVals[p][fkey][0]=soft_limits[0]+filter_step
+					params.filterVals[p][fkey][1]=soft_limits[1]+filter_step
+				}
+				// update the slider position
+				params.SliderF[p][fkey].noUiSlider.set(params.filterVals[p][fkey]);
+			}
+		}
 		params.partsMesh[p].forEach( function( m, j ) {
 			m.material.uniforms.velType.value = params.velopts[params.velType[p]];
 			if (params.showParts[p]) {
