@@ -1033,9 +1033,10 @@ function checkText(input, event)
 function checkshowParts(checkbox)
 {
 	var type = checkbox.id.slice(-5); 
-	params.updateOnOff[pID] = true;
+
 	if (type == 'Check'){	
 		var pID = checkbox.id.slice(0,-5); // remove  "Check" from id
+		params.updateOnOff[pID] = true;
 		params.showParts[pID] = false;
 		if (checkbox.checked){
 			params.showParts[pID] = true;

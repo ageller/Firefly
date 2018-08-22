@@ -160,6 +160,7 @@ function update(time){
 					radiusScale[ii] = 0.;
 				}
 				m.geometry.attributes.radiusScale.needsUpdate = true;
+				params.updateOnOff[p] = false;
 			}
 
 		});
