@@ -906,6 +906,10 @@ function WebGLStart(){
 
 
 //begin the animation
+// keep track of runtime for crashing the app rather than the computer
+	var currentTime = new Date();
+	var seconds = currentTime.getTime()/1000;
+	params.currentTime = seconds;
 	params.pauseAnimation = false;
 	animate();
 }
