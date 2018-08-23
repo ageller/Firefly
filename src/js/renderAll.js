@@ -67,10 +67,11 @@ function update(time){
 	var seconds = currentTime.getTime()/1000;
 	
 	//console.log((seconds-params.currentTime))
-	// if we spent more than 1 seconds drawing the last frame crash the app
-	if ( (seconds-params.currentTime) > 1){
-		console.log("Crashing the app, taking too long!")
+	// if we spent more than 1.5 seconds drawing the last frame crash the app
+	if ( (seconds-params.currentTime) > 1.5){
+		console.log("Crashing the app, taking too long!",(seconds-params.currentTime))
 		params.pauseAnimation=true;
+		showCrash();
 	}
 
 	for (var i=0; i<params.partsKeys.length; i++){
