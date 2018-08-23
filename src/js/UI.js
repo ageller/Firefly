@@ -1963,7 +1963,7 @@ function applyUIoptions(){
 
 //hide the splash screen
 function hideSplash(){
-	if (params.loaded){
+	if (params.loaded && !params.pauseAnimation){
 		params.helpMessage = 0;
 		var fdur = 700.;
 
@@ -1987,13 +1987,29 @@ function showSplash(){
 		var fdur = 700.;
 
 		var splash = d3.select("#splash");
-		splash.style("display","block");
+		splash.style("display","block")
 
 		splash.transition()
 			.ease(d3.easeLinear)
 			.duration(fdur)
 			.style("opacity", 0.8);
 		}
+
+}
+
+function showCrash(){
+
+	var fdur = 700
+	var splash = d3.select("#splash");
+	splash.on("click",function (d){});
+	
+	splash.style("display","block")
+		.html("Firefly has crashed\nplease reload :]");
+
+	splash.transition()
+		.ease(d3.easeLinear)
+		.duration(fdur)
+		.style("opacity", 0.95);
 
 }
 
