@@ -24,7 +24,24 @@ function update(time){
 		params.controls.dispose();
 		initControls();
 	}
-	
+	if (params.keyboard.down("C")) {
+		console.log(params.camera.position, params.camera.rotation);
+	}
+
+	if (params.updateTween){
+		TWEEN.update(time);
+	}
+	if (params.keyboard.down("T")) {
+		if (params.inTween){
+			params.updateTween = false;
+			params.inTween = false;
+		} else {
+			console.log("tweening")
+			params.updateTween = true;
+			setTweenParams();
+		}
+	}
+
 	params.controls.update();
 
 	updateUICenterText();
