@@ -1983,7 +1983,7 @@ function hideSplash(){
 
 	//hide the splash screen
 function showSplash(){
-	if (params.loaded){
+	if (params.loaded && !params.pauseAnimation){
 		params.helpMessage = 1;
 		var fdur = 700.;
 
@@ -1998,20 +1998,41 @@ function showSplash(){
 
 }
 
-function showCrash(){
+function showSleep(){
 
 	var fdur = 700
-	var splash = d3.select("#splash");
-	splash.on("click",function (d){});
+	var splash = d3.select("#sleep");
 	
-	splash.style("display","block")
-		.html("Firefly has crashed\nplease reload :]");
+	splash.style("display","block");
 
 	splash.transition()
 		.ease(d3.easeLinear)
 		.duration(fdur)
 		.style("opacity", 0.95);
 
+}
+
+function hideSleep(){
+	params.pauseAnimation = false;
+	var fdur = 700.;
+
+	var splash = d3.select("#sleep");
+
+	splash.transition()
+		.ease(d3.easeLinear)
+		.duration(fdur)
+		.style("opacity", 0)
+
+		.on("end", function(d){
+			splash.style("display","none");
+		})
+	// startup the app and reset the time-- maybe I should move this stuff to the top 
+	//	of animate? hmm...
+	var currentTime = new Date();
+	var seconds = currentTime.getTime()/1000;
+	params.currentTime = seconds;
+	params.pauseAnimation = false;
+	animate();
 }
 
 

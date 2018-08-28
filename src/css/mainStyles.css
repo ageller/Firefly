@@ -8,6 +8,25 @@ canvas{
 	height: 100% 
 }
 
+#sleep{
+	position:absolute; 
+	top:0; 
+	left:0;
+	right:0;
+	bottom:0;
+	z-index:3;
+	margin:0;
+	padding:0;
+	color:white;
+	background-color:black;
+	font-family: Sans-Serif;
+	text-align: center;
+	font-size:20px;
+	font-size:10vw;
+	opacity: 0.8;
+	cursor: pointer;
+}
+
 #splash{
 	position:absolute; 
 	top:0; 

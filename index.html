@@ -14,7 +14,14 @@
 		<div style="background-color:black; position:absolute; top:0; bottom:0; left:0; right:0;" id='loader'></div>
 
 		<div id="ContentContainer" > 
-
+			<div id="sleep" onclick="hideSleep()" style="display:none">
+				<div style="font-size: x-large; margin-top:15%"> 
+					Firefly has gone to sleep after spending too long between rendering frames, click to wake it back up!
+				</div>
+				<div style="font-size: small"> 
+					Hint: if this is happening frequently it might be because Firefly is being overtaxed!
+				</div>
+			</div>
 			<div id="splash" onclick="hideSplash()">
 				<div id="splashdiv1">Firefly: </div>
 				<div id="splashdiv2">A WebGL tool to explore particle-based data</div>
