@@ -1037,6 +1037,7 @@ function checkshowParts(checkbox)
 	if (type == 'Check'){	
 		var pID = checkbox.id.slice(0,-5); // remove  "Check" from id
 		params.updateOnOff[pID] = true;
+		params.updateFilter[pID] = true;
 		params.showParts[pID] = false;
 		if (checkbox.checked){
 			params.showParts[pID] = true;
