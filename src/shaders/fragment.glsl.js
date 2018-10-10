@@ -5,12 +5,15 @@ precision mediump float;
 varying float vID;
 varying float vTheta;
 varying float vAlpha;
+varying vec2 vUv;
 //varying float vVertexScale;
 //varying float glPointSize;
 
 uniform vec4 color;
 uniform int SPHrad;
 uniform float velType; //0 = line, 1 = arrow, 2 = triangle
+uniform bool columnDensity;
+uniform float scaleCD;
 
 //http://www.neilmendoza.com/glsl-rotation-about-an-arbitrary-axis/
 mat4 rotationMatrix(vec3 axis, float angle)
@@ -85,5 +88,9 @@ void main(void) {
         gl_FragColor.a = posRot.x/vSize;
     }
     gl_FragColor.a *= vAlpha;
+
+    if (columnDensity){
+        gl_FragColor.rgb *= scaleCD; //need some factor here so that it adds up progressively
+    }
 }
 `;

@@ -1,7 +1,8 @@
 :root {
 	--main-foreground-color: #a6fd56;
 	--main-background-color: rgba(0, 0, 0, 0.5);
-	--main-dropdown-background-color: ; 
+	--main-dropdown-foreground-color: #fdca56;
+/*	--main-dropdown-background-color: rgba(1, 1, 1, 1); */
 }
 
 .UIcontainer{
@@ -249,8 +250,8 @@ input:checked + .slideroo:before {
 .dropdown-content {
 	display: none;
 	position: relative;
-	color:var(--main-foreground-color);
-	background-color:var(--main-dropdown-background-color);
+	color:var(--main-dropdown-foreground-color);
+/*	background-color:var(--main-dropdown-background-color);*/
 	width: 290px;
 	padding:0;
 	margin:-5px;
@@ -259,9 +260,12 @@ input:checked + .slideroo:before {
 	z-index: 2;
 	left:0;
 	border-radius: 0px 0px 6px 6px;
+	border-color:var(--main-dropdown-foreground-color);
+	border-style:solid;
+	border-width: 0px 0px 2px 0px;
 }
 .dropdown-content div {
-	color: var(--main-foreground-color);
+	color:var(--main-dropdown-foreground-color);
 	text-decoration: none;
 	display: block;
 }

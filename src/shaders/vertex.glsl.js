@@ -7,6 +7,7 @@ attribute vec4 velVals;
 varying float vID;
 varying float vTheta;
 varying float vAlpha;
+varying vec2 vUv;
 //varying float vVertexScale;
 //varying float glPointSize;
 
@@ -25,6 +26,7 @@ void main(void) {
     vID = oID;
     vTheta = 0.;
     vAlpha = alpha;
+    vUv = uv;
     
     //vVertexScale = uVertexScale;
 

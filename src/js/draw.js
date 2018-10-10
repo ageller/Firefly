@@ -43,6 +43,8 @@ function drawScene(pdraw = params.partsKeys)
 				cameraY: {value: [0.,1.,0.]},
 				cameraX: {value: [1.,0.,0.]},
 				velType: {value: 0.},
+				columnDensity: {value: params.columnDensity},
+				scaleCD: {value: params.scaleCD},
 			},
 
 			vertexShader: myVertexShader,
