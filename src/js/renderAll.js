@@ -43,6 +43,10 @@ function update(time){
 		}
 	}
 
+	if (params.keyboard.down("P")){
+		params.columnDensity = !params.columnDensity;
+	}
+
 	//this is affecting the rotation of the camera somehow, I would have thought that I should turn this off for the tweens to work as expected, but it appears that this helps (at least in this example)
 	// if (!params.inTween){
 		params.controls.update();
@@ -119,6 +123,7 @@ function update(time){
 		}
 		params.partsMesh[p].forEach( function( m, j ) {
 			m.material.uniforms.velType.value = params.velopts[params.velType[p]];
+			m.material.uniforms.columnDensity.value = params.columnDensity;
 			if (params.showParts[p]) {
 
 				m.geometry.setDrawRange( 0, params.plotNmax[p]*(1./params.decimate) )
@@ -184,6 +189,12 @@ function update(time){
 
 function render() {
 
-	params.renderer.render( params.scene, params.camera );
+	if (params.columnDensity){
+		//first, render to the texture
+		params.renderer.render( params.scene, params.camera, params.textureCD, true );
+		params.renderer.render( params.sceneCD, params.cameraCD );
+	} else {
+		params.renderer.render( params.scene, params.camera );
+	}
 
 }

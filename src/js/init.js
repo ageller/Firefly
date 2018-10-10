@@ -136,6 +136,16 @@ function defineParams(){
 		this.tweenRot = [];
 		this.tweenFileName = "tweenParams.json"
 
+		//render texture to show column density
+		this.textureCD = null;
+		this.columnDensity = false;
+		this.materialCD = null;
+		this.sceneCD = null;
+		this.cameraCD = null;
+		this.scaleCD = 0.1; //scaling factor for the shader so that it adds up to one at highest density
+		this.cmap = new THREE.TextureLoader().load( "src/textures/cmap.png");
+		this.cmap.minFilter = THREE.LinearFilter;
+		this.cmap.magFilter = THREE.NearestFilter;
 	};
 
 
@@ -240,12 +250,49 @@ function init() {
 	params.camera.position.set(params.center.x, params.center.y, params.center.z - params.boxSize/2.);
 	params.camera.lookAt(params.scene.position);  
 
+
 	//apply presets from the options file
 	applyOptions();
 
 	// controls
 	initControls();
 
+}
+
+function initColumnDensity(){
+	//following this example: https://threejs.org/examples/webgl_rtt.html
+	var screenWidth = window.innerWidth;
+	var screenHeight = window.innerHeight;
+	var aspect = screenWidth / screenHeight;
+
+	//render texture
+	params.textureCD = new THREE.WebGLRenderTarget( screenWidth, screenHeight, {
+		minFilter: THREE.LinearFilter, 
+		magFilter: THREE.NearestFilter, 
+		format: THREE.RGBAFormat 
+	} );
+
+	params.materialCD = new THREE.ShaderMaterial( {
+		uniforms: { 
+			tex: { value: params.textureCD.texture }, 
+			cmap: { type:'t', value: params.cmap },
+		},
+		vertexShader: myVertexShader,
+		fragmentShader: myFragmentShader_pass2,
+		depthWrite: false
+	} );
+	var plane = new THREE.PlaneBufferGeometry( screenWidth, screenHeight );
+	var quad = new THREE.Mesh( plane, params.materialCD );
+	quad.position.z = -100;
+	params.sceneCD = new THREE.Scene();
+	params.sceneCD.add( quad );
+
+	// camera
+	params.cameraCD = new THREE.OrthographicCamera( screenWidth/-2, screenWidth/2, screenHeight/2, screenHeight/-2, -10000, 10000 );
+	//params.cameraCD = new THREE.PerspectiveCamera( params.fov, aspect, params.zmin, params.zmax);
+	params.cameraCD.position.z = 100;
+	params.cameraCD.up.set(0, -1, 0);
+	params.sceneCD.add(params.cameraCD);  
 }
 
 function applyOptions(){
@@ -897,7 +944,8 @@ function WebGLStart(){
 	initPVals();
 
 	init();
-
+	initColumnDensity();
+	
 	createUI();
 	mouseDown = false;  //silly fix
 
