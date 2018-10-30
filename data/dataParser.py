@@ -7,23 +7,56 @@ from snapshot_utils import openSnapshot
 import warnings
 
 class Options(object):
+    """
+    This is a class for organizing the various options you can pass to 
+    Firefly to customize how the app is initialized and what features 
+    the user has access to. It is easiest to use when instances of 
+    Options are passed to a Reader instance when it is initialized.
+    """
     def __getitem__(self,key):
+        """
+        Implementation of builtin function  __getitem__ 
+        """
         attr = self.findWhichOptionsDict(key)
         return getattr(self,attr)[key]
         
     def __setitem__(self,key,value):
+        """
+        Implementation of builtin function __setitem__ 
+        """
         attr = self.findWhichOptionsDict(key)
         ## set that dictonary's value
         getattr(self,attr)[key]=value
 
     def findWhichOptionsDict(self,key):
+        """
+        Find which sub-dictionary a key belongs to
+        """
         for attr in self.__dict__.keys():
             if '_options' in attr:
                 if key in getattr(self,attr).keys():
                     return attr
         raise KeyError("Invalid option key")
         
+    def listKeys(self,values=True):
+        """ 
+        Pretty-prints the options according to sub-dictionary.
+        Input:  
+            values=True - flag to print what the options are set to, in addition to the key
+        """
+        for attr in self.__dict__.keys():
+            if '_options' in attr:
+                print('--',attr,'--')
+                if values:
+                    for key in list(getattr(self,attr).keys()):
+                        print(key,self[key],)
+                else:
+                    print(list(getattr(self,attr).keys()))
+
     def keys(self):
+        """ 
+        Returns a list of keys for all the different options sub-dictionaries
+        """
         this_keys = [] 
         for attr in self.__dict__.keys():
             if '_options' in attr:
@@ -33,6 +66,16 @@ class Options(object):
     def __init__(self,
         options_filename = 'Options.json',
         **kwargs):
+        """
+        Input:
+            options_filename='Options.json' - what to call the options file if you output it
+                to json
+            **kwargs - options keyword arguments, should be among: 
+                'stereoSep','stereo','camera','center','maxVrange','startFly','decimate','friction',
+                'cameraRotation','filterVals','filterLims','UIsnapshot','UIfullscreen','UI','UIloadNewData',
+                'UIcameraControls','UIsavePreset','UIreset','UIdecimation','UIcolorPicker','UIdropdown',
+                'UIparticle','loaded','title','showVel','sizeMult','color','showParts','plotNmax','velType'
+        """
 
         ## where should this be saved if it's outputToJSON
         self.options_filename = options_filename
@@ -138,15 +181,31 @@ class Options(object):
     def addToOptions(
         self,
         particleGroup):
+        """
+        Adds a particle group's options_default to the options that require 
+        dictionaries for each particle group.
+        Input:
+            particleGroup - the ParticleGroup instance that you want to add to this
+                Options instance.
+        """
         for key in [
             'UIparticle','UIdropdown','UIcolorPicker',
             'color','sizeMult','showParts',
-            'filterVals','filterLims']:
+            'filterVals','filterLims','showVel','plotNmax','velType']:
             self[key][particleGroup.UIname]=particleGroup.options_default[key]
 
     def outputToJSON(
         self,
-        JSONdir,prefix=''):
+        JSONdir,
+        prefix='',
+        loud=1):
+        """
+        Saves the current options to a JSON file.
+        Input:
+            JSONdir - path for this file to get saved to
+            prefix='' - string to prepend to self.options_filename
+            loud=1 - flag for whether warnings should be shown
+        """
         all_options_dict = {}
         for attr in self.__dict__.keys():
             if '_options' in attr:
@@ -154,6 +213,31 @@ class Options(object):
 
         pd.Series(all_options_dict).to_json(
             os.path.join(JSONdir,prefix+self.options_filename), orient='index')  
+
+        if loud:
+            warnings.warn("You will need to add this options filename to"+
+                " filenames.json if this was not called by a Reader instance.")
+
+    def loadFromJSON(self,
+        filename,loud=1):
+        """
+        Replaces the current options with those stored in a JSON file.
+        Input:
+            loud=1 - Flag to print the differences from your current options file
+        """
+
+        if os.path.isfile(filename):
+            with file(filename,'r') as handle:
+                options_dict=pd.json.loads(''.join(handle.readlines()))
+        else:
+            raise IOError("Options file: %s doesn't exist."%filename) 
+
+        for key in options_dict.keys():
+            if loud:
+                if np.all(options_dict[key] != self[key]):
+                    print("replacing",key)
+                    print(self[key],'-->',options_dict[key])
+            self[key]=options_dict[key]
 
 class ParticleGroup(object):
     """
@@ -163,6 +247,16 @@ class ParticleGroup(object):
     to attach it to a Reader instance using that reader's addParticleGroup
     method please be careful!!
     """
+
+    def __repr__(self):
+        """
+        Implementation of builtin function __repr__
+        """
+        mystr = "Particle Group of %s\n"%(self.UIname)
+        mystr += "Contains %d (%d after dec) particles and %d arrays\n"%(
+            self.nparts,self.nparts/self.decimation_factor,len(self.tracked_names))
+        return mystr
+
 
     def __init__(
         self,
@@ -268,7 +362,10 @@ class ParticleGroup(object):
             'sizeMult':1.,
             'showParts':True,
             'filterVals':dict(),
-            'filterLims':dict()
+            'filterLims':dict(),
+            'showVel':False,
+            'plotNmax':None,
+            'velType':None
         }
         
         ## setup default values for the initial filter limits (vals/lims represent the interactive
@@ -298,8 +395,13 @@ class ParticleGroup(object):
         self.getDecimationIndexArray()
         
     def trackArray(self,name,arr,filter_flag=1):
-        """Adds a new array to the particle group,
-            compare with addToDict method of reader"""
+        """
+        Adds a new "tracked" array to the particle group
+        Input:
+            name - name of the tracked array in the UI
+            arr - the array itself
+            filter_flag=1 - whether this array should be filterable in the app
+        """
         ## check that it's the correct length
         assert self.nparts == len(arr)
 
@@ -314,6 +416,11 @@ class ParticleGroup(object):
             self.options_default['filterLims'][name] = None
 
     def getDecimationIndexArray(self):
+        """
+        Creates a numpy index array to handle decimation (sub-sampling) of your
+        data. Chooses nparts/decimation_factor many particles randomly without
+        replacement.
+        """
         if self.decimation_factor > 1:
             ## use an array of indices
             self.dec_inds = np.random.choice(
@@ -331,8 +438,18 @@ class ParticleGroup(object):
         loud=1,
         nparts_per_file = 10**4,
         clean=0):
-        """loud will print warnings that you should hear if you're not using a
-            reader that does these things for you"""
+        """
+        Outputs this ParticleGroup instance's data to JSON format, best used when coupled with a Reader
+        instance's dumpToJSON method. 
+        Input:
+            path - the name of the sub-directory of Firefly/data you want to put these files into
+            path_prefix - the the path to Firefly/data
+            prefix - the string you want to prepend to the data JSONs
+            loud=1 - flag to print warnings that you should hear if you're not using a
+                reader that does these things for you
+            nparts_per_file=10**4 - maximum number of particles per JSON file
+            clean=0 - flag for whether the JSON directory should be purged before writing your files.
+         """
         if not os.path.isdir(path):
             os.makedirs(path)
         if loud:
@@ -384,15 +501,19 @@ class ParticleGroup(object):
         return self.filenames_and_nparts
 
     def outputToHDF5(self):
+        """
+        Hook for a future implementation of Firefly that can use HDF5 formats.
+        """
         raise Exception("Unimplemented!")
 
-    def __repr__(self):
-        mystr = "Particle Group of %s\n"%(self.UIname)
-        mystr += "Contains %d (%d after dec) particles and %d arrays\n"%(
-            self.nparts,self.nparts/self.decimation_factor,len(self.tracked_names))
-        return mystr
-
 class Reader(object):
+    """
+    This class provides a framework to unify the Options and ParticleGroup classes
+    to make sure that the user can easily produce Firefly compatible files. It also 
+    provides some rudimentary data validation. You should use this Reader as a base
+    for any custom readers you may build (and should use inheritance, as demonstrated
+    below in FIREreader!
+    """
     def __init__(self,
         JSONdir=None, ## abs path, must be a sub-directory of Firefly/data
         options=None,
@@ -407,7 +528,7 @@ class Reader(object):
             `/path/to/Firefly/data` it should be the absolute path.
 
         `options=None` - An `Options` instance, if you have created one you can
-            pass it here. `None` will generate default options. `reader.options.keys()`
+            pass it here. `None` will generate default options. `reader.options.listKeys()`
             will give you a list of the different available options you can set
             using `reader.options["option_name"] = option_value`. 
 
@@ -468,6 +589,11 @@ class Reader(object):
         self.particleGroups = []
 
     def splitAndValidateDatadir(self):
+        """
+        Ensures that files will be output to a location that Firefly 
+        can read, as well as splits the path so that filenames.json 
+        references files correctly.
+        """
         path_prefix,path = os.path.split(self.JSONdir)
         for validate in ['index.html','data','src','LICENSE','README.md']:
             try:
@@ -477,8 +603,12 @@ class Reader(object):
         return path_prefix,path
 
     def addParticleGroup(self,particleGroup):
-        """ If you can open your own data then more power to you,
-            I respect your autonomy"""
+        """
+        Adds a particle group to the Reader instance and adds that particle group's
+        options to the attached Options instance.
+        Input:
+            particleGroup - the particle group in question that you would like to add
+        """
         ## data validation of new ParticleGroup happened in its initialization
         self.particleGroups += [particleGroup]
 
@@ -490,6 +620,13 @@ class Reader(object):
     def dumpToJSON(
         self,
         loud=0):
+        """
+        Creates all the necessary JSON files to run Firefly, making sure they are
+        properly linked and cross-reference correctly, using the attached Options
+        instance's and particleGroups' outputToJSON() methods.
+        Input:
+            loud=0 - flag for whether warnings within each outputToJSON should be shown
+        """
 
         filenamesDict = {}
 
@@ -507,7 +644,7 @@ class Reader(object):
             filenamesDict[particleGroup.UIname]=this_filenames_and_nparts
 
         ## output the options file...
-        self.options.outputToJSON(self.JSONdir,prefix=self.prefix)
+        self.options.outputToJSON(self.JSONdir,prefix=self.prefix,loud=loud)
 
         ## really... it has to be an array with a tuple with a 0 in the nparts spot? 
         filenamesDict['options'] = [(os.path.join(self.path,self.prefix+self.options.options_filename),0)]
@@ -536,7 +673,12 @@ class Reader(object):
         elif self.write_startup:
             pd.Series({"0":startup_path}).to_json(startup_file, orient='index') 
 
-class ABGFIREreader(Reader):
+class FIREreader(Reader):
+    """
+    This is an example of a "custom" Reader that has been tuned to conveniently
+    open data from the FIRE galaxy formation collaboration (fire.northwestern.edu).
+    You should use this as a primer for building your own custom reader!
+    """
     def __init__(self,
         snapdir, # directory that contains all the hdf5 data files
         snapnum, # which snapnumber to open
@@ -555,7 +697,47 @@ class ABGFIREreader(Reader):
         clean_JSONdir = 0,
         options = None,
         ):
+        """
+        snapdir - string, directory that contains all the hdf5 data files
+        snapnum - integer, which snapshot to open
+        ptypes=[] - list of strings, which particle types to extract (e.g. 'PartType0', 'PartType1')
+        UInames=[] - list of strings, what should the particle groups be called in the UI
+        dec_factors=[] - list of integers, by what factor should the datasets be subsampled
+        returnKeys=[] - list of strings, which arrays from the snapshot should we extract,
+            do not include 'Coordinates'
+        filterFlags=[] - list of booleans, of those, which should be "filterable"
+        doMags=[] - list of booleans, of those, which should have their magnitude taken (e.g. velocity)
+        doLogs=[] - list of booleans, of those, which should have their log10 taken (e.g. density)
 
+        ------ inherited from Reader ------
+        `JSONdir=None` - This should be the name of the sub-directory that will
+            contain your JSON files, if you are not running python from
+            `/path/to/Firefly/data` it should be the absolute path.
+
+        `options=None` - An `Options` instance, if you have created one you can
+            pass it here. `None` will generate default options. `reader.options.listKeys()`
+            will give you a list of the different available options you can set
+            using `reader.options["option_name"] = option_value`. 
+
+        `write_startup='append'` - This is a flag for whether `startup.json` file
+            should be written. It has 3 values: `True` -> writes a new `startup.json`
+            that will contain only this visualization, `'append'` -> which will
+            add this visualization to an existing `startup.json` (or create a
+            new one), this is the default option, or `False` -> which will not
+            add an entry to `startup.json`.
+
+        `max_npart_per_file=10000` - The maximum number of particles saved per file,
+            don't use too large a number or you will have trouble loading
+            the individual files in. 
+
+        `prefix='Data'` - What you would like your `.json` files to be called when
+            you run `reader.dumpToJSON`. The format is
+            `(prefix)(particleGroupName)(fileNumber).json`.
+
+        `clean_JSONdir=0` - Whether you would like to delete all `.json` files in
+            the `JSONdir`. Usually not necessary (since `filenames.json` will be
+            updated) but good to clean up after yourself.
+        """
         ## input validation
         ##  ptypes
         try:
@@ -657,6 +839,13 @@ class ABGFIREreader(Reader):
         self.particleGroups = []
 
     def loadData(self):
+        """
+        Loads the snapshot data using Alex Gurvich's openSnapshot utility
+        (originally from github.com/abg_python) and binds it to a ParticleGroup.
+        Converts to physical coordinates (removes factors of h and scale factor)
+        and will calculate the temperature and age in gyr of star particles for you
+        (You're welcome!!). Also adds these particle groups to the reader's options file.
+        """
         for ptype,UIname,dec_factor in zip(self.ptypes,self.UInames,self.dec_factors):
             print("Loading ptype %s"%ptype)
             snapdict = openSnapshot(
