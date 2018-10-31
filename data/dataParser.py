@@ -193,10 +193,14 @@ class Options(object):
             'color','sizeMult','showParts',
             'filterVals','filterLims','showVel','plotNmax','velType']:
             self[key][particleGroup.UIname]=particleGroup.options_default[key]
+        
+        ## and link this particle group to this Options instance, for better or worse.
+        particleGroup.linked_options = self
 
     def outputToJSON(
         self,
         JSONdir,
+        filename=None,
         prefix='',
         loud=1):
         """
@@ -206,13 +210,14 @@ class Options(object):
             prefix='' - string to prepend to self.options_filename
             loud=1 - flag for whether warnings should be shown
         """
+        filename = self.options_filename if filename is None else filename
         all_options_dict = {}
         for attr in self.__dict__.keys():
             if '_options' in attr:
                 all_options_dict.update(getattr(self,attr))
 
         pd.Series(all_options_dict).to_json(
-            os.path.join(JSONdir,prefix+self.options_filename), orient='index')  
+            os.path.join(JSONdir,prefix+filename), orient='index')  
 
         if loud:
             warnings.warn("You will need to add this options filename to"+
@@ -257,7 +262,29 @@ class ParticleGroup(object):
             self.nparts,self.nparts/self.decimation_factor,len(self.tracked_names))
         return mystr
 
+    def __getitem__(self,key):
+        """
+        Implementation of builtin function __getitem__
+        """
+        if key == 'Coordinates':
+            return self.coordinates
 
+        elif key in self.tracked_names:
+            return self.tracked_arrays[self.tracked_names.index(key)]
+        else:
+            raise KeyError("%s is not a tracked array"%key)
+    
+    def __setitem__(self,key,value):
+        """
+        Implementation of builtin function __setitem__
+        """
+        if key == 'Coordinates':
+            self.coordinates=value
+        elif key in self.tracked_names:
+            self.tracked_arrays[self.tracked_names.index(key)]=value
+        else:
+            raise KeyError("%s is not a tracked array"%key)
+        
     def __init__(
         self,
         UIname,
@@ -406,14 +433,18 @@ class ParticleGroup(object):
         assert self.nparts == len(arr)
 
         ## go ahead and put it in the tracked arrays
-        self.tracked_names = np.append(self.tracked_names,[name],axis=0)
-        self.tracked_arrays = np.append(self.tracked_arrays,[arr],axis=0)
-        self.tracked_filter_flags = np.append(self.tracked_filter_flags,[filter_flag])
+        self.tracked_names += [name]
+        self.tracked_arrays += [arr]
+        self.tracked_filter_flags += [filter_flag]
 
         ## and add this to the filter limits arrays, see __init__ above
         if filter_flag: 
             self.options_default['filterVals'][name] = None
             self.options_default['filterLims'][name] = None
+
+        if self.linked_options is not None:
+            self.linked_options['filterVals'][self.UIname][name] = None
+            self.linked_options['filterLims'][self.UIname][name] = None
 
     def getDecimationIndexArray(self):
         """
@@ -460,7 +491,7 @@ class ParticleGroup(object):
             warnings.warn("Removing data files from %s"%path)
             for fname in os.listdir(path):
                 if "json" in fname:
-                    os.remove(os.path.join(path,filee))
+                    os.remove(os.path.join(path,fname))
 
         if self.filenames_and_nparts is None:
             if self.dec_inds.dtype == bool:
@@ -630,6 +661,7 @@ class Reader(object):
 
         filenamesDict = {}
 
+        clean = self.clean_JSONdir
         ## write each particleGroup to JSON using their own method
         ##  save the filenames into a dictionary for filenames.json
         for particleGroup in self.particleGroups:
@@ -640,8 +672,12 @@ class Reader(object):
                 self.prefix,
                 loud=loud,
                 nparts_per_file = self.max_npart_per_file,
-                clean = self.clean_JSONdir)
+                clean = clean)
             filenamesDict[particleGroup.UIname]=this_filenames_and_nparts
+
+            ## already cleaned once
+            if clean:
+                clean = False
 
         ## output the options file...
         self.options.outputToJSON(self.JSONdir,prefix=self.prefix,loud=loud)
@@ -744,9 +780,9 @@ class FIREreader(Reader):
             lists = [dec_factors,UInames]
             names = ['dec_factors','UInames']
             for name,llist in zip(names,lists):
-                assert len(llist) == len(returnKeys)
+                assert len(llist) == len(ptypes)
         except AssertionError:
-            raise ValueError("%s is not the same length as ptypes"%name)
+            raise ValueError("%s is not the same length as ptypes (%d,%d)"%(name,len(llist),len(ptypes)))
 
         ##  returnKeys
         try:
@@ -755,7 +791,7 @@ class FIREreader(Reader):
             for name,llist in zip(names,lists):
                 assert len(llist) == len(returnKeys)
         except AssertionError:
-            raise ValueError("%s is not the same length as returnKeys"%name)
+            raise ValueError("%s is not the same length as returnKeys"%(name,len(llist),len(returnKeys)))
     
         ##  IO/snapshots
         try:
@@ -879,6 +915,9 @@ class FIREreader(Reader):
                 decimation_factor = dec_factor,
                 tracked_filter_flags = tracked_filter_flags
                 )]
+
+            ## save the filenames that were opened (so you can re-open them yourself in that order)
+            self.particleGroups[-1].filenames_opened = snapdict['fnames']
 
             ## add this particle group to the reader's options file
             self.options.addToOptions(self.particleGroups[-1])
