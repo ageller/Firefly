@@ -1,6 +1,6 @@
 var myFragmentShader = `
 
-precision mediump float;
+//precision mediump float;
 
 varying float vID;
 varying float vTheta;
