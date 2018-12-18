@@ -1910,7 +1910,7 @@ function createUI(){
 				.attr('class', 'NMaxTClass')
 				.attr('type','text');
 
-			var dheight = 40;
+			var dheight = 45;
 
 	//for velocity vectors
 
