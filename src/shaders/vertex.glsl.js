@@ -9,8 +9,7 @@ varying float vID;
 varying float vTheta;
 varying float vColormapMag;
 varying float vAlpha;
-varying vec2 vUv;
-
+varying vec2 vUv; //for the column density 
 
 uniform float colormapMax;
 uniform float colormapMin;
@@ -26,40 +25,40 @@ const float PI = 3.1415926535897932384626433832795;
 
 
 void main(void) {
-    vID = oID;
-    vTheta = 0.;
-    vAlpha = alpha;
-    vUv = uv;
-    
-    //vVertexScale = uVertexScale;
+	vID = oID;
+	vTheta = 0.;
+	vAlpha = alpha;
+	vUv = uv;
+	
+	//vVertexScale = uVertexScale;
 
-    vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+	vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
 
-    float cameraDist = length(mvPosition.xyz);
-    float pointScale = maxDistance/cameraDist;
-    pointScale = clamp(pointScale, minPointScale, maxPointScale);
-    
-    
-    // send colormap array to fragment shader
-    vColormapMag = clamp(((colormapArray - colormapMin) / (colormapMax - colormapMin)), 0., 1.);
+	float cameraDist = length(mvPosition.xyz);
+	float pointScale = maxDistance/cameraDist;
+	pointScale = clamp(pointScale, minPointScale, maxPointScale);
+	
+	
+	// send colormap array to fragment shader
+	vColormapMag = clamp(((colormapArray - colormapMin) / (colormapMax - colormapMin)), 0., 1.);
 
-    gl_PointSize = uVertexScale * pointScale * radiusScale;
+	gl_PointSize = uVertexScale * pointScale * radiusScale;
 
-    if (vID > 0.5){ //velocities (==1, but safer this way)
-        float vyc= -dot(velVals.xyz,cameraY);
-        float vxc = dot(velVals.xyz,cameraX); 
-        float vSize = sqrt(vyc*vyc+vxc*vxc)/sqrt(dot(velVals.xyz,velVals.xyz))*velVals[3] * 0.5;
-        vTheta = atan(vyc,vxc);
-        if (vTheta<0.0){
-            vTheta=vTheta+2.0*PI;
-        }
+	if (vID > 0.5){ //velocities (==1, but safer this way)
+		float vyc= -dot(velVals.xyz,cameraY);
+		float vxc = dot(velVals.xyz,cameraX); 
+		float vSize = sqrt(vyc*vyc+vxc*vxc)/sqrt(dot(velVals.xyz,velVals.xyz))*velVals[3] * 0.5;
+		vTheta = atan(vyc,vxc);
+		if (vTheta<0.0){
+			vTheta=vTheta+2.0*PI;
+		}
 		gl_PointSize = gl_PointSize*vSize;
 
-    }
+	}
 
-    //glPointSize = gl_PointSize;
+	//glPointSize = gl_PointSize;
 
-    gl_Position = projectionMatrix * mvPosition;
+	gl_Position = projectionMatrix * mvPosition;
 
 }
 

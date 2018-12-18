@@ -27,11 +27,17 @@ function drawScene(pdraw = params.partsKeys)
 
 	for (var i=0; i<pdraw.length; i++){
 		var p = pdraw[i];
-		
+
 		params.scene.remove(params.partsMesh[p]);
 
 		params.partsMesh[p] = [];
 	
+		//change the blending mode when showing the colormap (so we don't get summing to white colors)
+		var blend = THREE.AdditiveBlending;
+		if (params.showColormap[p]){
+			blend = THREE.NormalBlending;
+		}
+
 		var material = new THREE.ShaderMaterial( {
 
 			uniforms: { //add uniform variable here
@@ -43,11 +49,11 @@ function drawScene(pdraw = params.partsKeys)
 				cameraY: {value: [0.,1.,0.]},
 				cameraX: {value: [1.,0.,0.]},
 				velType: {value: 0.},
-				texture: {value: params.colormapTexture},
+				colormapTexture: {value: params.colormapTexture},
 				colormap: {value: params.colormap[p]},
 				showColormap: {value: params.showColormap[p]},
 				colormapMin: {value: params.colormapVals[p][params.ckeys[p][params.colormapVariable[p]]][0]},
-				colormapMax: {value: params.colormapVals[p][params.ckeys[p][params.colormapVariable[p]]][1]}
+				colormapMax: {value: params.colormapVals[p][params.ckeys[p][params.colormapVariable[p]]][1]},
 				columnDensity: {value: params.columnDensity},
 				scaleCD: {value: params.scaleCD},
 			},
@@ -58,7 +64,7 @@ function drawScene(pdraw = params.partsKeys)
 			depthTest: false,
 			transparent:true,
 			alphaTest: false,
-			blending:THREE.AdditiveBlending,
+			blending:blend,
 		} );
 
 		//geometry
@@ -92,7 +98,7 @@ function drawScene(pdraw = params.partsKeys)
 		geo.addAttribute('colormapArray', new THREE.BufferAttribute( colormapArray, 1));
 
 		//var positions = mesh.geometry.attributes.position.array;
-		var index = 0;
+		var cindex = 0;
 		var pindex = 0;
 		var vindex = 0;
 		var rindex = 0;
@@ -138,7 +144,8 @@ function drawScene(pdraw = params.partsKeys)
 				// fill colormap array with appropriate variable values
 				if (params.colormap[p] > 0.){
 					if (params.parts[p][params.ckeys[p][params.colormapVariable[p]]] != null){
-						colormapArray[index] = params.parts[p][params.ckeys[p][params.colormapVariable[p]]][j];
+						colormapArray[cindex] = params.parts[p][params.ckeys[p][params.colormapVariable[p]]][j];
+						cindex++;
 					}
 				}
 

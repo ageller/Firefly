@@ -126,7 +126,7 @@ function defineParams(){
 		//animation
 		this.pauseAnimation = false;
 
-		// initializes colormap texture
+		// contains colormap texture
 		this.colormapTexture;
 
 		// determines which colormap is applied to each particle type
@@ -140,10 +140,10 @@ function defineParams(){
 		this.ckeys = {};
 
 		// determines if colormap is on or off
-		this.showColorMap = {};
+		this.showColormap = {};
 
 		// list of all colormaps
-		this.colormaps = ['viridis', 'plasma', 'inferno', 'magma', 
+		this.colormapList = ['viridis', 'plasma', 'inferno', 'magma', 
 		'Greys', 'Purples', 'Blues', 'Greens', 'Oranges',
 	   'binary', 'gist_yarg', 'gist_gray', 'gray', 'afmhot',
 	   'PiYG', 'PRGn', 'BrBG', 'RdGy', 'coolwarm', 'bwr',
@@ -158,7 +158,7 @@ function defineParams(){
 
 	   // colormap sliders
 	   this.SliderCMapinputs = {};
-	   this.updateColorMap = {};
+	   this.updateColormap = {};
 	   this.SliderCMap = {};
 	   this.SliderCMapmin = {};
 	   this.SliderCMapmax = {};
@@ -183,7 +183,6 @@ function defineParams(){
 		this.cmap = new THREE.TextureLoader().load( "src/textures/cmap.png");
 		this.cmap.minFilter = THREE.LinearFilter;
 		this.cmap.magFilter = THREE.NearestFilter;
->>>>>>> upstream/master
 	};
 
 	params = new ParamsInit();
@@ -308,7 +307,8 @@ function initColormap(){
 		params.colormapVariable[p] = 0;
 		params.colormap[p] = 4/256;
 		//eventually these should be set in the python code and read in
-		params.ckeys['Gas'] = ["magVelocities", "log10Temperature", "HIIAbundance", "log10Density"];
+		//params.ckeys['Gas'] = ["magVelocities", "log10Temperature", "HIIAbundance", "log10Density"];
+		params.ckeys['Gas'] = ["magVelocities", "log10Temperature", "log10Density"];
 		params.ckeys['Stars'] = ["magVelocities"];
 		params.ckeys['DarkMatter'] = ["magVelocities"];
 		params.showColormap[p] = false;
@@ -325,7 +325,7 @@ function initColormap(){
 			}
 		}
 	}
-
+}
 function initColumnDensity(){
 	//following this example: https://threejs.org/examples/webgl_rtt.html
 	var screenWidth = window.innerWidth;
@@ -577,9 +577,6 @@ function applyOptions(){
 
 function calcFilterLimits(p, fkey){
 //calculate limits for the filters
-	
-	
-	
 
 	var j=0;
 	if (params.parts[p][fkey] != null){
@@ -1038,6 +1035,7 @@ function WebGLStart(){
 	//draw everything
 	drawScene();
 
+	console.log(params.parts['Gas'])
 	//begin the animation
 	// keep track of runtime for crashing the app rather than the computer
 	var currentTime = new Date();
