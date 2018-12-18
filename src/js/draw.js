@@ -1,4 +1,3 @@
-
 function clearPartsMesh(pClear = params.partsKeys) {
 	for (var i=0; i<pClear.length; i++){
 		var p = pClear[i];
@@ -28,13 +27,20 @@ function drawScene(pdraw = params.partsKeys)
 
 	for (var i=0; i<pdraw.length; i++){
 		var p = pdraw[i];
-		
+
 		params.scene.remove(params.partsMesh[p]);
 
 		params.partsMesh[p] = [];
+	
+		//change the blending mode when showing the colormap (so we don't get summing to white colors)
+		var blend = THREE.AdditiveBlending;
+		if (params.showColormap[p]){
+			blend = THREE.NormalBlending;
+		}
 
 		var material = new THREE.ShaderMaterial( {
-			uniforms: {
+
+			uniforms: { //add uniform variable here
 				color: {value: new THREE.Vector4( params.Pcolors[p][0], params.Pcolors[p][1], params.Pcolors[p][2], params.Pcolors[p][3])},
 				oID: {value: 0},
 				SPHrad: {value: params.parts[p].doSPHrad},
@@ -43,6 +49,11 @@ function drawScene(pdraw = params.partsKeys)
 				cameraY: {value: [0.,1.,0.]},
 				cameraX: {value: [1.,0.,0.]},
 				velType: {value: 0.},
+				colormapTexture: {value: params.colormapTexture},
+				colormap: {value: params.colormap[p]},
+				showColormap: {value: params.showColormap[p]},
+				colormapMin: {value: params.colormapVals[p][params.ckeys[p][params.colormapVariable[p]]][0]},
+				colormapMax: {value: params.colormapVals[p][params.ckeys[p][params.colormapVariable[p]]][1]},
 				columnDensity: {value: params.columnDensity},
 				scaleCD: {value: params.scaleCD},
 			},
@@ -53,7 +64,7 @@ function drawScene(pdraw = params.partsKeys)
 			depthTest: false,
 			transparent:true,
 			alphaTest: false,
-			blending:THREE.AdditiveBlending,
+			blending:blend,
 		} );
 
 		//geometry
@@ -80,10 +91,15 @@ function drawScene(pdraw = params.partsKeys)
 		geo.setDrawRange( 0, params.plotNmax[p] );
 
 		var mesh = new THREE.Points(geo, material);
-		params.scene.add(mesh)
+		params.scene.add(mesh);
+
+		// create array to hold colormap variable values
+		var colormapArray = new Float32Array( params.plotNmax[p]); 
+		geo.addAttribute('colormapArray', new THREE.BufferAttribute( colormapArray, 1));
 
 		//var positions = mesh.geometry.attributes.position.array;
-		var index = 0;
+		var cindex = 0;
+		var pindex = 0;
 		var vindex = 0;
 		var rindex = 0;
 		var aindex = 0;
@@ -107,12 +123,12 @@ function drawScene(pdraw = params.partsKeys)
 
 				//geo.vertices.push(new THREE.Vector3(params.parts[p].Coordinates[j][0], params.parts[p].Coordinates[j][1], params.parts[p].Coordinates[j][2] ))
 				
-				positions[index] = params.parts[p].Coordinates[j][0];
-				index++;
-				positions[index] = params.parts[p].Coordinates[j][1];
-				index++;
-				positions[index] = params.parts[p].Coordinates[j][2];
-				index++;
+				positions[pindex] = params.parts[p].Coordinates[j][0];
+				pindex++;
+				positions[pindex] = params.parts[p].Coordinates[j][1];
+				pindex++;
+				positions[pindex] = params.parts[p].Coordinates[j][2];
+				pindex++;
 
 				if (params.parts[p].Velocities != null){
 					velVals[vindex] = params.parts[p].VelVals[j][0]/params.parts[p].magVelocities[j];
@@ -121,14 +137,23 @@ function drawScene(pdraw = params.partsKeys)
 					vindex++;
 					velVals[vindex] = params.parts[p].VelVals[j][2]/params.parts[p].magVelocities[j];
 					vindex++;
-					velVals[vindex] = params.parts[p].VelVals[j][3];
+					velVals[vindex] = params.parts[p].NormVel[j];
 					vindex++;
 				}
+
+				// fill colormap array with appropriate variable values
+				if (params.colormap[p] > 0.){
+					if (params.parts[p][params.ckeys[p][params.colormapVariable[p]]] != null){
+						colormapArray[cindex] = params.parts[p][params.ckeys[p][params.colormapVariable[p]]][j];
+						cindex++;
+					}
+				}
+
 
 				radiusScale[rindex] = 1.;
 				rindex++;
 				
-				alpha[rindex] = 1.;
+				alpha[aindex] = 1.;
 				aindex++;
 				
 				ndraw += 1;
@@ -140,7 +165,6 @@ function drawScene(pdraw = params.partsKeys)
 		}
 
 		mesh.position.set(0,0,0);
-
 
 		params.partsMesh[p].push(mesh)
 		//params.octree.add( mesh, { useVertices: true } );
@@ -155,4 +179,3 @@ function drawScene(pdraw = params.partsKeys)
 	//}
 
 }
-
