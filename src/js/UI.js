@@ -12,7 +12,7 @@ function resetToOptions()
 	init();
 
 	//reset colormap
-	initializeColorMap();
+	initializeColormap();
 
 	//resize the bottom of the UI if necessary
 	var i = params.partsKeys.length-1;
@@ -87,7 +87,7 @@ function resetToPreset(preset)
 	init();
 
 	// reset colormap
-	initializeColorMap();
+	initializeColormap();
 
 	//resize the bottom of the UI if necessary
 	var i = params.partsKeys.length-1;
@@ -222,21 +222,20 @@ function checkVelBox(box)
 
 }
 
-<<<<<<< HEAD
-function checkColorMapBox(box)
+function checkColormapBox(box)
 {
 	var p = box.id.slice(0, -13)
-	params.showColorMap[p] = false;
+	params.showColormap[p] = false;
 	if (box.checked){
-		params.showColorMap[p] = true;
+		params.showColormap[p] = true;
 		fillColorbarContainer();
 	}
 	
-	console.log(p, "colormap:", params.showColorMap[p])
+	console.log(p, "colormap:", params.showColormap[p])
 
 	// redraw particle type
 	drawScene(pDraw = [p]);
-	if ( p == 'Gas' && !params.showColorMap[p]){
+	if ( p == 'Gas' && !params.showColormap[p]){
 		// empty the colorbar_container!
 		var colorbar_container = d3.select("#colorbar_container")
 	    colorbar_container.html("")
@@ -244,7 +243,7 @@ function checkColorMapBox(box)
 	    	.style('height','0px');
 
 	}
-=======
+
 function checkInvertFilterBox(box)
 {
 	var fpos = box.id.indexOf('_FK_');
@@ -286,7 +285,6 @@ function checkPlaybackFilterBox(box)
 		console.log(params.parts[pID]['playbackFilter'])
 	}
 
->>>>>>> upstream/master
 }
 
 //functions to check color of particles
@@ -530,9 +528,9 @@ function setCMapSliderHandle(i, value, parent, reset=false) {
 
 
 	//because we are now redrawing each time, we do not need to do this
-	params.updateColorMap[p] = true;
+	params.updateColormap[p] = true;
 	mouseDown = false; 
-	// if (params.showColorMap[p]){
+	// if (params.showColormap[p]){
 	// 	fillColorbarContainer();
 	// }
 	fillColorbarContainer()
@@ -634,7 +632,7 @@ function createCMapSliders(){
 						var nf = parseFloat(values[handle])/ (Math.round(1000.*params.colormapVals[pp][ffk][handle])/1000.);
 						params.SliderCMapinputs[pp][ffk][handle].value = values[handle];
 						params.colormapVals[pp][ffk][handle] = parseFloat(values[handle]);
-						// if (params.showColorMap[p]){
+						// if (params.showColormap[p]){
 						// 	fillColorbarContainer();
 						// }
 						fillColorbarContainer();
@@ -645,7 +643,7 @@ function createCMapSliders(){
 
 
 						//because we are now redrawing each time, we do not need to do this
-						params.updateColorMap[pp] = true;
+						params.updateColormap[pp] = true;
 						mouseDown = true;
 					});
 
@@ -1377,7 +1375,7 @@ function selectFilter() {
 		.style('display','inline-block');
 };
 
-function selectColorMapVariable() {
+function selectColormapVariable() {
 	var option = d3.select(this)
 		.selectAll("option")
 		.filter(function (d, i) { 
@@ -1399,13 +1397,13 @@ function selectColorMapVariable() {
 	console.log(p, "colored by:", params.ckeys[p][params.colormapVariable[p]])
 
 	// redraw particle type if colormap is on
-	if (params.showColorMap[p]){
+	if (params.showColormap[p]){
 		drawScene(pDraw = [p]);
 		fillColorbarContainer();
 	}
 };
 
-function selectColorMap() {
+function selectColormap() {
 	var option = d3.select(this)
 		.selectAll("option")
 		.filter(function (d, i) { 
@@ -1420,7 +1418,7 @@ function selectColorMap() {
 	console.log(p, "colormap:", params.colormaps[params.colormap[p] * (256/8) - 0.5])
 
 	// redraw particle type if colormap is on
-	if (params.showColorMap[p]){
+	if (params.showColormap[p]){
 		drawScene(pDraw = [p]);
 		fillColorbarContainer();
 	}
@@ -2012,9 +2010,9 @@ function createUI(){
 					.attr('value','false')
 					.attr('type','checkbox')
 					.attr('autocomplete','off')
-					.attr('onchange','checkColorMapBox(this)');
+					.attr('onchange','checkColormapBox(this)');
 
-				if (params.showColorMap[d]){
+				if (params.showColormap[d]){
 					elm = document.getElementById(d+'colorCheckBox');
 					elm.checked = true;
 					elm.value = true;
@@ -2025,7 +2023,7 @@ function createUI(){
 				var selectCMap = ColorDiv.append('select')
 					.attr('class','selectCMap')
 					.attr('id',d+'_SelectCMap')
-					.on('change', selectColorMap)
+					.on('change', selectColormap)
 
 				var options = selectCMap.selectAll('option')
 					.data(params.colormaps).enter()
@@ -2037,7 +2035,7 @@ function createUI(){
 				var selectCMapVar = ColorDiv.append('select')
 					.attr('class','selectCMapVar')
 					.attr('id',d+'_SelectCMapVar')
-					.on('change',selectColorMapVariable)
+					.on('change',selectColormapVariable)
 
 				var options = selectCMapVar.selectAll('option')
 					.data(params.ckeys[d]).enter()
@@ -2100,20 +2098,12 @@ function createUI(){
 					.style('margin','0')
 					.style('border','1px solid #909090')
 
-<<<<<<< HEAD
-				var FilterDiv = dropdown.append('div')
+				var filterDiv = dropdown.append('div')
 					.attr('style','margin:0px;  padding:5px; height:45px')
 
-				var selectF = FilterDiv.append('div')
-					.attr('style', 'height:20px')
-					.html('Filters &nbsp')	
-=======
-				var filterDiv = dropdown.append('div')
-					.attr('style','margin:0px; padding:5px; height:40px;');
->>>>>>> upstream/master
-
 				var selectF = filterDiv.append('div')
-					.attr('style','height:20px; display:inline-block')
+					.attr('style', 'height:20px')
+					//.attr('style','height:20px; display:inline-block')
 					.html('Filters &nbsp')	
 					.append('select')
 					.attr('style','width:160px')
@@ -2131,10 +2121,7 @@ function createUI(){
 					var fk = params.fkeys[d][j]
 					if (params.parts[d][fk] != null){
 
-<<<<<<< HEAD
 
-						dfilters = FilterDiv.append('div')
-=======
 						invFilter = filterDiv.append('label')
 							.attr('for',d+'_FK_'+fk+'_'+'InvertFilterCheckBox')
 							.attr('id',d+'_FK_'+fk+'_END_InvertFilterCheckBoxLabel')
@@ -2150,7 +2137,6 @@ function createUI(){
 							.attr('onchange','checkInvertFilterBox(this)');
 
 						dfilters = filterDiv.append('div')
->>>>>>> upstream/master
 							.attr('id',d+'_FK_'+fk+'_END_Filter')
 							.attr('class','FilterClass')
 							.style('display','block');
@@ -2184,8 +2170,6 @@ function createUI(){
 							.style('display','none');
 					}
 				}
-<<<<<<< HEAD
-=======
 
 				playbackCheckbox = filterDiv.append('input')
 					.attr('id',d+'_PlaybackCheckbox')
@@ -2204,7 +2188,6 @@ function createUI(){
 
 				
 
->>>>>>> upstream/master
 			} 
 			
 			dropdown.style('height',dheight+'px');
@@ -2252,7 +2235,7 @@ function createUI(){
 
 	applyUIoptions();
 
-	if (params.showColorMap[d]){
+	if (params.showColormap[d]){
 		fillColorbarContainer();
 	}
 	//fillColorbarContainer();
@@ -2527,7 +2510,7 @@ function savePreset()
 	preset.UIparticle = {};
 	preset.UIdropdown = {};
 	preset.UIcolorPicker = {};
-	preset.showColorMap = {};
+	preset.showColormap = {};
 	preset.colormap = {};
 	preset.colormapVariable = {};
 	for (var i=0; i<params.partsKeys.length; i++){
@@ -2539,7 +2522,7 @@ function savePreset()
 		preset.plotNmax[p] = params.plotNmax[p];
 		preset.showVel[p] = params.showVel[p];
 		preset.velType[p] = params.velType[p];
-		preset.showColorMap[p] = params.showColorMap[p];
+		preset.showColormap[p] = params.showColormap[p];
 		preset.colormap[p] = params.colormap[p];
 		preset.colormapVariable[p] = params.colormapVariable[p];	
 
@@ -2616,7 +2599,6 @@ function dragElement(elm, e) {
 	}
 }
 
-<<<<<<< HEAD
 /////////////////////////// COLOR SCALE
 //from https://www.w3schools.com/howto/howto_js_draggable.asp
 function dragColorbarElement(elm, e) {
@@ -2749,11 +2731,9 @@ function fillColorbarContainer(){
 	    .attr('background-color','inherited')
 }
 
-=======
 function changeSnapSizes(){
 	document.getElementById("RenderXText").value = window.innerWidth;
 	document.getElementById("RenderYText").value = window.innerHeight;
 }
 window.addEventListener('resize', changeSnapSizes);
->>>>>>> upstream/master
 

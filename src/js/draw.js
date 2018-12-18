@@ -43,16 +43,13 @@ function drawScene(pdraw = params.partsKeys)
 				cameraY: {value: [0.,1.,0.]},
 				cameraX: {value: [1.,0.,0.]},
 				velType: {value: 0.},
-<<<<<<< HEAD
-				texture: {value: params.texture},
+				texture: {value: params.colormapTexture},
 				colormap: {value: params.colormap[p]},
-				showcolormap: {value: params.showColorMap[p]},
-				min: {value: params.colormapVals[p][params.ckeys[p][params.colormapVariable[p]]][0]},
-				max: {value: params.colormapVals[p][params.ckeys[p][params.colormapVariable[p]]][1]}
-=======
+				showColormap: {value: params.showColormap[p]},
+				colormapMin: {value: params.colormapVals[p][params.ckeys[p][params.colormapVariable[p]]][0]},
+				colormapMax: {value: params.colormapVals[p][params.ckeys[p][params.colormapVariable[p]]][1]}
 				columnDensity: {value: params.columnDensity},
 				scaleCD: {value: params.scaleCD},
->>>>>>> upstream/master
 			},
 
 			vertexShader: myVertexShader,
@@ -91,18 +88,15 @@ function drawScene(pdraw = params.partsKeys)
 		params.scene.add(mesh);
 
 		// create array to hold colormap variable values
-		var colormapVariable_array = new Float32Array( params.plotNmax[p]); 
-		geo.addAttribute('ColorMapVariable_Array', new THREE.BufferAttribute( colormapVariable_array, 1));
+		var colormapArray = new Float32Array( params.plotNmax[p]); 
+		geo.addAttribute('colormapArray', new THREE.BufferAttribute( colormapArray, 1));
 
 		//var positions = mesh.geometry.attributes.position.array;
 		var index = 0;
 		var pindex = 0;
 		var vindex = 0;
-<<<<<<< HEAD
-=======
 		var rindex = 0;
 		var aindex = 0;
->>>>>>> upstream/master
 
 		var includePoint = true;
 		//for (var j=0; j<params.parts[p].Coordinates.length/params.decimate; j++){
@@ -141,23 +135,19 @@ function drawScene(pdraw = params.partsKeys)
 					vindex++;
 				}
 
-<<<<<<< HEAD
 				// fill colormap array with appropriate variable values
 				if (params.colormap[p] > 0.){
 					if (params.parts[p][params.ckeys[p][params.colormapVariable[p]]] != null){
-						colormapVariable_array[index] = params.parts[p][params.ckeys[p][params.colormapVariable[p]]][j];
+						colormapArray[index] = params.parts[p][params.ckeys[p][params.colormapVariable[p]]][j];
 					}
 				}
 
-				alphas[index] = 1.;
-				index++;
-=======
+
 				radiusScale[rindex] = 1.;
 				rindex++;
 				
-				alpha[rindex] = 1.;
+				alpha[aindex] = 1.;
 				aindex++;
->>>>>>> upstream/master
 				
 				ndraw += 1;
 				if (ndraw % ndiv < 1 || ndraw == params.parts.totalSize){

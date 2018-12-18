@@ -3,17 +3,17 @@ var myVertexShader = `
 attribute float radiusScale;
 attribute float alpha;
 attribute vec4 velVals;
-attribute float colorMapVariableArray;
+attribute float colormapArray;
 
 varying float vID;
 varying float vTheta;
-varying float vColorMapMag;
+varying float vColormapMag;
 varying float vAlpha;
 varying vec2 vUv;
 
 
-uniform float colorMapVariableMax;
-uniform float colorMapVariableMin;
+uniform float colormapMax;
+uniform float colormapMin;
 uniform float oID;
 uniform float uVertexScale;
 uniform float maxDistance;
@@ -41,7 +41,7 @@ void main(void) {
     
     
     // send colormap array to fragment shader
-    vColorMapMag = clamp(((colorMapVariableArray - colorMapVariable) / (colorMapVariable - colorMapVariable)), 0., 1.);
+    vColormapMag = clamp(((colormapArray - colormapMin) / (colormapMax - colormapMin)), 0., 1.);
 
     gl_PointSize = uVertexScale * pointScale * radiusScale;
 

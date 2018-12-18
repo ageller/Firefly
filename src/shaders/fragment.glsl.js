@@ -4,17 +4,17 @@ var myFragmentShader = `
 
 varying float vID;
 varying float vTheta;
-varying float vColorMapMag;
+varying float vColormapMag;
 varying float vAlpha;
 varying vec2 vUv;
 
 
-uniform bool showColorMap;
-uniform float colorMap;
+uniform bool showColormap;
+uniform float colormap;
 uniform vec4 color;
 uniform int SPHrad;
 uniform float velType; //0 = line, 1 = arrow, 2 = triangle
-uniform sampler2D colorMapTexture;
+uniform sampler2D colormapTexture;
 uniform bool columnDensity;
 uniform float scaleCD;
 
@@ -35,10 +35,10 @@ void main(void) {
     gl_FragColor = color;
     
     // if colormap is requested, apply appropriate colormap to appropriate variable
-    if (showColorMap){
+    if (showColormap){
         if (vID > -1.){
-            vec2 pos = vec2(vColorMapMag, colorMap);
-            vec3 c = texture2D(colorMapTexture, pos).rgb;
+            vec2 pos = vec2(vColormapMag, colormap);
+            vec3 c = texture2D(colormapTexture, pos).rgb;
             gl_FragColor.rgb = c;
         }
     }

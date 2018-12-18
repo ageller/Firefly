@@ -27,22 +27,6 @@ function update(time){
 		params.controls.dispose();
 		initControls();
 	}
-<<<<<<< HEAD
-	if (params.keyboard.down("C")) {
-		console.log(params.camera.position, params.camera.rotation);
-	}
-
-	if (params.updateTween){
-		TWEEN.update(time);
-	}
-	if (params.keyboard.down("T")) {
-		if (params.inTween){
-			params.updateTween = false;
-			params.inTween = false;
-		} else {
-			console.log("tweening")
-			params.updateTween = true;
-=======
 	
 	if (params.keyboard.down("C")) {
 		console.log(params.camera.position, params.camera.rotation);
@@ -54,14 +38,10 @@ function update(time){
 		} else {
 			console.log("tweening")
 			params.updateTween = true	
->>>>>>> upstream/master
 			setTweenParams();
 		}
 	}
 
-<<<<<<< HEAD
-	params.controls.update();
-=======
 	if (params.keyboard.down("P")){
 		params.columnDensity = !params.columnDensity;
 	}
@@ -70,7 +50,6 @@ function update(time){
 	// if (!params.inTween){
 		params.controls.update();
 	// }
->>>>>>> upstream/master
 
 	updateUICenterText();
 	updateUICameraText();
@@ -87,8 +66,6 @@ function update(time){
 	cameraX.applyQuaternion(params.camera.quaternion);
 	cameraY.applyQuaternion(params.camera.quaternion);
 
-<<<<<<< HEAD
-=======
 	var currentTime = new Date();
 	var seconds = currentTime.getTime()/1000;
 	
@@ -100,7 +77,6 @@ function update(time){
 		showSleep();
 	}
 
->>>>>>> upstream/master
 	for (var i=0; i<params.partsKeys.length; i++){
 		var p = params.partsKeys[i];
 		//change filter limits if playback is enabled
@@ -164,9 +140,7 @@ function update(time){
 				} else {
 					m.material.uniforms.oID.value = 0.;
 				}
-<<<<<<< HEAD
-				
-=======
+
 				//switching back to previous method of filtering, but now setting radii to zero, and also setting to sizes back to 1 for all particles (in case turned off below)
 				if (params.updateFilter[p] || params.updateOnOff[p]){
 					var radiusScale = m.geometry.attributes.radiusScale.array;
@@ -194,7 +168,6 @@ function update(time){
 					m.geometry.attributes.radiusScale.needsUpdate = true;
 					m.geometry.attributes.alpha.needsUpdate = true;
 				}
->>>>>>> upstream/master
 			} else { 
 				//don't need to set alphas here because I am setting the entire color to 0 (RGBA)
 				m.material.uniforms.color.value = new THREE.Vector4(0);

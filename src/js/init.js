@@ -126,9 +126,8 @@ function defineParams(){
 		//animation
 		this.pauseAnimation = false;
 
-<<<<<<< HEAD
 		// initializes colormap texture
-		this.texture;
+		this.colormapTexture;
 
 		// determines which colormap is applied to each particle type
 		this.colormap = {};
@@ -164,15 +163,7 @@ function defineParams(){
 	   this.SliderCMapmin = {};
 	   this.SliderCMapmax = {};
 	   
-	   //tweening
-	   this.inTween = false;
-	   this.updateTween = false;
-	   this.tweenFile = null;
-	   this.tweenParams = {};
-	   this.tweenPos = [];
-	   this.tweenRot = [];
-	   this.tweenFileName = "tweenParams.json";
-=======
+
 		//tweening
 		this.inTween = false;
 		this.updateTween = false;
@@ -302,13 +293,12 @@ function init() {
 
 }
 
-<<<<<<< HEAD
 // establishes initial conditions for the colormap
-function initializeColorMap(){
+function initColormap(){
 
 	// load colormap
-	params.texture = new THREE.TextureLoader().load( "textures/colormap.png" );
-	console.log('colormap loaded', params.texture)
+	params.colormapTexture = new THREE.TextureLoader().load( "textures/colormap.png" );
+	console.log('colormap loaded', params.colormapTexture)
 
 	// loop through each particle type
 	for (var i = 0; i < params.partsKeys.length; i++){
@@ -317,11 +307,12 @@ function initializeColorMap(){
 		// initialize dictionaries
 		params.colormapVariable[p] = 0;
 		params.colormap[p] = 4/256;
+		//eventually these should be set in the python code and read in
 		params.ckeys['Gas'] = ["magVelocities", "log10Temperature", "HIIAbundance", "log10Density"];
 		params.ckeys['Stars'] = ["magVelocities"];
 		params.ckeys['DarkMatter'] = ["magVelocities"];
-		params.showColorMap[p] = false;
-		params.updateColorMap[p] = false;
+		params.showColormap[p] = false;
+		params.updateColormap[p] = false;
 		params.colormapVals[p] = {};
 		params.colormapLims[p] = {};
 
@@ -334,7 +325,7 @@ function initializeColorMap(){
 			}
 		}
 	}
-=======
+
 function initColumnDensity(){
 	//following this example: https://threejs.org/examples/webgl_rtt.html
 	var screenWidth = window.innerWidth;
@@ -369,7 +360,6 @@ function initColumnDensity(){
 	params.cameraCD.position.z = 100;
 	params.cameraCD.up.set(0, -1, 0);
 	params.sceneCD.add(params.cameraCD);  
->>>>>>> upstream/master
 }
 
 function applyOptions(){
@@ -1037,30 +1027,23 @@ function WebGLStart(){
 	initPVals();
 
 	init();
-<<<<<<< HEAD
 	
-	initializeColorMap();
+	initColormap();
 
-=======
 	initColumnDensity();
 	
->>>>>>> upstream/master
 	createUI();
 	mouseDown = false;  //silly fix
 
 	//draw everything
 	drawScene();
 
-<<<<<<< HEAD
 	//begin the animation
-=======
-
-//begin the animation
-// keep track of runtime for crashing the app rather than the computer
+	// keep track of runtime for crashing the app rather than the computer
 	var currentTime = new Date();
 	var seconds = currentTime.getTime()/1000;
 	params.currentTime = seconds;
->>>>>>> upstream/master
+
 	params.pauseAnimation = false;
 	animate();
 }
