@@ -1,4 +1,3 @@
-
 function animate(time) {
 	if (!params.pauseAnimation){
 		requestAnimationFrame( animate );
@@ -122,6 +121,7 @@ function update(time){
 			}
 		}
 		params.partsMesh[p].forEach( function( m, j ) {
+			
 			m.material.uniforms.velType.value = params.velopts[params.velType[p]];
 			m.material.uniforms.columnDensity.value = params.columnDensity;
 			if (params.showParts[p]) {
@@ -140,6 +140,7 @@ function update(time){
 				} else {
 					m.material.uniforms.oID.value = 0.;
 				}
+
 				//switching back to previous method of filtering, but now setting radii to zero, and also setting to sizes back to 1 for all particles (in case turned off below)
 				if (params.updateFilter[p] || params.updateOnOff[p]){
 					var radiusScale = m.geometry.attributes.radiusScale.array;

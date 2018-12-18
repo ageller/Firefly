@@ -124,6 +124,7 @@ def openSnapshot(
 	## split off chimes keys, if necessary
 	if keys_to_extract is not None:
 		popped = 0
+
 	for i,key in enumerate(keys_to_extract):
 		## if the key was put into keys_to_extract instead of chimes_key
 		##	which is a uSER ERROR(!!)

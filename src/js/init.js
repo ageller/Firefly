@@ -2,7 +2,6 @@
 var params;
 function defineParams(){
 	ParamsInit = function() {
-
 		this.container = null;
 		this.scene = null;
 		this.camera = null;
@@ -127,6 +126,44 @@ function defineParams(){
 		//animation
 		this.pauseAnimation = false;
 
+		// contains colormap texture
+		this.colormapTexture;
+
+		// determines which colormap is applied to each particle type
+		this.colormap = {};
+
+		// determines which colormap variable is activated for each particle type
+		this.colormapVariable = {};
+
+		// list of possible colormap variables for each particle type
+		// this will eventually be produced by Python code
+		this.ckeys = {};
+
+		// determines if colormap is on or off
+		this.showColormap = {};
+
+		// list of all colormaps
+		this.colormapList = ['viridis', 'plasma', 'inferno', 'magma', 
+		'Greys', 'Purples', 'Blues', 'Greens', 'Oranges',
+	   'binary', 'gist_yarg', 'gist_gray', 'gray', 'afmhot',
+	   'PiYG', 'PRGn', 'BrBG', 'RdGy', 'coolwarm', 'bwr',
+	   'Pastel1', 'Pastel2', 'Paired', 'Accent', 'Dark2', 'Set1',
+	   'flag', 'prism', 'ocean', 'gist_earth', 'terrain', 'gist_stern'].reverse();
+
+	   // slider limits for colormap
+	   this.colormapVals = {};
+
+	   // textbox limits for colormap
+	   this.colormapLims = {};
+
+	   // colormap sliders
+	   this.SliderCMapinputs = {};
+	   this.updateColormap = {};
+	   this.SliderCMap = {};
+	   this.SliderCMapmin = {};
+	   this.SliderCMapmax = {};
+	   
+
 		//tweening
 		this.inTween = false;
 		this.updateTween = false;
@@ -147,7 +184,6 @@ function defineParams(){
 		this.cmap.minFilter = THREE.LinearFilter;
 		this.cmap.magFilter = THREE.NearestFilter;
 	};
-
 
 	params = new ParamsInit();
 
@@ -184,7 +220,6 @@ function initControls(){
 	}
 
 	params.switchControls = false;
-
 
 	if (params.haveUI){
 		updateUICenterText();
@@ -229,7 +264,6 @@ function init() {
 		params.effect.setEyeSeparation(params.stereoSep);
 	}
 
-
 	// scene
 	params.scene = new THREE.Scene();     
 
@@ -241,7 +275,6 @@ function init() {
 	// events
 	THREEx.WindowResize(params.renderer, params.camera);
 	//THREEx.FullScreen.bindKey({ charCode : 'm'.charCodeAt(0) });
-
 
 	params.useTrackball = true;
 
@@ -259,6 +292,40 @@ function init() {
 
 }
 
+// establishes initial conditions for the colormap
+function initColormap(){
+
+	// load colormap
+	params.colormapTexture = new THREE.TextureLoader().load( "textures/colormap.png" );
+	console.log('colormap loaded', params.colormapTexture)
+
+	// loop through each particle type
+	for (var i = 0; i < params.partsKeys.length; i++){
+		var p = params.partsKeys[i];
+
+		// initialize dictionaries
+		params.colormapVariable[p] = 0;
+		params.colormap[p] = 4/256;
+		//eventually these should be set in the python code and read in
+		//params.ckeys['Gas'] = ["magVelocities", "log10Temperature", "HIIAbundance", "log10Density"];
+		params.ckeys['Gas'] = ["magVelocities", "log10Temperature", "log10Density"];
+		params.ckeys['Stars'] = ["magVelocities"];
+		params.ckeys['DarkMatter'] = ["magVelocities"];
+		params.showColormap[p] = false;
+		params.updateColormap[p] = false;
+		params.colormapVals[p] = {};
+		params.colormapLims[p] = {};
+
+		// calculate the max/min for each colormappable variable
+		for (var j=0; j<params.ckeys[p].length; j++){
+			if (params.parts[p][params.ckeys[p][j]] != null){
+				params.colormapVals[p][params.ckeys[p][j]] = [];
+				params.colormapLims[p][params.ckeys[p][j]] = [];
+				calcMaxMin(p, params.ckeys[p][j]);
+			}
+		}
+	}
+}
 function initColumnDensity(){
 	//following this example: https://threejs.org/examples/webgl_rtt.html
 	var screenWidth = window.innerWidth;
@@ -380,7 +447,7 @@ function applyOptions(){
 			}
 		}
 	}
-
+	console.log("keys", params.partsKeys)
 	//particle specific options
 	for (var i=0; i<params.partsKeys.length; i++){
 		var p = params.partsKeys[i];
@@ -503,15 +570,13 @@ function applyOptions(){
 				}
 			}
 		}
+
 	}
 }
 
 
 function calcFilterLimits(p, fkey){
 //calculate limits for the filters
-	
-	
-	
 
 	var j=0;
 	if (params.parts[p][fkey] != null){
@@ -542,6 +607,7 @@ function calcFilterLimits(p, fkey){
 function calcVelVals(p){
 	params.parts[p].VelVals = [];
 	params.parts[p].magVelocities = [];
+	params.parts[p].NormVel = [];
 	var mag, angx, angy, v;
 	var max = -1.;
 	var min = 1.e20;
@@ -562,12 +628,29 @@ function calcVelVals(p){
 	}
 	vdif = Math.min(max - min, params.maxVrange);
 	for (var i=0; i<params.parts[p].Velocities.length; i++){
-		params.parts[p].VelVals[i].push( THREE.Math.clamp((params.parts[p].magVelocities[i] - min) / vdif, 0., 1.));
+		params.parts[p].NormVel.push( THREE.Math.clamp((params.parts[p].magVelocities[i] - min) / vdif, 0., 1.));
 	}
 }
+
+// calculate normalized values of an attribute
+function calcMaxMin(p, arrayname){
+	params.colormapVals[p][arrayname][0] = 1.e20;
+	params.colormapVals[p][arrayname][1] = -1;
+	for (var i=0; i<params.parts[p][arrayname].length; i++){
+		t = params.parts[p][arrayname][i];
+		if (t > params.colormapVals[p][arrayname][1]){
+			params.colormapVals[p][arrayname][1] = t;
+		}
+		if (t < params.colormapVals[p][arrayname][0]){
+			params.colormapVals[p][arrayname][0] = t;
+		}
+	}
+	params.colormapLims[p][arrayname][0] = params.colormapVals[p][arrayname][0];
+	params.colormapLims[p][arrayname][1] = params.colormapVals[p][arrayname][1];	
+}
+
 //initialize various values for the parts dict from the input data file, 
 function initPVals(){
-
 
 	for (var i=0; i<params.partsKeys.length; i++){
 		var p = params.partsKeys[i];
@@ -597,6 +680,7 @@ function initPVals(){
 			params.velType[p] = 'line';
 			//console.log(p, params.parts[p].VelVals, params.parts[p].Velocities)
 		}
+		
 		if (params.parts[p].hasOwnProperty("filterKeys")){
 			params.fkeys[p] = params.parts[p].filterKeys;
 			for (var k=0; k<params.fkeys[p].length; k++){
@@ -727,7 +811,6 @@ function selectFromStartup(){
 		.append('span')
 			.text('Confirm');
 
-
 	var updateButton = document.getElementById('selectStartupButton');
 	var cancelButton = document.getElementById('cancelSelection');
 	var submitButton = document.getElementById('submitSelection');
@@ -849,8 +932,6 @@ function loadData(callback){
 							params.parts.options0 = JSON.parse(JSON.stringify(params.parts.options));
 						}
 
-
-
 						callback(); 
 					}
 
@@ -930,7 +1011,6 @@ function clearloading(){
 
 }
 
-
 function WebGLStart(){
 
 //reset the window title
@@ -944,20 +1024,24 @@ function WebGLStart(){
 	initPVals();
 
 	init();
+	
+	initColormap();
+
 	initColumnDensity();
 	
 	createUI();
 	mouseDown = false;  //silly fix
 
-//draw everything
+	//draw everything
 	drawScene();
 
-
-//begin the animation
-// keep track of runtime for crashing the app rather than the computer
+	console.log(params.parts['Gas'])
+	//begin the animation
+	// keep track of runtime for crashing the app rather than the computer
 	var currentTime = new Date();
 	var seconds = currentTime.getTime()/1000;
 	params.currentTime = seconds;
+
 	params.pauseAnimation = false;
 	animate();
 }
@@ -996,7 +1080,6 @@ d3.select('body').append('input')
 		}
 	})
 	.style('display','None');
-
 
 //This will define the params object (that contains all "global" variables), then load the data, and then start the WebGL rendering
 getFilenames();
