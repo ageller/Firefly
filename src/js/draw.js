@@ -43,11 +43,16 @@ function drawScene(pdraw = params.partsKeys)
 				cameraY: {value: [0.,1.,0.]},
 				cameraX: {value: [1.,0.,0.]},
 				velType: {value: 0.},
+<<<<<<< HEAD
 				texture: {value: params.texture},
 				colormap: {value: params.colormap[p]},
 				showcolormap: {value: params.showColorMap[p]},
 				min: {value: params.colormapVals[p][params.ckeys[p][params.colormapVariable[p]]][0]},
 				max: {value: params.colormapVals[p][params.ckeys[p][params.colormapVariable[p]]][1]}
+=======
+				columnDensity: {value: params.columnDensity},
+				scaleCD: {value: params.scaleCD},
+>>>>>>> upstream/master
 			},
 
 			vertexShader: myVertexShader,
@@ -68,9 +73,13 @@ function drawScene(pdraw = params.partsKeys)
 		var positions = new Float32Array( params.plotNmax[p] * 3 ); // 3 vertices per point
 		geo.addAttribute( 'position', new THREE.BufferAttribute( positions, 3 ) );
 
-		//alphas for filtering
-		var alphas = new Float32Array( params.plotNmax[p] ); 
-		geo.addAttribute( 'alpha', new THREE.BufferAttribute( alphas, 1 ) );
+		//radiusScaling (e.g., for filtering and on/off)
+		var radiusScale = new Float32Array( params.plotNmax[p] ); 
+		geo.addAttribute( 'radiusScale', new THREE.BufferAttribute( radiusScale, 1 ) );
+
+		//alphas (e.g., for filtering and on/off)
+		var alpha = new Float32Array( params.plotNmax[p] ); 
+		geo.addAttribute( 'alpha', new THREE.BufferAttribute( alpha, 1 ) );
 
 		//angles for velocities
 		var velVals = new Float32Array( params.plotNmax[p] * 4); // unit vector (vx, vy, vz), scaled magnitude
@@ -89,21 +98,26 @@ function drawScene(pdraw = params.partsKeys)
 		var index = 0;
 		var pindex = 0;
 		var vindex = 0;
+<<<<<<< HEAD
+=======
+		var rindex = 0;
+		var aindex = 0;
+>>>>>>> upstream/master
 
 		var includePoint = true;
 		//for (var j=0; j<params.parts[p].Coordinates.length/params.decimate; j++){
 		for (var j=0; j<params.plotNmax[p]; j++){
 
-			//we are now including the filtering here instead of simply changing the alpha value during rendering
 			includePoint = true;
-			for (k=0; k<params.fkeys[p].length; k++){
-				if (params.parts[p][params.fkeys[p][k]] != null) {
-					val = params.parts[p][params.fkeys[p][k]][j]; 
-					if ( val < params.filterVals[p][params.fkeys[p][k]][0] || val > params.filterVals[p][params.fkeys[p][k]][1] ){
-						includePoint = false;
-					} 
-				}
-			}
+			//if we redraw upon filtering, then we would include the filtering here 
+			// for (k=0; k<params.fkeys[p].length; k++){
+			// 	if (params.parts[p][params.fkeys[p][k]] != null) {
+			// 		val = params.parts[p][params.fkeys[p][k]][j]; 
+			// 		if ( val < params.filterVals[p][params.fkeys[p][k]][0] || val > params.filterVals[p][params.fkeys[p][k]][1] ){
+			// 			includePoint = false;
+			// 		} 
+			// 	}
+			// }
 
 			if (includePoint){
 
@@ -127,6 +141,7 @@ function drawScene(pdraw = params.partsKeys)
 					vindex++;
 				}
 
+<<<<<<< HEAD
 				// fill colormap array with appropriate variable values
 				if (params.colormap[p] > 0.){
 					if (params.parts[p][params.ckeys[p][params.colormapVariable[p]]] != null){
@@ -136,6 +151,13 @@ function drawScene(pdraw = params.partsKeys)
 
 				alphas[index] = 1.;
 				index++;
+=======
+				radiusScale[rindex] = 1.;
+				rindex++;
+				
+				alpha[rindex] = 1.;
+				aindex++;
+>>>>>>> upstream/master
 				
 				ndraw += 1;
 				if (ndraw % ndiv < 1 || ndraw == params.parts.totalSize){

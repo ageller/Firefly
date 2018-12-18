@@ -37,3 +37,8 @@ Additional documentation is available on the [wiki page](https://github.com/agel
 
 This tool builds off of a [previous version developed by Alessandro Febretti](https://github.com/nuitrcs/firefly). 
 
+## Acknowledgments
+
+This project is funded by [Northwestern's Center for Interdisciplinary Exploration and Research in Astrophysics (CIERA)](https://ciera.northwestern.edu/),  [Northwestern's IT Research Computing group](https://www.it.northwestern.edu/research/index.html), and NSF grants AST-1412836, AST-1715216, and CAREER award AST-1652522 awarded to [Claude-André Faucher-Giguère](https://www.physics.northwestern.edu/people/faculty/core-faculty/claude-andre-faucher-giguere.html).
+
+
