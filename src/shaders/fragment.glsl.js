@@ -1,20 +1,22 @@
 var myFragmentShader = `
 
-precision mediump float;
+//precision mediump float;
 
 varying float vID;
-varying float vAlpha;
 varying float vTheta;
-varying float VariableMag;
-//varying float vVertexScale;
-//varying float glPointSize;
+varying float vColorMapMag;
+varying float vAlpha;
+varying vec2 vUv;
 
-uniform bool showcolormap;
-uniform float colormap;
+
+uniform bool showColorMap;
+uniform float colorMap;
 uniform vec4 color;
 uniform int SPHrad;
 uniform float velType; //0 = line, 1 = arrow, 2 = triangle
-uniform sampler2D texture;
+uniform sampler2D colorMapTexture;
+uniform bool columnDensity;
+uniform float scaleCD;
 
 //http://www.neilmendoza.com/glsl-rotation-about-an-arbitrary-axis/
 mat4 rotationMatrix(vec3 axis, float angle)
@@ -33,10 +35,10 @@ void main(void) {
     gl_FragColor = color;
     
     // if colormap is requested, apply appropriate colormap to appropriate variable
-    if (showcolormap){
+    if (showColorMap){
         if (vID > -1.){
-            vec2 pos = vec2(VariableMag, colormap);
-            vec3 c = texture2D(texture, pos).rgb;
+            vec2 pos = vec2(vColorMapMag, colorMap);
+            vec3 c = texture2D(colorMapTexture, pos).rgb;
             gl_FragColor.rgb = c;
         }
     }
@@ -97,7 +99,11 @@ void main(void) {
         //gl_FragColor.rgb +=  (1. - posRot.x/vSize); //white at tail
         gl_FragColor.rgb +=  0.6*posRot.x/vSize; //whiter at head
         gl_FragColor.a = posRot.x/vSize;
-}
+    }
     gl_FragColor.a *= vAlpha;
+
+    if (columnDensity){
+        gl_FragColor.rgb *= scaleCD; //need some factor here so that it adds up progressively
+    }
 }
 `;

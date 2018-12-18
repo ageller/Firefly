@@ -24,6 +24,7 @@ function defineParams(){
 
 		//plotting fields
 		this.showParts = {};
+		this.updateOnOff = {};
 
 		//particle size multiplicative factor
 		this.PsizeMult = {};
@@ -45,6 +46,7 @@ function defineParams(){
 		this.updateFilter = {};
 		this.filterLims = {};
 		this.filterVals = {};
+		this.invertFilter = {};
 
 		//for frustum      
 		this.zmax = 5.e10;
@@ -124,6 +126,7 @@ function defineParams(){
 		//animation
 		this.pauseAnimation = false;
 
+<<<<<<< HEAD
 		// initializes colormap texture
 		this.texture;
 
@@ -169,6 +172,27 @@ function defineParams(){
 	   this.tweenPos = [];
 	   this.tweenRot = [];
 	   this.tweenFileName = "tweenParams.json";
+=======
+		//tweening
+		this.inTween = false;
+		this.updateTween = false;
+		this.tweenFile = null;
+		this.tweenParams = {};
+		this.tweenPos = [];
+		this.tweenRot = [];
+		this.tweenFileName = "tweenParams.json"
+
+		//render texture to show column density
+		this.textureCD = null;
+		this.columnDensity = false;
+		this.materialCD = null;
+		this.sceneCD = null;
+		this.cameraCD = null;
+		this.scaleCD = 0.1; //scaling factor for the shader so that it adds up to one at highest density
+		this.cmap = new THREE.TextureLoader().load( "src/textures/cmap.png");
+		this.cmap.minFilter = THREE.LinearFilter;
+		this.cmap.magFilter = THREE.NearestFilter;
+>>>>>>> upstream/master
 	};
 
 	params = new ParamsInit();
@@ -187,7 +211,11 @@ function initControls(){
 
 			}
 		} 
-
+		if (params.haveUI){
+			elm = document.getElementById("CenterCheckBox");
+			elm.checked = true;
+			elm.value = true;
+		}
 		params.controls.dynamicDampingFactor = params.friction;
 
 	} else {
@@ -265,6 +293,7 @@ function init() {
 	params.camera.position.set(params.center.x, params.center.y, params.center.z - params.boxSize/2.);
 	params.camera.lookAt(params.scene.position);  
 
+
 	//apply presets from the options file
 	applyOptions();
 
@@ -273,6 +302,7 @@ function init() {
 
 }
 
+<<<<<<< HEAD
 // establishes initial conditions for the colormap
 function initializeColorMap(){
 
@@ -304,6 +334,42 @@ function initializeColorMap(){
 			}
 		}
 	}
+=======
+function initColumnDensity(){
+	//following this example: https://threejs.org/examples/webgl_rtt.html
+	var screenWidth = window.innerWidth;
+	var screenHeight = window.innerHeight;
+	var aspect = screenWidth / screenHeight;
+
+	//render texture
+	params.textureCD = new THREE.WebGLRenderTarget( screenWidth, screenHeight, {
+		minFilter: THREE.LinearFilter, 
+		magFilter: THREE.NearestFilter, 
+		format: THREE.RGBAFormat 
+	} );
+
+	params.materialCD = new THREE.ShaderMaterial( {
+		uniforms: { 
+			tex: { value: params.textureCD.texture }, 
+			cmap: { type:'t', value: params.cmap },
+		},
+		vertexShader: myVertexShader,
+		fragmentShader: myFragmentShader_pass2,
+		depthWrite: false
+	} );
+	var plane = new THREE.PlaneBufferGeometry( screenWidth, screenHeight );
+	var quad = new THREE.Mesh( plane, params.materialCD );
+	quad.position.z = -100;
+	params.sceneCD = new THREE.Scene();
+	params.sceneCD.add( quad );
+
+	// camera
+	params.cameraCD = new THREE.OrthographicCamera( screenWidth/-2, screenWidth/2, screenHeight/2, screenHeight/-2, -10000, 10000 );
+	//params.cameraCD = new THREE.PerspectiveCamera( params.fov, aspect, params.zmin, params.zmax);
+	params.cameraCD.position.z = 100;
+	params.cameraCD.up.set(0, -1, 0);
+	params.sceneCD.add(params.cameraCD);  
+>>>>>>> upstream/master
 }
 
 function applyOptions(){
@@ -516,14 +582,15 @@ function applyOptions(){
 		}
 
 	}
-
-
 }
 
 
 function calcFilterLimits(p, fkey){
 //calculate limits for the filters
 	
+	
+	
+
 	var j=0;
 	if (params.parts[p][fkey] != null){
 		var i=0;
@@ -538,6 +605,15 @@ function calcFilterLimits(p, fkey){
 		max += 0.001;
 		params.filterLims[p][fkey] = [min, max];
 		params.filterVals[p][fkey] = [min, max];
+		params.invertFilter[p][fkey] = false;
+		//TODO this should not be here!!
+		// set the currently shown filter for each part type at startup
+		// so the first click isn't broken
+		if (params.parts[p]['currentlyShownFilter'] == undefined){
+			params.parts[p]['currentlyShownFilter']=fkey;
+			params.parts[p]['playbackTicks']=0;
+			params.parts[p]['playbackTickRate']=10;	
+		}
 	}
 }
 
@@ -597,9 +673,13 @@ function initPVals(){
 		params.updateFilter[p] = false;
 		params.filterLims[p] = {};
 		params.filterVals[p] = {};
+		params.invertFilter[p] = {};
 		params.fkeys[p] = [];
 		params.plotNmax[p] = params.parts[p].Coordinates.length;
-		
+		params.PsizeMult[p] = 1.;
+		params.showParts[p] = true;
+		params.updateOnOff[p] = false;
+
 		params.showVel[p] = false;
 		if (params.parts[p].Velocities != null){
 			if (!params.reset){
@@ -957,16 +1037,30 @@ function WebGLStart(){
 	initPVals();
 
 	init();
+<<<<<<< HEAD
 	
 	initializeColorMap();
 
+=======
+	initColumnDensity();
+	
+>>>>>>> upstream/master
 	createUI();
 	mouseDown = false;  //silly fix
 
 	//draw everything
 	drawScene();
 
+<<<<<<< HEAD
 	//begin the animation
+=======
+
+//begin the animation
+// keep track of runtime for crashing the app rather than the computer
+	var currentTime = new Date();
+	var seconds = currentTime.getTime()/1000;
+	params.currentTime = seconds;
+>>>>>>> upstream/master
 	params.pauseAnimation = false;
 	animate();
 }

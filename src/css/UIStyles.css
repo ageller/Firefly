@@ -1,79 +1,3 @@
-body{ 
-	margin: 0; 
-	font-family: Sans-Serif;
-}
-
-canvas{
-	width: 100%; 
-	height: 100% 
-}
-
-
-#splash{
-	position:absolute; 
-	top:0; 
-	left:0;
-	right:0;
-	bottom:0;
-	z-index:3;
-	margin:0;
-	padding:0;
-	color:white;
-	background-color:black;
-	font-family: Sans-Serif;
-	text-align: center;
-	font-size:20px;
-	font-size:10vw;
-	opacity: 0.8;
-	cursor: pointer;
-}
-#splashdiv1 {
-	font-size:50px;
-	font-size:10vmin;
-	padding:0;
-	margin:0;
-	padding-top:20vmin;
-}
-#splashdiv2 {
-	font-size:35px;
-	font-size:6vmin;
-	padding:0;
-	margin:0;
-	padding-top:2vmin;
-}
-#splashdiv3 {
-	font-size:25px;
-	font-size:4vmin;
-	padding:0;
-	margin:0;
-	padding-top:2vmin;
-}
-#splashdiv4 {
-	font-size:10px;
-	font-size:2vmin;
-	text-align: left;
-	margin:0;
-	padding:0;
-	padding-top:5vmin;
-	padding-left: 50%;
-	margin-left:-20%;
-	width:40%;
-}
-#splashdiv5 {
-	font-size:10px;
-	font-size:2vmin;
-	margin:0;
-	padding:0;
-	padding-top:15vmin;
-}
-#splashdivLoader {
-	margin:0;
-	padding:0;
-	position:absolute;
-	left:0;
-}
-
-
 .UIcontainer{
 	z-index:2; 
 	display:inline-block; 
@@ -81,6 +5,8 @@ canvas{
 	border-style:solid;
 	border-width: 2px 2px 2px 2px;
 	font-family: Sans-Serif;
+	-webkit-transition: width 0.4s;
+	transition: width 0.4s;
 }
 .UItopbar{
 	background-color:#d3d3d3;
@@ -201,7 +127,8 @@ canvas{
 	margin:5px;
 	height:20px;
 	opacity: 0.8;
-	transition: opacity .15s;
+	-webkit-transition: width 0.4s, opacity 0.15s;
+	transition: width 0.4s, opacity .15s;
 }
 .particleDiv:hover {
 	opacity: 1;
@@ -512,6 +439,7 @@ select{
 	left:55px;
 	width:230px;
 }
+<<<<<<< HEAD:src/css/index.css
 
 /* https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_modal_bottom */
 /* The Modal (background) */
@@ -612,3 +540,5 @@ a{
 a:visited {
 	color: #339999;
 }
+=======
+>>>>>>> upstream/master:src/css/UIStyles.css

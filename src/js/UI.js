@@ -222,6 +222,7 @@ function checkVelBox(box)
 
 }
 
+<<<<<<< HEAD
 function checkColorMapBox(box)
 {
 	var p = box.id.slice(0, -13)
@@ -243,6 +244,49 @@ function checkColorMapBox(box)
 	    	.style('height','0px');
 
 	}
+=======
+function checkInvertFilterBox(box)
+{
+	var fpos = box.id.indexOf('_FK_');
+	var epos = box.id.indexOf('_END_');
+	var sl = box.id.length;
+	var pID = box.id.slice(0, fpos - sl);
+	var fk = box.id.slice(fpos + 4, epos - sl);
+	params.invertFilter[pID][fk] = false;
+	if (box.checked){
+		params.invertFilter[pID][fk] = true;
+	}
+	params.updateFilter[pID] = true;
+
+
+}
+
+function checkPlaybackFilterBox(box)
+{
+	// figure out which checkbox was checked by slicing the ID, clever move Aaron!
+	var playback_index = box.id.indexOf('_Playback');
+	var pID = box.id.slice(0, playback_index);
+	this_label = document.getElementById(pID+'_PlaybackLabel');
+
+	//reset the text/appstate to default values
+	this_label.innerText = "Playback: "
+	params.parts[pID]["playbackEnabled"]=false;
+	params.updateFilter[pID]=false;
+	params.parts[p]['playbackTicks']=0;
+	if (box.checked){
+		// read which fkey is currently shown 
+		this_label = document.getElementById(pID+'_PlaybackLabel');
+		// update the playback text in the UI
+		this_label.innerText += " " + params.parts[pID]['currentlyShownFilter']//"under development"//
+
+		//flag that we should run playback
+		params.parts[pID]["playbackEnabled"]=true;
+		params.updateFilter[pID]=true;
+		params.parts[pID]['playbackFilter']=params.parts[pID][['currentlyShownFilter']]
+		console.log(params.parts[pID]['playbackFilter'])
+	}
+
+>>>>>>> upstream/master
 }
 
 //functions to check color of particles
@@ -280,9 +324,9 @@ function setFSliderHandle(i, value, parent, reset=false) {
 		var nf = parseFloat(value)/ (Math.round(1000.*params.filterLims[p][fk][i])/1000.);
 		params.SliderFinputs[p][fk][i].value = value;
 		params.filterLims[p][fk][i] = parseFloat(value);
-		if (Math.abs(1. - nf) > 0.001 && ! params.reset){
-			drawScene(pDraw = [p]);
-		}
+		// if (Math.abs(1. - nf) > 0.001 && ! params.reset){
+		// 	//drawScene(pDraw = [p]);
+		// }
 
 		if (i == 0){
 			parent.noUiSlider.updateOptions({
@@ -412,12 +456,11 @@ function createFilterSliders(){
 						var nf = parseFloat(values[handle])/ (Math.round(1000.*params.filterVals[pp][ffk][handle])/1000.);
 						params.SliderFinputs[pp][ffk][handle].value = values[handle];
 						params.filterVals[pp][ffk][handle] = parseFloat(values[handle]);
-						if (Math.abs(1. - nf) > 0.001 && ! params.reset){
-							drawScene(pDraw = [pp]);
-						}
+						// if (Math.abs(1. - nf) > 0.001 && ! params.reset){
+						// 	drawScene(pDraw = [pp]);
+						// }
 
 
-						//because we are now redrawing each time, we do not need to do this
 						params.updateFilter[pp] = true;
 						mouseDown = true;
 					});
@@ -695,10 +738,9 @@ function createNsliders(){
 
 					var nf = parseFloat(values[handle])/params.plotNmax[pp];
 					params.plotNmax[pp] = parseInt(values[handle]);
-					if (nf != 1 && ! params.reset){
-						drawScene(pDraw = [pp]);
-
-					}
+					// if (nf != 1 && ! params.reset){
+					// 	drawScene(pDraw = [pp]);
+					// }
 					mouseDown = true;
 				});
 
@@ -779,7 +821,7 @@ function createPsliders(){
 			params.SliderPInputs[p] = [params.SliderPmax[p]];
 			params.SliderPInputs[p][0].parent = params.SliderP[p];
 			min = 0.;
-			max = 1.;
+			max = params.PsizeMult[p];
 
 			noUiSlider.create(params.SliderP[p], {
 				start: [params.PsizeMult[p]],
@@ -873,7 +915,7 @@ function createDslider(){
 		params.SliderDInputs = [params.SliderDmax];
 		params.SliderDInputs[0].parent = params.SliderD;
 		min = 1.;
-		max = 100.;
+		max = 20.;
 
 		noUiSlider.create(params.SliderD, {
 			start: [params.decimate],
@@ -1206,8 +1248,11 @@ function checkText(input, event)
 function checkshowParts(checkbox)
 {
 	var type = checkbox.id.slice(-5); 
+
 	if (type == 'Check'){	
 		var pID = checkbox.id.slice(0,-5); // remove  "Check" from id
+		params.updateOnOff[pID] = true;
+		params.updateFilter[pID] = true;
 		params.showParts[pID] = false;
 		if (checkbox.checked){
 			params.showParts[pID] = true;
@@ -1220,26 +1265,33 @@ function hideUI(x){
 	if (!params.movingUI){
 
 		x.classList.toggle("change");
-
 		var UI = document.getElementById("UIhider");
 		var UIc = document.getElementsByClassName("UIcontainer")[0];
+		var UIt = document.getElementById("ControlsText");
+		//var UIp = document.getElementsByClassName("particleDiv");
+		var UIp = d3.selectAll('.particleDiv');
 		if (params.UIhidden){
 			UI.style.display = 'inline';
 			//UI.style.visibility = 'visible';
 			UIc.style.borderStyle = 'solid';
 			UIc.style.marginLeft = '0';
 			UIc.style.marginTop = '0';
-			params.UIhidden = false;
+			UIc.style.width = '300px';
+			//UIp.style('width', '280px');
+			UIt.style.opacity = 1;
 		} else {
 			UI.style.display = 'none';
 			//UI.style.visibility = 'hidden';
 			UIc.style.borderStyle = 'none';
 			UIc.style.marginLeft = '2px';
 			UIc.style.marginTop = '2px';
-			params.UIhidden = true;	
+			UIc.style.width = '35px';
+			//UIp.style('width', '35px');
+			UIt.style.opacity = 0;
 		}
 		var UIt = document.getElementById("UItopbar");
 		//UIt.style.display = 'inline';
+		params.UIhidden = !params.UIhidden
 	}
 }
 
@@ -1247,8 +1299,10 @@ function hideUI(x){
 
 function getPi(pID){
 	var i=0;
-	for (i=0; i<params.partsKeys.length; i++){
-		if (pID == params.partsKeys[i]){
+	keys = Object.keys(params.gtoggle)
+	// for (i=0; i<params.partsKeys.length; i++){
+	for (i=0; i<keys.length; i++){
+		if (pID == keys[i]){
 			break;
 		}
 	}
@@ -1265,43 +1319,29 @@ function showFunction(handle) {
 
 	var pdiv;
 	var ddiv = document.getElementById(pID+'Dropdown');
-	var ht = parseFloat(ddiv.style.height.slice(0,-2)) + offset; //to take of "px"
+	var ht = parseFloat(ddiv.style.height.slice(0,-2)) + offset; //to take off "px"
 	var pb = 0.;
 
-	if (i < params.partsKeys.length-1){
-		pdiv = document.getElementsByClassName(params.partsKeys[i+1]+'Div')[0];
+	keys = Object.keys(params.gtoggle)
+	pdiv = document.getElementById(keys[i+1]+'Div');
+	if (i < keys.length-1){
 		if (params.gtoggle[pID]){
 			pdiv.style.marginTop = ht + "px";
-			params.gtoggle[pID] = false;	
 		} else {
 			pdiv.style.marginTop = "0px";
-			params.gtoggle[pID] = true;
 		}
-	} else { // a bit clunky, but works with the current setup
-		if (pID == "Camera"){
-			c = document.getElementById("decimationDiv");
-			pb = 5;
-			if (params.gtoggle[pID]){
-				c.style.marginTop = (pb+ht-5)+'px';
-				params.gtoggle[pID] = false;	
-
-			} else {
-				c.style.marginTop = pb+'px';	
-				params.gtoggle[pID] = true;	
-			}	
-		} else { //for the last particle (to move the bottom of the container)
-			c = document.getElementsByClassName("UIcontainer")[0];
-
-			if (params.gtoggle[pID]){
-				c.style.paddingBottom = (pb+ht-5)+'px';
-				params.gtoggle[pID] = false;	
-
-			} else {
-				c.style.paddingBottom = pb+'px';	
-				params.gtoggle[pID] = true;		
-			}
+	} else {
+		//handle the last one differently
+		c = document.getElementsByClassName("UIcontainer")[0];
+		if (params.gtoggle[pID]){
+			c.style.paddingBottom = (pb+ht-5)+'px';
+		} else {
+			c.style.paddingBottom = pb+'px';	
 		}
 	}
+
+	params.gtoggle[pID] =! params.gtoggle[pID];	
+
 }
 
 function selectFilter() {
@@ -1314,17 +1354,27 @@ function selectFilter() {
 
 	var p = this.id.slice(0,-13)
 
+	// store the "currently shown" filter for later use
+	console.log("setting the current filter value to",selectValue)
+	params.parts[p]['currentlyShownFilter']=selectValue
+
 	//console.log("in selectFilter", selectValue, this.id, p)
 	for (var i=0; i<params.fkeys[p].length; i+=1){
 		//console.log('hiding','#'+p+'_FK_'+params.fkeys[p][i]+'_END_Filter')
 		d3.selectAll('#'+p+'_FK_'+params.fkeys[p][i]+'_END_Filter')
 			.style('display','none');
+		d3.selectAll('#'+p+'_FK_'+params.fkeys[p][i]+'_END_InvertFilterCheckBox')
+			.style('display','none');
+		d3.selectAll('#'+p+'_FK_'+params.fkeys[p][i]+'_END_InvertFilterCheckBoxLabel')
+			.style('display','none');
 	}
 	//console.log('showing', '#'+p+'_FK_'+selectValue+'_END_Filter')
 	d3.selectAll('#'+p+'_FK_'+selectValue+'_END_Filter')
-		.style('display','inline');
-
-
+		.style('display','block');
+	d3.selectAll('#'+p+'_FK_'+selectValue+'_END_InvertFilterCheckBox')
+		.style('display','inline-block');
+	d3.selectAll('#'+p+'_FK_'+selectValue+'_END_InvertFilterCheckBoxLabel')
+		.style('display','inline-block');
 };
 
 function selectColorMapVariable() {
@@ -1427,14 +1477,18 @@ function createUI(){
 		var hider = UIcontainer.append('div').attr('id','UIhider');
 		hider.append('div').attr('id','particleUI');
 
-		var hamburger = document.getElementById('UItopbar');
-		//hide the UI
-		hideUI(hamburger);
-		hamburger.classList.toggle("change");
-
 	 }
 
 	console.log(params.partsKeys)
+	//set the gtoggle Object (in correct order)
+	params.gtoggle.dataControls = true;
+	params.gtoggle.cameraControls = true;
+	for (i=0; i<params.partsKeys.length; i++){
+		d = params.partsKeys[i];
+		params.gtoggle[d] = true;
+	}
+
+
 
 	d3.select('body').append('input')
 		.attr('type','file')
@@ -1450,32 +1504,77 @@ function createUI(){
 	var UI = d3.select('#particleUI')
 	var UIparts = UI.selectAll('div');
 
+	////////////////////////
+	//generic dropdown for "data" controls"
+	var m1 = UI.append('div')
+		.attr('id','dataControlsDiv')
+		.attr('class','particleDiv');
+	m1.append('div')
+		.attr('class','pLabelDiv')
+		.style('width', '215px')
+		.text('Data Controls')
+	m1.append('button')
+		.attr('class','dropbtn')
+		.attr('id','dataControlsDropbtn')
+		.attr('onclick','showFunction(this);')
+		.html('&#x25BC');
+	var m2 = m1.append('div')
+		.attr('class','dropdown-content')
+		.attr('id','dataControlsDropdown')
+		.style('height','220px');
+
+	//decimation
+	var dec = m2.append('div')
+		.attr('id', 'decimationDiv')
+		.style('width','270px')
+		.style('margin-left','5px')
+		.style('margin-top','10px')
+		.style('display','inline-block')
+	dec.append('div')
+		.attr('class','pLabelDiv')
+		.style('width','85')
+		.style('display','inline-block')
+		.text('Decimation');
+	dec.append('div')
+		.attr('class','NSliderClass')
+		.attr('id','DSlider')
+		.style('margin-left','40px')
+		.style('width','158px');
+	dec.append('input')
+		.attr('class','NMaxTClass')
+		.attr('id','DMaxT')
+		.attr('type','text')
+		.style('left','255px')
+		.style('width','30px');
 
 	//fullscreen button
-	UI.append('div').attr('id','fullScreenDiv')
+	m2.append('div').attr('id','fullScreenDiv')
 		.append('button')
 		.attr('id','fullScreenButton')
 		.attr('class','button')
+		.style('width','280px')
 		.attr('onclick','fullscreen();')
 		.append('span')
 			.text('Fullscreen');
 
 	//snapshots
-	var snap = UI.append('div')
+	var snap = m2.append('div')
 		.attr('id','snapshotDiv')
-		.attr('class', 'button-div');
+		.attr('class', 'button-div')
+		.style('width','280px')
 	snap.append('button')
 		.attr('class','button')
 		.attr('onclick','renderImage();')
-		.style('width','150px')
+		.style('width','140px')
 		.style('padding','5px')
 		.style('margin',0)
 		.append('span')
 			.text('Take Snapshot');
+
 	snap.append('input')
 		.attr('id','RenderXText')
 		.attr('type', 'text')
-		.attr('value', '1920')
+		.attr('value',window.innerWidth)
 		.attr('autocomplete','off')
 		.attr('onkeypress','checkText(this, event)')
 		.attr('class','pTextInput')
@@ -1485,7 +1584,7 @@ function createUI(){
 	snap.append('input')
 		.attr('id','RenderYText')
 		.attr('type', 'text')
-		.attr('value', '1200')
+		.attr('value',window.innerHeight)
 		.attr('autocomplete','off')
 		.attr('onkeypress','checkText(this, event)')
 		.attr('class','pTextInput')
@@ -1493,20 +1592,21 @@ function createUI(){
 		.style('margin-top','5px');
 
 	//save preset button
-	UI.append('div').attr('id','savePresetDiv')
+	m2.append('div').attr('id','savePresetDiv')
 		.append('button')
 		.attr('id','savePresetButton')
 		.attr('class','button')
+		.style('width','280px')
 		.attr('onclick','savePreset();')
 		.append('span')
 			.text('Save Preset');
 
 	//reset to default button
-	UI.append('div').attr('id','resetDiv')
+	m2.append('div').attr('id','resetDiv')
 		.append('button')
 		.attr('id','resetButton')
 		.attr('class','button')
-		.style('width','142px')
+		.style('width','134px')
 		.attr('onclick','resetToOptions();')
 		.append('span')
 			.text('Reset to Default');
@@ -1515,24 +1615,27 @@ function createUI(){
 		.append('button')
 		.attr('id','resetPButton')
 		.attr('class','button')
-		.style('width','143px')
-		.style('left','147px')
+		.style('width','140px')
+		.style('left','134px')
 		.style('margin-left','0px')
 		.attr('onclick','loadPreset();')
 		.append('span')
 			.text('Reset to Preset');
 
 	//load new data button
-	UI.append('div').attr('id','loadNewDataDiv')
+	m2.append('div').attr('id','loadNewDataDiv')
 		.append('button')
 		.attr('id','loadNewDataButton')
 		.attr('class','button')
+		.style('width','280px')
+
 		.attr('onclick','loadNewData();')
 		.append('span')
 			.text('Load New Data');
 
+
+	/////////////////////////
 	//camera
-	params.gtoggle.Camera = true;
 	var c1 = UI.append('div')
 		.attr('id','cameraControlsDiv')
 		.attr('class','particleDiv');
@@ -1542,12 +1645,12 @@ function createUI(){
 		.text('Camera Controls')
 	c1.append('button')
 		.attr('class','dropbtn')
-		.attr('id','CameraDropbtn')
+		.attr('id','cameraControlsDropbtn')
 		.attr('onclick','showFunction(this);')
 		.html('&#x25BC');
 	var c2 = c1.append('div')
 		.attr('class','dropdown-content')
-		.attr('id','CameraDropdown')
+		.attr('id','cameraControlsDropdown')
 		.style('height','190px');
 	//center text boxes
 	var c3 = c2.append('div')
@@ -1705,7 +1808,7 @@ function createUI(){
 	c3 = c2.append('div')
 		.attr('class','pLabelDiv')
 		.attr('id','FrictionDiv')
-		.style('background-color','#808080')
+		// .style('background-color','#808080')
 		.style('width','280px')
 		.style('padding-top','10px');
 	c3.append('div')
@@ -1726,7 +1829,7 @@ function createUI(){
 	c3 = c2.append('div')
 		.attr('class','pLabelDiv')
 		.attr('id','StereoSepDiv')
-		.style('background-color','#808080')
+		// .style('background-color','#808080')
 		.style('width','280px')
 		.style('padding-top','10px');
 	c3.append('div')
@@ -1758,38 +1861,20 @@ function createUI(){
 		.attr('type','text')
 		.style('margin-top','-4px');
 
-	//decimation
-	var dec = UI.append('div')
-		.attr('class','particleDiv')
-		.attr('id', 'decimationDiv');
-	dec.append('div')
-		.attr('class','pLabelDiv')
-		.style('width','85px')
-		.text('Decimation');
-	dec.append('div')
-		.attr('class','PSliderClass')
-		.attr('id','DSlider')
-		.style('margin-top','-22px')
-		.style('width','145px');
-	dec.append('input')
-		.attr('class','PMaxTClass')
-		.attr('id','DMaxT')
-		.attr('type','text')
-		.style('left','245px')
-		.style('width','40px');
 
 
+	///////////////////////
 	//setup for all the particle UI bits 
 	UIparts.data(params.partsKeys).enter()
 		.append('div')
 		.attr('class', function (d) { return "particleDiv "+d+"Div" }) //+ dropdown
+		.attr('id', function (d) { return d+"Div" }) //+ dropdown
 
 
 	var i=0;
 	var j=0;
 	for (i=0; i<params.partsKeys.length; i++){
 		d = params.partsKeys[i];
-		params.gtoggle[d] = true;
 
 		var controls = d3.selectAll('div.'+d+'Div');
 
@@ -2009,20 +2094,29 @@ function createUI(){
 			nfilt = showfilts.length;
 
 			if (nfilt > 0){
-				dheight += 70;
+				dheight += 80;
 
 				dropdown.append('hr')
 					.style('margin','0')
 					.style('border','1px solid #909090')
 
+<<<<<<< HEAD
 				var FilterDiv = dropdown.append('div')
 					.attr('style','margin:0px;  padding:5px; height:45px')
 
 				var selectF = FilterDiv.append('div')
 					.attr('style', 'height:20px')
 					.html('Filters &nbsp')	
+=======
+				var filterDiv = dropdown.append('div')
+					.attr('style','margin:0px; padding:5px; height:40px;');
+>>>>>>> upstream/master
 
+				var selectF = filterDiv.append('div')
+					.attr('style','height:20px; display:inline-block')
+					.html('Filters &nbsp')	
 					.append('select')
+					.attr('style','width:160px')
 					.attr('class','selectFilter')
 					.attr('id',d+'_SelectFilter')
 					.on('change',selectFilter)
@@ -2032,16 +2126,34 @@ function createUI(){
 					.append('option')
 					.text(function (d) { return d; });
 
-
 				var filtn = 0;
 				for (j=0; j<params.fkeys[d].length; j++){
 					var fk = params.fkeys[d][j]
 					if (params.parts[d][fk] != null){
 
+<<<<<<< HEAD
 
 						dfilters = FilterDiv.append('div')
+=======
+						invFilter = filterDiv.append('label')
+							.attr('for',d+'_FK_'+fk+'_'+'InvertFilterCheckBox')
+							.attr('id',d+'_FK_'+fk+'_END_InvertFilterCheckBoxLabel')
+							.style('display','inline-block')
+							.style('margin-left','160px')
+							.text('Invert');
+
+						invFilter.append('input')
+							.attr('id',d+'_FK_'+fk+'_END_InvertFilterCheckBox')
+							.attr('value','false')
+							.attr('type','checkbox')
+							.attr('autocomplete','off')
+							.attr('onchange','checkInvertFilterBox(this)');
+
+						dfilters = filterDiv.append('div')
+>>>>>>> upstream/master
 							.attr('id',d+'_FK_'+fk+'_END_Filter')
 							.attr('class','FilterClass')
+							.style('display','block');
 
 						dfilters.append('div')
 							.attr('class','FilterClassLabel')
@@ -2061,12 +2173,38 @@ function createUI(){
 							.attr('type','text');
 
 						filtn += 1;
+
 					}
 					if (filtn > 1){
 						d3.selectAll('#'+d+'_FK_'+fk+'_END_Filter')
 							.style('display','none');
+						d3.selectAll('#'+d+'_FK_'+fk+'_END_InvertFilterCheckBox')
+							.style('display','none');
+						d3.selectAll('#'+d+'_FK_'+fk+'_END_InvertFilterCheckBoxLabel')
+							.style('display','none');
 					}
 				}
+<<<<<<< HEAD
+=======
+
+				playbackCheckbox = filterDiv.append('input')
+					.attr('id',d+'_PlaybackCheckbox')
+					.attr('value','false')
+					.attr('type','checkbox')
+					.attr('autocomplete','off')
+					.attr('onchange','checkPlaybackFilterBox(this)')
+					.style('display','inline-block')
+
+				playbackLabel = filterDiv.append('label')
+					.attr('for',d+'_'+'PlaybackLabel')
+					.attr('id',d+'_PlaybackLabel')
+					.style('display','inline-block')
+					.style('margin-top','30px')
+					.text('Playback:');
+
+				
+
+>>>>>>> upstream/master
 			} 
 			
 			dropdown.style('height',dheight+'px');
@@ -2120,6 +2258,13 @@ function createUI(){
 	//fillColorbarContainer();
 
 	params.haveUI = true;
+
+	//hide the UI initially
+	if (!params.reset){
+		var hamburger = document.getElementById('UItopbar');
+		hideUI(hamburger);
+		hamburger.classList.toggle("change");
+	}
 }
 
 function applyUIoptions(){
@@ -2206,7 +2351,7 @@ function applyUIoptions(){
 
 //hide the splash screen
 function hideSplash(){
-	if (params.loaded){
+	if (params.loaded && !params.pauseAnimation){
 		params.helpMessage = 0;
 		var fdur = 700.;
 
@@ -2225,12 +2370,12 @@ function hideSplash(){
 
 	//hide the splash screen
 function showSplash(){
-	if (params.loaded){
+	if (params.loaded && !params.pauseAnimation){
 		params.helpMessage = 1;
 		var fdur = 700.;
 
 		var splash = d3.select("#splash");
-		splash.style("display","block");
+		splash.style("display","block")
 
 		splash.transition()
 			.ease(d3.easeLinear)
@@ -2238,6 +2383,43 @@ function showSplash(){
 			.style("opacity", 0.8);
 		}
 
+}
+
+function showSleep(){
+
+	var fdur = 700
+	var splash = d3.select("#sleep");
+	
+	splash.style("display","block");
+
+	splash.transition()
+		.ease(d3.easeLinear)
+		.duration(fdur)
+		.style("opacity", 0.95);
+
+}
+
+function hideSleep(){
+	params.pauseAnimation = false;
+	var fdur = 700.;
+
+	var splash = d3.select("#sleep");
+
+	splash.transition()
+		.ease(d3.easeLinear)
+		.duration(fdur)
+		.style("opacity", 0)
+
+		.on("end", function(d){
+			splash.style("display","none");
+		})
+	// startup the app and reset the time-- maybe I should move this stuff to the top 
+	//	of animate? hmm...
+	var currentTime = new Date();
+	var seconds = currentTime.getTime()/1000;
+	params.currentTime = seconds;
+	params.pauseAnimation = false;
+	animate();
 }
 
 
@@ -2434,6 +2616,7 @@ function dragElement(elm, e) {
 	}
 }
 
+<<<<<<< HEAD
 /////////////////////////// COLOR SCALE
 //from https://www.w3schools.com/howto/howto_js_draggable.asp
 function dragColorbarElement(elm, e) {
@@ -2566,4 +2749,11 @@ function fillColorbarContainer(){
 	    .attr('background-color','inherited')
 }
 
+=======
+function changeSnapSizes(){
+	document.getElementById("RenderXText").value = window.innerWidth;
+	document.getElementById("RenderYText").value = window.innerHeight;
+}
+window.addEventListener('resize', changeSnapSizes);
+>>>>>>> upstream/master
 

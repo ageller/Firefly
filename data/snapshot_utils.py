@@ -124,6 +124,7 @@ def openSnapshot(
 	## split off chimes keys, if necessary
 	if keys_to_extract is not None:
 		popped = 0
+<<<<<<< HEAD
 		for i,key in enumerate(keys_to_extract):
 			## if the key was put into keys_to_extract instead of chimes_key
 			##	which is a uSER ERROR(!!)
@@ -134,6 +135,18 @@ def openSnapshot(
 					ckey = ckey[:-len('Abundance')]
 				chimes_keys+=[ckey]
 				popped+=1
+=======
+	for i,key in enumerate(keys_to_extract):
+		## if the key was put into keys_to_extract instead of chimes_key
+		##	which is a uSER ERROR(!!)
+		if key in chimes_dict or 'Abundance' in key:
+		## transfer the key to the chimes_keys, WHERE IT BELONGS
+			ckey = keys_to_extract.pop(i-popped)
+			if 'Abundance' in ckey:
+				ckey = ckey[:-len('Abundance')]
+			chimes_keys+=[ckey]
+			popped+=1
+>>>>>>> upstream/master
 	
 	new_dictionary = {}
 

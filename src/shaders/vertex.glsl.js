@@ -1,18 +1,19 @@
 var myVertexShader = `
 
+attribute float radiusScale;
 attribute float alpha;
 attribute vec4 velVals;
-attribute float ColorMapVariable_Array;
+attribute float colorMapVariableArray;
 
 varying float vID;
-varying float vAlpha;
 varying float vTheta;
-varying float VariableMag;
-//varying float vVertexScale;
-//varying float glPointSize;
+varying float vColorMapMag;
+varying float vAlpha;
+varying vec2 vUv;
 
-uniform float max;
-uniform float min;
+
+uniform float colorMapVariableMax;
+uniform float colorMapVariableMin;
 uniform float oID;
 uniform float uVertexScale;
 uniform float maxDistance;
@@ -26,9 +27,10 @@ const float PI = 3.1415926535897932384626433832795;
 
 void main(void) {
     vID = oID;
-    vAlpha = alpha;
     vTheta = 0.;
-
+    vAlpha = alpha;
+    vUv = uv;
+    
     //vVertexScale = uVertexScale;
 
     vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
@@ -37,10 +39,11 @@ void main(void) {
     float pointScale = maxDistance/cameraDist;
     pointScale = clamp(pointScale, minPointScale, maxPointScale);
     
-    gl_PointSize = uVertexScale * pointScale;
     
     // send colormap array to fragment shader
-    VariableMag = clamp(((ColorMapVariable_Array - min) / (max - min)), 0., 1.);
+    vColorMapMag = clamp(((colorMapVariableArray - colorMapVariable) / (colorMapVariable - colorMapVariable)), 0., 1.);
+
+    gl_PointSize = uVertexScale * pointScale * radiusScale;
 
     if (vID > 0.5){ //velocities (==1, but safer this way)
         float vyc= -dot(velVals.xyz,cameraY);
