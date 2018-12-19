@@ -36,10 +36,12 @@ function drawScene(pdraw = params.partsKeys)
 		var blend = THREE.AdditiveBlending;
 		var dWrite = false;
 		var dTest = false;
+		var transp = true;
 		if (params.showColormap[p]){
 			blend = THREE.NormalBlending;
 			dWrite = true;
 			dTest = true;
+			transp = false;
 		}
 
 		var material = new THREE.ShaderMaterial( {
@@ -66,7 +68,7 @@ function drawScene(pdraw = params.partsKeys)
 			fragmentShader: myFragmentShader,
 			depthWrite:dWrite,
 			depthTest: dTest,
-			transparent:true,
+			transparent:transp,
 			alphaTest: false,
 			blending:blend,
 		} );

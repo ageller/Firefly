@@ -102,8 +102,8 @@ void main(void) {
 			} 
 		} 
 		//gl_FragColor.rgb +=  (1. - posRot.x/vSize); //white at tail
-		gl_FragColor.rgb +=  0.6*posRot.x/vSize; //whiter at head
-		gl_FragColor.a = posRot.x/vSize;
+		gl_FragColor.rgb +=  0.4*posRot.x/vSize; //whiter at head
+		//gl_FragColor.a = posRot.x/vSize;
 	}
 	gl_FragColor.a *= vAlpha;
 
