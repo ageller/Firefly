@@ -72,7 +72,8 @@ class Options(object):
                 to json
             **kwargs - options keyword arguments, should be among: 
                 'stereoSep','stereo','camera','center','maxVrange','startFly','decimate','friction',
-                'cameraRotation','filterVals','filterLims','UIsnapshot','UIfullscreen','UI','UIloadNewData',
+                'cameraRotation','filterVals','filterLims','colormapVals','colormapLims',
+                'UIsnapshot','UIfullscreen','UI','UIloadNewData',
                 'UIcameraControls','UIsavePreset','UIreset','UIdecimation','UIcolorPicker','UIdropdown',
                 'UIparticle','loaded','title','showVel','sizeMult','color','showParts','plotNmax','velType'
         """
@@ -178,6 +179,19 @@ class Options(object):
             #    (e.g., 'filter':{'Gas':{'log10Density':[0,1],'magVelocities':[20, 100]}} )
         }
 
+        ## options that will define the initial values of the /colormap/ in the particle UI panes
+        ##  and consequently what particles are colored at startup.
+        self.particle_colormap_options = {
+            'colormapVals':dict(), #initial coloring selection. This is a dict 
+            #    with initial keys of the particle UInames, 
+            #    then for each color the [min, max] range 
+            #    (e.g., 'color':{'Gas':{'log10Density':[0,1],'magVelocities':[20, 100]}} )
+            'colormapLims':dict(), #initial [min, max] limits to the colors. 
+            #    This is a dict with initial keys of the UInames 
+            #    , then for each color the [min, max] range 
+            #    (e.g., 'color':{'Gas':{'log10Density':[0,1],'magVelocities':[20, 100]}} )
+        }
+
     def addToOptions(
         self,
         particleGroup):
@@ -191,7 +205,7 @@ class Options(object):
         for key in [
             'UIparticle','UIdropdown','UIcolorPicker',
             'color','sizeMult','showParts',
-            'filterVals','filterLims','showVel','plotNmax','velType']:
+            'filterVals','filterLims','colormapVals','colormapLims','showVel','plotNmax','velType']:
             self[key][particleGroup.UIname]=particleGroup.options_default[key]
         
         ## and link this particle group to this Options instance, for better or worse.
@@ -232,8 +246,8 @@ class Options(object):
         """
 
         if os.path.isfile(filename):
-            with file(filename,'r') as handle:
-                options_dict=pd.json.loads(''.join(handle.readlines()))
+            with open(filename,'r') as handle:
+                options_dict=pd.io.json.loads(''.join(handle.readlines()))
         else:
             raise IOError("Options file: %s doesn't exist."%filename) 
 
@@ -292,6 +306,7 @@ class ParticleGroup(object):
         tracked_arrays = [],
         tracked_names = [],
         tracked_filter_flags = [],
+        tracked_colormap_flags = [],
         decimation_factor = 1,
         filenames_and_nparts = None,
         **option_kwargs):
@@ -308,6 +323,8 @@ class ParticleGroup(object):
 
         `tracked_filter_flags=[]` - Should be the same length as `tracked_arrays`,
             and gives a flag for whether that array should be available as an interactive filter within Firefly.
+        `tracked_colormap_flags=[]` - Should be the same length as `tracked_arrays`,
+            and gives a flag for whether that array should be available to color points within Firefly.
 
         `decimation_factor=1` - An integer factor to sub-sample the provided dataset at
             (in addition to any manual subsampling you might do). This will choose
@@ -342,6 +359,19 @@ class ParticleGroup(object):
             )
             print(tracked_filter_flags,"becomes ->",new_tracked_filter_flags)
             tracked_filter_flags = new_tracked_filter_flags
+
+        try: 
+            assert len(tracked_names) == len(tracked_colormap_flags)
+        except:
+            print(tracked_names,tracked_colormap_flags)
+            warnings.warn("Make sure each tracked_array has a tracked_colormap_flag, assuming True.")
+            new_tracked_colormap_flags = np.append(
+                tracked_colormap_flags,
+                [True]*(len(tracked_names)-len(tracked_colormap_flags)),axis=0
+            )
+            print(tracked_colormap_flags,"becomes ->",new_tracked_colormap_flags)
+            tracked_colormap_flags = new_tracked_colormap_flags
+
         
         if filenames_and_nparts is not None:
             try:
@@ -373,6 +403,7 @@ class ParticleGroup(object):
         self.tracked_names = tracked_names
         self.tracked_arrays = tracked_arrays
         self.tracked_filter_flags = tracked_filter_flags
+        self.tracked_colormap_flags = tracked_colormap_flags
 
         self.filenames_and_nparts = filenames_and_nparts
 
@@ -390,6 +421,8 @@ class ParticleGroup(object):
             'showParts':True,
             'filterVals':dict(),
             'filterLims':dict(),
+            'colormapVals':dict(),
+            'colormapLims':dict(),
             'showVel':False,
             'plotNmax':None,
             'velType':None
@@ -401,6 +434,13 @@ class ParticleGroup(object):
             if tracked_filter_flag:
                 self.options_default['filterVals'][tracked_name] = None
                 self.options_default['filterLims'][tracked_name] = None
+
+        ## setup default values for the initial color limits (vals/lims represent the interactive
+        ##  "displayed" particles and the available boundaries for the limits)
+        for tracked_name,tracked_colormap_flag in zip(self.tracked_names,self.tracked_colormap_flags):
+            if tracked_filter_flag:
+                self.options_default['colormapVals'][tracked_name] = None
+                self.options_default['colormapLims'][tracked_name] = None
         
         ## now let the user overwrite the defaults if they'd like (e.g. the color, likely
         ##  the most popular thing users will like to do
@@ -421,7 +461,7 @@ class ParticleGroup(object):
         ##  have it ready (but still be able to add stuff whenever)
         self.getDecimationIndexArray()
         
-    def trackArray(self,name,arr,filter_flag=1):
+    def trackArray(self,name,arr,filter_flag=1,colormap_flag=1):
         """
         Adds a new "tracked" array to the particle group
         Input:
@@ -436,15 +476,24 @@ class ParticleGroup(object):
         self.tracked_names += [name]
         self.tracked_arrays += [arr]
         self.tracked_filter_flags += [filter_flag]
+        self.tracked_colormap_flags += [colormap_flag]
 
         ## and add this to the filter limits arrays, see __init__ above
         if filter_flag: 
             self.options_default['filterVals'][name] = None
             self.options_default['filterLims'][name] = None
 
+        ## and add this to the color limits arrays, see __init__ above
+        if colormap_flag: 
+            self.options_default['colormapVals'][name] = None
+            self.options_default['colormapLims'][name] = None
+
         if self.linked_options is not None:
             self.linked_options['filterVals'][self.UIname][name] = None
             self.linked_options['filterLims'][self.UIname][name] = None
+
+            self.linked_options['colormapVals'][self.UIname][name] = None
+            self.linked_options['colormapLims'][self.UIname][name] = None
 
     def getDecimationIndexArray(self):
         """
@@ -521,6 +570,7 @@ class ParticleGroup(object):
             if i_file == 0:
                 print(self.tracked_names,self.tracked_filter_flags)
                 outDict['filterKeys'] = np.array(self.tracked_names)[np.array(self.tracked_filter_flags,dtype=bool)]
+                outDict['colormapKeys'] = np.array(self.tracked_names)[np.array(self.tracked_colormap_flags,dtype=bool)]
 
                 ## TODO this needs to be changed, this is a flag for having the
                 ##  opacity vary across a particle as the impact parameter projection
@@ -690,7 +740,7 @@ class Reader(object):
         startup_file = os.path.join(self.path_prefix,'startup.json')
         if self.write_startup == 'append' and os.path.isfile(startup_file):
             with open(startup_file,'r+') as handle:
-                startup_dict=pd.json.loads(''.join(handle.readlines()))
+                startup_dict=pd.io.json.loads(''.join(handle.readlines()))
 
             maxx = 0 
             need_to_add = True
@@ -722,6 +772,7 @@ class FIREreader(Reader):
         dec_factors = [], # factor by which to decimate the particle types by
         returnKeys = [], # which things to read from the simulation
         filterFlags = [], # flags whether we should filter by that returnKey
+        colormapFlags = [], # flags whether we should color by that returnKey
         doMags = [], # flags for whether we should take the magnitude of that returnKey
         doLogs = [], # flags for whether we should take the log of that returnKey
         ## arguments from Reader
@@ -741,6 +792,7 @@ class FIREreader(Reader):
         returnKeys=[] - list of strings, which arrays from the snapshot should we extract,
             do not include 'Coordinates'
         filterFlags=[] - list of booleans, of those, which should be "filterable"
+        colormapFlags=[] - list of booleans, of those, which should be "colarable"
         doMags=[] - list of booleans, of those, which should have their magnitude taken (e.g. velocity)
         doLogs=[] - list of booleans, of those, which should have their log10 taken (e.g. density)
 
@@ -785,12 +837,12 @@ class FIREreader(Reader):
 
         ##  returnKeys
         try:
-            lists = [filterFlags,doMags,doLogs]
-            names = ['filterFlags','doMags','doLogs']
+            lists = [filterFlags,colormapFlags,doMags,doLogs]
+            names = ['filterFlags','colormapFlags','doMags','doLogs']
             for name,llist in zip(names,lists):
                 assert len(llist) == len(returnKeys)
         except AssertionError:
-            raise ValueError("%s is not the same length as returnKeys"%(name,len(llist),len(returnKeys)))
+            raise ValueError("%s is not the same length as returnKeys (%d,%d)"%(name,len(llist),len(returnKeys)))
     
         ##  IO/snapshots
         try:
@@ -804,6 +856,7 @@ class FIREreader(Reader):
             print("Do not put Coordinates in returnKeys,removing it... (and its flags)")
             returnKeys = list(returnKeys)
             filterFlags = list(filterFlags)
+            colormapFlags = list(colormapFlags)
             doMags = list(doMags)
             doLogs = list(doLogs)
 
@@ -830,6 +883,9 @@ class FIREreader(Reader):
         
         ## do we want to filter on that attribute?
         self.filterFlags = filterFlags
+
+        ## do we want to color by that attribute?
+        self.colormapFlags = colormapFlags
         
         ## do we need to take the magnitude of it? (velocity? typically not..)
         self.doMags = doMags
@@ -881,7 +937,7 @@ class FIREreader(Reader):
         and will calculate the temperature and age in gyr of star particles for you
         (You're welcome!!). Also adds these particle groups to the reader's options file.
         """
-        for ptype,UIname,dec_factor in zip(self.ptypes,self.UInames,self.dec_factors):
+        for ptype,UIname,dec_factor in list(zip(self.ptypes,self.UInames,self.dec_factors)):
             print("Loading ptype %s"%ptype)
             snapdict = openSnapshot(
                 self.snapdir,
@@ -890,9 +946,9 @@ class FIREreader(Reader):
                 keys_to_extract = ['Coordinates']+self.returnKeys
             )
 
-            tracked_names,tracked_arrays,tracked_filter_flags = [],[],[]
-            for returnKey,filterFlag,doMag,doLog in zip(
-                self.returnKeys,self.filterFlags,self.doMags,self.doLogs):
+            tracked_names,tracked_arrays,tracked_filter_flags,tracked_colormap_flags = [],[],[],[]
+            for returnKey,filterFlag,colormapFlag,doMag,doLog in list(zip(
+                self.returnKeys,self.filterFlags,self.colormapFlags,self.doMags,self.doLogs)):
                 if returnKey in snapdict:
                     arr = snapdict[returnKey]
                     if doLog:
@@ -904,6 +960,7 @@ class FIREreader(Reader):
 
                     tracked_names += [returnKey]
                     tracked_filter_flags += [filterFlag]
+                    tracked_colormap_flags += [colormapFlag]
                     tracked_arrays+= [arr]
                 
             self.particleGroups += [ParticleGroup(
@@ -912,7 +969,8 @@ class FIREreader(Reader):
                 tracked_names = tracked_names,
                 tracked_arrays = tracked_arrays,
                 decimation_factor = dec_factor,
-                tracked_filter_flags = tracked_filter_flags
+                tracked_filter_flags = tracked_filter_flags,
+                tracked_colormap_flags = tracked_colormap_flags
                 )]
 
             ## save the filenames that were opened (so you can re-open them yourself in that order)
