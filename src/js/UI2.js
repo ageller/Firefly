@@ -1,5 +1,6 @@
 //reset to the initial Options file
-function resetToOptions(){
+function resetToOptions()
+{
 	console.log("Resetting to Default");
 	params.parts.options = params.parts.options0;
 
@@ -9,9 +10,6 @@ function resetToOptions(){
 
 	//redo init, but only the camera bits (maybe could streamline this and init by using the functions below?)
 	init();
-
-	//reset colormap
-	initializeColormap();
 
 	//resize the bottom of the UI if necessary
 	var i = params.partsKeys.length-1;
@@ -53,10 +51,12 @@ function loadNewData(){
 }
 
 //for loading, reading and resetting to a preset file
-function loadPreset(){
+function loadPreset()
+{
 	document.getElementById("presetFile").click();
 }
-function readPreset(file){
+function readPreset(file)
+{
 	//get the new options JSON
 	var preset = {};
 	preset.loaded = false;
@@ -70,7 +70,8 @@ function readPreset(file){
 		}
 	}
 }
-function resetToPreset(preset){
+function resetToPreset(preset)
+{
 	console.log("Resetting to Preset");
 	document.getElementById("presetFile").value = "";
 	params.parts.options = preset;
@@ -81,9 +82,6 @@ function resetToPreset(preset){
 
 	//redo init, but only the camera bits (maybe could streamline this and init by using the functions below?)
 	init();
-
-	// reset colormap
-	initializeColormap();
 
 	//resize the bottom of the UI if necessary
 	var i = params.partsKeys.length-1;
@@ -102,7 +100,8 @@ function resetToPreset(preset){
 }
 
 //check whether the center is locked or not
-function checkCenterLock(box){
+function checkCenterLock(box)
+{
 
 	params.controls.dispose();
 	params.switchControls = true;
@@ -117,7 +116,8 @@ function checkCenterLock(box){
 
 //reset the camera position to whatever is saved in the options parameters
 //NOTE: if the cameraRotation is set, then the controls become fly controls
-function resetCamera() {
+function resetCamera() 
+{
 
 	var screenWidth = window.innerWidth;
 	var screenHeight = window.innerHeight;
@@ -161,13 +161,15 @@ function resetCamera() {
 }
 
 //reset the camera center.  Can be useful when switching back and forth between trackball and fly controls
-function recenterCamera() {
+function recenterCamera() 
+{
 	initControls();
 }
 
 //replace the current camera settings in options with the current camera position and rotation (to return here upon clicking reset)
 //NOTE: with a reset, this will set the controls to fly controls
-function saveCamera() {
+function saveCamera() 
+{
 
 	if (params.parts.options.hasOwnProperty('camera')){
 		if (params.parts.options.camera == null){
@@ -204,7 +206,8 @@ function saveCamera() {
 	}
 }
 
-function checkVelBox(box){
+function checkVelBox(box)
+{
 	var pID = box.id.slice(0, -11)
 	params.showVel[pID] = false;
 	if (box.checked){
@@ -213,29 +216,8 @@ function checkVelBox(box){
 
 }
 
-function checkColormapBox(box){
-	var p = box.id.slice(0, -13)
-	params.showColormap[p] = false;
-	if (box.checked){
-		params.showColormap[p] = true;
-		//fillColorbarContainer();
-	}
-	
-	console.log(p, " showColormap:", params.showColormap[p])
-
-	// redraw particle type
-	drawScene(pDraw = [p]);
-	if ( p == 'Gas' && !params.showColormap[p]){
-		// empty the colorbar_container!
-		var colorbar_container = d3.select("#colorbar_container")
-		colorbar_container.html("")
-			.style('width','0px')
-			.style('height','0px');
-
-	}
-}
-
-function checkInvertFilterBox(box){
+function checkInvertFilterBox(box)
+{
 	var fpos = box.id.indexOf('_FK_');
 	var epos = box.id.indexOf('_END_');
 	var sl = box.id.length;
@@ -250,7 +232,8 @@ function checkInvertFilterBox(box){
 
 }
 
-function checkPlaybackFilterBox(box){
+function checkPlaybackFilterBox(box)
+{
 	// figure out which checkbox was checked by slicing the ID, clever move Aaron!
 	var playback_index = box.id.indexOf('_Playback');
 	var pID = box.id.slice(0, playback_index);
@@ -277,7 +260,8 @@ function checkPlaybackFilterBox(box){
 }
 
 //functions to check color of particles
-function checkColor(event, color){
+function checkColor(event, color)
+{
 	rgb = color.toRgb();
 	var pID = event.id.slice(0,-11); // remove  "ColorPicker" from id
 	params.Pcolors[pID] = [rgb.r/255., rgb.g/255., rgb.b/255., rgb.a];
@@ -344,7 +328,8 @@ function setFSliderHandle(i, value, parent, reset=false) {
 }
 
 // Listen to keydown events on the input field.
-function handleFSliderText(input, handle) {
+function handleFSliderText(input, handle) 
+{
 	// input.addEventListener('change', function(){
 	// 	setFSliderHandle(handle, this.value, this.parent);
 	// });
@@ -386,7 +371,7 @@ function handleFSliderText(input, handle) {
 				break;
 		}
 	});
-}
+};
 
 function createFilterSliders(){
 
@@ -463,190 +448,6 @@ function createFilterSliders(){
 }
 
 /////////////////////////////////////////////
-// Colormap sliders
-function setCMapSliderHandle(i, value, parent, reset=false) {
-
-	// I need a better way to do this!
-	var cpos = parent.id.indexOf('_CK_');
-	var epos = parent.id.indexOf('_END_');
-	var sl = parent.id.length;
-	var p = parent.id.slice(0, cpos - sl);
-	var ck = parent.id.slice(cpos + 4, epos - sl);
-	params.colormapVals[p][ck][i] = parseFloat(value);
-
-	//reset the color limits if there is a text entry
-	if (reset){
-		var check = []
-		check.push(params.colormapLims[p][ck][0]);
-		check.push(params.colormapLims[p][ck][1]);
-		check[i] = parseFloat(value);
-		var max = parseFloat(parent.noUiSlider.options.range.max[0]);
-		var min = parseFloat(parent.noUiSlider.options.range.min[0]);
-
-		var nf = parseFloat(value)/ (Math.round(1000.*params.colormapLims[p][ck][i])/1000.);
-		params.SliderCMapinputs[p][ck][i].value = value;
-		params.colormapLims[p][ck][i] = parseFloat(value);
-		if (Math.abs(1. - nf) > 0.001 && ! params.reset){
-			drawScene(pDraw = [p]);
-		}
-
-		if (i == 0){
-			parent.noUiSlider.updateOptions({
-				range: {
-					'min': [parseFloat(value)],
-					'max': [max]
-				}
-			});
-		}
-		if (i == 1){
-			parent.noUiSlider.updateOptions({
-				range: {
-					'min': [min],
-					'max': [parseFloat(value)]
-				}
-			});
-		}
-	}
-
-	var r = parent.noUiSlider.get()
-	r[i] = value;
-	parent.noUiSlider.set(r);
-
-
-
-	//because we are now redrawing each time, we do not need to do this
-	params.updateColormap[p] = true;
-	mouseDown = false; 
-	// if (params.showColormap[p]){
-	// 	fillColorbarContainer();
-	// }
-	//fillColorbarContainer();
-}
-
-// Listen to keydown events on the input field.
-function handleCMapSliderText(input, handle) {
-	input.addEventListener('keydown', function( e ) {
-		var values = input.parent.noUiSlider.get();
-		var value = Number(values[handle]);
-		// [[handle0_down, handle0_up], [handle1_down, handle1_up]]
-		var steps = input.parent.noUiSlider.options.steps;
-		// [down, up]
-		var step = steps[handle];
-		var position;
-		// 13 is enter,
-		// 38 is key up,
-		// 40 is key down.
-		switch ( e.which ) {
-			case 13:
-				setCMapSliderHandle(handle, this.value, input.parent, reset=true);
-				break;
-			case 38:
-				// Get step to go increase slider value (up)
-				// false = no step is set
-				position = step[1];
-				if ( position === false ) {
-					position = 1;
-				}
-				// null = edge of slider
-				if ( position !== null ) {
-					setCMapSliderHandle(handle, value + position, input.parent, reset=false);
-				}
-				break;
-			case 40:
-				position = step[0];
-				if ( position === false ) {
-					position = 1;
-				}
-				if ( position !== null ) {
-					setCMapSliderHandle(handle, value - position, input.parent, reset=false);
-				}
-				break;
-		}
-	});
-}
-
-function createCMapSliders(){
-
-	var i = 0;
-	var j = 0;
-	for (i=0; i<params.partsKeys.length; i++){
-		p = params.partsKeys[i];
-		if (params.parts.options.UIdropdown[p]){
-
-			params.SliderCMap[p] = {};
-			params.SliderCMapmin[p] = {};
-			params.SliderCMapmax[p] = {};
-			params.SliderCMapinputs[p] = {};
-
-			for (j=0; j<params.ckeys[p].length; j++){
-				var ck = params.ckeys[p][j]
-				params.SliderCMap[p][ck] = document.getElementById(p+'_CK_'+ck+'_END_CMapSlider');
-				params.SliderCMapmin[p][ck] = document.getElementById(p+'_CK_'+ck+'_END_CMapMinT');
-				params.SliderCMapmax[p][ck] = document.getElementById(p+'_CK_'+ck+'_END_CMapMaxT');
-				if (params.SliderCMap[p][ck] != null && params.SliderCMapmin[p][ck] != null && params.SliderCMapmax[p][ck] != null && params.colormapLims[p][ck] != null){
-					if (params.SliderCMap[p][ck].noUiSlider) {
-						params.SliderCMap[p][ck].noUiSlider.destroy();
-					}
-					params.SliderCMapinputs[p][ck] = [params.SliderCMapmin[p][ck], params.SliderCMapmax[p][ck]];
-					params.SliderCMapinputs[p][ck][0].parent = params.SliderCMap[p][ck];
-					params.SliderCMapinputs[p][ck][1].parent = params.SliderCMap[p][ck];
-					min = parseFloat(params.colormapLims[p][ck][0].toFixed(3));
-					max = parseFloat(params.colormapLims[p][ck][1].toFixed(3));
-
-					noUiSlider.create(params.SliderCMap[p][ck], {
-						start: [min, max],
-						connect: true,
-						tooltips: [false, false],
-						steps: [[0.001,0.001],[0.001,0.001]],
-						range: {
-							'min': [min],
-							'max': [max]
-						},
-						format: wNumb({
-							decimals: 3
-						})
-					});
-					params.SliderCMap[p][ck].noUiSlider.on('mouseup', mouseDown=false); 
-					params.SliderCMap[p][ck].noUiSlider.on('update', function(values, handle) {
-						var cpos = this.target.id.indexOf('_CK_');
-						var epos = this.target.id.indexOf('_END_');
-						var sl = this.target.id.length;
-						var pp = this.target.id.slice(0, cpos - sl);
-						var ffk = this.target.id.slice(cpos + 4, epos - sl);
-
-
-						var nf = parseFloat(values[handle])/ (Math.round(1000.*params.colormapVals[pp][ffk][handle])/1000.);
-						params.SliderCMapinputs[pp][ffk][handle].value = values[handle];
-						params.colormapVals[pp][ffk][handle] = parseFloat(values[handle]);
-						// if (params.showColormap[p]){
-						// 	fillColorbarContainer();
-						// }
-						//fillColorbarContainer();
-
-						if (Math.abs(1. - nf) > 0.001 && ! params.reset){
-							drawScene(pDraw = [pp]);
-						}
-
-
-						//because we are now redrawing each time, we do not need to do this
-						params.updateColormap[pp] = true;
-						mouseDown = true;
-					});
-
-					params.SliderCMapinputs[p][ck].forEach(handleCMapSliderText);
-				}
-				var w = parseInt(d3.select('.CMapClass').style("width").slice(0,-2));
-				d3.select('#'+p+'_CK_'+ck+'_END_CMapSlider').select('.noUi-base').style('width',w-10+"px");
-				d3.select('#'+p+'_CK_'+ck+'_END_CMapSlider').select('.noUi-connect').style('border-radius','6px 0px 0px 6px');
-				d3.select('#'+p+'_CK_'+ck+'_END_CMapSlider').select('.noUi-handle-lower').style('border-radius','6px 0px 0px 6px');
-
-			}
-		}
-	}
-}
-
-
-/////////////////////////////////////////////
 // N sliders
 function setNSliderHandle(i, value, parent) {
 	var r = [null];
@@ -659,7 +460,8 @@ function setNSliderHandle(i, value, parent) {
 
 // Listen to keydown events on the input field.
 // can I just use the same functions as for the filters?
-function handleNSliderText(input, handle) {
+function handleNSliderText(input, handle) 
+{
 	// input.addEventListener('change', function(){
 	// 	setNSliderHandle(handle, this.value, this.parent);
 	// });
@@ -679,7 +481,7 @@ function handleNSliderText(input, handle) {
 				break;
 		}
 	});
-}
+};
 
 function createNsliders(){
 
@@ -758,7 +560,8 @@ function setPSliderHandle(i, value, parent) {
 
 // Listen to keydown events on the input field.
 // can I just use the same functions as for the filters?
-function handlePSliderText(input, handle) {
+function handlePSliderText(input, handle) 
+{
 	// input.addEventListener('change', function(){
 	// 	setPSliderHandle(handle, this.value, this.parent);
 	// });
@@ -780,10 +583,12 @@ function handlePSliderText(input, handle) {
 				break;
 		}
 	});
-}
+};
 
 //need to allow this to update at large numbers
 function createPsliders(){
+
+
 
 	var i = 0;
 	var j = 0;
@@ -858,7 +663,8 @@ function setDSliderHandle(i, value, parent) {
 
 // Listen to keydown events on the input field.
 // can I just use the same functions as for the filters?
-function handleDSliderText(input, handle) {
+function handleDSliderText(input, handle) 
+{
 	// input.addEventListener('change', function(){
 	// 	setDSliderHandle(handle, this.value, this.parent);
 	// });
@@ -880,7 +686,7 @@ function handleDSliderText(input, handle) {
 				break;
 		}
 	});
-}
+};
 
 //need to allow this to update at large numbers
 function createDslider(){
@@ -969,7 +775,8 @@ function setCFSliderHandle(i, value, parent) {
 }
 
 // Listen to keydown events on the input field.
-function handleCFSliderText(input, handle) {
+function handleCFSliderText(input, handle) 
+{
 	// input.addEventListener('change', function(){
 	// 	setCFSliderHandle(handle, this.value, this.parent);
 	// });
@@ -991,7 +798,7 @@ function handleCFSliderText(input, handle) {
 				break;
 		}
 	});
-}
+};
 
 function createCFslider(){
 
@@ -1043,7 +850,8 @@ function createCFslider(){
 
 /////////////////////////////////////////////
 // Stereo Separation slider
-function checkStereoLock(box){
+function checkStereoLock(box)
+{
 	if (box.checked) {
 		params.normalRenderer = params.renderer;
 		params.renderer = params.effect;
@@ -1076,7 +884,8 @@ function setSSSliderHandle(i, value, parent) {
 }
 
 // Listen to keydown events on the input field.
-function handleSSSliderText(input, handle) {
+function handleSSSliderText(input, handle) 
+{
 	// input.addEventListener('change', function(){
 	// 	setSSSliderHandle(handle, this.value, this.parent);
 	// });
@@ -1098,7 +907,7 @@ function handleSSSliderText(input, handle) {
 				break;
 		}
 	});
-}
+};
 
 function createSSslider(){
 
@@ -1144,7 +953,8 @@ function createSSslider(){
 	d3.select("#SSSlider").select('.noUi-base').style('width',w-10+"px");
 }
 
-function updateUICenterText(){
+function updateUICenterText()
+{
 	if (params.useTrackball){
 		document.getElementById("CenterXText").value = params.controls.target.x;// + params.center.x;
 		document.getElementById("CenterYText").value = params.controls.target.y;// + params.center.y;
@@ -1156,13 +966,16 @@ function updateUICenterText(){
 		document.getElementById("CenterZText").value = xx.z + params.camera.position.z;		
 	}
 }
-function updateUICameraText(){
+function updateUICameraText()
+{
+
 	document.getElementById("CameraXText").value = params.camera.position.x;// + params.center.x;
 	document.getElementById("CameraYText").value = params.camera.position.y;// + params.center.y;
 	document.getElementById("CameraZText").value = params.camera.position.z;// + params.center.z;
 }
 
-function updateUIRotText(){
+function updateUIRotText()
+{
 	document.getElementById("RotXText").value = params.camera.rotation.x;
 	document.getElementById("RotYText").value = params.camera.rotation.y;
 	document.getElementById("RotZText").value = params.camera.rotation.z;
@@ -1170,7 +983,8 @@ function updateUIRotText(){
 }
 
 
-function checkText(input, event){
+function checkText(input, event)
+{
 
 	var key=event.keyCode || event.which;
 	if (key==13){
@@ -1216,7 +1030,8 @@ function checkText(input, event){
 }
 
 //function to check which types to plot
-function checkshowParts(checkbox){
+function checkshowParts(checkbox)
+{
 	var type = checkbox.id.slice(-5); 
 
 	if (type == 'Check'){	
@@ -1289,26 +1104,22 @@ function showFunction(handle) {
 
 	var pdiv;
 	var ddiv = document.getElementById(pID+'Dropdown');
-	var ht = parseFloat(ddiv.style.height.slice(0,-2)) + offset; //to take off "px"
-	var pb = 0.;
+	var wd = parseFloat(ddiv.style.width.slice(0,-2)) + offset; //to take off "px"
 
 	keys = Object.keys(params.gtoggle)
-	pdiv = document.getElementById(keys[i+1]+'Div');
-	if (i < keys.length-1){
-		if (params.gtoggle[pID]){
-			pdiv.style.marginTop = ht + "px";
-		} else {
-			pdiv.style.marginTop = "0px";
-		}
+	pdiv = document.getElementById(keys[i]+'Div');
+
+	pdiv = d3.select('#'+keys[i]+'Div').selectAll('div')
+	console.log(pdiv.node())
+	if (params.gtoggle[pID]){
+		pdiv.node().forEach(function(d){
+			d.style('margin-left',wd + "px");
+		})
 	} else {
-		//handle the last one differently
-		c = document.getElementsByClassName("UIcontainer")[0];
-		if (params.gtoggle[pID]){
-			c.style.paddingBottom = (pb+ht-5)+'px';
-		} else {
-			c.style.paddingBottom = pb+'px';	
-		}
+		pdiv.style.marginLeft = "0px";
 	}
+
+
 
 	params.gtoggle[pID] =! params.gtoggle[pID];	
 
@@ -1345,57 +1156,7 @@ function selectFilter() {
 		.style('display','inline-block');
 	d3.selectAll('#'+p+'_FK_'+selectValue+'_END_InvertFilterCheckBoxLabel')
 		.style('display','inline-block');
-}
-
-function selectColormapVariable() {
-	var option = d3.select(this)
-		.selectAll("option")
-		.filter(function (d, i) { 
-			return this.selected; 
-	});
-	selectValue = option.property('value');
-
-	var p = this.id.slice(0,-14)
-
-	for (var i=0; i<params.ckeys[p].length; i+=1){
-		d3.selectAll('#'+p+'_CK_'+params.ckeys[p][i]+'_END_CMap')
-			.style('display','none');
-	}
-	d3.selectAll('#'+p+'_CK_'+selectValue+'_END_CMap')
-		.style('display','block');
-
-	// update colormap variable
-	params.colormapVariable[p] = params.ckeys[p].indexOf(selectValue);
-	console.log(p, "colored by:", params.ckeys[p][params.colormapVariable[p]])
-
-	// redraw particle type if colormap is on
-	if (params.showColormap[p]){
-		drawScene(pDraw = [p]);
-		//fillColorbarContainer();
-	}
-}
-
-function selectColormap() {
-	var option = d3.select(this)
-		.selectAll("option")
-		.filter(function (d, i) { 
-			return this.selected; 
-	});
-	selectValue = option.property('value');
-
-	var p = this.id.slice(0,-11)
-
-	// update colormap
-	params.colormap[p] = ((params.colormapList.indexOf(selectValue)) + 0.5) * (8/256);
-	console.log(p, " selected colormap:", params.colormapList[params.colormapList.indexOf(selectValue)], params.colormap[p])
-
-	// redraw particle type if colormap is on
-	if (params.showColormap[p]){
-		drawScene(pDraw = [p]);
-		//fillColorbarContainer();
-	}
-}
-
+};
 
 function selectVelType() {
 	var option = d3.select(this)
@@ -1407,7 +1168,7 @@ function selectVelType() {
 
 	var p = this.id.slice(0,-14)
 	params.velType[p] = selectValue;
-}
+};
 
 
 function createUI(){
@@ -1487,7 +1248,7 @@ function createUI(){
 		.attr('class','dropbtn')
 		.attr('id','dataControlsDropbtn')
 		.attr('onclick','showFunction(this);')
-		.html('&#x25BC');
+		.html('&#x25b6');
 	var m2 = m1.append('div')
 		.attr('class','dropdown-content')
 		.attr('id','dataControlsDropdown')
@@ -1617,7 +1378,7 @@ function createUI(){
 		.attr('class','dropbtn')
 		.attr('id','cameraControlsDropbtn')
 		.attr('onclick','showFunction(this);')
-		.html('&#x25BC');
+		.html('&#x25b6');
 	var c2 = c1.append('div')
 		.attr('class','dropdown-content')
 		.attr('id','cameraControlsDropdown')
@@ -1887,7 +1648,7 @@ function createUI(){
 				.attr('id', d+'Dropbtn')
 				.attr('class', 'dropbtn')
 				.attr('onclick','showFunction(this)')
-				.html('&#x25BC');
+				.html('&#x25b6');
 
 			dropdown = controls.append('div')
 				.attr('id',d+'Dropdown')
@@ -1910,7 +1671,7 @@ function createUI(){
 				.attr('class', 'NMaxTClass')
 				.attr('type','text');
 
-			var dheight = 45;
+			var dheight = 30;
 
 	//for velocity vectors
 
@@ -1952,105 +1713,6 @@ function createUI(){
 				dheight += 30;
 			}
 
-			// colormap functionality
-			showcolor = [];
-
-			for (j=0; j<params.ckeys[d].length; j++){
-				var ck = params.ckeys[d][j]
-				if (params.parts[d][ck] != null){
-					showcolor.push(ck);
-				}
-			}
-			ncolor = showcolor.length;
-
-			if (ncolor > 0){
-				dheight += 50;
-
-				dropdown.append('hr')
-					.style('margin','0')
-					.style('border','1px solid #909090')
-
-				var ColorDiv = dropdown.append('div')
-					.attr('style','margin:0px;  padding:5px; height:50px')
-
-				ColorDiv.append('label')
-				.attr('for',d+'colorCheckBox')
-				.text('Colormap');
-
-				ColorDiv.append('input')
-					.attr('id',d+'colorCheckBox')
-					.attr('value','false')
-					.attr('type','checkbox')
-					.attr('autocomplete','off')
-					.attr('onchange','checkColormapBox(this)');
-
-				if (params.showColormap[d]){
-					elm = document.getElementById(d+'colorCheckBox');
-					elm.checked = true;
-					elm.value = true;
-					//fillColorbarContainer();
-				} 
-
-				// dropdown to select colormap
-				var selectCMap = ColorDiv.append('select')
-					.attr('class','selectCMap')
-					.attr('id',d+'_SelectCMap')
-					.on('change', selectColormap)
-
-				var options = selectCMap.selectAll('option')
-					.data(params.colormapList).enter()
-					.append('option')
-						.text(function (x) { return x; });
-				elm = document.getElementById(d+'_SelectCMap');
-
-				// dropdown to select colormap variable
-				var selectCMapVar = ColorDiv.append('select')
-					.attr('class','selectCMapVar')
-					.attr('id',d+'_SelectCMapVar')
-					.on('change',selectColormapVariable)
-
-				var options = selectCMapVar.selectAll('option')
-					.data(params.ckeys[d]).enter()
-					.append('option')
-						.text(function (x) { return x; });
-				elm = document.getElementById(d+'_SelectCMapVar');
-
-				// sliders for colormap limits
-				var colormapn = 0;
-				for (j=0; j<params.ckeys[d].length; j++){
-					var ck = params.ckeys[d][j]
-					if (params.parts[d][ck] != null){
-
-						colormapsliders = ColorDiv.append('div')
-							.attr('id',d+'_CK_'+ck+'_END_CMap')
-							.attr('class','CMapClass')
-
-						colormapsliders.append('div')
-							.attr('class','CMapClassLabel')
-
-						colormapsliders.append('div')
-							.attr('id',d+'_CK_'+ck+'_END_CMapSlider')
-							.style("margin-top","-1px")
-
-						colormapsliders.append('input')
-							.attr('id',d+'_CK_'+ck+'_END_CMapMinT')
-							.attr('class','CMapMinTClass')
-							.attr('type','text');
-
-						colormapsliders.append('input')
-							.attr('id',d+'_CK_'+ck+'_END_CMapMaxT')
-							.attr('class','CMapMaxTClass')
-							.attr('type','text');
-
-						colormapn += 1;
-					}
-					if (colormapn > 1){
-						d3.selectAll('#'+d+'_CK_'+ck+'_END_CMap')
-							.style('display','none');
-					}
-				}
-			}
-
 	//this is dynamic, depending on what is in the data
 	//create the filters
 	//first count the available filters
@@ -2071,10 +1733,9 @@ function createUI(){
 					.style('border','1px solid #909090')
 
 				var filterDiv = dropdown.append('div')
-					.attr('style','margin:0px;  padding:5px; height:45px')
+					.attr('style','margin:0px; padding:5px; height:40px;');
 
 				var selectF = filterDiv.append('div')
-					//.attr('style', 'height:20px')
 					.attr('style','height:20px; display:inline-block')
 					.html('Filters &nbsp')	
 					.append('select')
@@ -2092,7 +1753,6 @@ function createUI(){
 				for (j=0; j<params.fkeys[d].length; j++){
 					var fk = params.fkeys[d][j]
 					if (params.parts[d][fk] != null){
-
 
 						invFilter = filterDiv.append('label')
 							.attr('for',d+'_FK_'+fk+'_'+'InvertFilterCheckBox')
@@ -2143,13 +1803,7 @@ function createUI(){
 					}
 				}
 
-				playback = filterDiv.append('label')
-					.attr('for',d+'_'+'PlaybackLabel')
-					.attr('id',d+'_PlaybackLabel')
-					.style('display','inline-block')
-					.style('margin-top','30px')
-					.text('Playback:');
-				playback.append('input')
+				playbackCheckbox = filterDiv.append('input')
 					.attr('id',d+'_PlaybackCheckbox')
 					.attr('value','false')
 					.attr('type','checkbox')
@@ -2157,12 +1811,16 @@ function createUI(){
 					.attr('onchange','checkPlaybackFilterBox(this)')
 					.style('display','inline-block')
 
-
+				playbackLabel = filterDiv.append('label')
+					.attr('for',d+'_'+'PlaybackLabel')
+					.attr('id',d+'_PlaybackLabel')
+					.style('display','inline-block')
+					.style('margin-top','30px')
+					.text('Playback:');
 
 				
 
 			} 
-			
 			dropdown.style('height',dheight+'px');
 
 		}
@@ -2201,17 +1859,12 @@ function createUI(){
 	createCFslider();
 	createSSslider();
 	createFilterSliders();
-	createCMapSliders();
+
 	updateUICenterText();
 	updateUICameraText();
 	updateUIRotText();
 
 	applyUIoptions();
-
-	if (params.showColormap[d]){
-		//fillColorbarContainer();
-	}
-	//fillColorbarContainer();
 
 	params.haveUI = true;
 
@@ -2303,7 +1956,7 @@ function applyUIoptions(){
 			}
 		}
 	}
-}
+};
 
 //hide the splash screen
 function hideSplash(){
@@ -2337,7 +1990,7 @@ function showSplash(){
 			.ease(d3.easeLinear)
 			.duration(fdur)
 			.style("opacity", 0.8);
-	}
+		}
 
 }
 
@@ -2436,7 +2089,8 @@ function renderImage() {
 
 }
 
-function savePreset(){
+function savePreset()
+{
 	var preset = {};
 	if (params.useTrackball){
 		preset.center = [params.controls.target.x, params.controls.target.y, params.controls.target.z];
@@ -2477,14 +2131,9 @@ function savePreset(){
 	preset.velType = {};
 	preset.filterLims = {};
 	preset.filterVals = {};
-	preset.colormapLims = {};
-	preset.colormapVals = {};
 	preset.UIparticle = {};
 	preset.UIdropdown = {};
 	preset.UIcolorPicker = {};
-	preset.showColormap = {};
-	preset.colormap = {};
-	preset.colormapVariable = {};
 	for (var i=0; i<params.partsKeys.length; i++){
 		var p = params.partsKeys[i];
 
@@ -2494,26 +2143,16 @@ function savePreset(){
 		preset.plotNmax[p] = params.plotNmax[p];
 		preset.showVel[p] = params.showVel[p];
 		preset.velType[p] = params.velType[p];
-		preset.showColormap[p] = params.showColormap[p];
-		preset.colormap[p] = params.colormap[p];
-		preset.colormapVariable[p] = params.colormapVariable[p];	
 
 		preset.UIparticle[p] = params.parts.options.UIparticle[p];
 		preset.UIdropdown[p] = params.parts.options.UIdropdown[p];
 		preset.UIcolorPicker[p] = params.parts.options.UIcolorPicker[p];
-		preset.filterLims[p] = {};
-		preset.filterVals[p] = {};
-		preset.colormapLims[p] = {};
-		preset.colormapVals[p] = {};
+		preset.filterLims[p] = {}
+		preset.filterVals[p] = {}
 		for (k=0; k<params.fkeys[p].length; k++){
 			var fkey = params.fkeys[p][k]
 			preset.filterLims[p][fkey] = params.filterLims[p][fkey];
 			preset.filterVals[p][fkey] = params.filterVals[p][fkey];
-		}
-		for (k=0; k<params.ckeys[p].length; k++){
-			var ckey = params.ckeys[p][k]
-			preset.colormapLims[p][ckey] = params.colormapLims[p][ckey];
-			preset.colormapVals[p][ckey] = params.colormapVals[p][ckey];
 		}
 	}
 
@@ -2570,138 +2209,6 @@ function dragElement(elm, e) {
 
 	}
 }
-
-// /////////////////////////// COLOR SCALE
-// //from https://www.w3schools.com/howto/howto_js_draggable.asp
-// function dragColorbarElement(elm, e) {
-// 	var elmnt = document.getElementById("colorbar_container");
-// 	var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-// 	dragMouseDown(e);
-
-// 	function dragMouseDown(e) {
-// 		e = e || window.event;
-// 		// get the mouse cursor position at startup:
-// 		pos3 = e.clientX;
-// 		pos4 = e.clientY;
-// 		document.addEventListener('mouseup', closeDragElement);
-// 		document.addEventListener('mousemove', elementDrag);
-
-// 	}
-
-// 	function elementDrag(e) {
-// 		params.movingUI = true;
-// 		e = e || window.event;
-// 		// calculate the new cursor position:
-// 		pos1 = pos3 - e.clientX;
-// 		pos2 = pos4 - e.clientY;
-// 		pos3 = e.clientX;
-// 		pos4 = e.clientY;
-
-// 		// set the element's new position:
-// 		var top = parseInt(elmnt.style.top);
-// 		var left = parseInt(elmnt.style.left);
-// 		elmnt.style.top = (top - pos2) + "px";
-// 		elmnt.style.left = (left - pos1) + "px";
-// 	}
-
-// 	function closeDragElement(e) {
-// 		/* stop moving when mouse button is released:*/
-// 		e.stopPropagation();
-// 		params.movingUI = false;
-// 		document.removeEventListener('mouseup', closeDragElement);
-// 		document.removeEventListener('mousemove', elementDrag);
-
-// 	}
-// }
-
-
-// function fillColorbarContainer(){
-// 	var n_colormap = 31-(params.colormap['Gas']*32-0.5)
-// 	//console.log(n_colormap,params.colormap['Gas'])
-// 	var minmax = params.colormapVals['Gas'][params.ckeys['Gas'][params.colormapVariable['Gas']]]
-// 	var xmin = minmax[0]
-// 	var xmax = minmax[1]
-// 	var colorbar_label = params.ckeys['Gas'][params.colormapVariable['Gas']]
-
-// 	var text_height = 40;
-// 	var container_margin = {"top":10,"side":15}
-// 	var container_width = 600 
-// 	var container_height = 150
-// 	var cbar_bounds = {'width':container_width,'height':container_height}
-
-// 	var colorbar_container = d3.select("#colorbar_container")
-// 	colorbar_container.html("");
-
-// 	colorbar_container.style("height",cbar_bounds.height+container_margin.top*2+text_height+"px")
-// 	// contianer_margin : +*2 for the margins themselves, +1 for the offset of the content...?
-// 	colorbar_container.style("width",cbar_bounds.width+container_margin.side*2+container_margin.side+"px")
-// 		.attr('onmousedown','dragColorbarElement(this, event);')
-// 		.style("top","25px")
-// 		.style("left","500px")
-
-// 	// this is the box that contains the colorbar image node, which fills this div
-// 	var this_colorbar_box = colorbar_container.append('div')
-// 		.style("background-color","red")
-// 		.attr("width",cbar_bounds.width+container_margin.side)
-// 		.attr("height",cbar_bounds.height)
-// 		.style("left",container_margin.side+"px")
-// 		.style("background-color","red") // debug background from image
-
-// 	this_colorbar_box.style("width",this_colorbar_box.attr('width')+"px")
-// 		.style("height",this_colorbar_box.attr('height')+"px")
-// 		.style("position","relative")
-// 		.style("top","10px")
-// 		.style("overflow","hidden")
-
-// 	this_colorbar_box.html("<img src=textures/colormap.png"+ 
-// 		" height="+ this_colorbar_box.attr("height")*32 +
-// 		" width="+ this_colorbar_box.attr("width") +
-// 		' style="'+
-// 		' position:relative;'+
-// 		' top:'+'-'+n_colormap*this_colorbar_box.attr("height")+'px;'+
-// 		'pointer-events: none' + // literally why
-// 		'"' + 
-// 		'draggable="false"'+ // is it so hard
-// 		+'onmousedown="if (event.preventDefault) event.preventDefault()"'+ // to make it not drag the image
-// 		"></img>")
-
-// 	svg = colorbar_container.append("svg")
-// 		.attr("width", +this_colorbar_box.attr("width")+2*container_margin.side) 
-// 		.attr("height",text_height)
-// 		//.style("background-color","green") // debug background from the axis ticks
-// 		.style("position","relative")
-// 		.style("top",container_margin.top+"px")
-// 		.append("g")
-// 		.attr("class",".cbar_svg")
-
-
-// 	// set the ranges
-// 	var x = d3.scaleLinear().range([0+container_margin.side, +this_colorbar_box.attr("width")+container_margin.side]);
-
-// 	// Scale the range of the data
-// 	x.domain([xmin,xmax]);
-
-// 	// Add the X Axis
-// 	svg.append("g")
-// 	  .attr("class", "axis")
-// 	  .call(d3.axisBottom(x).ticks(10))
-// 	  .selectAll("text")    
-// 		.style("text-anchor", "end")
-// 		.attr("transform", "translate("+container_margin.side+",0)")
-// 		.attr("dx", "-.8em")
-// 		.attr("dy", ".15em")
-// 		.attr("transform", "rotate(-65)")
-
-// 	colorbar_container.append('div')
-// 		.html(colorbar_label)
-// 		.style("text-align","center")
-// 		.style("font-size","16pt")
-// 		.style("position",'relative')
-// 		.style("height",text_height + "px")
-// 		.style("top","16px") // why do I need this... ? 
-// 		.attr('class','colorbar_label') // hardcode background color in index.css, why isn't this inherited??
-// 		.attr('background-color','inherited')
-// }
 
 function changeSnapSizes(){
 	document.getElementById("RenderXText").value = window.innerWidth;
