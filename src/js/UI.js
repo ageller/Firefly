@@ -1449,7 +1449,6 @@ function createUI(){
 
 	 }
 
-	console.log(params.partsKeys)
 	//set the gtoggle Object (in correct order)
 	params.gtoggle.dataControls = true;
 	params.gtoggle.cameraControls = true;
