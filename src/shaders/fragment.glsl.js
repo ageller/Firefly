@@ -49,12 +49,18 @@ void main(void) {
 		dist = 2.*length(fromCenter) ;
 		float dist2 = dist*dist;
 		// best fit quartic to SPH kernel (unormalized)
-		if (SPHrad == 1){
-			float alpha_SPH =  -4.87537494*dist2*dist2 + 11.75074987*dist2*dist - 8.14117164*dist2 + 0.2657967*dist + 0.99328463;
-			gl_FragColor.a *= alpha_SPH;
-		} 
-		else {
-			gl_FragColor.a *= 1. - dist;
+		if (showColormap){
+			if (dist > 1.){
+				discard;
+			}
+		} else {
+			if (SPHrad == 1){
+				float alpha_SPH =  -4.87537494*dist2*dist2 + 11.75074987*dist2*dist - 8.14117164*dist2 + 0.2657967*dist + 0.99328463;
+				gl_FragColor.a *= alpha_SPH;
+			} 
+			else {
+				gl_FragColor.a *= 1. - dist;
+			}
 		}
 	} else { //velocities, lines (Note: requiring vID == 1. breaks in windows for some reason)
 
@@ -96,8 +102,8 @@ void main(void) {
 			} 
 		} 
 		//gl_FragColor.rgb +=  (1. - posRot.x/vSize); //white at tail
-		gl_FragColor.rgb +=  0.6*posRot.x/vSize; //whiter at head
-		gl_FragColor.a = posRot.x/vSize;
+		gl_FragColor.rgb +=  0.4*posRot.x/vSize; //whiter at head
+		//gl_FragColor.a = posRot.x/vSize;
 	}
 	gl_FragColor.a *= vAlpha;
 
