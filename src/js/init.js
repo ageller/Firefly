@@ -127,7 +127,7 @@ function defineParams(){
 		this.pauseAnimation = false;
 
 		// contains colormap texture
-		this.colormapTexture;
+		this.colormapTexture = new THREE.TextureLoader().load( "textures/colormap.png" );
 
 		// determines which colormap is applied to each particle type
 		this.colormap = {};
@@ -228,7 +228,7 @@ function initControls(){
 	}
 }
 
-function init() {
+function initScene() {
 	var screenWidth = window.innerWidth;
 	var screenHeight = window.innerHeight;
 	var aspect = screenWidth / screenHeight;
@@ -292,75 +292,7 @@ function init() {
 
 }
 
-// establishes initial conditions for the colormap
-function initColormap(){
 
-	// load colormap
-	params.colormapTexture = new THREE.TextureLoader().load( "textures/colormap.png" );
-	console.log('colormap loaded', params.colormapTexture)
-
-	// loop through each particle type
-	for (var i = 0; i < params.partsKeys.length; i++){
-		var p = params.partsKeys[i];
-
-		// initialize dictionaries
-		params.colormapVariable[p] = 0;
-		params.colormap[p] = 4/256;
-		//eventually these should be set in the python code and read in
-		//params.ckeys['Gas'] = ["magVelocities", "log10Temperature", "HIIAbundance", "log10Density"];
-		params.ckeys['Gas'] = ["magVelocities", "log10Temperature", "log10Density"];
-		params.ckeys['Stars'] = ["magVelocities"];
-		params.ckeys['DarkMatter'] = ["magVelocities"];
-		params.showColormap[p] = false;
-		params.updateColormap[p] = false;
-		params.colormapVals[p] = {};
-		params.colormapLims[p] = {};
-
-		// calculate the max/min for each colormappable variable
-		for (var j=0; j<params.ckeys[p].length; j++){
-			if (params.parts[p][params.ckeys[p][j]] != null){
-				params.colormapVals[p][params.ckeys[p][j]] = [];
-				params.colormapLims[p][params.ckeys[p][j]] = [];
-				calcMaxMin(p, params.ckeys[p][j]);
-			}
-		}
-	}
-}
-function initColumnDensity(){
-	//following this example: https://threejs.org/examples/webgl_rtt.html
-	var screenWidth = window.innerWidth;
-	var screenHeight = window.innerHeight;
-	var aspect = screenWidth / screenHeight;
-
-	//render texture
-	params.textureCD = new THREE.WebGLRenderTarget( screenWidth, screenHeight, {
-		minFilter: THREE.LinearFilter, 
-		magFilter: THREE.NearestFilter, 
-		format: THREE.RGBAFormat 
-	} );
-
-	params.materialCD = new THREE.ShaderMaterial( {
-		uniforms: { 
-			tex: { value: params.textureCD.texture }, 
-			cmap: { type:'t', value: params.cmap },
-		},
-		vertexShader: myVertexShader,
-		fragmentShader: myFragmentShader_pass2,
-		depthWrite: false
-	} );
-	var plane = new THREE.PlaneBufferGeometry( screenWidth, screenHeight );
-	var quad = new THREE.Mesh( plane, params.materialCD );
-	quad.position.z = -100;
-	params.sceneCD = new THREE.Scene();
-	params.sceneCD.add( quad );
-
-	// camera
-	params.cameraCD = new THREE.OrthographicCamera( screenWidth/-2, screenWidth/2, screenHeight/2, screenHeight/-2, -10000, 10000 );
-	//params.cameraCD = new THREE.PerspectiveCamera( params.fov, aspect, params.zmin, params.zmax);
-	params.cameraCD.position.z = 100;
-	params.cameraCD.up.set(0, -1, 0);
-	params.sceneCD.add(params.cameraCD);  
-}
 
 function applyOptions(){
 
@@ -447,7 +379,6 @@ function applyOptions(){
 			}
 		}
 	}
-	console.log("keys", params.partsKeys)
 	//particle specific options
 	for (var i=0; i<params.partsKeys.length; i++){
 		var p = params.partsKeys[i];
@@ -571,38 +502,111 @@ function applyOptions(){
 			}
 		}
 
+
+		//colormap limits
+		if (params.parts.options.hasOwnProperty("colormapLims")){
+			if (params.parts.options.colormapLims != null){
+				if (params.parts.options.colormapLims.hasOwnProperty(p)){
+					if (params.parts.options.colormapLims[p] != null){
+						params.updateColormap[p] = true
+
+						for (k=0; k<params.ckeys[p].length; k++){
+							var ckey = params.ckeys[p][k]
+							if (params.parts.options.colormapLims[p].hasOwnProperty(ckey)){
+								if (params.parts.options.colormapLims[p][ckey] != null){
+									params.colormapLims[p][ckey] = []
+									params.colormapLims[p][ckey].push(params.parts.options.colormapLims[p][ckey][0]);
+									params.colormapLims[p][ckey].push(params.parts.options.colormapLims[p][ckey][1]);
+								}
+							}
+						}
+
+					}
+				}
+			}
+		}
+
+		//colormap values
+		if (params.parts.options.hasOwnProperty("colormapVals")){
+			if (params.parts.options.colormapVals != null){
+				if (params.parts.options.colormapVals.hasOwnProperty(p)){
+					if (params.parts.options.colormapVals[p] != null){
+						params.updateColormap[p] = true
+
+						for (k=0; k<params.ckeys[p].length; k++){
+							var fkey = params.ckeys[p][k]
+							if (params.parts.options.colormapVals[p].hasOwnProperty(ckey)){
+								if (params.parts.options.colormapVals[p][ckey] != null){
+									params.colormapVals[p][ckey] = []
+									params.colormapVals[p][ckey].push(params.parts.options.colormapVals[p][ckey][0]);
+									params.colormapVals[p][ckey].push(params.parts.options.colormapVals[p][ckey][1]);
+								}
+							}
+						}
+
+					}
+				}
+			}
+		}
+
+
 	}
 }
 
-
-function calcFilterLimits(p, fkey){
-//calculate limits for the filters
-
-	var j=0;
-	if (params.parts[p][fkey] != null){
-		var i=0;
-		min = params.parts[p][fkey][i];
-		max = params.parts[p][fkey][i];
-		for (i=0; i< params.parts[p][fkey].length; i++){
-			min = Math.min(min, params.parts[p][fkey][i]);
-			max = Math.max(max, params.parts[p][fkey][i]);
-		}
+function calcMinMax(p,key, addFac = true){
+	var i=0;
+	min = params.parts[p][key][i];
+	max = params.parts[p][key][i];
+	for (i=0; i< params.parts[p][key].length; i++){
+		min = Math.min(min, params.parts[p][key][i]);
+		max = Math.max(max, params.parts[p][key][i]);
+	}
+	if (addFac){
 		//need to add a small factor here because of the precision of noUIslider
 		min -= 0.001;
 		max += 0.001;
-		params.filterLims[p][fkey] = [min, max];
-		params.filterVals[p][fkey] = [min, max];
-		params.invertFilter[p][fkey] = false;
-		//TODO this should not be here!!
-		// set the currently shown filter for each part type at startup
-		// so the first click isn't broken
-		if (params.parts[p]['currentlyShownFilter'] == undefined){
-			params.parts[p]['currentlyShownFilter']=fkey;
-			params.parts[p]['playbackTicks']=0;
-			params.parts[p]['playbackTickRate']=10;	
-		}
 	}
+	return {"min":min, "max":max}
 }
+
+
+function initColumnDensity(){
+	//following this example: https://threejs.org/examples/webgl_rtt.html
+	var screenWidth = window.innerWidth;
+	var screenHeight = window.innerHeight;
+	var aspect = screenWidth / screenHeight;
+
+	//render texture
+	params.textureCD = new THREE.WebGLRenderTarget( screenWidth, screenHeight, {
+		minFilter: THREE.LinearFilter, 
+		magFilter: THREE.NearestFilter, 
+		format: THREE.RGBAFormat 
+	} );
+
+	params.materialCD = new THREE.ShaderMaterial( {
+		uniforms: { 
+			tex: { value: params.textureCD.texture }, 
+			cmap: { type:'t', value: params.cmap },
+		},
+		vertexShader: myVertexShader,
+		fragmentShader: myFragmentShader_pass2,
+		depthWrite: false
+	} );
+	var plane = new THREE.PlaneBufferGeometry( screenWidth, screenHeight );
+	var quad = new THREE.Mesh( plane, params.materialCD );
+	quad.position.z = -100;
+	params.sceneCD = new THREE.Scene();
+	params.sceneCD.add( quad );
+
+	// camera
+	params.cameraCD = new THREE.OrthographicCamera( screenWidth/-2, screenWidth/2, screenHeight/2, screenHeight/-2, -10000, 10000 );
+	//params.cameraCD = new THREE.PerspectiveCamera( params.fov, aspect, params.zmin, params.zmax);
+	params.cameraCD.position.z = 100;
+	params.cameraCD.up.set(0, -1, 0);
+	params.sceneCD.add(params.cameraCD);  
+}
+
+
 
 function calcVelVals(p){
 	params.parts[p].VelVals = [];
@@ -632,22 +636,6 @@ function calcVelVals(p){
 	}
 }
 
-// calculate normalized values of an attribute
-function calcMaxMin(p, arrayname){
-	params.colormapVals[p][arrayname][0] = 1.e20;
-	params.colormapVals[p][arrayname][1] = -1;
-	for (var i=0; i<params.parts[p][arrayname].length; i++){
-		t = params.parts[p][arrayname][i];
-		if (t > params.colormapVals[p][arrayname][1]){
-			params.colormapVals[p][arrayname][1] = t;
-		}
-		if (t < params.colormapVals[p][arrayname][0]){
-			params.colormapVals[p][arrayname][0] = t;
-		}
-	}
-	params.colormapLims[p][arrayname][0] = params.colormapVals[p][arrayname][0];
-	params.colormapLims[p][arrayname][1] = params.colormapVals[p][arrayname][1];	
-}
 
 //initialize various values for the parts dict from the input data file, 
 function initPVals(){
@@ -657,16 +645,30 @@ function initPVals(){
 		if (! params.reset){
 			params.partsMesh[p] = [];
 		}
-		params.updateFilter[p] = false;
-		params.filterLims[p] = {};
-		params.filterVals[p] = {};
-		params.invertFilter[p] = {};
-		params.fkeys[p] = [];
+
+		//misc
 		params.plotNmax[p] = params.parts[p].Coordinates.length;
 		params.PsizeMult[p] = 1.;
 		params.showParts[p] = true;
 		params.updateOnOff[p] = false;
 
+		//filter
+		params.updateFilter[p] = false;
+		params.filterLims[p] = {};
+		params.filterVals[p] = {};
+		params.invertFilter[p] = {};
+		params.fkeys[p] = [];
+
+		//colormap
+		params.ckeys[p] = [];
+		params.colormapVariable[p] = 0;
+		params.colormap[p] = 4/256;
+		params.showColormap[p] = false;
+		params.updateColormap[p] = false;
+		params.colormapVals[p] = {};
+		params.colormapLims[p] = {};
+
+		//velocities
 		params.showVel[p] = false;
 		if (params.parts[p].Velocities != null){
 			if (!params.reset){
@@ -674,17 +676,60 @@ function initPVals(){
 				if(!params.parts[p].hasOwnProperty("filterKeys")){
 					params.parts[p].filterKeys = [];
 				}
-				params.parts[p].filterKeys.push("magVelocities");
 			 
 			}
 			params.velType[p] = 'line';
 			//console.log(p, params.parts[p].VelVals, params.parts[p].Velocities)
 		}
 		
+		//filters
 		if (params.parts[p].hasOwnProperty("filterKeys")){
 			params.fkeys[p] = params.parts[p].filterKeys;
 			for (var k=0; k<params.fkeys[p].length; k++){
-				calcFilterLimits(p, params.fkeys[p][k]);
+				if (params.fkeys[p][k] == "Velocities"){
+					params.fkeys[p][k] = "magVelocities";
+				}
+				var fkey = params.fkeys[p][k];
+				//calculate limits for the filters
+				if (params.parts[p][fkey] != null){
+					var m = calcMinMax(p,fkey)
+					params.filterLims[p][fkey] = [m.min, m.max];
+					params.filterVals[p][fkey] = [m.min, m.max];
+					params.invertFilter[p][fkey] = false;
+					//TODO this should not be here!!
+					// set the currently shown filter for each part type at startup
+					// so the first click isn't broken
+					if (params.parts[p]['currentlyShownFilter'] == undefined){
+						params.parts[p]['currentlyShownFilter']=fkey;
+						params.parts[p]['playbackTicks']=0;
+						params.parts[p]['playbackTickRate']=10;	
+					}
+				}
+			}
+		}
+
+		//colormap
+		//in case there are no colormap possibilities (but will be overwritten below)
+		params.ckeys[p] = ["null"];
+		params.colormapLims[p]["null"] = [0,1];
+		params.colormapVals[p]["null"] = [0,1];
+		if (params.parts[p].hasOwnProperty("colormapKeys")){
+			if (params.parts[p].colormapKeys.length > 0){
+				params.ckeys[p] = params.parts[p].colormapKeys;
+				for (var k=0; k<params.ckeys[p].length; k++){
+					if (params.ckeys[p][k] == "Velocities"){
+						params.ckeys[p][k] = "magVelocities";
+					}
+					var ckey = params.ckeys[p][k];
+					params.colormapLims[p][ckey] = [0,1];
+					params.colormapVals[p][ckey] = [0,1];
+					if (params.parts[p][ckey] != null){
+						//could probably take results from filter to save time, but will do this again to be safe
+						var m = calcMinMax(p,ckey)
+						params.colormapLims[p][ckey] = [m.min, m.max];
+						params.colormapVals[p][ckey] = [m.min, m.max];
+					}
+				}
 			}
 		}
 	}
@@ -1023,10 +1068,8 @@ function WebGLStart(){
 
 	initPVals();
 
-	init();
+	initScene();
 	
-	initColormap();
-
 	initColumnDensity();
 	
 	createUI();
@@ -1035,7 +1078,6 @@ function WebGLStart(){
 	//draw everything
 	drawScene();
 
-	console.log(params.parts['Gas'])
 	//begin the animation
 	// keep track of runtime for crashing the app rather than the computer
 	var currentTime = new Date();

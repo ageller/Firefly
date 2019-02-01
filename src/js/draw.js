@@ -34,8 +34,14 @@ function drawScene(pdraw = params.partsKeys)
 	
 		//change the blending mode when showing the colormap (so we don't get summing to white colors)
 		var blend = THREE.AdditiveBlending;
+		var dWrite = false;
+		var dTest = false;
+		var transp = true;
 		if (params.showColormap[p]){
 			blend = THREE.NormalBlending;
+			dWrite = true;
+			dTest = true;
+			transp = false;
 		}
 
 		var material = new THREE.ShaderMaterial( {
@@ -60,9 +66,9 @@ function drawScene(pdraw = params.partsKeys)
 
 			vertexShader: myVertexShader,
 			fragmentShader: myFragmentShader,
-			depthWrite:false,
-			depthTest: false,
-			transparent:true,
+			depthWrite:dWrite,
+			depthTest: dTest,
+			transparent:transp,
 			alphaTest: false,
 			blending:blend,
 		} );

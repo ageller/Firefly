@@ -530,17 +530,18 @@ class ParticleGroup(object):
             nparts_per_file=10**4 - maximum number of particles per JSON file
             clean=0 - flag for whether the JSON directory should be purged before writing your files.
          """
-        if not os.path.isdir(path):
-            os.makedirs(path)
+        full_path = os.path.join( path_prefix, path )
+        if not os.path.isdir(full_path):
+            os.makedirs(full_path)
         if loud:
             warnings.warn("You will need to add the sub-filenames to"+
                 " filenames.json if this was not called by a Reader instance.")
-            print("Writing:",self,"JSON to %s"%path)
+            print("Writing:",self,"JSON to %s"%full_path)
         if clean:
-            warnings.warn("Removing data files from %s"%path)
-            for fname in os.listdir(path):
+            warnings.warn("Removing data files from %s"%full_path)
+            for fname in os.listdir(full_path):
                 if "json" in fname:
-                    os.remove(os.path.join(path,fname))
+                    os.remove(os.path.join(full_path,fname))
 
         if self.filenames_and_nparts is None:
             if self.dec_inds.dtype == bool:
