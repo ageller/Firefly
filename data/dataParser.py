@@ -596,8 +596,8 @@ class Reader(object):
     below in FIREreader!
     """
     def __init__(self,
-        JSONdir=None, ## abs path, must be a sub-directory of Firefly/data
-        options=None,
+        JSONdir = None, ## abs path, must be a sub-directory of Firefly/data
+        options = None,
         write_startup = 'append',# True -> write | False -> leave alone | "append" -> adds to existing file
         max_npart_per_file = 10**4,
         prefix = 'Data',
