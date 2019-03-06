@@ -3,8 +3,11 @@ import numpy as np
 import pandas as pd
 import copy
 import h5py,os, shutil
-from snapshot_utils import openSnapshot
+
 import warnings
+
+from firefly.snapshot_utils import openSnapshot
+
 
 class Options(object):
     """
@@ -569,9 +572,13 @@ class ParticleGroup(object):
 
             cur_index+=nparts_this_file
             if i_file == 0:
-                print(self.tracked_names,self.tracked_filter_flags)
-                outDict['filterKeys'] = np.array(self.tracked_names)[np.array(self.tracked_filter_flags,dtype=bool)]
-                outDict['colormapKeys'] = np.array(self.tracked_names)[np.array(self.tracked_colormap_flags,dtype=bool)]
+                print(self.tracked_names,
+                    'filter:',self.tracked_filter_flags,
+                    'colormap:',self.tracked_colormap_flags)
+                outDict['filterKeys'] = np.array(self.tracked_names)[np.array(
+                    self.tracked_filter_flags,dtype=bool)]
+                outDict['colormapKeys'] = np.array(self.tracked_names)[np.array(
+                    self.tracked_colormap_flags,dtype=bool)]
 
                 ## TODO this needs to be changed, this is a flag for having the
                 ##  opacity vary across a particle as the impact parameter projection
