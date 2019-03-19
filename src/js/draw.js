@@ -28,6 +28,10 @@ function drawScene(pdraw = params.partsKeys)
 	for (var i=0; i<pdraw.length; i++){
 		var p = pdraw[i];
 
+		params.updateColormap[p] = true;
+		params.updateFilter[p] = true;
+		params.updateOnOff[p] = true;
+
 		params.scene.remove(params.partsMesh[p]);
 
 		params.partsMesh[p] = [];
@@ -41,7 +45,7 @@ function drawScene(pdraw = params.partsKeys)
 			blend = THREE.NormalBlending;
 			dWrite = true;
 			dTest = true;
-			transp = false;
+			transp = true; //still need this because I use alpha to set control filtering!
 		}
 
 		var material = new THREE.ShaderMaterial( {

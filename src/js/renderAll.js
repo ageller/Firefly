@@ -120,6 +120,7 @@ function update(time){
 				params.SliderF[p][fkey].noUiSlider.set(params.filterVals[p][fkey]);
 			}
 		}
+		//check on all the UI inputs for each particle type
 		params.partsMesh[p].forEach( function( m, j ) {
 			
 			m.material.uniforms.velType.value = params.velopts[params.velType[p]];
@@ -142,7 +143,7 @@ function update(time){
 				}
 
 				//switching back to previous method of filtering, but now setting radii to zero, and also setting to sizes back to 1 for all particles (in case turned off below)
-				if (params.updateFilter[p] || params.updateOnOff[p]){
+				if (params.updateFilter[p] || params.updateOnOff[p] || params.updateColormap[p]){
 					var radiusScale = m.geometry.attributes.radiusScale.array;
 					var alpha = m.geometry.attributes.alpha.array;
 					var fk;
@@ -153,7 +154,7 @@ function update(time){
 							for (k=0; k<params.fkeys[p].length; k++){
 								fk = params.fkeys[p][k];
 								if (params.parts[p][fk] != null) {
-									val = params.parts[p][fk][ii]; 
+									val = params.parts[p][fk][ii];
 									//if ( val < params.filterVals[p][fk][0] || val > params.filterVals[p][fk][1] ){
 									if ( (!params.invertFilter[p][fk] && (val < params.filterVals[p][fk][0] || val > params.filterVals[p][fk][1])) || ( (params.invertFilter[p][fk] && (val > params.filterVals[p][fk][0] && val < params.filterVals[p][fk][1])))   ){
 										radiusScale[ii] = 0.;
@@ -163,10 +164,11 @@ function update(time){
 							}
 						}
 					}
+					m.geometry.attributes.radiusScale.needsUpdate = true;
+					m.geometry.attributes.alpha.needsUpdate = true;					
 					params.updateFilter[p] = false;
 					params.updateOnOff[p] = false;
-					m.geometry.attributes.radiusScale.needsUpdate = true;
-					m.geometry.attributes.alpha.needsUpdate = true;
+					params.updateColormap[p] = false;
 				}
 			} else { 
 				//don't need to set alphas here because I am setting the entire color to 0 (RGBA)
