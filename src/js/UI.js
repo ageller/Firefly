@@ -218,6 +218,8 @@ function checkColormapBox(box){
 	params.showColormap[p] = false;
 	if (box.checked){
 		params.showColormap[p] = true;
+		params.updateColormap[p] = true;
+		params.updateFilter[p] = true;
 		//fillColorbarContainer();
 	}
 	
@@ -516,6 +518,7 @@ function setCMapSliderHandle(i, value, parent, reset=false) {
 
 	//because we are now redrawing each time, we do not need to do this
 	params.updateColormap[p] = true;
+	params.updateFilter[p] = true;
 	mouseDown = false; 
 	// if (params.showColormap[p]){
 	// 	fillColorbarContainer();
@@ -630,6 +633,7 @@ function createCMapSliders(){
 
 						//because we are now redrawing each time, we do not need to do this
 						params.updateColormap[pp] = true;
+						params.updateFilter[pp] = true;
 						mouseDown = true;
 					});
 

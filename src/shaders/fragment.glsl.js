@@ -39,6 +39,7 @@ void main(void) {
 			vec2 pos = vec2(vColormapMag, colormap);
 			vec3 c = texture2D(colormapTexture, pos).rgb;
 			gl_FragColor.rgb = c;
+
 		}
 	}
 
