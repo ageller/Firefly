@@ -439,3 +439,8 @@ select{
 	left:55px;
 	width:230px;
 }
+
+.hidden{
+	display:none;
+}
+}
