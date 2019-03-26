@@ -619,7 +619,7 @@ function createCMapSliders(){
 						var nf = parseFloat(values[handle])/ (Math.round(1000.*params.colormapVals[pp][ffk][handle])/1000.);
 						params.SliderCMapinputs[pp][ffk][handle].value = values[handle];
 						params.colormapVals[pp][ffk][handle] = parseFloat(values[handle]);
-						if (params.showColormap[p]){
+						if (params.showColormap[pp]){
 							fillColorbarContainer();
 						}
 						//fillColorbarContainer();
@@ -2669,7 +2669,6 @@ function defineColorbarContainer(){
 
 
 	// set the ranges
-	console.log("checking", xmin, xmax, parseFloat(colorbar_container.style('margin-left')), parseFloat(colorbar_box.style("width"))+parseFloat(colorbar_container.style('margin-left')))
 	var x = d3.scaleLinear().range([parseFloat(colorbar_container.style('margin-left')), parseFloat(colorbar_box.style("width"))+parseFloat(colorbar_container.style('margin-left'))]);
 
 	// Scale the range of the data
@@ -2720,7 +2719,6 @@ function fillColorbarContainer(){
 	var minmax = params.colormapVals['Gas'][params.ckeys['Gas'][params.colormapVariable['Gas']]]
 	var xmin = minmax[0]
 	var xmax = minmax[1]
-	console.log("changing axes", xmin, xmax)
 	// set the ranges
 	var x = d3.scaleLinear().range([parseFloat(colorbar_container.style('margin-left')), parseFloat(colorbar_box.style("width"))+parseFloat(colorbar_container.style('margin-left'))]);
 
