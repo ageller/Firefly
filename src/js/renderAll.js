@@ -130,7 +130,14 @@ function update(time){
 				m.geometry.setDrawRange( 0, params.plotNmax[p]*(1./params.decimate) )
 				m.material.uniforms.uVertexScale.value = params.PsizeMult[p];
 
+				//for colormap
+				m.material.uniforms.colormapMin.value = params.colormapVals[p][params.ckeys[p][params.colormapVariable[p]]][0];
+				m.material.uniforms.colormapMax.value = params.colormapVals[p][params.ckeys[p][params.colormapVariable[p]]][1];
+				m.material.uniforms.colormap.value = params.colormap[p];
+				m.material.uniforms.showColormap.value = params.showColormap[p];
+
 				m.material.uniforms.color.value = new THREE.Vector4( params.Pcolors[p][0], params.Pcolors[p][1], params.Pcolors[p][2], params.Pcolors[p][3]);
+				
 				if (params.showVel[p]){
 					// pass camera orientation to the shader
 					m.material.uniforms.cameraX.value = [cameraX.x,cameraX.y,cameraX.z];

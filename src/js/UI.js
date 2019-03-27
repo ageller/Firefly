@@ -221,6 +221,8 @@ function checkColormapBox(box){
 		params.updateColormap[p] = true;
 		params.updateFilter[p] = true;
 		fillColorbarContainer();
+		// redraw particle type (this may not be necessary if I'm smarter about initializing things)
+		drawScene(pDraw = [p]);
 	}
 	
 	console.log(p, " showColormap:", params.showColormap[p])
@@ -228,8 +230,7 @@ function checkColormapBox(box){
 	//show/hide the colorbardiv
 	d3.select('#colorbar_container').classed('hidden', !params.showColormap[p])
 
-	// redraw particle type
-	drawScene(pDraw = [p]);
+
 
 
 
@@ -486,9 +487,9 @@ function setCMapSliderHandle(i, value, parent, reset=false) {
 		var nf = parseFloat(value)/ (Math.round(1000.*params.colormapLims[p][ck][i])/1000.);
 		params.SliderCMapinputs[p][ck][i].value = value;
 		params.colormapLims[p][ck][i] = parseFloat(value);
-		if (Math.abs(1. - nf) > 0.001 && ! params.reset){
-			drawScene(pDraw = [p]);
-		}
+		// if (Math.abs(1. - nf) > 0.001 && ! params.reset){
+		// 	drawScene(pDraw = [p]);
+		// }
 
 		if (i == 0){
 			parent.noUiSlider.updateOptions({
@@ -624,9 +625,9 @@ function createCMapSliders(){
 						}
 						//fillColorbarContainer();
 
-						if (Math.abs(1. - nf) > 0.001 && ! params.reset){
-							drawScene(pDraw = [pp]);
-						}
+						// if (Math.abs(1. - nf) > 0.001 && ! params.reset){
+						// 	drawScene(pDraw = [pp]);
+						// }
 
 
 						//because we are now redrawing each time, we do not need to do this
@@ -1393,7 +1394,7 @@ function selectColormap() {
 
 	// redraw particle type if colormap is on
 	if (params.showColormap[p]){
-		drawScene(pDraw = [p]);
+		//drawScene(pDraw = [p]);
 		fillColorbarContainer();
 	}
 }
