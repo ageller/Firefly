@@ -9,7 +9,7 @@ Firefly is an interactive particle viewer designed for [FIRE](http://galaxies.no
 
 To install Firefly (on any operating system), please clone this GitHub repository :
 ```
-$ git clone https://github.com/ageller/Firefly.git
+$ git clone --recursive https://github.com/ageller/Firefly.git
 ```
 
 Or, if you prefer, you can download the zip file and unpack it.  
@@ -35,9 +35,23 @@ This will open the data set included within this repository.  If you want to use
 
 Additional documentation is available on the [wiki page](https://github.com/ageller/Firefly/wiki) associated with this repository.
 
-This tool builds off of a [previous version developed by Alessandro Febretti](https://github.com/nuitrcs/firefly). 
+## Contributors 
+### Primary Developers
+* Aaron Geller
+* Alex Gurvich
+### Fearless Leader
+* Claude-André Faucher-Giguère 
+### Past Contributors 
+* Mike Cronin
+* Zach Hafen
+* Alessandro Febretti
+#### Students
+* Mahlet Shiferaw 
+* Luolei Zhao
+
 
 ## Acknowledgments
+This tool builds off of a [previous version developed by Alessandro Febretti](https://github.com/nuitrcs/firefly). 
 
 This project is funded by [Northwestern's Center for Interdisciplinary Exploration and Research in Astrophysics (CIERA)](https://ciera.northwestern.edu/),  [Northwestern's IT Research Computing group](https://www.it.northwestern.edu/research/index.html), and NSF grants AST-1412836, AST-1715216, and CAREER award AST-1652522 awarded to [Claude-André Faucher-Giguère](https://www.physics.northwestern.edu/people/faculty/core-faculty/claude-andre-faucher-giguere.html).
 
