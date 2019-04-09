@@ -39,15 +39,15 @@ Additional documentation is available on the [wiki page](https://github.com/agel
 ### Primary Developers
 * Aaron Geller
 * Alex Gurvich
-### Fearless Leader
-* Claude-André Faucher-Giguère 
 ### Past Contributors 
 * Mike Cronin
 * Zach Hafen
 * Alessandro Febretti
-#### Students
+### Student Contributors
 * Mahlet Shiferaw 
 * Luolei Zhao
+### Project PI
+* Claude-André Faucher-Giguère 
 
 
 ## Acknowledgments
