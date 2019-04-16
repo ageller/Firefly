@@ -220,7 +220,7 @@ function checkColormapBox(box){
 		params.showColormap[p] = true;
 		params.updateColormap[p] = true;
 		params.updateFilter[p] = true;
-		fillColorbarContainer();
+		fillColorbarContainer(p);
 		// redraw particle type (this may not be necessary if I'm smarter about initializing things)
 		drawScene(pDraw = [p]);
 	}
@@ -520,7 +520,7 @@ function setCMapSliderHandle(i, value, parent, reset=false) {
 	params.updateFilter[p] = true;
 	mouseDown = false; 
 	if (params.showColormap[p]){
-		fillColorbarContainer();
+		fillColorbarContainer(p);
 	}
 	//fillColorbarContainer();
 }
@@ -621,7 +621,7 @@ function createCMapSliders(){
 						params.SliderCMapinputs[pp][ffk][handle].value = values[handle];
 						params.colormapVals[pp][ffk][handle] = parseFloat(values[handle]);
 						if (params.showColormap[pp]){
-							fillColorbarContainer();
+							fillColorbarContainer(pp);
 						}
 						//fillColorbarContainer();
 
@@ -1374,7 +1374,7 @@ function selectColormapVariable() {
 	// redraw particle type if colormap is on
 	if (params.showColormap[p]){
 		drawScene(pDraw = [p]);
-		fillColorbarContainer();
+		fillColorbarContainer(p);
 	}
 }
 
@@ -1395,7 +1395,7 @@ function selectColormap() {
 	// redraw particle type if colormap is on
 	if (params.showColormap[p]){
 		//drawScene(pDraw = [p]);
-		fillColorbarContainer();
+		fillColorbarContainer(p);
 	}
 }
 
@@ -1415,8 +1415,8 @@ function selectVelType() {
 
 function createUI(){
 	console.log("Creating UI");
-
-
+        
+        var use_color_id = null
 
 //change the hamburger to the X to start
 	if (! params.reset){
@@ -1965,7 +1965,9 @@ function createUI(){
 			}
 			ncolor = showcolor.length;
 
+
 			if (ncolor > 0){
+                                use_color_id = d
 				dheight += 50;
 
 				dropdown.append('hr')
@@ -1990,7 +1992,7 @@ function createUI(){
 					elm = document.getElementById(d+'colorCheckBox');
 					elm.checked = true;
 					elm.value = true;
-					fillColorbarContainer();
+					fillColorbarContainer(d);
 				} 
 
 				// dropdown to select colormap
@@ -2222,10 +2224,12 @@ function createUI(){
 	}
 
 	//create the colorbar container
-	defineColorbarContainer()
-	if (params.showColormap[d]){
-		fillColorbarContainer();
-	}
+        if (use_color_id != null){
+            defineColorbarContainer(use_color_id)
+            if (params.showColormap[use_color_id]){
+                    fillColorbarContainer(use_color_id);
+            }
+        }
 }
 
 function applyUIoptions(){
@@ -2619,7 +2623,7 @@ function dragColorbarElement(elm, e) {
 	}
 }
 
-function defineColorbarContainer(){
+function defineColorbarContainer(particle_group_UIname){
 	var text_height = 40;
 	var container_margin = {"top":10,"side":15}
 	var container_width = 300 
@@ -2630,7 +2634,8 @@ function defineColorbarContainer(){
 	var container_top = 138; 
 	var container_left = 188;
 
-	var minmax = params.colormapVals['Gas'][params.ckeys['Gas'][params.colormapVariable['Gas']]]
+        console.log(params.colormapVals);
+	var minmax = params.colormapVals[particle_group_UIname][params.ckeys[particle_group_UIname][params.colormapVariable[particle_group_UIname]]]
 	var xmin = minmax[0]
 	var xmax = minmax[1]
 
@@ -2696,8 +2701,8 @@ function defineColorbarContainer(){
 	colorbar_container.classed('hidden', true)
 }
 
-function fillColorbarContainer(){
-	var n_colormap = 31-(params.colormap['Gas']*32-0.5)
+function fillColorbarContainer( particle_group_UIname){
+	var n_colormap = 31-(params.colormap[particle_group_UIname]*32-0.5)
 
 	//change the image
 	var colorbar_box = d3.select("#colorbar_box");
@@ -2717,7 +2722,7 @@ function fillColorbarContainer(){
 
 	//update the axes
 	var colorbar_container = d3.select('#colorbar_container');
-	var minmax = params.colormapVals['Gas'][params.ckeys['Gas'][params.colormapVariable['Gas']]]
+	var minmax = params.colormapVals[particle_group_UIname][params.ckeys[particle_group_UIname][params.colormapVariable[particle_group_UIname]]]
 	var xmin = minmax[0]
 	var xmax = minmax[1]
 	// set the ranges
@@ -2737,7 +2742,7 @@ function fillColorbarContainer(){
 			.attr("transform", "rotate(-65)")
 
 	//change the label
-	var colorbar_label = params.ckeys['Gas'][params.colormapVariable['Gas']]
+	var colorbar_label = particle_group_UIname + ' ' +  params.ckeys[particle_group_UIname][params.colormapVariable[particle_group_UIname]]
 	d3.select('.colorbar_label').html(colorbar_label)
 
 
