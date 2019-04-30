@@ -7,11 +7,7 @@ function resetToOptions(){
 	//reset all the parts specific values to the initial ones
 	initPVals();
 
-	//redo init, but only the camera bits (maybe could streamline this and init by using the functions below?)
-	init();
-
-	//reset colormap
-	initializeColormap();
+    initScene();
 
 	//resize the bottom of the UI if necessary
 	var i = params.partsKeys.length-1;
@@ -79,11 +75,7 @@ function resetToPreset(preset){
 	//reset all the parts specific values to the initial ones
 	initPVals();
 
-	//redo init, but only the camera bits (maybe could streamline this and init by using the functions below?)
-	init();
-
-	// reset colormap
-	initializeColormap();
+    initScene();
 
 	//resize the bottom of the UI if necessary
 	var i = params.partsKeys.length-1;

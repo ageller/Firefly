@@ -607,7 +607,6 @@ function initColumnDensity(){
 }
 
 
-
 function calcVelVals(p){
 	params.parts[p].VelVals = [];
 	params.parts[p].magVelocities = [];
