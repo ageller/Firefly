@@ -80,7 +80,10 @@ function resetToPreset(preset){
 	initPVals();
 
 	//redo init, but only the camera bits (maybe could streamline this and init by using the functions below?)
-	initScene();
+	init();
+
+	// reset colormap
+	initializeColormap();
 
 	//resize the bottom of the UI if necessary
 	var i = params.partsKeys.length-1;
@@ -218,6 +221,8 @@ function checkColormapBox(box){
 		params.updateColormap[p] = true;
 		params.updateFilter[p] = true;
 		fillColorbarContainer();
+		// redraw particle type (this may not be necessary if I'm smarter about initializing things)
+		drawScene(pDraw = [p]);
 	}
 	
 	console.log(p, " showColormap:", params.showColormap[p])
@@ -225,8 +230,7 @@ function checkColormapBox(box){
 	//show/hide the colorbardiv
 	d3.select('#colorbar_container').classed('hidden', !params.showColormap[p])
 
-	// redraw particle type (this seems necessary to enable the correct blending)
-	drawScene(pDraw = [p]);
+
 
 
 
@@ -2633,13 +2637,14 @@ function defineColorbarContainer(){
 
 	var colorbar_container = d3.select("#colorbar_container")
 		.html("")
-		.attr('class', 'colorbar')
 		.style("height",cbar_bounds.height+container_margin.top*2+text_height+"px")
 	// contianer_margin : +*2 for the margins themselves, +1 for the offset of the content...?
 		.style("width",cbar_bounds.width+container_margin.side*2+container_margin.side+"px")
 		.style("top",container_top+"px")
 		.style("left",container_left+"px")
 		.style('position','absolute')
+		.style('background-color','#d3d3d3')
+		.style('opacity',0.8)
 		.style('transform','rotate(90deg)')
 		.attr('onmousedown','dragColorbarElement(this, event);');
 
