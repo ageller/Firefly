@@ -220,7 +220,9 @@ function checkColormapBox(box){
 		params.showColormap[p] = true;
 		params.updateColormap[p] = true;
 		params.updateFilter[p] = true;
+
 		fillColorbarContainer(p);
+
 		// redraw particle type (this may not be necessary if I'm smarter about initializing things)
 		drawScene(pDraw = [p]);
 	}
