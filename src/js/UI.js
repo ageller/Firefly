@@ -222,8 +222,6 @@ function checkColormapBox(box){
 	
 	console.log(p, " showColormap:", params.showColormap[p])
 
-	}
-	
 	console.log(p, " showColormap:", params.showColormap[p])
 
 	//show/hide the colorbardiv
