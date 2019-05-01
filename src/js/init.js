@@ -148,7 +148,7 @@ function defineParams(){
 	   'binary', 'gist_yarg', 'gist_gray', 'gray', 'afmhot',
 	   'PiYG', 'PRGn', 'BrBG', 'RdGy', 'coolwarm', 'bwr',
 	   'Pastel1', 'Pastel2', 'Paired', 'Accent', 'Dark2', 'Set1',
-	   'flag', 'prism', 'ocean', 'gist_earth', 'terrain', 'gist_stern'].reverse();
+	   'flag', 'prism', 'ocean', 'gist_earth', 'terrain', 'gist_stern'];
 
 	   // slider limits for colormap
 	   this.colormapVals = {};
@@ -180,7 +180,7 @@ function defineParams(){
 		this.sceneCD = null;
 		this.cameraCD = null;
 		this.scaleCD = 0.1; //scaling factor for the shader so that it adds up to one at highest density
-		this.cmap = new THREE.TextureLoader().load( "textures/colormap.png" );//"src/textures/cmap.png");
+		this.cmap = this.colormapTexture;//new THREE.TextureLoader().load( "textures/cmap.png");
 		this.cmap.minFilter = THREE.LinearFilter;
 		this.cmap.magFilter = THREE.NearestFilter;
 		this.quadCD = null; //for the column density 
