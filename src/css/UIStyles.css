@@ -443,4 +443,11 @@ select{
 .hidden{
 	display:none;
 }
+.colorbar{
+    background-color:#d3d3d3;
+    opacity:0.8;
+    transition: opacity: 0.15s;
+}
+.colorbar:hover {
+    opacity: 1;
 }
