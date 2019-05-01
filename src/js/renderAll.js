@@ -56,9 +56,8 @@ function update(time){
 	updateUIRotText();
 
 	// camera's -z direction
-    // camera's -z direction
-    var cameraDir = new THREE.Vector3(0,0,0);
-    params.camera.getWorldDirection(cameraDir);
+	var cameraDir = new THREE.Vector3(0,0,0);
+	params.camera.getWorldDirection(cameraDir);
 
 	
 	// find the camera's x and y axes 

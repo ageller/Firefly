@@ -192,7 +192,8 @@ function defineParams(){
 function initControls(){
 
 	if (params.useTrackball) {
-		xx = params.camera.getWorldDirection()
+		var xx = new THREE.Vector3(0,0,0);
+		params.camera.getWorldDirection(xx);
 		params.controls = new THREE.TrackballControls( params.camera, params.renderer.domElement );
 		params.controls.target = new THREE.Vector3(params.camera.position.x + xx.x, params.camera.position.y + xx.y, params.camera.position.z + xx.z);
 		if (params.parts.options.hasOwnProperty('center') && !params.switchControls){
