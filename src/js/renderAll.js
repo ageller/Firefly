@@ -203,7 +203,10 @@ function render() {
 
 	if (params.columnDensity){
 		//first, render to the texture
-		params.renderer.render( params.scene, params.camera, params.textureCD, true );
+		params.renderer.setRenderTarget(params.textureCD)
+		params.renderer.render( params.scene, params.camera);
+		//then back to the canvas
+		params.renderer.setRenderTarget(null)
 		params.renderer.render( params.sceneCD, params.cameraCD );
 	} else {
 		params.renderer.render( params.scene, params.camera );
