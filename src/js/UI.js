@@ -221,6 +221,9 @@ function checkColormapBox(box){
 	
 	console.log(p, " showColormap:", params.showColormap[p])
 
+    // redraw particle type (this seems necessary to enable the correct blending)
+    drawScene(pDraw = [p]);
+
 	//show/hide the colorbardiv
 	d3.select('#colorbar_container').classed('hidden', !params.showColormap[p])
 
