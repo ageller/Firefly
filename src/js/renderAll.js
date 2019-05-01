@@ -39,7 +39,7 @@ function update(time){
 			console.log("tweening")
 			params.updateTween = true	
 			setTweenParams();
-		}
+		}Ï
 	}
 
 	if (params.keyboard.down("P")){
@@ -204,7 +204,12 @@ function render() {
 		//first, render to the texture
 		params.renderer.setRenderTarget(params.textureCD)
 		params.renderer.render( params.scene, params.camera);
+
 		//then back to the canvas
+		//for now, just use the colormap from the first particle group
+		var p = params.partsKeys[0];
+		params.quadCD.material.uniforms.colormap.value = params.colormap[p];
+		//console.log(params.quadCD)
 		params.renderer.setRenderTarget(null)
 		params.renderer.render( params.sceneCD, params.cameraCD );
 	} else {

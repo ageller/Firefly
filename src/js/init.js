@@ -180,9 +180,11 @@ function defineParams(){
 		this.sceneCD = null;
 		this.cameraCD = null;
 		this.scaleCD = 0.1; //scaling factor for the shader so that it adds up to one at highest density
-		this.cmap = new THREE.TextureLoader().load( "src/textures/cmap.png");
+		this.cmap = new THREE.TextureLoader().load( "textures/colormap.png" );//"src/textures/cmap.png");
 		this.cmap.minFilter = THREE.LinearFilter;
 		this.cmap.magFilter = THREE.NearestFilter;
+		this.quadCD = null; //for the column density 
+
 	};
 
 	params = new ParamsInit();
@@ -584,20 +586,23 @@ function initColumnDensity(){
 		format: THREE.RGBAFormat 
 	} );
 
+	//for now, just use the first colormap
+	var p = params.partsKeys[0];
 	params.materialCD = new THREE.ShaderMaterial( {
 		uniforms: { 
 			tex: { value: params.textureCD.texture }, 
 			cmap: { type:'t', value: params.cmap },
+			colormap: {value: params.colormap[p]},
 		},
 		vertexShader: myVertexShader,
 		fragmentShader: myFragmentShader_pass2,
 		depthWrite: false
 	} );
 	var plane = new THREE.PlaneBufferGeometry( screenWidth, screenHeight );
-	var quad = new THREE.Mesh( plane, params.materialCD );
-	quad.position.z = -100;
+	params.quadCD = new THREE.Mesh( plane, params.materialCD );
+	params.quadCD.position.z = -100;
 	params.sceneCD = new THREE.Scene();
-	params.sceneCD.add( quad );
+	params.sceneCD.add( params.quadCD );
 
 	// camera
 	params.cameraCD = new THREE.OrthographicCamera( screenWidth/-2, screenWidth/2, screenHeight/2, screenHeight/-2, -10000, 10000 );
