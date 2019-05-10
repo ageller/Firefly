@@ -5,6 +5,8 @@
 Firefly is an interactive particle viewer designed for [FIRE](http://galaxies.northwestern.edu/fire-simulations/) data, written in WebGL using the three.js library. A live version is available [here](https://ageller.github.io/Firefly/).
 This package should not be confused with the serendipitously named web-based visualization software [Firefly, from Caltech-IPAC](https://github.com/Caltech-IPAC/firefly), a general tool for retrieving and viewing astronomy data.
 
+If you use Firefly, please cite us using the [ADS listing](http://adsabs.harvard.edu/abs/2018ascl.soft10021G) that points to our Astrophysics Source Code Library (ASCL) entry.
+
 ## Installation
 
 To install Firefly (on any operating system), please clone this GitHub repository :
