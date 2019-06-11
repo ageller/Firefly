@@ -59,7 +59,8 @@ $ git clone --mirror https://github.com/ageller/Firefly.git
 ```
 
 5. Try removing all jsons
-```$ bfg --delete-files *json  Firefly.git
+```
+$ bfg --delete-files *json  Firefly.git
 
 Using repo : /Users/ageller/Desktop/tmp/cleanFirefly/Firefly.git
 
@@ -218,6 +219,6 @@ To https://github.com/ageller/Firefly.git
 error: failed to push some refs to 'https://github.com/ageller/Firefly.git'
 ```
 
-9. There are some errors here, but according to the bfg issues, this is OK.  These are from pull requests that can't be updated in this way.  [See here.](https://github.com/rtyley/bfg-repo-cleaner/issues/36).
+9. There are some errors here, but according to the bfg issues, this is OK.  These are from pull requests that can't be updated in this way.  [See here.](https://github.com/rtyley/bfg-repo-cleaner/issues/36)
 
 
