@@ -18,6 +18,8 @@ Or, if you prefer, you can download the zip file and unpack it.
 
 You will also need a browser; we recommend Firefox or Google Chrome. To import your own data into Firefly, you will also need Python; we recommend installing [Anaconda](https://www.anaconda.com/download/) Python version 3.x .
 
+_Note: On June 11, 2019 we removed some excessively large files from the .git pack.  See the documentation [here](src/docs/READMEcleanPack.md).  If you have cloned this repo prior to June 11, 2019 and want to update your local repo, please remove your local copy and clone this repo again.  (This will reduce the disk space used from >600MB to about 30MB.)_
+
 ## Running Firefly
 
 To start Firefly, you can simply open the index.html file with your browser. If you prefer Chrome, you may need to host your own server.  This is easy to do by executing the following python command within the directory that contains your index.html file:
