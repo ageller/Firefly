@@ -19,7 +19,7 @@ uniform float maxDistance;
 uniform vec3 cameraX;
 uniform vec3 cameraY;
 
-const float minPointScale = 0.01;
+const float minPointScale = 0.0;//1;
 const float maxPointScale = 1000.;
 const float PI = 3.1415926535897932384626433832795;
 
@@ -37,7 +37,6 @@ void main(void) {
 	float cameraDist = length(mvPosition.xyz);
 	float pointScale = maxDistance/cameraDist;
 	pointScale = clamp(pointScale, minPointScale, maxPointScale);
-	
 	
 	// send colormap array to fragment shader
 	vColormapMag = clamp(((colormapArray - colormapMin) / (colormapMax - colormapMin)), 0., 1.);

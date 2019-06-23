@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="utf-8">
 		<title>Firefly</title>		
-		<link rel="icon" href="src/docs/icon.png">  
+		<link rel="icon" href="static/docs/icon.png">  
 
 
 
@@ -57,50 +57,66 @@
 		</div>
 
 <!-- three.js resources -->		
-		<script src="src/resources/three.min.r102.js"></script>
-		<script src="src/resources/Detector.js"></script>
-		<script src="src/resources/TrackballControls.js"></script>
-		<script src="src/resources/three-fly-controls.js"></script>
-		<script src="src/resources/KeyboardState.js"></script>
-		<script src="src/resources/THREEx.FullScreen.js"></script>
-		<script src="src/resources/THREEx.WindowResize.js"></script>
-		<script src="src/resources/StereoEffect.js"></script>
+		<script src="static/lib/three.min.r102.js"></script>
+		<script src="static/lib/Detector.js"></script>
+		<script src="static/lib/TrackballControls.js"></script>
+		<script src="static/lib/three-fly-controls.js"></script>
+		<script src="static/lib/KeyboardState.js"></script>
+		<script src="static/lib/THREEx.FullScreen.js"></script>
+		<script src="static/lib/THREEx.WindowResize.js"></script>
+		<script src="static/lib/StereoEffect.js"></script>
 <!-- https://github.com/collinhover/threeoctree -->
-		<script src="src/resources/threeoctree.min.js"></script>
+		<script src="static/lib/threeoctree.min.js"></script>
 		
 		<!-- for the color picker = spectrum : https://github.com/bgrins/spectrum -->
-		<link rel="stylesheet" href="src/resources/spectrum.css" />
-		<script src="src/resources/jquery-3.2.1.min.js"></script> 
-		<script src="src/resources/spectrum.js"></script>
+		<link rel="stylesheet" href="static/lib/spectrum.css" />
+		<script src="static/lib/jquery-3.2.1.min.js"></script> 
+		<script src="static/lib/spectrum.js"></script>
 
 		<!-- noUIslider for filtering -->
-		<link href="src/resources/nouislider.min.css" rel="stylesheet">
-		<script src="src/resources/nouislider.min.js"></script>
+		<link href="static/lib/nouislider.min.css" rel="stylesheet">
+		<script src="static/lib/nouislider.min.js"></script>
 
 		<!-- wNumb number formatter -->
-		<script src="src/resources/wNumb.js"></script>
+		<script src="static/lib/wNumb.js"></script>
 
 		<!-- d3 -->
-		<script src="src/resources/d3.v4.10.2.min.js"></script>
+		<script src="static/lib/d3.v4.10.2.min.js"></script>
 
 		<!-- tween -->
-		<script src="src/resources/Tween.js"></script>
+		<script src="static/lib/Tween.js"></script>
+
+		<!-- web sockets -->
+	    <script src="static/lib/socket.io.min.js"></script>
 
 		<!-- the main attraction -->
 
 		<!-- shaders -->
-		<script src="src/shaders/vertex.glsl.js"></script>
-		<script src="src/shaders/fragment.glsl.js"></script>
-		<script src="src/shaders/fragment_pass2.glsl.js"></script>
+		<script src="static/shaders/vertex.glsl.js"></script>
+		<script src="static/shaders/fragment.glsl.js"></script>
+		<script src="static/shaders/fragment_pass2.glsl.js"></script>
 
-		<link rel="stylesheet" type="text/css" href="src/css/mainStyles.css" />
-		<link rel="stylesheet" type="text/css" href="src/css/UIStyles.css" />
-		<script src="src/js/windowEvents.js"></script>
-		<script src="src/js/UI.js"></script>
-		<script src="src/js/draw.js"></script>
-		<script src="src/js/renderAll.js"></script>
-		<script src="src/js/init.js"></script>
-		<script src="src/js/runTweens.js"></script>
+		<link rel="stylesheet" type="text/css" href="static/css/mainStyles.css" />
+		<link rel="stylesheet" type="text/css" href="static/css/UIStyles.css" />
+		<script src="static/js/params.js"></script>
+		<script>
+			//called upon loading
+			defineGUIParams();
+			defineViewerParams();
+		</script>
+		<script src="static/js/utils.js"></script>
+		<script src="static/js/windowEvents.js"></script>
+		<script src="static/js/UI.js"></script>
+		<script src="static/js/applyUISelections.js"></script>
+		<script src="static/js/draw.js"></script>
+		<script src="static/js/renderAll.js"></script>
+		<script src="static/js/initViewer.js"></script>
+		<script src="static/js/runTweens.js"></script>
+
+		<script>
+			//called upon loading
+			runLocal();
+		</script>
 
 	</body>
 

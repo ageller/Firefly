@@ -38,10 +38,78 @@ function handleMouseDown(event) {
 		}
 	}
 
-	mouseDown = true;
 
 }
-function handleMouseUp(event) {
-	mouseDown = false;
+
+//hide the splash screen
+function hideSplash(){
+	if (viewerParams.loaded && !viewerParams.pauseAnimation){
+		viewerParams.helpMessage = 0;
+		var fdur = 700.;
+
+		var splash = d3.select("#splash");
+
+		splash.transition()
+			.ease(d3.easeLinear)
+			.duration(fdur)
+			.style("opacity", 0)
+
+			.on("end", function(d){
+				splash.style("display","none");
+			})
+	}
 }
 
+//show the splash screen
+function showSplash(){
+	if (viewerParams.loaded && !viewerParams.pauseAnimation){
+		viewerParams.helpMessage = 1;
+		var fdur = 700.;
+
+		var splash = d3.select("#splash");
+		splash.style("display","block")
+
+		splash.transition()
+			.ease(d3.easeLinear)
+			.duration(fdur)
+			.style("opacity", 0.8);
+	}
+
+}
+
+function showSleep(){
+
+	var fdur = 700
+	var splash = d3.select("#sleep");
+	
+	splash.style("display","block");
+
+	splash.transition()
+		.ease(d3.easeLinear)
+		.duration(fdur)
+		.style("opacity", 0.95);
+
+}
+
+function hideSleep(){
+	viewerParams.pauseAnimation = false;
+	var fdur = 700.;
+
+	var splash = d3.select("#sleep");
+
+	splash.transition()
+		.ease(d3.easeLinear)
+		.duration(fdur)
+		.style("opacity", 0)
+
+		.on("end", function(d){
+			splash.style("display","none");
+		})
+	// startup the app and reset the time-- maybe I should move this stuff to the top 
+	//	of animate? hmm...
+	var currentTime = new Date();
+	var seconds = currentTime.getTime()/1000;
+	viewerParams.currentTime = seconds;
+	viewerParams.pauseAnimation = false;
+	animate();
+}

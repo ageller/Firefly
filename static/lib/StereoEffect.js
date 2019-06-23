@@ -34,7 +34,8 @@ THREE.StereoEffect = function ( renderer ) {
 
 		_stereo.update( camera );
 
-		var size = renderer.getSize();
+		var size = new THREE.Vector2(0,0);
+		renderer.getSize(size);
 
 		if ( renderer.autoClear ) renderer.clear();
 		renderer.setScissorTest( true );
