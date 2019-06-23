@@ -75,10 +75,6 @@ function defineViewerParams(){
 		this.maxVrange = 2000.; //maximum dynamic range for length of velocity vectors (can be reset in options file)
 
 		//for single sliders
-		this.SliderN = {};
-		this.SliderNmin = {};
-		this.SliderNmax = {};
-		this.SliderNInputs = {};
 		this.SliderD;
 		this.SliderDmin;
 		this.SliderDmax;
@@ -209,19 +205,15 @@ function defineGUIParams(){
 		///////////////////
 		// these below are shared with viewerParams (passed from viewerParams to GUIParams)
 
-		// slider limits for colormap
+		this.partsKeys;
+		this.PsizeMult = {};
+		this.plotNmax = {};
+		this.decimate;
+
 		this.colormapVals = {};
-
-		// list of possible colormap variables for each particle type
 		this.ckeys = {};
-
-		// determines which colormap variable is activated for each particle type
 		this.colormapVariable = {};
-
-		// determines which colormap is applied to each particle type
 		this.colormap = {};
-
-		// determines if colormap is on or off
 		this.showColormap = {};
 
 

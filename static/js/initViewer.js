@@ -926,6 +926,10 @@ function sendInitGUI(){
 	sendToGUI({'setGUIParamByKey':[viewerParams.ckeys,"ckeys"]});
 	sendToGUI({'setGUIParamByKey':[viewerParams.colormap, "colormap"]});
 	sendToGUI({'setGUIParamByKey':[viewerParams.showColormap, "showColormap"]});
+	sendToGUI({'setGUIParamByKey':[viewerParams.partsKeys, "partsKeys"]});
+	sendToGUI({'setGUIParamByKey':[viewerParams.PsizeMult, "PsizeMult"]});
+	sendToGUI({'setGUIParamByKey':[viewerParams.plotNmax, "plotNmax"]});
+	sendToGUI({'setGUIParamByKey':[viewerParams.decimate, "decimate"]});
 	sendToGUI({'setGUIParamByKey':[true,"ready"]});
 }
 

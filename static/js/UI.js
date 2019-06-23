@@ -111,17 +111,18 @@ function showFunction(handle) {
 
 /////////////////////////////////////////////
 /////////////Generic single sliders
-function setSingleSliderHandle(i, value, parent, varToSet) {
+function setSingleSliderHandle(i, value, parent, varToSet, resetEnd) {
+	//resetEnd : 0=don't reset; 1=reset if value > max; 2=reset always
 	//always reset the limits?
-	// var max = parent.noUiSlider.options.range.max[0];
-	// if (value > max){
+	var max = parent.noUiSlider.options.range.max[0];
+	if ( resetEnd == 2 || (resetEnd == 1 && value > max)){
 		parent.noUiSlider.updateOptions({
 			range: {
 				'min': [0],
 				'max': [parseFloat(value)]
 			}
 		});
-	// }
+	}
 
 	var r = [null];
 	r[i] = value;
@@ -133,7 +134,7 @@ function setSingleSliderHandle(i, value, parent, varToSet) {
 }
 
 // Listen to keydown events on the input field.
-function handleSingleSliderText(input, handle, varToSet) {
+function handleSingleSliderText(input, handle, varToSet, resetEnd) {
 	input.addEventListener('keydown', function( e ) {
 		var value = Number(input.parent.noUiSlider.get());
 		var steps = input.parent.noUiSlider.options.steps;
@@ -141,20 +142,21 @@ function handleSingleSliderText(input, handle, varToSet) {
 
 		switch ( e.which ) {
 			case 13:
-				setSingleSliderHandle(handle, this.value, input.parent, varToSet);
+				setSingleSliderHandle(handle, this.value, input.parent, varToSet, resetEnd);
 				break;
 			case 38:
-				setSingleSliderHandle(handle, value + step, input.parent, varToSet);
+				setSingleSliderHandle(handle, value + step, input.parent, varToSet, resetEnd);
 				break;
 			case 40:
-				setSingleSliderHandle(handle, value - step, input.parent, varToSet);
+				setSingleSliderHandle(handle, value - step, input.parent, varToSet, resetEnd);
 				break;
 		}
 	});
 }
 
 //need to allow this to update at large numbers
-function createSingleSlider(slider, text, args, varToSet){
+function createSingleSlider(slider, text, args, varToSet, resetEnd=2){
+	//resetEnd : 0=don't reset; 1=reset if value > max; 2=reset always
 
 	if (slider != null && text != null){
 
@@ -171,13 +173,13 @@ function createSingleSlider(slider, text, args, varToSet){
 
 		slider.noUiSlider.on('update', function(values, handle) {
 			sliderInputs[handle].value = values[handle];
-			varToSet[0] = values[handle]
+			varToSet[0] = values[handle];
 			sendToViewer({'setViewerParamByKey':varToSet})
 
 		});
 
 		sliderInputs.forEach(function(input, handle){
-			handleSingleSliderText(input, handle, varToSet)
+			handleSingleSliderText(input, handle, varToSet, resetEnd)
 		});
 	}
 }
@@ -186,19 +188,17 @@ function createSingleSlider(slider, text, args, varToSet){
 // create the individual sliders
 function createPSliders(){
 
-	viewerParams.partsKeys.forEach(function(p,i){
-///////////////
-		var initialValue = viewerParams.PsizeMult[p]; 
-/////////////
+	GUIParams.partsKeys.forEach(function(p,i){
+		var initialValue = GUIParams.PsizeMult[p]; //I don't *think* I need to update this in GUI; it's just the initial value that matters, right?
 
 		var args = {
-			start: [0], //reset below
+			start: [initialValue], 
 			connect: [true, false],
 			tooltips: false,
 			steps: [0.0001],
 			range: { //reset below
 				'min': [0],
-				'max': [1]
+				'max': [initialValue]
 			},
 			format: wNumb({
 				decimals: 4
@@ -207,9 +207,7 @@ function createPSliders(){
 
 		var slider = document.getElementById(p+'_PSlider');
 		var text = document.getElementById(p+'_PMaxT');
-		args.start = [initialValue];
-		args.range.max = [initialValue];
-		var varToSet = [initialValue, "PsizeMult",p]
+		var varToSet = [initialValue, "PsizeMult",p];
 
 		createSingleSlider(slider, text, args, varToSet)
 
@@ -219,6 +217,97 @@ function createPSliders(){
 	});
 
 }
+
+function createNSliders(){
+	GUIParams.partsKeys.forEach(function(p,i){
+		var initialValue = GUIParams.plotNmax[p]; //I don't *think* I need to update this in GUI; it's just the initial value that matters, right?
+
+		var args = {
+			start: [initialValue], 
+			connect: [true, false],
+			tooltips: false,
+			steps: [1],
+			range: { 
+				'min': [0],
+				'max': [initialValue]
+			},
+			format: wNumb({
+				decimals: 0
+			})
+		}
+
+		var slider = document.getElementById(p+'_NSlider');
+		var text = document.getElementById(p+'_NMaxT');
+		var varToSet = [initialValue, "plotNmax",p]
+
+		createSingleSlider(slider, text, args, varToSet, 0)
+
+		//reformat
+		w = parseInt(d3.select('#'+p+'_NSlider').style('width').slice(0,-2));
+		d3.select('#'+p+'_NSlider').select('.noUi-base').style('width',w-10+"px");
+	});
+}
+
+//need to allow this to update at large numbers
+function createDSlider(){
+
+	var initialValue = GUIParams.decimate; //I don't *think* I need to update this in GUI; it's just the initial value that matters, right?
+
+	var args = {
+		start: [initialValue], 
+		connect: [true, false],
+		tooltips: false,
+		steps: [0.1],
+		range: { 
+			'min': [initialValue],
+			'max': [20]
+		},
+		format: wNumb({
+			decimals: 1
+		})
+	}
+
+	var slider = document.getElementById('DSlider');
+	var text = document.getElementById('DMaxT');
+	var varToSet = [initialValue, "decimate"]
+
+	createSingleSlider(slider, text, args, varToSet, 0)
+
+	//reformat
+	w = parseInt(d3.select("#DSlider").style("width").slice(0,-2));
+	d3.select("#DSlider").select('.noUi-base').style('width',w-10+"px");
+
+
+	//redefine the update function -- special case because it needs to talk to the Nslider as well
+	slider.noUiSlider.on('update', function(values, handle) {
+		var decf = GUIParams.decimate/parseFloat(values[handle]);
+		//if (decf != 1){ //is this if statement really necessary?
+			text.value = values[handle];
+			varToSet[0] = values[handle];
+			sendToViewer({'setViewerParamByKey':varToSet})
+			GUIParams.decimate = values[handle];
+		//}
+
+		GUIParams.partsKeys.forEach(function(p){
+			var max = Math.round(viewerParams.parts[p].Coordinates.length);
+			var sliderInput = document.getElementById(p+'_NMaxT');
+			if (sliderInput != null){
+				var val = parseFloat(sliderInput.parent.noUiSlider.get());
+
+				sliderInput.parent.noUiSlider.updateOptions({
+					range: {
+						'min': [0],
+						'max': [Math.round(max/parseFloat(values[handle]))]
+					}
+				});
+				sliderInput.parent.noUiSlider.set(Math.min(max, val*decf));
+			}
+
+		});
+	});
+
+}
+
 //////////////////////
 
 function selectVelType() {
@@ -912,207 +1001,7 @@ function createCMapSliders(){
 }
 
 
-/////////////////////////////////////////////
-// N sliders
-function setNSliderHandle(i, value, parent) {
-	var r = [null];
-	r[i] = value;
-	parent.noUiSlider.set(value);
-	var p = parent.id.slice(0, -8);
-	viewerParams.plotNmax[p] = value;
-}
 
-// Listen to keydown events on the input field.
-// can I just use the same functions as for the filters?
-function handleNSliderText(input, handle) {
-	// input.addEventListener('change', function(){
-	// 	setNSliderHandle(handle, this.value, this.parent);
-	// });
-	input.addEventListener('keydown', function( e ) {
-		var value = Number(input.parent.noUiSlider.get());
-		var steps = input.parent.noUiSlider.options.steps;
-		var step = steps[handle];
-		switch ( e.which ) {
-			case 13:
-				setNSliderHandle(handle, this.value, input.parent);
-				break;
-			case 38:
-				setNSliderHandle(handle, value + step, input.parent);
-				break;
-			case 40:
-				setNSliderHandle(handle, value - step, input.parent);
-				break;
-		}
-	});
-}
-
-function createNsliders(){
-
-	var i = 0;
-	var j = 0;
-	for (i=0; i<viewerParams.partsKeys.length; i++){
-
-		p = viewerParams.partsKeys[i];
-
-		if (viewerParams.parts.options.UIdropdown[p]){
-
-			viewerParams.SliderN[p] = document.getElementById(p+'_NSlider');
-			viewerParams.SliderNmax[p] = document.getElementById(p+'_NMaxT');
-			if (viewerParams.SliderN[p] != null && viewerParams.SliderNmax[p] != null){
-				viewerParams.SliderNInputs[p] = [viewerParams.SliderNmax[p]];
-				viewerParams.SliderNInputs[p][0].parent = viewerParams.SliderN[p];
-				min = 0;
-				max = viewerParams.plotNmax[p]
-				noUiSlider.create(viewerParams.SliderN[p], {
-					start: [max],
-					connect: [true, false],
-					tooltips: [false],
-					steps: [1],
-					range: {
-						'min': [min],
-						'max': [max]
-					},
-					format: wNumb({
-						decimals: 0
-					})
-				});
-				viewerParams.SliderN[p].noUiSlider.on('update', function(values, handle) {
-
-
-
-					var pp = this.target.id.slice(0, -8);
-					viewerParams.SliderNInputs[pp][handle].value = values[handle];
-
-					var nf = parseFloat(values[handle])/viewerParams.plotNmax[pp];
-					viewerParams.plotNmax[pp] = parseInt(values[handle]);
-					// if (nf != 1 && ! viewerParams.reset){
-					// 	drawScene(pDraw = [pp]);
-					// }
-				});
-
-				viewerParams.SliderNInputs[p].forEach(handleNSliderText);
-			}
-			w = parseInt(d3.select('#'+p+'_NSlider').style('width').slice(0,-2));
-			d3.select('#'+p+'_NSlider').select('.noUi-base').style('width',w-10+"px");
-		}
-	}
-}
-
-
-
-/////////////////////////////////////////////
-// Decimation slider
-function setDSliderHandle(i, value, parent) {
-	value = Math.max(1, parseFloat(value));
-
-	var max = parseFloat(parent.noUiSlider.options.range.max[i]);
-	if (value > max){
-		parent.noUiSlider.updateOptions({
-			range: {
-				'min': [1],
-				'max': [parseFloat(value)]
-			}
-		});
-	}
-
-	var r = [null];
-	r[i] = value;
-	parent.noUiSlider.set(value);
-	viewerParams.decimate = value;
-
-}
-
-// Listen to keydown events on the input field.
-// can I just use the same functions as for the filters?
-function handleDSliderText(input, handle) {
-	// input.addEventListener('change', function(){
-	// 	setDSliderHandle(handle, this.value, this.parent);
-	// });
-	input.addEventListener('keydown', function( e ) {
-		var value = Number(input.parent.noUiSlider.get());
-		var steps = input.parent.noUiSlider.options.steps;
-		var step = steps[handle];
-		//var max = max = document.getElementById(pID+"PRange").max;
-
-		switch ( e.which ) {
-			case 13:
-				setDSliderHandle(handle, this.value, input.parent);
-				break;
-			case 38:
-				setDSliderHandle(handle, value + step, input.parent);
-				break;
-			case 40:
-				setDSliderHandle(handle, value - step, input.parent);
-				break;
-		}
-	});
-}
-
-//need to allow this to update at large numbers
-function createDslider(){
-
-	viewerParams.SliderD = document.getElementById('DSlider');
-	viewerParams.SliderDmax = document.getElementById('DMaxT');
-	if (viewerParams.SliderD != null && viewerParams.SliderDmax != null){
-		if (viewerParams.SliderD.noUiSlider) {
-			viewerParams.SliderD.noUiSlider.destroy();
-		}
-		viewerParams.SliderDInputs = [viewerParams.SliderDmax];
-		viewerParams.SliderDInputs[0].parent = viewerParams.SliderD;
-		min = 1.;
-		max = 20.;
-
-		noUiSlider.create(viewerParams.SliderD, {
-			start: [viewerParams.decimate],
-			connect: [true, false],
-			tooltips: false,
-			steps: [1],
-			range: {
-				'min': [min],
-				'max': [max]
-			},
-			format: wNumb({
-			decimals: 0
-			})
-		});
-
-		viewerParams.SliderD.noUiSlider.on('update', function(values, handle) {
-
-			viewerParams.SliderDInputs[handle].value = values[handle];
-
-			var decf = viewerParams.decimate/parseFloat(values[handle]);
-			if (decf != 1){
-				viewerParams.decimate = parseFloat(values[handle]);
-				//drawScene();
-			}
-
-			for (i=0; i<viewerParams.partsKeys.length; i++){
-				var p = viewerParams.partsKeys[i];
-				var max = Math.round(viewerParams.parts[p].Coordinates.length);
-				if (viewerParams.parts.options.UIdropdown[p]){
-					var val = parseFloat(viewerParams.SliderN[p].noUiSlider.get());
-
-					viewerParams.SliderN[p].noUiSlider.updateOptions({
-						range: {
-							'min': [0],
-							'max': [Math.round(max/parseFloat(values[handle]))]
-						}
-					});
-					viewerParams.SliderN[p].noUiSlider.set(Math.min(max, val*decf));
-
-				}
-
-			}
-
-
-
-		});
-
-		viewerParams.SliderDInputs.forEach(handleDSliderText);
-	}
-	w = parseInt(d3.select("#DSlider").style("width").slice(0,-2));
-	d3.select("#DSlider").select('.noUi-base').style('width',w-10+"px");
-}
 
 
 /////////////////////////////////////////////
@@ -2175,8 +2064,8 @@ function createUI(){
 
 // create all the noUISliders
 	createPSliders();
-	createNsliders();
-	createDslider();
+	createNSliders();
+	createDSlider();
 	createCFslider();
 	createSSslider();
 	createFilterSliders();
