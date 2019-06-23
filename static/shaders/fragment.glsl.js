@@ -6,6 +6,7 @@ varying float vID;
 varying float vTheta;
 varying float vColormapMag;
 varying float vAlpha;
+varying float vPointSize;
 
 
 uniform bool showColormap;
@@ -49,18 +50,20 @@ void main(void) {
 		vec2 fromCenter = abs(gl_PointCoord - vec2(0.5));
 		dist = 2.*length(fromCenter) ;
 		float dist2 = dist*dist;
-		// best fit quartic to SPH kernel (unormalized)
+		// fix for the minimum point size imposed by WebGL context gl.ALIASED_POINT_SIZE_RANGE = [1, ~8000]
+		float dMax = min(1., vPointSize);
 		if (showColormap){
-			if (dist > 1.){
+			if (dist > dMax){
 				discard;
 			}
 		} else {
 			if (SPHrad == 1){
+				// best fit quartic to SPH kernel (unormalized)
 				float alpha_SPH =  -4.87537494*dist2*dist2 + 11.75074987*dist2*dist - 8.14117164*dist2 + 0.2657967*dist + 0.99328463;
 				gl_FragColor.a *= alpha_SPH;
 			} 
 			else {
-				gl_FragColor.a *= 1. - dist;
+				gl_FragColor.a *= dMax - dist;
 			}
 		}
 	} else { //velocities, lines (Note: requiring vID == 1. breaks in windows for some reason)

@@ -10,6 +10,7 @@ varying float vTheta;
 varying float vColormapMag;
 varying float vAlpha;
 varying vec2 vUv; //for the column density 
+varying float vPointSize;
 
 uniform float colormapMax;
 uniform float colormapMin;
@@ -54,6 +55,8 @@ void main(void) {
 		gl_PointSize = gl_PointSize*vSize;
 
 	}
+
+	vPointSize = gl_PointSize;
 
 	//glPointSize = gl_PointSize;
 
