@@ -22,7 +22,12 @@ function sendToViewer(GUIinput){
 function setGUIParamByKey(args){
 	var value = args[0];
 	var keyName = args[1];
-	GUIParams[keyName] = value;
+	GUIParams[keyName] = JSON.parse(JSON.stringify(value));
+	// if (typeof value == "object") {
+	// 	GUIParams[keyName] = $.extend({}, value);
+	// } else {
+	// 	GUIParams[keyName] = value;
+	// }
 }
 
 /////////////
@@ -289,7 +294,7 @@ function createDSlider(){
 		//}
 
 		GUIParams.partsKeys.forEach(function(p){
-			var max = Math.round(viewerParams.parts[p].Coordinates.length);
+			var max = Math.round(GUIParams.plotNmax[p]);
 			var sliderInput = document.getElementById(p+'_NMaxT');
 			if (sliderInput != null){
 				var val = parseFloat(sliderInput.parent.noUiSlider.get());

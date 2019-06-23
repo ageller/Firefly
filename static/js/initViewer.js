@@ -959,14 +959,14 @@ function setViewerParamByKey(args){
 	var value = args[0];
 	var key1 = args[1];
 	if (args.length == 2) {
-		viewerParams[key1] = value;
+		viewerParams[key1] = JSON.parse(JSON.stringify(value));
 	} else if (args.length == 3) {
 		var key2 = args[2];
-		viewerParams[key1][key2] = value;
+		viewerParams[key1][key2] = JSON.parse(JSON.stringify(value));
 	} else if (args.length == 4) {
 		var key2 = args[2];
 		var key3 = args[3];
-		viewerParams[key1][key2][key3] = value;
+		viewerParams[key1][key2][key3] = JSON.parse(JSON.stringify(value));
 	} else {
 		console.log('!!!! TOO MANY ARGUMENTS TO PASS', args.length, args)
 	}
