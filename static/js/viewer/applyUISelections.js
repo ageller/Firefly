@@ -1,6 +1,3 @@
-
-
-
 //////////////////////////////////////////////////
 ///// Functions to execute the GUI commands //////
 //////////////////////////////////////////////////
@@ -588,3 +585,11 @@ function savePreset(){
 
 }
 
+function updateFriction(value){
+	if (viewerParams.useTrackball){
+		viewerParams.controls.dynamicDampingFactor = value;
+	} else {
+		viewerParams.controls.movementSpeed = 1. - Math.pow(value, viewerParams.flyffac);
+	}
+	viewerParams.friction = value;
+}

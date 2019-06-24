@@ -32,7 +32,9 @@ function defineGUIParams(){
 		this.PsizeMult = {};
 		this.plotNmax = {};
 		this.decimate;
-
+		this.stereoSepMax;
+		this.friction;
+		
 		this.colormapVals = {};
 		this.ckeys = {};
 		this.colormapVariable = {};

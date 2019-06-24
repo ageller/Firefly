@@ -116,7 +116,7 @@ function showFunction(handle) {
 
 /////////////////////////////////////////////
 /////////////Generic single sliders
-function setSingleSliderHandle(i, value, parent, varToSet, resetEnd) {
+function setSingleSliderHandle(i, value, parent, varToSet, funcName, resetEnd) {
 	//resetEnd : 0=don't reset; 1=reset if value > max; 2=reset always
 	//always reset the limits?
 	var max = parent.noUiSlider.options.range.max[0];
@@ -135,11 +135,13 @@ function setSingleSliderHandle(i, value, parent, varToSet, resetEnd) {
 	//var p = parent.id.slice(0, -8);
 	//varToSet[p] = value;
 	varToSet[0] = value;
-	sendToViewer({'setViewerParamByKey':varToSet})
+	toSend = {};
+	toSend[funcName]= varToSet;
+	sendToViewer(toSend);
 }
 
 // Listen to keydown events on the input field.
-function handleSingleSliderText(input, handle, varToSet, resetEnd) {
+function handleSingleSliderText(input, handle, varToSet, funcName, resetEnd) {
 	input.addEventListener('keydown', function( e ) {
 		var value = Number(input.parent.noUiSlider.get());
 		var steps = input.parent.noUiSlider.options.steps;
@@ -147,20 +149,20 @@ function handleSingleSliderText(input, handle, varToSet, resetEnd) {
 
 		switch ( e.which ) {
 			case 13:
-				setSingleSliderHandle(handle, this.value, input.parent, varToSet, resetEnd);
+				setSingleSliderHandle(handle, this.value, input.parent, varToSet, funcName, resetEnd);
 				break;
 			case 38:
-				setSingleSliderHandle(handle, value + step, input.parent, varToSet, resetEnd);
+				setSingleSliderHandle(handle, value + step, input.parent, varToSet, funcName, resetEnd);
 				break;
 			case 40:
-				setSingleSliderHandle(handle, value - step, input.parent, varToSet, resetEnd);
+				setSingleSliderHandle(handle, value - step, input.parent, varToSet, funcName, resetEnd);
 				break;
 		}
 	});
 }
 
 //need to allow this to update at large numbers
-function createSingleSlider(slider, text, args, varToSet, resetEnd=2){
+function createSingleSlider(slider, text, args, varToSet, funcName = 'setViewerParamByKey', resetEnd=2){
 	//resetEnd : 0=don't reset; 1=reset if value > max; 2=reset always
 
 	if (slider != null && text != null){
@@ -179,19 +181,21 @@ function createSingleSlider(slider, text, args, varToSet, resetEnd=2){
 		slider.noUiSlider.on('update', function(values, handle) {
 			sliderInputs[handle].value = values[handle];
 			varToSet[0] = values[handle];
-			sendToViewer({'setViewerParamByKey':varToSet})
+			toSend = {};
+			toSend[funcName]= varToSet;
+			sendToViewer(toSend);
 
 		});
 
 		sliderInputs.forEach(function(input, handle){
-			handleSingleSliderText(input, handle, varToSet, resetEnd)
+			handleSingleSliderText(input, handle, varToSet, funcName, resetEnd)
 		});
 	}
 }
 /////////////////////////////////////////////
 
 // create the individual sliders
-function createPSliders(){
+function createPsizeSliders(){
 
 	GUIParams.partsKeys.forEach(function(p,i){
 		var initialValue = GUIParams.PsizeMult[p]; //I don't *think* I need to update this in GUI; it's just the initial value that matters, right?
@@ -223,7 +227,7 @@ function createPSliders(){
 
 }
 
-function createNSliders(){
+function createNpartsSliders(){
 	GUIParams.partsKeys.forEach(function(p,i){
 		var initialValue = GUIParams.plotNmax[p]; //I don't *think* I need to update this in GUI; it's just the initial value that matters, right?
 
@@ -245,7 +249,7 @@ function createNSliders(){
 		var text = document.getElementById(p+'_NMaxT');
 		var varToSet = [initialValue, "plotNmax",p]
 
-		createSingleSlider(slider, text, args, varToSet, 0)
+		createSingleSlider(slider, text, args, varToSet, 'setViewerParamByKey', 0)
 
 		//reformat
 		w = parseInt(d3.select('#'+p+'_NSlider').style('width').slice(0,-2));
@@ -253,8 +257,9 @@ function createNSliders(){
 	});
 }
 
-//need to allow this to update at large numbers
-function createDSlider(){
+
+//This one requires a birt of a special handling to talk to the N slider
+function createDecimationSlider(){
 
 	var initialValue = GUIParams.decimate; //I don't *think* I need to update this in GUI; it's just the initial value that matters, right?
 
@@ -276,7 +281,7 @@ function createDSlider(){
 	var text = document.getElementById('DMaxT');
 	var varToSet = [initialValue, "decimate"]
 
-	createSingleSlider(slider, text, args, varToSet, 0)
+	createSingleSlider(slider, text, args, varToSet, 'setViewerParamByKey', 1)
 
 	//reformat
 	w = parseInt(d3.select("#DSlider").style("width").slice(0,-2));
@@ -312,6 +317,68 @@ function createDSlider(){
 	});
 
 }
+
+
+function createStereoSlider(){
+
+	var initialValue = GUIParams.stereoSepMax; //I don't *think* I need to update this in GUI; it's just the initial value that matters, right?
+
+	var args = {
+		start: [initialValue], 
+		connect: [true, false],
+		tooltips: false,
+		steps: [0.001],
+		range: { 
+			'min': [0],
+			'max': [initialValue]
+		},
+		format: wNumb({
+			decimals: 3
+		})
+	}
+
+	var slider = document.getElementById('SSSlider');
+	var text = document.getElementById('SSMaxT');
+	var varToSet = [initialValue, "effect","setEyeSeparation"]
+
+	createSingleSlider(slider, text, args, varToSet, 'setViewerParamByKey', 1)
+
+	//reformat
+	w = parseInt(d3.select("#SSSlider").style("width").slice(0,-2));
+	d3.select("#SSSlider").select('.noUi-base').style('width',w-10+"px");
+
+}
+
+function createFrictionSlider(){
+
+	var initialValue = GUIParams.friction; //I don't *think* I need to update this in GUI; it's just the initial value that matters, right?
+
+	var args = {
+		start: [initialValue], 
+		connect: [true, false],
+		tooltips: false,
+		steps: [0.001],
+		range: { 
+			'min': [0],
+			'max': [initialValue]
+		},
+		format: wNumb({
+			decimals: 3
+		})
+	}
+
+	var slider = document.getElementById('CFSlider');
+	var text = document.getElementById('CFMaxT');
+	var varToSet = [initialValue];
+
+	createSingleSlider(slider, text, args, varToSet, 'updateFriction', 1)
+
+	//reformat
+	w = parseInt(d3.select("#CFSlider").style("width").slice(0,-2));
+	d3.select("#CFSlider").select('.noUi-base').style('width',w-10+"px");
+}
+
+
 
 //////////////////////
 
@@ -1004,188 +1071,6 @@ function createCMapSliders(){
 		}
 	}
 }
-
-
-
-
-
-/////////////////////////////////////////////
-// Friction slider
-function setCFSliderHandle(i, value, parent) {
-	value = Math.min(Math.max(0., parseFloat(value)),1.);
-
-	parent.noUiSlider.set(value);
-	if (viewerParams.useTrackball){
-		viewerParams.controls.dynamicDampingFactor = value;
-	} else {
-		viewerParams.controls.movementSpeed = 1. - Math.pow(value, viewerParams.flyffac);
-
-	}
-	viewerParams.friction = value;
-
-}
-
-// Listen to keydown events on the input field.
-function handleCFSliderText(input, handle) {
-	// input.addEventListener('change', function(){
-	// 	setCFSliderHandle(handle, this.value, this.parent);
-	// });
-	input.addEventListener('keydown', function( e ) {
-		var value = Number(input.parent.noUiSlider.get());
-		var steps = input.parent.noUiSlider.options.steps;
-		var step = steps[handle];
-		//var max = max = document.getElementById(pID+"PRange").max;
-
-		switch ( e.which ) {
-			case 13:
-				setCFSliderHandle(handle, this.value, input.parent);
-				break;
-			case 38:
-				setCFSliderHandle(handle, value + step, input.parent);
-				break;
-			case 40:
-				setCFSliderHandle(handle, value - step, input.parent);
-				break;
-		}
-	});
-}
-
-function createCFslider(){
-
-	viewerParams.SliderCF = document.getElementById('CFSlider');
-	viewerParams.SliderCFmax = document.getElementById('CFMaxT');
-	if (viewerParams.SliderCF != null && viewerParams.SliderCFmax != null){
-		if (viewerParams.SliderCF.noUiSlider) {
-			viewerParams.SliderCF.noUiSlider.destroy();
-		}
-		viewerParams.SliderCFInputs = [viewerParams.SliderCFmax];
-		viewerParams.SliderCFInputs[0].parent = viewerParams.SliderCF;
-		min = 0.;
-		max = 1.;
-
-		noUiSlider.create(viewerParams.SliderCF, {
-			start: [viewerParams.friction],
-			connect: [true, false],
-			tooltips: false,
-			steps: [0.01],
-			range: {
-				'min': [min],
-				'max': [max]
-			},
-			format: wNumb({
-				decimals: 2
-			})
-		});
-
-		viewerParams.SliderCF.noUiSlider.on('update', function(values, handle) {
-			viewerParams.SliderCFInputs[handle].value = values[handle];
-			var value = Math.min(Math.max(0., parseFloat(values[handle])),1.);
-			if (viewerParams.useTrackball){
-				viewerParams.controls.dynamicDampingFactor = value;
-			} else {
-				viewerParams.controls.movementSpeed = 1. - Math.pow(value, viewerParams.flyffac);
-			}
-			viewerParams.friction = value;
-		});
-
-		viewerParams.SliderCFInputs.forEach(handleCFSliderText);
-	}
-	w = parseInt(d3.select("#CFSlider").style("width").slice(0,-2));
-	d3.select("#CFSlider").select('.noUi-base').style('width',w-10+"px");
-}
-
-
-
-/////////////////////////////////////////////
-// Stereo Separation slider
-
-function setSSSliderHandle(i, value, parent) {
-	var max = parent.noUiSlider.options.range.max[i];
-	if (value > max){
-		viewerParams.stereoSepMax = parseFloat(value);
-		parent.noUiSlider.updateOptions({
-			range: {
-				'min': [0],
-				'max': [parseFloat(value)]
-			}
-		});
-	}
-	value = Math.min(Math.max(0., parseFloat(value)),viewerParams.stereoSepMax);
-
-	parent.noUiSlider.set(value);
-	viewerParams.effect.setEyeSeparation(value);
-	viewerParams.stereoSep = value;
-
-
-}
-
-// Listen to keydown events on the input field.
-function handleSSSliderText(input, handle) {
-	// input.addEventListener('change', function(){
-	// 	setSSSliderHandle(handle, this.value, this.parent);
-	// });
-	input.addEventListener('keydown', function( e ) {
-		var value = Number(input.parent.noUiSlider.get());
-		var steps = input.parent.noUiSlider.options.steps;
-		var step = steps[handle];
-		//var max = max = document.getElementById(pID+"PRange").max;
-
-		switch ( e.which ) {
-			case 13:
-				setSSSliderHandle(handle, this.value, input.parent);
-				break;
-			case 38:
-				setSSSliderHandle(handle, value + step, input.parent);
-				break;
-			case 40:
-				setSSSliderHandle(handle, value - step, input.parent);
-				break;
-		}
-	});
-}
-
-function createSSslider(){
-
-	viewerParams.sliderSS = document.getElementById('SSSlider');
-	viewerParams.sliderSSmax = document.getElementById('SSMaxT');
-	if (viewerParams.sliderSS != null && viewerParams.sliderSSmax != null){
-		if (viewerParams.sliderSS.noUiSlider) {
-			viewerParams.sliderSS.noUiSlider.destroy();
-		}
-		viewerParams.sliderSSInputs = [viewerParams.sliderSSmax];
-		viewerParams.sliderSSInputs[0].parent = viewerParams.sliderSS;
-		min = 0.;
-		max = parseFloat(viewerParams.stereoSepMax);
-
-		noUiSlider.create(viewerParams.sliderSS, {
-			start: [viewerParams.stereoSep],
-			connect: [true, false],
-			tooltips: false,
-			steps: [0.001],
-			range: {
-				'min': [min],
-				'max': [max]
-			},
-			format: wNumb({
-				decimals: 3
-			})
-		});
-
-		viewerParams.sliderSS.noUiSlider.on('update', function(values, handle) {
-
-			viewerParams.sliderSSInputs[handle].value = values[handle];
-
-			var value = Math.min(Math.max(0., parseFloat(values[handle])),viewerParams.stereoSepMax);
-			viewerParams.effect.setEyeSeparation(value);
-			viewerParams.stereoSep = value;
-		});
-
-		viewerParams.sliderSSInputs.forEach(handleSSSliderText);
-	}
-	w = parseInt(d3.select("#SSSlider").style("width").slice(0,-2));
-	d3.select("#SSSlider").select('.noUi-base').style('width',w-10+"px");
-}
-
 
 
 
@@ -2068,11 +1953,11 @@ function createUI(){
 	}
 
 // create all the noUISliders
-	createPSliders();
-	createNSliders();
-	createDSlider();
-	createCFslider();
-	createSSslider();
+	createPsizeSliders();
+	createNpartsSliders();
+	createDecimationSlider();
+	createStereoSlider();
+	createFrictionSlider();
 	createFilterSliders();
 	createCMapSliders();
 	updateUICenterText();

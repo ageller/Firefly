@@ -72,16 +72,6 @@ function defineViewerParams(){
 		this.velType = {};
 		this.maxVrange = 2000.; //maximum dynamic range for length of velocity vectors (can be reset in options file)
 
-		//for single sliders
-		this.SliderCF;
-		this.SliderCFmin;
-		this.SliderCFmax;
-		this.SliderCFInputs;
-		this.SliderSS;
-		this.SliderSSmin;
-		this.SliderSSmax;
-		this.SliderSSInputs;
-
 		//help screen
 		this.helpMessage = 1;
 

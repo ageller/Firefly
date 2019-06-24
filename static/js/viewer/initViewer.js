@@ -930,6 +930,9 @@ function sendInitGUI(){
 	sendToGUI({'setGUIParamByKey':[viewerParams.PsizeMult, "PsizeMult"]});
 	sendToGUI({'setGUIParamByKey':[viewerParams.plotNmax, "plotNmax"]});
 	sendToGUI({'setGUIParamByKey':[viewerParams.decimate, "decimate"]});
+	sendToGUI({'setGUIParamByKey':[viewerParams.stereoSepMax, "stereoSepMax"]});
+	sendToGUI({'setGUIParamByKey':[viewerParams.friction, "friction"]});
+
 	sendToGUI({'setGUIParamByKey':[true,"ready"]});
 }
 
