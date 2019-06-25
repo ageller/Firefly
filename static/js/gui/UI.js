@@ -8,6 +8,7 @@ GUIParams.waitForInit = setInterval(function(){
 
 //////////////
 // sockets
+//////////////
 
 //function to send events to the viewer
 function sendToViewer(GUIinput){
@@ -31,7 +32,8 @@ function setGUIParamByKey(args){
 }
 
 /////////////
-// for the UI
+// for show/hide of elements of the UI
+//////////////
 function hideUI(x){
 	if (!GUIParams.movingUI){
 
@@ -114,85 +116,128 @@ function showFunction(handle) {
 
 }
 
-/////////////////////////////////////////////
-/////////////Generic single sliders
-function setSingleSliderHandle(i, value, parent, varToSet, funcName, resetEnd) {
-	//resetEnd : 0=don't reset; 1=reset if value > max; 2=reset always
-	//always reset the limits?
-	var max = parent.noUiSlider.options.range.max[0];
-	if ( resetEnd == 2 || (resetEnd == 1 && value > max)){
-		parent.noUiSlider.updateOptions({
-			range: {
-				'min': [0],
-				'max': [parseFloat(value)]
-			}
-		});
+
+//to move the GUI around on the screen
+//from https://www.w3schools.com/howto/howto_js_draggable.asp
+function dragElement(elm, e) {
+	var elmnt = document.getElementsByClassName("UIcontainer")[0];
+	var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
+	dragMouseDown(e);
+
+
+	function dragMouseDown(e) {
+		e = e || window.event;
+		// get the mouse cursor position at startup:
+		pos3 = e.clientX;
+		pos4 = e.clientY;
+		document.addEventListener('mouseup', closeDragElement);
+		document.addEventListener('mousemove', elementDrag);
+
 	}
 
-	var r = [null];
-	r[i] = value;
-	parent.noUiSlider.set(value);
-	//var p = parent.id.slice(0, -8);
-	//varToSet[p] = value;
-	varToSet[0] = value;
-	toSend = {};
-	toSend[funcName]= varToSet;
-	sendToViewer(toSend);
+	function elementDrag(e) {
+		GUIParams.movingUI = true;
+		e = e || window.event;
+		// calculate the new cursor position:
+		pos1 = pos3 - e.clientX;
+		pos2 = pos4 - e.clientY;
+		pos3 = e.clientX;
+		pos4 = e.clientY;
+
+		// set the element's new position:
+		var top = parseInt(elmnt.style.top);
+		var left = parseInt(elmnt.style.left);
+		elmnt.style.top = (top - pos2) + "px";
+		elmnt.style.left = (left - pos1) + "px";
+	}
+
+	function closeDragElement(e) {
+		/* stop moving when mouse button is released:*/
+		e.stopPropagation();
+		GUIParams.movingUI = false;
+		document.removeEventListener('mouseup', closeDragElement);
+		document.removeEventListener('mousemove', elementDrag);
+
+	}
 }
 
-// Listen to keydown events on the input field.
-function handleSingleSliderText(input, handle, varToSet, funcName, resetEnd) {
-	input.addEventListener('keydown', function( e ) {
-		var value = Number(input.parent.noUiSlider.get());
-		var steps = input.parent.noUiSlider.options.steps;
-		var step = steps[handle];
 
-		switch ( e.which ) {
-			case 13:
-				setSingleSliderHandle(handle, this.value, input.parent, varToSet, funcName, resetEnd);
-				break;
-			case 38:
-				setSingleSliderHandle(handle, value + step, input.parent, varToSet, funcName, resetEnd);
-				break;
-			case 40:
-				setSingleSliderHandle(handle, value - step, input.parent, varToSet, funcName, resetEnd);
-				break;
-		}
+//////////////////////
+// various functions tied to buttons in UI
+//////////////////////
+function selectVelType() {
+	//type of symbol to draw velocity vectors (from input box)
+	var option = d3.select(this)
+		.selectAll("option")
+		.filter(function (d, i) { 
+			return this.selected; 
 	});
+	selectValue = option.property('value');
+
+	var p = this.id.slice(0,-14)
+	sendToViewer({'setViewerParamByKey':[selectValue, "velType",p]})
 }
 
-//need to allow this to update at large numbers
-function createSingleSlider(slider, text, args, varToSet, funcName = 'setViewerParamByKey', resetEnd=2){
-	//resetEnd : 0=don't reset; 1=reset if value > max; 2=reset always
+function changeSnapSizes(){
+	//size of the snapshot (from text input)
+	sendToViewer({'setViewerParamByKey':[window.innerWidth, 'renderWidth']});
+	sendToViewer({'setViewerParamByKey':[window.innerHeight, 'renderHeight'] });
+	document.getElementById("RenderXText").value = window.innerWidth;
+	document.getElementById("RenderYText").value = window.innerHeight;
+}
+window.addEventListener('resize', changeSnapSizes);
 
-	if (slider != null && text != null){
+////////////////////////
+// update the text in the camera location
+////////////////////////
+function updateUICenterText(){
+	var el;
+	if (GUIParams.useTrackball){
+		el = document.getElementById("CenterXText");
+		if (el != null) el.value = GUIParams.controlsTarget.x;
 
-		if (slider.noUiSlider) {
-			slider.noUiSlider.destroy();
-		}
+		el = document.getElementById("CenterYText");
+		if (el != null) el.value = GUIParams.controlsTarget.y;
+		
+		el = document.getElementById("CenterZText");
+		if (el != null) el.value = GUIParams.controlsTarget.z;
+	} else {
+		el = document.getElementById("CenterXText");
+		if (el != null) el.value = GUIParams.cameraDirection.x + GUIParams.cameraPosition.x;
 
-		var sliderInputs = [text];
-		sliderInputs[0].parent = slider;
-		min = 0.;
-		max = varToSet;
+		el = document.getElementById("CenterYText");
+		if (el != null) el.value = GUIParams.cameraDirection.y + GUIParams.cameraPosition.y;
 
-		noUiSlider.create(slider, args);
-
-		slider.noUiSlider.on('update', function(values, handle) {
-			sliderInputs[handle].value = values[handle];
-			varToSet[0] = values[handle];
-			toSend = {};
-			toSend[funcName]= varToSet;
-			sendToViewer(toSend);
-
-		});
-
-		sliderInputs.forEach(function(input, handle){
-			handleSingleSliderText(input, handle, varToSet, funcName, resetEnd)
-		});
+		el = document.getElementById("CenterZText");
+		if (el != null) el.value = GUIParams.cameraDirection.z + GUIParams.cameraPosition.z;		
 	}
 }
-/////////////////////////////////////////////
+
+function updateUICameraText(){
+	var el = document.getElementById("CameraXText");
+	if (el != null) el.value = GUIParams.cameraPosition.x;
+	
+	el = document.getElementById("CameraYText"); 
+	if (el != null) el.value = GUIParams.cameraPosition.y;
+		
+	el = document.getElementById("CameraZText"); 
+	if (el != null) el.value = GUIParams.cameraPosition.z;
+}
+
+function updateUIRotText(){
+	var el = document.getElementById("RotXText");
+	if (el != null) el.value = GUIParams.cameraRotation.x;
+
+	var el = document.getElementById("RotYText");
+	if (el != null) el.value = GUIParams.cameraRotation.y;
+
+	el = document.getElementById("RotZText");
+	if (el != null) el.value = GUIParams.cameraRotation.z;
+}
+
+///////////////////////////////
+///// create the single sliders
+///////////////////////////////
 
 // create the individual sliders
 function createPsizeSliders(){
@@ -215,10 +260,11 @@ function createPsizeSliders(){
 		}
 
 		var slider = document.getElementById(p+'_PSlider');
-		var text = document.getElementById(p+'_PMaxT');
+		var text = [document.getElementById(p+'_PMaxT')];
 		var varToSet = [initialValue, "PsizeMult",p];
+		var varArgs = {'f':'setViewerParamByKey','v':varToSet};
 
-		createSingleSlider(slider, text, args, varToSet)
+		createSlider(slider, text, args, varArgs);
 
 		//reformat
 		w = parseInt(d3.select('#'+p+'_PSlider').style('width').slice(0,-2));
@@ -246,10 +292,11 @@ function createNpartsSliders(){
 		}
 
 		var slider = document.getElementById(p+'_NSlider');
-		var text = document.getElementById(p+'_NMaxT');
+		var text = [document.getElementById(p+'_NMaxT')];
 		var varToSet = [initialValue, "plotNmax",p]
+		var varArgs = {'f':'setViewerParamByKey','v':varToSet};
 
-		createSingleSlider(slider, text, args, varToSet, 'setViewerParamByKey', 0)
+		createSlider(slider, text, args, varArgs, 0);
 
 		//reformat
 		w = parseInt(d3.select('#'+p+'_NSlider').style('width').slice(0,-2));
@@ -258,7 +305,7 @@ function createNpartsSliders(){
 }
 
 
-//This one requires a birt of a special handling to talk to the N slider
+//This one requires a bit of a special handling to talk to the N slider
 function createDecimationSlider(){
 
 	var initialValue = GUIParams.decimate; //I don't *think* I need to update this in GUI; it's just the initial value that matters, right?
@@ -278,10 +325,11 @@ function createDecimationSlider(){
 	}
 
 	var slider = document.getElementById('DSlider');
-	var text = document.getElementById('DMaxT');
+	var text = [document.getElementById('DMaxT')];
 	var varToSet = [initialValue, "decimate"]
+	var varArgs = {'f':'setViewerParamByKey','v':varToSet};
 
-	createSingleSlider(slider, text, args, varToSet, 'setViewerParamByKey', 1)
+	createSlider(slider, text, args, varArgs, 1);
 
 	//reformat
 	w = parseInt(d3.select("#DSlider").style("width").slice(0,-2));
@@ -338,10 +386,11 @@ function createStereoSlider(){
 	}
 
 	var slider = document.getElementById('SSSlider');
-	var text = document.getElementById('SSMaxT');
+	var text = [document.getElementById('SSMaxT')];
 	var varToSet = [initialValue, "effect","setEyeSeparation"]
+	var varArgs = {'f':'setViewerParamByKey','v':varToSet};
 
-	createSingleSlider(slider, text, args, varToSet, 'setViewerParamByKey', 1)
+	createSlider(slider, text, args, varArgs, 1);
 
 	//reformat
 	w = parseInt(d3.select("#SSSlider").style("width").slice(0,-2));
@@ -368,10 +417,11 @@ function createFrictionSlider(){
 	}
 
 	var slider = document.getElementById('CFSlider');
-	var text = document.getElementById('CFMaxT');
+	var text = [document.getElementById('CFMaxT')];
 	var varToSet = [initialValue];
+	var varArgs = {'f':'updateFriction','v':varToSet};
 
-	createSingleSlider(slider, text, args, varToSet, 'updateFriction', 1)
+	createSlider(slider, text, args, varArgs,1);
 
 	//reformat
 	w = parseInt(d3.select("#CFSlider").style("width").slice(0,-2));
@@ -379,337 +429,6 @@ function createFrictionSlider(){
 }
 
 
-
-//////////////////////
-
-function selectVelType() {
-	var option = d3.select(this)
-		.selectAll("option")
-		.filter(function (d, i) { 
-			return this.selected; 
-	});
-	selectValue = option.property('value');
-
-	var p = this.id.slice(0,-14)
-	sendToViewer({'setViewerParamByKey':[selectValue, "velType",p]})
-}
-
-function changeSnapSizes(){
-	sendToViewer({'setViewerParamByKey':[window.innerWidth, 'renderWidth']});
-	sendToViewer({'setViewerParamByKey':[window.innerHeight, 'renderHeight'] });
-	document.getElementById("RenderXText").value = window.innerWidth;
-	document.getElementById("RenderYText").value = window.innerHeight;
-}
-window.addEventListener('resize', changeSnapSizes);
-
-
-
-//to move the GUI around on the screen
-//from https://www.w3schools.com/howto/howto_js_draggable.asp
-function dragElement(elm, e) {
-	var elmnt = document.getElementsByClassName("UIcontainer")[0];
-	var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-	dragMouseDown(e);
-
-
-	function dragMouseDown(e) {
-		e = e || window.event;
-		// get the mouse cursor position at startup:
-		pos3 = e.clientX;
-		pos4 = e.clientY;
-		document.addEventListener('mouseup', closeDragElement);
-		document.addEventListener('mousemove', elementDrag);
-
-	}
-
-	function elementDrag(e) {
-		GUIParams.movingUI = true;
-		e = e || window.event;
-		// calculate the new cursor position:
-		pos1 = pos3 - e.clientX;
-		pos2 = pos4 - e.clientY;
-		pos3 = e.clientX;
-		pos4 = e.clientY;
-
-		// set the element's new position:
-		var top = parseInt(elmnt.style.top);
-		var left = parseInt(elmnt.style.left);
-		elmnt.style.top = (top - pos2) + "px";
-		elmnt.style.left = (left - pos1) + "px";
-	}
-
-	function closeDragElement(e) {
-		/* stop moving when mouse button is released:*/
-		e.stopPropagation();
-		GUIParams.movingUI = false;
-		document.removeEventListener('mouseup', closeDragElement);
-		document.removeEventListener('mousemove', elementDrag);
-
-	}
-}
-
-/////////////////////////// COLOR SCALE
-//from https://www.w3schools.com/howto/howto_js_draggable.asp
-function dragColorbarElement(elm, e) {
-	var elmnt = document.getElementById("colorbar_container");
-	var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
-	dragMouseDown(e);
-
-	function dragMouseDown(e) {
-		e = e || window.event;
-		// get the mouse cursor position at startup:
-		pos3 = e.clientX;
-		pos4 = e.clientY;
-		document.addEventListener('mouseup', closeDragElement);
-		document.addEventListener('mousemove', elementDrag);
-
-	}
-
-	function elementDrag(e) {
-		GUIParams.movingUI = true;
-		e = e || window.event;
-		// calculate the new cursor position:
-		pos1 = pos3 - e.clientX;
-		pos2 = pos4 - e.clientY;
-		pos3 = e.clientX;
-		pos4 = e.clientY;
-
-		// set the element's new position:
-		var top = parseInt(elmnt.style.top);
-		var left = parseInt(elmnt.style.left);
-		elmnt.style.top = (top - pos2) + "px";
-		elmnt.style.left = (left - pos1) + "px";
-	}
-
-	function closeDragElement(e) {
-		/* stop moving when mouse button is released:*/
-		e.stopPropagation();
-		GUIParams.movingUI = false;
-		document.removeEventListener('mouseup', closeDragElement);
-		document.removeEventListener('mousemove', elementDrag);
-
-	}
-}
-
-function defineColorbarContainer(particle_group_UIname){
-	var text_height = 40;
-	var container_margin = {"top":10,"side":15}
-	var container_width = 300 
-	var container_height = 30
-	var cbar_bounds = {'width':container_width,'height':container_height}
-
-	//trying to position this next to the UI, but where do these numbers come from?? both depend on the container_width and container_height...
-	var container_top = 138; 
-	var container_left = 188;
-
-	var minmax = GUIParams.colormapVals[particle_group_UIname][GUIParams.ckeys[particle_group_UIname][GUIParams.colormapVariable[particle_group_UIname]]]
-	var xmin = minmax[0]
-	var xmax = minmax[1]
-
-
-	var colorbar_container = d3.select("#colorbar_container")
-		.html("")
-		.attr('class', 'colorbar')
-		.style("height",cbar_bounds.height+container_margin.top*2+text_height+"px")
-	// contianer_margin : +*2 for the margins themselves, +1 for the offset of the content...?
-		.style("width",cbar_bounds.width+container_margin.side*2+container_margin.side+"px")
-		.style("top",container_top+"px")
-		.style("left",container_left+"px")
-		.style('position','absolute')
-		.style('transform','rotate(90deg)')
-		.attr('onmousedown','dragColorbarElement(this, event);');
-
-		// this is the box that contains the colorbar image node, which fills this div
-	var colorbar_box = colorbar_container.append('div')
-		.attr('id','colorbar_box')
-		.style("position","relative")
-		.style("width",cbar_bounds.width+container_margin.side)
-		.style("height",cbar_bounds.height)
-		.style("left",container_margin.side+"px")
-		.style("top","10px")
-		.style("overflow","hidden")
-
-	var svg = colorbar_container.append("svg")
-		.attr("width", parseFloat(colorbar_box.style("width"))+2*container_margin.side) 
-		.attr("height",text_height)
-		//.style("background-color","green") // debug background from the axis ticks
-		.style("position","relative")
-		.style("top",container_margin.top+"px")
-		.style("left",container_margin.side+"px")
-		.append("g")
-		.attr("class","cbar_svg")
-
-
-	// set the ranges
-	var x = d3.scaleLinear().range([parseFloat(colorbar_container.style('margin-left')), parseFloat(colorbar_box.style("width"))+parseFloat(colorbar_container.style('margin-left'))]);
-
-	// Scale the range of the data
-	//x.domain([xmin,xmax]);
-	x.domain([xmax,xmin]); //because I'm rotating
-
-	// Add the X Axis
-	svg.append("g")
-		.attr("class", "axis")
-		.call(d3.axisBottom(x).ticks(10))
-		.selectAll("text")  
-			.style("text-anchor", "end")
-			.attr("transform", "translate("+container_margin.side+",0)")
-			.attr("dx", "-.8em")
-			.attr("dy", ".15em")
-			.attr("transform", "rotate(-65)")
-
-	colorbar_container.append('div')
-		.style("text-align","center")
-		.style("position",'relative')
-		.style("height",text_height + "px")
-		.attr('class','colorbar_label') // hardcode background color in index.css, why isn't this inherited??
-
-	colorbar_container.classed('hidden', true)
-}
-
-function fillColorbarContainer( particle_group_UIname){
-	var n_colormap = 31-(GUIParams.colormap[particle_group_UIname]*32-0.5)
-
-	//change the image
-	var colorbar_box = d3.select("#colorbar_box");
-	colorbar_box.html("<img src=static/textures/colormap.png"+ 
-		" height="+ parseFloat(colorbar_box.style("height"))*32 +
-		" width="+ parseFloat(colorbar_box.style("width")) +
-		' style="'+
-		' position:relative;'+
-		' top:'+'-'+n_colormap*parseFloat(colorbar_box.style("height"))+'px;'+
-		' transform:scaleX(-1);'+ //because I'm rotating the whole div
-		'pointer-events: none' + // literally why
-		'"' + 
-		'draggable="false"'+ // is it so hard
-		+'onmousedown="if (event.preventDefault) event.preventDefault()"'+ // to make it not drag the image
-		"></img>")
-
-
-	//update the axes
-	var colorbar_container = d3.select('#colorbar_container');
-	var minmax = GUIParams.colormapVals[particle_group_UIname][GUIParams.ckeys[particle_group_UIname][GUIParams.colormapVariable[particle_group_UIname]]]
-	var xmin = minmax[0]
-	var xmax = minmax[1]
-	// set the ranges
-	var x = d3.scaleLinear().range([parseFloat(colorbar_container.style('margin-left')), parseFloat(colorbar_box.style("width"))+parseFloat(colorbar_container.style('margin-left'))]);
-
-	// Scale the range of the data
-	//x.domain([xmin,xmax]);
-	x.domain([xmax,xmin]); //because I'm rotating
-
-	d3.select('#colorbar_container').select('.axis')
-		.call(d3.axisBottom(x).ticks(10))
-		.selectAll("text")  
-			.style("text-anchor", "end")
-			.attr("transform", "translate("+parseFloat(colorbar_container.style('margin-left'))+",0)")
-			.attr("dx", "-.8em")
-			.attr("dy", ".15em")
-			.attr("transform", "rotate(-65)")
-
-	//change the label
-	var colorbar_label = particle_group_UIname + ' ' +  GUIParams.ckeys[particle_group_UIname][GUIParams.colormapVariable[particle_group_UIname]]
-	d3.select('.colorbar_label').html(colorbar_label)
-
-
-
-}
-
-function selectColormapVariable() {
-	var option = d3.select(this)
-		.selectAll("option")
-		.filter(function (d, i) { 
-			return this.selected; 
-	});
-	selectValue = option.property('value');
-
-	var p = this.id.slice(0,-14)
-
-	for (var i=0; i<GUIParams.ckeys[p].length; i+=1){
-		d3.selectAll('#'+p+'_CK_'+GUIParams.ckeys[p][i]+'_END_CMap')
-			.style('display','none');
-	}
-	d3.selectAll('#'+p+'_CK_'+selectValue+'_END_CMap')
-		.style('display','block');
-
-	// update colormap variable
-	GUIParams.colormapVariable[p] = GUIParams.ckeys[p].indexOf(selectValue);
-	console.log(p, "colored by:", GUIParams.ckeys[p][GUIParams.colormapVariable[p]])
-
-	// redraw particle type if colormap is on
-	if (GUIParams.showColormap[p]){
-		drawScene(pDraw = [p]);
-		fillColorbarContainer(p);
-	}
-}
-
-function selectColormap() {
-	var option = d3.select(this)
-		.selectAll("option")
-		.filter(function (d, i) { 
-			return this.selected; 
-	});
-	selectValue = option.property('value');
-
-	var p = this.id.slice(0,-11)
-
-	// update colormap
-	GUIParams.colormap[p] = ((GUIParams.colormapList.indexOf(selectValue)) + 0.5) * (8/256);
-	sendToViewer({'setViewerParamByKey':[GUIParams.colormap, "colormap"]});	
-
-	console.log(p, " selected colormap:", GUIParams.colormapList[GUIParams.colormapList.indexOf(selectValue)], GUIParams.colormap[p])
-
-	// redraw particle type if colormap is on
-	if (GUIParams.showColormap[p]){
-		//drawScene(pDraw = [p]);
-		fillColorbarContainer(p);
-	}
-}
-
-function updateUICenterText(){
-	var el;
-	if (GUIParams.useTrackball){
-		el = document.getElementById("CenterXText");
-		if (el != null) el.value = GUIParams.controlsTarget.x;
-
-		el = document.getElementById("CenterYText");
-		if (el != null) el.value = GUIParams.controlsTarget.y;
-		
-		el = document.getElementById("CenterZText");
-		if (el != null) el.value = GUIParams.controlsTarget.z;
-	} else {
-		el = document.getElementById("CenterXText");
-		if (el != null) el.value = GUIParams.cameraDirection.x + GUIParams.cameraPosition.x;
-
-		el = document.getElementById("CenterYText");
-		if (el != null) el.value = GUIParams.cameraDirection.y + GUIParams.cameraPosition.y;
-
-		el = document.getElementById("CenterZText");
-		if (el != null) el.value = GUIParams.cameraDirection.z + GUIParams.cameraPosition.z;		
-	}
-}
-
-function updateUICameraText(){
-	var el = document.getElementById("CameraXText");
-	if (el != null) el.value = GUIParams.cameraPosition.x;
-	
-	el = document.getElementById("CameraYText"); 
-	if (el != null) el.value = GUIParams.cameraPosition.y;
-		
-	el = document.getElementById("CameraZText"); 
-	if (el != null) el.value = GUIParams.cameraPosition.z;
-}
-
-function updateUIRotText(){
-	var el = document.getElementById("RotXText");
-	if (el != null) el.value = GUIParams.cameraRotation.x;
-
-	var el = document.getElementById("RotYText")
-	if (el != null) el.value = GUIParams.cameraRotation.y;
-
-	el = document.getElementById("RotZText")
-	if (el != null) el.value = GUIParams.cameraRotation.z;
-}
 ///////////////////////////////
 ////// all below needs work
 //////////////////////////////
@@ -818,7 +537,7 @@ function handleFSliderText(input, handle) {
 	});
 }
 
-function createFilterSliders(){
+function OLDcreateFilterSliders(){
 
 	var i = 0;
 	var j = 0;
@@ -1076,40 +795,6 @@ function createCMapSliders(){
 
 
 
-
-
-function selectFilter() {
-	var option = d3.select(this)
-		.selectAll("option")
-		.filter(function (d, i) { 
-			return this.selected; 
-	});
-	selectValue = option.property('value');
-
-	var p = this.id.slice(0,-13)
-
-	// store the "currently shown" filter for later use
-	console.log("setting the current filter value to",selectValue)
-	sendToViewer({'setViewerParamByKey':[selectValue, 'parts',p,'currentlyShownFilter']})
-
-	//console.log("in selectFilter", selectValue, this.id, p)
-	for (var i=0; i<viewerParams.fkeys[p].length; i+=1){
-		//console.log('hiding','#'+p+'_FK_'+viewerParams.fkeys[p][i]+'_END_Filter')
-		d3.selectAll('#'+p+'_FK_'+viewerParams.fkeys[p][i]+'_END_Filter')
-			.style('display','none');
-		d3.selectAll('#'+p+'_FK_'+viewerParams.fkeys[p][i]+'_END_InvertFilterCheckBox')
-			.style('display','none');
-		d3.selectAll('#'+p+'_FK_'+viewerParams.fkeys[p][i]+'_END_InvertFilterCheckBoxLabel')
-			.style('display','none');
-	}
-	//console.log('showing', '#'+p+'_FK_'+selectValue+'_END_Filter')
-	d3.selectAll('#'+p+'_FK_'+selectValue+'_END_Filter')
-		.style('display','block');
-	d3.selectAll('#'+p+'_FK_'+selectValue+'_END_InvertFilterCheckBox')
-		.style('display','inline-block');
-	d3.selectAll('#'+p+'_FK_'+selectValue+'_END_InvertFilterCheckBoxLabel')
-		.style('display','inline-block');
-}
 
 
 

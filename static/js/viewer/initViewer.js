@@ -524,7 +524,6 @@ function initPVals(){
 				}
 			}
 		}
-
 		//colormap
 		//in case there are no colormap possibilities (but will be overwritten below)
 		viewerParams.ckeys[p] = ["foo"];
@@ -558,6 +557,7 @@ function initPVals(){
 
 
 	}
+
 
 
 }
@@ -932,6 +932,9 @@ function sendInitGUI(){
 	sendToGUI({'setGUIParamByKey':[viewerParams.decimate, "decimate"]});
 	sendToGUI({'setGUIParamByKey':[viewerParams.stereoSepMax, "stereoSepMax"]});
 	sendToGUI({'setGUIParamByKey':[viewerParams.friction, "friction"]});
+	sendToGUI({'setGUIParamByKey':[viewerParams.fkeys,"fkeys"]});
+	sendToGUI({'setGUIParamByKey':[viewerParams.filterVals,"filterVals"]});
+	sendToGUI({'setGUIParamByKey':[viewerParams.filterLims,"filterLims"]});
 
 	sendToGUI({'setGUIParamByKey':[true,"ready"]});
 }
@@ -959,6 +962,8 @@ function sendToGUI(viewerInput){
 
 //a bit clunky...
 function setViewerParamByKey(args){
+	//first argument is always the value of the variable that you want to set
+	//the remaining values in args are how to reference the variable, going in order for object keys as they would be written to access the variable (see below)
 	var value = args[0];
 	var key1 = args[1];
 	if (args.length == 2) {
@@ -970,6 +975,11 @@ function setViewerParamByKey(args){
 		var key2 = args[2];
 		var key3 = args[3];
 		viewerParams[key1][key2][key3] = JSON.parse(JSON.stringify(value));
+	} else if (args.length == 5) {
+		var key2 = args[2];
+		var key3 = args[3];
+		var key4 = args[4];
+		viewerParams[key1][key2][key3][key4] = JSON.parse(JSON.stringify(value));
 	} else {
 		console.log('!!!! TOO MANY ARGUMENTS TO PASS', args.length, args)
 	}

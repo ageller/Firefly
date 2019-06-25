@@ -34,12 +34,16 @@ function defineGUIParams(){
 		this.decimate;
 		this.stereoSepMax;
 		this.friction;
-		
+
 		this.colormapVals = {};
 		this.ckeys = {};
 		this.colormapVariable = {};
 		this.colormap = {};
 		this.showColormap = {};
+
+		this.fkeys = {};
+		this.filterVals = {};
+		this.filterLims = {};
 
 
 		//only need to pass the position, rotation, direction portion of the camera
