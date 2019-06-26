@@ -437,10 +437,10 @@ function createFrictionSlider(){
 function createUI(){
 	console.log("Creating UI");
 		
-		var use_color_id = null
+	var use_color_id = null
 
 //change the hamburger to the X to start
-	if (! viewerParams.reset){
+	if (! GUIParams.reset){
 
 		var UIcontainer = d3.select('.UIcontainer');
 
@@ -476,10 +476,10 @@ function createUI(){
 	//set the gtoggle Object (in correct order)
 	GUIParams.gtoggle.dataControls = true;
 	GUIParams.gtoggle.cameraControls = true;
-	for (i=0; i<viewerParams.partsKeys.length; i++){
-		d = viewerParams.partsKeys[i];
-		GUIParams.gtoggle[d] = true;
-	}
+	GUIParams.partsKeys.forEach(function(p){
+		GUIParams.gtoggle[p] = true;
+
+	})
 
 
 	var UI = d3.select('#particleUI')
@@ -557,7 +557,7 @@ function createUI(){
 	snap.append('input')
 		.attr('id','RenderXText')
 		.attr('type', 'text')
-		.attr('value',viewerParams.renderWidth)
+		.attr('value',GUIParams.renderWidth)
 		.attr('autocomplete','off')
 		.attr('class','pTextInput')
 		.style('width','50px')
@@ -570,7 +570,7 @@ function createUI(){
 	snap.append('input')
 		.attr('id','RenderYText')
 		.attr('type', 'text')
-		.attr('value',viewerParams.renderHeight)
+		.attr('value',GUIParams.renderHeight)
 		.attr('autocomplete','off')
 		.attr('class','pTextInput')
 		.style('width','50px')
@@ -703,7 +703,7 @@ function createUI(){
 		.on('change',function(){
 			sendToViewer({'checkCenterLock':this});
 		})
-	if (viewerParams.useTrackball){
+	if (GUIParams.useTrackball){
 		elm = document.getElementById("CenterCheckBox");
 		elm.value = true
 		elm.checked = true;
@@ -875,7 +875,7 @@ function createUI(){
 		.on('change',function(){
 			sendToViewer({'checkStereoLock':this});
 		});
-	if (viewerParams.useStereo){
+	if (GUIParams.useStereo){
 		elm = document.getElementById("StereoCheckBox");
 		elm.value = true
 		elm.checked = true;
@@ -899,36 +899,34 @@ function createUI(){
 
 	///////////////////////
 	//setup for all the particle UI bits 
-	UIparts.data(viewerParams.partsKeys).enter()
+	UIparts.data(GUIParams.partsKeys).enter()
 		.append('div')
-		.attr('class', function (d) { return "particleDiv "+d+"Div" }) //+ dropdown
-		.attr('id', function (d) { return d+"Div" }) //+ dropdown
+		.attr('class', function (p) { return "particleDiv "+p+"Div" }) //+ dropdown
+		.attr('id', function (p) { return p+"Div" }) //+ dropdown
 
 
-	var i=0;
-	var j=0;
-	for (i=0; i<viewerParams.partsKeys.length; i++){
-		d = viewerParams.partsKeys[i];
 
-		var controls = d3.selectAll('div.'+d+'Div');
+	GUIParams.partsKeys.forEach(function(p,i){
+
+		var controls = d3.selectAll('div.'+p+'Div');
 
 		controls.append('div')
 			.attr('class','pLabelDiv')
-			.text(function (d) { return d})
+			.text(function (p) { return p})
 			
 		var onoff = controls.append('label')
 			.attr('class','switch');
 
 		onoff.append('input')
-			.attr('id',d+'Check')
+			.attr('id',p+'Check')
 			.attr('type','checkbox')
 			.attr('autocomplete','off')
 			.attr('checked','true')
 			.on('change',function(){
 				sendToViewer({'checkshowParts':this});
 			})
-		if (!viewerParams.showParts[d]){
-			elm = document.getElementById(d+'Check');
+		if (!GUIParams.showParts[p]){
+			elm = document.getElementById(p+'Check');
 			elm.checked = false;
 			elm.value = false;
 		} 
@@ -937,26 +935,26 @@ function createUI(){
 
 
 		controls.append('div')
-			.attr('id',d+'_PSlider')
+			.attr('id',p+'_PSlider')
 			.attr('class','PSliderClass');
 
 		controls.append('input')
-			.attr('id',d+'_PMaxT')
+			.attr('id',p+'_PMaxT')
 			.attr('class', 'PMaxTClass')
 			.attr('type','text');
 
 		controls.append('input')
-			.attr('id',d+'ColorPicker');
+			.attr('id',p+'ColorPicker');
 
-		if (viewerParams.parts.options.UIdropdown[d]){
+		if (GUIParams.useDropdown[p]){
 			controls.append('button')
-				.attr('id', d+'Dropbtn')
+				.attr('id', p+'Dropbtn')
 				.attr('class', 'dropbtn')
 				.attr('onclick','showFunction(this)')
 				.html('&#x25BC');
 
 			dropdown = controls.append('div')
-				.attr('id',d+'Dropdown')
+				.attr('id',p+'Dropdown')
 				.attr('class','dropdown-content');
 
 			dNcontent = dropdown.append('div')
@@ -968,11 +966,11 @@ function createUI(){
 				.text('N');
 
 			dNcontent.append('div')
-				.attr('id',d+'_NSlider')
+				.attr('id',p+'_NSlider')
 				.attr('class','NSliderClass');
 
 			dNcontent.append('input')
-				.attr('id',d+'_NMaxT')
+				.attr('id',p+'_NMaxT')
 				.attr('class', 'NMaxTClass')
 				.attr('type','text');
 
@@ -980,7 +978,7 @@ function createUI(){
 
 	//for velocity vectors
 
-			if (viewerParams.parts[d].Velocities != null){
+			if (GUIParams.haveVelocities[p]){
 				dropdown.append('hr')
 					.style('margin','0')
 					.style('border','1px solid #909090')
@@ -989,51 +987,41 @@ function createUI(){
 					.attr('class','NdDiv');
 
 				dVcontent.append('label')
-					.attr('for',d+'velCheckBox')
+					.attr('for',p+'velCheckBox')
 					.text('Plot Velocity Vectors');
 
 				dVcontent.append('input')
-					.attr('id',d+'velCheckBox')
+					.attr('id',p+'velCheckBox')
 					.attr('value','false')
 					.attr('type','checkbox')
 					.attr('autocomplete','off')
 					.on('change',function(){
 						sendToViewer({'checkVelBox':this});
 					})
-				if (viewerParams.showVel[d]){
-					elm = document.getElementById(d+'velCheckBox');
+				if (GUIParams.showVel[p]){
+					elm = document.getElementById(p+'velCheckBox');
 					elm.checked = true;
 					elm.value = true;
 				} 
 				var selectVType = dVcontent.append('select')
 					.attr('class','selectVelType')
-					.attr('id',d+'_SelectVelType')
+					.attr('id',p+'_SelectVelType')
 					.on('change',selectVelType)
 
 				var options = selectVType.selectAll('option')
-					.data(Object.keys(viewerParams.velopts)).enter()
+					.data(Object.keys(GUIParams.velopts)).enter()
 					.append('option')
 						.text(function (d) { return d; });
-				elm = document.getElementById(d+'_SelectVelType');
-				elm.value = viewerParams.velType[d];
+				elm = document.getElementById(p+'_SelectVelType');
+				elm.value = GUIParams.velType[p];
 
 				dheight += 30;
 			}
 
 			// colormap functionality
-			showcolor = [];
 
-			for (j=0; j<GUIParams.ckeys[d].length; j++){
-				var ck = GUIParams.ckeys[d][j]
-				if (viewerParams.parts[d][ck] != null){
-					showcolor.push(ck);
-				}
-			}
-			ncolor = showcolor.length;
-
-
-			if (ncolor > 0){
-								use_color_id = d
+			if (GUIParams.haveColormap[p]){
+				use_color_id = p;
 				dheight += 50;
 
 				dropdown.append('hr')
@@ -1044,11 +1032,11 @@ function createUI(){
 					.attr('style','margin:0px;  padding:5px; height:50px')
 
 				ColorDiv.append('label')
-				.attr('for',d+'colorCheckBox')
-				.text('Colormap');
+					.attr('for',p+'colorCheckBox')
+					.text('Colormap');
 
 				ColorDiv.append('input')
-					.attr('id',d+'colorCheckBox')
+					.attr('id',p+'colorCheckBox')
 					.attr('value','false')
 					.attr('type','checkbox')
 					.attr('autocomplete','off')
@@ -1056,86 +1044,73 @@ function createUI(){
 						sendToViewer({'checkColormapBox':this});
 					})
 
-				if (GUIParams.showColormap[d]){
-					elm = document.getElementById(d+'colorCheckBox');
+				if (GUIParams.showColormap[p]){
+					elm = document.getElementById(p+'colorCheckBox');
 					elm.checked = true;
 					elm.value = true;
-					fillColorbarContainer(d);
+					fillColorbarContainer(p);
 				} 
 
 				// dropdown to select colormap
 				var selectCMap = ColorDiv.append('select')
 					.attr('class','selectCMap')
-					.attr('id',d+'_SelectCMap')
+					.attr('id',p+'_SelectCMap')
 					.on('change', selectColormap)
 
 				var options = selectCMap.selectAll('option')
 					.data(GUIParams.colormapList).enter()
 					.append('option')
-						.text(function (x) { return x; });
-				elm = document.getElementById(d+'_SelectCMap');
+						.text(function (d) { return d; });
 
 				// dropdown to select colormap variable
 				var selectCMapVar = ColorDiv.append('select')
 					.attr('class','selectCMapVar')
-					.attr('id',d+'_SelectCMapVar')
+					.attr('id',p+'_SelectCMapVar')
 					.on('change',selectColormapVariable)
 
 				var options = selectCMapVar.selectAll('option')
-					.data(GUIParams.ckeys[d]).enter()
+					.data(GUIParams.ckeys[p]).enter()
 					.append('option')
-						.text(function (x) { return x; });
-				elm = document.getElementById(d+'_SelectCMapVar');
+						.text(function (d) { return d; });
 
 				// sliders for colormap limits
 				var colormapn = 0;
-				for (j=0; j<GUIParams.ckeys[d].length; j++){
-					var ck = GUIParams.ckeys[d][j]
-					if (viewerParams.parts[d][ck] != null){
+				GUIParams.ckeys[p].forEach(function(ck){
+					if (GUIParams.haveColormapSlider){
 
 						colormapsliders = ColorDiv.append('div')
-							.attr('id',d+'_CK_'+ck+'_END_CMap')
+							.attr('id',p+'_CK_'+ck+'_END_CMap')
 							.attr('class','CMapClass')
 
 						colormapsliders.append('div')
 							.attr('class','CMapClassLabel')
 
 						colormapsliders.append('div')
-							.attr('id',d+'_CK_'+ck+'_END_CMapSlider')
+							.attr('id',p+'_CK_'+ck+'_END_CMapSlider')
 							.style("margin-top","-1px")
 
 						colormapsliders.append('input')
-							.attr('id',d+'_CK_'+ck+'_END_CMapMinT')
+							.attr('id',p+'_CK_'+ck+'_END_CMapMinT')
 							.attr('class','CMapMinTClass')
 							.attr('type','text');
 
 						colormapsliders.append('input')
-							.attr('id',d+'_CK_'+ck+'_END_CMapMaxT')
+							.attr('id',p+'_CK_'+ck+'_END_CMapMaxT')
 							.attr('class','CMapMaxTClass')
 							.attr('type','text');
 
 						colormapn += 1;
 					}
 					if (colormapn > 1){
-						d3.selectAll('#'+d+'_CK_'+ck+'_END_CMap')
+						d3.selectAll('#'+p+'_CK_'+ck+'_END_CMap')
 							.style('display','none');
 					}
-				}
+				});
 			}
 
 	//this is dynamic, depending on what is in the data
 	//create the filters
-	//first count the available filters
-			showfilts = [];
-			for (j=0; j<viewerParams.fkeys[d].length; j++){
-				var fk = viewerParams.fkeys[d][j]
-				if (viewerParams.parts[d][fk] != null){
-					showfilts.push(fk);
-				}
-			}
-			nfilt = showfilts.length;
-
-			if (nfilt > 0){
+			if (GUIParams.haveFilter[p]){
 				dheight += 80;
 
 				dropdown.append('hr')
@@ -1152,29 +1127,28 @@ function createUI(){
 					.append('select')
 					.attr('style','width:160px')
 					.attr('class','selectFilter')
-					.attr('id',d+'_SelectFilter')
+					.attr('id',p+'_SelectFilter')
 					.on('change',selectFilter)
 
 				var options = selectF.selectAll('option')
-					.data(showfilts).enter()
+					.data(GUIParams.fkeys[p]).enter()
 					.append('option')
-					.text(function (d) { return d; });
+						.text(function (d) { return d; });
+
 
 				var filtn = 0;
-				for (j=0; j<viewerParams.fkeys[d].length; j++){
-					var fk = viewerParams.fkeys[d][j]
-					if (viewerParams.parts[d][fk] != null){
-
+				GUIParams.fkeys[p].forEach(function(fk){
+					if (GUIParams.haveFilterSlider[p][fk] != null){
 
 						invFilter = filterDiv.append('label')
-							.attr('for',d+'_FK_'+fk+'_'+'InvertFilterCheckBox')
-							.attr('id',d+'_FK_'+fk+'_END_InvertFilterCheckBoxLabel')
+							.attr('for',p+'_FK_'+fk+'_'+'InvertFilterCheckBox')
+							.attr('id',p+'_FK_'+fk+'_END_InvertFilterCheckBoxLabel')
 							.style('display','inline-block')
 							.style('margin-left','160px')
 							.text('Invert');
 
 						invFilter.append('input')
-							.attr('id',d+'_FK_'+fk+'_END_InvertFilterCheckBox')
+							.attr('id',p+'_FK_'+fk+'_END_InvertFilterCheckBox')
 							.attr('value','false')
 							.attr('type','checkbox')
 							.attr('autocomplete','off')
@@ -1183,7 +1157,7 @@ function createUI(){
 							})
 
 						dfilters = filterDiv.append('div')
-							.attr('id',d+'_FK_'+fk+'_END_Filter')
+							.attr('id',p+'_FK_'+fk+'_END_Filter')
 							.attr('class','FilterClass')
 							.style('display','block');
 
@@ -1191,16 +1165,16 @@ function createUI(){
 							.attr('class','FilterClassLabel')
 
 						dfilters.append('div')
-							.attr('id',d+'_FK_'+fk+'_END_FilterSlider')
+							.attr('id',p+'_FK_'+fk+'_END_FilterSlider')
 							.style("margin-top","-1px")
 
 						dfilters.append('input')
-							.attr('id',d+'_FK_'+fk+'_END_FilterMinT')
+							.attr('id',p+'_FK_'+fk+'_END_FilterMinT')
 							.attr('class','FilterMinTClass')
 							.attr('type','text');
 
 						dfilters.append('input')
-							.attr('id',d+'_FK_'+fk+'_END_FilterMaxT')
+							.attr('id',p+'_FK_'+fk+'_END_FilterMaxT')
 							.attr('class','FilterMaxTClass')
 							.attr('type','text');
 
@@ -1208,23 +1182,23 @@ function createUI(){
 
 					}
 					if (filtn > 1){
-						d3.selectAll('#'+d+'_FK_'+fk+'_END_Filter')
+						d3.selectAll('#'+p+'_FK_'+fk+'_END_Filter')
 							.style('display','none');
-						d3.selectAll('#'+d+'_FK_'+fk+'_END_InvertFilterCheckBox')
+						d3.selectAll('#'+p+'_FK_'+fk+'_END_InvertFilterCheckBox')
 							.style('display','none');
-						d3.selectAll('#'+d+'_FK_'+fk+'_END_InvertFilterCheckBoxLabel')
+						d3.selectAll('#'+p+'_FK_'+fk+'_END_InvertFilterCheckBoxLabel')
 							.style('display','none');
 					}
-				}
+				});
 
 				playback = filterDiv.append('label')
-					.attr('for',d+'_'+'PlaybackLabel')
-					.attr('id',d+'_PlaybackLabel')
+					.attr('for',p+'_'+'PlaybackLabel')
+					.attr('id',p+'_PlaybackLabel')
 					.style('display','inline-block')
 					.style('margin-top','30px')
 					.text('Playback:');
 				playback.append('input')
-					.attr('id',d+'_PlaybackCheckbox')
+					.attr('id',p+'_PlaybackCheckbox')
 					.attr('value','false')
 					.attr('type','checkbox')
 					.attr('autocomplete','off')
@@ -1245,8 +1219,8 @@ function createUI(){
 
 /* for color pickers*/
 //can I write this in d3? I don't think so.  It needs a jquery object
-		$("#"+d+"ColorPicker").spectrum({
-			color: "rgba("+(viewerParams.Pcolors[d][0]*255)+","+(viewerParams.Pcolors[d][1]*255)+","+(viewerParams.Pcolors[d][2]*255)+","+viewerParams.Pcolors[d][3]+")",
+		$("#"+p+"ColorPicker").spectrum({
+			color: "rgba("+(GUIParams.Pcolors[p][0]*255)+","+(GUIParams.Pcolors[p][1]*255)+","+(GUIParams.Pcolors[p][2]*255)+","+GUIParams.Pcolors[p][3]+")",
 			flat: false,
 			showInput: true,
 			showInitial: false,
@@ -1261,14 +1235,14 @@ function createUI(){
 			},
 		});
 
-		if (!viewerParams.parts.options.UIcolorPicker[d]){
+		if (!GUIParams.useColorPicker[p]){
 			$("#"+d+"ColorPicker").spectrum({
-				color: "rgba("+(viewerParams.Pcolors[d][0]*255)+","+(viewerParams.Pcolors[d][1]*255)+","+(viewerParams.Pcolors[d][2]*255)+","+viewerParams.Pcolors[d][3]+")",
+				color: "rgba("+(GUIParams.Pcolors[p][0]*255)+","+(GUIParams.Pcolors[p][1]*255)+","+(GUIParams.Pcolors[p][2]*255)+","+GUIParams.Pcolors[p][3]+")",
 				disabled: true,
 			});		
 		}
 
-	}
+	});
 
 // create all the noUISliders
 	createPsizeSliders();
@@ -1286,11 +1260,11 @@ function createUI(){
 
 	sendToViewer({'applyUIoptions':null});
 
+	sendToViewer({'setViewerParamByKey':[true, "haveUI"]});
 
-	viewerParams.haveUI = true;
 
 	//hide the UI initially
-	if (!viewerParams.reset){
+	if (!GUIParams.reset){
 		var hamburger = document.getElementById('UItopbar');
 		hideUI(hamburger);
 		hamburger.classList.toggle("change");

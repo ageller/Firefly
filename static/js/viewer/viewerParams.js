@@ -120,12 +120,9 @@ function defineViewerParams(){
 		// textbox limits for colormap
 		this.colormapLims = {};
 
-		// colormap sliders
-		this.SliderCMapinputs = {};
+		//check if we need to update the colormap when rendering
 		this.updateColormap = {};
-		this.SliderCMap = {};
-		this.SliderCMapmin = {};
-		this.SliderCMapmax = {};
+
 
 
 		//tweening

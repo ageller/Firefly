@@ -921,24 +921,83 @@ viewerParams.waitForInit = setInterval(function(){
 
 
 function sendInitGUI(){
+	//general particle settings
 	sendToGUI({'setGUIParamByKey':[viewerParams.partsKeys, "partsKeys"]});
 	sendToGUI({'setGUIParamByKey':[viewerParams.PsizeMult, "PsizeMult"]});
 	sendToGUI({'setGUIParamByKey':[viewerParams.plotNmax, "plotNmax"]});
 	sendToGUI({'setGUIParamByKey':[viewerParams.decimate, "decimate"]});
-	sendToGUI({'setGUIParamByKey':[viewerParams.stereoSepMax, "stereoSepMax"]});
-	sendToGUI({'setGUIParamByKey':[viewerParams.friction, "friction"]});
+	sendToGUI({'setGUIParamByKey':[viewerParams.Pcolors, "Pcolors"]});
+	sendToGUI({'setGUIParamByKey':[viewerParams.showParts, "showParts"]});
+	sendToGUI({'setGUIParamByKey':[viewerParams.parts.options.UIdropdown, "useDropdown"]});
+	sendToGUI({'setGUIParamByKey':[viewerParams.parts.options.UIcolorPicker, "useColorPicker"]});
 
+	//for velocities
+	sendToGUI({'setGUIParamByKey':[viewerParams.showVel, "showVel"]});
+	sendToGUI({'setGUIParamByKey':[viewerParams.velopts, "velopts"]});
+	sendToGUI({'setGUIParamByKey':[viewerParams.velType, "velType"]});
+	var haveVelocities = {};
+	viewerParams.partsKeys.forEach(function(p){
+		haveVelocities[p] = false;
+		if (viewerParams.parts[p].Velocities != null){
+			haveVelocities[p] = true;
+		}
+	});
+	sendToGUI({'setGUIParamByKey':[haveVelocities,"haveVelocities"]});
+
+	//for colormap
 	sendToGUI({'setGUIParamByKey':[viewerParams.ckeys,"ckeys"]});
 	sendToGUI({'setGUIParamByKey':[viewerParams.colormapVals, "colormapVals"]});
 	sendToGUI({'setGUIParamByKey':[viewerParams.colormapLims, "colormapLims"]});
 	sendToGUI({'setGUIParamByKey':[viewerParams.colormapVariable, "colormapVariable"]});
 	sendToGUI({'setGUIParamByKey':[viewerParams.colormap, "colormap"]});
 	sendToGUI({'setGUIParamByKey':[viewerParams.showColormap, "showColormap"]});
-	
+	var haveColormap = {};
+	var haveColormapSlider = {};
+	viewerParams.partsKeys.forEach(function(p){
+		haveColormap[p] = false;
+		haveColormapSlider[p] = {};
+		viewerParams.ckeys[p].forEach(function(ck){
+			haveColormapSlider[p][ck] = false;
+			if (viewerParams.parts[p][ck] != null){
+				haveColormap[p] = true;
+				haveColormapSlider[p][ck] = true;
+			}
+		});
+	});
+	sendToGUI({'setGUIParamByKey':[haveColormap,"haveColormap"]});
+	sendToGUI({'setGUIParamByKey':[haveColormapSlider,"haveColormapSlider"]});
+
+	//for filters
 	sendToGUI({'setGUIParamByKey':[viewerParams.fkeys,"fkeys"]});
 	sendToGUI({'setGUIParamByKey':[viewerParams.filterVals,"filterVals"]});
 	sendToGUI({'setGUIParamByKey':[viewerParams.filterLims,"filterLims"]});
+	var haveFilter = {};
+	var haveFilterSlider = {};
+	viewerParams.partsKeys.forEach(function(p){
+		haveFilter[p] = false;
+		haveFilterSlider[p] = {};
+		viewerParams.fkeys[p].forEach(function(fk){
+			haveFilterSlider[p][fk] = false;
+			if (viewerParams.parts[p][fk] != null){
+				haveFilter[p] = true;
+				haveFilterSlider[p][fk] = true;
+			}
+		});
+	});
+	sendToGUI({'setGUIParamByKey':[haveFilter,"haveFilter"]});
+	sendToGUI({'setGUIParamByKey':[haveFilterSlider,"haveFilterSlider"]});
 
+	//for camera
+	sendToGUI({'setGUIParamByKey':[viewerParams.stereoSepMax, "stereoSepMax"]});
+	sendToGUI({'setGUIParamByKey':[viewerParams.friction, "friction"]});
+	sendToGUI({'setGUIParamByKey':[viewerParams.useTrackball, "useTrackball"]});
+	sendToGUI({'setGUIParamByKey':[viewerParams.useStereo, "useStereo"]});
+	sendToGUI({'setGUIParamByKey':[viewerParams.renderWidth,"renderWidth"]});
+	sendToGUI({'setGUIParamByKey':[viewerParams.renderHeight,"renderHeight"]});
+
+	sendToGUI({'setGUIParamByKey':[viewerParams.reset,"reset"]});
+
+	//ready to create GUI
 	sendToGUI({'setGUIParamByKey':[true,"ready"]});
 }
 
