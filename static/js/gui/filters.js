@@ -42,7 +42,7 @@ function createFilterSliders(){
 			//I don't *think* I need to update this in GUI; it's just the initial value that matters, right?
 			var initialValueMin = GUIParams.filterLims[p][fk][0]; 
 			var initialValueMax = GUIParams.filterLims[p][fk][1];
-			var args = {
+			var sliderArgs = {
 				start: [initialValueMin, initialValueMax], 
 				connect: true,
 				tooltips: [false, false],
@@ -63,7 +63,7 @@ function createFilterSliders(){
 			var varArgs = {'f':'setViewerParamByKey','v':[initialValueMin, "filterVals",p, fk],
 						  'f2':'setViewerParamByKey','v2':[true,'updateFilter',p]};
 
-			createSlider(slider, text, args, varArgs, [2,2], 'double');
+			createSlider(slider, text, sliderArgs, varArgs, [2,2], 'double');
 
 			//reformat
 			var w = parseInt(d3.select('.FilterClass').style("width").slice(0,-2));

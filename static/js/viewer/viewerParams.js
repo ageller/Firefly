@@ -40,10 +40,6 @@ function defineViewerParams(){
 
 		//Filtering
 		this.fkeys = {};
-		this.SliderF = {};
-		this.SliderFmin = {};
-		this.SliderFmax = {};
-		this.SliderFinputs = {};
 		this.updateFilter = {};
 		this.filterLims = {};
 		this.filterVals = {};

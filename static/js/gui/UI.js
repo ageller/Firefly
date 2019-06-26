@@ -245,7 +245,7 @@ function createPsizeSliders(){
 	GUIParams.partsKeys.forEach(function(p,i){
 		var initialValue = GUIParams.PsizeMult[p]; //I don't *think* I need to update this in GUI; it's just the initial value that matters, right?
 
-		var args = {
+		var sliderArgs = {
 			start: [initialValue], 
 			connect: [true, false],
 			tooltips: false,
@@ -264,7 +264,7 @@ function createPsizeSliders(){
 		var varToSet = [initialValue, "PsizeMult",p];
 		var varArgs = {'f':'setViewerParamByKey','v':varToSet};
 
-		createSlider(slider, text, args, varArgs);
+		createSlider(slider, text, sliderArgs, varArgs);
 
 		//reformat
 		w = parseInt(d3.select('#'+p+'_PSlider').style('width').slice(0,-2));
@@ -277,7 +277,7 @@ function createNpartsSliders(){
 	GUIParams.partsKeys.forEach(function(p,i){
 		var initialValue = GUIParams.plotNmax[p]; //I don't *think* I need to update this in GUI; it's just the initial value that matters, right?
 
-		var args = {
+		var sliderArgs = {
 			start: [initialValue], 
 			connect: [true, false],
 			tooltips: false,
@@ -296,7 +296,7 @@ function createNpartsSliders(){
 		var varToSet = [initialValue, "plotNmax",p]
 		var varArgs = {'f':'setViewerParamByKey','v':varToSet};
 
-		createSlider(slider, text, args, varArgs, 0);
+		createSlider(slider, text, sliderArgs, varArgs, [null, 0]);
 
 		//reformat
 		w = parseInt(d3.select('#'+p+'_NSlider').style('width').slice(0,-2));
@@ -310,7 +310,7 @@ function createDecimationSlider(){
 
 	var initialValue = GUIParams.decimate; //I don't *think* I need to update this in GUI; it's just the initial value that matters, right?
 
-	var args = {
+	var sliderArgs = {
 		start: [initialValue], 
 		connect: [true, false],
 		tooltips: false,
@@ -329,7 +329,7 @@ function createDecimationSlider(){
 	var varToSet = [initialValue, "decimate"]
 	var varArgs = {'f':'setViewerParamByKey','v':varToSet};
 
-	createSlider(slider, text, args, varArgs, 1);
+	createSlider(slider, text, sliderArgs, varArgs, [null, 1]);
 
 	//reformat
 	w = parseInt(d3.select("#DSlider").style("width").slice(0,-2));
@@ -371,7 +371,7 @@ function createStereoSlider(){
 
 	var initialValue = GUIParams.stereoSepMax; //I don't *think* I need to update this in GUI; it's just the initial value that matters, right?
 
-	var args = {
+	var sliderArgs = {
 		start: [initialValue], 
 		connect: [true, false],
 		tooltips: false,
@@ -390,7 +390,7 @@ function createStereoSlider(){
 	var varToSet = [initialValue, "effect","setEyeSeparation"]
 	var varArgs = {'f':'setViewerParamByKey','v':varToSet};
 
-	createSlider(slider, text, args, varArgs, 1);
+	createSlider(slider, text, sliderArgs, varArgs, [null, 1]);
 
 	//reformat
 	w = parseInt(d3.select("#SSSlider").style("width").slice(0,-2));
@@ -402,7 +402,7 @@ function createFrictionSlider(){
 
 	var initialValue = GUIParams.friction; //I don't *think* I need to update this in GUI; it's just the initial value that matters, right?
 
-	var args = {
+	var sliderArgs = {
 		start: [initialValue], 
 		connect: [true, false],
 		tooltips: false,
@@ -421,7 +421,7 @@ function createFrictionSlider(){
 	var varToSet = [initialValue];
 	var varArgs = {'f':'updateFriction','v':varToSet};
 
-	createSlider(slider, text, args, varArgs,1);
+	createSlider(slider, text, sliderArgs, varArgs,[null, 1]);
 
 	//reformat
 	w = parseInt(d3.select("#CFSlider").style("width").slice(0,-2));
