@@ -268,6 +268,7 @@ function fillColorbarContainer( particle_group_UIname){
 	var colorbar_label = particle_group_UIname + ' ' +  GUIParams.ckeys[particle_group_UIname][GUIParams.colormapVariable[particle_group_UIname]]
 	d3.select('.colorbar_label').html(colorbar_label)
 
-
+	//show/hide the colorbardiv
+	d3.select('#colorbar_container').classed('hidden', !GUIParams.showColormap[particle_group_UIname])
 
 }

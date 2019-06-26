@@ -2,7 +2,7 @@ function animate(time) {
 	if (!viewerParams.pauseAnimation){
 		requestAnimationFrame( animate );
 		update(time);
-		sendInfoToGUI();
+		//sendInfoToGUI();
 		render();
 	}
 
@@ -24,7 +24,7 @@ function update(time){
 	}
 	if (viewerParams.keyboard.down("space")){
 		viewerParams.useTrackball = !viewerParams.useTrackball;
-		sendToGUI({'setGUIParamByKey':[viewerParams.useTrackball, "useTrackball"]});
+		sendToGUI([{'setGUIParamByKey':[viewerParams.useTrackball, "useTrackball"]}]);
 		viewerParams.switchControls = true;
 		viewerParams.controls.dispose();
 		initControls();
@@ -223,14 +223,17 @@ function sendInfoToGUI(){
 	var xx = new THREE.Vector3(0,0,0);
 	viewerParams.camera.getWorldDirection(xx);
 
-	sendToGUI({'setGUIParamByKey':[viewerParams.camera.position, "cameraPosition"]});
-	sendToGUI({'setGUIParamByKey':[viewerParams.camera.rotation, "cameraRotation"]});
-	sendToGUI({'setGUIParamByKey':[xx, "cameraDirection"]});
-	if (viewerParams.useTrackball) sendToGUI({'setGUIParamByKey':[viewerParams.controls.target, "controlsTarget"]});
+	var forGUI = [];
+	forGUI.push({'setGUIParamByKey':[viewerParams.camera.position, "cameraPosition"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.camera.rotation, "cameraRotation"]});
+	forGUI.push({'setGUIParamByKey':[xx, "cameraDirection"]});
+	if (viewerParams.useTrackball) forGUI.push({'setGUIParamByKey':[viewerParams.controls.target, "controlsTarget"]});
 
-	sendToGUI({'updateUICenterText':null});
-	sendToGUI({'updateUICameraText':null});
-	sendToGUI({'updateUIRotText':null});
+	forGUI.push({'updateUICenterText':null});
+	forGUI.push({'updateUICameraText':null});
+	forGUI.push({'updateUIRotText':null});
+
+	sendToGUI(forGUI);
 }
 
 

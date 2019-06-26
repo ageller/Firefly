@@ -1,0 +1,8 @@
+*.pyc
+.DS_STORE
+
+dist/*
+build/*
+*.sw*
+
+

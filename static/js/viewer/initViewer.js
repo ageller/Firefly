@@ -1,5 +1,5 @@
 function initControls(){
-	sendToGUI({'setGUIParamByKey':[viewerParams.useTrackball, "useTrackball"]});
+	sendToGUI([{'setGUIParamByKey':[viewerParams.useTrackball, "useTrackball"]}]);
 
 	if (viewerParams.useTrackball) {
 		var xx = new THREE.Vector3(0,0,0);
@@ -599,10 +599,10 @@ function countParts(){
 }
 
 //if startup.json exists, this is called first
-function getFilenames(){
+function getFilenames(prefix=""){
 
-	d3.json(viewerParams.startup,  function(dir) {
-		console.log(dir, viewerParams.startup, viewerParams)
+	d3.json(prefix+viewerParams.startup,  function(dir) {
+		console.log(prefix, dir, viewerParams.startup, viewerParams)
 		if (dir != null){
 			var i = 0;
 			viewerParams.dir = dir;
@@ -610,13 +610,13 @@ function getFilenames(){
 				i = null
 				console.log("multiple file options in startup:", Object.keys(viewerParams.dir).length, viewerParams.dir);
 				showLoadingButton('#selectStartupButton');
-				selectFromStartup();
+				selectFromStartup(prefix);
 
 			} 
 			if (i != null && i < Object.keys(viewerParams.dir).length){
-				d3.json(viewerParams.dir[i] + "/filenames.json",  function(files) {
+				d3.json(prefix+viewerParams.dir[i] + "/filenames.json",  function(files) {
 					if (files != null){
-						callLoadData(files);
+						callLoadData(files, prefix);
 					} else {
 						showLoadingButton('#loadDataButton');
 						alert("Cannot load data. Please select another directory.");
@@ -633,7 +633,7 @@ function loadStartup(){
 	document.getElementById("inputFilenames").click();
 }
 //for loading and reading a startup file with multiple entries
-function selectFromStartup(){
+function selectFromStartup(prefix=""){
 	var screenWidth = parseFloat(window.innerWidth);
 
 	var dirs = [];
@@ -703,10 +703,10 @@ function selectFromStartup(){
 	// submit fires the loader
 	submitButton.addEventListener('click', function() {
 		startupModal.style.display = "none";
-		var f = selection.value+'/filenames.json';
+		var f = prefix+selection.value+'/filenames.json';
 		d3.json(f,  function(files) {
 			if (files != null){
-				callLoadData(files);
+				callLoadData(files, prefix);
 			} else {
 				alert("Cannot load data. Please select another directory.");
 			}
@@ -725,7 +725,7 @@ function showLoadingButton(id){
 }
 
 //once a data directory is identified, this will define the parameters, draw the loading bar and, load in the data
-function callLoadData(files){
+function callLoadData(files, prefix=""){
 	var dir = {};
 	if (viewerParams.hasOwnProperty('dir')){
 		dir = viewerParams.dir;
@@ -735,9 +735,9 @@ function callLoadData(files){
 
 	drawLoadingBar();
 	viewerParams.filenames = files;
-	loadData(WebGLStart);
+	loadData(WebGLStart, prefix);
 }
-function loadData(callback){
+function loadData(callback, prefix=""){
 
 	document.getElementById("inputFilenames").value = "";
 
@@ -771,7 +771,7 @@ function loadData(callback){
 			//console.log(readf)
 			if (readf != null){
 				//console.log("f = ", f)
-				d3.json(readf,  function(foo) {
+				d3.json(prefix+readf,  function(foo) {
 					//console.log("keys", Object.keys(foo), f[0])
 					Object.keys(foo).forEach(function(k, jj) {
 						//console.log("k = ", k, jj)
@@ -914,27 +914,28 @@ function WebGLStart(){
 //wait for all the input before loading
 viewerParams.waitForInit = setInterval(function(){ 
 	if (viewerParams.ready){
-		sendInitGUI();
 		clearInterval(viewerParams.waitForInit);
+		sendInitGUI();
 	}
 }, 100);
 
 
 function sendInitGUI(){
 	//general particle settings
-	sendToGUI({'setGUIParamByKey':[viewerParams.partsKeys, "partsKeys"]});
-	sendToGUI({'setGUIParamByKey':[viewerParams.PsizeMult, "PsizeMult"]});
-	sendToGUI({'setGUIParamByKey':[viewerParams.plotNmax, "plotNmax"]});
-	sendToGUI({'setGUIParamByKey':[viewerParams.decimate, "decimate"]});
-	sendToGUI({'setGUIParamByKey':[viewerParams.Pcolors, "Pcolors"]});
-	sendToGUI({'setGUIParamByKey':[viewerParams.showParts, "showParts"]});
-	sendToGUI({'setGUIParamByKey':[viewerParams.parts.options.UIdropdown, "useDropdown"]});
-	sendToGUI({'setGUIParamByKey':[viewerParams.parts.options.UIcolorPicker, "useColorPicker"]});
+	var forGUI = [];
+	forGUI.push({'setGUIParamByKey':[viewerParams.partsKeys, "partsKeys"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.PsizeMult, "PsizeMult"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.plotNmax, "plotNmax"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.decimate, "decimate"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.Pcolors, "Pcolors"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.showParts, "showParts"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.parts.options.UIdropdown, "useDropdown"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.parts.options.UIcolorPicker, "useColorPicker"]});
 
 	//for velocities
-	sendToGUI({'setGUIParamByKey':[viewerParams.showVel, "showVel"]});
-	sendToGUI({'setGUIParamByKey':[viewerParams.velopts, "velopts"]});
-	sendToGUI({'setGUIParamByKey':[viewerParams.velType, "velType"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.showVel, "showVel"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.velopts, "velopts"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.velType, "velType"]});
 	var haveVelocities = {};
 	viewerParams.partsKeys.forEach(function(p){
 		haveVelocities[p] = false;
@@ -942,15 +943,15 @@ function sendInitGUI(){
 			haveVelocities[p] = true;
 		}
 	});
-	sendToGUI({'setGUIParamByKey':[haveVelocities,"haveVelocities"]});
+	forGUI.push({'setGUIParamByKey':[haveVelocities,"haveVelocities"]});
 
 	//for colormap
-	sendToGUI({'setGUIParamByKey':[viewerParams.ckeys,"ckeys"]});
-	sendToGUI({'setGUIParamByKey':[viewerParams.colormapVals, "colormapVals"]});
-	sendToGUI({'setGUIParamByKey':[viewerParams.colormapLims, "colormapLims"]});
-	sendToGUI({'setGUIParamByKey':[viewerParams.colormapVariable, "colormapVariable"]});
-	sendToGUI({'setGUIParamByKey':[viewerParams.colormap, "colormap"]});
-	sendToGUI({'setGUIParamByKey':[viewerParams.showColormap, "showColormap"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.ckeys,"ckeys"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.colormapVals, "colormapVals"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.colormapLims, "colormapLims"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.colormapVariable, "colormapVariable"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.colormap, "colormap"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.showColormap, "showColormap"]});
 	var haveColormap = {};
 	var haveColormapSlider = {};
 	viewerParams.partsKeys.forEach(function(p){
@@ -964,13 +965,13 @@ function sendInitGUI(){
 			}
 		});
 	});
-	sendToGUI({'setGUIParamByKey':[haveColormap,"haveColormap"]});
-	sendToGUI({'setGUIParamByKey':[haveColormapSlider,"haveColormapSlider"]});
+	forGUI.push({'setGUIParamByKey':[haveColormap,"haveColormap"]});
+	forGUI.push({'setGUIParamByKey':[haveColormapSlider,"haveColormapSlider"]});
 
 	//for filters
-	sendToGUI({'setGUIParamByKey':[viewerParams.fkeys,"fkeys"]});
-	sendToGUI({'setGUIParamByKey':[viewerParams.filterVals,"filterVals"]});
-	sendToGUI({'setGUIParamByKey':[viewerParams.filterLims,"filterLims"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.fkeys,"fkeys"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.filterVals,"filterVals"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.filterLims,"filterLims"]});
 	var haveFilter = {};
 	var haveFilterSlider = {};
 	viewerParams.partsKeys.forEach(function(p){
@@ -984,21 +985,24 @@ function sendInitGUI(){
 			}
 		});
 	});
-	sendToGUI({'setGUIParamByKey':[haveFilter,"haveFilter"]});
-	sendToGUI({'setGUIParamByKey':[haveFilterSlider,"haveFilterSlider"]});
+	forGUI.push({'setGUIParamByKey':[haveFilter,"haveFilter"]});
+	forGUI.push({'setGUIParamByKey':[haveFilterSlider,"haveFilterSlider"]});
 
 	//for camera
-	sendToGUI({'setGUIParamByKey':[viewerParams.stereoSepMax, "stereoSepMax"]});
-	sendToGUI({'setGUIParamByKey':[viewerParams.friction, "friction"]});
-	sendToGUI({'setGUIParamByKey':[viewerParams.useTrackball, "useTrackball"]});
-	sendToGUI({'setGUIParamByKey':[viewerParams.useStereo, "useStereo"]});
-	sendToGUI({'setGUIParamByKey':[viewerParams.renderWidth,"renderWidth"]});
-	sendToGUI({'setGUIParamByKey':[viewerParams.renderHeight,"renderHeight"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.stereoSepMax, "stereoSepMax"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.friction, "friction"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.useTrackball, "useTrackball"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.useStereo, "useStereo"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.renderWidth,"renderWidth"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.renderHeight,"renderHeight"]});
 
-	sendToGUI({'setGUIParamByKey':[viewerParams.reset,"reset"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.reset,"reset"]});
+
+	sendToGUI(forGUI);
 
 	//ready to create GUI
-	sendToGUI({'createUI':null});
+	console.log("sent all inits to GUI")
+
 }
 
 //so that it can run locally also without using Flask
@@ -1007,18 +1011,45 @@ function runLocal(){
 	GUIParams.usingSocket = false;
 
 	//This will  load the data, and then start the WebGL rendering
-	getFilenames();
+	getFilenames(prefix = "static/");
 }
 
 /////////////////////
 //// for sockets
+/////////////////////
+//https://blog.miguelgrinberg.com/post/easy-websockets-with-flask-and-gevent
+//https://github.com/miguelgrinberg/Flask-SocketIO
+function connectSocket(){
+	//$(document).ready(function() {
+	document.addEventListener("DOMContentLoaded", function(event) { 
+		// Event handler for new connections.
+		// The callback function is invoked when a connection with the
+		// server is established.
+		socketParams.socket.on('connect', function() {
+			socketParams.socket.emit('connection_test', {data: 'I\'m connected!'});
+		});
+		socketParams.socket.on('connection_response', function(msg) {
+			console.log(msg);
+		});		
+		// Event handler for server sent data.
+		// The callback function is invoked whenever the server emits data
+		// to the client. The data is then displayed in the "Received"
+		// section of the page.
+		//updates from ML engine
+		socketParams.socket.on('update_viewerParams', function(msg) {
+			setParams(msg);
+		});
+
+	});
+}
+
+
 //function to send events to the GUI
-function sendToGUI(viewerInput){
+function sendToGUI(GUIInput){
 	if (viewerParams.usingSocket){
-		console.log('sending to GUI', viewerInput)
-		socketParams.socket.emit('viewerInput',viewerInput);
+		socketParams.socket.emit('gui_input',GUIInput);
 	} else {
-		setParams(viewerInput);
+		setParams(GUIInput);
 	}
 }
 
@@ -1047,16 +1078,6 @@ function setViewerParamByKey(args){
 	}
 }
 
-//apply the information from sockets to the viewer
-function setViewerParams(vars){
-	console.log('have params for viewer.', vars)
-	var keys = Object.keys(vars);
-	//var keys = ['objDataShown']
-	keys.forEach(function(k,i){
-		executeFunctionByName(k, window, vars[k])
-	});
-
-}
 
 
 /////////////////////
@@ -1081,7 +1102,9 @@ d3.select('body').append('input')
 				reader.onload = function(){
 					var foo = JSON.parse(this.result);
 					if (foo != null){
-						callLoadData(foo);
+						var prefix = null;
+						if (viewerParams.usingSocket) prefix = 'static/'
+						callLoadData(foo, prefix);
 					} else {
 						alert("Cannot load data. Please select another directory.");
 					}

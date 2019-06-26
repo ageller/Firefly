@@ -3,6 +3,10 @@ var GUIParams;
 
 function defineGUIParams(){
 	GUIParams = new function(){
+
+		//when ready the GUI will be created
+		this.waitForInit = null;
+
 		//for show/hide UI
 		this.movingUI = false;
 		this.UIhidden = false;
@@ -43,29 +47,29 @@ function defineGUIParams(){
 		// these below are shared with viewerParams (passed from viewerParams to GUIParams)
 		this.reset = false;
 
-		this.partsKeys;
-		this.PsizeMult = {};
-		this.plotNmax = {};
-		this.decimate;
-		this.stereoSepMax;
-		this.friction;
+		this.partsKeys = null;
+		this.PsizeMult = null;
+		this.plotNmax = null;
+		this.decimate = null;
+		this.stereoSepMax = null;
+		this.friction = null;
 
-		this.Pcolors = {};
-		this.showParts = {};
-		this.showVel = {};
-		this.velopts = {}; 
-		this.velType = {}; 
+		this.Pcolors = null;
+		this.showParts = null;
+		this.showVel = null;
+		this.velopts = null; 
+		this.velType = null; 
 
-		this.ckeys = {};
-		this.colormapVals = {};
-		this.colormapLims = {};
-		this.colormapVariable = {};
-		this.colormap = {};
-		this.showColormap = {};
+		this.ckeys = null;
+		this.colormapVals = null;
+		this.colormapLims = null;
+		this.colormapVariable = null;
+		this.colormap = null;
+		this.showColormap = null;
 
-		this.fkeys = {};
-		this.filterVals = {};
-		this.filterLims = {};
+		this.fkeys = null;
+		this.filterVals = null;
+		this.filterLims = null;
 
 		//only need to pass the position, rotation, direction portion of the camera
 		this.cameraPosition = new THREE.Vector3(0,0,0);

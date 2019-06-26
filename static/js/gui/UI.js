@@ -1,14 +1,55 @@
+//wait for all the input before loading
+GUIParams.waitForInit = setInterval(function(){ 
+	var ready = confirmInit();
+	if (ready){
+		clearInterval(GUIParams.waitForInit);
+		createUI();
+	}
+}, 1000);
+function confirmInit(){
+	var keys = ["partsKeys", "PsizeMult", "plotNmax", "decimate", "stereoSepMax", "friction", "Pcolors", "showParts", "showVel", "velopts", "velType", "ckeys", "colormapVals", "colormapLims", "colormapVariable", "colormap", "showColormap", "fkeys", "filterVals", "filterLims"];
+	var ready = true;
+	keys.forEach(function(k,i){
+		if (GUIParams[k] == null) ready = false;
+	});
+	return ready
+}
+
+
 //////////////
 // sockets
 //////////////
+//https://blog.miguelgrinberg.com/post/easy-websockets-with-flask-and-gevent
+//https://github.com/miguelgrinberg/Flask-SocketIO
+function connectSocket(){
+	//$(document).ready(function() {
+	document.addEventListener("DOMContentLoaded", function(event) { 
+		// Event handler for new connections.
+		// The callback function is invoked when a connection with the
+		// server is established.
+		socketParams.socket.on('connect', function() {
+			socketParams.socket.emit('connection_test', {data: 'I\'m connected!'});
+		});
+		socketParams.socket.on('connection_response', function(msg) {
+			console.log(msg);
+		});
+		// Event handler for server sent data.
+		// The callback function is invoked whenever the server emits data
+		// to the client. The data is then displayed in the "Received"
+		// section of the page.
+		socketParams.socket.on('update_GUIParams', function(msg) {
+			setParams(msg); 
+		});
+
+	});
+}
 
 //function to send events to the viewer
-function sendToViewer(GUIinput){
+function sendToViewer(viewerInput){
 	if (GUIParams.usingSocket){
-		console.log('sending to viewer', GUIinput)
-		socketParams.socket.emit('GUIinput',GUIinput);
+		socketParams.socket.emit('viewer_input',viewerInput);
 	} else {
-		setParams(GUIinput);
+		setParams(viewerInput);
 	}
 }
 
@@ -167,13 +208,16 @@ function selectVelType() {
 	selectValue = option.property('value');
 
 	var p = this.id.slice(0,-14)
-	sendToViewer({'setViewerParamByKey':[selectValue, "velType",p]});
+	sendToViewer([{'setViewerParamByKey':[selectValue, "velType",p]}]);
 }
 
 function changeSnapSizes(){
 	//size of the snapshot (from text input)
-	sendToViewer({'setViewerParamByKey':[window.innerWidth, 'renderWidth']});
-	sendToViewer({'setViewerParamByKey':[window.innerHeight, 'renderHeight'] });
+	var forViewer = [];
+	forViewer.append({'setViewerParamByKey':[window.innerWidth, 'renderWidth']});
+	forViewer.append({'setViewerParamByKey':[window.innerHeight, 'renderHeight'] });
+	sendToViewer(forViewer);
+
 	document.getElementById("RenderXText").value = window.innerWidth;
 	document.getElementById("RenderYText").value = window.innerHeight;
 }
@@ -334,7 +378,7 @@ function createDecimationSlider(){
 		//if (decf != 1){ //is this if statement really necessary?
 			text.value = values[handle];
 			varToSet[0] = values[handle];
-			sendToViewer({'setViewerParamByKey':varToSet})
+			sendToViewer([{'setViewerParamByKey':varToSet}])
 			GUIParams.decimate = values[handle];
 		//}
 
@@ -422,12 +466,12 @@ function createFrictionSlider(){
 
 
 ///////////////////////////////
-////// all below needs work
+////// create the UI
 //////////////////////////////
 
 
 function createUI(){
-	console.log("Creating UI");
+	console.log("Creating UI", GUIParams.partsKeys);
 		
 	var use_color_id = null
 
@@ -541,7 +585,7 @@ function createUI(){
 		.style('padding','5px')
 		.style('margin',0)
 		.on('click',function(){
-			sendToViewer({'renderImage':null});
+			sendToViewer([{'renderImage':null}]);
 		})
 		.append('span')
 			.text('Take Snapshot');
@@ -557,7 +601,7 @@ function createUI(){
 		.style('margin-right','5px')
 		.on('keypress',function(){
 			var key = event.keyCode || event.which;
-			if (key == 13) sendToViewer({'checkText':this});
+			if (key == 13) sendToViewer([{'checkText':this}]);
 		})
 	snap.append('input')
 		.attr('id','RenderYText')
@@ -569,7 +613,7 @@ function createUI(){
 		.style('margin-top','5px')
 		.on('keypress',function(){
 			var key = event.keyCode || event.which;
-			if (key == 13) sendToViewer({'checkText':this});
+			if (key == 13) sendToViewer([{'checkText':this}]);
 		})
 
 	//save preset button
@@ -579,7 +623,7 @@ function createUI(){
 		.attr('class','button')
 		.style('width','280px')
 		.on('click',function(){
-			sendToViewer({'savePreset':null});
+			sendToViewer([{'savePreset':null}]);
 		})
 		.append('span')
 			.text('Save Preset');
@@ -591,7 +635,7 @@ function createUI(){
 		.attr('class','button')
 		.style('width','134px')
 		.on('click',function(){
-			sendToViewer({'resetToOptions':null});
+			sendToViewer([{'resetToOptions':null}]);
 		})
 		.append('span')
 			.text('Reset to Default');
@@ -604,7 +648,7 @@ function createUI(){
 		.style('left','134px')
 		.style('margin-left','0px')
 		.on('click',function(){
-			sendToViewer({'loadPreset':null});
+			sendToViewer([{'loadPreset':null}]);
 		})
 		.append('span')
 			.text('Reset to Preset');
@@ -616,7 +660,7 @@ function createUI(){
 		.attr('class','button')
 		.style('width','280px')
 		.on('click',function(){
-			sendToViewer({'loadNewData':null});
+			sendToViewer([{'loadNewData':null}]);
 		})
 		.append('span')
 			.text('Load New Data');
@@ -658,7 +702,7 @@ function createUI(){
 		.style('margin-right','8px')
 		.on('keypress',function(){
 			var key = event.keyCode || event.which;
-			if (key == 13) sendToViewer({'checkText':this});
+			if (key == 13) sendToViewer([{'checkText':this}]);
 		})
 	c3.append('input')
 		.attr('class','pTextInput')
@@ -669,7 +713,7 @@ function createUI(){
 		.style('margin-right','8px')
 		.on('keypress',function(){
 			var key = event.keyCode || event.which;
-			if (key == 13) sendToViewer({'checkText':this});
+			if (key == 13) sendToViewer([{'checkText':this}]);
 		})
 	c3.append('input')
 		.attr('class','pTextInput')
@@ -679,7 +723,7 @@ function createUI(){
 		.style('width','40px')
 		.on('keypress',function(){
 			var key = event.keyCode || event.which;
-			if (key == 13) sendToViewer({'checkText':this});
+			if (key == 13) sendToViewer([{'checkText':this}]);
 		})
 	//center lock checkbox
 	var c4 = c3.append('span')
@@ -693,7 +737,7 @@ function createUI(){
 		.attr('type','checkbox')
 		.attr('autocomplete','off')
 		.on('change',function(){
-			sendToViewer({'checkCenterLock':this});
+			sendToViewer([{'checkCenterLock':this.checked}]);
 		})
 	if (GUIParams.useTrackball){
 		elm = document.getElementById("CenterCheckBox");
@@ -727,7 +771,7 @@ function createUI(){
 		.style('margin-right','8px')
 		.on('keypress',function(){
 			var key = event.keyCode || event.which;
-			if (key == 13) sendToViewer({'checkText':this});
+			if (key == 13) sendToViewer([{'checkText':this}]);
 		})
 	c3.append('input')
 		.attr('class','pTextInput')
@@ -738,7 +782,7 @@ function createUI(){
 		.style('margin-right','8px')
 		.on('keypress',function(){
 			var key = event.keyCode || event.which;
-			if (key == 13) sendToViewer({'checkText':this});
+			if (key == 13) sendToViewer([{'checkText':this}]);
 		})
 	c3.append('input')
 		.attr('class','pTextInput')
@@ -748,7 +792,7 @@ function createUI(){
 		.style('width','40px')
 		.on('keypress',function(){
 			var key = event.keyCode || event.which;
-			if (key == 13) sendToViewer({'checkText':this});
+			if (key == 13) sendToViewer([{'checkText':this}]);
 		})
 	//rotation text boxes
 	c3 = c2.append('div')
@@ -768,7 +812,7 @@ function createUI(){
 		.style('margin-right','8px')
 		.on('keypress',function(){
 			var key = event.keyCode || event.which;
-			if (key == 13) sendToViewer({'checkText':this});
+			if (key == 13) sendToViewer([{'checkText':this}]);
 		})
 	c3.append('input')
 		.attr('class','pTextInput')
@@ -779,7 +823,7 @@ function createUI(){
 		.style('margin-right','8px')
 		.on('keypress',function(){
 			var key = event.keyCode || event.which;
-			if (key == 13) sendToViewer({'checkText':this});
+			if (key == 13) sendToViewer([{'checkText':this}]);
 		})
 	c3.append('input')
 		.attr('class','pTextInput')
@@ -789,7 +833,7 @@ function createUI(){
 		.style('width','40px')
 		.on('keypress',function(){
 			var key = event.keyCode || event.which;
-			if (key == 13) sendToViewer({'checkText':this});
+			if (key == 13) sendToViewer([{'checkText':this}]);
 		})
 	//buttons
 	c3 = c2.append('div')
@@ -803,7 +847,7 @@ function createUI(){
 		.style('padding','2px')
 		.on('click',function(){
 			var key = event.keyCode || event.which;
-			if (key == 13) sendToViewer({'checkText':this});
+			if (key == 13) sendToViewer([{'checkText':this}]);
 		})
 		.append('span')
 			.text('Save');
@@ -814,7 +858,7 @@ function createUI(){
 		.style('margin-right','8px')
 		.style('padding','2px')
 		.on('click',function(){
-			sendToViewer({'resetCamera':null});
+			sendToViewer([{'resetCamera':null}]);
 		})
 		.append('span')
 			.text('Reset');
@@ -824,7 +868,7 @@ function createUI(){
 		.style('margin',0)
 		.style('padding','2px')
 		.on('click',function(){
-			sendToViewer({'recenterCamera':null});
+			sendToViewer([{'recenterCamera':null}]);
 		})
 		.append('span')
 			.text('Recenter');
@@ -865,7 +909,7 @@ function createUI(){
 		.attr('type','checkbox')
 		.attr('autocomplete','false')
 		.on('change',function(){
-			sendToViewer({'checkStereoLock':this});
+			sendToViewer([{'checkStereoLock':this.checked}]);
 		});
 	if (GUIParams.useStereo){
 		elm = document.getElementById("StereoCheckBox");
@@ -915,7 +959,7 @@ function createUI(){
 			.attr('autocomplete','off')
 			.attr('checked','true')
 			.on('change',function(){
-				sendToViewer({'checkshowParts':this});
+				sendToViewer([{'checkshowParts':[p,this.checked]}]);
 			})
 		if (!GUIParams.showParts[p]){
 			elm = document.getElementById(p+'Check');
@@ -988,7 +1032,7 @@ function createUI(){
 					.attr('type','checkbox')
 					.attr('autocomplete','off')
 					.on('change',function(){
-						sendToViewer({'checkVelBox':this});
+						sendToViewer([{'checkVelBox':[p, this.checked]}]);
 					})
 				if (GUIParams.showVel[p]){
 					elm = document.getElementById(p+'velCheckBox');
@@ -1033,7 +1077,7 @@ function createUI(){
 					.attr('type','checkbox')
 					.attr('autocomplete','off')
 					.on('change',function(){
-						sendToViewer({'checkColormapBox':this});
+						sendToViewer([{'checkColormapBox':[p, this.checked]}]);
 					})
 
 				if (GUIParams.showColormap[p]){
@@ -1145,7 +1189,7 @@ function createUI(){
 							.attr('type','checkbox')
 							.attr('autocomplete','off')
 							.on('change',function(){
-								sendToViewer({'checkInvertFilterBox':this});
+								sendToViewer([{'checkInvertFilterBox':[p, fk, this.checked]}]);
 							})
 
 						dfilters = filterDiv.append('div')
@@ -1196,7 +1240,7 @@ function createUI(){
 					.attr('autocomplete','off')
 					.style('display','inline-block')
 					.on('change',function(){
-						sendToViewer({'checkPlaybackFilterBox':this});
+						sendToViewer([{'checkPlaybackFilterBox':[p, this.checked]}]);
 					})
 
 
@@ -1223,7 +1267,8 @@ function createUI(){
 			maxSelectionSize: 10,
 			preferredFormat: "rgb",
 			change: function(color) {
-				sendToViewer({'checkColor':[this, color]});
+				console.log(color)
+				sendToViewer([{'checkColor':[p, color.toRgb()]}]);
 			},
 		});
 
@@ -1250,9 +1295,9 @@ function createUI(){
 	updateUICameraText();
 	updateUIRotText();
 
-	sendToViewer({'applyUIoptions':null});
+	sendToViewer([{'applyUIoptions':null}]);
 
-	sendToViewer({'setViewerParamByKey':[true, "haveUI"]});
+	sendToViewer([{'setViewerParamByKey':[true, "haveUI"]}]);
 
 
 	//hide the UI initially

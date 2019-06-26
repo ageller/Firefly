@@ -24,7 +24,7 @@ function resetToOptions(){
 	//destroy the particle portion of the UI and recreate it (simplest option, but not really destroying all elements...)
 	d3.select('#particleUI').html("");
 	sendInitGUI();
-	sendToGUI({'createUI':null});
+	sendToGUI([{'createUI':null}]);
 
 	drawScene();
 	viewerParams.reset = false;
@@ -107,7 +107,7 @@ function resetToPreset(preset){
 	//destroy the particle portion of the UI and recreate it (simplest option, but not really destroying all elements...)
 	d3.select('#particleUI').html("");
 	sendInitGUI();
-	sendToGUI({'createUI':null});
+	sendToGUI([{'createUI':null}]);
 
 	drawScene();
 	viewerParams.reset = false;
@@ -115,11 +115,11 @@ function resetToPreset(preset){
 }
 
 //check whether the center is locked or not
-function checkCenterLock(box){
+function checkCenterLock(checked){
 
 	viewerParams.controls.dispose();
 	viewerParams.switchControls = true;
-	if (box.checked) {
+	if (checked) {
 		viewerParams.useTrackball = true;
 	} else {
 		viewerParams.useTrackball = false;
@@ -220,109 +220,104 @@ function saveCamera() {
 }
 
 //turn on/off velocity vectors
-function checkVelBox(box){
-	var pID = box.id.slice(0, -11)
-	viewerParams.showVel[pID] = false;
-	if (box.checked){
-		viewerParams.showVel[pID] = true;
+function checkVelBox(args){
+	var p = args[0];
+	var checked = args[1];
+	viewerParams.showVel[p] = false;
+	if (checked){
+		viewerParams.showVel[p] = true;
 	}
 }
 
 //turn on/off the colormap
-function checkColormapBox(box){
-	var p = box.id.slice(0, -13)
+function checkColormapBox(args){
+	var p = args[0];
+	var checked = args[1];
+	var forGUI = []; 
 	viewerParams.showColormap[p] = false;
-	if (box.checked){
+	if (checked){
 		viewerParams.showColormap[p] = true;
 		viewerParams.updateColormap[p] = true;
 		viewerParams.updateFilter[p] = true;
-
-		fillColorbarContainer(p);
+		forGUI.push({'fillColorbarContainer':p})
 
 		// redraw particle type (this may not be necessary if I'm smarter about initializing things)
 		drawScene(pDraw = [p]);
 	}
-	sendToGUI({'setGUIParamByKey':[viewerParams.showColormap, "showColormap"]});
 
+	forGUI.unshift({'setGUIParamByKey':[viewerParams.showColormap, "showColormap"]})
+	sendToGUI(forGUI);
 	console.log(p, " showColormap:", viewerParams.showColormap[p])
 
 	// redraw particle type (this seems necessary to enable the correct blending)
 	drawScene(pDraw = [p]);
 
-	//show/hide the colorbardiv
-	d3.select('#colorbar_container').classed('hidden', !viewerParams.showColormap[p])
-
-	sendToGUI({'setGUIParamByKey':["showColormap",viewerParams.showColormap]});
 
 }
 
 //turn on/off the invert filter option
-function checkInvertFilterBox(box){
-	var fpos = box.id.indexOf('_FK_');
-	var epos = box.id.indexOf('_END_');
-	var sl = box.id.length;
-	var pID = box.id.slice(0, fpos - sl);
-	var fk = box.id.slice(fpos + 4, epos - sl);
-	viewerParams.invertFilter[pID][fk] = false;
-	if (box.checked){
-		viewerParams.invertFilter[pID][fk] = true;
+function checkInvertFilterBox(args){
+	var p = args[0];
+	var fk = args[1];
+	var checked = args[2];
+
+	viewerParams.invertFilter[p][fk] = false;
+	if (checked){
+		viewerParams.invertFilter[p][fk] = true;
 	}
-	viewerParams.updateFilter[pID] = true;
+	viewerParams.updateFilter[p] = true;
 }
 
 //turn on/off playback
-function checkPlaybackFilterBox(box){
+//this is probably broken
+function checkPlaybackFilterBox(args){
+	var p = args[0];
+	var checked = args[1];
 	// figure out which checkbox was checked by slicing the ID, clever move Aaron!
-	var playback_index = box.id.indexOf('_Playback');
-	var pID = box.id.slice(0, playback_index);
-	this_label = document.getElementById(pID+'_PlaybackLabel');
+	this_label = document.getElementById(p+'_PlaybackLabel');
 
 	//reset the text/appstate to default values
 	this_label.innerText = "Playback: "
-	viewerParams.parts[pID]["playbackEnabled"]=false;
-	viewerParams.updateFilter[pID]=false;
+	viewerParams.parts[p]["playbackEnabled"]=false;
+	viewerParams.updateFilter[p]=false;
 	viewerParams.parts[p]['playbackTicks']=0;
 	if (box.checked){
 		// read which fkey is currently shown 
-		this_label = document.getElementById(pID+'_PlaybackLabel');
+		this_label = document.getElementById(p+'_PlaybackLabel');
 		// update the playback text in the UI
-		this_label.innerText += " " + viewerParams.parts[pID]['currentlyShownFilter']//"under development"//
+		this_label.innerText += " " + viewerParams.parts[p]['currentlyShownFilter']//"under development"//
 
 		//flag that we should run playback
-		viewerParams.parts[pID]["playbackEnabled"]=true;
-		viewerParams.updateFilter[pID]=true;
-		viewerParams.parts[pID]['playbackFilter']=viewerParams.parts[pID][['currentlyShownFilter']]
-		console.log(viewerParams.parts[pID]['playbackFilter'])
+		viewerParams.parts[p]["playbackEnabled"]=true;
+		viewerParams.updateFilter[p]=true;
+		viewerParams.parts[p]['playbackFilter']=viewerParams.parts[p][['currentlyShownFilter']]
+		console.log(viewerParams.parts[p]['playbackFilter'])
 	}
 }
 
 //change the color of particles
 function checkColor(args){
-	event = args[0];
-	color = args[1];
-	rgb = color.toRgb();
-	var pID = event.id.slice(0,-11); // remove  "ColorPicker" from id
-	viewerParams.Pcolors[pID] = [rgb.r/255., rgb.g/255., rgb.b/255., rgb.a];
+	var p = args[0];
+	var rgb = args[1];
+	viewerParams.Pcolors[p] = [rgb.r/255., rgb.g/255., rgb.b/255., rgb.a];
 }
 
 //function to check which types to plot
-function checkshowParts(checkbox){
-	var type = checkbox.id.slice(-5); 
-
-	if (type == 'Check'){	
-		var pID = checkbox.id.slice(0,-5); // remove  "Check" from id
-		viewerParams.updateOnOff[pID] = true;
-		viewerParams.updateFilter[pID] = true;
-		viewerParams.showParts[pID] = false;
-		if (checkbox.checked){
-			viewerParams.showParts[pID] = true;
-		}
-	} 
+function checkshowParts(args){
+	var p = args[0];
+	var checked = args[1];
+	
+	viewerParams.updateOnOff[p] = true;
+	viewerParams.updateFilter[p] = true;
+	viewerParams.showParts[p] = false;
+	if (checked){
+		viewerParams.showParts[p] = true;
+	}
 }
 
 //check for stereo separation
-function checkStereoLock(box){
-	if (box.checked) {
+function checkStereoLock(checked){
+	if (checked) {
 		viewerParams.normalRenderer = viewerParams.renderer;
 		viewerParams.renderer = viewerParams.effect;
 		viewerParams.useStereo = true;

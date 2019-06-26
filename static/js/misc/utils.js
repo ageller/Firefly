@@ -12,10 +12,12 @@ function executeFunctionByName(functionName, context /*, args */) {
 
 
 function setParams(vars){
-	//console.log('have params from sockets', vars)
-	var keys = Object.keys(vars);
-	keys.forEach(function(k,i){
-		executeFunctionByName(k, window, vars[k])
+	if (!Array.isArray(vars)) vars = [vars];
+	vars.forEach(function(v){
+		var keys = Object.keys(v);
+		keys.forEach(function(k,i){
+			executeFunctionByName(k, window, v[k])
+		});
 	});
 
 }
