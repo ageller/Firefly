@@ -3,6 +3,8 @@
 /////////////////////////////////////////////
 
 function updateSliderValues(i, value, varArgs, type){
+
+	//these update the viewer parameters
 	varToSetSend = [];
 	varArgs.v.forEach(function(x){
 		varToSetSend.push(x);
@@ -19,6 +21,14 @@ function updateSliderValues(i, value, varArgs, type){
 		sendToViewer(toSend);
 	}
 
+	if (varArgs.hasOwnProperty('f3')){
+		toSend = {};
+		toSend[varArgs.f3]= varArgs.v3;
+		sendToViewer(toSend);
+	}
+
+	//this can run a function in the GUI (can I improve on this method?)
+	if (varArgs.hasOwnProperty('evalString')) eval(varArgs.evalString);
 }
 
 //Maybe there's a way to get rid of all these if statements? (in this and the following function)

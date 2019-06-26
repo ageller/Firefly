@@ -240,7 +240,8 @@ function checkColormapBox(box){
 		// redraw particle type (this may not be necessary if I'm smarter about initializing things)
 		drawScene(pDraw = [p]);
 	}
-	
+	sendToGUI({'setGUIParamByKey':[viewerParams.showColormap, "showColormap"]});
+
 	console.log(p, " showColormap:", viewerParams.showColormap[p])
 
 	// redraw particle type (this seems necessary to enable the correct blending)

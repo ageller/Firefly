@@ -921,17 +921,20 @@ viewerParams.waitForInit = setInterval(function(){
 
 
 function sendInitGUI(){
-	sendToGUI({'setGUIParamByKey':[viewerParams.colormapVals, "colormapVals"]});
-	sendToGUI({'setGUIParamByKey':[viewerParams.colormapVariable, "colormapVariable"]});
-	sendToGUI({'setGUIParamByKey':[viewerParams.ckeys,"ckeys"]});
-	sendToGUI({'setGUIParamByKey':[viewerParams.colormap, "colormap"]});
-	sendToGUI({'setGUIParamByKey':[viewerParams.showColormap, "showColormap"]});
 	sendToGUI({'setGUIParamByKey':[viewerParams.partsKeys, "partsKeys"]});
 	sendToGUI({'setGUIParamByKey':[viewerParams.PsizeMult, "PsizeMult"]});
 	sendToGUI({'setGUIParamByKey':[viewerParams.plotNmax, "plotNmax"]});
 	sendToGUI({'setGUIParamByKey':[viewerParams.decimate, "decimate"]});
 	sendToGUI({'setGUIParamByKey':[viewerParams.stereoSepMax, "stereoSepMax"]});
 	sendToGUI({'setGUIParamByKey':[viewerParams.friction, "friction"]});
+
+	sendToGUI({'setGUIParamByKey':[viewerParams.ckeys,"ckeys"]});
+	sendToGUI({'setGUIParamByKey':[viewerParams.colormapVals, "colormapVals"]});
+	sendToGUI({'setGUIParamByKey':[viewerParams.colormapLims, "colormapLims"]});
+	sendToGUI({'setGUIParamByKey':[viewerParams.colormapVariable, "colormapVariable"]});
+	sendToGUI({'setGUIParamByKey':[viewerParams.colormap, "colormap"]});
+	sendToGUI({'setGUIParamByKey':[viewerParams.showColormap, "showColormap"]});
+	
 	sendToGUI({'setGUIParamByKey':[viewerParams.fkeys,"fkeys"]});
 	sendToGUI({'setGUIParamByKey':[viewerParams.filterVals,"filterVals"]});
 	sendToGUI({'setGUIParamByKey':[viewerParams.filterLims,"filterLims"]});

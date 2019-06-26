@@ -35,8 +35,9 @@ function defineGUIParams(){
 		this.stereoSepMax;
 		this.friction;
 
-		this.colormapVals = {};
 		this.ckeys = {};
+		this.colormapVals = {};
+		this.colormapLims = {};
 		this.colormapVariable = {};
 		this.colormap = {};
 		this.showColormap = {};
