@@ -7,10 +7,6 @@ function defineGUIParams(){
 		this.movingUI = false;
 		this.UIhidden = false;
 
-		//when ready the GUI will be created
-		this.waitForInit = null;
-		this.ready = false; 
-
 		//for dropdowns
 		this.gtoggle = {};
 

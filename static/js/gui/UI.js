@@ -1,11 +1,3 @@
-//wait for all the input before loading
-GUIParams.waitForInit = setInterval(function(){ 
-	if (GUIParams.ready){
-		clearInterval(GUIParams.waitForInit);
-		createUI();
-	}
-}, 100);
-
 //////////////
 // sockets
 //////////////

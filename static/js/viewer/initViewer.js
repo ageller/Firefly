@@ -998,7 +998,7 @@ function sendInitGUI(){
 	sendToGUI({'setGUIParamByKey':[viewerParams.reset,"reset"]});
 
 	//ready to create GUI
-	sendToGUI({'setGUIParamByKey':[true,"ready"]});
+	sendToGUI({'createUI':null});
 }
 
 //so that it can run locally also without using Flask

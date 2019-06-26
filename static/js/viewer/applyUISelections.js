@@ -24,7 +24,7 @@ function resetToOptions(){
 	//destroy the particle portion of the UI and recreate it (simplest option, but not really destroying all elements...)
 	d3.select('#particleUI').html("");
 	sendInitGUI();
-	createUI();
+	sendToGUI({'createUI':null});
 
 	drawScene();
 	viewerParams.reset = false;
@@ -107,7 +107,7 @@ function resetToPreset(preset){
 	//destroy the particle portion of the UI and recreate it (simplest option, but not really destroying all elements...)
 	d3.select('#particleUI').html("");
 	sendInitGUI();
-	createUI();
+	sendToGUI({'createUI':null});
 
 	drawScene();
 	viewerParams.reset = false;
