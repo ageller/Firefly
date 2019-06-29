@@ -2,35 +2,6 @@
 /////////////Generic  slider functions
 /////////////////////////////////////////////
 
-function updateSliderValues(i, value, varArgs, type){
-
-	//these update the viewer parameters
-	varToSetSend = [];
-	varArgs.v.forEach(function(x){
-		varToSetSend.push(x);
-	})
-	if (type == "double") varToSetSend.push(i); //adding this only for double sliders 
-	varToSetSend[0] = parseFloat(value);
-	toSend = {};
-	toSend[varArgs.f]= varToSetSend;
-	sendToViewer(toSend);
-
-	if (varArgs.hasOwnProperty('f2')){
-		toSend = {};
-		toSend[varArgs.f2]= varArgs.v2;
-		sendToViewer(toSend);
-	}
-
-	if (varArgs.hasOwnProperty('f3')){
-		toSend = {};
-		toSend[varArgs.f3]= varArgs.v3;
-		sendToViewer(toSend);
-	}
-
-	//this can run a function in the GUI (can I improve on this method?)
-	if (varArgs.hasOwnProperty('evalString')) eval(varArgs.evalString);
-}
-
 //Maybe there's a way to get rid of all these if statements? (in this and the following function)
 function setSliderHandle(i, value, parent, varArgs, resetEnd, type) {
 	//resetEnd : 0=don't reset; 1=reset if value > max; 2=reset always
@@ -58,7 +29,7 @@ function setSliderHandle(i, value, parent, varArgs, resetEnd, type) {
 	parent.noUiSlider.set(r);
 
 	//update the attached variables
-	updateSliderValues(i, value, varArgs, type);
+	updateUIValues(value, varArgs, i, type);
 }
 
 
@@ -107,7 +78,7 @@ function createSlider(slider, text, sliderArgs, varArgs, resetEnd=[null, 2], typ
 
 		slider.noUiSlider.on('update', function(values, handle) {
 			sliderInputs[handle].value = values[handle];
-			updateSliderValues(handle, values[handle], varArgs, type);
+			updateUIValues(values[handle], varArgs, handle, type);
 
 		});
 

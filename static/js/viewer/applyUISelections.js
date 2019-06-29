@@ -14,17 +14,22 @@ function resetToOptions(){
 
 	initScene();
 
-	//resize the bottom of the UI if necessary
-	var i = viewerParams.partsKeys.length-1;
-	var pID = viewerParams.partsKeys[i];
-	if (!viewerParams.gtoggle[pID]){
-		var elm = document.getElementById(pID+'Dropbtn');
-		showFunction(elm);
-	}
-	//destroy the particle portion of the UI and recreate it (simplest option, but not really destroying all elements...)
-	d3.select('#particleUI').html("");
-	sendInitGUI();
-	sendToGUI([{'createUI':null}]);
+	//resize the bottom of the UI if necessary (is this still needed?)
+	// var i = viewerParams.partsKeys.length-1;
+	// var pID = viewerParams.partsKeys[i];
+	// if (!viewerParams.gtoggle[pID]){
+	// 	var elm = document.getElementById(pID+'Dropbtn');
+	// 	showFunction(elm);
+	// }
+
+	//recreate the GUI
+	viewerParams.waitForInit = setInterval(function(){ 
+		if (viewerParams.ready){
+			clearInterval(viewerParams.waitForInit);
+			sendInitGUI();
+		}
+	}, 100);
+	sendToGUI([{'makeUI':null}]);
 
 	drawScene();
 	viewerParams.reset = false;
@@ -97,17 +102,25 @@ function resetToPreset(preset){
 
 	initScene();
 
-	//resize the bottom of the UI if necessary
-	var i = viewerParams.partsKeys.length-1;
-	var pID = viewerParams.partsKeys[i];
-	if (!viewerParams.gtoggle[pID]){
-		var elm = document.getElementById(pID+'Dropbtn');
-		showFunction(elm);
-	}	
-	//destroy the particle portion of the UI and recreate it (simplest option, but not really destroying all elements...)
-	d3.select('#particleUI').html("");
-	sendInitGUI();
-	sendToGUI([{'createUI':null}]);
+	// //resize the bottom of the UI if necessary
+	// var i = viewerParams.partsKeys.length-1;
+	// var pID = viewerParams.partsKeys[i];
+	// if (!viewerParams.gtoggle[pID]){
+	// 	var elm = document.getElementById(pID+'Dropbtn');
+	// 	showFunction(elm);
+	// }	
+	// //destroy the particle portion of the UI and recreate it (simplest option, but not really destroying all elements...)
+	// d3.select('#particleUI').html("");
+
+	defineGUIParams();
+	viewerParams.waitForInit = setInterval(function(){ 
+		if (viewerParams.ready){
+			clearInterval(viewerParams.waitForInit);
+			sendInitGUI();
+		}
+	}, 100);
+
+	sendToGUI([{'makeUI':null}]);
 
 	drawScene();
 	viewerParams.reset = false;
@@ -490,7 +503,7 @@ function renderImage() {
 }
 
 
-function savePreset(){
+function createPreset(){
 	var preset = {};
 	if (viewerParams.useTrackball){
 		preset.center = [viewerParams.controls.target.x, viewerParams.controls.target.y, viewerParams.controls.target.z];
@@ -573,6 +586,12 @@ function savePreset(){
 	}
 
 	preset.loaded = true;
+	return preset;
+
+}
+
+function savePreset(){
+	var preset = createPreset();
 
 	//https://stackoverflow.com/questions/33780271/export-a-json-object-to-a-text-file
 	var str = JSON.stringify(preset)
