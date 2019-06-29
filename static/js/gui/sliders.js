@@ -43,6 +43,8 @@ function setSliderHandle(i, value, parent, varArgs, resetEnd, type) {
 	if ((i == 0 && type == "double") && resetEnd[0] == 2 || (resetEnd[0] == 1 && value < min)) minReset = parseFloat(value);
 	if ((i == 1 || type == "single") && resetEnd[1] == 2 || (resetEnd[1] == 1 && value > max)) maxReset = parseFloat(value);
 
+	maxReset = Math.max(minReset + 0.0001*Math.abs(minReset), maxReset); //in case user makes a mistake
+
 	parent.noUiSlider.updateOptions({
 		range: {
 			'min': [minReset],
