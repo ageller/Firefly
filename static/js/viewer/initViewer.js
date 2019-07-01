@@ -1074,7 +1074,7 @@ function setViewerParamByKey(args){
 		var key4 = args[4];
 		viewerParams[key1][key2][key3][key4] = JSON.parse(JSON.stringify(value));
 	} else {
-		console.log('!!!! TOO MANY ARGUMENTS TO PASS', args.length, args)
+		console.log('!!!! WRONG NUMBER OF ARGUMENTS TO PASS', args.length, args)
 	}
 }
 

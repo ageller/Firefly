@@ -46,7 +46,7 @@ function selectColormapVariable() {
 
 	// redraw particle type if colormap is on
 	if (GUIParams.showColormap[p]){
-		drawScene(pDraw = [p]);
+		sendToViewer({'drawScene':[[p]]})
 		fillColorbarContainer(p);
 	}
 }
