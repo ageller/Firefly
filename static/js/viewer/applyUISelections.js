@@ -14,14 +14,6 @@ function resetToOptions(){
 
 	initScene();
 
-	//resize the bottom of the UI if necessary (is this still needed?)
-	// var i = viewerParams.partsKeys.length-1;
-	// var pID = viewerParams.partsKeys[i];
-	// if (!viewerParams.gtoggle[pID]){
-	// 	var elm = document.getElementById(pID+'Dropbtn');
-	// 	showFunction(elm);
-	// }
-
 	//recreate the GUI
 	viewerParams.waitForInit = setInterval(function(){ 
 		if (viewerParams.ready){
@@ -59,40 +51,11 @@ function loadNewData(){
 	document.getElementById("inputFilenames").click();
 }
 
-//load a preset file
-function loadPreset(){
-	document.getElementById("presetFile").click();
-}
 
-//read a preset file
-d3.select('body').append('input')
-	.attr('type','file')
-	.attr('id','presetFile')
-	.on('change', function(e){
-		file = this.files[0];
-		if (file != null){
-			readPreset(file);
-		}})
-	.style('display','None');
-function readPreset(file){
-	//get the new options JSON
-	var preset = {};
-	preset.loaded = false;
-
-	var reader = new FileReader();
-	reader.readAsText(file, 'UTF-8');
-	reader.onload = function(){
-		preset = JSON.parse(this.result);
-		if (preset.loaded){
-			resetToPreset(preset);
-		}
-	}
-}
 
 //reset to a preset file
 function resetToPreset(preset){
 	console.log("Resetting to Preset");
-	document.getElementById("presetFile").value = "";
 	viewerParams.parts.options = preset;
 
 	viewerParams.reset = true;
@@ -102,24 +65,13 @@ function resetToPreset(preset){
 
 	initScene();
 
-	// //resize the bottom of the UI if necessary
-	// var i = viewerParams.partsKeys.length-1;
-	// var pID = viewerParams.partsKeys[i];
-	// if (!viewerParams.gtoggle[pID]){
-	// 	var elm = document.getElementById(pID+'Dropbtn');
-	// 	showFunction(elm);
-	// }	
-	// //destroy the particle portion of the UI and recreate it (simplest option, but not really destroying all elements...)
-	// d3.select('#particleUI').html("");
-
-	defineGUIParams();
+	//recreate the GUI
 	viewerParams.waitForInit = setInterval(function(){ 
 		if (viewerParams.ready){
 			clearInterval(viewerParams.waitForInit);
 			sendInitGUI();
 		}
 	}, 100);
-
 	sendToGUI([{'makeUI':null}]);
 
 	drawScene();

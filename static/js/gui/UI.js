@@ -68,7 +68,7 @@ function setGUIParamByKey(args){
 }
 
 
-function updateUIValues(value, varArgs, i=0, type='single'){
+function updateUIValues(value, varArgs={}, i=0, type='single'){
 	//these update the viewer parameters
 	if (varArgs.hasOwnProperty('f')){
 		varToSetSend = [];
@@ -499,7 +499,37 @@ function createFrictionSlider(){
 	d3.select("#CFSlider").select('.noUi-base').style('width',w-10+"px");
 }
 
+// for presets
+//load a preset file
+function loadPreset(){
+	document.getElementById("presetFile").click();
+}
 
+//read a preset file
+d3.select('body').append('input')
+	.attr('type','file')
+	.attr('id','presetFile')
+	.on('change', function(e){
+		file = this.files[0];
+		if (file != null){
+			readPreset(file);
+		}})
+	.style('display','None');
+function readPreset(file){
+	//get the new options JSON
+	var preset = {};
+	preset.loaded = false;
+
+	var reader = new FileReader();
+	reader.readAsText(file, 'UTF-8');
+	reader.onload = function(){
+		preset = JSON.parse(this.result);
+		if (preset.loaded){
+			document.getElementById("presetFile").value = "";
+			sendToViewer([{'resetToPreset':preset}]);
+		}
+	}
+}
 ///////////////////////////////
 ////// create the UI
 //////////////////////////////
@@ -682,7 +712,7 @@ function createUI(){
 		.style('left','134px')
 		.style('margin-left','0px')
 		.on('click',function(){
-			sendToViewer([{'loadPreset':null}]);
+			loadPreset();
 		})
 		.append('span')
 			.text('Reset to Preset');

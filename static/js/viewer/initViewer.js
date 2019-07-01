@@ -160,9 +160,9 @@ function applyOptions(){
 			viewerParams.renderer = viewerParams.effect;
 			viewerParams.useStereo = true;
 			if (viewerParams.haveUI){
-				elm = document.getElementById("StereoCheckBox");
-				elm.checked = true;
-				elm.value = true;
+				var evalString = 'elm = document.getElementById("StereoCheckBox"); elm.checked = true; elm.value = true;'
+				var varArgs = {'evalString':evalString};
+				sendToGUI([{'updateUIValues':[null, varArgs, null, null]}]);
 			}
 		}
 	}
@@ -252,9 +252,9 @@ function applyOptions(){
 					if (viewerParams.parts.options.showVel[p] == true){
 						viewerParams.showVel[p] = true;
 						if (viewerParams.haveUI){
-							elm = document.getElementById(p+'velCheckBox');
-							elm.checked = true;
-							elm.value = true;
+							var evalString = 'elm = document.getElementById("'+p+'velCheckBox"); elm.checked = true; elm.value = true;'
+							var varArgs = {'evalString':evalString};
+							sendToGUI([{'updateUIValues':[null, varArgs, null, null]}]);
 						}
 					}
 				}

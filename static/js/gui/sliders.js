@@ -23,7 +23,7 @@ function setSliderHandle(i, value, parent, varArgs, resetEnd, type) {
 	parent.noUiSlider.set(r);
 
 	//update the attached variables
-	updateSliderValues(i, value, varArgs, type);
+	updateUIValues(i, value, varArgs, type);
 
 	parent.noUiSlider.updateOptions({
 		range: {
