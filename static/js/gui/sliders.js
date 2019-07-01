@@ -2,35 +2,6 @@
 /////////////Generic  slider functions
 /////////////////////////////////////////////
 
-function updateSliderValues(i, value, varArgs, type){
-
-	//these update the viewer parameters
-	varToSetSend = [];
-	varArgs.v.forEach(function(x){
-		varToSetSend.push(x);
-	})
-	if (type == "double") varToSetSend.push(i); //adding this only for double sliders 
-	varToSetSend[0] = parseFloat(value);
-	toSend = {};
-	toSend[varArgs.f]= varToSetSend;
-	sendToViewer(toSend);
-
-	if (varArgs.hasOwnProperty('f2')){
-		toSend = {};
-		toSend[varArgs.f2]= varArgs.v2;
-		sendToViewer(toSend);
-	}
-
-	if (varArgs.hasOwnProperty('f3')){
-		toSend = {};
-		toSend[varArgs.f3]= varArgs.v3;
-		sendToViewer(toSend);
-	}
-
-	//this can run a function in the GUI (can I improve on this method?)
-	if (varArgs.hasOwnProperty('evalString')) eval(varArgs.evalString);
-}
-
 //Maybe there's a way to get rid of all these if statements? (in this and the following function)
 function setSliderHandle(i, value, parent, varArgs, resetEnd, type) {
 	//resetEnd : 0=don't reset; 1=reset if value > max; 2=reset always
@@ -42,6 +13,9 @@ function setSliderHandle(i, value, parent, varArgs, resetEnd, type) {
 	var maxReset = max;
 	if ((i == 0 && type == "double") && resetEnd[0] == 2 || (resetEnd[0] == 1 && value < min)) minReset = parseFloat(value);
 	if ((i == 1 || type == "single") && resetEnd[1] == 2 || (resetEnd[1] == 1 && value > max)) maxReset = parseFloat(value);
+
+
+	maxReset = Math.max(minReset + 0.0001*Math.abs(minReset), maxReset); //in case user makes a mistake
 
 	//reset the slider value
 	var r = parent.noUiSlider.get()
@@ -57,6 +31,7 @@ function setSliderHandle(i, value, parent, varArgs, resetEnd, type) {
 			'max': [maxReset]
 		}
 	});
+
 }
 
 
@@ -105,7 +80,7 @@ function createSlider(slider, text, sliderArgs, varArgs, resetEnd=[null, 2], typ
 
 		slider.noUiSlider.on('update', function(values, handle) {
 			sliderInputs[handle].value = values[handle];
-			updateSliderValues(handle, values[handle], varArgs, type);
+			updateUIValues(values[handle], varArgs, handle, type);
 
 		});
 

@@ -1,11 +1,14 @@
 //wait for all the input before loading
-GUIParams.waitForInit = setInterval(function(){ 
-	var ready = confirmInit();
-	if (ready){
-		clearInterval(GUIParams.waitForInit);
-		createUI();
-	}
-}, 1000);
+function makeUI(){
+	GUIParams.waitForInit = setInterval(function(){ 
+		var ready = confirmInit();
+		console.log("waiting for GUI init", ready)
+		if (ready){
+			clearInterval(GUIParams.waitForInit);
+			createUI();
+		}
+	}, 1000);
+}
 function confirmInit(){
 	var keys = ["partsKeys", "PsizeMult", "plotNmax", "decimate", "stereoSepMax", "friction", "Pcolors", "showParts", "showVel", "velopts", "velType", "ckeys", "colormapVals", "colormapLims", "colormapVariable", "colormap", "showColormap", "fkeys", "filterVals", "filterLims"];
 	var ready = true;
@@ -63,6 +66,38 @@ function setGUIParamByKey(args){
 	// 	GUIParams[keyName] = value;
 	// }
 }
+
+
+function updateUIValues(value, varArgs, i=0, type='single'){
+	//these update the viewer parameters
+	if (varArgs.hasOwnProperty('f')){
+		varToSetSend = [];
+		varArgs.v.forEach(function(x){
+			varToSetSend.push(x);
+		})
+		if (type == "double") varToSetSend.push(i); //adding this only for double sliders 
+		varToSetSend[0] = parseFloat(value);
+		toSend = {};
+		toSend[varArgs.f]= varToSetSend;
+		sendToViewer(toSend);
+	}
+
+	if (varArgs.hasOwnProperty('f2')){
+		toSend = {};
+		toSend[varArgs.f2]= varArgs.v2;
+		sendToViewer(toSend);
+	}
+
+	if (varArgs.hasOwnProperty('f3')){
+		toSend = {};
+		toSend[varArgs.f3]= varArgs.v3;
+		sendToViewer(toSend);
+	}
+
+	//this can run a function in the GUI (can I improve on this method?)
+	if (varArgs.hasOwnProperty('evalString')) eval(varArgs.evalString);
+}
+
 
 /////////////
 // for show/hide of elements of the UI
@@ -279,7 +314,7 @@ function updateUIRotText(){
 function createPsizeSliders(){
 
 	GUIParams.partsKeys.forEach(function(p,i){
-		var initialValue = GUIParams.PsizeMult[p]; //I don't *think* I need to update this in GUI; it's just the initial value that matters, right?
+		var initialValue = parseFloat(GUIParams.PsizeMult[p]); //I don't *think* I need to update this in GUI; it's just the initial value that matters, right?
 
 		var sliderArgs = {
 			start: [initialValue], 
@@ -311,7 +346,7 @@ function createPsizeSliders(){
 
 function createNpartsSliders(){
 	GUIParams.partsKeys.forEach(function(p,i){
-		var initialValue = GUIParams.plotNmax[p]; //I don't *think* I need to update this in GUI; it's just the initial value that matters, right?
+		var initialValue = parseFloat(GUIParams.plotNmax[p]); //I don't *think* I need to update this in GUI; it's just the initial value that matters, right?
 
 		var sliderArgs = {
 			start: [initialValue], 
@@ -344,7 +379,7 @@ function createNpartsSliders(){
 //This one requires a bit of a special handling to talk to the N slider
 function createDecimationSlider(){
 
-	var initialValue = GUIParams.decimate; //I don't *think* I need to update this in GUI; it's just the initial value that matters, right?
+	var initialValue = parseFloat(GUIParams.decimate); //I don't *think* I need to update this in GUI; it's just the initial value that matters, right?
 
 	var sliderArgs = {
 		start: [initialValue], 
@@ -405,7 +440,7 @@ function createDecimationSlider(){
 
 function createStereoSlider(){
 
-	var initialValue = GUIParams.stereoSepMax; //I don't *think* I need to update this in GUI; it's just the initial value that matters, right?
+	var initialValue = parseFloat(GUIParams.stereoSepMax); //I don't *think* I need to update this in GUI; it's just the initial value that matters, right?
 
 	var sliderArgs = {
 		start: [initialValue], 
@@ -436,7 +471,7 @@ function createStereoSlider(){
 
 function createFrictionSlider(){
 
-	var initialValue = GUIParams.friction; //I don't *think* I need to update this in GUI; it's just the initial value that matters, right?
+	var initialValue = parseFloat(GUIParams.friction); //I don't *think* I need to update this in GUI; it's just the initial value that matters, right?
 
 	var sliderArgs = {
 		start: [initialValue], 
@@ -471,43 +506,42 @@ function createFrictionSlider(){
 
 
 function createUI(){
-	console.log("Creating UI", GUIParams.partsKeys);
-		
+	console.log("Creating UI", GUIParams.partsKeys, GUIParams.decimate);
+
 	var use_color_id = null
 
 //change the hamburger to the X to start
-	if (! GUIParams.reset){
 
-		var UIcontainer = d3.select('.UIcontainer');
+	var UIcontainer = d3.select('.UIcontainer');
+	UIcontainer.html(""); //start fresh
 
-		UIcontainer.attr('style','position:absolute; top:10px; left:10px; width:300px');
+	UIcontainer.attr('style','position:absolute; top:10px; left:10px; width:300px');
 
-		var UIt = UIcontainer.append('div')
-			.attr('class','UItopbar')
-			.attr('id','UItopbar')
-			.attr('onmouseup','hideUI(this);')
-			.attr('onmousedown','dragElement(this, event);');
+	var UIt = UIcontainer.append('div')
+		.attr('class','UItopbar')
+		.attr('id','UItopbar')
+		.attr('onmouseup','hideUI(this);')
+		.attr('onmousedown','dragElement(this, event);');
 
-		UIt.append('table');
-		var UIr1 = UIt.append('tr');
-		var UIc1 = UIr1.append('td')
-			.style('padding-left','5px')
-			.attr('id','Hamburger')
-		UIc1.append('div').attr('class','bar1');
-		UIc1.append('div').attr('class','bar2');
-		UIc1.append('div').attr('class','bar3');
-		var UIc2 = UIr1.append('td').append('div')
-			.attr('id','ControlsText')
-			.style('font-size','16pt')
-			.style('padding-left','5px')
-			.style('top','6px')
-			.style('position','absolute')
-			.append('b').text('Controls');
+	UIt.append('table');
+	var UIr1 = UIt.append('tr');
+	var UIc1 = UIr1.append('td')
+		.style('padding-left','5px')
+		.attr('id','Hamburger')
+	UIc1.append('div').attr('class','bar1');
+	UIc1.append('div').attr('class','bar2');
+	UIc1.append('div').attr('class','bar3');
+	var UIc2 = UIr1.append('td').append('div')
+		.attr('id','ControlsText')
+		.style('font-size','16pt')
+		.style('padding-left','5px')
+		.style('top','6px')
+		.style('position','absolute')
+		.append('b').text('Controls');
 
-		var hider = UIcontainer.append('div').attr('id','UIhider');
-		hider.append('div').attr('id','particleUI');
+	var hider = UIcontainer.append('div').attr('id','UIhider');
+	hider.append('div').attr('id','particleUI');
 
-	 }
 
 	//set the gtoggle Object (in correct order)
 	GUIParams.gtoggle.dataControls = true;
@@ -1301,11 +1335,9 @@ function createUI(){
 
 
 	//hide the UI initially
-	if (!GUIParams.reset){
-		var hamburger = document.getElementById('UItopbar');
-		hideUI(hamburger);
-		hamburger.classList.toggle("change");
-	}
+	var hamburger = document.getElementById('UItopbar');
+	hideUI(hamburger);
+	hamburger.classList.toggle("change");
 
 	//create the colorbar container
 		if (use_color_id != null){

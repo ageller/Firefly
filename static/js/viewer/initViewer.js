@@ -13,17 +13,17 @@ function initControls(){
 			}
 		} 
 		if (viewerParams.haveUI){
-			elm = document.getElementById("CenterCheckBox");
-			elm.checked = true;
-			elm.value = true;
+			var evalString = 'elm = document.getElementById("CenterCheckBox"); elm.checked = true; elm.value = true;'
+			var varArgs = {'evalString':evalString};
+			sendToGUI([{'updateUIValues':[null, varArgs, null, null]}]);
 		}
 		viewerParams.controls.dynamicDampingFactor = viewerParams.friction;
 
 	} else {
 		if (viewerParams.haveUI){
-			elm = document.getElementById("CenterCheckBox");
-			elm.checked = false;
-			elm.value = false;
+			var evalString = 'elm = document.getElementById("CenterCheckBox"); elm.checked = true; elm.value = true;'
+			var varArgs = {'evalString':evalString};
+			sendToGUI([{'updateUIValues':[null, varArgs, null, null]}]);
 		}
 		viewerParams.controls = new THREE.FlyControls( viewerParams.camera , viewerParams.renderer.domElement);
 		viewerParams.controls.movementSpeed = 1. - Math.pow(viewerParams.friction, viewerParams.flyffac);
@@ -912,12 +912,16 @@ function WebGLStart(){
 }
 
 //wait for all the input before loading
-viewerParams.waitForInit = setInterval(function(){ 
-	if (viewerParams.ready){
-		clearInterval(viewerParams.waitForInit);
-		sendInitGUI();
-	}
-}, 100);
+function makeViewer(){
+	viewerParams.waitForInit = setInterval(function(){ 
+		if (viewerParams.ready){
+			clearInterval(viewerParams.waitForInit);
+			viewerParams.parts.options0 = createPreset(); //this might break things if the presets don't work...
+			console.log("initial options", viewerParams.parts.options)
+			sendInitGUI();
+		}
+	}, 100);
+}
 
 
 function sendInitGUI(){
@@ -1010,6 +1014,10 @@ function runLocal(){
 	viewerParams.usingSocket = false;
 	GUIParams.usingSocket = false;
 
+	//both of these start setIntervals to wait for the proper variables to be set
+	makeViewer();
+	makeUI();
+	
 	//This will  load the data, and then start the WebGL rendering
 	getFilenames(prefix = "static/");
 }
