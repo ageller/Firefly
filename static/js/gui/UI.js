@@ -67,9 +67,9 @@ function setGUIParamByKey(args){
 	// }
 }
 
-
 function updateUIValues(value, varArgs={}, i=0, type='single'){
 	//these update the viewer parameters
+	console.log(varArgs.evalString)
 	if (varArgs.hasOwnProperty('f')){
 		varToSetSend = [];
 		varArgs.v.forEach(function(x){
@@ -297,13 +297,13 @@ function updateUICameraText(){
 
 function updateUIRotText(){
 	var el = document.getElementById("RotXText");
-	if (el != null) el.value = GUIParams.cameraRotation.x;
+	if (el != null) el.value = GUIParams.cameraRotation._x;
 
 	var el = document.getElementById("RotYText");
-	if (el != null) el.value = GUIParams.cameraRotation.y;
+	if (el != null) el.value = GUIParams.cameraRotation._y;
 
 	el = document.getElementById("RotZText");
-	if (el != null) el.value = GUIParams.cameraRotation.z;
+	if (el != null) el.value = GUIParams.cameraRotation._z;
 }
 
 ///////////////////////////////
@@ -665,7 +665,7 @@ function createUI(){
 		.style('margin-right','5px')
 		.on('keypress',function(){
 			var key = event.keyCode || event.which;
-			if (key == 13) sendToViewer([{'checkText':this}]);
+			if (key == 13) sendToViewer([{'checkText':[this.id, this.value]}]);
 		})
 	snap.append('input')
 		.attr('id','RenderYText')
@@ -677,7 +677,7 @@ function createUI(){
 		.style('margin-top','5px')
 		.on('keypress',function(){
 			var key = event.keyCode || event.which;
-			if (key == 13) sendToViewer([{'checkText':this}]);
+			if (key == 13) sendToViewer([{'checkText':[this.id, this.value]}]);
 		})
 
 	//save preset button
@@ -766,7 +766,7 @@ function createUI(){
 		.style('margin-right','8px')
 		.on('keypress',function(){
 			var key = event.keyCode || event.which;
-			if (key == 13) sendToViewer([{'checkText':this}]);
+			if (key == 13) sendToViewer([{'checkText':[this.id, this.value]}]);
 		})
 	c3.append('input')
 		.attr('class','pTextInput')
@@ -777,7 +777,7 @@ function createUI(){
 		.style('margin-right','8px')
 		.on('keypress',function(){
 			var key = event.keyCode || event.which;
-			if (key == 13) sendToViewer([{'checkText':this}]);
+			if (key == 13) sendToViewer([{'checkText':[this.id, this.value]}]);
 		})
 	c3.append('input')
 		.attr('class','pTextInput')
@@ -787,7 +787,7 @@ function createUI(){
 		.style('width','40px')
 		.on('keypress',function(){
 			var key = event.keyCode || event.which;
-			if (key == 13) sendToViewer([{'checkText':this}]);
+			if (key == 13) sendToViewer([{'checkText':[this.id, this.value]}]);
 		})
 	//center lock checkbox
 	var c4 = c3.append('span')
@@ -835,7 +835,7 @@ function createUI(){
 		.style('margin-right','8px')
 		.on('keypress',function(){
 			var key = event.keyCode || event.which;
-			if (key == 13) sendToViewer([{'checkText':this}]);
+			if (key == 13) sendToViewer([{'checkText':[this.id, this.value]}]);
 		})
 	c3.append('input')
 		.attr('class','pTextInput')
@@ -846,7 +846,7 @@ function createUI(){
 		.style('margin-right','8px')
 		.on('keypress',function(){
 			var key = event.keyCode || event.which;
-			if (key == 13) sendToViewer([{'checkText':this}]);
+			if (key == 13) sendToViewer([{'checkText':[this.id, this.value]}]);
 		})
 	c3.append('input')
 		.attr('class','pTextInput')
@@ -856,7 +856,7 @@ function createUI(){
 		.style('width','40px')
 		.on('keypress',function(){
 			var key = event.keyCode || event.which;
-			if (key == 13) sendToViewer([{'checkText':this}]);
+			if (key == 13) sendToViewer([{'checkText':[this.id, this.value]}]);
 		})
 	//rotation text boxes
 	c3 = c2.append('div')
@@ -876,7 +876,7 @@ function createUI(){
 		.style('margin-right','8px')
 		.on('keypress',function(){
 			var key = event.keyCode || event.which;
-			if (key == 13) sendToViewer([{'checkText':this}]);
+			if (key == 13) sendToViewer([{'checkText':[this.id, this.value]}]);
 		})
 	c3.append('input')
 		.attr('class','pTextInput')
@@ -887,7 +887,7 @@ function createUI(){
 		.style('margin-right','8px')
 		.on('keypress',function(){
 			var key = event.keyCode || event.which;
-			if (key == 13) sendToViewer([{'checkText':this}]);
+			if (key == 13) sendToViewer([{'checkText':[this.id, this.value]}]);
 		})
 	c3.append('input')
 		.attr('class','pTextInput')
@@ -897,7 +897,7 @@ function createUI(){
 		.style('width','40px')
 		.on('keypress',function(){
 			var key = event.keyCode || event.which;
-			if (key == 13) sendToViewer([{'checkText':this}]);
+			if (key == 13) sendToViewer([{'checkText':[this.id, this.value]}]);
 		})
 	//buttons
 	c3 = c2.append('div')
@@ -911,7 +911,7 @@ function createUI(){
 		.style('padding','2px')
 		.on('click',function(){
 			var key = event.keyCode || event.which;
-			if (key == 13) sendToViewer([{'checkText':this}]);
+			if (key == 13) sendToViewer([{'checkText':[this.id, this.value]}]);
 		})
 		.append('span')
 			.text('Save');

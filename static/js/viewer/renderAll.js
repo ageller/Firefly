@@ -2,7 +2,6 @@ function animate(time) {
 	if (!viewerParams.pauseAnimation){
 		requestAnimationFrame( animate );
 		update(time);
-		//sendInfoToGUI();
 		render();
 	}
 
@@ -24,7 +23,13 @@ function update(time){
 	}
 	if (viewerParams.keyboard.down("space")){
 		viewerParams.useTrackball = !viewerParams.useTrackball;
-		sendToGUI([{'setGUIParamByKey':[viewerParams.useTrackball, "useTrackball"]}]);
+		var forGUI = []
+		forGUI.push([{'setGUIParamByKey':[viewerParams.useTrackball, "useTrackball"]}]);
+		var evalString = 'elm = document.getElementById("CenterCheckBox"); elm.checked = '+viewerParams.useTrackball+'; elm.value = '+viewerParams.useTrackball+';';
+		var varArgs = {'evalString':evalString};
+		forGUI.push([{'updateUIValues':[null, varArgs, null, null]}]);
+		sendToGUI(forGUI);
+		console.log(varArgs)
 		viewerParams.switchControls = true;
 		viewerParams.controls.dispose();
 		initControls();
@@ -218,22 +223,6 @@ function render() {
 
 }
 
-function sendInfoToGUI(){
 
-	var xx = new THREE.Vector3(0,0,0);
-	viewerParams.camera.getWorldDirection(xx);
-
-	var forGUI = [];
-	forGUI.push({'setGUIParamByKey':[viewerParams.camera.position, "cameraPosition"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.camera.rotation, "cameraRotation"]});
-	forGUI.push({'setGUIParamByKey':[xx, "cameraDirection"]});
-	if (viewerParams.useTrackball) forGUI.push({'setGUIParamByKey':[viewerParams.controls.target, "controlsTarget"]});
-
-	forGUI.push({'updateUICenterText':null});
-	forGUI.push({'updateUICameraText':null});
-	forGUI.push({'updateUIRotText':null});
-
-	sendToGUI(forGUI);
-}
 
 

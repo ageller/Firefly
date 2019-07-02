@@ -294,19 +294,28 @@ function checkStereoLock(checked){
 }
 
 //set values based on various text box entries
-function checkText(input){
+function checkText(args){
+	var id = args[0];
+	var value = args[1];
 
-	if (input.id == "CenterXText") viewerParams.center.x = parseFloat(input.value);
-	if (input.id == "CenterYText") viewerParams.center.y = parseFloat(input.value);
-	if (input.id == "CenterZText") viewerParams.center.z = parseFloat(input.value);
-	if (input.id == "CameraXText") viewerParams.camera.position.x = parseFloat(input.value) - viewerParams.center.x;
-	if (input.id == "CameraYText") viewerParams.camera.position.y = parseFloat(input.value) - viewerParams.center.y
-	if (input.id == "CameraZText") viewerParams.camera.position.z = parseFloat(input.value) - viewerParams.center.z;
-	if (input.id == "RotXText") viewerParams.camera.rotation.x = parseFloat(input.value)
-	if (input.id == "RotYText") viewerParams.camera.rotation.y = parseFloat(input.value)
-	if (input.id == "RotZText") viewerParams.camera.rotation.z = parseFloat(input.value)
-	if (input.id == "RenderXText") viewerParams.renderWidth = parseInt(input.value);
-	if (input.id == "RenderYText") viewerParams.renderHeight = parseInt(input.value);
+	var cameraPosition = new THREE.Vector3(viewerParams.camera.position.x, viewerParams.camera.position.y, viewerParams.camera.position.z);
+	var cameraRotation = new THREE.Vector3(viewerParams.camera.rotation.x, viewerParams.camera.rotation.y, viewerParams.camera.rotation.z);
+
+	if (id == "CenterXText") viewerParams.center.x = parseFloat(value);
+	if (id == "CenterYText") viewerParams.center.y = parseFloat(value);
+	if (id == "CenterZText") viewerParams.center.z = parseFloat(value);
+	if (id == "CameraXText") cameraPosition.x = parseFloat(value) - viewerParams.center.x;
+	if (id == "CameraYText") cameraPosition.y = parseFloat(value) - viewerParams.center.y
+	if (id == "CameraZText") cameraPosition.z = parseFloat(value) - viewerParams.center.z;
+	if (id == "RotXText") cameraRotation.x = parseFloat(value)
+	if (id == "RotYText") cameraRotation.y = parseFloat(value)
+	if (id == "RotZText") cameraRotation.z = parseFloat(value)
+	if (id == "RenderXText") viewerParams.renderWidth = parseInt(value);
+	if (id == "RenderYText") viewerParams.renderHeight = parseInt(value);
+
+	viewerParams.camera.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z);
+	viewerParams.camera.rotation.set(cameraRotation.x, cameraRotation.y, cameraRotation.z);
+	viewerParams.controls.target = new THREE.Vector3(viewerParams.center.x, viewerParams.center.y, viewerParams.center.z);
 
 }
 

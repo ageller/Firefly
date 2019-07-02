@@ -18,6 +18,7 @@ function initControls(){
 			sendToGUI([{'updateUIValues':[null, varArgs, null, null]}]);
 		}
 		viewerParams.controls.dynamicDampingFactor = viewerParams.friction;
+		viewerParams.controls.addEventListener('change', sendCameraInfoToGUI);
 
 	} else {
 		if (viewerParams.haveUI){
@@ -98,6 +99,7 @@ function initScene() {
 
 	// controls
 	initControls();
+
 
 	//investigating the minimum point size issue
 	// console.log("context", viewerParams.renderer.context)
@@ -913,6 +915,7 @@ function WebGLStart(){
 
 //wait for all the input before loading
 function makeViewer(){
+	viewerParams.haveUI = false;
 	viewerParams.waitForInit = setInterval(function(){ 
 		if (viewerParams.ready){
 			clearInterval(viewerParams.waitForInit);
@@ -1002,6 +1005,17 @@ function sendInitGUI(){
 
 	forGUI.push({'setGUIParamByKey':[viewerParams.reset,"reset"]});
 
+	forGUI.push({'setGUIParamByKey':[viewerParams.camera.position, "cameraPosition"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.camera.rotation, "cameraRotation"]});
+	var xx = new THREE.Vector3(0,0,0);
+	viewerParams.camera.getWorldDirection(xx);
+	forGUI.push({'setGUIParamByKey':[xx, "cameraDirection"]});
+	if (viewerParams.useTrackball) forGUI.push({'setGUIParamByKey':[viewerParams.controls.target, "controlsTarget"]});
+
+	forGUI.push({'updateUICenterText':null});
+	forGUI.push({'updateUICameraText':null});
+	forGUI.push({'updateUIRotText':null});
+
 	sendToGUI(forGUI);
 
 	//ready to create GUI
@@ -1009,6 +1023,23 @@ function sendInitGUI(){
 
 }
 
+function sendCameraInfoToGUI(){
+
+	var xx = new THREE.Vector3(0,0,0);
+	viewerParams.camera.getWorldDirection(xx);
+
+	var forGUI = [];
+	forGUI.push({'setGUIParamByKey':[viewerParams.camera.position, "cameraPosition"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.camera.rotation, "cameraRotation"]});
+	forGUI.push({'setGUIParamByKey':[xx, "cameraDirection"]});
+	if (viewerParams.useTrackball) forGUI.push({'setGUIParamByKey':[viewerParams.controls.target, "controlsTarget"]});
+
+	forGUI.push({'updateUICenterText':null});
+	forGUI.push({'updateUICameraText':null});
+	forGUI.push({'updateUIRotText':null});
+
+	sendToGUI(forGUI);
+}
 //so that it can run locally also without using Flask
 function runLocal(){
 	viewerParams.usingSocket = false;
@@ -1086,6 +1117,8 @@ function setViewerParamByKey(args){
 	}
 }
 
+//for fly controls
+document.addEventListener("keydown", sendCameraInfoToGUI);
 
 
 /////////////////////
