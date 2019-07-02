@@ -71,20 +71,19 @@ function createSlider(slider, text, sliderArgs, varArgs, resetEnd=[null, 2], typ
 			slider.noUiSlider.destroy();
 		}
 
-		var sliderInputs = text;
-		sliderInputs.forEach(function(s){
+		text.forEach(function(s){
 			s.parent = slider;
 		})
 
 		noUiSlider.create(slider, sliderArgs);
 
 		slider.noUiSlider.on('update', function(values, handle) {
-			sliderInputs[handle].value = values[handle];
+			text[handle].value = values[handle];
 			updateUIValues(values[handle], varArgs, handle, type);
 
 		});
 
-		sliderInputs.forEach(function(input, handle){
+		text.forEach(function(input, handle){
 			handleSliderText(input, handle, varArgs, resetEnd, type);
 		});
 	}

@@ -155,5 +155,12 @@ function defineViewerParams(){
 
 		//save the initial state in a preset file
 		this.initialState = null;
+
+		//from GUI
+		this.cameraPosition = new THREE.Vector3(0,0,0);
+		this.cameraRotation = new THREE.Vector3(0,0,0);
+		this.cameraUp = new THREE.Vector3(0,0,0);
+		this.cameraDirection = new THREE.Vector3(0,0,0);
+		this.controlsTarget = new THREE.Vector3(0,0,0);
 	};
 }

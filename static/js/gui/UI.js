@@ -1,71 +1,3 @@
-//wait for all the input before loading
-function makeUI(){
-	GUIParams.waitForInit = setInterval(function(){ 
-		var ready = confirmInit();
-		console.log("waiting for GUI init", ready)
-		if (ready){
-			clearInterval(GUIParams.waitForInit);
-			createUI();
-		}
-	}, 1000);
-}
-function confirmInit(){
-	var keys = ["partsKeys", "PsizeMult", "plotNmax", "decimate", "stereoSepMax", "friction", "Pcolors", "showParts", "showVel", "velopts", "velType", "ckeys", "colormapVals", "colormapLims", "colormapVariable", "colormap", "showColormap", "fkeys", "filterVals", "filterLims"];
-	var ready = true;
-	keys.forEach(function(k,i){
-		if (GUIParams[k] == null) ready = false;
-	});
-	return ready
-}
-
-
-//////////////
-// sockets
-//////////////
-//https://blog.miguelgrinberg.com/post/easy-websockets-with-flask-and-gevent
-//https://github.com/miguelgrinberg/Flask-SocketIO
-function connectSocket(){
-	//$(document).ready(function() {
-	document.addEventListener("DOMContentLoaded", function(event) { 
-		// Event handler for new connections.
-		// The callback function is invoked when a connection with the
-		// server is established.
-		socketParams.socket.on('connect', function() {
-			socketParams.socket.emit('connection_test', {data: 'I\'m connected!'});
-		});
-		socketParams.socket.on('connection_response', function(msg) {
-			console.log(msg);
-		});
-		// Event handler for server sent data.
-		// The callback function is invoked whenever the server emits data
-		// to the client. The data is then displayed in the "Received"
-		// section of the page.
-		socketParams.socket.on('update_GUIParams', function(msg) {
-			setParams(msg); 
-		});
-
-	});
-}
-
-//function to send events to the viewer
-function sendToViewer(viewerInput){
-	if (GUIParams.usingSocket){
-		socketParams.socket.emit('viewer_input',viewerInput);
-	} else {
-		setParams(viewerInput);
-	}
-}
-
-function setGUIParamByKey(args){
-	var value = args[0];
-	var keyName = args[1];
-	GUIParams[keyName] = JSON.parse(JSON.stringify(value));
-	// if (typeof value == "object") {
-	// 	GUIParams[keyName] = $.extend({}, value);
-	// } else {
-	// 	GUIParams[keyName] = value;
-	// }
-}
 
 function updateUIValues(value, varArgs, i=0, type='single'){
 	//these update the viewer parameters
@@ -496,6 +428,18 @@ function createFrictionSlider(){
 	//reformat
 	w = parseInt(d3.select("#CFSlider").style("width").slice(0,-2));
 	d3.select("#CFSlider").select('.noUi-base').style('width',w-10+"px");
+
+	//redefine here so that I can set the friction in the GUI controls
+	slider.noUiSlider.on('update', function(values, handle) {
+		text[handle].value = values[handle];
+		updateUIValues(values[handle], varArgs, handle, "single");
+		updateFriction(parseFloat(values[handle]));
+	});
+
+	//do I need to do something here?
+	// text.forEach(function(input, handle){
+	// 	handleSliderText(input, handle, varArgs, resetEnd, type);
+	// });
 }
 
 // for presets
@@ -542,6 +486,7 @@ function createUI(){
 //change the hamburger to the X to start
 
 	var UIcontainer = d3.select('.UIcontainer');
+	UIcontainer.classed('hidden', false);
 	UIcontainer.html(""); //start fresh
 
 	UIcontainer.attr('style','position:absolute; top:10px; left:10px; width:300px');
@@ -1353,7 +1298,7 @@ function createUI(){
 	createFilterSliders();
 	createColormapSliders();
 
-// update the text boxes for cameray
+// update the text boxes for camera
 	updateUICenterText();
 	updateUICameraText();
 	updateUIRotText();

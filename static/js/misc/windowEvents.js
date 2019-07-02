@@ -42,40 +42,24 @@ function handleMouseDown(event) {
 }
 
 //hide the splash screen
-function hideSplash(){
-	if (viewerParams.loaded && !viewerParams.pauseAnimation){
-		viewerParams.helpMessage = 0;
-		var fdur = 700.;
+function showSplash(show){
+	var fdur = 700.;
 
-		var splash = d3.select("#splash");
-
-		splash.transition()
-			.ease(d3.easeLinear)
-			.duration(fdur)
-			.style("opacity", 0)
-
-			.on("end", function(d){
-				splash.style("display","none");
-			})
+	var splash = d3.select("#splash");
+	var op = 0.8;
+	if (!show) {
+		op = 0. 
 	}
+	splash.transition()
+		.ease(d3.easeLinear)
+		.duration(fdur)
+		.style("opacity", op)
+
+		.on("end", function(d){
+			if (!show) splash.style("display","none");
+		})
 }
 
-//show the splash screen
-function showSplash(){
-	if (viewerParams.loaded && !viewerParams.pauseAnimation){
-		viewerParams.helpMessage = 1;
-		var fdur = 700.;
-
-		var splash = d3.select("#splash");
-		splash.style("display","block")
-
-		splash.transition()
-			.ease(d3.easeLinear)
-			.duration(fdur)
-			.style("opacity", 0.8);
-	}
-
-}
 
 function showSleep(){
 

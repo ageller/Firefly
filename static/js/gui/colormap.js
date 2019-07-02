@@ -167,6 +167,7 @@ function defineColorbarContainer(particle_group_UIname){
 	var colorbar_container = d3.select("#colorbar_container")
 		.html("")
 		.attr('class', 'colorbar')
+		.classed('hidden', false)
 		.style("height",cbar_bounds.height+container_margin.top*2+text_height+"px")
 	// contianer_margin : +*2 for the margins themselves, +1 for the offset of the content...?
 		.style("width",cbar_bounds.width+container_margin.side*2+container_margin.side+"px")

@@ -927,6 +927,12 @@ function makeViewer(){
 	}, 100);
 }
 
+function updateViewerCamera(){
+	viewerParams.camera.position.set(viewerParams.cameraPosition.x, viewerParams.cameraPosition.y, viewerParams.cameraPosition.z);
+	viewerParams.camera.rotation.set(viewerParams.cameraRotation.x, viewerParams.cameraRotation.y, viewerParams.cameraRotation.z);
+	viewerParams.controls.target = new THREE.Vector3(viewerParams.controlsTarget.x, viewerParams.controlsTarget.y, viewerParams.controlsTarget.z);
+
+}
 
 function sendInitGUI(){
 	//general particle settings
@@ -1017,6 +1023,8 @@ function sendInitGUI(){
 	forGUI.push({'updateUICameraText':null});
 	forGUI.push({'updateUIRotText':null});
 
+	forGUI.push({'updateGUICamera':null});
+
 	sendToGUI(forGUI);
 
 	//ready to create GUI
@@ -1032,12 +1040,15 @@ function sendCameraInfoToGUI(){
 	var forGUI = [];
 	forGUI.push({'setGUIParamByKey':[viewerParams.camera.position, "cameraPosition"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.camera.rotation, "cameraRotation"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.camera.up, "cameraUp"]});
 	forGUI.push({'setGUIParamByKey':[xx, "cameraDirection"]});
 	if (viewerParams.useTrackball) forGUI.push({'setGUIParamByKey':[viewerParams.controls.target, "controlsTarget"]});
 
 	forGUI.push({'updateUICenterText':null});
 	forGUI.push({'updateUICameraText':null});
 	forGUI.push({'updateUIRotText':null});
+
+	//forGUI.push({'updateGUICamera':null});
 
 	sendToGUI(forGUI);
 }

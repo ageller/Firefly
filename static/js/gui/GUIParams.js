@@ -4,6 +4,18 @@ var GUIParams;
 function defineGUIParams(){
 	GUIParams = new function(){
 
+		//for the cube 
+		this.scene = null;
+		this.renderer = null;
+		this.container = null;
+		this.camera = null;
+		this.controls = null;
+		//for frustum      
+		this.zmax = 5.e10;
+		this.zmin = 1;
+		this.fov = 45.
+		this.flyffac = 0.2;
+
 		//when ready the GUI will be created
 		this.waitForInit = null;
 
@@ -74,6 +86,7 @@ function defineGUIParams(){
 		//only need to pass the position, rotation, direction portion of the camera
 		this.cameraPosition = new THREE.Vector3(0,0,0);
 		this.cameraRotation = new THREE.Vector3(0,0,0);
+		this.cameraUp = new THREE.Vector3(0,0,0);
 		this.cameraDirection = new THREE.Vector3(0,0,0);
 		this.useTrackball = true;
 		this.useStereo = false;
