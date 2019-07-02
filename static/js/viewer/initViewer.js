@@ -25,7 +25,7 @@ function initControls(){
 		var evalString = 'elm = document.getElementById("CenterCheckBox"); elm.checked = '+viewerParams.useTrackball+'; elm.value = '+viewerParams.useTrackball+';'
 		forGUI.push({'evalCommand':evalString});
 	}
-	
+
 	viewerParams.switchControls = false;
 	sendToGUI(forGUI);
 
@@ -1026,7 +1026,7 @@ function sendInitGUI(){
 
 }
 
-function sendCameraInfoToGUI(){
+function sendCameraInfoToGUI(foo, updateCam=false){
 
 	var xx = new THREE.Vector3(0,0,0);
 	viewerParams.camera.getWorldDirection(xx);
@@ -1042,7 +1042,8 @@ function sendCameraInfoToGUI(){
 	forGUI.push({'updateUICameraText':null});
 	forGUI.push({'updateUIRotText':null});
 
-	//forGUI.push({'updateGUICamera':null});
+	console.log(updateCam)
+	if (updateCam) forGUI.push({'updateGUICamera':null});
 
 	sendToGUI(forGUI);
 }

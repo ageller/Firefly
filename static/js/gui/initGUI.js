@@ -175,7 +175,7 @@ function initGUIControls(initial=false){
 	console.log("initializing controls", GUIParams.useTrackball)
 	var forViewer = [];
 
-	if (!initial)forGUI.push({'setViewerParamByKey':[GUIParams.useTrackball, "useTrackball"]})
+	if (!initial) forViewer.push({'setViewerParamByKey':[GUIParams.useTrackball, "useTrackball"]})
 
 	if (GUIParams.useTrackball) {
 		var xx = new THREE.Vector3(0,0,0);
@@ -228,7 +228,7 @@ function animateGUI(time) {
 }
 function animateGUIupdate(){
 	GUIParams.controls.update();
-	GUIParams.renderer.render( GUIParams.scene, GUIParams.camera );
+	GUIParams.keyboard.update();
 
 	if (GUIParams.keyboard.down("space")){
 		GUIParams.useTrackball = !GUIParams.useTrackball;
@@ -236,4 +236,7 @@ function animateGUIupdate(){
 		GUIParams.controls.dispose();
 		initGUIControls();
 	}
+
+	GUIParams.renderer.render( GUIParams.scene, GUIParams.camera );
+
 }

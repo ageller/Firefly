@@ -21,6 +21,7 @@ function resetToOptions(){
 			sendInitGUI();
 		}
 	}, 100);
+	
 	sendToGUI([{'makeUI':null}]);
 
 	drawScene();
@@ -135,6 +136,7 @@ function resetCamera() {
 
 	viewerParams.controls.dispose();
 	initControls();
+	sendCameraInfoToGUI(null, true);
 
 
 }
@@ -142,6 +144,7 @@ function resetCamera() {
 //reset the camera center.  Can be useful when switching back and forth between trackball and fly controls
 function recenterCamera() {
 	initControls();
+	sendCameraInfoToGUI(null, true);
 }
 
 
