@@ -23,13 +23,6 @@ function update(time){
 	}
 	if (viewerParams.keyboard.down("space")){
 		viewerParams.useTrackball = !viewerParams.useTrackball;
-		var forGUI = []
-		forGUI.push([{'setGUIParamByKey':[viewerParams.useTrackball, "useTrackball"]}]);
-		var evalString = 'elm = document.getElementById("CenterCheckBox"); elm.checked = '+viewerParams.useTrackball+'; elm.value = '+viewerParams.useTrackball+';';
-		var varArgs = {'evalString':evalString};
-		forGUI.push([{'updateUIValues':[null, varArgs, null, null]}]);
-		sendToGUI(forGUI);
-		console.log(varArgs)
 		viewerParams.switchControls = true;
 		viewerParams.controls.dispose();
 		initControls();

@@ -1,5 +1,6 @@
 function initControls(){
-	sendToGUI([{'setGUIParamByKey':[viewerParams.useTrackball, "useTrackball"]}]);
+	var forGUI = []
+	forGUI.push({'setGUIParamByKey':[viewerParams.useTrackball, "useTrackball"]})
 
 	if (viewerParams.useTrackball) {
 		var xx = new THREE.Vector3(0,0,0);
@@ -13,25 +14,25 @@ function initControls(){
 			}
 		} 
 		if (viewerParams.haveUI){
-			var evalString = 'elm = document.getElementById("CenterCheckBox"); elm.checked = true; elm.value = true;'
-			var varArgs = {'evalString':evalString};
-			sendToGUI([{'updateUIValues':[null, varArgs, null, null]}]);
+			var evalString = 'elm = document.getElementById("CenterCheckBox"); elm.checked = '+viewerParams.useTrackball+'; elm.value = '+viewerParams.useTrackball+';'
+			forGUI.push({'evalCommand':evalString});
 		}
 		viewerParams.controls.dynamicDampingFactor = viewerParams.friction;
 		viewerParams.controls.addEventListener('change', sendCameraInfoToGUI);
 
 	} else {
 		if (viewerParams.haveUI){
-			var evalString = 'elm = document.getElementById("CenterCheckBox"); elm.checked = true; elm.value = true;'
-			var varArgs = {'evalString':evalString};
-			sendToGUI([{'updateUIValues':[null, varArgs, null, null]}]);
+			var evalString = 'elm = document.getElementById("CenterCheckBox"); elm.checked = '+viewerParams.useTrackball+'; elm.value = '+viewerParams.useTrackball+';'
+			forGUI.push({'evalCommand':evalString});
 		}
 		viewerParams.controls = new THREE.FlyControls( viewerParams.camera , viewerParams.renderer.domElement);
 		viewerParams.controls.movementSpeed = 1. - Math.pow(viewerParams.friction, viewerParams.flyffac);
 
 	}
 
+
 	viewerParams.switchControls = false;
+	sendToGUI(forGUI);
 
 }
 

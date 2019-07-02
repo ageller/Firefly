@@ -67,9 +67,8 @@ function setGUIParamByKey(args){
 	// }
 }
 
-function updateUIValues(value, varArgs={}, i=0, type='single'){
+function updateUIValues(value, varArgs, i=0, type='single'){
 	//these update the viewer parameters
-	console.log(varArgs.evalString)
 	if (varArgs.hasOwnProperty('f')){
 		varToSetSend = [];
 		varArgs.v.forEach(function(x){

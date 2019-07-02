@@ -6,6 +6,7 @@ function executeFunctionByName(functionName, context /*, args */) {
 	for(var i = 0; i < namespaces.length; i++) {
 		context = context[namespaces[i]];
 	}
+	//console.log(context, functionName, func, args)
 	return context[func].apply(context, args);
 }
 
@@ -20,4 +21,10 @@ function setParams(vars){
 		});
 	});
 
+}
+
+function evalCommand(evalString){
+	console.log(evalString)
+	//can I improve on this method?
+	eval(evalString);
 }
