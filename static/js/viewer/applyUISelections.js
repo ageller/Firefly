@@ -204,13 +204,12 @@ function checkColormapBox(args){
 		viewerParams.showColormap[p] = true;
 		viewerParams.updateColormap[p] = true;
 		viewerParams.updateFilter[p] = true;
-		forGUI.push({'fillColorbarContainer':p})
-
-		// redraw particle type (this may not be necessary if I'm smarter about initializing things)
-		drawScene(pDraw = [p]);
+		
 	}
 
-	forGUI.unshift({'setGUIParamByKey':[viewerParams.showColormap, "showColormap"]})
+
+	forGUI.push({'setGUIParamByKey':[viewerParams.showColormap, "showColormap"]})
+	forGUI.push({'fillColorbarContainer':p})
 	sendToGUI(forGUI);
 	console.log(p, " showColormap:", viewerParams.showColormap[p])
 

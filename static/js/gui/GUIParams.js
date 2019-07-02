@@ -10,6 +10,7 @@ function defineGUIParams(){
 		this.container = null;
 		this.camera = null;
 		this.controls = null;
+		this.keyboard = null;
 		//for frustum      
 		this.zmax = 5.e10;
 		this.zmin = 1;

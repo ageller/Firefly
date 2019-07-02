@@ -13,24 +13,19 @@ function initControls(){
 
 			}
 		} 
-		if (viewerParams.haveUI){
-			var evalString = 'elm = document.getElementById("CenterCheckBox"); elm.checked = '+viewerParams.useTrackball+'; elm.value = '+viewerParams.useTrackball+';'
-			forGUI.push({'evalCommand':evalString});
-		}
+
 		viewerParams.controls.dynamicDampingFactor = viewerParams.friction;
 		viewerParams.controls.addEventListener('change', sendCameraInfoToGUI);
-
 	} else {
-		if (viewerParams.haveUI){
-			var evalString = 'elm = document.getElementById("CenterCheckBox"); elm.checked = '+viewerParams.useTrackball+'; elm.value = '+viewerParams.useTrackball+';'
-			forGUI.push({'evalCommand':evalString});
-		}
 		viewerParams.controls = new THREE.FlyControls( viewerParams.camera , viewerParams.renderer.domElement);
 		viewerParams.controls.movementSpeed = 1. - Math.pow(viewerParams.friction, viewerParams.flyffac);
-
 	}
 
-
+	if (viewerParams.haveUI){
+		var evalString = 'elm = document.getElementById("CenterCheckBox"); elm.checked = '+viewerParams.useTrackball+'; elm.value = '+viewerParams.useTrackball+';'
+		forGUI.push({'evalCommand':evalString});
+	}
+	
 	viewerParams.switchControls = false;
 	sendToGUI(forGUI);
 

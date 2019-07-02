@@ -152,6 +152,9 @@ function initGUIScene(){
 	GUIParams.container = document.getElementById('WebGLContainer');
 	GUIParams.container.appendChild( GUIParams.renderer.domElement );
 
+	//keyboard
+	GUIParams.keyboard = new KeyboardState();
+
 	// scene
 	GUIParams.scene = new THREE.Scene();     
 
@@ -165,15 +168,50 @@ function initGUIScene(){
 	THREEx.WindowResize(GUIParams.renderer, GUIParams.camera);
 
 	//controls
-	GUIParams.controls = new THREE.TrackballControls( GUIParams.camera, GUIParams.renderer.domElement );
-	GUIParams.controls.addEventListener('change', sendCameraInfoToViewer);
+	initGUIControls(initial=true)
 }
 
+function initGUIControls(initial=false){
+	console.log("initializing controls", GUIParams.useTrackball)
+	var forViewer = [];
+
+	if (!initial)forGUI.push({'setViewerParamByKey':[GUIParams.useTrackball, "useTrackball"]})
+
+	if (GUIParams.useTrackball) {
+		var xx = new THREE.Vector3(0,0,0);
+		GUIParams.camera.getWorldDirection(xx);
+		GUIParams.controls = new THREE.TrackballControls( GUIParams.camera, GUIParams.renderer.domElement );
+		GUIParams.controls.target = new THREE.Vector3(GUIParams.camera.position.x + xx.x, GUIParams.camera.position.y + xx.y, GUIParams.camera.position.z + xx.z);
+		// if (GUIParams.parts.options.hasOwnProperty('center') && !GUIParams.switchControls){
+		// 	if (GUIParams.parts.options.center != null){
+		// 		GUIParams.controls.target = new THREE.Vector3(GUIParams.parts.options.center[0], GUIParams.parts.options.center[1], GUIParams.parts.options.center[2]);
+
+		// 	}
+
+		GUIParams.controls.dynamicDampingFactor = GUIParams.friction;
+		GUIParams.controls.addEventListener('change', sendCameraInfoToViewer);
+
+	} else {
+		GUIParams.controls = new THREE.FlyControls( GUIParams.camera , GUIParams.renderer.domElement);
+		GUIParams.controls.movementSpeed = 1. - Math.pow(GUIParams.friction, GUIParams.flyffac);
+
+	}
+
+	var elm = document.getElementById("CenterCheckBox")
+	if (elm != null){
+		elm.checked = GUIParams.useTrackball; 
+		elm.value = GUIParams.useTrackball;
+	}
+	
+	//GUIParams.switchControls = false;
+	sendToViewer(forViewer);
+
+}
 //this is the animation loop
 function animateGUI(time) {
 	requestAnimationFrame( animateGUI );
-	GUIParams.controls.update();
-	GUIParams.renderer.render( GUIParams.scene, GUIParams.camera );
+	animateGUIupdate();
+
 
 	// //send the camera info back to the flask app, and then on to the viewer
 	// if (internalParams.controls.changed){
@@ -188,4 +226,14 @@ function animateGUI(time) {
 	// 	});
 	// }
 }
+function animateGUIupdate(){
+	GUIParams.controls.update();
+	GUIParams.renderer.render( GUIParams.scene, GUIParams.camera );
 
+	if (GUIParams.keyboard.down("space")){
+		GUIParams.useTrackball = !GUIParams.useTrackball;
+		//GUIParams.switchControls = true;
+		GUIParams.controls.dispose();
+		initGUIControls();
+	}
+}
