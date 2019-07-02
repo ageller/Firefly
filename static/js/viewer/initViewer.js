@@ -1042,7 +1042,6 @@ function sendCameraInfoToGUI(foo, updateCam=false){
 	forGUI.push({'updateUICameraText':null});
 	forGUI.push({'updateUIRotText':null});
 
-	console.log(updateCam)
 	if (updateCam) forGUI.push({'updateGUICamera':null});
 
 	sendToGUI(forGUI);

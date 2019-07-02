@@ -24,7 +24,7 @@ function setParams(vars){
 }
 
 function evalCommand(evalString){
-	console.log(evalString)
+	//console.log(evalString)
 	//can I improve on this method?
 	eval(evalString);
 }

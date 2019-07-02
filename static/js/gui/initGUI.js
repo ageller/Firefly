@@ -4,7 +4,8 @@ function makeUI(local=false){
 		initGUIScene();
 		drawCube();
 		animateGUI();
-		document.addEventListener("keydown", sendCameraInfoToViewer);//for fly controls
+		document.removeEventListener("keypress", sendCameraInfoToViewer,true);//for fly controls
+		document.addEventListener("keypress", sendCameraInfoToViewer,true);//for fly controls
 	}
 
 	GUIParams.waitForInit = setInterval(function(){ 
