@@ -12,12 +12,12 @@ import json
 
 app = Flask(__name__)
 
-# Set this variable to "threading", "eventlet" or "gevent" to test the
+# Set this variable to "threading", "eventlet" ,"gevent" or "gevent_uwsgi" to test the
 # different async modes, or leave it set to None for the application to choose
 # the best option based on installed packages.
-async_mode = None
+async_mode = "eventlet" #"eventlet" is WAY better than "threading"
 
-app = Flask(__name__)
+app = Flask(__name__) 
 app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app, async_mode=async_mode)
 thread = None
@@ -42,7 +42,7 @@ def background_thread():
 			#print("========= viewerParams:",viewerParams)
 			socketio.emit('update_viewerParams', viewerParams, namespace='/test')
 		if (updateGUIParams):
-			print("========= GUIParams:",GUIParams)
+			#print("========= GUIParams:",GUIParams)
 			socketio.emit('update_GUIParams', GUIParams, namespace='/test')
 		updateViewerParams = False
 		updateGUIParams = False
