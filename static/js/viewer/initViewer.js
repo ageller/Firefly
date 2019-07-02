@@ -603,7 +603,6 @@ function countParts(){
 
 //if startup.json exists, this is called first
 function getFilenames(prefix=""){
-
 	d3.json(prefix+viewerParams.startup,  function(dir) {
 		console.log(prefix, dir, viewerParams.startup, viewerParams)
 		if (dir != null){
@@ -1023,7 +1022,7 @@ function sendInitGUI(){
 	forGUI.push({'updateUICameraText':null});
 	forGUI.push({'updateUIRotText':null});
 
-	forGUI.push({'updateGUICamera':null});
+	if (viewerParams.usingSocket) forGUI.push({'updateGUICamera':null});
 
 	sendToGUI(forGUI);
 
@@ -1059,7 +1058,7 @@ function runLocal(){
 
 	//both of these start setIntervals to wait for the proper variables to be set
 	makeViewer();
-	makeUI();
+	makeUI(local=true);
 	
 	//This will  load the data, and then start the WebGL rendering
 	getFilenames(prefix = "static/");

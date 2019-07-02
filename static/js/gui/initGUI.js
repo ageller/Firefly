@@ -1,15 +1,18 @@
 //wait for all the input before loading
-function makeUI(){
-	initScene();
-	drawCube();
-	animateGUI();
+function makeUI(local=false){
+	if (!local){
+		initGUIScene();
+		drawCube();
+		animateGUI();
+		document.addEventListener("keydown", sendCameraInfoToViewer);//for fly controls
+	}
 
 	GUIParams.waitForInit = setInterval(function(){ 
 		var ready = confirmInit();
 		console.log("waiting for GUI init", ready)
 		if (ready){
 			clearInterval(GUIParams.waitForInit);
-			showSplash(false);
+			if (!local) showSplash(false);
 			createUI();
 		}
 	}, 1000);
@@ -127,7 +130,7 @@ function drawCube(){
 }
 
 //this initializes everything needed for the scene
-function initScene(){
+function initGUIScene(){
 
 	var screenWidth = window.innerWidth;
 	var screenHeight = window.innerHeight;
@@ -186,5 +189,3 @@ function animateGUI(time) {
 	// }
 }
 
-//for fly controls
-document.addEventListener("keydown", sendCameraInfoToViewer);

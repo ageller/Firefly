@@ -1,6 +1,7 @@
 body{ 
 	margin: 0; 
 	font-family: Sans-Serif;
+	overflow:hidden;
 }
 
 canvas{
