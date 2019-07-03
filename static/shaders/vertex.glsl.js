@@ -3,6 +3,7 @@ var myVertexShader = `
 attribute float radiusScale;
 attribute float alpha;
 attribute vec4 velVals;
+attribute vec4 colorArray;
 attribute float colormapArray;
 
 varying float vID;
@@ -11,6 +12,7 @@ varying float vColormapMag;
 varying float vAlpha;
 varying vec2 vUv; //for the column density 
 varying float vPointSize;
+varying vec4 vColor;
 
 uniform float colormapMax;
 uniform float colormapMin;
@@ -59,6 +61,8 @@ void main(void) {
 	vPointSize = gl_PointSize;
 
 	//glPointSize = gl_PointSize;
+
+	vColor = colorArray;
 
 	gl_Position = projectionMatrix * mvPosition;
 

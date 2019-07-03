@@ -7,7 +7,7 @@ varying float vTheta;
 varying float vColormapMag;
 varying float vAlpha;
 varying float vPointSize;
-
+varying vec4 vColor;
 
 uniform bool showColormap;
 uniform float colormap;
@@ -33,7 +33,7 @@ mat4 rotationMatrix(vec3 axis, float angle)
 }
 void main(void) {
 	gl_FragColor = color;
-	
+
 	// if colormap is requested, apply appropriate colormap to appropriate variable
 	if (showColormap){
 		if (vID > -1.){
@@ -114,5 +114,11 @@ void main(void) {
 	if (columnDensity){
 		gl_FragColor.rgb *= scaleCD; //need some factor here so that it adds up progressively
 	}
+
+	if (vColor[3] != 0.) {
+		gl_FragColor.rgb = vColor.rgb;
+		gl_FragColor.a *= vColor[3];
+	}
+
 }
 `;

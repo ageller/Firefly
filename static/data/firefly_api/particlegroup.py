@@ -265,7 +265,7 @@ class ParticleGroup(object):
         outDict = dict()
         if (these_dec_inds[0] == None):
             these_dec_inds = np.arange(len(self.coordinates))
-            
+        
         outDict['Coordinates'] = self.coordinates[these_dec_inds]
 
         for tracked_name,tracked_arr in zip(self.tracked_names,self.tracked_arrays):

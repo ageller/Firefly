@@ -2,8 +2,9 @@
 
 from firefly_api.reader import Reader
 from firefly_api.particlegroup import ParticleGroup
+import numpy as np
 
-def simpleReader(name = "foo", coords = [], color=[1,1,1,1], sizeMult=1):
+def simpleReader(name = "foo", coords = [], color=[1,1,1,1], sizeMult=1, colorArray=[None]):
     #create the reader
     my_reader = Reader(
         ## the name of the sub-directory that will contain your JSON files,
@@ -24,7 +25,14 @@ def simpleReader(name = "foo", coords = [], color=[1,1,1,1], sizeMult=1):
         sizeMult=sizeMult, 
         color = color, 
     )
+    
+    if (colorArray[0] != None):
+        my_parts.tracked_names = ['colorArray']
+        my_parts.tracked_arrays = [np.array(colorArray)]
+        my_parts.tracked_filter_flags = [False]
+        my_parts.tracked_colormap_flags = [False]
 
+        
     ## tell the reader to keep track of this particle group
     my_reader.addParticleGroup(my_parts)
 

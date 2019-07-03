@@ -98,6 +98,11 @@ function drawScene(pdraw = viewerParams.partsKeys)
 		var velVals = new Float32Array( viewerParams.plotNmax[p] * 4); // unit vector (vx, vy, vz), scaled magnitude
 		geo.addAttribute( 'velVals', new THREE.BufferAttribute( velVals, 4 ) );
 
+		//individual colors
+		if (viewerParams.parts[p].hasOwnProperty("colorArray")) console.log("have color Array")
+		var colorArray = new Float32Array( viewerParams.plotNmax[p] * 4); // RGBA
+		geo.addAttribute( 'colorArray', new THREE.BufferAttribute( colorArray, 4 ) );
+
 		geo.setDrawRange( 0, viewerParams.plotNmax[p] );
 
 		var mesh = new THREE.Points(geo, material);
@@ -109,6 +114,7 @@ function drawScene(pdraw = viewerParams.partsKeys)
 
 		//var positions = mesh.geometry.attributes.position.array;
 		var cindex = 0;
+		var colorIndex = 0;
 		var pindex = 0;
 		var vindex = 0;
 		var rindex = 0;
@@ -149,6 +155,28 @@ function drawScene(pdraw = viewerParams.partsKeys)
 					vindex++;
 					velVals[vindex] = viewerParams.parts[p].NormVel[j];
 					vindex++;
+				}
+
+				//probably a better way to deal with this
+				if (viewerParams.parts[p].hasOwnProperty("colorArray")){
+					colorArray[colorIndex] = viewerParams.parts[p].colorArray[j][0]
+					colorIndex++;
+					colorArray[colorIndex] = viewerParams.parts[p].colorArray[j][1]
+					colorIndex++;
+					colorArray[colorIndex] = viewerParams.parts[p].colorArray[j][2]
+					colorIndex++;
+					colorArray[colorIndex] = viewerParams.parts[p].colorArray[j][3];
+					colorIndex++;
+				} else {
+					colorArray[colorIndex] = 0.;
+					colorIndex++;
+					colorArray[colorIndex] = 0.;
+					colorIndex++;
+					colorArray[colorIndex] = 0.;
+					colorIndex++;
+					colorArray[colorIndex] = 0.;
+					colorIndex++;
+
 				}
 
 				// fill colormap array with appropriate variable values

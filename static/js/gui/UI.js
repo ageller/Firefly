@@ -180,8 +180,8 @@ function selectVelType() {
 function changeSnapSizes(){
 	//size of the snapshot (from text input)
 	var forViewer = [];
-	forViewer.append({'setViewerParamByKey':[window.innerWidth, 'renderWidth']});
-	forViewer.append({'setViewerParamByKey':[window.innerHeight, 'renderHeight'] });
+	forViewer.push({'setViewerParamByKey':[window.innerWidth, 'renderWidth']});
+	forViewer.push({'setViewerParamByKey':[window.innerHeight, 'renderHeight'] });
 	sendToViewer(forViewer);
 
 	document.getElementById("RenderXText").value = window.innerWidth;
