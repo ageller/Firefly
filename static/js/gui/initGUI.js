@@ -9,7 +9,7 @@ function makeUI(local=false){
 	}
 	
 	GUIParams.waitForInit = setInterval(function(){ 
-		var ready = confirmInit();
+		var ready = confirmGUIInit();
 		console.log("waiting for GUI init", ready)
 		if (ready){
 			clearInterval(GUIParams.waitForInit);
@@ -18,7 +18,7 @@ function makeUI(local=false){
 		}
 	}, 1000);
 }
-function confirmInit(){
+function confirmGUIInit(){
 	var keys = ["partsKeys", "PsizeMult", "plotNmax", "decimate", "stereoSepMax", "friction", "Pcolors", "showParts", "showVel", "velopts", "velType", "ckeys", "colormapVals", "colormapLims", "colormapVariable", "colormap", "showColormap", "fkeys", "filterVals", "filterLims"];
 	var ready = true;
 	keys.forEach(function(k,i){

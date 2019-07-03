@@ -500,6 +500,10 @@ function initPVals(){
 		}
 		
 		//filters
+		//in case there are no filter possibilities (but will be overwritten below)
+		viewerParams.fkeys[p] = ["None"];
+		viewerParams.filterLims[p]["None"] = [0,1];
+		viewerParams.filterVals[p]["None"] = [0,1];		
 		if (viewerParams.parts[p].hasOwnProperty("filterKeys")){
 			viewerParams.fkeys[p] = viewerParams.parts[p].filterKeys;
 			for (var k=0; k<viewerParams.fkeys[p].length; k++){
@@ -526,9 +530,9 @@ function initPVals(){
 		}
 		//colormap
 		//in case there are no colormap possibilities (but will be overwritten below)
-		viewerParams.ckeys[p] = ["foo"];
-		viewerParams.colormapLims[p]["foo"] = [0,1];
-		viewerParams.colormapVals[p]["foo"] = [0,1];
+		viewerParams.ckeys[p] = ["None"];
+		viewerParams.colormapLims[p]["None"] = [0,1];
+		viewerParams.colormapVals[p]["None"] = [0,1];
 		if (viewerParams.parts[p].hasOwnProperty("colormapKeys")){
 			if (viewerParams.parts[p].colormapKeys.length > 0){
 				viewerParams.ckeys[p] = viewerParams.parts[p].colormapKeys;
@@ -917,15 +921,41 @@ function makeViewer(){
 	viewerParams.haveUI = false;
 	viewerParams.ready = false;	
 	viewerParams.waitForInit = setInterval(function(){ 
-		console.log("Waiting for viewer init", viewerParams.ready)
-		if (viewerParams.ready){
+		var ready = confirmViewerInit();
+		console.log("Waiting for viewer init", ready)
+		if (ready){
 			clearInterval(viewerParams.waitForInit);
+			viewerParams.ready = true;
 			viewerParams.pauseAnimation = false;
 			viewerParams.parts.options0 = createPreset(); //this might break things if the presets don't work...
 			console.log("initial options", viewerParams.parts.options)
 			sendInitGUI();
 		}
 	}, 100);
+}
+
+function confirmViewerInit(){
+	var keys = ["partsKeys", "PsizeMult", "plotNmax", "decimate", "stereoSepMax", "friction", "Pcolors", "showParts", "showVel", "velopts", "velType", "ckeys", "colormapVals", "colormapLims", "colormapVariable", "colormap", "showColormap", "fkeys", "filterVals", "filterLims", "renderer", "scene", "controls","camera"];
+	var ready = true;
+	keys.forEach(function(k,i){
+		if (viewerParams[k] == null) {
+			//console.log("Viewer missing ", k)
+			ready = false;
+		}
+	});
+	var partsVals = ["Coordinates"]
+	if (viewerParams.hasOwnProperty('partsKeys')){
+		viewerParams.partsKeys.forEach(function(p){
+			partsVals.forEach(function(k,i){
+				if (viewerParams.parts[p][k] == null) {
+					//console.log("Viewer parts missing ", p, k)
+					ready = false;
+				}
+			});
+		})
+	}
+
+	return ready
 }
 
 function updateViewerCamera(){

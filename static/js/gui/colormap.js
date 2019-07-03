@@ -60,43 +60,45 @@ function createColormapSliders(){
 
 	GUIParams.partsKeys.forEach(function(p,i){
 		GUIParams.ckeys[p].forEach(function(ck, j){
-			//I don't *think* I need to update this in GUI; it's just the initial value that matters, right?
-			var initialValueMin = GUIParams.colormapLims[p][ck][0]; 
-			var initialValueMax = GUIParams.colormapLims[p][ck][1];
-			var sliderArgs = {
-				start: [initialValueMin, initialValueMax], 
-				connect: true,
-				tooltips: [false, false],
-				steps: [[0.001,0.001],[0.001,0.001]],
-				range: { 
-					'min': [initialValueMin],
-					'max': [initialValueMax]
-				},
-				format: wNumb({
-					decimals: 3
-				})
+			if (ck != "None"){
+				//I don't *think* I need to update this in GUI; it's just the initial value that matters, right?
+				var initialValueMin = GUIParams.colormapLims[p][ck][0]; 
+				var initialValueMax = GUIParams.colormapLims[p][ck][1];
+				var sliderArgs = {
+					start: [initialValueMin, initialValueMax], 
+					connect: true,
+					tooltips: [false, false],
+					steps: [[0.001,0.001],[0.001,0.001]],
+					range: { 
+						'min': [initialValueMin],
+						'max': [initialValueMax]
+					},
+					format: wNumb({
+						decimals: 3
+					})
+				}
+
+				var slider = document.getElementById(p+'_CK_'+ck+'_END_CMapSlider');
+				var textMin = document.getElementById(p+'_CK_'+ck+'_END_CMapMinT');
+				var textMax = document.getElementById(p+'_CK_'+ck+'_END_CMapMaxT');
+
+
+				text = [textMin, textMax];
+				//not sure this is the best way to handle this.
+				var evalString = 'if (GUIParams.showColormap.'+p+') fillColorbarContainer("'+p+'"); GUIParams.colormapVals.'+p+'.'+ck+'[i] = parseFloat(value)';
+				var varArgs = {'f':'setViewerParamByKey','v':[initialValueMin, "colormapVals",p, ck],
+							  'f2':'setViewerParamByKey','v2':[true,'updateColormap',p],
+							  'f3':'setViewerParamByKey','v3':[true,'updateFilter',p],
+							  'evalString':evalString};
+
+				createSlider(slider, text, sliderArgs, varArgs, [2,2], 'double');
+
+				//reformat
+				var w = parseInt(d3.select('.CMapClass').style("width").slice(0,-2));
+				d3.select('#'+p+'_CK_'+ck+'_END_CMapSlider').select('.noUi-base').style('width',w-10+"px");
+				d3.select('#'+p+'_CK_'+ck+'_END_CMapSlider').select('.noUi-connect').style('border-radius','6px 0px 0px 6px');
+				d3.select('#'+p+'_CK_'+ck+'_END_CMapSlider').select('.noUi-handle-lower').style('border-radius','6px 0px 0px 6px');
 			}
-
-			var slider = document.getElementById(p+'_CK_'+ck+'_END_CMapSlider');
-			var textMin = document.getElementById(p+'_CK_'+ck+'_END_CMapMinT');
-			var textMax = document.getElementById(p+'_CK_'+ck+'_END_CMapMaxT');
-
-
-			text = [textMin, textMax];
-			//not sure this is the best way to handle this.
-			var evalString = 'if (GUIParams.showColormap.'+p+') fillColorbarContainer("'+p+'"); GUIParams.colormapVals.'+p+'.'+ck+'[i] = parseFloat(value)';
-			var varArgs = {'f':'setViewerParamByKey','v':[initialValueMin, "colormapVals",p, ck],
-						  'f2':'setViewerParamByKey','v2':[true,'updateColormap',p],
-						  'f3':'setViewerParamByKey','v3':[true,'updateFilter',p],
-						  'evalString':evalString};
-
-			createSlider(slider, text, sliderArgs, varArgs, [2,2], 'double');
-
-			//reformat
-			var w = parseInt(d3.select('.CMapClass').style("width").slice(0,-2));
-			d3.select('#'+p+'_CK_'+ck+'_END_CMapSlider').select('.noUi-base').style('width',w-10+"px");
-			d3.select('#'+p+'_CK_'+ck+'_END_CMapSlider').select('.noUi-connect').style('border-radius','6px 0px 0px 6px');
-			d3.select('#'+p+'_CK_'+ck+'_END_CMapSlider').select('.noUi-handle-lower').style('border-radius','6px 0px 0px 6px');
 		});
 	});
 

@@ -1314,12 +1314,12 @@ function createUI(){
 	hamburger.classList.toggle("change");
 
 	//create the colorbar container
-		if (use_color_id != null){
-			defineColorbarContainer(use_color_id)
-			if (GUIParams.showColormap[use_color_id]){
-					fillColorbarContainer(use_color_id);
-			}
+	if (use_color_id != null){
+		defineColorbarContainer(use_color_id)
+		if (GUIParams.showColormap[use_color_id]){
+				fillColorbarContainer(use_color_id);
 		}
+	}
 }
 
 
