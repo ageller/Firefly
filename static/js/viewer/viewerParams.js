@@ -69,7 +69,7 @@ function defineViewerParams(){
 		this.maxVrange = 2000.; //maximum dynamic range for length of velocity vectors (can be reset in options file)
 
 		//help screen
-		this.helpMessage = 1;
+		this.helpMessage = false;
 
 		//initial friction value
 		this.friction = 0.1;

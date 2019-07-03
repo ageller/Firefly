@@ -46,17 +46,21 @@ function showSplash(show){
 	var fdur = 700.;
 
 	var splash = d3.select("#splash");
+
+	if (show) splash.classed("hidden",false);
+
 	var op = 0.8;
 	if (!show) {
 		op = 0. 
 	}
+
 	splash.transition()
 		.ease(d3.easeLinear)
 		.duration(fdur)
 		.style("opacity", op)
 
 		.on("end", function(d){
-			if (!show) splash.style("display","none");
+			if (!show) splash.classed("hidden",true);
 		})
 }
 

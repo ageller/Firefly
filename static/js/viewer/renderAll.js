@@ -14,7 +14,7 @@ function update(time){
 	viewerParams.keyboard.update();
 	if (viewerParams.keyboard.down("H")){
 		viewerParams.helpMessage=!viewerParams.helpMessage;
-			showSplash(viewerParams.helpMessage);
+		showSplash(viewerParams.helpMessage);
 	}
 	if (viewerParams.keyboard.down("space")){
 		viewerParams.useTrackball = !viewerParams.useTrackball;
