@@ -3,7 +3,7 @@
 from firefly_api.reader import Reader
 from firefly_api.particlegroup import ParticleGroup
 
-def simpleReader(name, coords, color, sizeMult):
+def simpleReader(name = "foo", coords = [], color=[1,1,1,1], sizeMult=1):
     #create the reader
     my_reader = Reader(
         ## the name of the sub-directory that will contain your JSON files,
