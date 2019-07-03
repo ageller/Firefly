@@ -110,8 +110,8 @@ class Reader(object):
                     assert validate in os.listdir(os.path.split(path_prefix)[0])   
                 except:
                     raise FireflyError("JSONdir is not a sub-directory of a version of Firefly/data")
-        if not os.path.isdir(self.JSONdir):
-            os.mkdir(self.JSONdir)
+            if not os.path.isdir(self.JSONdir):
+                os.mkdir(self.JSONdir)
 
         return path_prefix,path
 

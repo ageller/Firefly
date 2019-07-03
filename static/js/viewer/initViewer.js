@@ -1092,20 +1092,27 @@ function connectViewerSocket(){
 			setParams(msg);
 		});
 		socketParams.socket.on('input_data', function(msg) {
-			//right now only implemented for local (GUI + viewer in one window)
+			//only tested for local (GUI + viewer in one window)
 			console.log("have data : ", msg);
-			defineGUIParams();
+			var socketCheck = viewerParams.usingSocket;
 			defineViewerParams();
 			viewerParams.pauseAnimation = true;
 			viewerParams.partsKeys = Object.keys(msg.parts);
 			viewerParams.parts = JSON.parse(JSON.stringify(msg.parts));
 			viewerParams.parts.options = JSON.parse(JSON.stringify(msg.options));
 			console.log("parts", viewerParams.parts, viewerParams.partsKeys)
-			viewerParams.usingSocket = false;
-			GUIParams.usingSocket = false;
+
+			viewerParams.usingSocket = socketCheck; 
+
 			makeViewer();
 			WebGLStart();
-			makeUI(local=true);
+
+			var forGUI = [];
+			forGUI.push({'defineGUIParams':null});
+			forGUI.push({'setGUIParamByKey':[viewerParams.usingSocket, "usingSocket"]});
+			forGUI.push({'makeUI':!viewerParams.usingSocket});
+			sendToGUI(forGUI);
+
 		});
 	});
 }

@@ -14,23 +14,22 @@ function setSliderHandle(i, value, parent, varArgs, resetEnd, type) {
 	if ((i == 0 && type == "double") && resetEnd[0] == 2 || (resetEnd[0] == 1 && value < min)) minReset = parseFloat(value);
 	if ((i == 1 || type == "single") && resetEnd[1] == 2 || (resetEnd[1] == 1 && value > max)) maxReset = parseFloat(value);
 
-
 	maxReset = Math.max(minReset + 0.0001*Math.abs(minReset), maxReset); //in case user makes a mistake
-
-	//reset the slider value
-	var r = parent.noUiSlider.get()
-	if (Array.isArray(r)) r[i] = value; else r = value; //this could also be type 'double' vs. 'single'
-	parent.noUiSlider.set(r);
-
-	//update the attached variables
-	updateUIValues(i, value, varArgs, type);
-
 	parent.noUiSlider.updateOptions({
 		range: {
 			'min': [minReset],
 			'max': [maxReset]
 		}
 	});
+
+	//reset the slider value
+	var r = parent.noUiSlider.get()
+	if (Array.isArray(r)) r[i] = value; else r = value; //this could also be type 'double' vs. 'single'
+	parent.noUiSlider.set(r);
+
+
+	//update the attached variables (already taken care of when we change the slider value)
+	//updateUIValues(i, parseFloat(value), varArgs, type);
 
 }
 
