@@ -2,10 +2,7 @@
 ///// Functions to execute the GUI commands //////
 //////////////////////////////////////////////////
 
-//reset to the initial Options file
-function resetToOptions(){
-	console.log("Resetting to Default");
-	viewerParams.parts.options = viewerParams.parts.options0;
+function resetViewer(){
 
 	viewerParams.reset = true;
 	viewerParams.ready = false;
@@ -21,12 +18,18 @@ function resetToOptions(){
 			sendInitGUI();
 		}
 	}, 100);
-	
 	sendToGUI([{'makeUI':null}]);
 
 	drawScene();
 	viewerParams.reset = false;
 
+}
+
+//reset to the initial Options file
+function resetToOptions(){
+	console.log("Resetting to Default");
+	viewerParams.parts.options = viewerParams.parts.options0;
+	resetViewer();
 }
 
 //to load in a new data set
@@ -58,26 +61,7 @@ function loadNewData(){
 function resetToPreset(preset){
 	console.log("Resetting to Preset");
 	viewerParams.parts.options = preset;
-
-	viewerParams.reset = true;
-	viewerParams.ready = false;
-	//reset all the parts specific values to the initial ones
-	initPVals();
-
-	initScene();
-
-	//recreate the GUI
-	viewerParams.waitForInit = setInterval(function(){ 
-		if (viewerParams.ready){
-			clearInterval(viewerParams.waitForInit);
-			sendInitGUI();
-		}
-	}, 100);
-	sendToGUI([{'makeUI':null}]);
-
-	drawScene();
-	viewerParams.reset = false;
-
+	resetViewer();
 }
 
 //check whether the center is locked or not

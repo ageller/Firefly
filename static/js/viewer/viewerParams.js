@@ -148,6 +148,7 @@ function defineViewerParams(){
 
 		//for sockets
 		this.usingSocket = true;
+		this.local = false; //for GUI and viewer in one but still using sockets?
 
 		//when ready the GUI will be created
 		this.waitForInit = null;

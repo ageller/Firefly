@@ -7,7 +7,7 @@ function makeUI(local=false){
 		document.removeEventListener("keypress", sendCameraInfoToViewer,true);//for fly controls
 		document.addEventListener("keypress", sendCameraInfoToViewer,true);//for fly controls
 	}
-
+	
 	GUIParams.waitForInit = setInterval(function(){ 
 		var ready = confirmInit();
 		console.log("waiting for GUI init", ready)
@@ -22,7 +22,10 @@ function confirmInit(){
 	var keys = ["partsKeys", "PsizeMult", "plotNmax", "decimate", "stereoSepMax", "friction", "Pcolors", "showParts", "showVel", "velopts", "velType", "ckeys", "colormapVals", "colormapLims", "colormapVariable", "colormap", "showColormap", "fkeys", "filterVals", "filterLims"];
 	var ready = true;
 	keys.forEach(function(k,i){
-		if (GUIParams[k] == null) ready = false;
+		if (GUIParams[k] == null) {
+			//console.log("GUI missing ", k)
+			ready = false;
+		}
 	});
 	return ready
 }
@@ -33,7 +36,7 @@ function confirmInit(){
 //////////////
 //https://blog.miguelgrinberg.com/post/easy-websockets-with-flask-and-gevent
 //https://github.com/miguelgrinberg/Flask-SocketIO
-function connectSocket(){
+function connectGUISocket(){
 	//$(document).ready(function() {
 	document.addEventListener("DOMContentLoaded", function(event) { 
 		// Event handler for new connections.

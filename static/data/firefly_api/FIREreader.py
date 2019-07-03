@@ -45,6 +45,7 @@ class FIREreader(Reader):
         prefix = 'FIREData',
         clean_JSONdir = 0,
         options = None,
+        doValidate = True
         ):
         """
         snapdir - string, directory that contains all the hdf5 data files
@@ -167,6 +168,9 @@ class FIREreader(Reader):
             raise IOError("You must specify the absolute path of the"+
                 " directory to save the JSON files using the JSONdir kwarg")
             """
+        #should we validate the path?
+        self.doValidate = doValidate
+        
         self.JSONdir = JSONdir
         self.path_prefix,self.path = self.splitAndValidateDatadir()
 
@@ -190,8 +194,8 @@ class FIREreader(Reader):
         ## array of particle groups
         self.particleGroups = []
         
-        self.particleGroups = []
 
+        
     def loadData(self):
         """
         Loads the snapshot data using Alex Gurvich's openSnapshot utility

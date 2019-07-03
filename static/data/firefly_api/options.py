@@ -212,6 +212,14 @@ class Options(object):
         ## and link this particle group to this Options instance, for better or worse.
         particleGroup.linked_options = self
 
+    def outputToDict(
+        self):
+        all_options_dict = {}
+        for attr in self.__dict__.keys():
+            if '_options' in attr:
+                all_options_dict.update(getattr(self,attr))
+        return all_options_dict
+    
     def outputToJSON(
         self,
         JSONdir,
@@ -226,10 +234,7 @@ class Options(object):
             loud=1 - flag for whether warnings should be shown
         """
         filename = self.options_filename if filename is None else filename
-        all_options_dict = {}
-        for attr in self.__dict__.keys():
-            if '_options' in attr:
-                all_options_dict.update(getattr(self,attr))
+        all_options_dict = self.outputToDict()
 
         pd.Series(all_options_dict).to_json(
             os.path.join(JSONdir,prefix+filename), orient='index')  

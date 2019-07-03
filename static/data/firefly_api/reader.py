@@ -24,6 +24,7 @@ class Reader(object):
         max_npart_per_file = 10**4,
         prefix = 'Data',
         clean_JSONdir = 0,
+        doValidate = True
         ):
         """
         `JSONdir=None` - This should be the name of the sub-directory that will
@@ -69,6 +70,9 @@ class Reader(object):
         ## absolute path of where to place all the data files in, must be a 
         ##  sub-directory of Firefly/data for Firefly to be able to find it.
 
+        #should we validate the path?
+        self.doValidate = doValidate
+        
         ## get rid of the trailing '/' if it's there
         if JSONdir[-1]==os.sep:
             JSONdir=JSONdir[:-1]
@@ -90,7 +94,9 @@ class Reader(object):
     
         ## array of particle groups
         self.particleGroups = []
+        
 
+        
     def splitAndValidateDatadir(self):
         """
         Ensures that files will be output to a location that Firefly 
@@ -98,11 +104,12 @@ class Reader(object):
         references files correctly.
         """
         path_prefix,path = os.path.split(self.JSONdir)
-        for validate in ['index.html','data','src','LICENSE','README.md']:
-            try:
-                assert validate in os.listdir(os.path.split(path_prefix)[0])   
-            except:
-                raise FireflyError("JSONdir is not a sub-directory of a version of Firefly/data")
+        if (self.doValidate):
+            for validate in ['index.html','data','src','LICENSE','README.md']:
+                try:
+                    assert validate in os.listdir(os.path.split(path_prefix)[0])   
+                except:
+                    raise FireflyError("JSONdir is not a sub-directory of a version of Firefly/data")
         if not os.path.isdir(self.JSONdir):
             os.mkdir(self.JSONdir)
 

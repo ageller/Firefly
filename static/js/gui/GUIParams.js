@@ -16,7 +16,7 @@ function defineGUIParams(){
 		this.zmin = 1;
 		this.fov = 45.
 		this.flyffac = 0.2;
-
+		
 		//when ready the GUI will be created
 		this.waitForInit = null;
 
@@ -29,6 +29,7 @@ function defineGUIParams(){
 
 		//for sockets
 		this.usingSocket = true;
+		this.local = false; //for GUI and viewer in one but still using sockets?
 
 		//check to enable dropdown -- mapped to viewerParams.parts.options.UIdropdown
 		this.useDropdown = {}; 

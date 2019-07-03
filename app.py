@@ -98,6 +98,21 @@ def viewer():
 def gui(): 
 	return render_template("gui.html")
 
+@app.route("/combined")
+def combined(): 
+	return render_template("combined.html")
+
+@app.route('/data_input', methods = ['POST'])
+def data_input():
+	jsondata = request.get_json()
+	data = json.loads(jsondata)
+
+	#stuff happens here that involves data to obtain a result
+	print('Received data from server : ', data.keys())
+	socketio.emit('input_data', data, namespace='/test')
+	#return json.dumps(data)
+	return "Done"
+
 if __name__ == "__main__":
 	socketio.run(app, debug=True, host='0.0.0.0', port=5000)
 	#app.run(host='0.0.0.0')

@@ -2,8 +2,10 @@
 
 	<head>
 		<meta charset="utf-8">
-		<title>Firefly Viewer</title>		
+		<title>Firefly</title>		
 		<link rel="icon" href="static/docs/icon.png">  
+
+
 
 	</head>
 
@@ -45,6 +47,11 @@
 				<div id="splashdiv5">Loading...</div>
 			</div>
 
+
+			<div class="UIcontainer" style="visibility:hidden"></div>
+			
+			<div id="colorbar_container"></div>
+
 			<div id="WebGLContainer" ></div>
 
 		</div>
@@ -58,9 +65,21 @@
 		<script src="static/lib/THREEx.FullScreen.js"></script>
 		<script src="static/lib/THREEx.WindowResize.js"></script>
 		<script src="static/lib/StereoEffect.js"></script>
-		<!-- https://github.com/collinhover/threeoctree -->
-		<!-- <script src="static/lib/threeoctree.min.js"></script> -->
+<!-- https://github.com/collinhover/threeoctree -->
+		<script src="static/lib/threeoctree.min.js"></script>
 		
+		<!-- for the color picker = spectrum : https://github.com/bgrins/spectrum -->
+		<link rel="stylesheet" href="static/lib/spectrum.css" />
+		<script src="static/lib/jquery-3.2.1.min.js"></script> 
+		<script src="static/lib/spectrum.js"></script>
+
+		<!-- noUIslider for filtering -->
+		<link href="static/lib/nouislider.min.css" rel="stylesheet">
+		<script src="static/lib/nouislider.min.js"></script>
+
+		<!-- wNumb number formatter -->
+		<script src="static/lib/wNumb.js"></script>
+
 		<!-- d3 -->
 		<script src="static/lib/d3.v4.10.2.min.js"></script>
 
@@ -78,17 +97,24 @@
 		<script src="static/shaders/fragment_pass2.glsl.js"></script>
 
 		<link rel="stylesheet" type="text/css" href="static/css/mainStyles.css" />
+		<link rel="stylesheet" type="text/css" href="static/css/UIStyles.css" />
 
 		<script src="static/js/misc/socketParams.js"></script>
+		<script src="static/js/gui/GUIParams.js"></script>
 		<script src="static/js/viewer/viewerParams.js"></script>
 		<script>
 			//called upon loading
-			defineSocketParams();
+			defineSocketParams();			
+			defineGUIParams();
 			defineViewerParams();
 		</script>
-		
 		<script src="static/js/misc/utils.js"></script>
 		<script src="static/js/misc/windowEvents.js"></script>
+		<script src="static/js/gui/initGUI.js"></script>
+		<script src="static/js/gui/sliders.js"></script>
+		<script src="static/js/gui/colormap.js"></script>
+		<script src="static/js/gui/filters.js"></script>
+		<script src="static/js/gui/UI.js"></script>
 		<script src="static/js/viewer/applyUISelections.js"></script>
 		<script src="static/js/viewer/draw.js"></script>
 		<script src="static/js/viewer/renderAll.js"></script>
@@ -97,9 +123,9 @@
 
 		<script>
 			//called upon loading
+			connectGUISocket();
 			connectViewerSocket();
-			makeViewer();
-			getFilenames("static/");
+			runLocal();
 		</script>
 
 	</body>

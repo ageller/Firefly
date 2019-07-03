@@ -256,6 +256,37 @@ class ParticleGroup(object):
             ## use a boolean mask instead
             self.dec_inds = np.ones(self.nparts,dtype=bool)
 
+    def outputToDict(
+        self,
+        these_dec_inds=[None],
+        i_file=0,
+        verbose=False):
+        
+        outDict = dict()
+        if (these_dec_inds[0] == None):
+            these_dec_inds = np.arange(len(self.coordinates))
+            
+        outDict['Coordinates'] = self.coordinates[these_dec_inds]
+
+        for tracked_name,tracked_arr in zip(self.tracked_names,self.tracked_arrays):
+            outDict[tracked_name]=tracked_arr[these_dec_inds]
+
+        if i_file == 0:
+            if (verbose): print(self.tracked_names,
+                'filter:',self.tracked_filter_flags,
+                'colormap:',self.tracked_colormap_flags)
+            outDict['filterKeys'] = np.array(self.tracked_names)[np.array(
+                 self.tracked_filter_flags,dtype=bool)]
+            outDict['colormapKeys'] = np.array(self.tracked_names)[np.array(
+                self.tracked_colormap_flags,dtype=bool)]
+
+            ## TODO this needs to be changed, this is a flag for having the
+            ##  opacity vary across a particle as the impact parameter projection
+            ##  of cubic spline kernel
+            outDict['doSPHrad'] = [0]
+        
+        return outDict
+    
     def outputToJSON(
         self,
         path, ## sub-directory name
@@ -311,27 +342,9 @@ class ParticleGroup(object):
                 these_dec_inds = self.dec_inds[cur_index:cur_index+nparts_this_file]
             else:
                 these_dec_inds = np.arange(cur_index,cur_index+nparts_this_file)
-
-            outDict = dict()
-            outDict['Coordinates'] = self.coordinates[these_dec_inds]
-
-            for tracked_name,tracked_arr in zip(self.tracked_names,self.tracked_arrays):
-                outDict[tracked_name]=tracked_arr[these_dec_inds]
-
-            cur_index+=nparts_this_file
-            if i_file == 0:
-                print(self.tracked_names,
-                    'filter:',self.tracked_filter_flags,
-                    'colormap:',self.tracked_colormap_flags)
-                outDict['filterKeys'] = np.array(self.tracked_names)[np.array(
-                    self.tracked_filter_flags,dtype=bool)]
-                outDict['colormapKeys'] = np.array(self.tracked_names)[np.array(
-                    self.tracked_colormap_flags,dtype=bool)]
-
-                ## TODO this needs to be changed, this is a flag for having the
-                ##  opacity vary across a particle as the impact parameter projection
-                ##  of cubic spline kernel
-                outDict['doSPHrad'] = [0]
+        
+            outDict = self.outputToDict(these_dec_inds, i_file)
+            cur_index += nparts_this_file
 
             pd.Series(outDict).to_json(os.path.join(path_prefix,fname), orient='index')
 

@@ -7,10 +7,12 @@ function initControls(){
 		viewerParams.camera.getWorldDirection(xx);
 		viewerParams.controls = new THREE.TrackballControls( viewerParams.camera, viewerParams.renderer.domElement );
 		viewerParams.controls.target = new THREE.Vector3(viewerParams.camera.position.x + xx.x, viewerParams.camera.position.y + xx.y, viewerParams.camera.position.z + xx.z);
-		if (viewerParams.parts.options.hasOwnProperty('center') && !viewerParams.switchControls){
-			if (viewerParams.parts.options.center != null){
-				viewerParams.controls.target = new THREE.Vector3(viewerParams.parts.options.center[0], viewerParams.parts.options.center[1], viewerParams.parts.options.center[2]);
+		if (viewerParams.parts.hasOwnProperty('options')){
+			if (viewerParams.parts.options.hasOwnProperty('center') && !viewerParams.switchControls){
+				if (viewerParams.parts.options.center != null){
+					viewerParams.controls.target = new THREE.Vector3(viewerParams.parts.options.center[0], viewerParams.parts.options.center[1], viewerParams.parts.options.center[2]);
 
+				}
 			}
 		} 
 
@@ -91,7 +93,7 @@ function initScene() {
 
 
 	//apply presets from the options file
-	applyOptions();
+	if (viewerParams.parts.hasOwnProperty('options')) applyOptions();
 
 	// controls
 	initControls();
@@ -881,8 +883,10 @@ function clearloading(){
 function WebGLStart(){
 
 //reset the window title
-	if (viewerParams.parts.options.hasOwnProperty('title')){
-		window.document.title = viewerParams.parts.options.title
+	if (viewerParams.parts.hasOwnProperty('options')){
+		if (viewerParams.parts.options.hasOwnProperty('title')){
+			window.document.title = viewerParams.parts.options.title
+		}
 	}
 
 	document.addEventListener('mousedown', handleMouseDown);
@@ -911,9 +915,12 @@ function WebGLStart(){
 //wait for all the input before loading
 function makeViewer(){
 	viewerParams.haveUI = false;
+	viewerParams.ready = false;	
 	viewerParams.waitForInit = setInterval(function(){ 
+		console.log("Waiting for viewer init", viewerParams.ready)
 		if (viewerParams.ready){
 			clearInterval(viewerParams.waitForInit);
+			viewerParams.pauseAnimation = false;
 			viewerParams.parts.options0 = createPreset(); //this might break things if the presets don't work...
 			console.log("initial options", viewerParams.parts.options)
 			sendInitGUI();
@@ -1017,7 +1024,7 @@ function sendInitGUI(){
 	forGUI.push({'updateUICameraText':null});
 	forGUI.push({'updateUIRotText':null});
 
-	if (viewerParams.usingSocket) forGUI.push({'updateGUICamera':null});
+	if (viewerParams.usingSocket && !viewerParams.local) forGUI.push({'updateGUICamera':null});
 
 	sendToGUI(forGUI);
 
@@ -1064,7 +1071,7 @@ function runLocal(){
 /////////////////////
 //https://blog.miguelgrinberg.com/post/easy-websockets-with-flask-and-gevent
 //https://github.com/miguelgrinberg/Flask-SocketIO
-function connectSocket(){
+function connectViewerSocket(){
 	//$(document).ready(function() {
 	document.addEventListener("DOMContentLoaded", function(event) { 
 		// Event handler for new connections.
@@ -1080,11 +1087,26 @@ function connectSocket(){
 		// The callback function is invoked whenever the server emits data
 		// to the client. The data is then displayed in the "Received"
 		// section of the page.
-		//updates from ML engine
+		//updates from GUI
 		socketParams.socket.on('update_viewerParams', function(msg) {
 			setParams(msg);
 		});
-
+		socketParams.socket.on('input_data', function(msg) {
+			//right now only implemented for local (GUI + viewer in one window)
+			console.log("have data : ", msg);
+			defineGUIParams();
+			defineViewerParams();
+			viewerParams.pauseAnimation = true;
+			viewerParams.partsKeys = Object.keys(msg.parts);
+			viewerParams.parts = JSON.parse(JSON.stringify(msg.parts));
+			viewerParams.parts.options = JSON.parse(JSON.stringify(msg.options));
+			console.log("parts", viewerParams.parts, viewerParams.partsKeys)
+			viewerParams.usingSocket = false;
+			GUIParams.usingSocket = false;
+			makeViewer();
+			WebGLStart();
+			makeUI(local=true);
+		});
 	});
 }
 
