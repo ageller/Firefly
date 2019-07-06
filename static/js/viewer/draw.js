@@ -174,7 +174,7 @@ function drawScene(pdraw = viewerParams.partsKeys)
 					colorIndex++;
 					colorArray[colorIndex] = 0.;
 					colorIndex++;
-					colorArray[colorIndex] = 0.;
+					colorArray[colorIndex] = -1.;
 					colorIndex++;
 
 				}

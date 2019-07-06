@@ -115,7 +115,7 @@ void main(void) {
 		gl_FragColor.rgb *= scaleCD; //need some factor here so that it adds up progressively
 	}
 
-	if (vColor[3] != 0.) {
+	if (vColor[3] >= 0.) {
 		gl_FragColor.rgb = vColor.rgb;
 		gl_FragColor.a *= vColor[3];
 	}

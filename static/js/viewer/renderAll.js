@@ -71,8 +71,7 @@ function update(time){
 		showSleep();
 	}
 
-	for (var i=0; i<viewerParams.partsKeys.length; i++){
-		var p = viewerParams.partsKeys[i];
+	viewerParams.partsKeys.forEach(function(p,i){
 		//change filter limits if playback is enabled
 		if (viewerParams.parts[p]['playbackEnabled']){
 			viewerParams.parts[p]['playbackTicks']++;
@@ -184,7 +183,7 @@ function update(time){
 			}
 
 		});
-	}
+	});
 	// update the current time
 	viewerParams.currentTime=seconds;
 
@@ -194,6 +193,39 @@ function update(time){
 function render() {
 
 	if (viewerParams.columnDensity){
+		//see if I can change the opacity to negative values?
+		//requires uncommenting a line in the fragment_pass2.glsl.js code
+		// viewerParams.partsKeys.forEach(function(p,i){
+		// 	viewerParams.partsMesh[p].forEach( function( m, j ) {
+		// 		var colorArray = m.geometry.attributes.colorArray.array;	
+		// 		var alpha = m.geometry.attributes.alpha.array;	
+		// 		colorIndex = 0.
+		// 		alpha.forEach(function(a,k){
+		// 			if (p == "Gas"){
+		// 				colorArray[colorIndex] = 0.5;
+		// 				colorIndex++;
+		// 				colorArray[colorIndex] = 0.;
+		// 				colorIndex++;
+		// 				colorArray[colorIndex] = 0.;
+		// 				colorIndex++;
+		// 				colorArray[colorIndex] = 1.;
+		// 				colorIndex++;
+		// 			}else{
+		// 				colorArray[colorIndex] = 0.;
+		// 				colorIndex++;
+		// 				colorArray[colorIndex] = 0.;
+		// 				colorIndex++;
+		// 				colorArray[colorIndex] = 1.;
+		// 				colorIndex++;
+		// 				colorArray[colorIndex] = 1.;
+		// 				colorIndex++;
+		// 			}
+		// 		});
+		// 		m.geometry.attributes.alpha.needsUpdate = true;					
+		// 		m.geometry.attributes.colorArray.needsUpdate = true;					
+		// 	});
+		// });
+
 		//first, render to the texture
 		viewerParams.renderer.setRenderTarget(viewerParams.textureCD)
 		viewerParams.renderer.render( viewerParams.scene, viewerParams.camera);
