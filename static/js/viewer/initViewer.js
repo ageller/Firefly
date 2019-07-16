@@ -350,7 +350,7 @@ function applyOptions(){
 						viewerParams.updateColormap[p] = true
 
 						for (k=0; k<viewerParams.ckeys[p].length; k++){
-							var fkey = viewerParams.ckeys[p][k]
+							var ckey = viewerParams.ckeys[p][k]
 							if (viewerParams.parts.options.colormapVals[p].hasOwnProperty(ckey)){
 								if (viewerParams.parts.options.colormapVals[p][ckey] != null){
 									viewerParams.colormapVals[p][ckey] = []
@@ -362,10 +362,52 @@ function applyOptions(){
 					}
 				}
 			}
-		}
+		}// colormap vals
 
+        //start plotting with a colormap
+		if (viewerParams.parts.options.hasOwnProperty("showColormap") &&
+            viewerParams.parts.options.showColormap != null &&
+            viewerParams.parts.options.showColormap.hasOwnProperty(p) &&
+            viewerParams.parts.options.showColormap[p] == true){
+            viewerParams.updateColormap[p] = true
+            viewerParams.showColormap[p] = true;
+            if (viewerParams.haveUI){
+                elm = document.getElementById(p+'colorCheckBox');
+                elm.checked = true;
+                elm.value = true;
+            }
+		}//start plotting with a colormap
 
-	}
+        //choose which colormap to use
+		if (viewerParams.parts.options.hasOwnProperty("colormap") && 
+		    viewerParams.parts.options.colormap != null &&
+			viewerParams.parts.options.colormap.hasOwnProperty(p) && 
+            viewerParams.parts.options.colormap[p] != null){
+
+            // passed the index as a pixel fraction out of 256
+            idx = viewerParams.parts.options.colormap[p];
+            //idx = GUIParams.colormapList[(idx * 256/8) - 0.5];
+
+            //TODO implement helper_selectColormap
+            //helper_selectColormap(
+                //idx,
+                //p);
+
+		}//choose which colormap to use
+
+        //select the colormap variable to color by
+		if (viewerParams.parts.options.hasOwnProperty("colormapVariable") && 
+		    viewerParams.parts.options.colormapVariable != null &&
+			viewerParams.parts.options.colormapVariable.hasOwnProperty(p) && 
+            viewerParams.parts.options.colormapVariable[p] != null){
+
+                var idx = viewerParams.parts.options.colormapVariable[p];
+                //TODO implement helper_selectColormapVariable
+                //helper_selectColormapVariable(
+                    //viewerParams.ckeys[p][idx],
+                    //p);
+		}//select the colormap variable to color by
+	}// particle specific options
 }
 
 function calcMinMax(p,key, addFac = true){
@@ -895,6 +937,9 @@ function WebGLStart(){
 
 	document.addEventListener('mousedown', handleMouseDown);
 
+    // define programatic divs
+    defineColorbarContainer(null);
+
 	initPVals();
 
 	initScene();
@@ -912,6 +957,7 @@ function WebGLStart(){
 	viewerParams.currentTime = seconds;
 
 	viewerParams.pauseAnimation = false;
+    console.log('before animate',viewerParams.colormapVals['Gas']['log10Density'])
 	animate();
 
 }
