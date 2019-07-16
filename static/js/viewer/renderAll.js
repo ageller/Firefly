@@ -81,8 +81,18 @@ function update(time){
 				// which parts do we want? 
 				this_parts = viewerParams.parts[p];
 				fkey = this_parts['playbackFilter']
+
+
+                var this_parent = document.getElementById(
+                    p + '_FK_' + fkey + '_END_FilterSlider')
+
+                hard_limits = [
+                    this_parent.noUiSlider.options.range.min[0],
+                    this_parent.noUiSlider.options.range.max[0]]
+
+
 				// here are the edges of the bar
-				hard_limits = viewerParams.filterLims[p][fkey]
+				//hard_limits = viewerParams.filterLims[p][fkey]
 				soft_limits = viewerParams.filterVals[p][fkey]
 
 				// how wide is the slider? 
@@ -109,8 +119,14 @@ function update(time){
 					viewerParams.filterVals[p][fkey][0]=soft_limits[0]+filter_step
 					viewerParams.filterVals[p][fkey][1]=soft_limits[1]+filter_step
 				}
+
 				// update the slider position
-				viewerParams.SliderF[p][fkey].noUiSlider.set(viewerParams.filterVals[p][fkey]);
+                var this_parent = document.getElementById(
+                    p + '_FK_' + fkey + '_END_FilterSlider')
+                this_parent.noUiSlider.set(
+                    viewerParams.filterVals[p][fkey])
+
+				//viewerParams.SliderF[p][fkey].noUiSlider.set(viewerParams.filterVals[p][fkey]);
 			}
 		}
 		//check on all the UI inputs for each particle type

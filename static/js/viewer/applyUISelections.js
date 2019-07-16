@@ -228,15 +228,16 @@ function checkPlaybackFilterBox(args){
 	this_label = document.getElementById(p+'_PlaybackLabel');
 
 	//reset the text/appstate to default values
-	this_label.innerText = "Playback: "
+    this_label.childNodes[0].nodeValue = 'Playback: ';
+
 	viewerParams.parts[p]["playbackEnabled"]=false;
 	viewerParams.updateFilter[p]=false;
 	viewerParams.parts[p]['playbackTicks']=0;
-	if (box.checked){
+	if (checked){
 		// read which fkey is currently shown 
 		this_label = document.getElementById(p+'_PlaybackLabel');
 		// update the playback text in the UI
-		this_label.innerText += " " + viewerParams.parts[p]['currentlyShownFilter']//"under development"//
+        this_label.childNodes[0].nodeValue += viewerParams.parts[p]['currentlyShownFilter']//"under development"//
 
 		//flag that we should run playback
 		viewerParams.parts[p]["playbackEnabled"]=true;
