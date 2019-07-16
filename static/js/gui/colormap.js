@@ -161,11 +161,6 @@ function defineColorbarContainer(particle_group_UIname){
 	var container_top = 138; 
 	var container_left = 188;
 
-	var minmax = GUIParams.colormapVals[particle_group_UIname][GUIParams.ckeys[particle_group_UIname][GUIParams.colormapVariable[particle_group_UIname]]]
-	var xmin = minmax[0]
-	var xmax = minmax[1]
-
-
 	var colorbar_container = d3.select("#colorbar_container")
 		.html("")
 		.attr('class', 'colorbar')
@@ -199,10 +194,20 @@ function defineColorbarContainer(particle_group_UIname){
 		.append("g")
 		.attr("class","cbar_svg")
 
+    
+    if (particle_group_UIname == null){
+        var xmin = 0;
+        var xmax = 1;
+    }
+    else{
+        var minmax = GUIParams.colormapVals[particle_group_UIname][GUIParams.ckeys[particle_group_UIname][GUIParams.colormapVariable[particle_group_UIname]]]
+        var xmin = minmax[0]
+        var xmax = minmax[1]
+    }
 
 	// set the ranges
 	var x = d3.scaleLinear().range([parseFloat(colorbar_container.style('margin-left')), parseFloat(colorbar_box.style("width"))+parseFloat(colorbar_container.style('margin-left'))]);
-
+    
 	// Scale the range of the data
 	//x.domain([xmin,xmax]);
 	x.domain([xmax,xmin]); //because I'm rotating
