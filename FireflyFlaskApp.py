@@ -15,7 +15,7 @@ app = Flask(__name__)
 # Set this variable to "threading", "eventlet" ,"gevent" or "gevent_uwsgi" to test the
 # different async modes, or leave it set to None for the application to choose
 # the best option based on installed packages.
-async_mode = None#"eventlet" #"eventlet" is WAY better than "threading"
+async_mode = "eventlet" #"eventlet" is WAY better than "threading"
 
 app = Flask(__name__) 
 app.config['SECRET_KEY'] = 'secret!'
