@@ -82,21 +82,14 @@ function update(time){
 				this_parts = viewerParams.parts[p];
 				fkey = this_parts['playbackFilter']
 
-
-                var this_parent = document.getElementById(
-                    p + '_FK_' + fkey + '_END_FilterSlider')
-
-                hard_limits = [
-                    this_parent.noUiSlider.options.range.min[0],
-                    this_parent.noUiSlider.options.range.max[0]]
-
-
 				// here are the edges of the bar
-				//hard_limits = viewerParams.filterLims[p][fkey]
+				hard_limits = viewerParams.filterLims[p][fkey]
 				soft_limits = viewerParams.filterVals[p][fkey]
 
 				// how wide is the slider? 
-				dfilter = (soft_limits[1]-soft_limits[0])
+				dfilter = this_parts['dfilter']
+                console.log(dfilter)
+
 				// TODO this could be editable
 				filter_step = dfilter/4
 				// conditional statement to decide how to move the filter
@@ -120,12 +113,23 @@ function update(time){
 					viewerParams.filterVals[p][fkey][1]=soft_limits[1]+filter_step
 				}
 
-				// update the slider position
-                var this_parent = document.getElementById(
-                    p + '_FK_' + fkey + '_END_FilterSlider')
-                this_parent.noUiSlider.set(
-                    viewerParams.filterVals[p][fkey])
-
+				// update the left slider position
+                var forGUI = [];
+                forGUI.push({'updateSliderHandles':[
+                    0,//i
+                    viewerParams.filterVals[p][fkey][0], // value
+                    p + '_FK_' + fkey + '_END_FilterSlider',// key
+                    0, // resetEnd
+                    "double"// type
+                    ]});
+                forGUI.push({'updateSliderHandles':[
+                    1,//i
+                    viewerParams.filterVals[p][fkey][1], // value
+                    p + '_FK_' + fkey + '_END_FilterSlider',// key
+                    0, // resetEnd
+                    "double"// type
+                    ]});
+                sendToGUI(forGUI);
 				//viewerParams.SliderF[p][fkey].noUiSlider.set(viewerParams.filterVals[p][fkey]);
 			}
 		}
@@ -262,3 +266,11 @@ function render() {
 
 
 
+/* --- not the best place for this, probably... */ 
+function updatePlaybackFilter(p){
+    var fkey = viewerParams.parts[p]['currentlyShownFilter'];
+    viewerParams.parts[p]['playbackFilter']=fkey;
+    var range = viewerParams.filterVals[p][fkey];
+    console.log(range)
+    viewerParams.parts[p]['dfilter'] = range[1]-range[0];
+}

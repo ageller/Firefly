@@ -189,6 +189,48 @@ function changeSnapSizes(){
 }
 window.addEventListener('resize', changeSnapSizes);
 
+function togglePlayback(p,checked){
+	// figure out which checkbox was checked by slicing the ID, clever move Aaron!
+	this_label = document.getElementById(p+'_PlaybackLabel');
+
+	//reset the text/appstate to default values
+    this_label.childNodes[0].nodeValue = 'Playback: ';
+
+    var forViewer = [];
+
+    forViewer.push({'setViewerParamByKey':[
+        false,'parts',p,"playbackEnabled"]})
+    forViewer.push({'setViewerParamByKey':[
+        false, "updateFilter",p,]})
+
+    forViewer.push({'setViewerParamByKey':[
+        0, 'parts',p,"playbackTicks"]})
+
+    sendToViewer(forViewer);
+
+	if (checked){
+		// read which fkey is currently shown 
+		this_label = document.getElementById(p+'_PlaybackLabel');
+		// update the playback text in the UI
+        this_label.childNodes[0].nodeValue += "under development"//viewerParams.parts[p]['currentlyShownFilter']
+
+        var forViewer = [];
+
+        forViewer.push({'setViewerParamByKey':[
+            true,'parts',p,"playbackEnabled"]})
+
+        forViewer.push({'setViewerParamByKey':[
+            true, "updateFilter",p,]})
+
+		//flag that we should run playback
+        forViewer.push({'updatePlaybackFilter':[p]})
+
+        sendToViewer(forViewer);
+
+	}
+
+}
+
 ////////////////////////
 // update the text in the camera location
 ////////////////////////
@@ -1065,7 +1107,13 @@ function createUI(){
 			// colormap functionality
 
 			if (GUIParams.haveColormap[p]){
-				use_color_id = p;
+                //create the colorbar container
+                if (!GUIParams.definedColorbarContainer){
+                    defineColorbarContainer(p)
+                    if (GUIParams.showColormap[use_color_id]){
+                            fillColorbarContainer(use_color_id);
+                    }
+                }
 				dheight += 50;
 
 				dropdown.append('hr')
@@ -1248,13 +1296,7 @@ function createUI(){
 					.attr('autocomplete','off')
 					.style('display','inline-block')
 					.on('change',function(){
-						sendToViewer([{'checkPlaybackFilterBox':[p, this.checked]}]);
-					})
-
-
-
-				
-
+						togglePlayback(p, this.checked)});
 			} 
 			
 			dropdown.style('height',dheight+'px');
@@ -1311,15 +1353,7 @@ function createUI(){
 	//hide the UI initially
 	var hamburger = document.getElementById('UItopbar');
 	hideUI(hamburger);
-	hamburger.classList.toggle("change");
-
-	//create the colorbar container
-	if (use_color_id != null){
-		defineColorbarContainer(use_color_id)
-		if (GUIParams.showColormap[use_color_id]){
-				fillColorbarContainer(use_color_id);
-		}
-	}
+	hamburger.classList.toggle("change");	
 }
 
 

@@ -2,6 +2,19 @@
 /////////////Generic  slider functions
 /////////////////////////////////////////////
 
+// write a wrapper function that the viewer can call
+function updateSliderHandles(args){
+    i = args[0]
+    value = args[1]
+    key = args[2]
+    resetEnd = args[3]
+    type = args[4]
+    
+    var this_parent = document.getElementById(key)
+
+    setSliderHandle(i,value,this_parent,null,resetEnd,type);
+}
+
 //Maybe there's a way to get rid of all these if statements? (in this and the following function)
 function setSliderHandle(i, value, parent, varArgs, resetEnd, type) {
 	//resetEnd : 0=don't reset; 1=reset if value > max; 2=reset always
@@ -46,6 +59,21 @@ function handleSliderText(input, handle, varArgs, resetEnd, type) {
 		}
 		var steps = input.parent.noUiSlider.options.steps;
 		var step = parseFloat(steps[handle]);
+
+        //TODO need to send filterLims back to viewer
+        // for playback to work...
+        /*
+        if (left text box is altered){
+            sendToViewer([{'setViewerParamByKey':[
+                input, "filterLims",p,fkey,0]}]);
+        }
+        
+        if (right text box is altered){
+            sendToViewer([{'setViewerParamByKey':[
+                input, "filterLims",p,fkey,1]}]);
+
+        }
+        */
 
 		switch ( e.which ) {
 			case 13:

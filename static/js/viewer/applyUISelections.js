@@ -219,34 +219,6 @@ function checkInvertFilterBox(args){
 	viewerParams.updateFilter[p] = true;
 }
 
-//turn on/off playback
-//this is probably broken
-function checkPlaybackFilterBox(args){
-	var p = args[0];
-	var checked = args[1];
-	// figure out which checkbox was checked by slicing the ID, clever move Aaron!
-	this_label = document.getElementById(p+'_PlaybackLabel');
-
-	//reset the text/appstate to default values
-    this_label.childNodes[0].nodeValue = 'Playback: ';
-
-	viewerParams.parts[p]["playbackEnabled"]=false;
-	viewerParams.updateFilter[p]=false;
-	viewerParams.parts[p]['playbackTicks']=0;
-	if (checked){
-		// read which fkey is currently shown 
-		this_label = document.getElementById(p+'_PlaybackLabel');
-		// update the playback text in the UI
-        this_label.childNodes[0].nodeValue += viewerParams.parts[p]['currentlyShownFilter']//"under development"//
-
-		//flag that we should run playback
-		viewerParams.parts[p]["playbackEnabled"]=true;
-		viewerParams.updateFilter[p]=true;
-		viewerParams.parts[p]['playbackFilter']=viewerParams.parts[p][['currentlyShownFilter']]
-		console.log(viewerParams.parts[p]['playbackFilter'])
-	}
-}
-
 //change the color of particles
 function checkColor(args){
 	var p = args[0];
