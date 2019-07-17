@@ -937,9 +937,6 @@ function WebGLStart(){
 
 	document.addEventListener('mousedown', handleMouseDown);
 
-    // define programatic divs
-    defineColorbarContainer(null);
-
 	initPVals();
 
 	initScene();

@@ -80,6 +80,7 @@ function defineGUIParams(){
 		this.colormapVariable = null;
 		this.colormap = null;
 		this.showColormap = null;
+        this.definedColorbarContainer = false;
 
 		this.fkeys = null;
 		this.filterVals = null;

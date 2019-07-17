@@ -151,6 +151,7 @@ function dragColorbarElement(elm, e) {
 }
 
 function defineColorbarContainer(particle_group_UIname){
+    GUIParams.definedColorbarContainer = true
 	var text_height = 40;
 	var container_margin = {"top":10,"side":15}
 	var container_width = 300 
