@@ -50,6 +50,7 @@ Additional documentation is available on the [wiki page](https://github.com/agel
 ### Student Contributors
 * Mahlet Shiferaw 
 * Luolei Zhao
+* Nora Linzer
 ### Project PI
 * Claude-André Faucher-Giguère 
 
