@@ -161,8 +161,7 @@ function applyOptions(){
 			viewerParams.useStereo = true;
 			if (viewerParams.haveUI){
 				var evalString = 'elm = document.getElementById("StereoCheckBox"); elm.checked = true; elm.value = true;'
-				var varArgs = {'evalString':evalString};
-				sendToGUI([{'updateUIValues':[null, varArgs, null, null]}]);
+				sendToGUI([{'evalCommand':[evalString]}]);
 			}
 		}
 	}
@@ -253,20 +252,62 @@ function applyOptions(){
 						viewerParams.showVel[p] = true;
 						if (viewerParams.haveUI){
 							var evalString = 'elm = document.getElementById("'+p+'velCheckBox"); elm.checked = true; elm.value = true;'
-							var varArgs = {'evalString':evalString};
-							sendToGUI([{'updateUIValues':[null, varArgs, null, null]}]);
+							sendToGUI([{'evalCommand':[evalString]}]);
 						}
 					}
 				}
 			}
 		}
 
+        // TODO should this be sendToGUI'd?
 		//type of velocity vectors
 		if (viewerParams.parts.options.hasOwnProperty("velType")){
 			if (viewerParams.parts.options.velType != null){
 				if (viewerParams.parts.options.velType.hasOwnProperty(p)){
 					if (viewerParams.parts.options.velType[p] == 'line' || viewerParams.parts.options.velType[p] == 'arrow' || viewerParams.parts.options.velType[p] == 'triangle'){
 						viewerParams.velType[p] = viewerParams.parts.options.velType[p];
+					}
+				}
+			}
+		}
+
+
+        //filter values
+		if (viewerParams.parts.options.hasOwnProperty("filterVals")){
+			if (viewerParams.parts.options.filterVals != null){
+				if (viewerParams.parts.options.filterVals.hasOwnProperty(p)){
+					if (viewerParams.parts.options.filterVals[p] != null){
+						viewerParams.updateFilter[p] = true
+
+						for (k=0; k<viewerParams.fkeys[p].length; k++){
+							var fkey = viewerParams.fkeys[p][k]
+							if (viewerParams.parts.options.filterVals[p].hasOwnProperty(fkey)){
+								if (viewerParams.parts.options.filterVals[p][fkey] != null){
+									viewerParams.filterVals[p][fkey] = []
+									viewerParams.filterVals[p][fkey].push(viewerParams.parts.options.filterVals[p][fkey][0]);
+									viewerParams.filterVals[p][fkey].push(viewerParams.parts.options.filterVals[p][fkey][1]);
+
+                                    var forGUI = [];
+                                    forGUI.push({'updateSliderHandles':[
+                                        0,// ??
+                                        viewerParams.filterVals[p][fkey][0], // ??
+                                        p+'_FK_'+fkey+'_END_FilterSlider', // which slider
+                                        [2,2], // reset end flags
+                                        "double" // type of slider?
+                                        ]});
+
+                                    forGUI.push({'updateSliderHandles':[
+                                        1,// ??
+                                        viewerParams.filterVals[p][fkey][1], // ??
+                                        p+'_FK_'+fkey+'_END_FilterSlider', // which slider
+                                        [2,2], // reset end flags
+                                        "double" // type of slider?
+                                        ]});
+                                    sendToGUI(forGUI);
+								}
+							}
+						}
+
 					}
 				}
 			}
@@ -286,6 +327,24 @@ function applyOptions(){
 									viewerParams.filterLims[p][fkey] = []
 									viewerParams.filterLims[p][fkey].push(viewerParams.parts.options.filterLims[p][fkey][0]);
 									viewerParams.filterLims[p][fkey].push(viewerParams.parts.options.filterLims[p][fkey][1]);
+
+                                    var forGUI = [];
+                                    forGUI.push({'updateSliderHandles':[
+                                        0,// ??
+                                        viewerParams.filterLims[p][fkey][0], // ??
+                                        p+'_FK_'+fkey+'_END_FilterSlider', // which slider
+                                        [1,1], // reset end flags
+                                        "double" // type of slider?
+                                        ]});
+
+                                    forGUI.push({'updateSliderHandles':[
+                                        1,// ??
+                                        viewerParams.filterLims[p][fkey][1], // ??
+                                        p+'_FK_'+fkey+'_END_FilterSlider', // which slider
+                                        [1,1], // reset end flags
+                                        "double" // type of slider?
+                                        ]});
+                                    sendToGUI(forGUI);
 								}
 							}
 						}
@@ -294,32 +353,9 @@ function applyOptions(){
 				}
 			}
 		}
-
-		//filter values
-		if (viewerParams.parts.options.hasOwnProperty("filterVals")){
-			if (viewerParams.parts.options.filterVals != null){
-				if (viewerParams.parts.options.filterVals.hasOwnProperty(p)){
-					if (viewerParams.parts.options.filterVals[p] != null){
-						viewerParams.updateFilter[p] = true
-
-						for (k=0; k<viewerParams.fkeys[p].length; k++){
-							var fkey = viewerParams.fkeys[p][k]
-							if (viewerParams.parts.options.filterVals[p].hasOwnProperty(fkey)){
-								if (viewerParams.parts.options.filterVals[p][fkey] != null){
-									viewerParams.filterVals[p][fkey] = []
-									viewerParams.filterVals[p][fkey].push(viewerParams.parts.options.filterVals[p][fkey][0]);
-									viewerParams.filterVals[p][fkey].push(viewerParams.parts.options.filterVals[p][fkey][1]);
-								}
-							}
-						}
-
-					}
-				}
-			}
-		}
-
 
 		//colormap limits
+        // TODO should this be sendToGUI'd?
 		if (viewerParams.parts.options.hasOwnProperty("colormapLims")){
 			if (viewerParams.parts.options.colormapLims != null){
 				if (viewerParams.parts.options.colormapLims.hasOwnProperty(p)){
@@ -333,6 +369,7 @@ function applyOptions(){
 									viewerParams.colormapLims[p][ckey] = []
 									viewerParams.colormapLims[p][ckey].push(viewerParams.parts.options.colormapLims[p][ckey][0]);
 									viewerParams.colormapLims[p][ckey].push(viewerParams.parts.options.colormapLims[p][ckey][1]);
+
 								}
 							}
 						}
@@ -343,6 +380,7 @@ function applyOptions(){
 		}
 
 		//colormap values
+        // TODO should this be sendToGUI'd?
 		if (viewerParams.parts.options.hasOwnProperty("colormapVals")){
 			if (viewerParams.parts.options.colormapVals != null){
 				if (viewerParams.parts.options.colormapVals.hasOwnProperty(p)){
@@ -356,7 +394,9 @@ function applyOptions(){
 									viewerParams.colormapVals[p][ckey] = []
 									viewerParams.colormapVals[p][ckey].push(viewerParams.parts.options.colormapVals[p][ckey][0]);
 									viewerParams.colormapVals[p][ckey].push(viewerParams.parts.options.colormapVals[p][ckey][1]);
+                                // TODO p+'_CK_'+'_END_CMapSlider'
 								}
+
 							}
 						}
 					}
@@ -372,9 +412,9 @@ function applyOptions(){
             viewerParams.updateColormap[p] = true
             viewerParams.showColormap[p] = true;
             if (viewerParams.haveUI){
-                elm = document.getElementById(p+'colorCheckBox');
-                elm.checked = true;
-                elm.value = true;
+                console.log(p+'colorCheckBox')
+                var evalString = 'elm = document.getElementById("'+p+'colorCheckBox"); elm.checked = true; elm.value = true;'
+				sendToGUI([{'evalCommand':[evalString]}]);
             }
 		}//start plotting with a colormap
 

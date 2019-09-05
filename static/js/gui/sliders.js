@@ -18,6 +18,7 @@ function updateSliderHandles(args){
 //Maybe there's a way to get rid of all these if statements? (in this and the following function)
 function setSliderHandle(i, value, parent, varArgs, resetEnd, type) {
 	//resetEnd : 0=don't reset; 1=reset if value > max; 2=reset always
+    console.log(i, value, parent, varArgs, resetEnd, type)
 
 	//reset the slider limits
 	var min = parent.noUiSlider.options.range.min[0];
@@ -43,7 +44,6 @@ function setSliderHandle(i, value, parent, varArgs, resetEnd, type) {
 
 	//update the attached variables (already taken care of when we change the slider value)
 	//updateUIValues(i, parseFloat(value), varArgs, type);
-
 }
 
 

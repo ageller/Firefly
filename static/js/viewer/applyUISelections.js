@@ -59,6 +59,7 @@ function loadNewData(){
 
 //reset to a preset file
 function resetToPreset(preset){
+    console.log(preset,viewerParams.parts.options0)
 	console.log("Resetting to Preset");
 	viewerParams.parts.options = preset;
 	resetViewer();
