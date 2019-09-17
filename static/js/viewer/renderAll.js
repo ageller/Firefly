@@ -168,7 +168,12 @@ function update(time){
 					var alpha = m.geometry.attributes.alpha.array;
 					var fk;
 					for( var ii = 0; ii < radiusScale.length; ii ++ ) {
-						radiusScale[ii] = 1.;
+                        if ('SmoothingLength' in viewerParams.parts[p]){
+                            radiusScale[ii] = viewerParams.parts[p].SmoothingLength[ii];
+                        }
+                        else{
+                            radiusScale[ii] = 1.;
+                        }
 						alpha[ii] = 1.;
 						if (viewerParams.updateFilter[p]){
 							for (k=0; k<viewerParams.fkeys[p].length; k++){
@@ -176,7 +181,12 @@ function update(time){
 								if (viewerParams.parts[p][fk] != null) {
 									val = viewerParams.parts[p][fk][ii];
 									//if ( val < viewerParams.filterVals[p][fk][0] || val > viewerParams.filterVals[p][fk][1] ){
-									if ( (!viewerParams.invertFilter[p][fk] && (val < viewerParams.filterVals[p][fk][0] || val > viewerParams.filterVals[p][fk][1])) || ( (viewerParams.invertFilter[p][fk] && (val > viewerParams.filterVals[p][fk][0] && val < viewerParams.filterVals[p][fk][1])))   ){
+									if ( (!viewerParams.invertFilter[p][fk] &&  // we want to hide this particle
+                                        (val < viewerParams.filterVals[p][fk][0] || 
+                                        val > viewerParams.filterVals[p][fk][1])) || 
+                                        ( (viewerParams.invertFilter[p][fk] && 
+                                        (val > viewerParams.filterVals[p][fk][0] && 
+                                        val < viewerParams.filterVals[p][fk][1])))   ){
 										radiusScale[ii] = 0.;
 										alpha[ii] = 0.;
 									} 

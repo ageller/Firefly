@@ -187,8 +187,12 @@ function drawScene(pdraw = viewerParams.partsKeys)
 					}
 				}
 
-
-				radiusScale[rindex] = 1.;
+                if ('SmoothingLength' in viewerParams.parts[p]){
+                    radiusScale[rindex] = viewerParams.parts[p].SmoothingLength[j];
+                }
+                else{
+                    radiusScale[rindex] = 1.;
+                }
 				rindex++;
 				
 				alpha[aindex] = 1.;
