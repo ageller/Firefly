@@ -4,8 +4,8 @@ function makeUI(local=false){
 		initGUIScene();
 		drawCube();
 		animateGUI();
-		document.removeEventListener("keypress", sendCameraInfoToViewer,true);//for fly controls
-		document.addEventListener("keypress", sendCameraInfoToViewer,true);//for fly controls
+		d3.select('#WebGLContainer').node().removeEventListener("keypress", sendCameraInfoToViewer,true);//for fly controls
+		d3.select('#WebGLContainer').node().addEventListener("keypress", sendCameraInfoToViewer,true);//for fly controls
 	}
 	
 	GUIParams.waitForInit = setInterval(function(){ 

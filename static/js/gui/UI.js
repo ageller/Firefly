@@ -1,5 +1,8 @@
 
 function updateUIValues(value, varArgs, i=0, type='single'){
+
+	var forViewer = [];
+
 	//these update the viewer parameters
 	if (varArgs.hasOwnProperty('f')){
 		varToSetSend = [];
@@ -10,23 +13,29 @@ function updateUIValues(value, varArgs, i=0, type='single'){
 		varToSetSend[0] = parseFloat(value);
 		toSend = {};
 		toSend[varArgs.f]= varToSetSend;
-		sendToViewer(toSend);
+
+		forViewer.push(toSend);
 	}
 
 	if (varArgs.hasOwnProperty('f2')){
 		toSend = {};
 		toSend[varArgs.f2]= varArgs.v2;
-		sendToViewer(toSend);
+		forViewer.push(toSend);
 	}
 
 	if (varArgs.hasOwnProperty('f3')){
 		toSend = {};
 		toSend[varArgs.f3]= varArgs.v3;
-		sendToViewer(toSend);
+		forViewer.push(toSend);
 	}
+
+	//console.log('updateUIValues', forViewer);
+	sendToViewer(forViewer);
 
 	//this can run a function in the GUI (can I improve on this method?)
 	if (varArgs.hasOwnProperty('evalString')) eval(varArgs.evalString);
+
+
 }
 
 

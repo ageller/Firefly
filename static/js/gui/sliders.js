@@ -18,7 +18,7 @@ function updateSliderHandles(args){
 //Maybe there's a way to get rid of all these if statements? (in this and the following function)
 function setSliderHandle(i, value, parent, varArgs, resetEnd, type) {
 	//resetEnd : 0=don't reset; 1=reset if value > max; 2=reset always
-    console.log(i, value, parent, varArgs, resetEnd, type)
+    //console.log(i, value, parent, varArgs, resetEnd, type)
 
 	//reset the slider limits
 	var min = parent.noUiSlider.options.range.min[0];
@@ -43,7 +43,8 @@ function setSliderHandle(i, value, parent, varArgs, resetEnd, type) {
 
 
 	//update the attached variables (already taken care of when we change the slider value)
-	//updateUIValues(i, parseFloat(value), varArgs, type);
+	updateUIValues(parseFloat(value), varArgs, i, type);
+
 }
 
 
@@ -59,21 +60,6 @@ function handleSliderText(input, handle, varArgs, resetEnd, type) {
 		}
 		var steps = input.parent.noUiSlider.options.steps;
 		var step = parseFloat(steps[handle]);
-
-        //TODO need to send filterLims back to viewer
-        // for playback to work...
-        /*
-        if (left text box is altered){
-            sendToViewer([{'setViewerParamByKey':[
-                input, "filterLims",p,fkey,0]}]);
-        }
-        
-        if (right text box is altered){
-            sendToViewer([{'setViewerParamByKey':[
-                input, "filterLims",p,fkey,1]}]);
-
-        }
-        */
 
 		switch ( e.which ) {
 			case 13:
@@ -106,12 +92,14 @@ function createSlider(slider, text, sliderArgs, varArgs, resetEnd=[null, 2], typ
 
 		slider.noUiSlider.on('update', function(values, handle) {
 			text[handle].value = values[handle];
-			updateUIValues(values[handle], varArgs, handle, type);
 
+		});
+		slider.noUiSlider.on('slide', function(values, handle) {
+			updateUIValues(values[handle], varArgs, handle, type); //update when sliding the slider
 		});
 
 		text.forEach(function(input, handle){
-			handleSliderText(input, handle, varArgs, resetEnd, type);
+			handleSliderText(input, handle, varArgs, resetEnd, type); //updates are in setSliderHandle
 		});
 	}
 }
