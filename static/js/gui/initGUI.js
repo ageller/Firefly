@@ -4,8 +4,6 @@ function makeUI(local=false){
 		initGUIScene();
 		drawCube();
 		animateGUI();
-		d3.select('#WebGLContainer').node().removeEventListener("keypress", sendCameraInfoToViewer,true);//for fly controls
-		d3.select('#WebGLContainer').node().addEventListener("keypress", sendCameraInfoToViewer,true);//for fly controls
 	}
 	
 	GUIParams.waitForInit = setInterval(function(){ 
@@ -99,6 +97,7 @@ function sendCameraInfoToViewer(){
 	if (GUIParams.useTrackball) forViewer.push({'setViewerParamByKey':[GUIParams.controls.target, "controlsTarget"]});
 
 	forViewer.push({'updateViewerCamera':null});
+	//console.log(GUIParams.camera.position, GUIParams.camera.rotation, GUIParams.camera.up);
 
 	sendToViewer(forViewer);
 }
@@ -179,7 +178,10 @@ function initGUIControls(initial=false){
 	console.log("initializing controls", GUIParams.useTrackball)
 	var forViewer = [];
 
-	if (!initial) forViewer.push({'setViewerParamByKey':[GUIParams.useTrackball, "useTrackball"]})
+	if (!initial) {
+		forViewer.push({'setViewerParamByKey':[GUIParams.useTrackball, "useTrackball"]});
+		forViewer.push({'initControls':null});
+	}
 
 	if (GUIParams.useTrackball) {
 		var xx = new THREE.Vector3(0,0,0);
@@ -193,12 +195,16 @@ function initGUIControls(initial=false){
 		// 	}
 
 		GUIParams.controls.dynamicDampingFactor = GUIParams.friction;
-		GUIParams.controls.addEventListener('change', sendCameraInfoToViewer);
+		GUIParams.controls.removeEventListener('change', sendCameraInfoToViewer, true);
+		GUIParams.controls.addEventListener('change', sendCameraInfoToViewer, true);
 
 	} else {
 		GUIParams.controls = new THREE.FlyControls( GUIParams.camera , GUIParams.renderer.domElement);
 		GUIParams.controls.movementSpeed = 1. - Math.pow(GUIParams.friction, GUIParams.flyffac);
-
+		d3.select('#WebGLContainer').node().removeEventListener("keydown", sendCameraInfoToViewer,true);//for fly controls
+		d3.select('#WebGLContainer').node().addEventListener("keydown", sendCameraInfoToViewer,true);//for fly controls
+		d3.select('#WebGLContainer').node().removeEventListener("keyup", sendCameraInfoToViewer,true);//for fly controls
+		d3.select('#WebGLContainer').node().addEventListener("keyup", sendCameraInfoToViewer,true);//for fly controls
 	}
 
 	var elm = document.getElementById("CenterCheckBox")
@@ -207,6 +213,8 @@ function initGUIControls(initial=false){
 		elm.value = GUIParams.useTrackball;
 	}
 	
+
+
 	//GUIParams.switchControls = false;
 	sendToViewer(forViewer);
 
