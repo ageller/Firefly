@@ -1042,9 +1042,11 @@ function confirmViewerInit(){
 }
 
 function updateViewerCamera(){
-	viewerParams.camera.position.set(viewerParams.cameraPosition.x, viewerParams.cameraPosition.y, viewerParams.cameraPosition.z);
-	viewerParams.camera.rotation.set(viewerParams.cameraRotation.x, viewerParams.cameraRotation.y, viewerParams.cameraRotation.z);
 	viewerParams.controls.target = new THREE.Vector3(viewerParams.controlsTarget.x, viewerParams.controlsTarget.y, viewerParams.controlsTarget.z);
+
+	viewerParams.camera.position.set(viewerParams.cameraPosition.x, viewerParams.cameraPosition.y, viewerParams.cameraPosition.z);
+	viewerParams.camera.rotation.set(viewerParams.cameraRotation._x, viewerParams.cameraRotation._y, viewerParams.cameraRotation._z);
+	viewerParams.camera.up.set(viewerParams.cameraUp.x, viewerParams.cameraUp.y, viewerParams.cameraUp.z);
 
 }
 
