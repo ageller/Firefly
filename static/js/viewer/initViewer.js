@@ -1271,6 +1271,21 @@ function setViewerParamByKey(args){
 document.addEventListener("keydown", sendCameraInfoToGUI);
 
 
+function changeSnapSizes(){
+	//size of the snapshot (from text input)
+	viewerParams.renderWidth = window.innerWidth;
+	viewerParams.renderHeight = window.innerHeight;
+
+	var forGUI = [];
+	forGUI.push({'setGUIParamByKey':[viewerParams.renderWidth, 'renderWidth']});
+	forGUI.push({'setGUIParamByKey':[viewerParams.renderHeight, 'renderHeight'] });
+
+	forGUI.push({'changeSnapSizes':null});
+
+	sendToGUI(forGUI);
+}
+window.addEventListener('resize', changeSnapSizes);
+
 /////////////////////
 //this is an input file that will fire if there is no startup.json in the data directory
 d3.select('body').append('input')

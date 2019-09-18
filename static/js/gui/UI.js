@@ -179,15 +179,9 @@ function selectVelType() {
 
 function changeSnapSizes(){
 	//size of the snapshot (from text input)
-	var forViewer = [];
-	forViewer.push({'setViewerParamByKey':[window.innerWidth, 'renderWidth']});
-	forViewer.push({'setViewerParamByKey':[window.innerHeight, 'renderHeight'] });
-	sendToViewer(forViewer);
-
-	document.getElementById("RenderXText").value = window.innerWidth;
-	document.getElementById("RenderYText").value = window.innerHeight;
+	document.getElementById("RenderXText").value = GUIParams.renderWidth;
+	document.getElementById("RenderYText").value = GUIParams.renderHeight;
 }
-window.addEventListener('resize', changeSnapSizes);
 
 function togglePlayback(p,checked){
 	// figure out which checkbox was checked by slicing the ID, clever move Aaron!
