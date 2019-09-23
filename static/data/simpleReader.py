@@ -4,17 +4,15 @@ from firefly_api.reader import Reader
 from firefly_api.particlegroup import ParticleGroup
 import numpy as np
 
-def simpleReader(name = "foo", coords = [], color=[1,1,1,1], sizeMult=1, colorArray=[None]):
+def simpleReader(name = ".", coords = [], color=[1,1,1,1], sizeMult=1, colorArray=[None]):
     #create the reader
     my_reader = Reader(
         ## the name of the sub-directory that will contain your JSON files,
         ##  if you are not running python from /path/to/Firefly/data it should be the absolute path
-        JSONdir = '/foo/', #this is silly, but required for now
+        JSONdir = '.', #this is silly, but required for now
         ## options object, if you have one you can pass it, None will generate default options, see
         ##  below for options arguments/capabilities
         options = None, 
-        ## whether a startup.json file should be written, defaults to 'append'
-        doValidate = False
     )
 
     #define a particle group
