@@ -35,37 +35,6 @@ Once this SimpleHTTPServer is running, you can open Chrome, and enter the url : 
 This will open the data set included within this repository.  If you want to use your own data, you will first need to convert your data to the format needed by Firefly.  You can do this with the python tools in the data directory.  Please see the [wiki page](https://github.com/ageller/Firefly/wiki) for more details.  
 
 
-## To Run with Flask
-
-Alternatively, Fiefly can run through python flask, socket-io, and webgl to separate the visualization and the gui.  (This may be particularly useful if you want to use Firefly in a presentation, or in 3D mode)
-
-
-```
-$ python FireflyFlaskApp.py
-```
-
-Then open two browser windows.  The gui lives here:
-
-http://localhost:5000/gui
-
-The viewer lives here:
-
-http://localhost:5000/viewer
-
-Change the values on the gui sliders, and watch the viewer update.
-
-To allow access for an external computer/tablet to a port in an ubuntu server:
-
-```
-$ sudo ufw allow 5000
-```
-
-to disable:
-
-```
-$ sudo ufw deny 5000
-```
-
 ## Additional Docs
 
 Additional documentation is available on the [wiki page](https://github.com/ageller/Firefly/wiki) associated with this repository.
