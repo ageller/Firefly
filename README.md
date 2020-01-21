@@ -56,11 +56,15 @@ Change the values on the gui sliders, and watch the viewer update.
 
 To allow access for an external computer/tablet to a port in an ubuntu server:
 
+```
 sudo ufw allow 5000
+```
 
 to disable:
 
+```
 sudo ufw deny 5000
+```
 
 ## Additional Docs
 
