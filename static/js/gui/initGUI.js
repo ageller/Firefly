@@ -193,6 +193,9 @@ function initGUIControls(initial=false){
 		// 		GUIParams.controls.target = new THREE.Vector3(GUIParams.parts.options.center[0], GUIParams.parts.options.center[1], GUIParams.parts.options.center[2]);
 
 		// 	}
+		if (GUIParams.isMobile){
+			GUIParams.controls.noPan = true; //disable the pinch+drag for pan on mobile
+		}
 
 		GUIParams.controls.dynamicDampingFactor = GUIParams.friction;
 		GUIParams.controls.removeEventListener('change', sendCameraInfoToViewer, true);
