@@ -434,8 +434,8 @@ function createStereoSlider(){
 
 	var slider = document.getElementById('SSSlider');
 	var text = [document.getElementById('SSMaxT')];
-	var varToSet = [initialValue, "effect","setEyeSeparation"]
-	var varArgs = {'f':'setViewerParamByKey','v':varToSet};
+	var varToSet = [initialValue];
+	var varArgs = {'f':'updateStereoSep','v':varToSet};
 
 	createSlider(slider, text, sliderArgs, varArgs, [null, 1]);
 

@@ -531,3 +531,8 @@ function updateFriction(value){
 	}
 	viewerParams.friction = value;
 }
+
+function updateStereoSep(value){
+	viewerParams.stereoSep = value;
+	viewerParams.effect.setEyeSeparation(viewerParams.stereoSep);
+}

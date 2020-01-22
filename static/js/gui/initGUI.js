@@ -109,6 +109,7 @@ function updateFriction(value){
 	}
 	GUIParams.friction = value;
 }
+
 ///////////////////////
 // scene
 ///////////////////////

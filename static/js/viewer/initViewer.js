@@ -1266,6 +1266,7 @@ function setViewerParamByKey(args){
 	} else {
 		console.log('!!!! WRONG NUMBER OF ARGUMENTS TO PASS', args.length, args)
 	}
+	//console.log(args)
 }
 
 //for fly controls
