@@ -23,8 +23,6 @@ function drawScene(pdraw = viewerParams.partsKeys)
 	var ndraw = 0.;
 	var ndiv = Math.round(viewerParams.parts.totalSize / 10.);
 
-	//viewerParams.octree = new THREE.Octree({scene:viewerParams.scene});
-
 	for (var i=0; i<pdraw.length; i++){
 		var p = pdraw[i];
 
@@ -146,6 +144,7 @@ function drawScene(pdraw = viewerParams.partsKeys)
 				positions[pindex] = viewerParams.parts[p].Coordinates[j][2];
 				pindex++;
 
+
 				if (viewerParams.parts[p].Velocities != null){
 					velVals[vindex] = viewerParams.parts[p].VelVals[j][0]/viewerParams.parts[p].magVelocities[j];
 					vindex++;
@@ -203,21 +202,30 @@ function drawScene(pdraw = viewerParams.partsKeys)
 					viewerParams.drawfrac = (1 + ndraw/viewerParams.parts.totalSize)*0.5;
 					//updateDrawingBar();
 				}
+
+				//add to the octree -- I will only want to do this in the initial draw! (and do I need to remove objects during filtering?)
+				viewerParams.octree.add({x:viewerParams.parts[p].Coordinates[j][0],
+										 y:viewerParams.parts[p].Coordinates[j][1],
+										 z:viewerParams.parts[p].Coordinates[j][2],
+										 radius:radiusScale[rindex],
+										 id:p+ndraw}); //probably don't want to initialize this every time
+
 			}
 		}
 
 		mesh.position.set(0,0,0);
 
 		viewerParams.partsMesh[p].push(mesh)
-		//viewerParams.octree.add( mesh, { useVertices: true } );
 	}
 
 	//this will not be printed if you change the N value in the slider, and therefore only redraw one particle type
 	//because ndraw will not be large enough, but I don't think this will cause a problem
 	//if (ndraw >= Math.floor(viewerParams.parts.totalSize/viewerParams.decimate)){
 		console.log("done drawing")
+
 		clearloading();
 
 	//}
+	return true;
 
 }

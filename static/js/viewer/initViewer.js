@@ -95,6 +95,9 @@ function initScene() {
 	//apply presets from the options file
 	if (viewerParams.parts.hasOwnProperty('options')) applyOptions();
 
+	//octree
+	viewerParams.octree = new THREE.Octree();//{scene:viewerParams.scene}); //add the scene if it should be visualized
+
 	// controls
 	initControls();
 
@@ -984,18 +987,24 @@ function WebGLStart(){
 	initColumnDensity();
 	
 	//draw everything
-	drawScene();
+	Promise.all([
+		drawScene(),
+	]).then(function(){
+		searchOctree();
+		
+		//begin the animation
+		// keep track of runtime for crashing the app rather than the computer
+		var currentTime = new Date();
+		var seconds = currentTime.getTime()/1000;
+		viewerParams.currentTime = seconds;
+
+		viewerParams.pauseAnimation = false;
+		console.log('before animate',viewerParams.colormapVals['Gas']['log10Density'])
+		animate();
+
+	})
 
 
-	//begin the animation
-	// keep track of runtime for crashing the app rather than the computer
-	var currentTime = new Date();
-	var seconds = currentTime.getTime()/1000;
-	viewerParams.currentTime = seconds;
-
-	viewerParams.pauseAnimation = false;
-    console.log('before animate',viewerParams.colormapVals['Gas']['log10Density'])
-	animate();
 
 }
 

@@ -47,10 +47,8 @@ function update(time){
 	// }
 
 
-
-	// camera's -z direction
-	var cameraDir = new THREE.Vector3(0,0,0);
-	viewerParams.camera.getWorldDirection(cameraDir);
+	// camera's direction
+	viewerParams.camera.getWorldDirection(viewerParams.cameraDirection);
 
 	
 	// find the camera's x and y axes 
