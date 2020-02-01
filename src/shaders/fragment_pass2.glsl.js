@@ -14,6 +14,10 @@ void main() {
 	gl_FragColor.rgb = texture2D(cmap, vec2(density, colormap)).rgb;
 	//gl_FragColor.rgb = vec3(density,colormap, 0);
 
+	if (density <= 0.){
+		gl_FragColor.rgb = vec3(0);
+	} 
+	
 	gl_FragColor.a = color.a;
 	
 }
