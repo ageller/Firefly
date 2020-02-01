@@ -673,6 +673,7 @@ function setBoxSize(coords){
 			viewerParams.boxSize = fee;
 		}
 	}
+	console.log('box size', viewerParams.boxSize)
 }
 
 function countParts(){
@@ -990,7 +991,7 @@ function WebGLStart(){
 	Promise.all([
 		drawScene(),
 	]).then(function(){
-		searchOctree();
+		//searchOctree();
 		
 		//begin the animation
 		// keep track of runtime for crashing the app rather than the computer
