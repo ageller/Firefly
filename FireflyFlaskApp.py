@@ -102,6 +102,10 @@ def gui():
 def combined(): 
 	return render_template("combined.html")
 
+@app.route("/cardboard")
+def cardboard(): 
+	return render_template("cardboard.html")
+
 @app.route('/data_input', methods = ['POST'])
 def data_input():
 	jsondata = request.get_json()
