@@ -1,4 +1,5 @@
 function initControls(){
+
 	var forGUI = []
 	forGUI.push({'setGUIParamByKey':[viewerParams.useTrackball, "useTrackball"]})
 
@@ -18,6 +19,8 @@ function initControls(){
 
 		viewerParams.controls.dynamicDampingFactor = viewerParams.friction;
 		viewerParams.controls.addEventListener('change', sendCameraInfoToGUI);
+	} else if (viewerParams.useOrientationControls) {
+		viewerParams.controls = new THREE.DeviceOrientationControls(viewerParams.camera);
 	} else {
 		viewerParams.controls = new THREE.FlyControls( viewerParams.camera , viewerParams.renderer.domElement);
 		viewerParams.controls.movementSpeed = 1. - Math.pow(viewerParams.friction, viewerParams.flyffac);
@@ -70,6 +73,11 @@ function initScene() {
 		viewerParams.effect = new THREE.StereoEffect( viewerParams.renderer );
 		viewerParams.effect.setAspect(1.);
 		viewerParams.effect.setEyeSeparation(viewerParams.stereoSep);
+
+		if (viewerParams.useStereo){
+			viewerParams.normalRenderer = viewerParams.renderer;
+			viewerParams.renderer = viewerParams.effect;
+		}
 	}
 
 	// scene
@@ -84,7 +92,7 @@ function initScene() {
 	THREEx.WindowResize(viewerParams.renderer, viewerParams.camera);
 	//THREEx.FullScreen.bindKey({ charCode : 'm'.charCodeAt(0) });
 
-	viewerParams.useTrackball = true;
+	//viewerParams.useTrackball = true;
 
 	//console.log(viewerParams.parts.options);
 	setCenter(viewerParams.parts[viewerParams.partsKeys[0]].Coordinates);
@@ -146,6 +154,15 @@ function applyOptions(){
 	if (viewerParams.parts.options.hasOwnProperty('startFly')){
 		if (viewerParams.parts.options.startFly == true){
 			viewerParams.useTrackball = false;
+			viewerParams.useOrientation = false;
+		}
+	}
+
+	//check if we are starting in Orientation controls
+	if (viewerParams.parts.options.hasOwnProperty('startOrientation')){
+		if (viewerParams.parts.options.startOrientation == true){
+			viewerParams.useTrackball = false;
+			viewerParams.useOrientation = true;
 		}
 	}
 
@@ -1180,13 +1197,21 @@ function sendCameraInfoToGUI(foo, updateCam=false){
 	sendToGUI(forGUI);
 }
 //so that it can run locally also without using Flask
-function runLocal(){
+function runLocal(showGUI=true, useOrientationControls=false, startStereo=false){
 	viewerParams.usingSocket = false;
 	GUIParams.usingSocket = false;
 
+	viewerParams.useStereo = startStereo;
+	viewerParams.useOrientationControls = useOrientationControls;
+	viewerParams.useTrackball = !useOrientationControls;
+
 	//both of these start setIntervals to wait for the proper variables to be set
 	makeViewer();
-	makeUI(local=true);
+	if (showGUI) {
+		makeUI(local=true);
+	} else {
+		d3.selectAll('.UIcontainer').classed('hidden', true)
+	}
 	
 	//This will  load the data, and then start the WebGL rendering
 	getFilenames(prefix = "static/");

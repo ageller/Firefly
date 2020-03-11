@@ -53,6 +53,7 @@ function defineViewerParams(){
 
 
 		//camera controls
+		this.useOrientationControls = false;
 		this.useTrackball = true;
 		this.useStereo = false;
 		this.stereoSep = 0.06;
