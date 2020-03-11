@@ -1027,7 +1027,7 @@ function WebGLStart(){
 }
 
 //wait for all the input before loading
-function makeViewer(){
+function makeViewer(pSize=null){
 	viewerParams.haveUI = false;
 	viewerParams.ready = false;	
 	viewerParams.waitForInit = setInterval(function(){ 
@@ -1039,6 +1039,12 @@ function makeViewer(){
 			viewerParams.pauseAnimation = false;
 			viewerParams.parts.options0 = createPreset(); //this might break things if the presets don't work...
 			console.log("initial options", viewerParams.parts.options)
+
+			//to test
+			if (pSize) {
+				viewerParams.PsizeMult.Gas = pSize;
+				console.log('new Psize', pSize)
+			}
 			sendInitGUI();
 		}
 	}, 100);
@@ -1197,16 +1203,18 @@ function sendCameraInfoToGUI(foo, updateCam=false){
 	sendToGUI(forGUI);
 }
 //so that it can run locally also without using Flask
-function runLocal(showGUI=true, useOrientationControls=false, startStereo=false){
+function runLocal(showGUI=true, useOrientationControls=false, startStereo=false, pSize=null){
 	viewerParams.usingSocket = false;
 	GUIParams.usingSocket = false;
 
 	viewerParams.useStereo = startStereo;
 	viewerParams.useOrientationControls = useOrientationControls;
 	viewerParams.useTrackball = !useOrientationControls;
+	
+
 
 	//both of these start setIntervals to wait for the proper variables to be set
-	makeViewer();
+	makeViewer(pSize);
 	if (showGUI) {
 		makeUI(local=true);
 	} else {
