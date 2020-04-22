@@ -104,7 +104,7 @@ function initScene() {
 	if (viewerParams.parts.hasOwnProperty('options')) applyOptions();
 
 	//octree
-	viewerParams.octree = new THREE.Octree();//{scene:viewerParams.scene}); //add the scene if it should be visualized
+	//viewerParams.octree = new THREE.Octree();//{scene:viewerParams.scene}); //add the scene if it should be visualized
 
 	// controls
 	initControls();

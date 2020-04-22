@@ -204,11 +204,11 @@ function drawScene(pdraw = viewerParams.partsKeys)
 				}
 
 				//add to the octree -- I will only want to do this in the initial draw! (and do I need to remove objects during filtering?)
-				viewerParams.octree.add({x:viewerParams.parts[p].Coordinates[j][0],
-										 y:viewerParams.parts[p].Coordinates[j][1],
-										 z:viewerParams.parts[p].Coordinates[j][2],
-										 radius:radiusScale[rindex],
-										 id:p+ndraw}); //probably don't want to initialize this every time
+				//viewerParams.octree.add({x:viewerParams.parts[p].Coordinates[j][0],
+				//						 y:viewerParams.parts[p].Coordinates[j][1],
+				//						 z:viewerParams.parts[p].Coordinates[j][2],
+				//						 radius:radiusScale[rindex],
+				//						 id:p+ndraw}); //probably don't want to initialize this every time
 
 			}
 		}
