@@ -8,6 +8,18 @@ canvas{
 	height: 100% 
 }
 
+#annotate_container{
+        position:absolute;
+        width:auto;
+        text-align:center;
+        color:black;
+        display:none;
+        margin-top:0px;
+        padding:3px;
+        transform: translate(-50%, 0%);
+        margin-left:50%;
+}
+
 #sleep{
 	position:absolute; 
 	top:0; 
