@@ -1353,9 +1353,7 @@ d3.select('body').append('input')
 				reader.onload = function(){
 					var foo = JSON.parse(this.result);
 					if (foo != null){
-						var prefix = null;
-						if (viewerParams.usingSocket) prefix = 'static/'
-						callLoadData(foo, prefix);
+						callLoadData(foo, 'static/');
 					} else {
 						alert("Cannot load data. Please select another directory.");
 					}

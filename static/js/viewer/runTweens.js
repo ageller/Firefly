@@ -1,8 +1,8 @@
-function setTweenviewerParams(){
+function setTweenviewerParams(prefix="static/"){
 	viewerParams.inTween = true;
 	viewerParams.tweenviewerParams = {};
 
-	viewerParams.tweenFile = viewerParams.dir[0]+"/"+viewerParams.tweenFileName
+	viewerParams.tweenFile = prefix + viewerParams.dir[0]+"/"+viewerParams.tweenFileName
 	d3.json(viewerParams.tweenFile,  function(val) {
 		Object.keys(val).forEach(function(k, jj) {
 			viewerParams.tweenviewerParams[k] = val[k]
