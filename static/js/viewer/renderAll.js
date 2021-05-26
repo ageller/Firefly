@@ -34,7 +34,7 @@ function update(time){
 			console.log("tweening")
 			viewerParams.updateTween = true	
 			setTweenviewerParams();
-		}Ï
+		}
 	}
 
 	if (viewerParams.keyboard.down("P")){
