@@ -70,7 +70,6 @@ function setGUIParamByKey(args){
 	var value = args[0];
 	var keyName = args[1];
 	GUIParams[keyName] = JSON.parse(JSON.stringify(value));
-	console.log('setting GUI param', keyName, GUIParams[keyName])
 	// if (typeof value == "object") {
 	// 	GUIParams[keyName] = $.extend({}, value);
 	// } else {
