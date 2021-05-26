@@ -16,7 +16,7 @@ $ git clone --recursive https://github.com/ageller/Firefly.git
 
 Or, if you prefer, you can download the zip file and unpack it.  
 
-You will also need a browser; we recommend Firefox or Google Chrome. To import your own data into Firefly, you will also need Python; we recommend installing [Anaconda](https://www.anaconda.com/download/) Python version 3.x .
+You will also need a browser; we recommend Firefox or Google Chrome. (The cardboard viewer only works properly in Firefox at this time.)  To import your own data into Firefly, you will also need Python; we recommend installing [Anaconda](https://www.anaconda.com/download/) Python version 3.x .
 
 _Note: On June 11, 2019 we removed some excessively large files from the .git pack.  See the documentation [here](static/docs/READMEcleanPack.md).  If you have cloned this repo prior to June 11, 2019 and want to update your local repo, please remove your local copy and clone this repo again.  (This will reduce the disk space used from >600MB to about 30MB.)_
 
