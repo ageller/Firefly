@@ -39,7 +39,7 @@ function update(time){
 			console.log("tweening")
 			params.updateTween = true	
 			setTweenParams();
-		}Ï
+		}
 	}
 
 	if (params.keyboard.down("P")){
