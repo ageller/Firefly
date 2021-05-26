@@ -10,7 +10,7 @@ function defineSocketParams(){
 		// Socket.IO will multiplex all those connections on a single
 		// physical channel. If you don't care about multiple channels, you
 		// can set the namespace to an empty string.
-		this.namespace = '/test';
+		this.namespace = '/Firefly';
 		// Connect to the Socket.IO server.
 		// The connection URL has the following format:
 		//     http[s]://<domain>:<port>[/<namespace>]

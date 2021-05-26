@@ -29,6 +29,7 @@ updateViewerParams = False
 GUIParams = None
 updateGUIParams = False
 
+namespace = '/Firefly'
 #number of seconds between updates
 seconds = 0.01
 
@@ -40,15 +41,15 @@ def background_thread():
 		socketio.sleep(seconds)
 		if (updateViewerParams):
 			#print("========= viewerParams:",viewerParams)
-			socketio.emit('update_viewerParams', viewerParams, namespace='/test')
+			socketio.emit('update_viewerParams', viewerParams, namespace=namespace)
 		if (updateGUIParams):
 			#print("========= GUIParams:",GUIParams)
-			socketio.emit('update_GUIParams', GUIParams, namespace='/test')
+			socketio.emit('update_GUIParams', GUIParams, namespace=namespace)
 		updateViewerParams = False
 		updateGUIParams = False
 		
 #testing the connection
-@socketio.on('connection_test', namespace='/test')
+@socketio.on('connection_test', namespace=namespace)
 def connection_test(message):
 	session['receive_count'] = session.get('receive_count', 0) + 1
 	emit('connection_response',{'data': message['data'], 'count': session['receive_count']})
@@ -57,14 +58,14 @@ def connection_test(message):
 
 ######for viewer
 #will receive data from viewer 
-@socketio.on('viewer_input', namespace='/test')
+@socketio.on('viewer_input', namespace=namespace)
 def viewer_input(message):
 	global viewerParams, updateViewerParams
 	updateViewerParams = True
 	viewerParams = message
 
 #the background task sends data to the viewer
-@socketio.on('connect', namespace='/test')
+@socketio.on('connect', namespace=namespace)
 def from_viewer():
 	global thread
 	with thread_lock:
@@ -73,14 +74,14 @@ def from_viewer():
 
 #######for GUI
 #will receive data from gui
-@socketio.on('gui_input', namespace='/test')
+@socketio.on('gui_input', namespace=namespace)
 def gui_input(message):
 	global GUIParams, updateGUIParams
 	updateGUIParams = True
 	GUIParams = message
 
 #the background task sends data to the viewer
-@socketio.on('connect', namespace='/test')
+@socketio.on('connect', namespace=namespace)
 def from_gui():
 	global thread
 	with thread_lock:
@@ -113,7 +114,7 @@ def data_input():
 
 	#stuff happens here that involves data to obtain a result
 	print('Received data from server : ', data.keys())
-	socketio.emit('input_data', data, namespace='/test')
+	socketio.emit('input_data', data, namespace=namespace)
 	#return json.dumps(data)
 	return "Done"
 

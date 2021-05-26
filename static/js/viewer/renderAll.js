@@ -48,7 +48,8 @@ function update(time){
 
 
 	// camera's direction
-	viewerParams.camera.getWorldDirection(viewerParams.cameraDirection);
+	//I'm not sure if this is actually needed 
+	//if (!viewerParams.usingSocket) viewerParams.camera.getWorldDirection(viewerParams.cameraDirection);
 
 	
 	// find the camera's x and y axes 
