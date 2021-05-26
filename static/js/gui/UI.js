@@ -4,38 +4,39 @@ function updateUIValues(value, varArgs, i=0, type='single'){
 	var forViewer = [];
 
 	//these update the viewer parameters
-	if (varArgs.hasOwnProperty('f')){
-		varToSetSend = [];
-		varArgs.v.forEach(function(x){
-			varToSetSend.push(x);
-		})
-		if (type == "double") varToSetSend.push(i); //adding this only for double sliders 
-		varToSetSend[0] = parseFloat(value);
-		toSend = {};
-		toSend[varArgs.f]= varToSetSend;
+	if (varArgs){
+		if (varArgs.hasOwnProperty('f')){
+			varToSetSend = [];
+			varArgs.v.forEach(function(x){
+				varToSetSend.push(x);
+			})
+			if (type == "double") varToSetSend.push(i); //adding this only for double sliders 
+			varToSetSend[0] = parseFloat(value);
+			toSend = {};
+			toSend[varArgs.f]= varToSetSend;
 
-		forViewer.push(toSend);
+			forViewer.push(toSend);
+		}
+
+		if (varArgs.hasOwnProperty('f2')){
+			toSend = {};
+			toSend[varArgs.f2]= varArgs.v2;
+			forViewer.push(toSend);
+		}
+
+		if (varArgs.hasOwnProperty('f3')){
+			toSend = {};
+			toSend[varArgs.f3]= varArgs.v3;
+			forViewer.push(toSend);
+		}
+
+		//console.log('updateUIValues', forViewer);
+		sendToViewer(forViewer);
+
+		//this can run a function in the GUI (can I improve on this method?)
+		if (varArgs.hasOwnProperty('evalString')) eval(varArgs.evalString);
+
 	}
-
-	if (varArgs.hasOwnProperty('f2')){
-		toSend = {};
-		toSend[varArgs.f2]= varArgs.v2;
-		forViewer.push(toSend);
-	}
-
-	if (varArgs.hasOwnProperty('f3')){
-		toSend = {};
-		toSend[varArgs.f3]= varArgs.v3;
-		forViewer.push(toSend);
-	}
-
-	//console.log('updateUIValues', forViewer);
-	sendToViewer(forViewer);
-
-	//this can run a function in the GUI (can I improve on this method?)
-	if (varArgs.hasOwnProperty('evalString')) eval(varArgs.evalString);
-
-
 }
 
 

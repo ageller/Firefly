@@ -8,20 +8,20 @@ function resetViewer(){
 	viewerParams.ready = false;
 	//reset all the parts specific values to the initial ones
 	initPVals();
-
 	initScene();
+	drawScene();
 
 	//recreate the GUI
 	viewerParams.waitForInit = setInterval(function(){ 
 		if (viewerParams.ready){
 			clearInterval(viewerParams.waitForInit);
 			sendInitGUI();
+			viewerParams.reset = false;
+			sendToGUI([{'makeUI':!viewerParams.usingSocket}]);
 		}
 	}, 100);
-	sendToGUI([{'makeUI':null}]);
 
-	drawScene();
-	viewerParams.reset = false;
+
 
 }
 
@@ -59,7 +59,7 @@ function loadNewData(){
 
 //reset to a preset file
 function resetToPreset(preset){
-    console.log(preset,viewerParams.parts.options0)
+	console.log(preset,viewerParams.parts.options0)
 	console.log("Resetting to Preset");
 	viewerParams.parts.options = preset;
 	resetViewer();
@@ -351,7 +351,25 @@ function applyUIoptions(){
 							var fkey = viewerParams.fkeys[p][k]
 							if (viewerParams.parts.options.filterVals[p].hasOwnProperty(fkey)){
 								if (viewerParams.parts.options.filterVals[p][fkey] != null){
-									viewerParams.SliderF[p][fkey].noUiSlider.set(viewerParams.parts.options.filterVals[p][fkey]);
+									var forGUI = [];
+									forGUI.push({'updateSliderHandles':[
+										0,// ??
+										viewerParams.filterVals[p][fkey][0], // ??
+										p+'_FK_'+fkey+'_END_FilterSlider', // which slider
+										[2,2], // reset end flags
+										"double" // type of slider?
+										]});
+
+									forGUI.push({'updateSliderHandles':[
+										1,// ??
+										viewerParams.filterVals[p][fkey][1], // ??
+										p+'_FK_'+fkey+'_END_FilterSlider', // which slider
+										[2,2], // reset end flags
+										"double" // type of slider?
+										]});
+									sendToGUI(forGUI);
+
+									//viewerParams.SliderF[p][fkey].noUiSlider.set(viewerParams.parts.options.filterVals[p][fkey]);
 								}
 							}
 						}

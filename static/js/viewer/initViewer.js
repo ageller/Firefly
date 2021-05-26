@@ -1178,7 +1178,7 @@ function sendInitGUI(){
 	sendToGUI(forGUI);
 
 	//ready to create GUI
-	console.log("sent all inits to GUI")
+	console.log("sent all inits to GUI", forGUI)
 
 }
 
