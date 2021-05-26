@@ -86,7 +86,7 @@ function update(time){
 
 				// how wide is the slider? 
 				dfilter = this_parts['dfilter']
-                console.log(dfilter)
+				console.log(dfilter)
 
 				// TODO this could be editable
 				filter_step = dfilter/4
@@ -112,22 +112,22 @@ function update(time){
 				}
 
 				// update the left slider position
-                var forGUI = [];
-                forGUI.push({'updateSliderHandles':[
-                    0,//i
-                    viewerParams.filterVals[p][fkey][0], // value
-                    p + '_FK_' + fkey + '_END_FilterSlider',// key
-                    0, // resetEnd
-                    "double"// type
-                    ]});
-                forGUI.push({'updateSliderHandles':[
-                    1,//i
-                    viewerParams.filterVals[p][fkey][1], // value
-                    p + '_FK_' + fkey + '_END_FilterSlider',// key
-                    0, // resetEnd
-                    "double"// type
-                    ]});
-                sendToGUI(forGUI);
+				var forGUI = [];
+				forGUI.push({'updateSliderHandles':[
+					0,//i
+					viewerParams.filterVals[p][fkey][0], // value
+					p + '_FK_' + fkey + '_END_FilterSlider',// key
+					0, // resetEnd
+					"double"// type
+					]});
+				forGUI.push({'updateSliderHandles':[
+					1,//i
+					viewerParams.filterVals[p][fkey][1], // value
+					p + '_FK_' + fkey + '_END_FilterSlider',// key
+					0, // resetEnd
+					"double"// type
+					]});
+				sendToGUI(forGUI);
 				//viewerParams.SliderF[p][fkey].noUiSlider.set(viewerParams.filterVals[p][fkey]);
 			}
 		}
@@ -166,12 +166,12 @@ function update(time){
 					var alpha = m.geometry.attributes.alpha.array;
 					var fk;
 					for( var ii = 0; ii < radiusScale.length; ii ++ ) {
-                        if ('SmoothingLength' in viewerParams.parts[p]){
-                            radiusScale[ii] = viewerParams.parts[p].SmoothingLength[ii];
-                        }
-                        else{
-                            radiusScale[ii] = 1.;
-                        }
+						if ('SmoothingLength' in viewerParams.parts[p]){
+							radiusScale[ii] = viewerParams.parts[p].SmoothingLength[ii];
+						}
+						else{
+							radiusScale[ii] = 1.;
+						}
 						alpha[ii] = 1.;
 						if (viewerParams.updateFilter[p]){
 							for (k=0; k<viewerParams.fkeys[p].length; k++){
@@ -180,11 +180,11 @@ function update(time){
 									val = viewerParams.parts[p][fk][ii];
 									//if ( val < viewerParams.filterVals[p][fk][0] || val > viewerParams.filterVals[p][fk][1] ){
 									if ( (!viewerParams.invertFilter[p][fk] &&  // we want to hide this particle
-                                        (val < viewerParams.filterVals[p][fk][0] || 
-                                        val > viewerParams.filterVals[p][fk][1])) || 
-                                        ( (viewerParams.invertFilter[p][fk] && 
-                                        (val > viewerParams.filterVals[p][fk][0] && 
-                                        val < viewerParams.filterVals[p][fk][1])))   ){
+										(val < viewerParams.filterVals[p][fk][0] || 
+										val > viewerParams.filterVals[p][fk][1])) || 
+										( (viewerParams.invertFilter[p][fk] && 
+										(val > viewerParams.filterVals[p][fk][0] && 
+										val < viewerParams.filterVals[p][fk][1])))   ){
 										radiusScale[ii] = 0.;
 										alpha[ii] = 0.;
 									} 
@@ -276,9 +276,9 @@ function render() {
 
 /* --- not the best place for this, probably... */ 
 function updatePlaybackFilter(p){
-    var fkey = viewerParams.parts[p]['currentlyShownFilter'];
-    viewerParams.parts[p]['playbackFilter']=fkey;
-    var range = viewerParams.filterVals[p][fkey];
-    console.log(range)
-    viewerParams.parts[p]['dfilter'] = range[1]-range[0];
+	var fkey = viewerParams.parts[p]['currentlyShownFilter'];
+	viewerParams.parts[p]['playbackFilter']=fkey;
+	var range = viewerParams.filterVals[p][fkey];
+	console.log(range)
+	viewerParams.parts[p]['dfilter'] = range[1]-range[0];
 }
