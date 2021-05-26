@@ -191,7 +191,8 @@ function defineColorbarContainer(particle_group_UIname){
 		//.style("background-color","green") // debug background from the axis ticks
 		.style("position","relative")
 		.style("top",container_margin.top+"px")
-		.style("left",container_margin.side+"px")
+		//.style("left",container_margin.side+"px")
+		.style("left","0px")
 		.append("g")
 		.attr("class","cbar_svg")
 
