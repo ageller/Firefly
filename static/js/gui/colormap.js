@@ -85,7 +85,7 @@ function createColormapSliders(){
 
 				text = [textMin, textMax];
 				//not sure this is the best way to handle this.
-				var evalString = 'if (GUIParams.showColormap.'+p+') fillColorbarContainer("'+p+'"); GUIParams.colormapVals.'+p+'.'+ck+'[i] = parseFloat(value)';
+				var evalString = 'GUIParams.colormapVals.'+p+'.'+ck+'[i] = parseFloat(value); if (GUIParams.showColormap.'+p+') fillColorbarContainer("'+p+'"); ';
 				var varArgs = {'f':'setViewerParamByKey','v':[initialValueMin, "colormapVals",p, ck],
 							  'f2':'setViewerParamByKey','v2':[true,'updateColormap',p],
 							  'f3':'setViewerParamByKey','v3':[true,'updateFilter',p],
