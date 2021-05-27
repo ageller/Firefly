@@ -23,27 +23,29 @@ function setSliderHandle(i, value, parent, varArgs, resetEnd, type) {
 	//reset the slider limits
 	var min = parent.noUiSlider.options.range.min[0];
 	var max = parent.noUiSlider.options.range.max[0];
-	var minReset = min;
-	var maxReset = max;
-	if ((i == 0 && type == "double") && resetEnd[0] == 2 || (resetEnd[0] == 1 && value < min)) minReset = parseFloat(value);
-	if ((i == 1 || type == "single") && resetEnd[1] == 2 || (resetEnd[1] == 1 && value > max)) maxReset = parseFloat(value);
+	if (typeof parseFloat(min) === "number" && typeof parseFloat(max) === "number" && !isNaN(min) && !isNaN(max)){
+		var minReset = min;
+		var maxReset = max;
+		if ((i == 0 && type == "double") && resetEnd[0] == 2 || (resetEnd[0] == 1 && value < min)) minReset = parseFloat(value);
+		if ((i == 1 || type == "single") && resetEnd[1] == 2 || (resetEnd[1] == 1 && value > max)) maxReset = parseFloat(value);
 
-	maxReset = Math.max(minReset + 0.0001*Math.abs(minReset), maxReset); //in case user makes a mistake
-	parent.noUiSlider.updateOptions({
-		range: {
-			'min': [minReset],
-			'max': [maxReset]
-		}
-	});
+		maxReset = Math.max(minReset + 0.0001*Math.abs(minReset), maxReset); //in case user makes a mistake
+		parent.noUiSlider.updateOptions({
+			range: {
+				'min': [minReset],
+				'max': [maxReset]
+			}
+		});
 
-	//reset the slider value
-	var r = parent.noUiSlider.get()
-	if (Array.isArray(r)) r[i] = value; else r = value; //this could also be type 'double' vs. 'single'
-	parent.noUiSlider.set(r);
+		//reset the slider value
+		var r = parent.noUiSlider.get()
+		if (Array.isArray(r)) r[i] = value; else r = value; //this could also be type 'double' vs. 'single'
+		parent.noUiSlider.set(r);
 
 
-	//update the attached variables (already taken care of when we change the slider value)
-	updateUIValues(parseFloat(value), varArgs, i, type);
+		//update the attached variables (already taken care of when we change the slider value)
+		updateUIValues(parseFloat(value), varArgs, i, type);
+	}
 
 }
 
@@ -63,7 +65,7 @@ function handleSliderText(input, handle, varArgs, resetEnd, type) {
 
 		switch ( e.which ) {
 			case 13:
-				setSliderHandle(handle, this.value, input.parent, varArgs, resetEnd, type);
+				if (typeof parseFloat(this.value) === 'number' && !isNaN(this.value)) setSliderHandle(handle, parseFloat(this.value), input.parent, varArgs, resetEnd, type);
 				break;
 			case 38:
 				setSliderHandle(handle, value + step, input.parent, varArgs, resetEnd, type);
