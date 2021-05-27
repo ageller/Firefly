@@ -16,9 +16,8 @@ function resetViewer(){
 	viewerParams.waitForInit = setInterval(function(){ 
 		if (viewerParams.ready){
 			clearInterval(viewerParams.waitForInit);
-			sendInitGUI();
+			sendInitGUI([],[{'makeUI':!viewerParams.usingSocket}]);
 			viewerParams.reset = false;
-			sendToGUI([{'makeUI':!viewerParams.usingSocket}]);
 		}
 	}, 100);
 

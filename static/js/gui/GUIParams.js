@@ -19,6 +19,9 @@ function defineGUIParams(){
 		
 		//when ready the GUI will be created
 		this.waitForInit = null;
+		this.GUIready = true;
+
+		this.cameraNeedsUpdate = false; 
 
 		//for show/hide UI
 		this.movingUI = false;

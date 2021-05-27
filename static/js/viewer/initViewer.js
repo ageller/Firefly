@@ -1058,11 +1058,12 @@ function updateViewerCamera(){
 	//console.log(viewerParams.camera.position, viewerParams.camera.rotation, viewerParams.camera.up);
 }
 
-function sendInitGUI(){
+function sendInitGUI(prepend=[], append=[]){
 	//general particle settings
 	console.log('Sending init to GUI', viewerParams);
 
-	var forGUI = [];
+	var forGUI = prepend;
+	forGUI.push({'setGUIParamByKey':[false,"GUIready"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.partsKeys, "partsKeys"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.PsizeMult, "PsizeMult"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.plotNmax, "plotNmax"]});
@@ -1150,7 +1151,14 @@ function sendInitGUI(){
 	forGUI.push({'updateUICameraText':null});
 	forGUI.push({'updateUIRotText':null});
 
-	if (viewerParams.usingSocket && !viewerParams.local) forGUI.push({'updateGUICamera':null});
+	//if (viewerParams.usingSocket && !viewerParams.local) forGUI.push({'updateGUICamera':null});
+	if (viewerParams.usingSocket && !viewerParams.local) forGUI.push({'setGUIParamByKey':[true, "cameraNeedsUpdate"]});
+
+	append.forEach(function(x,i){
+		forGUI.push(x);
+	})
+
+	forGUI.push({'setGUIParamByKey':[true,"GUIready"]});
 
 	sendToGUI(forGUI);
 

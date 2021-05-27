@@ -5,6 +5,7 @@ function makeUI(local=false){
 		drawCube();
 		animateGUI();
 	}
+
 	
 	GUIParams.waitForInit = setInterval(function(){ 
 		var ready = confirmGUIInit();
@@ -12,11 +13,14 @@ function makeUI(local=false){
 		if (ready){
 			clearInterval(GUIParams.waitForInit);
 			if (!local) showSplash(false);
+			if (GUIParams.cameraNeedsUpdate) updateGUICamera();
 			createUI();
 		}
 	}, 1000);
 }
 function confirmGUIInit(){
+	if (!GUIParams.GUIready) return false;
+
 	var keys = ["partsKeys", "PsizeMult", "plotNmax", "decimate", "stereoSepMax", "friction", "Pcolors", "showParts", "showVel", "velopts", "velType", "ckeys", "colormapVals", "colormapLims", "colormapVariable", "colormap", "showColormap", "fkeys", "filterVals", "filterLims"];
 	var ready = true;
 	keys.forEach(function(k,i){
@@ -51,6 +55,7 @@ function connectGUISocket(){
 		// to the client. The data is then displayed in the "Received"
 		// section of the page.
 		socketParams.socket.on('update_GUIParams', function(msg) {
+			//console.log('===have commands from viewer', msg)
 			setParams(msg); 
 		});
 
@@ -78,10 +83,11 @@ function setGUIParamByKey(args){
 }
 
 function updateGUICamera(){
+	console.log('===updating camera', GUIParams.controlsTarget)
 	GUIParams.camera.position.set(GUIParams.cameraPosition.x, GUIParams.cameraPosition.y, GUIParams.cameraPosition.z);
 	GUIParams.camera.rotation.set(GUIParams.cameraRotation.x, GUIParams.cameraRotation.y, GUIParams.cameraRotation.z);
 	GUIParams.controls.target = new THREE.Vector3(GUIParams.controlsTarget.x, GUIParams.controlsTarget.y, GUIParams.controlsTarget.z);
-
+	GUIParams.cameraNeedsUpdate = false;
 }
 
 function sendCameraInfoToViewer(){
@@ -188,7 +194,10 @@ function initGUIControls(initial=false){
 		var xx = new THREE.Vector3(0,0,0);
 		GUIParams.camera.getWorldDirection(xx);
 		GUIParams.controls = new THREE.TrackballControls( GUIParams.camera, GUIParams.renderer.domElement );
-		GUIParams.controls.target = new THREE.Vector3(GUIParams.camera.position.x + xx.x, GUIParams.camera.position.y + xx.y, GUIParams.camera.position.z + xx.z);
+		console.log('===initGUICOntrols', GUIParams.camera.position, xx)
+		if (!initial) GUIParams.controls.target = new THREE.Vector3(GUIParams.camera.position.x + xx.x, GUIParams.camera.position.y + xx.y, GUIParams.camera.position.z + xx.z);
+		if (GUIParams.cameraNeedsUpdate) updateGUICamera();
+
 		// if (GUIParams.parts.options.hasOwnProperty('center') && !GUIParams.switchControls){
 		// 	if (GUIParams.parts.options.center != null){
 		// 		GUIParams.controls.target = new THREE.Vector3(GUIParams.parts.options.center[0], GUIParams.parts.options.center[1], GUIParams.parts.options.center[2]);
