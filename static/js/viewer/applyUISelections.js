@@ -6,6 +6,7 @@ function resetViewer(){
 
 	viewerParams.reset = true;
 	viewerParams.ready = false;
+	console.log('===options', viewerParams.parts.options)
 	//reset all the parts specific values to the initial ones
 	initPVals();
 	initScene();
@@ -27,8 +28,8 @@ function resetViewer(){
 
 //reset to the initial Options file
 function resetToOptions(){
-	console.log("Resetting to Default");
-	viewerParams.parts.options = viewerParams.parts.options0;
+	console.log("Resetting to Default", viewerParams.parts.options0);
+	viewerParams.parts.options = JSON.parse(JSON.stringify(viewerParams.parts.options0));
 	resetViewer();
 }
 
@@ -441,38 +442,48 @@ function renderImage() {
 
 }
 
+function isPrimitive(test) {
+	return test !== Object(test);
+}
+function copyValue(a){
+	if (isPrimitive(a)) {
+		return a;
+	} else {
+		return JSON.parse(JSON.stringify(a));
+	}
+}
 
 function createPreset(){
 	var preset = {};
 	if (viewerParams.useTrackball){
-		preset.center = [viewerParams.controls.target.x, viewerParams.controls.target.y, viewerParams.controls.target.z];
+		preset.center = copyValue([viewerParams.controls.target.x, viewerParams.controls.target.y, viewerParams.controls.target.z]);
 	} else {
 		var xx = new THREE.Vector3(0,0,0);
 		viewerParams.camera.getWorldDirection(xx);
-		preset.center = [xx.x + viewerParams.camera.position.x, xx.y + viewerParams.camera.position.y, xx.z + viewerParams.camera.position.z];
+		preset.center = copyValue([xx.x + viewerParams.camera.position.x, xx.y + viewerParams.camera.position.y, xx.z + viewerParams.camera.position.z]);
 	}
-	preset.camera = [viewerParams.camera.position.x, viewerParams.camera.position.y, viewerParams.camera.position.z];
+	preset.camera = copyValue([viewerParams.camera.position.x, viewerParams.camera.position.y, viewerParams.camera.position.z]);
 	preset.startFly = !viewerParams.useTrackball;
 	if (viewerParams.parts.options.hasOwnProperty('cameraRotation')){
 		if (viewerParams.parts.options.cameraRotation != null){
-			preset.cameraRotation = [viewerParams.camera.rotation.x, viewerParams.camera.rotation.y, viewerParams.camera.rotation.z];
+			preset.cameraRotation = copyValue([viewerParams.camera.rotation.x, viewerParams.camera.rotation.y, viewerParams.camera.rotation.z]);
 		}
 	}
-	preset.friction = viewerParams.friction;
-	preset.stereo = viewerParams.useStereo;
-	preset.stereoSep = viewerParams.stereoSep;
-	preset.decimate = viewerParams.decimate;
-	preset.maxVrange = viewerParams.maxVrange;
+	preset.friction = copyValue(viewerParams.friction);
+	preset.stereo = copyValue(viewerParams.useStereo);
+	preset.stereoSep = copyValue(viewerParams.stereoSep);
+	preset.decimate = copyValue(viewerParams.decimate);
+	preset.maxVrange = copyValue(viewerParams.maxVrange);
 
 	//for the UI
-	preset.UI = viewerParams.parts.options.UI;
-	preset.UIfullscreen = viewerParams.parts.options.UIfullscreen;
-	preset.UIsnapshot = viewerParams.parts.options.UIsnapshot;
-	preset.UIreset = viewerParams.parts.options.UIreset;
-	preset.UIsavePreset = viewerParams.parts.options.UIsavePreset;
-	preset.UIloadNewData = viewerParams.parts.options.UIloadNewData;
-	preset.UIcameraControls = viewerParams.parts.options.UIcameraControls;
-	preset.UIdecimation = viewerParams.parts.options.UIdecimation;
+	preset.UI = copyValue(viewerParams.parts.options.UI);
+	preset.UIfullscreen = copyValue(viewerParams.parts.options.UIfullscreen);
+	preset.UIsnapshot = copyValue(viewerParams.parts.options.UIsnapshot);
+	preset.UIreset = copyValue(viewerParams.parts.options.UIreset);
+	preset.UIsavePreset = copyValue(viewerParams.parts.options.UIsavePreset);
+	preset.UIloadNewData = copyValue(viewerParams.parts.options.UIloadNewData);
+	preset.UIcameraControls = copyValue(viewerParams.parts.options.UIcameraControls);
+	preset.UIdecimation = copyValue(viewerParams.parts.options.UIdecimation);
 
 
 	//particle specific options
@@ -493,34 +504,34 @@ function createPreset(){
 	preset.colormap = {};
 	preset.colormapVariable = {};
 	for (var i=0; i<viewerParams.partsKeys.length; i++){
-		var p = viewerParams.partsKeys[i];
+		var p = copyValue(viewerParams.partsKeys[i]);
 
-		preset.showParts[p] = viewerParams.showParts[p];
-		preset.sizeMult[p] = viewerParams.PsizeMult[p];
-		preset.color[p] = viewerParams.Pcolors[p];
-		preset.plotNmax[p] = viewerParams.plotNmax[p];
-		preset.showVel[p] = viewerParams.showVel[p];
-		preset.velType[p] = viewerParams.velType[p];
-		preset.showColormap[p] = viewerParams.showColormap[p];
-		preset.colormap[p] = viewerParams.colormap[p];
-		preset.colormapVariable[p] = viewerParams.colormapVariable[p];	
+		preset.showParts[p] = copyValue(viewerParams.showParts[p]);
+		preset.sizeMult[p] = copyValue(viewerParams.PsizeMult[p]);
+		preset.color[p] = copyValue(viewerParams.Pcolors[p]);
+		preset.plotNmax[p] = copyValue(viewerParams.plotNmax[p]);
+		preset.showVel[p] = copyValue(viewerParams.showVel[p]);
+		preset.velType[p] = copyValue(viewerParams.velType[p]);
+		preset.showColormap[p] = copyValue(viewerParams.showColormap[p]);
+		preset.colormap[p] = copyValue(viewerParams.colormap[p]);
+		preset.colormapVariable[p] = copyValue(viewerParams.colormapVariable[p]);	
 
-		preset.UIparticle[p] = viewerParams.parts.options.UIparticle[p];
-		preset.UIdropdown[p] = viewerParams.parts.options.UIdropdown[p];
-		preset.UIcolorPicker[p] = viewerParams.parts.options.UIcolorPicker[p];
+		preset.UIparticle[p] = copyValue(viewerParams.parts.options.UIparticle[p]);
+		preset.UIdropdown[p] = copyValue(viewerParams.parts.options.UIdropdown[p]);
+		preset.UIcolorPicker[p] = copyValue(viewerParams.parts.options.UIcolorPicker[p]);
 		preset.filterLims[p] = {};
 		preset.filterVals[p] = {};
 		preset.colormapLims[p] = {};
 		preset.colormapVals[p] = {};
 		for (k=0; k<viewerParams.fkeys[p].length; k++){
-			var fkey = viewerParams.fkeys[p][k]
-			preset.filterLims[p][fkey] = viewerParams.filterLims[p][fkey];
-			preset.filterVals[p][fkey] = viewerParams.filterVals[p][fkey];
+			var fkey = copyValue(viewerParams.fkeys[p][k]);
+			preset.filterLims[p][fkey] = copyValue(viewerParams.filterLims[p][fkey]);
+			preset.filterVals[p][fkey] = copyValue(viewerParams.filterVals[p][fkey]);
 		}
 		for (k=0; k<viewerParams.ckeys[p].length; k++){
-			var ckey = viewerParams.ckeys[p][k]
-			preset.colormapLims[p][ckey] = viewerParams.colormapLims[p][ckey];
-			preset.colormapVals[p][ckey] = viewerParams.colormapVals[p][ckey];
+			var ckey = copyValue(viewerParams.ckeys[p][k]);
+			preset.colormapLims[p][ckey] = copyValue(viewerParams.colormapLims[p][ckey]);
+			preset.colormapVals[p][ckey] = copyValue(viewerParams.colormapVals[p][ckey]);
 		}
 	}
 

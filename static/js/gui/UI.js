@@ -1145,6 +1145,8 @@ function createUI(){
 					elm.checked = true;
 					elm.value = true;
 					fillColorbarContainer(p);
+				} else {
+					d3.select('#colorbar_container').classed('hidden', true);
 				} 
 
 				// dropdown to select colormap
