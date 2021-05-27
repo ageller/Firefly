@@ -4,15 +4,15 @@ function selectColormap() {
 		.filter(function (d, i) { 
 			return this.selected; 
 	});
-	selectValue = option.property('value');
+	selectValue = parseInt(option.property('value'));
 
 	var p = this.id.slice(0,-11)
 
 	// update colormap
-	GUIParams.colormap[p] = ((GUIParams.colormapList.indexOf(selectValue)) + 0.5) * (8/256);
+	GUIParams.colormap[p] = (selectValue + 0.5) * (8/256);
 	sendToViewer({'setViewerParamByKey':[GUIParams.colormap, "colormap"]});	
 
-	console.log(p, " selected colormap:", GUIParams.colormapList[GUIParams.colormapList.indexOf(selectValue)], GUIParams.colormap[p])
+	console.log(p, " selected colormap:", GUIParams.colormapList[selectValue], GUIParams.colormap[p])
 
 	// redraw particle type if colormap is on
 	if (GUIParams.showColormap[p]){
@@ -21,25 +21,28 @@ function selectColormap() {
 	}
 }
 
+function showHideColormapFilter(p, selectValue){
+	for (var i=0; i<GUIParams.ckeys[p].length; i+=1){
+		d3.selectAll('#'+p+'_CK_'+GUIParams.ckeys[p][i]+'_END_CMap')
+			.style('display','none');
+	}
+	if (selectValue >=0 ) d3.selectAll('#'+p+'_CK_'+GUIParams.ckeys[p][selectValue]+'_END_CMap').style('display','block');
+}
+
 function selectColormapVariable() {
 	var option = d3.select(this)
 		.selectAll("option")
 		.filter(function (d, i) { 
 			return this.selected; 
 	});
-	selectValue = option.property('value');
+	selectValue = parseInt(option.property('value'));
 
 	var p = this.id.slice(0,-14)
 
-	for (var i=0; i<GUIParams.ckeys[p].length; i+=1){
-		d3.selectAll('#'+p+'_CK_'+GUIParams.ckeys[p][i]+'_END_CMap')
-			.style('display','none');
-	}
-	d3.selectAll('#'+p+'_CK_'+selectValue+'_END_CMap')
-		.style('display','block');
+	showHideColormapFilter(p, selectValue);
 
 	// update colormap variable
-	GUIParams.colormapVariable[p] = GUIParams.ckeys[p].indexOf(selectValue);
+	GUIParams.colormapVariable[p] = selectValue;
 	sendToViewer({'setViewerParamByKey':[GUIParams.colormapVariable[p], "colormapVariable",p]});
 
 	console.log(p, "colored by:", GUIParams.ckeys[p][GUIParams.colormapVariable[p]])
@@ -61,17 +64,18 @@ function createColormapSliders(){
 	GUIParams.partsKeys.forEach(function(p,i){
 		GUIParams.ckeys[p].forEach(function(ck, j){
 			if (ck != "None"){
-				//I don't *think* I need to update this in GUI; it's just the initial value that matters, right?
-				var initialValueMin = GUIParams.colormapLims[p][ck][0]; 
-				var initialValueMax = GUIParams.colormapLims[p][ck][1];
+				var initialMin = GUIParams.colormapLims[p][ck][0]; 
+				var initialMax = GUIParams.colormapLims[p][ck][1];
+				var initialValueMin = GUIParams.colormapVals[p][ck][0]; 
+				var initialValueMax = GUIParams.colormapVals[p][ck][1];
 				var sliderArgs = {
 					start: [initialValueMin, initialValueMax], 
 					connect: true,
 					tooltips: [false, false],
 					steps: [[0.001,0.001],[0.001,0.001]],
 					range: { 
-						'min': [initialValueMin],
-						'max': [initialValueMax]
+						'min': [initialMin],
+						'max': [initialMax]
 					},
 					format: wNumb({
 						decimals: 3
@@ -236,7 +240,6 @@ function defineColorbarContainer(particle_group_UIname){
 
 function fillColorbarContainer( particle_group_UIname){
 	var n_colormap = 31-(GUIParams.colormap[particle_group_UIname]*32-0.5)
-
 	//change the image
 	var colorbar_box = d3.select("#colorbar_box");
 	colorbar_box.html("<img src=static/textures/colormap.png"+ 

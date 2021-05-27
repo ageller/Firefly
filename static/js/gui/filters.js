@@ -40,17 +40,18 @@ function createFilterSliders(){
 	GUIParams.partsKeys.forEach(function(p,i){
 		GUIParams.fkeys[p].forEach(function(fk, j){
 			if (fk != "None"){
-				//I don't *think* I need to update this in GUI; it's just the initial value that matters, right?
-				var initialValueMin = GUIParams.filterLims[p][fk][0]; 
-				var initialValueMax = GUIParams.filterLims[p][fk][1];
+				var initialMin = GUIParams.filterLims[p][fk][0]; 
+				var initialMax = GUIParams.filterLims[p][fk][1];
+				var initialValueMin = GUIParams.filterVals[p][fk][0]; 
+				var initialValueMax = GUIParams.filterVals[p][fk][1];
 				var sliderArgs = {
 					start: [initialValueMin, initialValueMax], 
 					connect: true,
 					tooltips: [false, false],
 					steps: [[0.001,0.001],[0.001,0.001]],
 					range: { 
-						'min': [initialValueMin],
-						'max': [initialValueMax]
+						'min': [initialMin],
+						'max': [initialMax]
 					},
 					format: wNumb({
 						decimals: 3

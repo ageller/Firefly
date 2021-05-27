@@ -6,7 +6,7 @@ function resetViewer(){
 
 	viewerParams.reset = true;
 	viewerParams.ready = false;
-	console.log('===options', viewerParams.parts.options)
+	console.log('Reset options', viewerParams.parts.options)
 	//reset all the parts specific values to the initial ones
 	initPVals();
 	initScene();
@@ -336,50 +336,6 @@ function applyUIoptions(){
 	}
 
 
-	//particle specific options
-	for (var i=0; i<viewerParams.partsKeys.length; i++){
-		var p = viewerParams.partsKeys[i];
-
-		//filter values
-		if (viewerParams.parts.options.hasOwnProperty("filterVals")){
-			if (viewerParams.parts.options.filterVals != null){
-				if (viewerParams.parts.options.filterVals.hasOwnProperty(p)){
-					if (viewerParams.parts.options.filterVals[p] != null){
-						//because we are now redrawing each time, we do not need to do this
-						viewerParams.updateFilter[p] = true
-
-						for (k=0; k<viewerParams.fkeys[p].length; k++){
-							var fkey = viewerParams.fkeys[p][k]
-							if (viewerParams.parts.options.filterVals[p].hasOwnProperty(fkey)){
-								if (viewerParams.parts.options.filterVals[p][fkey] != null){
-									var forGUI = [];
-									forGUI.push({'updateSliderHandles':[
-										0,// ??
-										viewerParams.filterVals[p][fkey][0], // ??
-										p+'_FK_'+fkey+'_END_FilterSlider', // which slider
-										[2,2], // reset end flags
-										"double" // type of slider?
-										]});
-
-									forGUI.push({'updateSliderHandles':[
-										1,// ??
-										viewerParams.filterVals[p][fkey][1], // ??
-										p+'_FK_'+fkey+'_END_FilterSlider', // which slider
-										[2,2], // reset end flags
-										"double" // type of slider?
-										]});
-									sendToGUI(forGUI);
-
-									//viewerParams.SliderF[p][fkey].noUiSlider.set(viewerParams.parts.options.filterVals[p][fkey]);
-								}
-							}
-						}
-
-					}
-				}
-			}
-		}
-	}
 }
 
 //save the image to a file
@@ -495,6 +451,7 @@ function createPreset(){
 	preset.velType = {};
 	preset.filterLims = {};
 	preset.filterVals = {};
+	preset.invertFilter = {};
 	preset.colormapLims = {};
 	preset.colormapVals = {};
 	preset.UIparticle = {};
@@ -521,12 +478,14 @@ function createPreset(){
 		preset.UIcolorPicker[p] = copyValue(viewerParams.parts.options.UIcolorPicker[p]);
 		preset.filterLims[p] = {};
 		preset.filterVals[p] = {};
+		preset.invertFilter[p] = {};
 		preset.colormapLims[p] = {};
 		preset.colormapVals[p] = {};
 		for (k=0; k<viewerParams.fkeys[p].length; k++){
 			var fkey = copyValue(viewerParams.fkeys[p][k]);
 			preset.filterLims[p][fkey] = copyValue(viewerParams.filterLims[p][fkey]);
 			preset.filterVals[p][fkey] = copyValue(viewerParams.filterVals[p][fkey]);
+			preset.invertFilter[p][fkey] = copyValue(viewerParams.invertFilter[p][fkey]);
 		}
 		for (k=0; k<viewerParams.ckeys[p].length; k++){
 			var ckey = copyValue(viewerParams.ckeys[p][k]);

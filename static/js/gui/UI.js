@@ -995,7 +995,7 @@ function createUI(){
 		.attr('id', function (p) { return p+"Div" }) //+ dropdown
 
 
-
+	var showCmap = false;
 	GUIParams.partsKeys.forEach(function(p,i){
 
 		var controls = d3.selectAll('div.'+p+'Div');
@@ -1115,7 +1115,7 @@ function createUI(){
                 if (!GUIParams.definedColorbarContainer){
                     defineColorbarContainer(p)
                     if (GUIParams.showColormap[use_color_id]){
-                            fillColorbarContainer(use_color_id);
+                        fillColorbarContainer(use_color_id);
                     }
                 }
 				dheight += 50;
@@ -1140,15 +1140,6 @@ function createUI(){
 						sendToViewer([{'checkColormapBox':[p, this.checked]}]);
 					})
 
-				if (GUIParams.showColormap[p]){
-					elm = document.getElementById(p+'colorCheckBox');
-					elm.checked = true;
-					elm.value = true;
-					fillColorbarContainer(p);
-				} else {
-					d3.select('#colorbar_container').classed('hidden', true);
-				} 
-
 				// dropdown to select colormap
 				var selectCMap = ColorDiv.append('select')
 					.attr('class','selectCMap')
@@ -1158,6 +1149,7 @@ function createUI(){
 				var options = selectCMap.selectAll('option')
 					.data(GUIParams.colormapList).enter()
 					.append('option')
+						.attr('value',function(d,i){ return i; })
 						.text(function (d) { return d; });
 
 				// dropdown to select colormap variable
@@ -1169,10 +1161,10 @@ function createUI(){
 				var options = selectCMapVar.selectAll('option')
 					.data(GUIParams.ckeys[p]).enter()
 					.append('option')
+						.attr('value',function(d,i){ return i; })
 						.text(function (d) { return d; });
 
 				// sliders for colormap limits
-				var colormapn = 0;
 				GUIParams.ckeys[p].forEach(function(ck){
 					if (GUIParams.haveColormapSlider){
 
@@ -1197,14 +1189,23 @@ function createUI(){
 							.attr('class','CMapMaxTClass')
 							.attr('type','text');
 
-						colormapn += 1;
-					}
-					if (colormapn > 1){
-						d3.selectAll('#'+p+'_CK_'+ck+'_END_CMap')
-							.style('display','none');
 					}
 				});
+
+				if (GUIParams.showColormap[p]){
+					elm = document.getElementById(p+'colorCheckBox');
+					elm.checked = true;
+					elm.value = true;
+					var idx = parseInt(Math.round(GUIParams.colormap[p]*256/8 - 0.5));
+					document.getElementById(p+'_SelectCMap').value = idx.toString();
+					document.getElementById(p+'_SelectCMapVar').value = GUIParams.colormapVariable[p].toString();
+					fillColorbarContainer(p);
+					showCmap = true;
+				} 
+				showHideColormapFilter(p, GUIParams.colormapVariable[p]);
+
 			}
+
 
 	//this is dynamic, depending on what is in the data
 	//create the filters
@@ -1279,6 +1280,10 @@ function createUI(){
 						filtn += 1;
 
 					}
+					elm = document.getElementById(p+'_FK_'+fk+'_END_InvertFilterCheckBox');
+					elm.checked = GUIParams.invertFilter[p][fk];
+					elm.value = GUIParams.invertFilter[p][fk];
+					
 					if (filtn > 1){
 						d3.selectAll('#'+p+'_FK_'+fk+'_END_Filter')
 							.style('display','none');
@@ -1345,6 +1350,7 @@ function createUI(){
 	createFrictionSlider();
 	createFilterSliders();
 	createColormapSliders();
+	d3.select('#colorbar_container').classed('hidden', !showCmap);
 
 // update the text boxes for camera
 	updateUICenterText();
