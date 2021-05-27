@@ -1319,16 +1319,21 @@ document.addEventListener("keydown", sendCameraInfoToGUI);
 
 function changeSnapSizes(){
 	//size of the snapshot (from text input)
+	var oldW = 0+viewerParams.renderWidth;
+	var oldH = 0+viewerParams.renderHeight;
+
 	viewerParams.renderWidth = window.innerWidth;
 	viewerParams.renderHeight = window.innerHeight;
 
-	var forGUI = [];
-	forGUI.push({'setGUIParamByKey':[viewerParams.renderWidth, 'renderWidth']});
-	forGUI.push({'setGUIParamByKey':[viewerParams.renderHeight, 'renderHeight'] });
+	if (oldW != viewerParams.renderWidth || oldH != viewerParams.renderHeight){
+		var forGUI = [];
+		forGUI.push({'setGUIParamByKey':[viewerParams.renderWidth, 'renderWidth']});
+		forGUI.push({'setGUIParamByKey':[viewerParams.renderHeight, 'renderHeight'] });
 
-	forGUI.push({'changeSnapSizes':null});
+		forGUI.push({'changeUISnapSizes':null});
 
-	sendToGUI(forGUI);
+		sendToGUI(forGUI);
+	}
 }
 window.addEventListener('resize', changeSnapSizes);
 

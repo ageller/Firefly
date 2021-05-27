@@ -13,14 +13,15 @@ function executeFunctionByName(functionName, context /*, args */) {
 
 
 function setParams(vars){
-	if (!Array.isArray(vars)) vars = [vars];
-	vars.forEach(function(v){
-		var keys = Object.keys(v);
-		keys.forEach(function(k,i){
-			executeFunctionByName(k, window, v[k])
+	if (vars){
+		if (!Array.isArray(vars)) vars = [vars];
+		vars.forEach(function(v){
+			var keys = Object.keys(v);
+			keys.forEach(function(k,i){
+				executeFunctionByName(k, window, v[k])
+			});
 		});
-	});
-
+	}
 }
 
 function evalCommand(evalString){

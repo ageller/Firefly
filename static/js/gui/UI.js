@@ -187,7 +187,7 @@ function selectVelType() {
 	sendToViewer([{'setViewerParamByKey':[selectValue, "velType",p]}]);
 }
 
-function changeSnapSizes(){
+function changeUISnapSizes(){
 	//size of the snapshot (from text input)
 	document.getElementById("RenderXText").value = GUIParams.renderWidth;
 	document.getElementById("RenderYText").value = GUIParams.renderHeight;
