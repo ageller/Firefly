@@ -18,6 +18,13 @@ function updateUIValues(value, varArgs, i=0, type='single'){
 			forViewer.push(toSend);
 		}
 
+		//is there a more efficient way to check for all of these?
+		if (varArgs.hasOwnProperty('f1')){
+			toSend = {};
+			toSend[varArgs.f1]= varArgs.v1;
+			forViewer.push(toSend);
+		}
+
 		if (varArgs.hasOwnProperty('f2')){
 			toSend = {};
 			toSend[varArgs.f2]= varArgs.v2;
@@ -30,6 +37,23 @@ function updateUIValues(value, varArgs, i=0, type='single'){
 			forViewer.push(toSend);
 		}
 
+		if (varArgs.hasOwnProperty('f4')){
+			toSend = {};
+			toSend[varArgs.f4]= varArgs.v4;
+			forViewer.push(toSend);
+		}
+
+		if (varArgs.hasOwnProperty('f5')){
+			toSend = {};
+			toSend[varArgs.f5]= varArgs.v5;
+			forViewer.push(toSend);
+		}
+
+		if (varArgs.hasOwnProperty('f6')){
+			toSend = {};
+			toSend[varArgs.f6]= varArgs.v6;
+			forViewer.push(toSend);
+		}
 		//console.log('updateUIValues', forViewer);
 		sendToViewer(forViewer);
 
@@ -198,40 +222,27 @@ function togglePlayback(p,checked){
 	this_label = document.getElementById(p+'_PlaybackLabel');
 
 	//reset the text/appstate to default values
-    this_label.childNodes[0].nodeValue = 'Playback: ';
+	this_label.childNodes[0].nodeValue = 'Playback: ';
 
-    var forViewer = [];
-
-    forViewer.push({'setViewerParamByKey':[
-        false,'parts',p,"playbackEnabled"]})
-    forViewer.push({'setViewerParamByKey':[
-        false, "updateFilter",p,]})
-
-    forViewer.push({'setViewerParamByKey':[
-        0, 'parts',p,"playbackTicks"]})
-
-    sendToViewer(forViewer);
+	var forViewer = [];
+	var playbackEnabled = false;
+	var updateFilter = false
 
 	if (checked){
-		// read which fkey is currently shown 
-		this_label = document.getElementById(p+'_PlaybackLabel');
-		// update the playback text in the UI
-        this_label.childNodes[0].nodeValue += "under development"//viewerParams.parts[p]['currentlyShownFilter']
+		//this_label.childNodes[0].nodeValue += "under development";
+		this_label.childNodes[0].nodeValue += GUIParams.currentlyShownFilter[p];
 
-        var forViewer = [];
-
-        forViewer.push({'setViewerParamByKey':[
-            true,'parts',p,"playbackEnabled"]})
-
-        forViewer.push({'setViewerParamByKey':[
-            true, "updateFilter",p,]})
-
-		//flag that we should run playback
-        forViewer.push({'updatePlaybackFilter':[p]})
-
-        sendToViewer(forViewer);
-
+		playbackEnabled = true;
+		updateFilter = true;
 	}
+
+	forViewer.push({'setViewerParamByKey':[0, 'parts',p,"playbackTicks"]})
+	forViewer.push({'setViewerParamByKey':[playbackEnabled,'parts',p,"playbackEnabled"]})
+	forViewer.push({'setViewerParamByKey':[updateFilter, "updateFilter",p,]})
+
+	if (checked) forViewer.push({'updatePlaybackFilter':[p]})
+
+	sendToViewer(forViewer);
 
 }
 
@@ -1111,13 +1122,13 @@ function createUI(){
 			// colormap functionality
 
 			if (GUIParams.haveColormap[p]){
-                //create the colorbar container
-                if (!GUIParams.definedColorbarContainer){
-                    defineColorbarContainer(p)
-                    if (GUIParams.showColormap[use_color_id]){
-                        fillColorbarContainer(use_color_id);
-                    }
-                }
+				//create the colorbar container
+				if (!GUIParams.definedColorbarContainer){
+					defineColorbarContainer(p)
+					if (GUIParams.showColormap[use_color_id]){
+						fillColorbarContainer(use_color_id);
+					}
+				}
 				dheight += 50;
 
 				dropdown.append('hr')

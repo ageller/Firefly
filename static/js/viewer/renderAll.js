@@ -87,30 +87,30 @@ function update(time){
 
 				// how wide is the slider? 
 				dfilter = this_parts['dfilter']
-				console.log(dfilter)
 
 				// TODO this could be editable
 				filter_step = dfilter/4
 				// conditional statement to decide how to move the filter
 				if (((soft_limits[0]+filter_step) >= hard_limits[1]) || 
-					((soft_limits[1]-hard_limits[1])*(soft_limits[1]-hard_limits[1]) <=1e-6)){
+					((soft_limits[1] - hard_limits[1])*(soft_limits[1] - hard_limits[1]) <=1e-6)){
 					// moving the slider to the right would put the lower limit over the edge
 					// set the soft left edge to the hard left edge, the soft right edge to that plus dfilter
-					viewerParams.filterVals[p][fkey][0]=hard_limits[0]
-					viewerParams.filterVals[p][fkey][1]=hard_limits[0]+dfilter
+					viewerParams.filterVals[p][fkey][0] = hard_limits[0];
+					viewerParams.filterVals[p][fkey][1] = hard_limits[0] + dfilter;
 				}
-				else if ((soft_limits[1]+filter_step) >= hard_limits[1]){
+				else if ((soft_limits[1] + filter_step) >= hard_limits[1]){
 					// moving the slider to the right would put the upper limit over the edge, but not the lower
 					// move the left edge but clip the right edge at the hard limit
-					viewerParams.filterVals[p][fkey][0]=hard_limits[1]-dfilter
-					viewerParams.filterVals[p][fkey][1]=hard_limits[1]
+					viewerParams.filterVals[p][fkey][0] = hard_limits[1] - dfilter;
+					viewerParams.filterVals[p][fkey][1] = hard_limits[1];
 				}
 				else{
 					// moving the slider will fit within hard limits
 					// move the slider over by dfilter
-					viewerParams.filterVals[p][fkey][0]=soft_limits[0]+filter_step
-					viewerParams.filterVals[p][fkey][1]=soft_limits[1]+filter_step
+					viewerParams.filterVals[p][fkey][0] = soft_limits[0] + filter_step;
+					viewerParams.filterVals[p][fkey][1] = soft_limits[1] + filter_step;
 				}
+				console.log('playback', dfilter, viewerParams.filterVals[p][fkey]);
 
 				// update the left slider position
 				var forGUI = [];
@@ -278,8 +278,7 @@ function render() {
 /* --- not the best place for this, probably... */ 
 function updatePlaybackFilter(p){
 	var fkey = viewerParams.parts[p]['currentlyShownFilter'];
-	viewerParams.parts[p]['playbackFilter']=fkey;
+	viewerParams.parts[p]['playbackFilter'] = fkey;
 	var range = viewerParams.filterVals[p][fkey];
-	console.log(range)
-	viewerParams.parts[p]['dfilter'] = range[1]-range[0];
+	viewerParams.parts[p]['dfilter'] = range[1] - range[0];
 }

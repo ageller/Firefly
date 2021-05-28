@@ -16,7 +16,7 @@ function updateSliderHandles(args){
 }
 
 //Maybe there's a way to get rid of all these if statements? (in this and the following function)
-function setSliderHandle(i, value, parent, varArgs, resetEnd, type) {
+function setSliderHandle(i, value, parent, varArgs, resetEnd, type, varVals=null, varLims=null) {
 	//resetEnd : 0=don't reset; 1=reset if value > max; 2=reset always
     //console.log(i, value, parent, varArgs, resetEnd, type)
 
@@ -37,6 +37,9 @@ function setSliderHandle(i, value, parent, varArgs, resetEnd, type) {
 			}
 		});
 
+		if (varVals) varVals[i] = parseFloat(value);	
+		if (varLims) varLims[i] = parseFloat(value);
+
 		//reset the slider value
 		var r = parent.noUiSlider.get()
 		if (Array.isArray(r)) r[i] = value; else r = value; //this could also be type 'double' vs. 'single'
@@ -51,7 +54,7 @@ function setSliderHandle(i, value, parent, varArgs, resetEnd, type) {
 
 
 // Listen to keydown events on the input field.
-function handleSliderText(input, handle, varArgs, resetEnd, type) {
+function handleSliderText(input, handle, varArgs, resetEnd, type, varVals=null, varLims=null) {
 	input.addEventListener('keydown', function( e ) {
 		var values = input.parent.noUiSlider.get();
 		var value;
@@ -63,21 +66,23 @@ function handleSliderText(input, handle, varArgs, resetEnd, type) {
 		var steps = input.parent.noUiSlider.options.steps;
 		var step = parseFloat(steps[handle]);
 
-		switch ( e.which ) {
-			case 13:
-				if (typeof parseFloat(this.value) === 'number' && !isNaN(this.value)) setSliderHandle(handle, parseFloat(this.value), input.parent, varArgs, resetEnd, type);
-				break;
-			case 38:
-				setSliderHandle(handle, value + step, input.parent, varArgs, resetEnd, type);
-				break;
-			case 40:
-				setSliderHandle(handle, value - step, input.parent, varArgs, resetEnd, type);
-				break;
+		if (typeof parseFloat(this.value) === 'number' && !isNaN(this.value)) {
+			switch ( e.which ) {
+				case 13:
+					setSliderHandle(handle, parseFloat(this.value), input.parent, varArgs, resetEnd, type, varVals, varLims);
+					break;
+				case 38:
+					setSliderHandle(handle, value + step, input.parent, varArgs, resetEnd, type, varVals, varLims);
+					break;
+				case 40:
+					setSliderHandle(handle, value - step, input.parent, varArgs, resetEnd, type, varVals, varLims);
+					break;
+			}
 		}
 	});
 }
 
-function createSlider(slider, text, sliderArgs, varArgs, resetEnd=[null, 2], type='single'){
+function createSlider(slider, text, sliderArgs, varArgs, resetEnd=[null, 2], type='single', varVals=null, varLims=null){
 	//resetEnd : 0=don't reset; 1=reset if value > max; 2=reset always
 	//varArgs = {f:'setViewerParamByKey', v:varToSet, f2:, v2:}
 	if (slider != null && text != null){
@@ -97,11 +102,12 @@ function createSlider(slider, text, sliderArgs, varArgs, resetEnd=[null, 2], typ
 
 		});
 		slider.noUiSlider.on('slide', function(values, handle) {
+			if (varVals) varVals[handle] = parseFloat(values[handle]);
 			updateUIValues(values[handle], varArgs, handle, type); //update when sliding the slider
 		});
 
 		text.forEach(function(input, handle){
-			handleSliderText(input, handle, varArgs, resetEnd, type); //updates are in setSliderHandle
+			handleSliderText(input, handle, varArgs, resetEnd, type, varVals, varLims); //updates are in setSliderHandle
 		});
 	}
 }

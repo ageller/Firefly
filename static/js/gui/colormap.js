@@ -64,18 +64,14 @@ function createColormapSliders(){
 	GUIParams.partsKeys.forEach(function(p,i){
 		GUIParams.ckeys[p].forEach(function(ck, j){
 			if (ck != "None"){
-				var initialMin = GUIParams.colormapLims[p][ck][0]; 
-				var initialMax = GUIParams.colormapLims[p][ck][1];
-				var initialValueMin = GUIParams.colormapVals[p][ck][0]; 
-				var initialValueMax = GUIParams.colormapVals[p][ck][1];
 				var sliderArgs = {
-					start: [initialValueMin, initialValueMax], 
+					start: GUIParams.colormapVals[p][ck], 
 					connect: true,
 					tooltips: [false, false],
 					steps: [[0.001,0.001],[0.001,0.001]],
 					range: { 
-						'min': [initialMin],
-						'max': [initialMax]
+						'min': [GUIParams.colormapLims[p][ck][0]],
+						'max': [GUIParams.colormapLims[p][ck][1]]
 					},
 					format: wNumb({
 						decimals: 3
@@ -90,12 +86,14 @@ function createColormapSliders(){
 				text = [textMin, textMax];
 				//not sure this is the best way to handle this.
 				var evalString = 'GUIParams.colormapVals.'+p+'.'+ck+'[i] = parseFloat(value); if (GUIParams.showColormap.'+p+') fillColorbarContainer("'+p+'"); ';
-				var varArgs = {'f':'setViewerParamByKey','v':[initialValueMin, "colormapVals",p, ck],
-							  'f2':'setViewerParamByKey','v2':[true,'updateColormap',p],
-							  'f3':'setViewerParamByKey','v3':[true,'updateFilter',p],
+				var varArgs = {//'f':'setViewerParamByKey','v':[initialValueMin, "colormapVals",p, ck],
+							  'f1':'setViewerParamByKey','v1':[GUIParams.colormapVals[p][ck], "colormapVals",p, ck],
+							  'f2':'setViewerParamByKey','v2':[GUIParams.colormapLims[p][ck], "colormapLims",p, ck],
+  							  'f3':'setViewerParamByKey','v3':[true,'updateColormap',p],
+							  'f4':'setViewerParamByKey','v4':[true,'updateFilter',p],
 							  'evalString':evalString};
 
-				createSlider(slider, text, sliderArgs, varArgs, [2,2], 'double');
+				createSlider(slider, text, sliderArgs, varArgs, [2,2], 'double', GUIParams.colormapVals[p][ck], GUIParams.colormapLims[p][ck]);
 
 				//reformat
 				var w = parseInt(d3.select('.CMapClass').style("width").slice(0,-2));

@@ -280,7 +280,6 @@ function applyOptions(){
 			}
 		}
 
-		// TODO should this be sendToGUI'd?
 		//type of velocity vectors
 		if (viewerParams.parts.options.hasOwnProperty("velType")){
 			if (viewerParams.parts.options.velType != null){
@@ -363,7 +362,6 @@ function applyOptions(){
 		}
 
 		//colormap limits
-		// TODO should this be sendToGUI'd?
 		if (viewerParams.parts.options.hasOwnProperty("colormapLims")){
 			if (viewerParams.parts.options.colormapLims != null){
 				if (viewerParams.parts.options.colormapLims.hasOwnProperty(p)){
@@ -584,6 +582,8 @@ function initPVals(){
 		viewerParams.filterVals[p]["None"] = [0,1];     
 		if (viewerParams.parts[p].hasOwnProperty("filterKeys")){
 			viewerParams.fkeys[p] = viewerParams.parts[p].filterKeys;
+			viewerParams.parts[p]['playbackTicks'] = 0;
+			viewerParams.parts[p]['playbackTickRate'] = 10;   
 			for (var k=0; k<viewerParams.fkeys[p].length; k++){
 				if (viewerParams.fkeys[p][k] == "Velocities"){
 					viewerParams.fkeys[p][k] = "magVelocities";
@@ -595,14 +595,9 @@ function initPVals(){
 					viewerParams.filterLims[p][fkey] = [m.min, m.max];
 					viewerParams.filterVals[p][fkey] = [m.min, m.max];
 					viewerParams.invertFilter[p][fkey] = false;
-					//TODO this should not be here!!
 					// set the currently shown filter for each part type at startup
 					// so the first click isn't broken
-					if (viewerParams.parts[p]['currentlyShownFilter'] == undefined){
-						viewerParams.parts[p]['currentlyShownFilter']=fkey;
-						viewerParams.parts[p]['playbackTicks']=0;
-						viewerParams.parts[p]['playbackTickRate']=10;   
-					}
+					if (viewerParams.parts[p]['currentlyShownFilter'] == undefined) viewerParams.parts[p]['currentlyShownFilter'] = fkey;
 				}
 			}
 		}
@@ -1119,6 +1114,7 @@ function sendInitGUI(prepend=[], append=[]){
 	viewerParams.partsKeys.forEach(function(p){
 		haveFilter[p] = false;
 		haveFilterSlider[p] = {};
+		forGUI.push({'setGUIParamByKey':[viewerParams.parts[p].currentlyShownFilter,"currentlyShownFilter",p]});
 		viewerParams.fkeys[p].forEach(function(fk){
 			haveFilterSlider[p][fk] = false;
 			if (viewerParams.parts[p][fk] != null){

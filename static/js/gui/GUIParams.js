@@ -51,6 +51,8 @@ function defineGUIParams(){
 		this.haveFilter = {};
 		this.haveFilterSlider = {};
 
+		this.currentlyShownFilter = {};
+
 		//list of all colormaps
 		this.colormapList = ['viridis', 'plasma', 'inferno', 'magma', 
 		'Greys', 'Purples', 'Blues', 'Greens', 'Oranges',

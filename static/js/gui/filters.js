@@ -10,6 +10,7 @@ function selectFilter() {
 
 	// store the "currently shown" filter for later use
 	console.log("setting the current filter value to",selectValue)
+	GUIParams.currentlyShownFilter[p] = selectValue;
 	sendToViewer({'setViewerParamByKey':[selectValue, 'parts',p,'currentlyShownFilter']})
 
 	//console.log("in selectFilter", selectValue, this.id, p)
@@ -40,18 +41,15 @@ function createFilterSliders(){
 	GUIParams.partsKeys.forEach(function(p,i){
 		GUIParams.fkeys[p].forEach(function(fk, j){
 			if (fk != "None"){
-				var initialMin = GUIParams.filterLims[p][fk][0]; 
-				var initialMax = GUIParams.filterLims[p][fk][1];
-				var initialValueMin = GUIParams.filterVals[p][fk][0]; 
-				var initialValueMax = GUIParams.filterVals[p][fk][1];
+
 				var sliderArgs = {
-					start: [initialValueMin, initialValueMax], 
+					start: GUIParams.filterVals[p][fk], 
 					connect: true,
 					tooltips: [false, false],
 					steps: [[0.001,0.001],[0.001,0.001]],
 					range: { 
-						'min': [initialMin],
-						'max': [initialMax]
+						'min': [GUIParams.filterLims[p][fk][0]],
+						'max': [GUIParams.filterLims[p][fk][1]]
 					},
 					format: wNumb({
 						decimals: 3
@@ -62,10 +60,12 @@ function createFilterSliders(){
 				var textMin = document.getElementById(p+'_FK_'+fk+'_END_FilterMinT');
 				var textMax = document.getElementById(p+'_FK_'+fk+'_END_FilterMaxT');
 				text = [textMin, textMax];
-				var varArgs = {'f':'setViewerParamByKey','v':[initialValueMin, "filterVals",p, fk],
-							  'f2':'setViewerParamByKey','v2':[true,'updateFilter',p]};
+				var varArgs = {//'f':'setViewerParamByKey','v':[GUIParams.filterVals[p][fk], "filterVals",p, fk],
+							  'f1':'setViewerParamByKey','v1':[GUIParams.filterVals[p][fk], "filterVals",p, fk],
+							  'f2':'setViewerParamByKey','v2':[GUIParams.filterLims[p][fk], "filterLims",p, fk],
+							  'f3':'setViewerParamByKey','v3':[true,'updateFilter',p]};
 
-				createSlider(slider, text, sliderArgs, varArgs, [2,2], 'double');
+				createSlider(slider, text, sliderArgs, varArgs, [2,2], 'double', GUIParams.filterVals[p][fk], GUIParams.filterLims[p][fk]);
 
 				//reformat
 				var w = parseInt(d3.select('.FilterClass').style("width").slice(0,-2));
