@@ -54,7 +54,7 @@
 	overflow: hidden;
 	border: none;
 	opacity: 0.7;
-	background-color: #339999;
+	background-color: var(--logo-color1);
 	transition: opacity: 0.15s;
 }
 .button-div:hover {
@@ -78,7 +78,7 @@
 	border: none;
 	border-radius: 0px;
 	opacity: 0.7;
-	background-color: #339999;
+	background-color: var(--logo-color1);
 	transition: opacity: 0.15s;
 
 }

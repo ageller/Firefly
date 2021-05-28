@@ -1,3 +1,8 @@
+:root {
+	--logo-color1: #ff4f75;
+	--logo-color2: #3d0066;
+}
+
 body{ 
 	margin: 0; 
 	font-family: Sans-Serif;
@@ -75,7 +80,7 @@ canvas{
 	font-size:10vmin;
 	padding:0;
 	margin:0;
-	padding-top:20vmin;
+	padding-top:5vmin;
 }
 #splashdiv2 {
 	font-size:35px;
@@ -154,20 +159,21 @@ canvas{
 .modal-header {
 	padding:20px;
 	height:40px;
-	background-color: #4E2A84;
+	font-size: 40px;
+	background-color: var(--logo-color2);
 	color: white;
-
 }
 
 .modal-body {
 	padding:20px;
 	height:40px;
+	background-color: var(--logo-color2);
 }
 
 .modal-footer {
 	padding:20px;
 	height:40px;
-	background-color: #4E2A84;
+	background-color: var(--logo-color2);
 	color: white;
 }
 
@@ -193,8 +199,8 @@ canvas{
 }
 
 a{
-	color: #339999;
+	color: var(--logo-color1);
 }
 a:visited {
-	color: #339999;
+	color: var(--logo-color1);
 }

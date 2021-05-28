@@ -730,7 +730,6 @@ function selectFromStartup(prefix=""){
 	var section = form.append('div')
 	section.append('div')
 		.attr('class','modal-header')
-		.style('font-size','20pt')
 		.html('Select the startup directory : <br />');
 
 	var mid = section.append('div')
@@ -917,7 +916,7 @@ function drawLoadingBar(){
 		.attr("width",viewerParams.loadingSizeX)
 		.attr("height",viewerParams.loadingSizeY)
 		.attr('fill','rgba(0,0,0,0)')
-		.attr('stroke','#4E2A84')
+		.attr('stroke','var(--logo-color1)')
 		.attr('stroke-width', '3')
 
 	viewerParams.svgContainer.append("rect")
@@ -925,7 +924,7 @@ function drawLoadingBar(){
 		.attr("x", (screenWidth - viewerParams.loadingSizeX)/2)
 		.attr("y", 0)//(screenHeight - sizeY)/2)
 		.attr("height",viewerParams.loadingSizeY)
-		.attr('fill','#4E2A84')
+		.attr('fill','var(--logo-color1)')
 		.attr("width",viewerParams.loadingSizeX*viewerParams.loadfrac);
 
 

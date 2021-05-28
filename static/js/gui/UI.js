@@ -650,6 +650,7 @@ function createUI(){
 		.style('width','140px')
 		.style('padding','5px')
 		.style('margin',0)
+		.style('opacity',1)
 		.on('click',function(){
 			sendToViewer([{'renderImage':null}]);
 		})
