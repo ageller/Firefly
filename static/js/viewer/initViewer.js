@@ -804,7 +804,6 @@ function showLoadingButton(id){
 
 //once a data directory is identified, this will define the parameters, draw the loading bar and, load in the data
 function callLoadData(files, prefix=""){
-	console.log('==callLoadData')
 	var dir = {};
 	if (viewerParams.hasOwnProperty('dir')){
 		dir = viewerParams.dir;
@@ -962,7 +961,6 @@ function clearloading(){
 
 function WebGLStart(){
 
-	console.log("==WebGLStart")
 //reset the window title
 	if (viewerParams.parts.hasOwnProperty('options')){
 		if (viewerParams.parts.options.hasOwnProperty('title')){
@@ -1050,10 +1048,11 @@ function confirmViewerInit(){
 function updateViewerCamera(){
 	if (viewerParams.useTrackball) viewerParams.controls.target = new THREE.Vector3(viewerParams.controlsTarget.x, viewerParams.controlsTarget.y, viewerParams.controlsTarget.z);
 
-	viewerParams.camera.position.set(viewerParams.cameraPosition.x, viewerParams.cameraPosition.y, viewerParams.cameraPosition.z);
-	viewerParams.camera.rotation.set(viewerParams.cameraRotation._x, viewerParams.cameraRotation._y, viewerParams.cameraRotation._z);
-	viewerParams.camera.up.set(viewerParams.cameraUp.x, viewerParams.cameraUp.y, viewerParams.cameraUp.z);
-
+	if (viewerParams.camera){
+		viewerParams.camera.position.set(viewerParams.cameraPosition.x, viewerParams.cameraPosition.y, viewerParams.cameraPosition.z);
+		viewerParams.camera.rotation.set(viewerParams.cameraRotation._x, viewerParams.cameraRotation._y, viewerParams.cameraRotation._z);
+		viewerParams.camera.up.set(viewerParams.cameraUp.x, viewerParams.cameraUp.y, viewerParams.cameraUp.z);
+	}
 	//console.log(viewerParams.camera.position, viewerParams.camera.rotation, viewerParams.camera.up);
 }
 
@@ -1071,6 +1070,7 @@ function sendInitGUI(prepend=[], append=[]){
 	forGUI.push({'setGUIParamByKey':[viewerParams.showParts, "showParts"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.parts.options.UIdropdown, "useDropdown"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.parts.options.UIcolorPicker, "useColorPicker"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.boxSize, "boxSize"]});
 
 	//for velocities
 	forGUI.push({'setGUIParamByKey':[viewerParams.showVel, "showVel"]});

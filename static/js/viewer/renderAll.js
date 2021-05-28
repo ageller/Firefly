@@ -1,4 +1,5 @@
 function animate(time) {
+	viewerParams.animating = true;
 	if (!viewerParams.pauseAnimation){
 		requestAnimationFrame( animate );
 		update(time);

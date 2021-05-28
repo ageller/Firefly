@@ -575,6 +575,7 @@ function createUI(){
 
 
 	//set the gtoggle Object (in correct order)
+	GUIParams.gtoggle = {};
 	GUIParams.gtoggle.dataControls = true;
 	GUIParams.gtoggle.cameraControls = true;
 	GUIParams.partsKeys.forEach(function(p){

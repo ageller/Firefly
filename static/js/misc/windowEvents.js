@@ -56,7 +56,7 @@ function showSplash(show=true){
 
 
 	//only hide if the data is loaded
-	if (viewerParams) if (!viewerParams.loaded) show=true;
+	if (typeof viewerParams !== 'undefined') if (!viewerParams.loaded) show = true;
 
 	var fdur = 700.;
 
@@ -95,7 +95,6 @@ function showSleep(){
 }
 
 function hideSleep(){
-	viewerParams.pauseAnimation = false;
 	var fdur = 700.;
 
 	var splash = d3.select("#sleep");
@@ -114,5 +113,4 @@ function hideSleep(){
 	var seconds = currentTime.getTime()/1000;
 	viewerParams.currentTime = seconds;
 	viewerParams.pauseAnimation = false;
-	animate();
 }

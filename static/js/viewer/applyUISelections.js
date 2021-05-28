@@ -39,15 +39,22 @@ function loadNewData(){
 
 	//sendInitGUI([],[{'makeUI':!viewerParams.usingSocket}]);
 	
-	//reset all the variables and remake the UI
+	//reset a few variables and remake the UI
+	//sendToGUI({'setGUIParamByKey':[null, "partsKeys"]})
 	sendToGUI({'defineGUIParams':null});
 	viewerParams.parts = null;
 	viewerParams.camera = null;
 	viewerParams.boxSize = 0;
 	viewerParams.controls.dispose();
 	makeViewer();
-	if (viewerParams.local) makeUI(local=true);
-	
+	//if (viewerParams.local) makeUI(local=true);
+	var forGUI = [{'makeUI':viewerParams.local}];
+	if (!viewerParams.local) {
+		forGUI.push({'setGUIParamByKey':[false,"GUIready"]});
+		forGUI.push({'showSplash':true});
+	}
+	sendToGUI(forGUI);
+
 	d3.select('#particleUI').html("");
 	d3.select('.UIcontainer').html("");
 	d3.select("#splashdivLoader").selectAll('svg').remove();
@@ -296,59 +303,61 @@ function checkText(args){
 
 //apply the options file to the UI
 function applyUIoptions(){
-// now check if we need to hide any of this
-	if (viewerParams.parts.options.hasOwnProperty('UI')){
-		if (!viewerParams.parts.options.UI){
-			d3.select('.UIcontainer').style('display','none');
+	if (viewerParams.parts){
+
+	// now check if we need to hide any of this
+		if (viewerParams.parts.options.hasOwnProperty('UI')){
+			if (!viewerParams.parts.options.UI){
+				d3.select('.UIcontainer').style('display','none');
+			}
 		}
-	}
-	if (viewerParams.parts.options.hasOwnProperty('UIfullscreen')){
-		if (!viewerParams.parts.options.UIfullscreen){
-			d3.select('#fullScreenDiv').style('display','none');
+		if (viewerParams.parts.options.hasOwnProperty('UIfullscreen')){
+			if (!viewerParams.parts.options.UIfullscreen){
+				d3.select('#fullScreenDiv').style('display','none');
+			}
 		}
-	}
-	if (viewerParams.parts.options.hasOwnProperty('UIsnapshot')){
-		if (!viewerParams.parts.options.UIsnapshot){
-			d3.select('#snapshotDiv').style('display','none');
+		if (viewerParams.parts.options.hasOwnProperty('UIsnapshot')){
+			if (!viewerParams.parts.options.UIsnapshot){
+				d3.select('#snapshotDiv').style('display','none');
+			}
 		}
-	}
-	if (viewerParams.parts.options.hasOwnProperty('UIreset')){
-		if (!viewerParams.parts.options.UIreset){
-			d3.select('#resetDiv').style('display','none');
+		if (viewerParams.parts.options.hasOwnProperty('UIreset')){
+			if (!viewerParams.parts.options.UIreset){
+				d3.select('#resetDiv').style('display','none');
+			}
 		}
-	}
-	if (viewerParams.parts.options.hasOwnProperty('UIsavePreset')){
-		if (!viewerParams.parts.options.UIsavePreset){
-			d3.select('#savePresetDiv').style('display','none');
+		if (viewerParams.parts.options.hasOwnProperty('UIsavePreset')){
+			if (!viewerParams.parts.options.UIsavePreset){
+				d3.select('#savePresetDiv').style('display','none');
+			}
 		}
-	}
-	if (viewerParams.parts.options.hasOwnProperty('UIloadNewData')){
-		if (!viewerParams.parts.options.UIloadNewData){
-			d3.select('#loadNewDataDiv').style('display','none');
+		if (viewerParams.parts.options.hasOwnProperty('UIloadNewData')){
+			if (!viewerParams.parts.options.UIloadNewData){
+				d3.select('#loadNewDataDiv').style('display','none');
+			}
 		}
-	}
-	if (viewerParams.parts.options.hasOwnProperty('UIcameraControls')){
-		if (!viewerParams.parts.options.UIcameraControls){
-			d3.select('#cameraControlsDiv').style('display','none');
+		if (viewerParams.parts.options.hasOwnProperty('UIcameraControls')){
+			if (!viewerParams.parts.options.UIcameraControls){
+				d3.select('#cameraControlsDiv').style('display','none');
+			}
 		}
-	}
-	if (viewerParams.parts.options.hasOwnProperty('UIdecimation')){
-		if (!viewerParams.parts.options.UIdecimation){
-			d3.select('#decimationDiv').style('display','none');
-		}
-	}	
-	if (viewerParams.parts.options.hasOwnProperty('UIparticle')){
-		for (i=0; i<viewerParams.partsKeys.length; i++){
-			d = viewerParams.partsKeys[i];    	
-			if (viewerParams.parts.options.UIparticle.hasOwnProperty(d)){
-				if (!viewerParams.parts.options.UIparticle[d]){
-					d3.selectAll('div.'+d+'Div').style('display','none');
+		if (viewerParams.parts.options.hasOwnProperty('UIdecimation')){
+			if (!viewerParams.parts.options.UIdecimation){
+				d3.select('#decimationDiv').style('display','none');
+			}
+		}	
+		if (viewerParams.parts.options.hasOwnProperty('UIparticle')){
+			for (i=0; i<viewerParams.partsKeys.length; i++){
+				d = viewerParams.partsKeys[i];    	
+				if (viewerParams.parts.options.UIparticle.hasOwnProperty(d)){
+					if (!viewerParams.parts.options.UIparticle[d]){
+						d3.selectAll('div.'+d+'Div').style('display','none');
+					}
 				}
 			}
 		}
+
 	}
-
-
 }
 
 //save the image to a file

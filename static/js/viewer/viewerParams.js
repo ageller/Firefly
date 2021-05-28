@@ -99,6 +99,7 @@ function defineViewerParams(){
 
 		//animation
 		this.pauseAnimation = false;
+		this.animating = false;
 
 		// contains colormap texture
 		this.colormapTexture = new THREE.TextureLoader().load( "static/textures/colormap.png" );

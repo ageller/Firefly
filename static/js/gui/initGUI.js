@@ -3,8 +3,7 @@ function makeUI(local=false){
 	if (local) GUIParams.usingSocket = false;
 	if (!local){
 		initGUIScene();
-		drawCube();
-		animateGUI();
+		if (!GUIParams.animating) animateGUI();
 	}
 
 	
@@ -13,7 +12,10 @@ function makeUI(local=false){
 		console.log("waiting for GUI init", ready)
 		if (ready){
 			clearInterval(GUIParams.waitForInit);
-			if (!local) showSplash(false);
+			if (!local) {
+				showSplash(false);
+				drawCube();
+			}
 			if (GUIParams.cameraNeedsUpdate) updateGUICamera();
 			createUI();
 		}
@@ -100,6 +102,7 @@ function updateGUICamera(){
 	GUIParams.camera.position.set(GUIParams.cameraPosition.x, GUIParams.cameraPosition.y, GUIParams.cameraPosition.z);
 	GUIParams.camera.rotation.set(GUIParams.cameraRotation.x, GUIParams.cameraRotation.y, GUIParams.cameraRotation.z);
 	GUIParams.controls.target = new THREE.Vector3(GUIParams.controlsTarget.x, GUIParams.controlsTarget.y, GUIParams.controlsTarget.z);
+	setCubePosition(GUIParams.controls.target);
 	GUIParams.cameraNeedsUpdate = false;
 }
 
@@ -132,8 +135,12 @@ function updateFriction(value){
 ///////////////////////
 // scene
 ///////////////////////
+function setCubePosition(pos){
+	if (GUIParams.cube) GUIParams.cube.position.set(pos.x, pos.y, pos.z);
+}
 function drawCube(){
-	var size = 1.;
+	var size = GUIParams.boxSize/100.;
+	console.log('==drawCube', size)
 	// CUBE
 	var geometry = new THREE.CubeGeometry(size, size, size);
 	var cubeMaterials = [ 
@@ -146,10 +153,10 @@ function drawCube(){
 	]; 
 	// Create a MeshFaceMaterial, which allows the cube to have different materials on each face 
 	var cubeMaterial = new THREE.MeshFaceMaterial(cubeMaterials); 
-	var cube = new THREE.Mesh(geometry, cubeMaterial);
+	GUIParams.cube = new THREE.Mesh(geometry, cubeMaterial);
+	setCubePosition(GUIParams.controls.target);
 
-
-	GUIParams.scene.add( cube );
+	GUIParams.scene.add( GUIParams.cube );
 }
 
 //this initializes everything needed for the scene
@@ -206,8 +213,12 @@ function initGUIControls(initial=false){
 	if (GUIParams.useTrackball) {
 		var xx = new THREE.Vector3(0,0,0);
 		GUIParams.camera.getWorldDirection(xx);
+		GUIParams.controlsName = "TrackballControls";
 		GUIParams.controls = new THREE.TrackballControls( GUIParams.camera, GUIParams.renderer.domElement );
 		if (!initial) GUIParams.controls.target = new THREE.Vector3(GUIParams.camera.position.x + xx.x, GUIParams.camera.position.y + xx.y, GUIParams.camera.position.z + xx.z);
+		
+		setCubePosition(GUIParams.controls.target);
+
 		if (GUIParams.cameraNeedsUpdate) updateGUICamera();
 
 		// if (GUIParams.parts.options.hasOwnProperty('center') && !GUIParams.switchControls){
@@ -224,6 +235,7 @@ function initGUIControls(initial=false){
 		GUIParams.controls.addEventListener('change', sendCameraInfoToViewer, true);
 
 	} else {
+		GUIParams.controlsName = "FlyControls";
 		GUIParams.controls = new THREE.FlyControls( GUIParams.camera , GUIParams.renderer.domElement);
 		GUIParams.controls.movementSpeed = 1. - Math.pow(GUIParams.friction, GUIParams.flyffac);
 		d3.select('#WebGLContainer').node().removeEventListener("keydown", sendCameraInfoToViewer,true);//for fly controls
@@ -246,6 +258,7 @@ function initGUIControls(initial=false){
 }
 //this is the animation loop
 function animateGUI(time) {
+	GUIParams.animating = true;
 	requestAnimationFrame( animateGUI );
 	animateGUIupdate();
 
@@ -264,16 +277,19 @@ function animateGUI(time) {
 	// }
 }
 function animateGUIupdate(){
-	GUIParams.controls.update();
-	GUIParams.keyboard.update();
+	if (GUIParams.controls) GUIParams.controls.update();
 
-	if (GUIParams.keyboard.down("space")){
-		GUIParams.useTrackball = !GUIParams.useTrackball;
-		//GUIParams.switchControls = true;
-		GUIParams.controls.dispose();
-		initGUIControls();
+	if (GUIParams.keyboard){
+		GUIParams.keyboard.update();
+
+		if (GUIParams.keyboard.down("space")){
+			GUIParams.useTrackball = !GUIParams.useTrackball;
+			//GUIParams.switchControls = true;
+			GUIParams.controls.dispose();
+			initGUIControls();
+		}
 	}
 
-	GUIParams.renderer.render( GUIParams.scene, GUIParams.camera );
+	if (GUIParams.renderer) GUIParams.renderer.render( GUIParams.scene, GUIParams.camera );
 
 }

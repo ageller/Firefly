@@ -4,13 +4,17 @@ var GUIParams;
 function defineGUIParams(){
 	GUIParams = new function(){
 
-		//for the cube 
+		//for the cube
+		this.cube = null;
 		this.scene = null;
 		this.renderer = null;
 		this.container = null;
 		this.camera = null;
 		this.controls = null;
+		this.controlsName = null
 		this.keyboard = null;
+		this.animating = false;
+
 		//for frustum      
 		this.zmax = 5.e10;
 		this.zmin = 1;
@@ -52,6 +56,7 @@ function defineGUIParams(){
 		this.haveFilterSlider = {};
 
 		this.currentlyShownFilter = {};
+
 
 		//list of all colormaps
 		this.colormapList = ['viridis', 'plasma', 'inferno', 'magma', 
@@ -102,6 +107,8 @@ function defineGUIParams(){
 
 		this.renderWidth = 1920;
 		this.renderHeight = 1200;
+
+		this.boxSize = 1.;
 
 		//only need to pass the controls target?
 		this.controlsTarget = new THREE.Vector3(0,0,0);
