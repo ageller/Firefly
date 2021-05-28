@@ -42,7 +42,22 @@ function handleMouseDown(event) {
 }
 
 //hide the splash screen
-function showSplash(show){
+function showSplash(show=true){
+
+	//don't hide the screen if the user clicked on a button from the screen (e.g., to load new data)
+	if (event){
+		if (event.clientX){
+			var x = event.clientX;
+			var y = event.clientY;
+			var elementMouseIsOver = document.elementFromPoint(x, y);
+			if (!elementMouseIsOver.id.includes("splash")) show = true;		
+		}
+	}
+
+
+	//only hide if the data is loaded
+	if (viewerParams) if (!viewerParams.loaded) show=true;
+
 	var fdur = 700.;
 
 	var splash = d3.select("#splash");

@@ -1,5 +1,6 @@
 //wait for all the input before loading
 function makeUI(local=false){
+	if (local) GUIParams.usingSocket = false;
 	if (!local){
 		initGUIScene();
 		drawCube();

@@ -35,6 +35,19 @@ function resetToOptions(){
 //to load in a new data set
 function loadNewData(){
 
+	console.log('===loading new data')
+
+	//sendInitGUI([],[{'makeUI':!viewerParams.usingSocket}]);
+	
+	//reset all the variables and remake the UI
+	sendToGUI({'defineGUIParams':null});
+	viewerParams.parts = null;
+	viewerParams.camera = null;
+	viewerParams.boxSize = 0;
+	viewerParams.controls.dispose();
+	makeViewer();
+	if (viewerParams.local) makeUI(local=true);
+	
 	d3.select('#particleUI').html("");
 	d3.select('.UIcontainer').html("");
 	d3.select("#splashdivLoader").selectAll('svg').remove();
@@ -47,12 +60,13 @@ function loadNewData(){
 	}
 	d3.select("#loader").style("display","visible");
 	viewerParams.loadfrac = 0.;
-	showSplash();
+	viewerParams.haveUI = false;
+	showSplash(true);
 
 	viewerParams.loaded = false;
 	viewerParams.pauseAnimation = true;
 
-	document.getElementById("inputFilenames").click();
+	//document.getElementById("inputFilenames").click();
 }
 
 

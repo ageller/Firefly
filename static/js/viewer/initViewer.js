@@ -677,6 +677,7 @@ function countParts(){
 
 //if startup.json exists, this is called first
 function getFilenames(prefix=""){
+	console.log('==getFilenames')
 	d3.json(prefix+viewerParams.startup,  function(dir) {
 		console.log(prefix, dir, viewerParams.startup, viewerParams)
 		if (dir != null){
@@ -706,6 +707,7 @@ function getFilenames(prefix=""){
 }
 //for loading and reading a new data directory
 function loadStartup(){
+	console.log('==loadStartup')
 	document.getElementById("inputFilenames").click();
 }
 //for loading and reading a startup file with multiple entries
@@ -802,6 +804,7 @@ function showLoadingButton(id){
 
 //once a data directory is identified, this will define the parameters, draw the loading bar and, load in the data
 function callLoadData(files, prefix=""){
+	console.log('==callLoadData')
 	var dir = {};
 	if (viewerParams.hasOwnProperty('dir')){
 		dir = viewerParams.dir;
@@ -959,6 +962,7 @@ function clearloading(){
 
 function WebGLStart(){
 
+	console.log("==WebGLStart")
 //reset the window title
 	if (viewerParams.parts.hasOwnProperty('options')){
 		if (viewerParams.parts.options.hasOwnProperty('title')){
@@ -1020,27 +1024,27 @@ function makeViewer(pSize=null){
 }
 
 function confirmViewerInit(){
-	var keys = ["partsKeys", "PsizeMult", "plotNmax", "decimate", "stereoSepMax", "friction", "Pcolors", "showParts", "showVel", "velopts", "velType", "ckeys", "colormapVals", "colormapLims", "colormapVariable", "colormap", "showColormap", "fkeys", "filterVals", "filterLims", "renderer", "scene", "controls","camera"];
+	var keys = ["partsKeys", "PsizeMult", "plotNmax", "decimate", "stereoSepMax", "friction", "Pcolors", "showParts", "showVel", "velopts", "velType", "ckeys", "colormapVals", "colormapLims", "colormapVariable", "colormap", "showColormap", "fkeys", "filterVals", "filterLims", "renderer", "scene", "controls","camera","parts"];
+
 	var ready = true;
 	keys.forEach(function(k,i){
-		if (viewerParams[k] == null) {
-			//console.log("Viewer missing ", k)
-			ready = false;
-		}
+		if (viewerParams[k] == null) ready = false;
 	});
-	var partsVals = ["Coordinates"]
-	if (viewerParams.hasOwnProperty('partsKeys')){
-		viewerParams.partsKeys.forEach(function(p){
-			partsVals.forEach(function(k,i){
-				if (viewerParams.parts[p][k] == null) {
-					//console.log("Viewer parts missing ", p, k)
-					ready = false;
-				}
-			});
-		})
+
+	if (viewerParams.parts == null){
+		ready = false;
+	} else {
+		var partsVals = ["Coordinates"]
+		if (viewerParams.hasOwnProperty('partsKeys')){
+			viewerParams.partsKeys.forEach(function(p){
+				partsVals.forEach(function(k,i){
+					if (viewerParams.parts[p][k] == null) ready = false;
+				});
+			})
+		}
 	}
 
-	return ready
+	return ready;
 }
 
 function updateViewerCamera(){
@@ -1186,14 +1190,13 @@ function sendCameraInfoToGUI(foo, updateCam=false){
 //so that it can run locally also without using Flask
 function runLocal(showGUI=true, useOrientationControls=false, startStereo=false, pSize=null){
 	viewerParams.usingSocket = false;
+	viewerParams.local = true;
 	GUIParams.usingSocket = false;
 
 	viewerParams.useStereo = startStereo;
 	viewerParams.useOrientationControls = useOrientationControls;
 	viewerParams.useTrackball = !useOrientationControls;
 	
-
-
 	//both of these start setIntervals to wait for the proper variables to be set
 	makeViewer(pSize);
 	if (showGUI) {
@@ -1329,6 +1332,7 @@ d3.select('body').append('input')
 	.attr('odirectory', true)
 	.attr('multiple', true)
 	.on('change', function(e){
+		console.log('===loading data')
 		var foundFile = false;
 		for (i=0; i<this.files.length; i++){
 			if (this.files[i].name == "filenames.json"){
