@@ -1,3 +1,6 @@
-[submodule "data/firefly_api"]
-	path = data/firefly_api
+[submodule "static/data/firefly_api"]
+	path = static/data/firefly_api
+	url = https://github.com/agurvich/firefly_api.git
+[submodule "dataReader/firefly_api"]
+	path = dataReader/firefly_api
 	url = https://github.com/agurvich/firefly_api.git

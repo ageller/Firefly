@@ -1,0 +1,128 @@
+from flask import Flask, render_template, request, session
+from flask_socketio import SocketIO, emit
+
+from threading import Lock
+import sys
+import numpy as np
+
+import json
+
+#in principle, we could read in the data here...
+
+
+app = Flask(__name__)
+
+# Set this variable to "threading", "eventlet" ,"gevent" or "gevent_uwsgi" to test the
+# different async modes, or leave it set to None for the application to choose
+# the best option based on installed packages.
+async_mode = "eventlet" #"eventlet" is WAY better than "threading"
+
+app = Flask(__name__) 
+app.config['SECRET_KEY'] = 'secret!'
+socketio = SocketIO(app, async_mode=async_mode)
+thread = None
+thread_lock = Lock()
+
+#global variables to hold the params object (not all of this needs to be passed along...)
+viewerParams = None
+updateViewerParams = False
+GUIParams = None
+updateGUIParams = False
+
+namespace = '/Firefly'
+#number of seconds between updates
+seconds = 0.01
+
+#this will pass to the viewer every "seconds" 
+def background_thread():
+	"""Example of how to send server generated events to clients."""
+	global viewerParams, updateViewerParams, GUIParams, updateGUIParams
+	while True:
+		socketio.sleep(seconds)
+		if (updateViewerParams):
+			#print("========= viewerParams:",viewerParams)
+			socketio.emit('update_viewerParams', viewerParams, namespace=namespace)
+		if (updateGUIParams):
+			#print("========= GUIParams:",GUIParams)
+			socketio.emit('update_GUIParams', GUIParams, namespace=namespace)
+		updateViewerParams = False
+		updateGUIParams = False
+		
+#testing the connection
+@socketio.on('connection_test', namespace=namespace)
+def connection_test(message):
+	session['receive_count'] = session.get('receive_count', 0) + 1
+	emit('connection_response',{'data': message['data'], 'count': session['receive_count']})
+
+
+
+######for viewer
+#will receive data from viewer 
+@socketio.on('viewer_input', namespace=namespace)
+def viewer_input(message):
+	global viewerParams, updateViewerParams
+	updateViewerParams = True
+	viewerParams = message
+
+#the background task sends data to the viewer
+@socketio.on('connect', namespace=namespace)
+def from_viewer():
+	global thread
+	with thread_lock:
+		if thread is None:
+			thread = socketio.start_background_task(target=background_thread)
+
+#######for GUI
+#will receive data from gui
+@socketio.on('gui_input', namespace=namespace)
+def gui_input(message):
+	global GUIParams, updateGUIParams
+	updateGUIParams = True
+	GUIParams = message
+
+#the background task sends data to the viewer
+@socketio.on('connect', namespace=namespace)
+def from_gui():
+	global thread
+	with thread_lock:
+		if thread is None:
+			thread = socketio.start_background_task(target=background_thread)
+
+##############
+
+#flask stuff
+@app.route("/viewer")
+def viewer():  
+	return render_template("viewer.html")
+
+@app.route("/gui")
+def gui(): 
+	return render_template("gui.html")
+
+@app.route("/combined")
+def combined(): 
+	return render_template("combined.html")
+
+@app.route("/cardboard")
+def cardboard(): 
+	return render_template("cardboard.html")
+
+@app.route('/data_input', methods = ['POST'])
+def data_input():
+	jsondata = request.get_json()
+	data = json.loads(jsondata)
+
+	#stuff happens here that involves data to obtain a result
+	print('Received data from server : ', data.keys())
+	socketio.emit('input_data', data, namespace=namespace)
+	#return json.dumps(data)
+	return "Done"
+
+if __name__ == "__main__":
+	#app.run(host='0.0.0.0')
+	socketio.run(app, debug=True, host='0.0.0.0', port=5000)
+
+
+
+
+
