@@ -102,6 +102,9 @@ def gui():
 @app.route("/")
 def combined(): 
 	return render_template("combined.html")
+@app.route("/index")
+def index(): 
+	return render_template("combined.html")
 
 @app.route("/cardboard")
 def cardboard(): 
