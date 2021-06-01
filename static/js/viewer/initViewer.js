@@ -598,7 +598,12 @@ function initPVals(){
 		//in case there are no filter possibilities (but will be overwritten below)
 		viewerParams.fkeys[p] = ["None"];
 		viewerParams.filterLims[p]["None"] = [0,1];
-		viewerParams.filterVals[p]["None"] = [0,1];     
+		viewerParams.filterVals[p]["None"] = [0,1]; 
+		var haveCurrentFilter = true;
+		if (viewerParams.parts[p].currentlyShownFilter == undefined) {
+			viewerParams.parts[p].currentlyShownFilter = ["None"];
+			haveCurrentFilter = false;
+		}
 		if (viewerParams.parts[p].hasOwnProperty("filterKeys")){
 			viewerParams.fkeys[p] = viewerParams.parts[p].filterKeys;
 			viewerParams.parts[p]['playbackTicks'] = 0;
@@ -616,7 +621,10 @@ function initPVals(){
 					viewerParams.invertFilter[p][fkey] = false;
 					// set the currently shown filter for each part type at startup
 					// so the first click isn't broken
-					if (viewerParams.parts[p]['currentlyShownFilter'] == undefined) viewerParams.parts[p]['currentlyShownFilter'] = fkey;
+					if (!haveCurrentFilter) {
+						viewerParams.parts[p].currentlyShownFilter = fkey;
+						haveCurrentFilter = true;
+					}
 				}
 			}
 		}

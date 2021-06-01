@@ -44,6 +44,7 @@ function defineViewerParams(){
 		this.filterLims = {};
 		this.filterVals = {};
 		this.invertFilter = {};
+		this.currentlyShownFilter = {};
 
 		//for frustum      
 		this.zmax = 5.e10;
