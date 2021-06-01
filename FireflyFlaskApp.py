@@ -99,7 +99,7 @@ def viewer():
 def gui(): 
 	return render_template("gui.html")
 
-@app.route("/combined")
+@app.route("/")
 def combined(): 
 	return render_template("combined.html")
 
