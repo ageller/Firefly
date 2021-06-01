@@ -21,10 +21,6 @@ void main() {
 	if (density <= 0.){
 		gl_FragColor.rgb = vec3(0);
 	} 
-
-	if (density <= 0.){
-		gl_FragColor.rgb = vec3(0);
-	} 
 	
 	gl_FragColor.a = color.a;
 	
