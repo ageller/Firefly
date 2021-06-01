@@ -34,9 +34,6 @@ function resetToOptions(){
 
 //to load in a new data set
 function loadNewData(){
-
-	console.log('===loading new data')
-
 	//sendInitGUI([],[{'makeUI':!viewerParams.usingSocket}]);
 	
 	//reset a few variables and remake the UI
@@ -53,18 +50,18 @@ function loadNewData(){
 		forGUI.push({'setGUIParamByKey':[false,"GUIready"]});
 		forGUI.push({'showSplash':true});
 	}
-	sendToGUI(forGUI);
 
 	d3.select('#particleUI').html("");
 	d3.select('.UIcontainer').html("");
 	d3.select("#splashdivLoader").selectAll('svg').remove();
 	d3.select("#splashdiv5").text("Loading...");
-	console.log('here', viewerParams.dir, Object.keys(viewerParams.dir).length)
 	if (Object.keys(viewerParams.dir).length > 1){
-		showLoadingButton('#selectStartupButton');
+		forGUI.push({'showLoadingButton':'#selectStartupButton'});
 	} else {
-		showLoadingButton('#loadDataButton');
+		forGUI.push({'showLoadingButton':'#loadDataButton'});
 	}
+	sendToGUI(forGUI);
+
 	d3.select("#loader").style("display","visible");
 	viewerParams.loadfrac = 0.;
 	viewerParams.haveUI = false;

@@ -4,7 +4,6 @@ function initControls(){
 	forGUI.push({'setGUIParamByKey':[viewerParams.useTrackball, "useTrackball"]})
 
 	if (viewerParams.useTrackball) {
-		console.log('==options',viewerParams.parts.options);
 		var xx = new THREE.Vector3(0,0,0);
 		viewerParams.camera.getWorldDirection(xx);
 		viewerParams.controls = new THREE.TrackballControls( viewerParams.camera, viewerParams.renderer.domElement );
@@ -704,7 +703,6 @@ function countParts(){
 
 //if startup.json exists, this is called first
 function getFilenames(prefix=""){
-	console.log('==getFilenames',prefix+viewerParams.startup)
 	d3.json(prefix+viewerParams.startup,  function(dir) {
 		console.log(prefix, dir, viewerParams.startup, viewerParams)
 		if (dir != null){
@@ -713,137 +711,48 @@ function getFilenames(prefix=""){
 			if (Object.keys(viewerParams.dir).length > 1){
 				i = null
 				console.log("multiple file options in startup:", Object.keys(viewerParams.dir).length, viewerParams.dir);
-				showLoadingButton('#selectStartupButton');
-				selectFromStartup(prefix);
-
+				var forGUI = [];
+				forGUI.push({'setGUIParamByKey':[viewerParams.dir, "dir"]});
+				forGUI.push({'showLoadingButton':'#selectStartupButton'});
+				forGUI.push({'selectFromStartup':prefix});
+				sendToGUI(forGUI);
 			} 
 			if (i != null && i < Object.keys(viewerParams.dir).length){
 				d3.json(prefix+viewerParams.dir[i] + "/filenames.json",  function(files) {
 					if (files != null){
-						callLoadData(files, prefix);
+						callLoadData([files, prefix]);
 					} else {
-						showLoadingButton('#loadDataButton');
+						sendToGUI([{'showLoadingButton':'#loadDataButton'}]);
 						alert("Cannot load data. Please select another directory.");
 					}
 				});
 			}
 		} else {
-			showLoadingButton('#loadDataButton');
+			sendToGUI([{'showLoadingButton':'#loadDataButton'}]);
 		}
 	});
 }
-//for loading and reading a new data directory
-function loadStartup(){
-	console.log('==loadStartup')
-	document.getElementById("inputFilenames").click();
-}
-//for loading and reading a startup file with multiple entries
-function selectFromStartup(prefix=""){
-	var screenWidth = parseFloat(window.innerWidth);
 
-	var dirs = [];
-	Object.keys(viewerParams.dir).forEach(function(d, i) {
-		dirs.push(viewerParams.dir[i]);
-	});
 
-//https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dialog
-//https://www.w3schools.com/howto/howto_css_modals.asp
-	var dialog = d3.select('#splashdivLoader').append('div');
-	dialog.attr('id','startupModal').attr('class','modal');
-
-	var form = dialog.append('div')
-		.attr('class','modal-content')
-
-	var section = form.append('div')
-	section.append('div')
-		.attr('class','modal-header')
-		.html('Select the startup directory : <br />');
-
-	var mid = section.append('div')
-		.attr('class','modal-body')
-		.style('height','20px')
-
-	var select = mid.append('select')
-		.attr('id','selectedStartup');
-
-	var options = select.selectAll('option')
-		.data(dirs).enter()
-			.append('option')
-				.text(function (d) { return d; });
-
-	var menu = form.append('div').attr('class','modal-footer');
-	menu.append('button')
-		.attr('id','cancelSelection')
-		.attr('class', 'button')
-		.style('width','100px')
-		.append('span')
-			.text('Cancel');
-	menu.append('button')
-		.attr('id','submitSelection')
-		.attr('class', 'button')
-		.style('width','100px')
-		.append('span')
-			.text('Confirm');
-
-	var updateButton = document.getElementById('selectStartupButton');
-	var cancelButton = document.getElementById('cancelSelection');
-	var submitButton = document.getElementById('submitSelection');
-	var startupModal = document.getElementById('startupModal');
-	var selection = document.getElementById('selectedStartup');
-
-	selection.value = dirs[0]
-	selection.defaultValue = dirs[0]
-
-	// Update button opens a modal dialog
-	updateButton.addEventListener('click', function() {
-		startupModal.style.display = "block";
-	});
-
-	// Form cancel button closes the modal box
-	cancelButton.addEventListener('click', function() {
-		startupModal.style.display = "none";
-	});
-
-	// submit fires the loader
-	submitButton.addEventListener('click', function() {
-		startupModal.style.display = "none";
-		var f = prefix+selection.value+'/filenames.json';
-		d3.json(f,  function(files) {
-			if (files != null){
-				callLoadData(files, prefix);
-			} else {
-				alert("Cannot load data. Please select another directory.");
-			}
-		});
-
-	});
-
-}
-//show the button on the splash screen
-function showLoadingButton(id){
-	var screenWidth = parseFloat(window.innerWidth);
-	var width = parseFloat(d3.select(id).style('width'));
-	d3.select(id)
-		.style('display','inline')
-		.style('margin-left',(screenWidth - width)/2);
-}
 
 //once a data directory is identified, this will define the parameters, draw the loading bar and, load in the data
-function callLoadData(files, prefix=""){
+function callLoadData(args){
+	var files = args[0];
+	var prefix = "";
+	if (args.length > 0) prefix = args[1];
+
 	var dir = {};
 	if (viewerParams.hasOwnProperty('dir')){
 		dir = viewerParams.dir;
-
 	}
 	viewerParams.dir = dir;
+	sendToGUI([{'setGUIParamByKey':[viewerParams.dir, "dir"]}]);
 
 	drawLoadingBar();
 	viewerParams.filenames = files;
 	loadData(WebGLStart, prefix);
 }
 function loadData(callback, prefix=""){
-
-	document.getElementById("inputFilenames").value = "";
 
 	viewerParams.parts = {};
 	viewerParams.parts.totalSize = 0.;
@@ -959,7 +868,6 @@ function drawLoadingBar(){
 
 }
 function updateLoadingBar(){
-
 	//console.log(viewerParams.loadfrac, viewerParams.loadingSizeX*viewerParams.loadfrac)
 	d3.selectAll('#loadingRect').transition().attr("width", viewerParams.loadingSizeX*viewerParams.loadfrac);
 
@@ -1351,40 +1259,5 @@ function changeSnapSizes(){
 }
 window.addEventListener('resize', changeSnapSizes);
 
-/////////////////////
-//this is an input file that will fire if there is no startup.json in the data directory
-d3.select('body').append('input')
-	.attr('type','file')
-	.attr('id','inputFilenames')
-	.attr('webkitdirectory', true)
-	.attr('directory', true)
-	.attr('mozdirectory', true)
-	.attr('msdirectory', true)
-	.attr('odirectory', true)
-	.attr('multiple', true)
-	.on('change', function(e){
-		console.log('===loading data')
-		var foundFile = false;
-		for (i=0; i<this.files.length; i++){
-			if (this.files[i].name == "filenames.json"){
-				foundFile = true;
-				var file = this.files[i];
-				var reader = new FileReader();
-				reader.readAsText(file, 'UTF-8');
-				reader.onload = function(){
-					var foo = JSON.parse(this.result);
-					if (foo != null){
-						callLoadData(foo, 'static/');
-					} else {
-						alert("Cannot load data. Please select another directory.");
-					}
-				}
-			}
-		}
-		if (i == this.files.length && !foundFile){
-			alert("Cannot load data. Please select another directory.");
-		}
-	})
-	.style('display','None');
 
 

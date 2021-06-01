@@ -57,6 +57,11 @@ function defineGUIParams(){
 
 		this.currentlyShownFilter = {};
 
+		//the startup file
+		this.startup = "data/startup.json";
+		this.filenames = null;
+		this.dir = {};
+
 
 		//list of all colormaps
 		this.colormapList = ['viridis', 'plasma', 'inferno', 'magma', 
