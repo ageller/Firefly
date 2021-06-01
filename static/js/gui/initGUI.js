@@ -82,7 +82,6 @@ function setGUIParamByKey(args){
 		GUIParams[key1] = JSON.parse(JSON.stringify(value));
 	} else if (args.length == 3) {
 		var key2 = args[2];
-		console.log('==checking', key1, key2, value)
 		GUIParams[key1][key2] = JSON.parse(JSON.stringify(value));
 	} else if (args.length == 4) {
 		var key2 = args[2];
