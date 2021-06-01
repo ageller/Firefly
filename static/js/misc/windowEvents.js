@@ -64,7 +64,7 @@ function showSplash(show=true){
 
 	if (show) splash.classed("hidden",false);
 
-	var op = 0.8;
+	var op = 1;
 	if (!show) {
 		op = 0. 
 	}

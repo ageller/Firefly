@@ -164,10 +164,11 @@ function defineColorbarContainer(particle_group_UIname){
 	var container_top = 138; 
 	var container_left = 188;
 
+	d3.select('#colorbar_container').classed('hidden', true);
+
 	var colorbar_container = d3.select("#colorbar_container")
 		.html("")
-		.attr('class', 'colorbar')
-		.classed('hidden', false)
+		.classed('colorbar', true)
 		.style("height",cbar_bounds.height+container_margin.top*2+text_height+"px")
 	// contianer_margin : +*2 for the margins themselves, +1 for the offset of the content...?
 		.style("width",cbar_bounds.width+container_margin.side*2+container_margin.side+"px")
@@ -233,7 +234,6 @@ function defineColorbarContainer(particle_group_UIname){
 		.style("height",text_height + "px")
 		.attr('class','colorbar_label') // hardcode background color in index.css, why isn't this inherited??
 
-	colorbar_container.classed('hidden', true)
 }
 
 function fillColorbarContainer( particle_group_UIname){

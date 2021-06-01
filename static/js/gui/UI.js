@@ -543,8 +543,9 @@ function createUI(){
 //change the hamburger to the X to start
 
 	var UIcontainer = d3.select('.UIcontainer');
-	UIcontainer.classed('hidden', false);
+	UIcontainer.classed('hidden', true); //hide to start
 	UIcontainer.html(""); //start fresh
+	d3.select('#colorbar_container').classed('hidden', true);
 
 	UIcontainer.attr('style','position:absolute; top:10px; left:10px; width:300px');
 
@@ -1379,6 +1380,10 @@ function createUI(){
 	var hamburger = document.getElementById('UItopbar');
 	hideUI(hamburger);
 	hamburger.classList.toggle("change");	
+
+	//and show the result
+	UIcontainer.classed('hidden', false);
+
 }
 
 
