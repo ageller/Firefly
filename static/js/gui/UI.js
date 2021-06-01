@@ -186,8 +186,8 @@ function dragElement(elm, e) {
 
 	function closeDragElement(e) {
 		/* stop moving when mouse button is released:*/
-		e.stopPropagation();
 		GUIParams.movingUI = false;
+		e.stopPropagation();
 		document.removeEventListener('mouseup', closeDragElement);
 		document.removeEventListener('mousemove', elementDrag);
 
@@ -541,6 +541,7 @@ function createUI(){
 	var use_color_id = null
 
 //change the hamburger to the X to start
+	window.addEventListener('mouseup',function(){GUIParams.movingUI = false;});
 
 	var UIcontainer = d3.select('.UIcontainer');
 	UIcontainer.classed('hidden', true); //hide to start

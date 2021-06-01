@@ -981,7 +981,11 @@ function clearloading(){
 
 	console.log("loaded")
 	d3.select("#loader").style("display","none")
-	d3.select("#splashdiv5").text("Click to begin.");
+	if (viewerParams.local){
+		d3.select("#splashdiv5").text("Click to begin.");
+	} else {
+		showSplash(false);
+	}
 
 }
 
