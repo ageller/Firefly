@@ -4,17 +4,30 @@ function initControls(){
 	forGUI.push({'setGUIParamByKey':[viewerParams.useTrackball, "useTrackball"]})
 
 	if (viewerParams.useTrackball) {
+		console.log('==options',viewerParams.parts.options);
 		var xx = new THREE.Vector3(0,0,0);
 		viewerParams.camera.getWorldDirection(xx);
 		viewerParams.controls = new THREE.TrackballControls( viewerParams.camera, viewerParams.renderer.domElement );
 		viewerParams.controls.target = new THREE.Vector3(viewerParams.camera.position.x + xx.x, viewerParams.camera.position.y + xx.y, viewerParams.camera.position.z + xx.z);
-		if (viewerParams.parts.hasOwnProperty('options')){
-			if (viewerParams.parts.options.hasOwnProperty('center') && !viewerParams.switchControls){
+		if (viewerParams.parts.hasOwnProperty('options') && !viewerParams.switchControls){
+			if (viewerParams.parts.options.hasOwnProperty('center') ){
 				if (viewerParams.parts.options.center != null){
 					viewerParams.controls.target = new THREE.Vector3(viewerParams.parts.options.center[0], viewerParams.parts.options.center[1], viewerParams.parts.options.center[2]);
 
 				}
 			}
+			if (viewerParams.parts.options.hasOwnProperty('cameraUp') ){
+				if (viewerParams.parts.options.cameraUp != null){
+					viewerParams.camera.up.set(viewerParams.parts.options.cameraUp[0], viewerParams.parts.options.cameraUp[1], viewerParams.parts.options.cameraUp[2]);
+				}
+			}
+			//this does not work (a bug/feature of trackballControls)
+			if (viewerParams.parts.options.hasOwnProperty('cameraRotation') ){
+				if (viewerParams.parts.options.cameraRotation != null){
+					viewerParams.camera.rotation.set(viewerParams.parts.options.cameraRotation[0], viewerParams.parts.options.cameraRotation[1], viewerParams.parts.options.cameraRotation[2]);
+				}
+			}
+
 		} 
 
 		viewerParams.controls.dynamicDampingFactor = viewerParams.friction;
@@ -143,11 +156,17 @@ function applyOptions(){
 		}
 	} 
 
-	//change the rotation of the camera (which requires Fly controls)
+	//change the rotation of the camera 
 	if (viewerParams.parts.options.hasOwnProperty('cameraRotation')){
 		if (viewerParams.parts.options.cameraRotation != null){
-			viewerParams.useTrackball = false;
 			viewerParams.camera.rotation.set(viewerParams.parts.options.cameraRotation[0], viewerParams.parts.options.cameraRotation[1], viewerParams.parts.options.cameraRotation[2]);
+		}
+	}
+
+	//change the up vector of the camera (required to get the rotation correct)
+	if (viewerParams.parts.options.hasOwnProperty('cameraUp')){
+		if (viewerParams.parts.options.cameraUp != null){
+			viewerParams.camera.up.set(viewerParams.parts.options.cameraUp[0], viewerParams.parts.options.cameraUp[1], viewerParams.parts.options.cameraUp[2]);
 		}
 	}
 
@@ -1141,6 +1160,7 @@ function sendInitGUI(prepend=[], append=[]){
 
 	forGUI.push({'setGUIParamByKey':[viewerParams.camera.position, "cameraPosition"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.camera.rotation, "cameraRotation"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.camera.up, "cameraUp"]});
 	var xx = new THREE.Vector3(0,0,0);
 	viewerParams.camera.getWorldDirection(xx);
 	forGUI.push({'setGUIParamByKey':[xx, "cameraDirection"]});

@@ -102,7 +102,6 @@ function checkCenterLock(checked){
 }
 
 //reset the camera position to whatever is saved in the options parameters
-//NOTE: if the cameraRotation is set, then the controls become fly controls
 function resetCamera() {
 
 	var screenWidth = window.innerWidth;
@@ -134,11 +133,17 @@ function resetCamera() {
 	//change the rotation of the camera (which requires Fly controls)
 	if (viewerParams.parts.options.hasOwnProperty('cameraRotation')){
 		if (viewerParams.parts.options.cameraRotation != null){
-			viewerParams.useTrackball = false;
 			viewerParams.camera.rotation.set(viewerParams.parts.options.cameraRotation[0], viewerParams.parts.options.cameraRotation[1], viewerParams.parts.options.cameraRotation[2]);
 		}
 	}
 
+
+	//change the rotation of the camera (which requires Fly controls)
+	if (viewerParams.parts.options.hasOwnProperty('cameraUp')){
+		if (viewerParams.parts.options.cameraUp != null){
+			viewerParams.camera.up.set(viewerParams.parts.options.cameraUp[0], viewerParams.parts.options.cameraUp[1], viewerParams.parts.options.cameraUp[2]);
+		}
+	}
 
 	viewerParams.controls.dispose();
 	initControls();
@@ -295,6 +300,7 @@ function checkText(args){
 	if (id == "RenderYText") viewerParams.renderHeight = parseInt(value);
 
 	viewerParams.camera.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z);
+	console.log('===here camera', cameraRotation);
 	viewerParams.camera.rotation.set(cameraRotation.x, cameraRotation.y, cameraRotation.z);
 	viewerParams.controls.target = new THREE.Vector3(viewerParams.center.x, viewerParams.center.y, viewerParams.center.z);
 
@@ -442,11 +448,9 @@ function createPreset(){
 	}
 	preset.camera = copyValue([viewerParams.camera.position.x, viewerParams.camera.position.y, viewerParams.camera.position.z]);
 	preset.startFly = !viewerParams.useTrackball;
-	if (viewerParams.parts.options.hasOwnProperty('cameraRotation')){
-		if (viewerParams.parts.options.cameraRotation != null){
-			preset.cameraRotation = copyValue([viewerParams.camera.rotation.x, viewerParams.camera.rotation.y, viewerParams.camera.rotation.z]);
-		}
-	}
+	preset.cameraRotation = copyValue([viewerParams.camera.rotation.x, viewerParams.camera.rotation.y, viewerParams.camera.rotation.z]);
+	preset.cameraUp = copyValue([viewerParams.camera.up.x, viewerParams.camera.up.y, viewerParams.camera.up.z]);
+
 	preset.friction = copyValue(viewerParams.friction);
 	preset.stereo = copyValue(viewerParams.useStereo);
 	preset.stereoSep = copyValue(viewerParams.stereoSep);

@@ -99,11 +99,14 @@ function setGUIParamByKey(args){
 }
 
 function updateGUICamera(){
-	GUIParams.camera.position.set(GUIParams.cameraPosition.x, GUIParams.cameraPosition.y, GUIParams.cameraPosition.z);
-	GUIParams.camera.rotation.set(GUIParams.cameraRotation.x, GUIParams.cameraRotation.y, GUIParams.cameraRotation.z);
-	GUIParams.controls.target = new THREE.Vector3(GUIParams.controlsTarget.x, GUIParams.controlsTarget.y, GUIParams.controlsTarget.z);
-	setCubePosition(GUIParams.controls.target);
-	GUIParams.cameraNeedsUpdate = false;
+	if (GUIParams.camera){
+		GUIParams.camera.position.set(GUIParams.cameraPosition.x, GUIParams.cameraPosition.y, GUIParams.cameraPosition.z);
+		GUIParams.camera.rotation.set(GUIParams.cameraRotation.x, GUIParams.cameraRotation.y, GUIParams.cameraRotation.z);
+		GUIParams.camera.up.set(GUIParams.cameraUp.x, GUIParams.cameraUp.y, GUIParams.cameraUp.z);
+		GUIParams.controls.target = new THREE.Vector3(GUIParams.controlsTarget.x, GUIParams.controlsTarget.y, GUIParams.controlsTarget.z);
+		setCubePosition(GUIParams.controls.target);
+		GUIParams.cameraNeedsUpdate = false;
+	}
 }
 
 function sendCameraInfoToViewer(){

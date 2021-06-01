@@ -68,6 +68,8 @@ THREE.TrackballControls = function ( object, domElement ) {
 	this.target0 = this.target.clone();
 	this.position0 = this.object.position.clone();
 	this.up0 = this.object.up.clone();
+	//added by AMG
+	this.rotation0 = this.object.rotation.clone();
 
 	// events
 
@@ -293,6 +295,7 @@ THREE.TrackballControls = function ( object, domElement ) {
 
 	};
 
+
 	this.update = function () {
 
 		_eye.subVectors( _this.object.position, _this.target );
@@ -339,6 +342,8 @@ THREE.TrackballControls = function ( object, domElement ) {
 		_this.target.copy( _this.target0 );
 		_this.object.position.copy( _this.position0 );
 		_this.object.up.copy( _this.up0 );
+		//added by AMG
+		_this.object.rotation.copy( _this.rotation0 );
 
 		_eye.subVectors( _this.object.position, _this.target );
 
