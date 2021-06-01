@@ -120,7 +120,12 @@ def data_input():
 
 if __name__ == "__main__":
 	#app.run(host='0.0.0.0')
-	socketio.run(app, debug=True, host='0.0.0.0', port=5000)
+	args = sys.argv[1:]
+	if len(args) >=1:
+		port = int(sys.argv[1])
+	else:
+		port = 5000
+	socketio.run(app, debug=True, host='0.0.0.0', port=port)
 
 
 

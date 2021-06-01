@@ -677,7 +677,7 @@ function countParts(){
 
 //if startup.json exists, this is called first
 function getFilenames(prefix=""){
-	console.log('==getFilenames')
+	console.log('==getFilenames',prefix+viewerParams.startup)
 	d3.json(prefix+viewerParams.startup,  function(dir) {
 		console.log(prefix, dir, viewerParams.startup, viewerParams)
 		if (dir != null){
