@@ -134,6 +134,9 @@ canvas{
 	left:0;
 }
 
+.hidden{
+	display:none;
+}
 
 /* https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_modal_bottom */
 /* The Modal (background) */

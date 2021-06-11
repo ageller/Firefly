@@ -51,8 +51,9 @@ def background_thread():
 #testing the connection
 @socketio.on('connection_test', namespace=namespace)
 def connection_test(message):
+	print('======= connected', message)
 	session['receive_count'] = session.get('receive_count', 0) + 1
-	emit('connection_response',{'data': message['data'], 'count': session['receive_count']})
+	emit('connection_response',{'data': message['data'], 'count': session['receive_count']}, namespace=namespace)
 
 
 
@@ -88,6 +89,13 @@ def from_gui():
 		if thread is None:
 			thread = socketio.start_background_task(target=background_thread)
 
+#######for Streamer
+#passing the rendered texture
+@socketio.on('streamer_input', namespace=namespace)
+def streamer_input(texture):
+	socketio.emit('update_streamer', texture, namespace=namespace)
+
+
 ##############
 
 #flask stuff
@@ -100,10 +108,13 @@ def gui():
 	return render_template("gui.html")
 
 @app.route("/")
-def combined(): 
+def default(): 
 	return render_template("combined.html")
 @app.route("/index")
 def index(): 
+	return render_template("combined.html")
+@app.route("/combined")
+def combined(): 
 	return render_template("combined.html")
 
 @app.route("/cardboard")
@@ -120,6 +131,11 @@ def data_input():
 	socketio.emit('input_data', data, namespace=namespace)
 	#return json.dumps(data)
 	return "Done"
+
+@app.route("/stream")
+def streamer():  
+	return render_template("streamer.html")
+
 
 if __name__ == "__main__":
 	#app.run(host='0.0.0.0')

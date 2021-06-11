@@ -256,7 +256,8 @@ function render() {
 		// });
 
 		//first, render to the texture
-		viewerParams.renderer.setRenderTarget(viewerParams.textureCD)
+		viewerParams.renderer.setRenderTarget(viewerParams.textureCD);
+		//pass this to the streamer if activated
 		viewerParams.renderer.render( viewerParams.scene, viewerParams.camera);
 
 		//then back to the canvas
@@ -270,6 +271,18 @@ function render() {
 		viewerParams.renderer.render( viewerParams.scene, viewerParams.camera );
 	}
 
+	if (viewerParams.streamerActive && viewerParams.usingSocket){
+		//send the image through flask to the stream webpage
+		if (viewerParams.streamReady){
+			//https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
+			viewerParams.renderer.domElement.toBlob(function(blob) {
+				url = URL.createObjectURL(blob);
+				socketParams.socket.emit('streamer_input', url);
+			});
+			viewerParams.streamReady = false;
+		}
+
+	}
 }
 
 

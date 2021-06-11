@@ -102,6 +102,11 @@ function defineGUIParams(){
 		this.filterLims = null;
 		this.invertFilter = null;
 
+		this.columnDensity = false;
+		
+		this.updateTween = false;
+		this.inTween = false;
+
 		//only need to pass the position, rotation, direction portion of the camera
 		this.cameraPosition = new THREE.Vector3(0,0,0);
 		this.cameraRotation = new THREE.Vector3(0,0,0);
