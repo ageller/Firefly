@@ -48,10 +48,10 @@ function connectGUISocket(){
 		// The callback function is invoked when a connection with the
 		// server is established.
 		socketParams.socket.on('connect', function() {
-			socketParams.socket.emit('connection_test', {data: 'I\'m connected!'});
+			socketParams.socket.emit('connection_test', {data: 'GUI connected!'});
 		});
 		socketParams.socket.on('connection_response', function(msg) {
-			console.log(msg);
+			console.log('connection response', msg);
 		});
 		// Event handler for server sent data.
 		// The callback function is invoked whenever the server emits data
@@ -289,6 +289,30 @@ function animateGUIupdate(){
 			//GUIParams.switchControls = true;
 			GUIParams.controls.dispose();
 			initGUIControls();
+		}
+
+		if (GUIParams.keyboard.down("T")) {
+			if (GUIParams.inTween){
+				GUIParams.updateTween = false;
+				GUIParams.inTween = false;
+				var forViewer = [];
+				forViewer.push({'setViewerParamByKey':[GUIParams.updateTween, "updateTween"]});
+				forViewer.push({'setViewerParamByKey':[GUIParams.inTween, "inTween"]});
+				sendToViewer(forViewer);
+			} else {
+				console.log("tweening")
+				GUIParams.inTween = true;
+				GUIParams.updateTween = true;	
+				var forViewer = [];
+				forViewer.push({'setViewerParamByKey':[GUIParams.updateTween, "updateTween"]});
+				forViewer.push({'setTweenviewerParams':['static/']});
+				sendToViewer(forViewer);
+			}
+		}
+
+		if (GUIParams.keyboard.down("P")){
+			GUIParams.columnDensity = !GUIParams.columnDensity;
+			sendToViewer([{'setViewerParamByKey':[GUIParams.columnDensity, "columnDensity"]}]);
 		}
 	}
 

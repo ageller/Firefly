@@ -166,5 +166,9 @@ function defineViewerParams(){
 		this.cameraUp = new THREE.Vector3(0,0,0);
 		this.cameraDirection = new THREE.Vector3(0,0,0);
 		this.controlsTarget = new THREE.Vector3(0,0,0);
+
+		//for streamer
+		this.streamerActive = false;
+		this.streamReady = true;
 	};
 }

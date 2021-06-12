@@ -913,7 +913,7 @@ function WebGLStart(){
 	initScene();
 	
 	initColumnDensity();
-	
+
 	//draw everything
 	Promise.all([
 		drawScene(),
@@ -1160,10 +1160,10 @@ function connectViewerSocket(){
 		// The callback function is invoked when a connection with the
 		// server is established.
 		socketParams.socket.on('connect', function() {
-			socketParams.socket.emit('connection_test', {data: 'I\'m connected!'});
+			socketParams.socket.emit('connection_test', {data: 'Viewer connected!'});
 		});
 		socketParams.socket.on('connection_response', function(msg) {
-			console.log(msg);
+			console.log('connection response', msg);
 		});     
 		// Event handler for server sent data.
 		// The callback function is invoked whenever the server emits data
@@ -1196,6 +1196,10 @@ function connectViewerSocket(){
 			sendToGUI(forGUI);
 
 		});
+
+		socketParams.socket.on('update_streamer', function(msg) {
+			viewerParams.streamReady = true;
+		})
 	});
 }
 
