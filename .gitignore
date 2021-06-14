@@ -12,6 +12,10 @@ Thumbs.db
 ###################
 *.json
 
+# hdf5 files *
+#####################
+*.hdf5
+
 # python #
 ###################
 *ipynb_checkpoints*
