@@ -753,7 +753,43 @@ function callLoadData(args){
 	console.log("loading new data", files)
 	loadData(WebGLStart, prefix);
 }
-function loadData(callback, prefix=""){
+function compileData(data, p, callback){
+	console.log('in compile data', p, data)
+	Object.keys(data).forEach(function(k, jj) {
+		//console.log("k = ", k, jj)
+		if (viewerParams.parts[p].hasOwnProperty(k)){
+			viewerParams.parts[p][k] = viewerParams.parts[p][k].concat(data[k]);
+			//console.log('appending', k, p, viewerParams.parts[p])
+
+		} else {
+			viewerParams.parts[p][k] = data[k];
+			//console.log('creating', k, p, viewerParams.parts[p], data[k])
+		}
+	});
+
+
+	viewerParams.loadfrac = countParts()/viewerParams.parts.totalSize;
+	//console.log("loading", viewerParams.loadfrac)
+	if (10. * viewerParams.loadfrac % 1 < 0.1 || viewerParams.loadfrac == 1){
+		updateLoadingBar();
+	}
+	if ('options' in viewerParams.parts){
+		//console.log(d3.selectAll('#loadingRect').node().getBoundingClientRect().width)
+		//console.log("counting", countParts(), viewerParams.parts.totalSize, viewerParams.loadfrac)
+		if (countParts() ==  viewerParams.parts.totalSize && viewerParams.parts.options.loaded){
+			//console.log("here")
+
+			var index = viewerParams.partsKeys.indexOf('options');
+			if (index > -1) {
+				viewerParams.partsKeys.splice(index, 1);
+				viewerParams.parts.options0 = JSON.parse(JSON.stringify(viewerParams.parts.options));
+			}
+
+			callback(); 
+		}
+	}
+}
+function loadData(callback, prefix="", internalData=null){
 
 	viewerParams.parts = {};
 	viewerParams.parts.totalSize = 0.;
@@ -774,52 +810,27 @@ function loadData(callback, prefix=""){
 	viewerParams.partsKeys.forEach( function(p, i) {
 		viewerParams.parts[p] = {};
 
-
 		viewerParams.filenames[p].forEach( function(f, j) {
-			var readf = null;
-			if (f.constructor == Array){
-				readf = "data/"+f[0];
-			} else if (j == 0){
-				readf = "data/"+f
-			}
-			//console.log(readf)
-			if (readf != null){
-				//console.log("f = ", f)
-				d3.json(prefix+readf,  function(foo) {
-					//console.log("keys", Object.keys(foo), f[0])
-					Object.keys(foo).forEach(function(k, jj) {
-						//console.log("k = ", k, jj)
-						if (viewerParams.parts[p].hasOwnProperty(k)){
-							viewerParams.parts[p][k] = viewerParams.parts[p][k].concat(foo[k]);
-							//console.log('appending', k, p, viewerParams.parts[p])
-
-						} else {
-							viewerParams.parts[p][k] = foo[k];
-							//console.log('creating', k, p, viewerParams.parts[p], foo[k])
-						}
+			//console.log("f = ", f)
+			if (internalData){
+				console.log('==== checking', f)
+				Object.keys(internalData).forEach(function(key,k){
+					//if I was sent a prefix, this could be simplified
+					if (key.includes(f[0])) compileData(JSON.parse(internalData[key]), p, callback)
+				})
+			} else {
+				var readf = null;
+				if (f.constructor == Array){
+					readf = "data/"+f[0];
+				} else if (j == 0){
+					readf = "data/"+f
+				}
+				//console.log(readf)
+				if (readf != null){
+					d3.json(prefix+readf,  function(foo) {
+						compileData(foo, p, callback);
 					});
-
-
-					viewerParams.loadfrac = countParts()/viewerParams.parts.totalSize;
-					//console.log("loading", viewerParams.loadfrac)
-					if (10. * viewerParams.loadfrac % 1 < 0.1 || viewerParams.loadfrac == 1){
-						updateLoadingBar();
-					}
-					//console.log(d3.selectAll('#loadingRect').node().getBoundingClientRect().width)
-					//console.log("counting", countParts(), viewerParams.parts.totalSize, viewerParams.loadfrac)
-					if (countParts() ==  viewerParams.parts.totalSize && viewerParams.parts.options.loaded){
-						//console.log("here")
-
-						var index = viewerParams.partsKeys.indexOf('options');
-						if (index > -1) {
-							viewerParams.partsKeys.splice(index, 1);
-							viewerParams.parts.options0 = JSON.parse(JSON.stringify(viewerParams.parts.options));
-						}
-
-						callback(); 
-					}
-
-				});
+				}
 			}
 		});
 	});
@@ -1180,50 +1191,37 @@ function connectViewerSocket(){
 		});
 
 		socketParams.socket.on('show_loader', function(msg) {
-			console.log('===showing loader')
 			d3.select("#splashdivLoader").selectAll('svg').remove();
 			d3.select("#splashdiv5").text("Loading...");
 			d3.select("#loader").style("display","visible");
 			viewerParams.loaded = false;
 			viewerParams.pauseAnimation = true;
 
-			drawLoadingBar();
 			viewerParams.loadfrac = 0.;
+			drawLoadingBar();
 
 			showSplash();
 		});
 
 		socketParams.socket.on('input_data', function(msg) {
 			//only tested for local (GUI + viewer in one window)
-			console.log("have new data : ", msg);
+			console.log("======== have new data : ", Object.keys(msg));
 			var socketCheck = viewerParams.usingSocket;
 			var localCheck = viewerParams.local;
 			defineViewerParams();
 			viewerParams.pauseAnimation = true;
-			viewerParams.partsKeys = Object.keys(msg.parts);
-			viewerParams.parts = JSON.parse(JSON.stringify(msg.parts));
-			viewerParams.parts.options = JSON.parse(JSON.stringify(msg.options));
-			console.log("parts", viewerParams.parts, viewerParams.partsKeys)
-
 			viewerParams.usingSocket = socketCheck; 
 			viewerParams.local = localCheck; 
-			viewerParams.loaded = true; //should I set this here, or will it be set elsewhere after the data is actually loaded
-			viewerParams.pauseAnimation = false;
 
-			//no good way to increment this yet
-			viewerParams.loadfrac = 1.;
-			updateLoadingBar();
-
-			makeViewer();
-			WebGLStart();
-
-			var forGUI = [];
-			forGUI.push({'defineGUIParams':null});
-			forGUI.push({'setGUIParamByKey':[viewerParams.usingSocket, "usingSocket"]});
-			forGUI.push({'setGUIParamByKey':[viewerParams.local, "local"]});
-			forGUI.push({'makeUI':viewerParams.local});
-			sendToGUI(forGUI);
-
+			var prefix = '';
+			Object.keys(msg).forEach(function(key,i){
+				if (key.includes('filenames.json')){
+					viewerParams.filenames = JSON.parse(msg[key]);
+				}
+				if (i == Object.keys(msg).length-1){
+					loadData(initInputData, prefix="", internalData=msg)
+				}
+			})
 		});
 
 		socketParams.socket.on('update_streamer', function(msg) {
@@ -1232,7 +1230,17 @@ function connectViewerSocket(){
 	});
 }
 
+function initInputData(){
+	makeViewer();
+	WebGLStart();
 
+	var forGUI = [];
+	forGUI.push({'defineGUIParams':null});
+	forGUI.push({'setGUIParamByKey':[viewerParams.usingSocket, "usingSocket"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.local, "local"]});
+	forGUI.push({'makeUI':viewerParams.local});
+	sendToGUI(forGUI);
+}
 //function to send events to the GUI
 function sendToGUI(GUIInput){
 	if (viewerParams.usingSocket){

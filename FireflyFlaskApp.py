@@ -54,7 +54,8 @@ def background_thread():
 			socketio.emit('update_GUIParams', GUIParams, namespace=namespace)
 		updateViewerParams = False
 		updateGUIParams = False
-		
+
+
 #testing the connection
 @socketio.on('connection_test', namespace=namespace)
 def connection_test(message):
@@ -108,11 +109,12 @@ def streamer_input(texture):
 @socketio.on('input_hdf5', namespace=namespace)
 def input_hdf5(filedir):
 	fdir = os.path.join(os.getcwd(),'static','data',filedir)
-	print('have hdf5 data', fdir)
+	print('======= have hdf5 data', fdir)
 	reader = SimpleReader(fdir, write_jsons_to_disk=False)
 	data = reader.outputToDict(JSON=True)
-	print('have data from hdf5 file, sending to viewer')
+	print('======= have data from hdf5 file, sending to viewer')
 	#I would like to enable a loading bar here.
+	print('======= sending data to viewer')
 	socketio.emit('input_data', data, namespace=namespace)
 
 ##############
@@ -142,14 +144,27 @@ def cardboard():
 
 @app.route('/data_input', methods = ['POST'])
 def data_input():
+
+	print('======= showing loader')
 	socketio.emit('show_loader', None, namespace=namespace)
+	socketio.sleep(1) #to make sure that the above emit is executed
 
+	print('======= receiving data from server ...')
 	jsondata = request.get_json()
-	data = json.loads(jsondata)
+	#this loop may not be necessary
+	sze = 0
+	while (sze != sys.getsizeof(jsondata)):
+		socketio.sleep(1)
+		sze = sys.getsizeof(jsondata)
+		print("======= size of data", sze)
 
-	print('Received data from server : ', data.keys())
+	data = json.loads(jsondata)
+	print('======= sending data to viewer ...')#,data.keys())
 	socketio.emit('input_data', data, namespace=namespace)
-	return "Done"
+	socketio.sleep(1) #to make sure that the above emit is executed
+
+	print('======= done')
+	return 'Done'
 
 @app.route("/stream")
 def streamer():  
