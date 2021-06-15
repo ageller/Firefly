@@ -170,5 +170,6 @@ function defineViewerParams(){
 		//for streamer
 		this.streamerActive = false;
 		this.streamReady = true;
+		this.streamQuality = 1.0;
 	};
 }

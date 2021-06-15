@@ -278,7 +278,7 @@ function render() {
 			viewerParams.renderer.domElement.toBlob(function(blob) {
 				url = URL.createObjectURL(blob);
 				socketParams.socket.emit('streamer_input', url);
-			});
+			},'image/jpeg', viewerParams.streamQuality);
 			viewerParams.streamReady = false;
 		}
 
