@@ -1,16 +1,18 @@
 //wait for all the input before loading
 function makeUI(local=false){
-	if (local) GUIParams.usingSocket = false;
+	//if (local) GUIParams.usingSocket = false;
+	console.log('making UI', local)
 	if (!local){
 		initGUIScene();
 		if (!GUIParams.animating) animateGUI();
 	}
 
 	
+	console.log("waiting for GUI init...")
 	GUIParams.waitForInit = setInterval(function(){ 
 		var ready = confirmGUIInit();
-		console.log("waiting for GUI init", ready)
 		if (ready){
+			console.log("GUI ready.")
 			clearInterval(GUIParams.waitForInit);
 			if (!local) {
 				showSplash(false);
@@ -431,7 +433,7 @@ d3.select('body').append('input')
 	.on('change', function(e){
 		var foundFile = false;
 		for (i=0; i<this.files.length; i++){
-			if (this.files[i].name == "filenames.json"){
+			if (this.files[i].name == "filenames.json" && !foundFile){
 				foundFile = true;
 				var file = this.files[i];
 				var reader = new FileReader();
@@ -443,6 +445,15 @@ d3.select('body').append('input')
 					} else {
 						alert("Cannot load data. Please select another directory.");
 					}
+				}
+			}
+			if (this.files[i].name.includes('.hdf5') && !foundFile){
+				console.log('here', GUIParams.usingSocket)
+				if (GUIParams.usingSocket){
+					foundFile = true;
+					var dir = this.files[i].webkitRelativePath.replace(this.files[i].name,'');
+					console.log('have hdf5 file', dir);
+					socketParams.socket.emit('input_hdf5', dir);
 				}
 			}
 		}

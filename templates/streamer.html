@@ -40,7 +40,7 @@
 		<script src="static/lib/d3.v4.10.2.min.js"></script>
 		
 		<!-- web sockets -->
-	    <script src="static/lib/socket.io.min.js"></script>
+		<script src="static/lib/socket.io.min.js"></script>
 
 		<!-- the main attraction -->
 
@@ -52,6 +52,9 @@
 		<script src="static/js/misc/windowEvents.js"></script>
 		<script src="static/js/streamer/initStreamer.js"></script>
 
+		<script>
+			window.onload = initFPS( {{ input|tojson|safe }} );
+		</script>
 	</body>
 
 

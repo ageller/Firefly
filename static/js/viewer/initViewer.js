@@ -750,6 +750,7 @@ function callLoadData(args){
 
 	drawLoadingBar();
 	viewerParams.filenames = files;
+	console.log("loading new data", files)
 	loadData(WebGLStart, prefix);
 }
 function loadData(callback, prefix=""){
@@ -939,10 +940,11 @@ function WebGLStart(){
 function makeViewer(pSize=null){
 	viewerParams.haveUI = false;
 	viewerParams.ready = false; 
+	console.log("Waiting for viewer init ...")
 	viewerParams.waitForInit = setInterval(function(){ 
 		var ready = confirmViewerInit();
-		console.log("Waiting for viewer init", ready)
 		if (ready){
+			console.log("Viewer ready.")
 			clearInterval(viewerParams.waitForInit);
 			viewerParams.ready = true;
 			viewerParams.pauseAnimation = false;
@@ -1127,10 +1129,13 @@ function sendCameraInfoToGUI(foo, updateCam=false){
 	sendToGUI(forGUI);
 }
 //so that it can run locally also without using Flask
-function runLocal(showGUI=true, useOrientationControls=false, startStereo=false, pSize=null){
-	viewerParams.usingSocket = false;
+function runLocal(useSockets=true, showGUI=true, useOrientationControls=false, startStereo=false, pSize=null){
 	viewerParams.local = true;
-	GUIParams.usingSocket = false;
+	viewerParams.usingSocket = useSockets;
+	forGUI = [];
+	forGUI.push({'setGUIParamByKey':[viewerParams.usingSocket, "usingSocket"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.local, "local"]});
+	sendToGUI(forGUI);
 
 	viewerParams.useStereo = startStereo;
 	viewerParams.useOrientationControls = useOrientationControls;
@@ -1173,10 +1178,26 @@ function connectViewerSocket(){
 		socketParams.socket.on('update_viewerParams', function(msg) {
 			setParams(msg);
 		});
+
+		socketParams.socket.on('show_loader', function(msg) {
+			console.log('===showing loader')
+			d3.select("#splashdivLoader").selectAll('svg').remove();
+			d3.select("#splashdiv5").text("Loading...");
+			d3.select("#loader").style("display","visible");
+			viewerParams.loaded = false;
+			viewerParams.pauseAnimation = true;
+
+			drawLoadingBar();
+			viewerParams.loadfrac = 0.;
+
+			showSplash();
+		});
+
 		socketParams.socket.on('input_data', function(msg) {
 			//only tested for local (GUI + viewer in one window)
-			console.log("have data : ", msg);
+			console.log("have new data : ", msg);
 			var socketCheck = viewerParams.usingSocket;
+			var localCheck = viewerParams.local;
 			defineViewerParams();
 			viewerParams.pauseAnimation = true;
 			viewerParams.partsKeys = Object.keys(msg.parts);
@@ -1185,6 +1206,13 @@ function connectViewerSocket(){
 			console.log("parts", viewerParams.parts, viewerParams.partsKeys)
 
 			viewerParams.usingSocket = socketCheck; 
+			viewerParams.local = localCheck; 
+			viewerParams.loaded = true; //should I set this here, or will it be set elsewhere after the data is actually loaded
+			viewerParams.pauseAnimation = false;
+
+			//no good way to increment this yet
+			viewerParams.loadfrac = 1.;
+			updateLoadingBar();
 
 			makeViewer();
 			WebGLStart();
@@ -1192,7 +1220,8 @@ function connectViewerSocket(){
 			var forGUI = [];
 			forGUI.push({'defineGUIParams':null});
 			forGUI.push({'setGUIParamByKey':[viewerParams.usingSocket, "usingSocket"]});
-			forGUI.push({'makeUI':!viewerParams.usingSocket});
+			forGUI.push({'setGUIParamByKey':[viewerParams.local, "local"]});
+			forGUI.push({'makeUI':viewerParams.local});
 			sendToGUI(forGUI);
 
 		});

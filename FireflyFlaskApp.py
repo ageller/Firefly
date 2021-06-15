@@ -7,6 +7,10 @@ import numpy as np
 
 import json
 
+import os
+sys.path.insert(0, os.path.join(os.getcwd(), 'dataReader'))
+from firefly_api.reader import SimpleReader
+
 #in principle, we could read in the data here...
 
 
@@ -32,6 +36,9 @@ updateGUIParams = False
 namespace = '/Firefly'
 #number of seconds between updates
 seconds = 0.01
+
+#for the stream
+fps = 30
 
 #this will pass to the viewer every "seconds" 
 def background_thread():
@@ -73,6 +80,7 @@ def from_viewer():
 		if thread is None:
 			thread = socketio.start_background_task(target=background_thread)
 
+
 #######for GUI
 #will receive data from gui
 @socketio.on('gui_input', namespace=namespace)
@@ -95,6 +103,17 @@ def from_gui():
 def streamer_input(texture):
 	socketio.emit('update_streamer', texture, namespace=namespace)
 
+
+########reading in hdf5 files
+@socketio.on('input_hdf5', namespace=namespace)
+def input_hdf5(filedir):
+	fdir = os.path.join(os.getcwd(),'static','data',filedir)
+	print('have hdf5 data', fdir)
+	reader = SimpleReader(fdir, write_jsons_to_disk=False)
+	data = reader.outputToDict(JSON=True)
+	print('have data from hdf5 file, sending to viewer')
+	#I would like to enable a loading bar here.
+	socketio.emit('input_data', data, namespace=namespace)
 
 ##############
 
@@ -123,27 +142,37 @@ def cardboard():
 
 @app.route('/data_input', methods = ['POST'])
 def data_input():
+	socketio.emit('show_loader', None, namespace=namespace)
+
 	jsondata = request.get_json()
 	data = json.loads(jsondata)
 
-	#stuff happens here that involves data to obtain a result
 	print('Received data from server : ', data.keys())
 	socketio.emit('input_data', data, namespace=namespace)
-	#return json.dumps(data)
 	return "Done"
 
 @app.route("/stream")
 def streamer():  
-	return render_template("streamer.html")
+	return render_template("streamer.html", input=json.dumps({'fps':fps}))
 
 
 if __name__ == "__main__":
 	#app.run(host='0.0.0.0')
+
+	#Note: we could have a more sophisticated arg parser, but this is probably fine for now.
+	#port as the first input
 	args = sys.argv[1:]
 	if len(args) >=1:
 		port = int(sys.argv[1])
 	else:
 		port = 5000
+
+	#stream fps as a second input
+	if len(args) >=2:
+		fps = float(sys.argv[2])
+	else:
+		fps = 30
+
 	socketio.run(app, debug=True, host='0.0.0.0', port=port)
 
 
