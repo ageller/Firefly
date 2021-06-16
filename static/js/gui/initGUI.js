@@ -9,6 +9,7 @@ function makeUI(local=false){
 
 	
 	console.log("waiting for GUI init...")
+	clearInterval(GUIParams.waitForInit);
 	GUIParams.waitForInit = setInterval(function(){ 
 		var ready = confirmGUIInit();
 		if (ready){
@@ -36,7 +37,9 @@ function confirmGUIInit(){
 	});
 	return ready
 }
-
+function clearGUIinterval(){
+	clearInterval(GUIParams.waitForInit);
+}
 
 //////////////
 // sockets

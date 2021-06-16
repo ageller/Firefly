@@ -11,7 +11,7 @@ If you use Firefly, please cite us using the [ADS listing](http://adsabs.harvard
 
 To install Firefly (on any operating system), please clone this GitHub repository :
 ```
-$ git clone --recursive https://github.com/ageller/Firefly.git
+$ git clone https://github.com/ageller/Firefly.git
 ```
 
 Or, if you prefer, you can download the zip file and unpack it.  
