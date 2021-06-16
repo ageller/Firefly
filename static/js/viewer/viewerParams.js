@@ -156,6 +156,7 @@ function defineViewerParams(){
 		//when ready the GUI will be created
 		this.waitForInit = null;
 		this.ready = false; 
+		this.counting = false;
 
 		//save the initial state in a preset file
 		this.initialState = null;

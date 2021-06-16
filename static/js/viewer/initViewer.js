@@ -691,12 +691,14 @@ function setBoxSize(coords){
 
 function countParts(){
 	var num = 0.;
+	viewerParams.counting = true;
 	viewerParams.partsKeys.forEach( function(p, i) {
 		if (viewerParams.parts.hasOwnProperty(p)){
 			if (viewerParams.parts[p].hasOwnProperty('Coordinates')){
 				num += viewerParams.parts[p].Coordinates.length;
 			}
 		}
+		if (i == viewerParams.partsKeys.length - 1) viewerParams.counting = false;
 	})
 	return num;
 }
@@ -768,11 +770,15 @@ function compileData(data, p, callback, initialLoadFrac=0){
 	});
 
 
-	loadfrac = (countParts()/viewerParams.parts.totalSize)*(1. - initialLoadFrac) + initialLoadFrac;
-	//some if statment like this seems necessary.  Otherwise the loading bar doesn't update (I suppose from too many calls)
-	if (loadfrac - viewerParams.loadfrac > 0.5 || loadfrac == 1){
-		viewerParams.loadfrac = loadfrac;
-		updateLoadingBar();
+	var num = 0;
+	if (!viewerParams.counting){
+		var num = countParts()
+		var loadfrac = (num/viewerParams.parts.totalSize)*(1. - initialLoadFrac) + initialLoadFrac;
+		//some if statment like this seems necessary.  Otherwise the loading bar doesn't update (I suppose from too many calls)
+		if (loadfrac - viewerParams.loadfrac > 0.5 || loadfrac == 1){
+			viewerParams.loadfrac = loadfrac;
+			updateLoadingBar();
+		}
 	}
 	if ('options' in viewerParams.parts){
 		//console.log(d3.selectAll('#loadingRect').node().getBoundingClientRect().width)
@@ -952,7 +958,7 @@ function WebGLStart(){
 }
 
 //wait for all the input before loading
-function makeViewer(pSize=null){
+function makeViewer(pSize=null, prepend=[], append=[]){
 	viewerParams.haveUI = false;
 	viewerParams.ready = false; 
 	console.log("Waiting for viewer init ...")
@@ -972,7 +978,7 @@ function makeViewer(pSize=null){
 				viewerParams.PsizeMult.Gas = pSize;
 				console.log('new Psize', pSize)
 			}
-			sendInitGUI();
+			sendInitGUI(prepend=prepend, append=append);
 		}
 	}, 100);
 }
@@ -1259,24 +1265,22 @@ function connectViewerSocket(){
 
 function initInputData(){
 	console.log('======== remaking gui and viewer')
-	var forGUI = [];
-	forGUI.push({'clearGUIinterval':null});
-	forGUI.push({'defineGUIParams':null});
-	sendToGUI(forGUI);
+	var forGUIprepend = [];
+	forGUIprepend.push({'clearGUIinterval':null});
+	forGUIprepend.push({'defineGUIParams':null});
+
+	var forGUIappend = [];
+	forGUIappend.push({'setGUIParamByKey':[viewerParams.usingSocket, "usingSocket"]});
+	forGUIappend.push({'setGUIParamByKey':[viewerParams.local, "local"]});
+	forGUIappend.push({'makeUI':viewerParams.local});
 
 	//I think I need to wait a moment because sometimes this doesn't fire (?)
 	setTimeout(function(){
-		makeViewer();
+		makeViewer(null, forGUIprepend, forGUIappend);
 		WebGLStart();
-	}, 500);
-
-	setTimeout(function(){
-		var forGUI = [];
-		forGUI.push({'setGUIParamByKey':[viewerParams.usingSocket, "usingSocket"]});
-		forGUI.push({'setGUIParamByKey':[viewerParams.local, "local"]});
-		forGUI.push({'makeUI':viewerParams.local});
-		sendToGUI(forGUI);
 	}, 1000);
+
+
 
 }
 
