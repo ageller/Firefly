@@ -2,6 +2,7 @@ from __future__ import print_function
 
 import h5py
 import os 
+import pandas as pd
 import requests
 import numpy as np
 
@@ -331,6 +332,7 @@ class SimpleReader(Reader):
         path_to_data,
         write_jsons_to_disk=True,
         decimation_factor=1,
+        extension='.hdf5',
         **kwargs):
         """
         A simple reader that will take as minimal input the path to a 
@@ -345,7 +347,7 @@ class SimpleReader(Reader):
                 immediately at the end of SimpleReader's __init__
         """
 
-        if '.hdf5' in path_to_data:
+        if extension in path_to_data:
             ## path_to_data points directly to a single .hdf5 file
             fnames = [path_to_data]
 
@@ -354,57 +356,44 @@ class SimpleReader(Reader):
 
             fnames = []
             for this_fname in os.listdir(path_to_data):
-                if '.hdf5' in this_fname:
+                if extension in this_fname:
                     fnames += [os.path.join(path_to_data,this_fname)]
         else:
             raise ValueError(
-                "%s needs to point to an .hdf5 file or "%path_to_data+
-                "a directory containing .hdf5 files.")
+                "%s needs to point to an %s file or "%(path_to_data,extension)+
+                "a directory containing %s files."%extension)
 
-        ## take the contents of the "first" file to define particle groups and keys
-        with h5py.File(fnames[0],'r') as handle:
-            particle_groups = list(handle.keys())
+        if extension == '.hdf5':
+            ## take the contents of the "first" file to define particle groups and keys
+            with h5py.File(fnames[0],'r') as handle:
+                particle_groups = list(handle.keys())
 
-        ## Gadget data has a header as well as particle groups
-        ##  so we need to ignore it
-        if 'Header' in particle_groups:
-            particle_groups.pop(particle_groups.index("Header"))
+            ## Gadget data has a header as well as particle groups
+            ##  so we need to ignore it
+            if 'Header' in particle_groups:
+                particle_groups.pop(particle_groups.index("Header"))
+        elif extension == '.csv':
+            particle_groups = [fname.replace(extension,'').split(os.sep)[-1] for fname in fnames]
+        else:
+            raise ValueError("Invalid extension %s, must be .hdf5 or .csv"%extension) 
 
         print("Opening %d files and %d particle types..."%(len(fnames),len(particle_groups)))
 
         ## create a default reader instance
         super().__init__(**kwargs)
-        for particle_group in particle_groups:
-            for i,fname in enumerate(fnames):
-                with h5py.File(fname,'r') as handle:
-                    ## (re)-initialize the coordinate array
-                    if i == 0:
-                        coordinates = np.empty((0,3))
+        for i,particle_group in enumerate(particle_groups):
+            coordinates = None
+            if extension == '.hdf5':
+                ## need to loop through each file and get the matching coordinates, 
+                ##  concatenating them.
+                for fname in fnames:
+                   coordinates = getHDF5Coordinates(fname,particle_group,coordinates) 
+            elif extension == '.csv':
+                ## each file corresponds to a single set of coordinates
+                coordinates = getCSVCoordinates(fnames[i]) 
+            else:
+                raise ValueError("Invalid extension %s, must be .hdf5 or .csv"%extension) 
 
-                    ## open the hdf5 group
-                    h5_group = handle[particle_group]
-                    
-                    if "Coordinates" in h5_group.keys():
-                        ## append the coordinates
-                        coordinates = np.append(coordinates,h5_group['Coordinates'][()],axis=0)
-
-                    elif ("x" in h5_group.keys() and
-                        "y" in h5_group.keys() and
-                        "z" in h5_group.keys()):
-
-                        ## read the coordinate data from x,y,z arrays
-                        xs = h5_group['x'][()]
-                        ys = h5_group['y'][()]
-                        zs = h5_group['z'][()]
-
-                        ## initialize a temporary coordinate array to append
-                        temp_coordinates = np.zeros((xs.size,3))
-                        temp_coordinates[:,0] = xs
-                        temp_coordinates[:,1] = ys
-                        temp_coordinates[:,2] = zs
-
-                        ## append the coordinates
-                        coordinates = np.append(coordinates,temp_coordinates,axis=0)
 
             ## initialize a firefly particle group instance
             firefly_particleGroup = ParticleGroup(
@@ -417,3 +406,51 @@ class SimpleReader(Reader):
         ## either write a bunch of mini JSONs to disk or store 
         ##  a single big JSON in self.JSON
         self.dumpToJSON(write_jsons_to_disk=write_jsons_to_disk)
+
+def getCSVCoordinates(fname):
+    full_df = pd.read_csv(fname,sep=' ')
+    coordinates = np.empty((full_df.shape[0],3))
+
+    if 'x' in full_df and 'y' in full_df and 'z' in full_df:
+        coordinates[:,0] = full_df['x']
+        coordinates[:,1] = full_df['y']
+        coordinates[:,2] = full_df['z']
+    else:
+        coordinates[:,0] = full_df.iloc[:,0]
+        coordinates[:,1] = full_df.iloc[:,1]
+        coordinates[:,2] = full_df.iloc[:,2]
+
+    return coordinates
+
+def getHDF5Coordinates(fname,particle_group,coordinates=None):
+    with h5py.File(fname,'r') as handle:
+        ## (re)-initialize the coordinate array
+        if coordinates is None:
+            coordinates = np.empty((0,3))
+
+        ## open the hdf5 group
+        h5_group = handle[particle_group]
+        
+        if "Coordinates" in h5_group.keys():
+            ## append the coordinates
+            coordinates = np.append(coordinates,h5_group['Coordinates'][()],axis=0)
+
+        elif ("x" in h5_group.keys() and
+            "y" in h5_group.keys() and
+            "z" in h5_group.keys()):
+
+            ## read the coordinate data from x,y,z arrays
+            xs = h5_group['x'][()]
+            ys = h5_group['y'][()]
+            zs = h5_group['z'][()]
+
+            ## initialize a temporary coordinate array to append
+            temp_coordinates = np.zeros((xs.size,3))
+            temp_coordinates[:,0] = xs
+            temp_coordinates[:,1] = ys
+            temp_coordinates[:,2] = zs
+
+            ## append the coordinates
+            coordinates = np.append(coordinates,temp_coordinates,axis=0)
+
+    return coordinates

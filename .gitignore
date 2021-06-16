@@ -12,9 +12,11 @@ Thumbs.db
 ###################
 *.json
 
-# hdf5 files *
+# data files *
 #####################
 *.hdf5
+*.csv
+
 
 # python #
 ###################
