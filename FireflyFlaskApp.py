@@ -105,19 +105,19 @@ def streamer_input(texture):
 	socketio.emit('update_streamer', texture, namespace=namespace)
 
 
-########reading in hdf5 files
-@socketio.on('input_hdf5', namespace=namespace)
-def input_hdf5(filedir):
+########reading in hdf5 or csv files
+@socketio.on('input_otherType', namespace=namespace)
+def input_otherType(filedir):
 	print('======= showing loader')
 	socketio.emit('show_loader', None, namespace=namespace)
 	socketio.sleep(0.1) #to make sure that the above emit is executed
 
 	fdir = os.path.join(os.getcwd(),'static','data',filedir)
-	print('======= have hdf5 data', fdir)
+	print('======= have input data file(s)', fdir)
 	reader = SimpleReader(fdir, write_jsons_to_disk=False)
 	data = json.loads(reader.JSON)
 
-	print('======= have data from hdf5 file, sending to viewer ...')
+	print('======= have data from file(s), sending to viewer ...')
 	socketio.emit('input_data', {'status':'start', 'length':len(data)}, namespace=namespace)
 	socketio.sleep(0.1) #to make sure that the above emit is executed
 	for fname in data:
@@ -129,6 +129,7 @@ def input_hdf5(filedir):
 	socketio.sleep(0.1) #to make sure that the above emit is executed
 
 	print('======= done')
+
 
 ##############
 

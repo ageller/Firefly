@@ -450,13 +450,13 @@ d3.select('body').append('input')
 					}
 				}
 			}
-			if (this.files[i].name.includes('.hdf5') && !foundFile){
+			if ((this.files[i].name.includes('.hdf5') || this.files[i].name.includes('.csv')) && !foundFile){
 				console.log('here', GUIParams.usingSocket)
 				if (GUIParams.usingSocket){
 					foundFile = true;
 					var dir = this.files[i].webkitRelativePath.replace(this.files[i].name,'');
-					console.log('have hdf5 file', dir);
-					socketParams.socket.emit('input_hdf5', dir);
+					console.log('have hdf5 or csv file', dir);
+					socketParams.socket.emit('input_otherType', dir);
 				}
 			}
 		}
