@@ -108,14 +108,27 @@ def streamer_input(texture):
 ########reading in hdf5 files
 @socketio.on('input_hdf5', namespace=namespace)
 def input_hdf5(filedir):
+	print('======= showing loader')
+	socketio.emit('show_loader', None, namespace=namespace)
+	socketio.sleep(0.1) #to make sure that the above emit is executed
+
 	fdir = os.path.join(os.getcwd(),'static','data',filedir)
 	print('======= have hdf5 data', fdir)
 	reader = SimpleReader(fdir, write_jsons_to_disk=False)
-	data = reader.outputToDict(JSON=True)
-	print('======= have data from hdf5 file, sending to viewer')
-	#I would like to enable a loading bar here.
-	print('======= sending data to viewer')
-	socketio.emit('input_data', data, namespace=namespace)
+	data = json.loads(reader.JSON)
+
+	print('======= have data from hdf5 file, sending to viewer ...')
+	socketio.emit('input_data', {'status':'start', 'length':len(data)}, namespace=namespace)
+	socketio.sleep(0.1) #to make sure that the above emit is executed
+	for fname in data:
+		print(fname, len(data[fname]))
+		output = {fname:data[fname], 'status':'data'}
+		socketio.emit('input_data', output, namespace=namespace)
+		socketio.sleep(0.1) #to make sure that the above emit is executed
+	socketio.emit('input_data', {'status':'done'}, namespace=namespace)
+	socketio.sleep(0.1) #to make sure that the above emit is executed
+
+	print('======= done')
 
 ##############
 

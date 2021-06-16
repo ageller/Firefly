@@ -956,6 +956,7 @@ function makeViewer(pSize=null){
 	viewerParams.haveUI = false;
 	viewerParams.ready = false; 
 	console.log("Waiting for viewer init ...")
+	clearInterval(viewerParams.waitForInit);
 	viewerParams.waitForInit = setInterval(function(){ 
 		var ready = confirmViewerInit();
 		if (ready){
@@ -1217,6 +1218,8 @@ function connectViewerSocket(){
 				if (msg.status == 'start') {
 					var socketCheck = viewerParams.usingSocket;
 					var localCheck = viewerParams.local;
+					//in case it's already waiting, which will happen if loading an hdf5 file from the gui
+					clearInterval(viewerParams.waitForInit);
 					defineViewerParams();
 					viewerParams.pauseAnimation = true;
 					viewerParams.usingSocket = socketCheck; 
@@ -1256,7 +1259,10 @@ function connectViewerSocket(){
 
 function initInputData(){
 	console.log('======== remaking gui and viewer')
-	sendToGUI([{'defineGUIParams':null}]);
+	var forGUI = [];
+	forGUI.push({'clearGUIinterval':null});
+	forGUI.push({'defineGUIParams':null});
+	sendToGUI(forGUI);
 
 	//I think I need to wait a moment because sometimes this doesn't fire (?)
 	setTimeout(function(){

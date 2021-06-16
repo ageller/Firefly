@@ -13,6 +13,7 @@ function resetViewer(){
 	drawScene();
 
 	//recreate the GUI
+	clearInterval(viewerParams.waitForInit);
 	viewerParams.waitForInit = setInterval(function(){ 
 		if (viewerParams.ready){
 			clearInterval(viewerParams.waitForInit);
@@ -38,14 +39,18 @@ function loadNewData(){
 	
 	//reset a few variables and remake the UI
 	//sendToGUI({'setGUIParamByKey':[null, "partsKeys"]})
-	sendToGUI({'defineGUIParams':null});
+	var forGUI = [];
+	forGUI.push({'clearGUIinterval':null});
+	forGUI.push({'defineGUIParams':null});
+	sendToGUI(forGUI);
+
 	viewerParams.parts = null;
 	viewerParams.camera = null;
 	viewerParams.boxSize = 0;
 	viewerParams.controls.dispose();
 	makeViewer();
 	//if (viewerParams.local) makeUI(local=true);
-	var forGUI = [{'makeUI':viewerParams.local}];
+	forGUI = [{'makeUI':viewerParams.local}];
 	if (!viewerParams.local) {
 		forGUI.push({'setGUIParamByKey':[false,"GUIready"]});
 		forGUI.push({'showSplash':true});
