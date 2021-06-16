@@ -113,8 +113,19 @@ def input_otherType(filedir):
 	socketio.sleep(0.1) #to make sure that the above emit is executed
 
 	fdir = os.path.join(os.getcwd(),'static','data',filedir)
-	print('======= have input data file(s)', fdir)
-	reader = SimpleReader(fdir, write_jsons_to_disk=False)
+	#check the file types
+	ftype = '.hdf5'
+	try:
+		for f in os.listdir(fdir):
+			if ('.csv' in f):
+				ftype = '.csv'
+			if ('.hdf5' in f):
+				ftype = '.hdf5'
+	except:
+		pass
+
+	print('======= have input '+ftype+' data file(s) in', fdir)
+	reader = SimpleReader(fdir, write_jsons_to_disk=False, extension=ftype)
 	data = json.loads(reader.JSON)
 
 	print('======= have data from file(s), sending to viewer ...')
