@@ -40,6 +40,9 @@ seconds = 0.01
 #for the stream
 fps = 30
 
+#decimation
+dec = 1
+
 #this will pass to the viewer every "seconds" 
 def background_thread():
 	"""Example of how to send server generated events to clients."""
@@ -125,7 +128,7 @@ def input_otherType(filedir):
 		pass
 
 	print('======= have input '+ftype+' data file(s) in', fdir)
-	reader = SimpleReader(fdir, write_jsons_to_disk=False, extension=ftype)
+	reader = SimpleReader(fdir, write_jsons_to_disk=False, extension=ftype, decimation_factor=dec)
 	data = json.loads(reader.JSON)
 
 	print('======= have data from file(s), sending to viewer ...')
@@ -205,6 +208,14 @@ def streamer():
 	return render_template("streamer.html", input=json.dumps({'fps':fps}))
 
 
+def startFireflyServer(port=5000, frames_per_second=30, decimation_factor=1):
+	global fps, dec
+
+	fps = fps
+	dec = dec
+
+	socketio.run(app, debug=True, host='0.0.0.0', port=port)
+
 if __name__ == "__main__":
 	#app.run(host='0.0.0.0')
 
@@ -222,8 +233,14 @@ if __name__ == "__main__":
 	else:
 		fps = 30
 
-	socketio.run(app, debug=True, host='0.0.0.0', port=port)
+	#decimation factor as third input (for reading in files)
+	if len(args) >=3:
+		dec = float(sys.argv[3])
+	else:
+		dec = 1
 
+	#socketio.run(app, debug=True, host='0.0.0.0', port=port)
+	startFireflyServer(port=port, frames_per_second=fps, decimation_factor=dec)
 
 
 
