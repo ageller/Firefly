@@ -753,8 +753,8 @@ function callLoadData(args){
 	console.log("loading new data", files)
 	loadData(WebGLStart, prefix);
 }
-function compileData(data, p, callback){
-	console.log('in compile data', p, data)
+function compileData(data, p, callback, initialLoadFrac=0){
+	//console.log('in compile data', p, data)
 	Object.keys(data).forEach(function(k, jj) {
 		//console.log("k = ", k, jj)
 		if (viewerParams.parts[p].hasOwnProperty(k)){
@@ -768,9 +768,10 @@ function compileData(data, p, callback){
 	});
 
 
-	viewerParams.loadfrac = countParts()/viewerParams.parts.totalSize;
-	//console.log("loading", viewerParams.loadfrac)
-	if (10. * viewerParams.loadfrac % 1 < 0.1 || viewerParams.loadfrac == 1){
+	loadfrac = (countParts()/viewerParams.parts.totalSize)*(1. - initialLoadFrac) + initialLoadFrac;
+	//some if statment like this seems necessary.  Otherwise the loading bar doesn't update (I suppose from too many calls)
+	if (loadfrac - viewerParams.loadfrac > 0.5 || loadfrac == 1){
+		viewerParams.loadfrac = loadfrac;
 		updateLoadingBar();
 	}
 	if ('options' in viewerParams.parts){
@@ -789,7 +790,7 @@ function compileData(data, p, callback){
 		}
 	}
 }
-function loadData(callback, prefix="", internalData=null){
+function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
 
 	viewerParams.parts = {};
 	viewerParams.parts.totalSize = 0.;
@@ -813,10 +814,10 @@ function loadData(callback, prefix="", internalData=null){
 		viewerParams.filenames[p].forEach( function(f, j) {
 			//console.log("f = ", f)
 			if (internalData){
-				console.log('==== checking', f)
+				console.log('==== compiling internal data', f)
 				Object.keys(internalData).forEach(function(key,k){
 					//if I was sent a prefix, this could be simplified
-					if (key.includes(f[0])) compileData(JSON.parse(internalData[key]), p, callback)
+					if (key.includes(f[0])) compileData(internalData[key], p, callback, initialLoadFrac=initialLoadFrac)
 				})
 			} else {
 				var readf = null;
@@ -828,11 +829,14 @@ function loadData(callback, prefix="", internalData=null){
 				//console.log(readf)
 				if (readf != null){
 					d3.json(prefix+readf,  function(foo) {
-						compileData(foo, p, callback);
+						compileData(foo, p, callback, initialLoadFrac=initialLoadFrac);
 					});
 				}
 			}
 		});
+		if (internalData && i == viewerParams.partsKeys.length - 1 && j == viewerParams.filenames[p].length - 1){
+			viewerParams.newInternalData = {};
+		}
 	});
 
  
@@ -1206,22 +1210,42 @@ function connectViewerSocket(){
 		socketParams.socket.on('input_data', function(msg) {
 			//only tested for local (GUI + viewer in one window)
 			console.log("======== have new data : ", Object.keys(msg));
-			var socketCheck = viewerParams.usingSocket;
-			var localCheck = viewerParams.local;
-			defineViewerParams();
-			viewerParams.pauseAnimation = true;
-			viewerParams.usingSocket = socketCheck; 
-			viewerParams.local = localCheck; 
 
-			var prefix = '';
-			Object.keys(msg).forEach(function(key,i){
-				if (key.includes('filenames.json')){
-					viewerParams.filenames = JSON.parse(msg[key]);
+
+			//first compile the data from multiple calls
+			if ('status' in msg){
+				if (msg.status == 'start') {
+					var socketCheck = viewerParams.usingSocket;
+					var localCheck = viewerParams.local;
+					defineViewerParams();
+					viewerParams.pauseAnimation = true;
+					viewerParams.usingSocket = socketCheck; 
+					viewerParams.local = localCheck; 
+
+					viewerParams.newInternalData.data = {};
+					viewerParams.newInternalData.len = msg.length;
+					viewerParams.newInternalData.count = 0;
 				}
-				if (i == Object.keys(msg).length-1){
-					loadData(initInputData, prefix="", internalData=msg)
+				if (msg.status == 'data') {
+					viewerParams.newInternalData.count += 1;
+					//I will update the loading bar here, but I'm not sure what fraction of the time this should take (using 0.8 for now)
+					viewerParams.loadfrac = (viewerParams.newInternalData.count/viewerParams.newInternalData.len)*0.8; 
+					updateLoadingBar();
+					Object.keys(msg).forEach(function(key,i){
+						if (key != 'status'){
+							viewerParams.newInternalData.data[key] = JSON.parse(msg[key]);
+							if (key.includes('filenames.json')){
+								viewerParams.filenames = JSON.parse(msg[key]);
+							}
+						}
+					})
 				}
-			})
+				if (msg.status == 'done'){
+					console.log('======== have all data', viewerParams.newInternalData, viewerParams.filenames);
+					loadData(initInputData, prefix='', internalData=viewerParams.newInternalData.data, initialLoadFrac=viewerParams.loadfrac)
+				}
+			}
+
 		});
 
 		socketParams.socket.on('update_streamer', function(msg) {

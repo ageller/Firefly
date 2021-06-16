@@ -147,21 +147,30 @@ def data_input():
 
 	print('======= showing loader')
 	socketio.emit('show_loader', None, namespace=namespace)
-	socketio.sleep(1) #to make sure that the above emit is executed
+	socketio.sleep(0.1) #to make sure that the above emit is executed
 
 	print('======= receiving data from server ...')
 	jsondata = request.get_json()
 	#this loop may not be necessary
-	sze = 0
-	while (sze != sys.getsizeof(jsondata)):
-		socketio.sleep(1)
-		sze = sys.getsizeof(jsondata)
-		print("======= size of data", sze)
+	# sze = 0
+	# while (sze != sys.getsizeof(jsondata)):
+	# 	socketio.sleep(0.1)
+	# 	sze = sys.getsizeof(jsondata)
+	# 	print("======= size of data", sze)
+	sze = sys.getsizeof(jsondata)
+	print("======= size of data", sze)
 
 	data = json.loads(jsondata)
 	print('======= sending data to viewer ...')#,data.keys())
-	socketio.emit('input_data', data, namespace=namespace)
-	socketio.sleep(1) #to make sure that the above emit is executed
+	socketio.emit('input_data', {'status':'start', 'length':len(data)}, namespace=namespace)
+	socketio.sleep(0.1) #to make sure that the above emit is executed
+	for fname in data:
+		print(fname, len(data[fname]))
+		output = {fname:data[fname], 'status':'data'}
+		socketio.emit('input_data', output, namespace=namespace)
+		socketio.sleep(0.1) #to make sure that the above emit is executed
+	socketio.emit('input_data', {'status':'done'}, namespace=namespace)
+	socketio.sleep(0.1) #to make sure that the above emit is executed
 
 	print('======= done')
 	return 'Done'

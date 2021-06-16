@@ -171,5 +171,8 @@ function defineViewerParams(){
 		this.streamerActive = false;
 		this.streamReady = true;
 		this.streamQuality = 1.0;
+
+		//for internal data
+		this.newInternalData = {};
 	};
 }
