@@ -1,0 +1,222 @@
+:root {
+	--logo-color1: #ff4f75;
+	--logo-color2: #3d0066;
+}
+
+body{ 
+	margin: 0; 
+	font-family: Sans-Serif;
+	overflow:hidden;
+	background-color:black;
+}
+
+canvas{
+	width: 100%; 
+	height: 100% 
+}
+
+#annotate_container{
+        position:absolute;
+        width:auto;
+        text-align:center;
+        color:black;
+        display:none;
+        margin-top:0px;
+        padding:3px;
+        transform: translate(-50%, 0%);
+        margin-left:50%;
+}
+
+#sleep{
+	position:absolute; 
+	top:0; 
+	left:0;
+	right:0;
+	bottom:0;
+	z-index:3;
+	margin:0;
+	padding:0;
+	color:white;
+	background-color:black;
+	font-family: Sans-Serif;
+	text-align: center;
+	font-size:20px;
+	font-size:10vw;
+	opacity: 0.8;
+	cursor: pointer;
+}
+
+#colorbar_container{
+    width:300;
+    height:30;
+    margin-top:10;
+    margin-bottom:10;
+    margin-left:15;
+    margin-right:15;
+    top:138;
+    left:188;
+}
+
+#UserMessage{
+	position:absolute; 
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    color:white;
+	text-align: center;
+	font-size:10px;
+	font-size:5vmin;
+	background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    opacity:0;
+    padding:15px;
+}
+#splash{
+	position:absolute; 
+	top:0; 
+	left:0;
+	right:0;
+	bottom:0;
+	z-index:3;
+	margin:0;
+	padding:0;
+	color:white;
+	background-color:black;
+	font-family: Sans-Serif;
+	text-align: center;
+	font-size:20px;
+	font-size:10vw;
+	opacity: 1;
+	cursor: pointer;
+}
+#splashdiv1 {
+	font-size:50px;
+	font-size:10vmin;
+	padding:0;
+	margin:0;
+	padding-top:5vmin;
+}
+#splashdiv2 {
+	font-size:35px;
+	font-size:6vmin;
+	padding:0;
+	margin:0;
+	padding-top:2vmin;
+}
+#splashdiv3 {
+	font-size:25px;
+	font-size:4vmin;
+	padding:0;
+	margin:0;
+	padding-top:2vmin;
+}
+#splashdiv4 {
+	font-size:10px;
+	font-size:2vmin;
+	text-align: left;
+	margin:0;
+	padding:0;
+	padding-top:5vmin;
+	padding-left: 50%;
+	margin-left:-20%;
+	width:40%;
+}
+#splashdiv5 {
+	font-size:10px;
+	font-size:2vmin;
+	margin:0;
+	padding:0;
+	padding-top:15vmin;
+}
+#splashdivLoader {
+	margin:0;
+	padding:0;
+	position:absolute;
+	left:0;
+}
+
+.hidden{
+	display:none;
+}
+
+/* https://www.w3schools.com/howto/tryit.asp?filename=tryhow_css_modal_bottom */
+/* The Modal (background) */
+.modal {
+	display:none;
+	position: fixed; /* Stay in place */
+	z-index: 1; /* Sit on top */
+	left: 0;
+	top: 0;
+	width: 100%; /* Full width */
+	height: 100%; /* Full height */
+	overflow: auto; /* Enable scroll if needed */
+	background-color: rgb(0,0,0); /* Fallback color */
+	background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+	-webkit-animation-name: fadeIn; /* Fade in the background */
+	-webkit-animation-duration: 0.4s;
+	animation-name: fadeIn;
+	animation-duration: 0.4s
+}
+
+/* Modal Content */
+.modal-content {
+	position: fixed;
+	margin:0;
+	padding:0;
+	left:0;
+	bottom: 0;
+	background-color: #fefefe;
+	height:220px;
+	width: 100%;
+	-webkit-animation-name: slideIn;
+	-webkit-animation-duration: 0.4s;
+	animation-name: slideIn;
+	animation-duration: 0.4s
+}
+.modal-header {
+	padding:20px;
+	height:40px;
+	font-size: 40px;
+	background-color: var(--logo-color2);
+	color: white;
+}
+
+.modal-body {
+	padding:20px;
+	height:40px;
+	background-color: var(--logo-color2);
+}
+
+.modal-footer {
+	padding:20px;
+	height:40px;
+	background-color: var(--logo-color2);
+	color: white;
+}
+
+/* Add Animation */
+@-webkit-keyframes slideIn {
+	from {bottom: -300px; opacity: 0} 
+	to {bottom: 0; opacity: 1}
+}
+
+@keyframes slideIn {
+	from {bottom: -300px; opacity: 0}
+	to {bottom: 0; opacity: 1}
+}
+
+@-webkit-keyframes fadeIn {
+	from {opacity: 0} 
+	to {opacity: 1}
+}
+
+@keyframes fadeIn {
+	from {opacity: 0} 
+	to {opacity: 1}
+}
+
+a{
+	color: var(--logo-color1);
+}
+a:visited {
+	color: var(--logo-color1);
+}
