@@ -1255,16 +1255,25 @@ function connectViewerSocket(){
 }
 
 function initInputData(){
-	makeViewer();
-	WebGLStart();
+	console.log('======== remaking gui and viewer')
+	sendToGUI([{'defineGUIParams':null}]);
 
-	var forGUI = [];
-	forGUI.push({'defineGUIParams':null});
-	forGUI.push({'setGUIParamByKey':[viewerParams.usingSocket, "usingSocket"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.local, "local"]});
-	forGUI.push({'makeUI':viewerParams.local});
-	sendToGUI(forGUI);
+	//I think I need to wait a moment because sometimes this doesn't fire (?)
+	setTimeout(function(){
+		makeViewer();
+		WebGLStart();
+	}, 500);
+
+	setTimeout(function(){
+		var forGUI = [];
+		forGUI.push({'setGUIParamByKey':[viewerParams.usingSocket, "usingSocket"]});
+		forGUI.push({'setGUIParamByKey':[viewerParams.local, "local"]});
+		forGUI.push({'makeUI':viewerParams.local});
+		sendToGUI(forGUI);
+	}, 1000);
+
 }
+
 //function to send events to the GUI
 function sendToGUI(GUIInput){
 	if (viewerParams.usingSocket){

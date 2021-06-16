@@ -82,7 +82,7 @@ function hideUI(x){
 			UIc.style.borderStyle = 'solid';
 			UIc.style.marginLeft = '0';
 			UIc.style.marginTop = '0';
-			UIc.style.width = '300px';
+			UIc.style.width = GUIParams.containerWidth + 'px';
 			//UIp.style('width', '280px');
 			UIt.style.opacity = 1;
 		} else {
@@ -540,6 +540,24 @@ function createUI(){
 
 	var use_color_id = null
 
+	//first get the maximum width of the particle type labels
+	var longestPartLabel = '';
+	var longestPartLabelLen = 0;
+	GUIParams.partsKeys.forEach(function(p,i){
+		if (p.length > longestPartLabel.length) longestPartLabel = p;
+		if (i == GUIParams.partsKeys.length - 1){
+			var elem = d3.select('body').append('div')
+				.attr('class','pLabelDivCHECK')
+				.text(longestPartLabel)
+			longestPartLabelLen = elem.node().clientWidth;
+			elem.remove();
+		}
+	});
+	longestPartLabelLen = Math.max(50, longestPartLabelLen); //50 is our default length
+	if (longestPartLabelLen > 50){
+		GUIParams.containerWidth += (longestPartLabelLen - 50);
+	}
+
 //change the hamburger to the X to start
 	window.addEventListener('mouseup',function(){GUIParams.movingUI = false;});
 
@@ -548,7 +566,7 @@ function createUI(){
 	UIcontainer.html(""); //start fresh
 	d3.select('#colorbar_container').classed('hidden', true);
 
-	UIcontainer.attr('style','position:absolute; top:10px; left:10px; width:300px');
+	UIcontainer.attr('style','position:absolute; top:10px; left:10px; width:'+GUIParams.containerWidth+'px');
 
 	var UIt = UIcontainer.append('div')
 		.attr('class','UItopbar')
@@ -556,7 +574,7 @@ function createUI(){
 		.attr('onmouseup','hideUI(this);')
 		.attr('onmousedown','dragElement(this, event);');
 
-	UIt.append('table');
+	//UIt.append('table');
 	var UIr1 = UIt.append('tr');
 	var UIc1 = UIr1.append('td')
 		.style('padding-left','5px')
@@ -593,7 +611,8 @@ function createUI(){
 	//generic dropdown for "data" controls"
 	var m1 = UI.append('div')
 		.attr('id','dataControlsDiv')
-		.attr('class','particleDiv');
+		.attr('class','particleDiv')
+		.style('width', (GUIParams.containerWidth - 20) + 'px')
 	m1.append('div')
 		.attr('class','pLabelDiv')
 		.style('width', '215px')
@@ -602,6 +621,7 @@ function createUI(){
 		.attr('class','dropbtn')
 		.attr('id','dataControlsDropbtn')
 		.attr('onclick','showFunction(this);')
+		.style('left',(GUIParams.containerWidth - 40) + 'px')
 		.html('&#x25BC');
 	var m2 = m1.append('div')
 		.attr('class','dropdown-content')
@@ -739,7 +759,8 @@ function createUI(){
 	//camera
 	var c1 = UI.append('div')
 		.attr('id','cameraControlsDiv')
-		.attr('class','particleDiv');
+		.attr('class','particleDiv')
+		.style('width', (GUIParams.containerWidth - 20) + 'px')
 	c1.append('div')
 		.attr('class','pLabelDiv')
 		.style('width', '215px')
@@ -748,6 +769,7 @@ function createUI(){
 		.attr('class','dropbtn')
 		.attr('id','cameraControlsDropbtn')
 		.attr('onclick','showFunction(this);')
+		.style('left',(GUIParams.containerWidth - 40) + 'px')
 		.html('&#x25BC');
 	var c2 = c1.append('div')
 		.attr('class','dropdown-content')
@@ -1008,15 +1030,18 @@ function createUI(){
 		.append('div')
 		.attr('class', function (p) { return "particleDiv "+p+"Div" }) //+ dropdown
 		.attr('id', function (p) { return p+"Div" }) //+ dropdown
+		.style('width', (GUIParams.containerWidth - 20) + 'px')
 
 
 	var showCmap = false;
+
 	GUIParams.partsKeys.forEach(function(p,i){
 
 		var controls = d3.selectAll('div.'+p+'Div');
 
 		controls.append('div')
 			.attr('class','pLabelDiv')
+			.style('width',longestPartLabelLen)
 			.text(function (p) { return p})
 			
 		var onoff = controls.append('label')
@@ -1041,12 +1066,14 @@ function createUI(){
 
 		controls.append('div')
 			.attr('id',p+'_PSlider')
-			.attr('class','PSliderClass');
+			.attr('class','PSliderClass')
+			.style('left',(GUIParams.containerWidth - 200) + 'px');
 
 		controls.append('input')
 			.attr('id',p+'_PMaxT')
 			.attr('class', 'PMaxTClass')
-			.attr('type','text');
+			.attr('type','text')
+			.style('left',(GUIParams.containerWidth - 90) + 'px');
 
 		controls.append('input')
 			.attr('id',p+'ColorPicker');
@@ -1056,6 +1083,7 @@ function createUI(){
 				.attr('id', p+'Dropbtn')
 				.attr('class', 'dropbtn')
 				.attr('onclick','showFunction(this)')
+				.style('left',(GUIParams.containerWidth - 40) + 'px')
 				.html('&#x25BC');
 
 			dropdown = controls.append('div')
@@ -1357,6 +1385,16 @@ function createUI(){
 
 	});
 
+// some resizing
+	d3.selectAll('.sp-replacer').style('left',(GUIParams.containerWidth - 60) + 'px');
+	
+	if (GUIParams.containerWidth > 300) {
+		//could be nice to center these, but there are lots of built in positions for the sliders and input boxes.  Not worth it
+		var pd = 0.//(GUIParams.containerWidth - 300)/2.;
+		d3.selectAll('.dropdown-content')
+			.style('width',(GUIParams.containerWidth - 10 - pd) + 'px')
+			//.style('padding-left',pd + 'px')
+	}
 // create all the noUISliders
 	createPsizeSliders();
 	createNpartsSliders();

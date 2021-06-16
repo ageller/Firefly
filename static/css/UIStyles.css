@@ -141,6 +141,13 @@
 	width:50px;
 	padding:2px;
 }
+.pLabelDivCHECK {
+	display: inline-block;
+	text-align: left;
+	vertical-align:top;
+	line-height: normal;
+	padding:2px;
+}
 .pTextInput{
 	display: inline-block;
 	text-align: left;

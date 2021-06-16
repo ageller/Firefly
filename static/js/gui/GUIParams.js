@@ -63,6 +63,9 @@ function defineGUIParams(){
 		this.dir = {};
 
 
+		//for setting the width
+		this.containerWidth = 300; //pixels
+		
 		//list of all colormaps
 		this.colormapList = ['viridis', 'plasma', 'inferno', 'magma', 
 		'Greys', 'Purples', 'Blues', 'Greens', 'Oranges',
