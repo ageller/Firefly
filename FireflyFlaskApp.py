@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 from flask import Flask, render_template, request, session
 from flask_socketio import SocketIO, emit
 
@@ -5,10 +7,19 @@ from threading import Lock
 import sys
 import numpy as np
 
+import subprocess,signal
+
 import json
 
 import os
-sys.path.insert(0, os.path.join(os.getcwd(), 'dataReader'))
+
+## add dataReader to the python path so that
+##  firefly_api is discoverable (ABG TODO: this should be possible to do w/ setup.py)
+sys.path.insert(0, 
+	os.path.join(
+		os.path.dirname(__file__),
+		'dataReader'))
+
 from firefly_api.reader import SimpleReader
 
 #in principle, we could read in the data here...
@@ -211,10 +222,24 @@ def streamer():
 def startFireflyServer(port=5000, frames_per_second=30, decimation_factor=1):
 	global fps, dec
 
-	fps = fps
-	dec = dec
+	fps = frames_per_second
+	dec = decimation_factor
 
 	socketio.run(app, debug=True, host='0.0.0.0', port=port)
+
+def spawnFireflyServer(*args):
+	## args must be positional, they are 1) port 2) fps 3) decimation_factor
+	return subprocess.Popen(["python", __file__]+list(args)) 
+
+def killAllFireflyServers(pid=None):
+	if pid is None:
+		## kill indiscriminately
+		subp = os.system("ps aux | grep 'FireflyFlaskApp.py' | awk '{print $2}' | xargs kill")
+	else:
+		## kill only the pid we were passed, ideally from the subprocess.Popen().pid but
+		##  you know I don't judge.  
+		subp = os.kill(pid,signal.SIGINT)
+	return subp
 
 if __name__ == "__main__":
 	#app.run(host='0.0.0.0')
