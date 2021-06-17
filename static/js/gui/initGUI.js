@@ -6,7 +6,6 @@ function makeUI(local=false){
 		initGUIScene();
 		if (!GUIParams.animating) animateGUI();
 	}
-
 	
 	console.log("waiting for GUI init...")
 	clearInterval(GUIParams.waitForInit);
@@ -67,6 +66,10 @@ function connectGUISocket(){
 			setParams(msg); 
 		});
 
+		socketParams.socket.on('reload_GUI', function(msg) {
+			console.log('!!! reloading GUI');
+			location.reload();
+		});
 	});
 }
 

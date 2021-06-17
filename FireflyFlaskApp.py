@@ -54,6 +54,9 @@ fps = 30
 #decimation
 dec = 1
 
+#check if the GUI is separated to see if we need to send a reload signal (currently not used)
+GUIseparated = False
+
 #this will pass to the viewer every "seconds" 
 def background_thread():
 	"""Example of how to send server generated events to clients."""
@@ -76,7 +79,6 @@ def connection_test(message):
 	print('======= connected', message)
 	session['receive_count'] = session.get('receive_count', 0) + 1
 	emit('connection_response',{'data': message['data'], 'count': session['receive_count']}, namespace=namespace)
-
 
 
 ######for viewer
@@ -111,6 +113,11 @@ def from_gui():
 	with thread_lock:
 		if thread is None:
 			thread = socketio.start_background_task(target=background_thread)
+
+@socketio.on('separate_GUI', namespace=namespace)
+def separate_GUI():
+	global GUIseparated
+	GUIseparated = True
 
 #######for Streamer
 #passing the rendered texture
@@ -219,13 +226,22 @@ def streamer():
 	return render_template("streamer.html", input=json.dumps({'fps':fps}))
 
 
+# Helper functions to start/stop the server
 def startFireflyServer(port=5000, frames_per_second=30, decimation_factor=1):
 	global fps, dec
 
 	fps = frames_per_second
 	dec = decimation_factor
 
-	socketio.run(app, debug=True, host='0.0.0.0', port=port)
+	socketio.run(app, host='0.0.0.0', port=port, use_reloader=True)
+
+def reload():
+	#currently not used
+	if (GUIseparated):
+		print('======= reloading GUI')
+		socketio.emit('reload_GUI', None, namespace=namespace) 
+	print('======= reloading viewer')
+	socketio.emit('reload_viewer', None, namespace=namespace)
 
 def spawnFireflyServer(*args):
 	## args must be positional, they are 1) port 2) fps 3) decimation_factor

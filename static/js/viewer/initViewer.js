@@ -1259,7 +1259,11 @@ function connectViewerSocket(){
 
 		socketParams.socket.on('update_streamer', function(msg) {
 			viewerParams.streamReady = true;
-		})
+		});
+		socketParams.socket.on('reload_viewer', function(msg) {
+			console.log('!!! reloading viewer');
+			location.reload();
+		});
 	});
 }
 
