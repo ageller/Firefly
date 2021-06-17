@@ -229,7 +229,7 @@ def startFireflyServer(port=5000, frames_per_second=30, decimation_factor=1):
 
 def spawnFireflyServer(*args):
 	## args must be positional, they are 1) port 2) fps 3) decimation_factor
-	return subprocess.Popen(["python", __file__]+list(args)) 
+	return subprocess.Popen(["python", __file__]+np.array(args).astype('str').tolist())
 
 def killAllFireflyServers(pid=None):
 	if pid is None:
