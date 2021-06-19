@@ -33,8 +33,8 @@ function connectStreamerSocket(){
 				showSplash(false);
 				splashShowing = false;
 			}
-			//console.log('have texture')
-			img.src = msg;
+			var b64 = arrayBufferToBase64(msg);
+			img.src = 'data:image/jpg;base64,' + b64;  
 			if (Math.abs(dtTarget - imgdt) > 10){
 				var sign = Math.sign(dtTarget - imgdt);
 				quality += sign*0.05;
@@ -47,7 +47,16 @@ function connectStreamerSocket(){
 		});
 	});
 }
-
+function arrayBufferToBase64( buffer ) {
+//https://stackoverflow.com/questions/38432611/converting-arraybuffer-to-string-maximum-call-stack-size-exceeded
+	var binary = '';
+	var bytes = new Uint8Array( buffer );
+	var len = bytes.byteLength;
+	for (var i = 0; i < len; i++) {
+		binary += String.fromCharCode( bytes[ i ] );
+	}
+	return window.btoa( binary );
+}
 
 //runs on load
 defineSocketParams();

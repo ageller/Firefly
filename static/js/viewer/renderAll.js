@@ -276,8 +276,17 @@ function render() {
 		if (viewerParams.streamReady){
 			//https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
 			viewerParams.renderer.domElement.toBlob(function(blob) {
-				url = URL.createObjectURL(blob);
-				socketParams.socket.emit('streamer_input', url);
+				var url = URL.createObjectURL(blob);
+
+				var xhr = new XMLHttpRequest();
+				xhr.open('POST', '/stream_input', true);
+
+				var formdata = new FormData();
+				formdata.append("image", blob);
+				xhr.send(formdata);
+
+				//this is giving errors when not on the same localhost
+				//socketParams.socket.emit('streamer_input', blob);
 			},'image/jpeg', viewerParams.streamQuality);
 			viewerParams.streamReady = false;
 		}
