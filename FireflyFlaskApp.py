@@ -13,8 +13,6 @@ import json
 
 import os
 
-from PIL import Image
-
 ## add dataReader to the python path so that
 ##  firefly_api is discoverable (ABG TODO: this should be possible to do w/ setup.py)
 sys.path.insert(0, 
