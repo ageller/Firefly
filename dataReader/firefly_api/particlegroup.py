@@ -10,7 +10,7 @@ class ParticleGroup(object):
     """
     This is a class for organizing data that you want to interface with a 
     Reader instance. This class provides rudimentary data validation and 
-    options defaults specific to this data class. If you do not intend
+    settings defaults specific to this data class. If you do not intend
     to attach it to a Reader instance using that reader's addParticleGroup
     method please be careful!!
     """
@@ -57,7 +57,7 @@ class ParticleGroup(object):
         tracked_colormap_flags = None,
         decimation_factor = 1,
         filenames_and_nparts = None,
-        linked_options=None,
+        linked_settings=None,
         doSPHrad=False,
         **option_kwargs):
         """
@@ -91,9 +91,9 @@ class ParticleGroup(object):
         `doSPHrad=False` - flag to vary the opacity across a particle by the SPH cubic spline. Should
             also provide SmoothingLength as a tracked_array. 
 
-        `**option_kwargs` - allows you to set default options like the color, particle sizes,
+        `**option_kwargs` - allows you to set default settings like the color, particle sizes,
             etc... for this particle group at the creation of the instance. You can see available
-            options by looking at `list(particleGroup.options_default.keys())`.
+            settings by looking at `list(particleGroup.settings_default.keys())`.
         """
 
         ## handle default values for iterables
@@ -172,8 +172,8 @@ class ParticleGroup(object):
         self.radiusFunction = None
         self.weightFunction = None
 
-        ## setup the options for this particleGroup 
-        self.options_default = {
+        ## setup the settings for this particleGroup 
+        self.settings_default = {
             'UIparticle':True,
             'UIdropdown':True,
             'UIcolorPicker':True,
@@ -196,30 +196,30 @@ class ParticleGroup(object):
         ##  "displayed" particles and the available boundaries for the limits)
         for tracked_name,tracked_filter_flag in zip(self.tracked_names,self.tracked_filter_flags):
             if tracked_filter_flag:
-                self.options_default['filterVals'][tracked_name] = None
-                self.options_default['filterLims'][tracked_name] = None
+                self.settings_default['filterVals'][tracked_name] = None
+                self.settings_default['filterLims'][tracked_name] = None
 
         ## setup default values for the initial color limits (vals/lims represent the interactive
         ##  "displayed" particles and the available boundaries for the limits)
         for tracked_name,tracked_colormap_flag in zip(self.tracked_names,self.tracked_colormap_flags):
             if tracked_filter_flag:
-                self.options_default['colormapVals'][tracked_name] = None
-                self.options_default['colormapLims'][tracked_name] = None
+                self.settings_default['colormapVals'][tracked_name] = None
+                self.settings_default['colormapLims'][tracked_name] = None
         
         ## now let the user overwrite the defaults if they'd like (e.g. the color, likely
         ##  the most popular thing users will like to do
         for option_kwarg in option_kwargs:
-            if option_kwarg in self.options_default.keys():
+            if option_kwarg in self.settings_default.keys():
                 if option_kwarg == 'color':
                     try:
                         assert len(option_kwargs[option_kwarg]) == 4
                     except AssertionError:
                         raise ValueError("Make sure you pass the color as an RGBA array")
                         
-                self.options_default[option_kwarg] = option_kwargs[option_kwarg]
+                self.settings_default[option_kwarg] = option_kwargs[option_kwarg]
             else:
                 raise KeyError("Invalid option kwarg")
-        self.linked_options = linked_options
+        self.linked_settings = linked_settings
         self.doSPHrad = doSPHrad
         
     def trackArray(self,name,arr,filter_flag=1,colormap_flag=1):
@@ -245,20 +245,20 @@ class ParticleGroup(object):
 
         ## and add this to the filter limits arrays, see __init__ above
         if filter_flag: 
-            self.options_default['filterVals'][name] = None
-            self.options_default['filterLims'][name] = None
+            self.settings_default['filterVals'][name] = None
+            self.settings_default['filterLims'][name] = None
 
         ## and add this to the color limits arrays, see __init__ above
         if colormap_flag: 
-            self.options_default['colormapVals'][name] = None
-            self.options_default['colormapLims'][name] = None
+            self.settings_default['colormapVals'][name] = None
+            self.settings_default['colormapLims'][name] = None
 
-        if self.linked_options is not None:
-            self.linked_options['filterVals'][self.UIname][name] = None
-            self.linked_options['filterLims'][self.UIname][name] = None
+        if self.linked_settings is not None:
+            self.linked_settings['filterVals'][self.UIname][name] = None
+            self.linked_settings['filterLims'][self.UIname][name] = None
 
-            self.linked_options['colormapVals'][self.UIname][name] = None
-            self.linked_options['colormapLims'][self.UIname][name] = None
+            self.linked_settings['colormapVals'][self.UIname][name] = None
+            self.linked_settings['colormapLims'][self.UIname][name] = None
 
     def getDecimationIndexArray(self):
         """

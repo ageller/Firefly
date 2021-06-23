@@ -54,11 +54,11 @@ class TweenParams(object):
         """ 
         Adds a new keyframe to an existing TweenParams object. 
         Input:  
-            coords - array of coordinates, 3 options for type of input:
+            coords - array of coordinates, 3 settings for type of input:
                 * [x,y,z] single keyframe
                 * [[x1,y1,z1],[x2,y2,z2],...] multiple keyframes
                 * [x1,y1,z1,x2,y2,z2,...] multiple flattened keyframes
-            durations - duration to approach keyframe, 3 options for type of input:
+            durations - duration to approach keyframe, 3 settings for type of input:
                 * d single duration
                 * [d] single duration in list
                 * [d1,d2,...] multiple durations (corresponding to number of keyframes or
@@ -109,7 +109,7 @@ class TweenParams(object):
         if filename is None:
             filename = 'tweenParams.json'
         else:
-            ##filename = self.options_filename if filename is None else filename
+            ##filename = self.settings_filename if filename is None else filename
             raise NotImplementedError("Tween params must be named TweenParams.json")
 
         tween_params_dict = self.outputToDict()

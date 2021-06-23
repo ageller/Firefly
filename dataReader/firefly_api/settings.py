@@ -7,46 +7,46 @@ import os
 from firefly_api.errors import FireflyError,FireflyWarning,warnings
 from firefly_api.json_utils import write_to_json,load_from_json
 
-class Options(object):
+class Settings(object):
     """
-    This is a class for organizing the various options you can pass to 
+    This is a class for organizing the various settings you can pass to 
     Firefly to customize how the app is initialized and what features 
     the user has access to. It is easiest to use when instances of 
-    Options are passed to a Reader instance when it is initialized.
+    Settings are passed to a Reader instance when it is initialized.
     """
     def __getitem__(self,key):
         """
         Implementation of builtin function  __getitem__ 
         """
-        attr = self.findWhichOptionsDict(key)
+        attr = self.findWhichSettingsDict(key)
         return getattr(self,attr)[key]
         
     def __setitem__(self,key,value):
         """
         Implementation of builtin function __setitem__ 
         """
-        attr = self.findWhichOptionsDict(key)
+        attr = self.findWhichSettingsDict(key)
         ## set that dictonary's value
         getattr(self,attr)[key]=value
 
-    def findWhichOptionsDict(self,key):
+    def findWhichSettingsDict(self,key):
         """
         Find which sub-dictionary a key belongs to
         """
         for attr in self.__dict__.keys():
-            if '_options' in attr:
+            if '_settings' in attr:
                 if key in getattr(self,attr).keys():
                     return attr
         raise KeyError("Invalid option key %s"%key)
         
     def listKeys(self,values=True):
         """ 
-        Pretty-prints the options according to sub-dictionary.
+        Pretty-prints the settings according to sub-dictionary.
         Input:  
-            values=True - flag to print what the options are set to, in addition to the key
+            values=True - flag to print what the settings are set to, in addition to the key
         """
         for attr in self.__dict__.keys():
-            if '_options' in attr:
+            if '_settings' in attr:
                 print('--',attr,'--')
                 if values:
                     for key in list(getattr(self,attr).keys()):
@@ -56,22 +56,22 @@ class Options(object):
 
     def keys(self):
         """ 
-        Returns a list of keys for all the different options sub-dictionaries
+        Returns a list of keys for all the different settings sub-dictionaries
         """
         this_keys = [] 
         for attr in self.__dict__.keys():
-            if '_options' in attr:
+            if '_settings' in attr:
                 this_keys += list(getattr(self,attr).keys())
         return this_keys
 
     def __init__(self,
-        options_filename = 'Options.json',
+        settings_filename = 'Settings.json',
         **kwargs):
         """
         Input:
-            options_filename='Options.json' - what to call the options file if you output it
+            settings_filename='Settings.json' - what to call the settings file if you output it
                 to json
-            **kwargs - options keyword arguments, should be among: 
+            **kwargs - settings keyword arguments, should be among: 
                 'stereoSep','stereo','camera','center','maxVrange','startFly','decimate','friction',
                 'cameraRotation','filterVals','filterLims','colormapVals','colormapLims',
                 'UIsnapshot','UIfullscreen','UI','UIloadNewData',
@@ -80,18 +80,18 @@ class Options(object):
         """
 
         ## where should this be saved if it's outputToJSON
-        self.options_filename = options_filename
+        self.settings_filename = settings_filename
 
-        self.window_options = {
+        self.window_settings = {
             'title':'Firefly', #set the title of the webpage
             ########################
             #this should not be modified
-            'loaded':True, #used in the web app to check if the options have been read in
+            'loaded':True, #used in the web app to check if the settings have been read in
             'annotation':None # adds some text at the very top
         }
 
         ## flags for enabling different elements of the UI
-        self.UI_options = {
+        self.UI_settings = {
             ########################
             #these settings are to turn on/off different bits of the user interface
             'UI':True, #do you want to show the UI?
@@ -106,7 +106,7 @@ class Options(object):
         }
 
         ## flags that control how the UI for each particle group looks like
-        self.particle_UI_options = {
+        self.particle_UI_settings = {
             'UIparticle':dict(), #do you want to show the particles 
             #    in the user interface (default = True). This is a dict 
             #    with keys of the particle swapnames (as defined in self.names),
@@ -120,8 +120,8 @@ class Options(object):
             #    particle UInames, and is boolean.
         }
             
-        ## options that will define the initial camera view
-        self.startup_options = {
+        ## settings that will define the initial camera view
+        self.startup_settings = {
             #these settings affect how the data are displayed
             'center':np.zeros(3), #do you want to define the initial camera center 
             #    (if not, the WebGL app will calculate the center as the mean 
@@ -143,11 +143,11 @@ class Options(object):
             'decimate':None, #set the initial decimation (e.g, 
             #    you could load in all the data by setting self.decimate to 
             #    1 above, but only display some fraction by setting 
-            #    self.options.decimate > 1 here).  This is a single value (not a dict)
+            #    self.settings.decimate > 1 here).  This is a single value (not a dict)
         }
         
-        ## options that will define the initial values of the particle UI panes
-        self.particle_startup_options = {
+        ## settings that will define the initial values of the particle UI panes
+        self.particle_startup_settings = {
             'plotNmax':dict(), #maximum initial number of particles to plot 
             #    (can be used to decimate on a per particle basis).  This is 
             #    a dict with keys of the particle swapnames (as defined in self.names)
@@ -168,9 +168,9 @@ class Options(object):
             #    boolean, default is true.
         }
         
-        ## options that will define the initial values of the /filters/ in the particle UI panes
+        ## settings that will define the initial values of the /filters/ in the particle UI panes
         ##  and consequently what particles are filtered at startup.
-        self.particle_filter_options = {
+        self.particle_filter_settings = {
             'filterVals':dict(), #initial filtering selection. This is a dict 
             #    with initial keys of the particle UInames, 
             #    then for each filter the [min, max] range 
@@ -181,9 +181,9 @@ class Options(object):
             #    (e.g., 'filter':{'Gas':{'log10Density':[0,1],'magVelocities':[20, 100]}} )
         }
 
-        ## options that will define the initial values of the /colormap/ in the particle UI panes
+        ## settings that will define the initial values of the /colormap/ in the particle UI panes
         ##  and consequently what particles are colored at startup.
-        self.particle_colormap_options = {
+        self.particle_colormap_settings = {
             'colormapVals':dict(), #initial coloring selection. This is a dict 
             #    with initial keys of the particle UInames, 
             #    then for each color the [min, max] range 
@@ -202,38 +202,38 @@ class Options(object):
             # (e.g. 'showColormap':{'Gas':False, 'Stars':False}
         }
 
-    def addToOptions(
+    def addToSettings(
         self,
         particleGroup):
         """
-        Adds a particle group's options_default to the options that require 
+        Adds a particle group's settings_default to the settings that require 
         dictionaries for each particle group.
         Input:
             particleGroup - the ParticleGroup instance that you want to add to this
-                Options instance.
+                Settings instance.
         """
         for key in [
             'UIparticle','UIdropdown','UIcolorPicker',
             'color','sizeMult','showParts',
             'filterVals','filterLims','colormapVals','colormapLims','showVel','plotNmax','velType','colormap','colormapVariable','showColormap']:
-            self[key][particleGroup.UIname]=particleGroup.options_default[key]
+            self[key][particleGroup.UIname]=particleGroup.settings_default[key]
         
-        ## and link this particle group to this Options instance, for better or worse.
-        particleGroup.linked_options = self
+        ## and link this particle group to this Settings instance, for better or worse.
+        particleGroup.linked_settings = self
 
     def outputToDict(
         self):
         """
-        Concatenates all the options dicts into a single dictionary.
+        Concatenates all the settings dicts into a single dictionary.
         Input:
             None
         """
 
-        all_options_dict = {}
+        all_settings_dict = {}
         for attr in self.__dict__.keys():
-            if '_options' in attr:
-                all_options_dict.update(getattr(self,attr))
-        return all_options_dict
+            if '_settings' in attr:
+                all_settings_dict.update(getattr(self,attr))
+        return all_settings_dict
 
     def outputToJSON(
         self,
@@ -243,44 +243,44 @@ class Options(object):
         loud=1,
         write_jsons_to_disk=True):
         """
-        Saves the current options to a JSON file.
+        Saves the current settings to a JSON file.
         Input:
             JSONdir - path for this file to get saved to
-            prefix='' - string to prepend to self.options_filename
+            prefix='' - string to prepend to self.settings_filename
             loud=1 - flag for whether warnings should be shown
         """
-        filename = self.options_filename if filename is None else filename
-        all_options_dict = self.outputToDict()
+        filename = self.settings_filename if filename is None else filename
+        all_settings_dict = self.outputToDict()
 
 
         filename = os.path.join(JSONdir,prefix+filename)
 
         if loud:
             warnings.warn(FireflyWarning(
-                "You will need to add this options filename to"+
+                "You will need to add this settings filename to"+
                 " filenames.json if this was not called by a Reader instance."))
 
         ## convert dictionary to a JSON
         return filename,write_to_json(
-            all_options_dict,
+            all_settings_dict,
             filename if write_jsons_to_disk else None) ## None -> string
 
     def loadFromJSON(self,
         filename,loud=1):
         """
-        Replaces the current options with those stored in a JSON file.
+        Replaces the current settings with those stored in a JSON file.
         Input:
-            loud=1 - Flag to print the differences from your current options file
+            loud=1 - Flag to print the differences from your current settings file
         """
 
         if os.path.isfile(filename):
-            options_dict = load_from_json(filename)
+            settings_dict = load_from_json(filename)
         else:
-            raise IOError("Options file: %s doesn't exist."%filename) 
+            raise IOError("Settings file: %s doesn't exist."%filename) 
 
-        for key in options_dict.keys():
+        for key in settings_dict.keys():
             if loud:
-                if np.all(options_dict[key] != self[key]):
+                if np.all(settings_dict[key] != self[key]):
                     print("replacing",key)
-                    print(self[key],'-->',options_dict[key])
-            self[key]=options_dict[key]
+                    print(self[key],'-->',settings_dict[key])
+            self[key]=settings_dict[key]

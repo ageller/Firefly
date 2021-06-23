@@ -715,7 +715,7 @@ function createUI(){
 			sendToViewer([{'savePreset':null}]);
 		})
 		.append('span')
-			.text('Save Preset');
+			.text('Save Settings');
 
 	//reset to default button
 	m2.append('div').attr('id','resetDiv')
@@ -727,7 +727,7 @@ function createUI(){
 			sendToViewer([{'resetToOptions':null}]);
 		})
 		.append('span')
-			.text('Reset to Default');
+			.text('Default Settings');
 	//reset to preset button
 	d3.select('#resetDiv')
 		.append('button')
@@ -740,7 +740,7 @@ function createUI(){
 			loadPreset();
 		})
 		.append('span')
-			.text('Reset to Preset');
+			.text('Load Settings');
 
 	//load new data button
 	m2.append('div').attr('id','loadNewDataDiv')

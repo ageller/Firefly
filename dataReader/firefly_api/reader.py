@@ -6,7 +6,7 @@ import pandas as pd
 import requests
 import numpy as np
 
-from firefly_api.options import Options
+from firefly_api.settings import Settings
 from firefly_api.tween import TweenParams
 from firefly_api.particlegroup import ParticleGroup
 from firefly_api.errors import FireflyError,FireflyWarning,FireflyMessage,warnings
@@ -14,7 +14,7 @@ from firefly_api.json_utils import write_to_json,load_from_json
 
 class Reader(object):
     """
-    This class provides a framework to unify the Options and ParticleGroup classes
+    This class provides a framework to unify the Settings and ParticleGroup classes
     to make sure that the user can easily produce Firefly compatible files. It also 
     provides some rudimentary data validation. You should use this Reader as a base
     for any custom readers you may build (and should use inheritance, as demonstrated
@@ -22,7 +22,7 @@ class Reader(object):
     """
     def __init__(self,
         JSONdir = None, ## abs path, must be a sub-directory of Firefly/data
-        options = None,
+        settings = None,
         write_startup = 'append',# True -> write | False -> leave alone | "append" -> adds to existing file
         max_npart_per_file = 10**4,
         prefix = 'Data',
@@ -34,10 +34,10 @@ class Reader(object):
             contain your JSON files, if you are not running python from
             `/path/to/Firefly/data` it should be the absolute path.
 
-        `options=None` - An `Options` instance, if you have created one you can
-            pass it here. `None` will generate default options. `reader.options.listKeys()`
-            will give you a list of the different available options you can set
-            using `reader.options["option_name"] = option_value`. 
+        `settings=None` - An `Settings` instance, if you have created one you can
+            pass it here. `None` will generate default settings. `reader.settings.listKeys()`
+            will give you a list of the different available settings you can set
+            using `reader.settings["option_name"] = option_value`. 
 
         `write_startup='append'` - This is a flag for whether `startup.json` file
             should be written. It has 3 values: `True` -> writes a new `startup.json`
@@ -79,16 +79,16 @@ class Reader(object):
                 self.DATA_dir,
                 prefix)
 
-        if options is not None:
+        if settings is not None:
             try:
-                ## fun fact, assert isinstance(options,Options) won't work with jupyter notebooks
+                ## fun fact, assert isinstance(settings,Settings) won't work with jupyter notebooks
                 ##  that use %load_ext autoreload
-                assert options.__class__.__name__ == 'Options'
+                assert settings.__class__.__name__ == 'Settings'
             except AssertionError:
-                raise FireflyError("Make sure you use an Options instance to specify Firefly settings.")
+                raise FireflyError("Make sure you use an Settings instance to specify Firefly settings.")
         else:
             ## we'll use the default ones then
-            options = Options()
+            settings = Settings()
 
         if tweenParams is not None:
             try:
@@ -98,7 +98,7 @@ class Reader(object):
 
         self.tweenParams = tweenParams
 
-        self.options = options
+        self.settings = settings
         ## absolute path of where to place all the data files in, must be a 
         ##  sub-directory of Firefly/data for Firefly to be able to find it.
 
@@ -153,7 +153,7 @@ class Reader(object):
     def addParticleGroup(self,particleGroup):
         """
         Adds a particle group to the Reader instance and adds that particle group's
-        options to the attached Options instance.
+        settings to the attached Settings instance.
         Input:
             particleGroup - the particle group in question that you would like to add
         """
@@ -163,8 +163,8 @@ class Reader(object):
             self.particleGroups,
             [particleGroup],axis=0)
 
-        ## add this particle group to the reader's options file
-        self.options.addToOptions(particleGroup)
+        ## add this particle group to the reader's settings file
+        self.settings.addToSettings(particleGroup)
 
         return self.particleGroups
     
@@ -174,7 +174,7 @@ class Reader(object):
         write_jsons_to_disk=True):
         """
         Creates all the necessary JSON files to run Firefly, making sure they are
-        properly linked and cross-reference correctly, using the attached Options
+        properly linked and cross-reference correctly, using the attached Settings
         instance's and particleGroups' outputToJSON() methods.
         Input:
             loud=0 - flag for whether warnings within each outputToJSON should be shown
@@ -217,15 +217,15 @@ class Reader(object):
 
             filenamesDict[particleGroup.UIname]=list(particleGroup.filenames_and_nparts)
 
-        ## output the options.json file
-        JSON_array +=[self.options.outputToJSON(
+        ## output the settings.json file
+        JSON_array +=[self.settings.outputToJSON(
             self.JSONdir,
             prefix=self.prefix,
             loud=loud,
             write_jsons_to_disk=write_jsons_to_disk)]
 
         ## format and output the filenames.json file
-        filenamesDict['options'] = [(os.path.join(self.path,self.prefix+self.options.options_filename),0)]
+        filenamesDict['options'] = [(os.path.join(self.path,self.prefix+self.settings.settings_filename),0)]
 
         filename=os.path.join(self.JSONdir,'filenames.json')
         JSON_array +=[(
@@ -292,7 +292,7 @@ class Reader(object):
     def outputToDict(self):
         """
         Formats the data in the reader to a python dictionary,
-        using the attached Options
+        using the attached Settings
         instance's and particleGroups' outputToDict() methods.
         """
 
@@ -303,8 +303,8 @@ class Reader(object):
         for particleGroup in self.particleGroups:
             outputDict['parts'][particleGroup.UIname] = particleGroup.outputToDict()
 
-        ## store the options file in the output dictionary
-        outputDict['options'] = self.options.outputToDict()
+        ## store the settings file in the output dictionary
+        outputDict['options'] = self.settings.outputToDict()
 
         return outputDict
 

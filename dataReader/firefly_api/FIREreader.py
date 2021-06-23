@@ -1,7 +1,7 @@
 import numpy as np
 import os
 
-from firefly_api.options import Options
+from firefly_api.settings import Settings
 from firefly_api.reader import Reader,ParticleGroup
 from firefly_api.errors import FireflyError,FireflyWarning,FireflyMessage,warnings
 
@@ -42,7 +42,7 @@ class FIREreader(Reader):
         max_npart_per_file = 10**4,
         prefix = 'FIREData',
         clean_JSONdir = 0,
-        options = None,
+        settings = None,
         tweenParams=None
         ):
         """
@@ -63,10 +63,10 @@ class FIREreader(Reader):
             contain your JSON files, if you are not running python from
             `/path/to/Firefly/data` it should be the absolute path.
 
-        `options=None` - An `Options` instance, if you have created one you can
-            pass it here. `None` will generate default options. `reader.options.listKeys()`
-            will give you a list of the different available options you can set
-            using `reader.options["option_name"] = option_value`. 
+        `settings=None` - An `Settings` instance, if you have created one you can
+            pass it here. `None` will generate default settings. `reader.settings.listKeys()`
+            will give you a list of the different available settings you can set
+            using `reader.settings["option_name"] = option_value`. 
 
         `tweenParams=None` - a tweenParams instance for automating a fly-through
             path by pressing `t` while within an open instance of Firefly.
@@ -175,7 +175,7 @@ class FIREreader(Reader):
             write_startup=write_startup,
             max_npart_per_file=max_npart_per_file,
             prefix = prefix,
-            options = options,
+            settings = settings,
             clean_JSONdir = clean_JSONdir,
             tweenParams = tweenParams)
 
@@ -185,7 +185,7 @@ class FIREreader(Reader):
         (originally from github.com/abg_python) and binds it to a ParticleGroup.
         Converts to physical coordinates (removes factors of h and scale factor)
         and will calculate the temperature and age in gyr of star particles for you
-        (You're welcome!!). Also adds these particle groups to the reader's options file.
+        (You're welcome!!). Also adds these particle groups to the reader's settings file.
         """
         for ptype,UIname,dec_factor in list(zip(self.ptypes,self.UInames,self.decimation_factors)):
             FireflyMessage("Loading ptype %s"%ptype)
@@ -244,8 +244,8 @@ class FIREreader(Reader):
             ## save the filenames that were opened (so you can re-open them yourself in that order)
             self.particleGroups[-1].filenames_opened = snapdict['fnames']
 
-            ## add this particle group to the reader's options file
-            self.options.addToOptions(self.particleGroups[-1])
+            ## add this particle group to the reader's settings file
+            self.settings.addToSettings(self.particleGroups[-1])
 
         return self.particleGroups
 
@@ -292,13 +292,13 @@ class SimpleFIREreader(FIREreader):
         ## load the data
         self.loadData()
 
-        self.options['color']['gas'] = [1,0,0,1]
-        self.options['color']['stars'] = [0,0,1,1]
+        self.settings['color']['gas'] = [1,0,0,1]
+        self.settings['color']['stars'] = [0,0,1,1]
 
-        self.options['sizeMult']['gas'] = 0.5
-        self.options['sizeMult']['stars'] = 0.5
+        self.settings['sizeMult']['gas'] = 0.5
+        self.settings['sizeMult']['stars'] = 0.5
 
-        self.options['camera'] = [0,0,-15]
+        self.settings['camera'] = [0,0,-15]
 
         ## dump the JSON files
         self.dumpToJSON(loud=True)
