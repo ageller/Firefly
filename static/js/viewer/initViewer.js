@@ -225,6 +225,15 @@ function applyOptions(){
 		}
 	}
 
+    // add an annotation to the top if necessary
+	if (viewerParams.parts.options.hasOwnProperty('annotation')){
+            if (viewerParams.parts.options.annotation != null){
+                elm = document.getElementById('annotate_container');
+                elm.innerHTML=viewerParams.parts.options.annotation;
+                elm.style.display='block';
+            }
+    }
+
 	//maximum range in calculating the length the velocity vectors
 	if (viewerParams.parts.options.hasOwnProperty("maxVrange")){
 		if (viewerParams.parts.options.maxVrange != null){
@@ -464,6 +473,7 @@ function applyOptions(){
 
 		}
 	}// particle specific options
+
 }
 
 function calcMinMax(p,key, addFac = true){
