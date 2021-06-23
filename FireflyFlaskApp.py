@@ -121,9 +121,10 @@ def separate_GUI():
 
 #######for Streamer
 #passing the rendered texture
-@socketio.on('streamer_input', namespace=namespace)
-def streamer_input(texture):
-	socketio.emit('update_streamer', texture, namespace=namespace)
+#trying with post below because this only seems to work when on the same localhost
+# @socketio.on('streamer_input', namespace=namespace)
+# def streamer_input(blob):
+# 	socketio.emit('update_streamer', blob, namespace=namespace)
 
 
 ########reading in hdf5 or csv files
@@ -225,6 +226,14 @@ def data_input():
 def streamer():  
 	return render_template("streamer.html", input=json.dumps({'fps':fps}))
 
+@app.route('/stream_input', methods = ['GET','POST'])
+def stream_input():
+	blob = request.files['image']  # get the image
+	blob_binary = blob.read()
+	#blob.save('tmp.jpg')
+	socketio.emit('update_streamer', blob_binary, namespace=namespace, broadcast = True)
+
+	return 'Done'
 
 # Helper functions to start/stop the server
 def startFireflyServer(port=5000, frames_per_second=30, decimation_factor=1):

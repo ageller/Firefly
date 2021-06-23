@@ -71,8 +71,12 @@ function initScene() {
 				antialias:true,
 				//preserveDrawingBuffer: true , //so that we can save the image
 			} );
+
 		} else {
-			viewerParams.renderer = new THREE.CanvasRenderer(); 
+			//Canvas Renderer has been removed, and I can't get the old version to work now
+			//viewerParams.renderer = new THREE.CanvasRenderer(); 
+			alert("Your browser does not support WebGL.  Therefore Firefly cannot run.  Please use a different browser.");
+
 		}
 		viewerParams.renderer.setSize(screenWidth, screenHeight);
 		viewerParams.normalRenderer = viewerParams.renderer;
