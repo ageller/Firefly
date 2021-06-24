@@ -1,0 +1,5 @@
+recursive-include src/Firefly/static *
+recursive-include src/Firefly/templates *
+recursive-include src/Firefly/ntbks *
+include src/Firefly/index.html
+include src/Firefly/Firefly
