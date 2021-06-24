@@ -1,10 +1,10 @@
 #!/usr/bin/env python
 import sys
 
-from server import startFireflyServer
+from Firefly.server import startFireflyServer
 
-if __name__ == "__main__":
-	#app.run(host='0.0.0.0')
+def main():
+    #app.run(host='0.0.0.0')
 
 	#Note: we could have a more sophisticated arg parser, but this is probably fine for now.
 	#port as the first input
@@ -28,3 +28,7 @@ if __name__ == "__main__":
 
 	#socketio.run(app, debug=True, host='0.0.0.0', port=port)
 	startFireflyServer(port=port, frames_per_second=fps, decimation_factor=dec)
+
+if __name__ == "__main__":
+    main()
+	

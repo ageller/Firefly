@@ -32,6 +32,7 @@ setuptools.setup(
           'flask',
           'requests'
       ],
-    include_package_data=True
+    include_package_data=True,
+    scripts=["src/Firefly/bin/Firefly"]
 )
 
