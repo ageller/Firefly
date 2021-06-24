@@ -3,8 +3,8 @@ import numpy as np
 
 import os 
 
-from firefly_api.errors import FireflyError,FireflyWarning,FireflyMessage,warnings
-from firefly_api.json_utils import write_to_json
+from .errors import FireflyError,FireflyWarning,FireflyMessage,warnings
+from .json_utils import write_to_json
 
 class ParticleGroup(object):
     """

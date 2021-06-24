@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-
 from flask import Flask, render_template, request, session
 from flask_socketio import SocketIO, emit
 
@@ -13,14 +11,7 @@ import json
 
 import os
 
-## add dataReader to the python path so that
-##  firefly_api is discoverable (ABG TODO: this should be possible to do w/ setup.py)
-sys.path.insert(0, 
-	os.path.join(
-		os.path.dirname(__file__),
-		'dataReader'))
-
-from firefly_api.reader import SimpleReader
+from Firefly.data_reader import SimpleReader
 
 #in principle, we could read in the data here...
 
@@ -237,12 +228,19 @@ def stream_input():
 
 # Helper functions to start/stop the server
 def startFireflyServer(port=5000, frames_per_second=30, decimation_factor=1):
-	global fps, dec
+    old_dir = os.getcwd()
+    try:
+        os.chdir(os.path.dirname(__file__))
+        global fps, dec
 
-	fps = frames_per_second
-	dec = decimation_factor
+        fps = frames_per_second
+        dec = decimation_factor
 
-	socketio.run(app, host='0.0.0.0', port=port, use_reloader=True)
+        socketio.run(app, host='0.0.0.0', port=port, use_reloader=True)
+    except:
+        raise
+    finally:
+        os.chdir(old_dir)
 
 def reload():
 	#currently not used
@@ -265,33 +263,3 @@ def killAllFireflyServers(pid=None):
 		##  you know I don't judge.  
 		subp = os.kill(pid,signal.SIGINT)
 	return subp
-
-if __name__ == "__main__":
-	#app.run(host='0.0.0.0')
-
-	#Note: we could have a more sophisticated arg parser, but this is probably fine for now.
-	#port as the first input
-	args = sys.argv[1:]
-	if len(args) >=1:
-		port = int(sys.argv[1])
-	else:
-		port = 5000
-
-	#stream fps as a second input
-	if len(args) >=2:
-		fps = float(sys.argv[2])
-	else:
-		fps = 30
-
-	#decimation factor as third input (for reading in files)
-	if len(args) >=3:
-		dec = float(sys.argv[3])
-	else:
-		dec = 1
-
-	#socketio.run(app, debug=True, host='0.0.0.0', port=port)
-	startFireflyServer(port=port, frames_per_second=fps, decimation_factor=dec)
-
-
-
-

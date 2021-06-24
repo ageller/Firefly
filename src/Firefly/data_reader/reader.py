@@ -6,11 +6,11 @@ import pandas as pd
 import requests
 import numpy as np
 
-from firefly_api.settings import Settings
-from firefly_api.tween import TweenParams
-from firefly_api.particlegroup import ParticleGroup
-from firefly_api.errors import FireflyError,FireflyWarning,FireflyMessage,warnings
-from firefly_api.json_utils import write_to_json,load_from_json
+from .settings import Settings
+from .tween import TweenParams
+from .particlegroup import ParticleGroup
+from .errors import FireflyError,FireflyWarning,FireflyMessage,warnings
+from .json_utils import write_to_json,load_from_json
 
 class Reader(object):
     """
@@ -63,13 +63,12 @@ class Reader(object):
         """
 
         ## where will firefly look for jsons
-        ##  firefly_api lives in dataReader, so let's steal the 
+        ##  we're in data_reader, so let's steal the 
         ##  path from there
         self.DATA_dir = os.path.join(
                 os.path.dirname( ## /
-                os.path.dirname( ## /dataReader
                 os.path.dirname(  
-                os.path.realpath(__file__)))),
+                os.path.realpath(__file__))),
                 'static', ## /static
                 'data') ## /static/data
 
@@ -78,6 +77,10 @@ class Reader(object):
             JSONdir = os.path.join(
                 self.DATA_dir,
                 prefix)
+        elif JSONdir[:1] != os.sep:
+            ## JSONdir is a relative path. 
+            ##  Let's assume they want to save w.r.t. their home directory?
+            JSONdir = os.path.join(os.environ['HOME'],JSONdir)
 
         if settings is not None:
             try:
@@ -85,7 +88,7 @@ class Reader(object):
                 ##  that use %load_ext autoreload
                 assert settings.__class__.__name__ == 'Settings'
             except AssertionError:
-                raise FireflyError("Make sure you use an Settings instance to specify Firefly settings.")
+                raise FireflyError("Make sure you use a Settings instance to specify Firefly settings.")
         else:
             ## we'll use the default ones then
             settings = Settings()
@@ -103,7 +106,7 @@ class Reader(object):
         ##  sub-directory of Firefly/data for Firefly to be able to find it.
 
         ## get rid of the trailing '/' if it's there
-        if JSONdir[-1]==os.sep:
+        if JSONdir[-1:]==os.sep:
             JSONdir=JSONdir[:-1]
 
         self.JSONdir = JSONdir
@@ -134,19 +137,22 @@ class Reader(object):
         if path_prefix == '':
             path_prefix = os.getcwd()
 
+        self.needs_link = False
         for validate in ['index.html','static','LICENSE','README.md']:
-            try:
-                assert validate in os.listdir(
+            if validate not in os.listdir(
                     os.path.join(
                         os.path.split(path_prefix)[0],
-                        ".."))   
-            except:
+                        "..")):
+
                 warnings.warn(FireflyWarning(
                     "JSONdir: {} -- ".format(self.JSONdir)+
                     "is not a sub-directory of Firefly/static/data. "+
                     "\nThis may produce confusing or inoperable results. "+
-                    "As such, we will create a symlink for you. You're "+
-                    "welcome."))
+                    "As such, we will create a symlink for you when you "+
+                    " dumpToJSON."))
+
+                self.needs_link = True
+                break
 
         return path_prefix,path
 
@@ -185,16 +191,30 @@ class Reader(object):
             if not os.path.isdir(self.JSONdir):
                 os.makedirs(self.JSONdir)
 
-            if not os.path.dirname(self.JSONdir) == 'data':
-
-                ## create a symlink so that data can 
-                ##  be read from a "sub-directory"
+            if self.needs_link:
                 try:
-                    os.symlink(self.JSONdir,os.path.join(
-                        self.DATA_dir,
-                        self.path))
+                    ## create a symlink so that data can 
+                    ##  be read from a "sub-directory"
+                    os.symlink(
+                        self.JSONdir,
+                        os.path.join(
+                            self.DATA_dir,
+                            self.path))
+
                 except FileExistsError:
-                    FireflyMessage("Symlink already exists. Skipping.")
+                    ## remove the existing symlink
+                    os.unlink(
+                        os.path.join(
+                            self.DATA_dir,
+                            self.path))
+
+                    ## create a symlink so that data can 
+                    ##  be read from a "sub-directory"
+                    os.symlink(
+                        self.JSONdir,
+                        os.path.join(
+                            self.DATA_dir,
+                            self.path))
 
 
         ## initialize an output array to contain all the jsons and their names
@@ -318,7 +338,7 @@ class Reader(object):
                 write_jsons_to_disk=False)
 
         ## post the json to the listening url data_input
-        ##  defined in FireflyFlaskApp.py
+        ##  defined in server.py
         print("posting...",end='')
         requests.post(
             f'http://localhost:{port:d}/data_input',

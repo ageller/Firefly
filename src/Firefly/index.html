@@ -1,0 +1,135 @@
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title>Firefly</title>		
+		<link rel="icon" href="static/docs/icon.png">  
+
+
+
+	</head>
+
+	<body>
+
+		<div style="background-color:black; position:absolute; top:0; bottom:0; left:0; right:0;" id='loader'></div>
+
+		<div id="ContentContainer" > 
+			<div id="sleep" onclick="hideSleep()" style="display:none; z-index: 6;">
+				<div style="font-size: x-large; margin-top:15%"> 
+					Firefly has gone to sleep after spending too long between rendering frames, click to wake it back up!
+				</div>
+				<div style="font-size: small"> 
+					Hint: if this is happening frequently it might be because Firefly is being overtaxed!
+				</div>
+			</div>
+			<div id="splash" onclick="showSplash(false)" style="z-index: 5;">
+				<!-- <div id="splashdiv1">Firefly: </div> -->
+				<div id="splashdiv1"><img width="80%" src='static/docs/FIREFLY-02_trimmed.png'> </div>
+				<div id="splashdiv2">A WebGL tool to explore particle-based data</div>
+				<div id="splashdiv3">Aaron Geller / Alex Gurvich / Northwestern</div>
+				<div id="splashdiv4">
+					<p><b>Instructions:</b></p>
+						<ul>
+							<li>Right-click and drag with the mouse to rotate your view. </li>
+							<li>Use the mouse wheel to zoom in and out. </li>
+							<li>Click the Controls bar on the top left to show/hide a user interface.</li>
+							<li>Detailed instructions can be found on <a href="https://github.com/ageller/Firefly" target="_blank">the Firefly GitHub page.</a> </li>
+							<li><b>h</b>: toggles this help screen on and off. </li>
+						</ul>
+				</div>
+				<div id="splashdivLoader">
+					<button id='loadDataButton' class='button' style='display:none; font-size:24px; width:415px; height:50px'>
+						<span>Click here to select a data directory</span>
+					</button>
+					<button id='selectStartupButton' class='button' style='display:none; font-size:24px; width:600px; height:50px'>
+						<span>Click here to select a directory from your startup file</span>
+					</button>
+				</div>
+				<div id="splashdiv5">Loading...</div>
+			</div>
+
+
+			<div class="UIcontainer" style="visibility:hidden"></div>
+			
+			<div id="colorbar_container"></div>
+
+			<div id="annotate_container" class="dropdown-content"></div>
+
+			<div id="WebGLContainer" ></div>
+
+		</div>
+
+<!-- three.js resources -->		
+		<script src="static/lib/three.min.r102.js"></script>
+		<script src="static/lib/Detector.js"></script>
+		<script src="static/lib/TrackballControls.js"></script>
+		<script src="static/lib/three-fly-controls.js"></script>
+		<script src="static/lib/KeyboardState.js"></script>
+		<script src="static/lib/THREEx.FullScreen.js"></script>
+		<script src="static/lib/THREEx.WindowResize.js"></script>
+		<script src="static/lib/StereoEffect.js"></script>
+<!-- https://github.com/collinhover/threeoctree -->
+		<script src="static/lib/threeoctree.min.js"></script>  
+		
+		<!-- for the color picker = spectrum : https://github.com/bgrins/spectrum -->
+		<link rel="stylesheet" href="static/lib/spectrum.css" />
+		<script src="static/lib/jquery-3.2.1.min.js"></script> 
+		<script src="static/lib/spectrum.js"></script>
+
+		<!-- noUIslider for filtering -->
+		<link href="static/lib/nouislider.min.css" rel="stylesheet">
+		<script src="static/lib/nouislider.min.js"></script>
+
+		<!-- wNumb number formatter -->
+		<script src="static/lib/wNumb.js"></script>
+
+		<!-- d3 -->
+		<script src="static/lib/d3.v4.10.2.min.js"></script>
+
+		<!-- tween -->
+		<script src="static/lib/Tween.js"></script>
+
+		<!-- web sockets -->
+	    <script src="static/lib/socket.io.min.js"></script>
+
+		<!-- the main attraction -->
+
+		<!-- shaders -->
+		<script src="static/shaders/vertex.glsl.js"></script>
+		<script src="static/shaders/fragment.glsl.js"></script>
+		<script src="static/shaders/fragment_pass2.glsl.js"></script>
+
+		<link rel="stylesheet" type="text/css" href="static/css/mainStyles.css" />
+		<link rel="stylesheet" type="text/css" href="static/css/UIStyles.css" />
+
+		<script src="static/js/misc/socketParams.js"></script>
+		<script src="static/js/gui/GUIParams.js"></script>
+		<script src="static/js/viewer/viewerParams.js"></script>
+		<script>
+			//called upon loading
+			defineGUIParams();
+			defineViewerParams();
+		</script>
+		<script src="static/js/misc/utils.js"></script>
+		<script src="static/js/misc/windowEvents.js"></script>
+		<script src="static/js/gui/initGUI.js"></script>
+		<script src="static/js/gui/sliders.js"></script>
+		<script src="static/js/gui/colormap.js"></script>
+		<script src="static/js/gui/filters.js"></script>
+		<script src="static/js/gui/UI.js"></script>
+		<script src="static/js/viewer/applyUISelections.js"></script>
+		<script src="static/js/viewer/draw.js"></script>
+		<script src="static/js/viewer/renderAll.js"></script>
+		<script src="static/js/viewer/initViewer.js"></script>
+		<script src="static/js/viewer/runTweens.js"></script>
+		<script src="static/js/viewer/octree.js"></script>
+
+		<script>
+			//called upon loading
+			runLocal(false);
+		</script>
+
+	</body>
+
+
+</html>
