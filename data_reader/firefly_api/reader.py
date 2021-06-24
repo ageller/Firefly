@@ -63,11 +63,11 @@ class Reader(object):
         """
 
         ## where will firefly look for jsons
-        ##  firefly_api lives in dataReader, so let's steal the 
+        ##  firefly_api lives in data_reader, so let's steal the 
         ##  path from there
         self.DATA_dir = os.path.join(
                 os.path.dirname( ## /
-                os.path.dirname( ## /dataReader
+                os.path.dirname( ## /data_reader
                 os.path.dirname(  
                 os.path.realpath(__file__)))),
                 'static', ## /static
