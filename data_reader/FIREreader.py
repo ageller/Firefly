@@ -1,23 +1,11 @@
 import numpy as np
 import os
 
-from firefly_api.settings import Settings
-from firefly_api.reader import Reader,ParticleGroup
-from firefly_api.errors import FireflyError,FireflyWarning,FireflyMessage,warnings
+from .settings import Settings
+from .reader import Reader,ParticleGroup
+from .errors import FireflyError,FireflyWarning,FireflyMessage,warnings
 
-
-try:
-    ### depends on abg_python, if you're me that's not a problem!
-    from abg_python.snapshot_utils import openSnapshot
-except ImportError:
-    try: 
-        import snapshot_utils
-        warnings.warn(FireflyWarning(
-            "importing openSnapshot from: {}".format(snapshot_utils.__file__)))
-        openSnapshot = snapshot_utils.openSnapshot
-    except ImportError:
-        raise ImportError("snapshot_utils not found, try looking inside Firefly/data"+
-            "or use yt to open your gizmo data")
+from .snapshot_utils import openSnapshot
 
 class FIREreader(Reader):
     """

@@ -6,11 +6,11 @@ import pandas as pd
 import requests
 import numpy as np
 
-from firefly_api.settings import Settings
-from firefly_api.tween import TweenParams
-from firefly_api.particlegroup import ParticleGroup
-from firefly_api.errors import FireflyError,FireflyWarning,FireflyMessage,warnings
-from firefly_api.json_utils import write_to_json,load_from_json
+from .settings import Settings
+from .tween import TweenParams
+from .particlegroup import ParticleGroup
+from .errors import FireflyError,FireflyWarning,FireflyMessage,warnings
+from .json_utils import write_to_json,load_from_json
 
 class Reader(object):
     """
@@ -63,13 +63,12 @@ class Reader(object):
         """
 
         ## where will firefly look for jsons
-        ##  firefly_api lives in data_reader, so let's steal the 
+        ##  we're in data_reader, so let's steal the 
         ##  path from there
         self.DATA_dir = os.path.join(
                 os.path.dirname( ## /
-                os.path.dirname( ## /data_reader
                 os.path.dirname(  
-                os.path.realpath(__file__)))),
+                os.path.realpath(__file__))),
                 'static', ## /static
                 'data') ## /static/data
 

@@ -18,7 +18,7 @@ sys.path.insert(0,
 		os.path.dirname(__file__),
 		'data_reader'))
 
-from firefly_api.reader import SimpleReader
+from Firefly.data_reader import SimpleReader
 
 #in principle, we could read in the data here...
 
@@ -235,12 +235,19 @@ def stream_input():
 
 # Helper functions to start/stop the server
 def startFireflyServer(port=5000, frames_per_second=30, decimation_factor=1):
-	global fps, dec
+    old_dir = os.getcwd()
+    try:
+        os.chdir(os.path.dirname(__file__))
+        global fps, dec
 
-	fps = frames_per_second
-	dec = decimation_factor
+        fps = frames_per_second
+        dec = decimation_factor
 
-	socketio.run(app, host='0.0.0.0', port=port, use_reloader=True)
+        socketio.run(app, host='0.0.0.0', port=port, use_reloader=True)
+    except:
+        raise
+    finally:
+        os.chdir(old_dir)
 
 def reload():
 	#currently not used

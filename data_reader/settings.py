@@ -4,8 +4,8 @@ import numpy as np
 
 import os 
 
-from firefly_api.errors import FireflyError,FireflyWarning,warnings
-from firefly_api.json_utils import write_to_json,load_from_json
+from .errors import FireflyError,FireflyWarning,warnings
+from .json_utils import write_to_json,load_from_json
 
 class Settings(object):
     """
