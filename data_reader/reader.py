@@ -318,7 +318,7 @@ class Reader(object):
                 write_jsons_to_disk=False)
 
         ## post the json to the listening url data_input
-        ##  defined in FireflyFlaskApp.py
+        ##  defined in server.py
         print("posting...",end='')
         requests.post(
             f'http://localhost:{port:d}/data_input',

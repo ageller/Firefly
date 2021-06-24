@@ -19,11 +19,11 @@ fi
 
 #check if the firefly directory env variable (FIREFLY_DIR) is set
 if [ -z "${FIREFLY_DIR}" ]; then
-#	if command -v python FireflyFlaskApp.py &> /dev/null; then
-	if [ -f FireflyFlaskApp.py ]; then
+#	if command -v python run_server.py &> /dev/null; then
+	if [ -f run_server.py ]; then
 		export FIREFLY_DIR=$PWD
 	else
-		LOC=$(pip show FireflyFlaskApp | grep Location)
+		LOC=$(pip show run_server | grep Location)
 		if [ ! -z "${LOC}" ]; then
 			export FIREFLY_DIR=$(cut -d " " -f2 <<< $LOC)
 		fi
@@ -70,7 +70,7 @@ if [ ! -z "${FIREFLY_BROWSER}" ] && [ ! -z "${FIREFLY_DIR}" ]; then
 	$FIREFLY_BROWSER http://localhost:5000/ & 
 
 	#launch the flask server
-	python $FIREFLY_DIR/FireflyFlaskApp.py
+	python $FIREFLY_DIR/run_server.py
 fi
 
 /bin/bash
