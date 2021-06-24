@@ -11,13 +11,6 @@ import json
 
 import os
 
-## add data_reader to the python path so that
-##  firefly_api is discoverable (ABG TODO: this should be possible to do w/ setup.py)
-sys.path.insert(0, 
-	os.path.join(
-		os.path.dirname(__file__),
-		'data_reader'))
-
 from Firefly.data_reader import SimpleReader
 
 #in principle, we could read in the data here...
