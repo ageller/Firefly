@@ -18,6 +18,11 @@ Thumbs.db
 *.csv
 
 
+# docs #
+###################
+docs/build/*
+docs/source/reference/api/*
+
 # python #
 ###################
 *ipynb_checkpoints*

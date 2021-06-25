@@ -12,6 +12,7 @@ Base classes
     Firefly.data_reader.Reader
     Firefly.data_reader.ParticleGroup
     Firefly.data_reader.Settings
+    Firefly.data_reader.TweenParams
 
 
 Pre-built Readers
