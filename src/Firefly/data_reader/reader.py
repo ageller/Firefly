@@ -9,43 +9,58 @@ import numpy as np
 from .settings import Settings
 from .tween import TweenParams
 from .particlegroup import ParticleGroup
-from .errors import FireflyError,FireflyWarning,FireflyMessage,warnings
+from .errors import FireflyWarning,FireflyMessage,warnings
 from .json_utils import write_to_json,load_from_json
 
 class Reader(object):
-    """
-    This class provides a framework to unify the Settings and ParticleGroup classes
+    """This class provides a framework to unify the Settings and ParticleGroup classes
     to make sure that the user can easily produce Firefly compatible files. It also 
     provides some rudimentary data validation. You should use this Reader as a base
     for any custom readers you may build (and should use inheritance, as demonstrated
-    below in FIREreader!
+    in FIREreader).
     """
+    
     def __init__(self,
-        JSONdir = None, ## abs path, must be a sub-directory of Firefly/data
-        settings = None,
-        write_startup = 'append',# True -> write | False -> leave alone | "append" -> adds to existing file
-        max_npart_per_file = 10**4,
         prefix = 'Data',
-        clean_JSONdir = 0,
-        tweenParams = None
-        ):
+        JSONdir = None, ## abs path, must be a sub-directory of Firefly/data
+        clean_JSONdir = False,
+        max_npart_per_file = 10**4,
+        write_startup = 'append',# True -> write | False -> leave alone | "append" -> adds to existing file
+        settings = None,
+        tweenParams = None):
+        """[summary]
+
+        :param prefix: Prefix for any JSON files created, JSON files will be of the format:
+            <prefix><parttype>_%d.json, defaults to 'Data'
+        :type prefix: str, optional
+        :param JSONdir: the sub-directory that will contain your JSON files, relative
+            to your $HOME directory. , defaults to $HOME/<prefix>
+        :type JSONdir: str, optional
+        :param clean_JSONdir: flag to delete all :code:`.json` files in
+            the :code:`JSONdir`. Strictly not necessary (since :code:`filenames.json` 
+            will be updated) but it is good to clean up after yourself., defaults to False
+        :type clean_JSONdir: bool, optional
+        :param max_npart_per_file: , defaults to 10**4
+        :type max_npart_per_file: int, optional
+        :param write_startup: flag for how to treat the :code:`startup.json` file. 
+            Takes three values: 
+            :code:`'append'`: appends :code:`JSONdir` to :code:`startup.json`, 
+            :code:`True`: overwrites :code:`startup.json` with a single entry, :code:`JSONdir`, 
+            :code:`False`: does not alter :code:`startup.json`, 
+            , defaults to 'append'
+        :type write_startup: str/bool, optional
+        :param settings: a :class:`Firefly.data_reader.Settings` instance, defaults to 
+            a new default :class:`Firefly.data_reader.Settings` instance.
+        :type settings: :class:`Firefly.data_reader.Settings`, optional
+        :param tweenParams: :class:`Firefly.data_reader.TweenParams` instance, defaults to None
+        :type tweenParams: :class:`Firefly.data_reader.TweenParams`, optional
+        :raises TypeError: raised if anything other than a :class:`Firefly.data_reader.Settings` 
+            instance is passed to :code:`settings`
+        :raises TypeError: raised if anything other than a :class:`Firefly.data_reader.TweenParams` 
+            instance is passed to :code:`tweenParams`
         """
-        `JSONdir=None` - This should be the name of the sub-directory that will
-            contain your JSON files, if you are not running python from
-            `/path/to/Firefly/data` it should be the absolute path.
 
-        `settings=None` - An `Settings` instance, if you have created one you can
-            pass it here. `None` will generate default settings. `reader.settings.listKeys()`
-            will give you a list of the different available settings you can set
-            using `reader.settings["option_name"] = option_value`. 
-
-        `write_startup='append'` - This is a flag for whether `startup.json` file
-            should be written. It has 3 values: `True` -> writes a new `startup.json`
-            that will contain only this visualization, `'append'` -> which will
-            add this visualization to an existing `startup.json` (or create a
-            new one), this is the default option, or `False` -> which will not
-            add an entry to `startup.json`.
-
+        """
         `max_npart_per_file=10000` - The maximum number of particles saved per file,
             don't use too large a number or you will have trouble loading
             the individual files in. 
@@ -54,13 +69,13 @@ class Reader(object):
             you run `reader.dumpToJSON`. The format is
             `(prefix)(particleGroupName)(fileNumber).json`.
 
-        `clean_JSONdir=0` - Whether you would like to delete all `.json` files in
-            the `JSONdir`. Usually not necessary (since `filenames.json` will be
-            updated) but good to clean up after yourself.
+        `clean_JSONdir=0` - 
 
         `tweenParams=None` - a tweenParams instance for automating a fly-through
             path by pressing `t` while within an open instance of Firefly.
         """
+
+       
 
         ## where will firefly look for jsons
         ##  we're in data_reader, so let's steal the 
@@ -83,21 +98,17 @@ class Reader(object):
             JSONdir = os.path.join(os.environ['HOME'],JSONdir)
 
         if settings is not None:
-            try:
+            if settings.__class__.__name__ != 'Settings':
                 ## fun fact, assert isinstance(settings,Settings) won't work with jupyter notebooks
                 ##  that use %load_ext autoreload
-                assert settings.__class__.__name__ == 'Settings'
-            except AssertionError:
-                raise FireflyError("Make sure you use a Settings instance to specify Firefly settings.")
+                raise TypeError("Make sure you use a Settings instance to specify Firefly settings.")
         else:
             ## we'll use the default ones then
             settings = Settings()
 
         if tweenParams is not None:
-            try:
-                assert tweenParams.__class__.__name__ == 'TweenParams'
-            except AssertionError:
-                raise FireflyError("Make sure you use a TweenParams instance to specify fly-through paths.")
+            if tweenParams.__class__.__name__ != 'TweenParams':
+                raise TypeError("Make sure you use a TweenParams instance to specify fly-through paths.")
 
         self.tweenParams = tweenParams
 
@@ -110,7 +121,7 @@ class Reader(object):
             JSONdir=JSONdir[:-1]
 
         self.JSONdir = JSONdir
-        self.path_prefix,self.path = self.splitAndValidateDatadir()
+        self.path_prefix,self.path = self.__splitAndValidateDatadir()
 
         #write the startup file?
         self.write_startup = write_startup
@@ -127,12 +138,19 @@ class Reader(object):
         ## array of particle groups
         self.particleGroups = []
 
-    def splitAndValidateDatadir(self):
+    def __splitAndValidateDatadir(self):
+        """[summary]
+
+        :return: [description]
+        :rtype: [type]
+        """
+
         """
         Ensures that files will be output to a location that Firefly 
         can read, as well as splits the path so that filenames.json 
         references files correctly.
         """
+        
         path_prefix,path = os.path.split(self.JSONdir)
         if path_prefix == '':
             path_prefix = os.getcwd()
@@ -157,12 +175,21 @@ class Reader(object):
         return path_prefix,path
 
     def addParticleGroup(self,particleGroup):
+        """[summary]
+
+        :param particleGroup: [description]
+        :type particleGroup: [type]
+        :return: [description]
+        :rtype: [type]
+        """
+
         """
         Adds a particle group to the Reader instance and adds that particle group's
         settings to the attached Settings instance.
         Input:
             particleGroup - the particle group in question that you would like to add
         """
+        
 
         ## data validation of new ParticleGroup happened in its initialization
         self.particleGroups = np.append(
@@ -178,6 +205,16 @@ class Reader(object):
         self,
         loud=0,
         write_jsons_to_disk=True):
+        """[summary]
+
+        :param loud: [description], defaults to 0
+        :type loud: int, optional
+        :param write_jsons_to_disk: [description], defaults to True
+        :type write_jsons_to_disk: bool, optional
+        :return: [description]
+        :rtype: [type]
+        """
+
         """
         Creates all the necessary JSON files to run Firefly, making sure they are
         properly linked and cross-reference correctly, using the attached Settings
@@ -185,6 +222,7 @@ class Reader(object):
         Input:
             loud=0 - flag for whether warnings within each outputToJSON should be shown
         """
+        
 
         ## handle JSON dir stuff
         if write_jsons_to_disk:
@@ -310,11 +348,18 @@ class Reader(object):
         return self.JSON
 
     def outputToDict(self):
+        """[summary]
+
+        :return: [description]
+        :rtype: [type]
+        """
+
         """
         Formats the data in the reader to a python dictionary,
         using the attached Settings
         instance's and particleGroups' outputToDict() methods.
         """
+        
 
         outputDict = {}
         outputDict['parts'] = {}
@@ -329,6 +374,12 @@ class Reader(object):
         return outputDict
 
     def sendDataViaFlask(self,port=5000):
+        """[summary]
+
+        :param port: [description], defaults to 5000
+        :type port: int, optional
+        """
+
 
         ## retrieve a single "big JSON" of all the mini-JSON 
         ##  sub-files. 
@@ -346,6 +397,11 @@ class Reader(object):
         print("data posted!")
 
 class SimpleReader(Reader):
+    """[summary]
+
+    :param Reader: [description]
+    :type Reader: [type]
+    """
 
     def __init__(
         self,
@@ -354,6 +410,21 @@ class SimpleReader(Reader):
         decimation_factor=1,
         extension='.hdf5',
         **kwargs):
+        """[summary]
+
+        :param path_to_data: [description]
+        :type path_to_data: [type]
+        :param write_jsons_to_disk: [description], defaults to True
+        :type write_jsons_to_disk: bool, optional
+        :param decimation_factor: [description], defaults to 1
+        :type decimation_factor: int, optional
+        :param extension: [description], defaults to '.hdf5'
+        :type extension: str, optional
+        :raises ValueError: [description]
+        :raises ValueError: [description]
+        :raises ValueError: [description]
+        """
+
         """
         A simple reader that will take as minimal input the path to a 
         (set of) .hdf5 file(s) and extract each top level group's
@@ -428,6 +499,13 @@ class SimpleReader(Reader):
         self.dumpToJSON(write_jsons_to_disk=write_jsons_to_disk)
 
 def getCSVCoordinates(fname):
+    """[summary]
+
+    :param fname: [description]
+    :type fname: [type]
+    :return: [description]
+    :rtype: [type]
+    """
     full_df = pd.read_csv(fname,sep=' ')
     coordinates = np.empty((full_df.shape[0],3))
 
@@ -443,6 +521,17 @@ def getCSVCoordinates(fname):
     return coordinates
 
 def getHDF5Coordinates(fname,particle_group,coordinates=None):
+    """[summary]
+
+    :param fname: [description]
+    :type fname: [type]
+    :param particle_group: [description]
+    :type particle_group: [type]
+    :param coordinates: [description], defaults to None
+    :type coordinates: [type], optional
+    :return: [description]
+    :rtype: [type]
+    """
     with h5py.File(fname,'r') as handle:
         ## (re)-initialize the coordinate array
         if coordinates is None:
