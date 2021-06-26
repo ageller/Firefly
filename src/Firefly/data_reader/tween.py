@@ -103,7 +103,7 @@ class TweenParams(object):
         self,
         JSONdir,
         filename=None,
-        prefix='',
+        JSON_prefix='',
         loud=1,
         write_jsons_to_disk=True):
         if filename is None:
@@ -114,7 +114,7 @@ class TweenParams(object):
 
         tween_params_dict = self.outputToDict()
 
-        filename = os.path.join(JSONdir,prefix+filename)
+        filename = os.path.join(JSONdir,JSON_prefix+filename)
 
         return filename,write_to_json(
             tween_params_dict,

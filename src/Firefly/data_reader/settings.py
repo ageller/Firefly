@@ -239,7 +239,7 @@ class Settings(object):
         self,
         JSONdir,
         filename=None,
-        prefix='',
+        JSON_prefix='',
         loud=1,
         write_jsons_to_disk=True):
         """
@@ -253,7 +253,7 @@ class Settings(object):
         all_settings_dict = self.outputToDict()
 
 
-        filename = os.path.join(JSONdir,prefix+filename)
+        filename = os.path.join(JSONdir,JSON_prefix+filename)
 
         if loud:
             warnings.warn(FireflyWarning(

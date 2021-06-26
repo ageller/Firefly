@@ -131,7 +131,9 @@ class ParticleGroup(object):
             tracked_colormap_flags = new_tracked_colormap_flags
 
         
-        if filenames_and_nparts is not None:
+        self.filenames_and_nparts = filenames_and_nparts
+
+        if self.filenames_and_nparts is not None:
             try:
                 assert type(filenames_and_nparts[0]) == tuple
                 assert type(filenames_and_nparts[0][0]) == str
@@ -166,7 +168,6 @@ class ParticleGroup(object):
         self.tracked_filter_flags = np.array(tracked_filter_flags)
         self.tracked_colormap_flags = np.array(tracked_colormap_flags)
 
-        self.filenames_and_nparts = filenames_and_nparts
 
         ## TODO how do these interface with javascript code?
         self.radiusFunction = None
@@ -339,9 +340,9 @@ class ParticleGroup(object):
 
     def outputToJSON(
         self,
-        path, ## sub-directory name
-        path_prefix, ## absolute path to Firefly/data
-        prefix, ## prefix of JSON filename
+        short_data_path,
+        hard_data_path,
+        JSON_prefix,
         loud=1,
         nparts_per_file = 10**4,
         clean=0,
@@ -351,8 +352,8 @@ class ParticleGroup(object):
         instance's dumpToJSON method. 
         Input:
             path - the name of the sub-directory of Firefly/data you want to put these files into
-            path_prefix - the the path to Firefly/data
-            prefix - the string you want to prepend to the data JSONs
+            hard_data_path - the the path to Firefly/data
+            JSON_prefix - the string you want to prepend to the data JSONs
             loud=1 - flag to print warnings that you should hear if you're not using a
                 reader that does these things for you
             nparts_per_file=10**4 - maximum number of particles per JSON file
@@ -363,7 +364,8 @@ class ParticleGroup(object):
         self.getDecimationIndexArray()
 
         ## where are we saving this json to?
-        full_path = os.path.join( path_prefix, path )
+        full_path = os.path.join(hard_data_path, short_data_path)
+
         if not os.path.isdir(full_path):
             os.makedirs(full_path)
         if loud:
@@ -379,9 +381,10 @@ class ParticleGroup(object):
                 if "json" in fname:
                     os.remove(os.path.join(full_path,fname))
 
+        filenames_and_nparts = self.filenames_and_nparts
         ## if the user did not specify how we should partition the data between
         ##  sub-JSON files then we'll just do it equally
-        if self.filenames_and_nparts is None:
+        if filenames_and_nparts is None:
             ## determine if we were passed a boolean mask or a index array
             if self.dec_inds.dtype == bool:
                 nparts = np.sum(self.dec_inds)
@@ -393,15 +396,15 @@ class ParticleGroup(object):
             nfiles = int(nparts/nparts_per_file + ((nparts%nparts_per_file)!=0))
 
             ## how many particles will each file have and what are they named?
-            filenames = [os.path.join(path,"%s%s%03d.json"%(prefix,self.UIname,i_file)) for i_file in range(nfiles)]
+            filenames = [os.path.join(short_data_path,"%s%s%03d.json"%(JSON_prefix,self.UIname,i_file)) for i_file in range(nfiles)]
             nparts = [min(nparts_per_file,nparts-(i_file)*(nparts_per_file)) for i_file in range(nfiles)]
 
-            self.filenames_and_nparts = list(zip(filenames,nparts))
+            filenames_and_nparts = list(zip(filenames,nparts))
         
         JSON_array = []
         ## loop through the sub-files
         cur_index = 0
-        for i_file,(fname,nparts_this_file) in enumerate(self.filenames_and_nparts):
+        for i_file,(fname,nparts_this_file) in enumerate(filenames_and_nparts):
             ## pick out the indices for this file
             if self.decimation_factor > 1:
                 these_dec_inds = self.dec_inds[cur_index:cur_index+nparts_this_file]
@@ -412,7 +415,7 @@ class ParticleGroup(object):
             ## format an output dictionary
             outDict = self.outputToDict(these_dec_inds, i_file)
 
-            fname = os.path.join(path_prefix,fname)
+            fname = os.path.join(hard_data_path,fname)
 
             JSON_array += [(
                 fname,
@@ -422,7 +425,7 @@ class ParticleGroup(object):
             ## move onto the next file
             cur_index += nparts_this_file
         
-        return JSON_array
+        return JSON_array,filenames_and_nparts
 
     def outputToHDF5(self):
         """
