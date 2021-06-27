@@ -3,6 +3,7 @@ from __future__ import print_function
 import h5py
 import os 
 import shutil 
+import subprocess
 import pandas as pd
 import requests
 import numpy as np
@@ -413,7 +414,11 @@ class Reader(object):
         target=None,
         flask_templates=False,
         dump_data=True,
-        overwrite=True):
+        overwrite=True,
+        init_git_pages=False,
+        GHREPONAME=None,
+        GHUSER=None,
+        GHOAUTHTOKENPATH=None):
         """[summary]
 
         :param target: [description], defaults to None
@@ -427,7 +432,8 @@ class Reader(object):
         """
 
         ## handle default argument(s)
-        if target is None: target = os.path.join(os.environ['HOME'],'Firefly')
+        if target is None: target = os.path.join(os.environ['HOME'],'my_Firefly')
+        elif target[:1] != os.sep: target = os.path.join(os.environ['HOME'],target)
 
         if not os.path.isdir(target): 
             ## create the directory because it doesn't exist
@@ -488,6 +494,58 @@ class Reader(object):
                 self.static_data_dir = old
                 self.hard_data_path,self.short_data_path = self.__splitAndValidateDatadir()
 
+        ## attempts to initialize a github pages site in order to 
+        ##  host this copied version of Firefly on the web.
+        if init_git_pages:
+            
+            ## default GHREPONAME to the directory name of the target
+            if GHREPONAME is None: GHREPONAME = os.path.split(target)[-1]
+
+            ## default GHOAUTHOTOKENPATH to ~/.github.token (my arbitrary choice)
+            if GHOAUTHTOKENPATH is None: GHOAUTHTOKENPATH = os.path.join( os.environ['HOME'], '.github.token')
+
+            ## default to the current user name
+            if GHUSER is None: GHUSER = os.environ['USER']
+
+            if not os.path.isfile(GHOAUTHTOKENPATH):
+                raise FileNotFoundError(f"No OAUTH token file matching {GHOAUTHTOKENPATH}, generate one from \
+                https://github.com/settings/tokens and write it to disk somewhere.")
+
+            print(f"Initializing a new GitHub repository at {target} with\n" + 
+                f"\tGHREPONAME: {GHREPONAME}\n" + 
+                f"\tGHUSER: {GHUSER}\n" + 
+                f"\tGHOAUTHTOKENPATH: {GHOAUTHTOKENPATH}\n")
+
+            ## check if the executable exists
+            executable = os.path.abspath(
+                os.path.join(
+                    self.static_data_dir,
+                    '..','..','bin','make_new_repo.sh'))
+            
+            if not os.path.isfile(executable):
+                raise FileNotFoundError("Missing make_new_repo.sh executable, cannot initialize a new repository.")
+            
+            ## stash the current directory
+            old = os.getcwd()
+            try:
+                ## move to the target directory
+                os.chdir(target)
+                ## intialize the github repo
+                #os.execv(executable,[GHREPONAME,GHUSER,GHOAUTHTOKENPATH]) 
+                with open("foo.txt",'w') as handle:
+                    subp = subprocess.Popen(
+                        ["bash",executable,GHREPONAME,GHUSER,GHOAUTHTOKENPATH],
+                        stdout=handle)
+                    subp.wait()
+                with open("foo.txt",'r') as handle:
+                    lines = handle.read().splitlines()
+                return lines
+            except:
+                ## raise any error that might've come up
+                raise
+            finally:
+                ## move back to the current directory
+                os.chdir(old)
 
 class SimpleReader(Reader):
     """[summary]
