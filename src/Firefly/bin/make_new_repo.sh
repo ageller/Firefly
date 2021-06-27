@@ -18,27 +18,32 @@ else
     TOKEN=`cat $TOKEN`
     REPONAME=${ANS_REPONAME:-${REPONAME}}
     USER=${ANS_USER:-${USER}}
-    ## create the new repository
+    ## create a new remote repository
     curl -u ${USER}:${TOKEN} https://api.github.com/user/repos -d "{\"name\": \"${REPONAME}\""
-
-    ## set the remote to be new repository
-    #git remote add origin http://github.com/${USER}/${REPONAME}
-
+    
+    ## create a new local repository
+    git init
+    
+    ## make a dummy readme
     echo "# ${REPONAME}" > README.md
     git add README.md
-if [ -f index.html]; then
-    git add index.html
-else
-    echo Missing index.html >& 2
-    exit 1
-fi
-if [ -d static]; then
-    git add --all static
-else
-    echo Missing static directory >& 2
-    exit 1
-fi
+    
+    ## track the Firefly index.html
+    if [ -f index.html]; then
+        git add index.html
+    else
+        echo Missing index.html >& 2
+        exit 1
+    fi
+    ## track the static source files
+    if [ -d static]; then
+        git add --all static
+    else
+        echo Missing static directory >& 2
+        exit 1
+    fi
     git commit -m 'initial commit'
+    ## push local repo to remote repo
     git remote add origin git@github.com:${USER}/${REPONAME}.git
     git push --set-upstream origin master
 
