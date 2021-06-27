@@ -15,22 +15,22 @@ from .errors import FireflyWarning,FireflyMessage,warnings
 from .json_utils import write_to_json,load_from_json
 
 class Reader(object):
-    """This class provides a framework to unify the Settings and ParticleGroup classes
-    to make sure that the user can easily produce Firefly compatible files. It also 
-    provides some rudimentary data validation. You should use this Reader as a base
-    for any custom readers you may build (and should use inheritance, as demonstrated
-    in FIREreader).
+    """ This class provides a framework to unify the Settings and ParticleGroup classes
+    to make sure that the user can easily produce Firefly compatible files. 
+    You should use this Reader as a base class for any custom readers you may build
+    (see :class:`Firefly.data_reader.FIREreader` for example).
     """
     
     def __init__(self,
-        JSON_prefix = 'Data',
-        JSONdir = None, 
-        clean_JSONdir = False,
-        max_npart_per_file = 10**4,
-        write_startup = 'append',# True -> write | False -> leave alone | "append" -> adds to existing file
-        settings = None,
-        tweenParams = None):
-        """[summary]
+        JSON_prefix='Data',
+        JSONdir=None, 
+        clean_JSONdir=False,
+        max_npart_per_file=10**4,
+        write_startup='append',
+        settings=None,
+        tweenParams=None):
+        """ Base initialization method for Reader instances. A Reader will read data and produce
+            Firefly compatible :code:`.json` files. 
 
         :param JSON_prefix: Prefix for any :code:`.json` files created, :code:`.json` files will be of the format:
             :code:`<JSON_prefix><parttype>_%d.json`, defaults to 'Data'
@@ -131,7 +131,7 @@ class Reader(object):
     def __splitAndValidateDatadir(self,loud=True):
         """[summary]
 
-        :param loud: [description], defaults to True
+        :param loud: flag to print status information to the console, defaults to False
         :type loud: bool, optional
         :return: [description]
         :rtype: [type]
@@ -143,8 +143,14 @@ class Reader(object):
         references files correctly.
         """
         
+        ## split the JSON directory path into the folder 
+        ##  that will actually contain the JSON files and the path leading 
+        ##  to it. 
         hard_data_path,short_data_path = os.path.split(self.JSONdir)
 
+        ## determine if we will need to soft link this data or if 
+        ##  it was saved to some kind of self.static_data_dir (whether this one
+        ##  or another).
         self.needs_soft_link = False
         for validate in ['index.html','static']:
             if validate not in os.listdir(
@@ -164,21 +170,14 @@ class Reader(object):
         return hard_data_path,short_data_path
 
     def addParticleGroup(self,particleGroup):
-        """[summary]
+        """ Track a new :class:`~Firefly.data_reader.ParticleGroup` instance in 
+            this :class:`Firefly.data_reader.Reader` instance's :code:`particleGroups` array
+            and to the attached :class:`Firefly.data_reader.Settings` instance.
 
-        :param particleGroup: [description]
-        :type particleGroup: [type]
-        :return: [description]
-        :rtype: [type]
+        :param particleGroup: a :class:`~Firefly.data_reader.ParticleGroup` instance
+            that contains particle data for an individual UI element.
+        :type particleGroup: :class:`Firefly.data_reader.ParticleGroup`
         """
-
-        """
-        Adds a particle group to the Reader instance and adds that particle group's
-        settings to the attached Settings instance.
-        Input:
-            particleGroup - the particle group in question that you would like to add
-        """
-        
 
         ## data validation of new ParticleGroup happened in its initialization
         self.particleGroups = np.append(
@@ -188,48 +187,48 @@ class Reader(object):
         ## add this particle group to the reader's settings file
         self.settings.addToSettings(particleGroup)
 
-        return self.particleGroups
-    
     def dumpToJSON(
         self,
-        loud=0,
+        loud=False,
         write_jsons_to_disk=True,
         symlink=True):
-        """[summary]
-
-        :param loud: [description], defaults to 0
-        :type loud: int, optional
-        :param write_jsons_to_disk: [description], defaults to True
+        """Creates all the necessary JSON files to run Firefly and ensures they are
+        properly linked and cross-referenced correctly using the
+        :func:`Firefly.data_reader.Settings.outputToJSON` and
+        :func:`Firefly.data_reader.ParticleGroup.outputToJSON` methods
+        (and :func:`Firefly.data_reader.TweenParams.outputToJSON` if one is attached).
+        :param loud: flag to print status information to the console, defaults to False
+        :type loud: bool, optional
+        :param write_jsons_to_disk: flag that controls whether data is saved to disk (:code:`True`)
+            or only converted to a string and stored in :code:`self.JSON` (:code:`False`), defaults to True
         :type write_jsons_to_disk: bool, optional
-        :param symlink: [description], defaults to True
+        :param symlink: flag for whether a soft link should be created between where the data is stored on
+            disk and the :code:`self.static_data_dir` directory (:code:`True`) or whether it should be 
+            saved directly to :code:`self.static_data_dir` directory (:code:`False`). 
+            Note that :code:`symlink=False` will not _also_ save results in :code:`self.JSONdir`, defaults to True
         :type symlink: bool, optional
-        :return: [description]
-        :rtype: [type]
-        """
-
-        """
-        Creates all the necessary JSON files to run Firefly, making sure they are
-        properly linked and cross-reference correctly, using the attached Settings
-        instance's and particleGroups' outputToJSON() methods.
-        Input:
-            loud=0 - flag for whether warnings within each outputToJSON should be shown
+        :return: :code:`self.JSON` or :code:`""` according to :code:`write_jsons_to_disk`
+        :rtype: str
         """
         
-        ## put the hard JSON files where we're asked to by default
+        ## path where data needs to be visible to Firefly
         static_data_path = os.path.join(
             self.static_data_dir,
             self.short_data_path)
 
+        ## where to put hard JSON files, if no symlink then we will
+        ##  need to save directly to static_data_path
         JSONdir = self.JSONdir if symlink else static_data_path
 
         if not symlink:
             ## we've been asked to ignore the request to put the
             ##  hard files in self.JSONdir and instead actually put them in 
             ##  Firefly/static/data/<short_data_path>
-            FireflyMessage(
-                "Outputting files to: %s instead of: %s as originally specified."%(
-                    static_data_path,
-                    self.JSONdir))
+            if loud:
+                FireflyMessage(
+                    "Outputting files to: %s instead of: %s as originally specified."%(
+                        static_data_path,
+                        self.JSONdir))
 
         ## if we don't actually want to write to disk then we don't need
         ##  to do any filesystem tasks
@@ -270,8 +269,9 @@ class Reader(object):
         ##  and save the filenames into a dictionary for filenames.json
         filenamesDict = {}
         for particleGroup in self.particleGroups:
-            FireflyMessage("outputting:",particleGroup)
-            ## append the JSON arrays for this particle group
+            if loud:
+                FireflyMessage("Outputting:",particleGroup)
+
             this_JSON_array,filenames_and_nparts = particleGroup.outputToJSON(
                 self.short_data_path,
                 self.hard_data_path,
@@ -281,6 +281,7 @@ class Reader(object):
                 clean=self.clean_JSONdir if particleGroup is self.particleGroups[0] else False,
                 write_jsons_to_disk=write_jsons_to_disk)
 
+            ## append the JSON arrays for this particle group
             JSON_array += this_JSON_array
 
             filenamesDict[particleGroup.UIname]=list(filenames_and_nparts)
@@ -301,6 +302,14 @@ class Reader(object):
             write_to_json(
                 filenamesDict,
                 filename if write_jsons_to_disk else None))] ## None -> returns JSON string
+
+        ## write a tweenParams file if a TweenParams instance is attached to reader
+        if hasattr(self,'tweenParams') and self.tweenParams is not None:
+            JSON_array+=[self.tweenParams.outputToJSON(
+                JSONdir,
+                JSON_prefix=self.JSON_prefix,
+                loud=loud,
+                write_jsons_to_disk=write_jsons_to_disk)] ## None -> returns JSON string
 
         ## handle the startup.json file, may need to append or totally overwrite
         startup_file = os.path.join(
@@ -339,14 +348,6 @@ class Reader(object):
                     {"0":startup_path},
                     startup_file if write_jsons_to_disk else None))] ## None -> returns JSON string
 
-        ## write a tweenParams file if a TweenParams instance is attached to reader
-        if hasattr(self,'tweenParams') and self.tweenParams is not None:
-            JSON_array+=[self.tweenParams.outputToJSON(
-                JSONdir,
-                JSON_prefix=self.JSON_prefix,
-                loud=loud,
-                write_jsons_to_disk=write_jsons_to_disk)] ## None -> returns JSON string
-
         if not write_jsons_to_disk:
             ## create a single "big JSON" with all the data in it in case
             ##  we want to send dataViaFlask
@@ -354,23 +355,24 @@ class Reader(object):
             self.JSON = write_to_json(JSON_dict,None)
             self.JSON_dict = JSON_dict
         else:
-            ## we wrote all the little JSONs to disk
-            ##  so we won't store a single big JSON to send to Flask
+            ## we wrote all the little JSONs to disk individually already
+            ##  so we won't store a single big JSON
             ##  since we only have None's in there anyway
-            self.JSON = None
+            self.JSON = ""
+
         return self.JSON
 
     def outputToDict(self):
-        """[summary]
+        """ Formats the data in the reader to a python dictionary using
+            the attached
+            :func:`Firefly.data_reader.Settings.outputToDict` and
+            :func:`Firefly.data_reader.ParticleGroup.outputToDict` methods
+            (and :func:`Firefly.data_reader.TweenParams.outputToDict` if one is attached).
 
-        :return: [description]
-        :rtype: [type]
-        """
-
-        """
-        Formats the data in the reader to a python dictionary,
-        using the attached Settings
-        instance's and particleGroups' outputToDict() methods.
+        :return: :code:`outputDict`, a dictionary structured like the javascript object in
+            the Firefly webapp. Can be sent to the js interpreter via Flask using the
+            :func:`Firefly.data_reader.Reader.sendDataViaFlask` method.
+        :rtype: dict
         """
         
 
@@ -387,12 +389,14 @@ class Reader(object):
         return outputDict
 
     def sendDataViaFlask(self,port=5000):
-        """[summary]
+        """ Exports the data as if it were being dumped to disk
+            but instead stores it as a string. Then feeds this string
+            to the js interpreter via Flask.
 
-        :param port: [description], defaults to 5000
+        :param port: port that the Firefly Flask server is being hosted on,
+            defaults to 5000
         :type port: int, optional
         """
-
 
         ## retrieve a single "big JSON" of all the mini-JSON 
         ##  sub-files. 
@@ -403,7 +407,7 @@ class Reader(object):
 
         ## post the json to the listening url data_input
         ##  defined in server.py
-        print("posting...",end='')
+        print("Posting...",end='')
         requests.post(
             f'http://localhost:{port:d}/data_input',
             json=self.JSON)
@@ -415,20 +419,46 @@ class Reader(object):
         flask_templates=False,
         dump_data=True,
         overwrite=True,
-        init_git_pages=False,
+        init_gh_pages=False,
         GHREPONAME=None,
         GHUSER=None,
         GHOAUTHTOKENPATH=None):
-        """[summary]
+        """ Copies the necessary source files to run a stand-alone instance of Firefly
+            on the web. Optionally, will also initialize a new GitHub repository with 
+            GitHub pages, a free web-hosting service, so that this stand-alone instance 
+            can be accessed by anyone over the internet.
 
-        :param target: [description], defaults to None
-        :type target: [type], optional
-        :param flask_templates: [description], defaults to False
+        :param target: target directory to save Firefly source files to,
+            defaults to :code:`$HOME/my_Firefly`
+        :type target: str, optional
+        :param flask_templates: flag for whether the flask template files should also be
+            copied. In general, these files are not required to run Firefly over the internet
+            but may be useful if one intends to run Firefly locally in this new directory,
+            defaults to False
         :type flask_templates: bool, optional
-        :param dump_data: [description], defaults to True
+        :param dump_data: flag for whether the data stored in this reader should also be saved
+            to this new stand-alone Firefly directory (vs. only the Firefly source files), defaults to True
         :type dump_data: bool, optional
-        :param overwrite: [description], defaults to True
+        :param overwrite: flag for whether the existing target directory should be purged
+            before anything is copied over or written to disk, defaults to True
         :type overwrite: bool, optional
+        :param init_gh_pages: flag to run :code:`Firefly/bin/make_new_repo.sh` in an attempt to initialize
+            a new github repository with GitHub Pages, a free web-hosting service provided by GitHub, enabled,
+            defaults to False
+        :type init_gh_pages: bool, optional
+        :param GHREPONAME: repository name that we should attempt to create (note that a non-critical error will be raised
+            if the repo already exists), defaults to the last sub-directory of :code:`target`
+        :type GHREPONAME: str, optional
+        :param GHUSER: GitHub username, defaults to :code:`$USER`
+        :type GHUSER: str, optional
+        :param GHOAUTHTOKENPATH: filepath to a file containing only the OAUTH token generated at:
+            :url:`https://github.com/settings/tokens`, defaults to :code:`$HOME/.github.token`
+        :type GHOAUTHTOKENPATH: str, optional
+        :raises FileNotFoundError: if :code:`GHOAUTHTOKENPATH` cannot be resolved
+        :raises FileNotFoundError: if :code:`Firefly/bin/make_new_repo.sh` cannot be found.
+        :return: returns a list of strings, :code:`[target]` if :code:`init_git_pages=False` otherwise
+            the output of running :code:`Firefly/bin/make_new_repo.sh`.
+        :rtype: list of str
         """
 
         ## handle default argument(s)
@@ -496,13 +526,20 @@ class Reader(object):
 
         ## attempts to initialize a github pages site in order to 
         ##  host this copied version of Firefly on the web.
-        if init_git_pages:
+        if not init_gh_pages:
+            return [target]
+        else:
             
             ## default GHREPONAME to the directory name of the target
             if GHREPONAME is None: GHREPONAME = os.path.split(target)[-1]
 
             ## default GHOAUTHOTOKENPATH to ~/.github.token (my arbitrary choice)
-            if GHOAUTHTOKENPATH is None: GHOAUTHTOKENPATH = os.path.join( os.environ['HOME'], '.github.token')
+            if GHOAUTHTOKENPATH is None: GHOAUTHTOKENPATH = '.github.token'
+
+            ## if we were passed a relative path prepend the $HOME path
+            if GHOAUTHTOKENPATH[:1] !=  os.sep: GHOAUTHTOKENPATH = os.path.join(
+                os.environ['HOME'],
+                GHOAUTHTOKENPATH)
 
             ## default to the current user name
             if GHUSER is None: GHUSER = os.environ['USER']
@@ -531,14 +568,9 @@ class Reader(object):
                 ## move to the target directory
                 os.chdir(target)
                 ## intialize the github repo
-                #os.execv(executable,[GHREPONAME,GHUSER,GHOAUTHTOKENPATH]) 
-                with open("foo.txt",'w') as handle:
-                    subp = subprocess.Popen(
-                        ["bash",executable,GHREPONAME,GHUSER,GHOAUTHTOKENPATH],
-                        stdout=handle)
-                    subp.wait()
-                with open("foo.txt",'r') as handle:
-                    lines = handle.read().splitlines()
+                lines = subprocess.check_output(
+                    ["bash",executable,GHREPONAME,GHUSER,GHOAUTHTOKENPATH])
+                lines = lines.decode("utf-8").split("\n")
                 return lines
             except:
                 ## raise any error that might've come up
@@ -548,7 +580,8 @@ class Reader(object):
                 os.chdir(old)
 
 class SimpleReader(Reader):
-    """[summary]
+    """ A wrapper to :class:`Firefly.data_reader.Reader` that attempts to 
+        flexibily open generically formatetd data with minimal interaction from the user.
 
     :param Reader: [description]
     :type Reader: [type]
@@ -560,34 +593,34 @@ class SimpleReader(Reader):
         write_jsons_to_disk=True,
         decimation_factor=1,
         extension='.hdf5',
+        loud=True,
         **kwargs):
-        """[summary]
-
-        :param path_to_data: [description]
-        :type path_to_data: [type]
-        :param write_jsons_to_disk: [description], defaults to True
-        :type write_jsons_to_disk: bool, optional
-        :param decimation_factor: [description], defaults to 1
-        :type decimation_factor: int, optional
-        :param extension: [description], defaults to '.hdf5'
-        :type extension: str, optional
-        :raises ValueError: [description]
-        :raises ValueError: [description]
-        :raises ValueError: [description]
-        """
-
-        """
-        A simple reader that will take as minimal input the path to a 
+        """A simple reader that will take as minimal input the path to a 
         (set of) .hdf5 file(s) and extract each top level group's
-        'Coordinates' or 'x','y','z' values. 
+        'Coordinates' or 'x','y','z' values. Coordinate data must saved either as an (N,3) array 
+        or in 3 separate (N,) arrays indexed by x,y, and z. 
 
-        Keyword arguments are passed to the Reader initialization.
+        Keyword arguments are passed to the parent :class:`~Firefly.data_reader.Reader`.
 
-        Input:
-            path_to_data - path to .hdf5 file(s)
-            write_jsons_to_disk=True - flag to write JSONs to disk
-                immediately at the end of SimpleReader's __init__
+        :param path_to_data: path to .hdf5/csv file(s; can be a directory)
+        :type path_to_data: str 
+        :param write_jsons_to_disk: flag that controls whether data is saved to disk (:code:`True`)
+            or only converted to a string and stored in :code:`self.JSON` (:code:`False`), defaults to True
+        :type write_jsons_to_disk: bool, optional
+        :param decimation_factor: factor by which to reduce the data randomly 
+            i.e. :code:`data=data[::decimation_factor]`, defaults to 1
+        :type decimation_factor: int, optional
+        :param extension: file extension to attempt to open. 
+            Accepts only :code:`'.hdf5'` or :code:`'.csv'`, defaults to '.hdf5'
+        :type extension: str, optional
+        :param loud: flag to print status information to the console, defaults to False
+        :type loud: bool, optional
+        :raises ValueError: if :code:`path_to_data` is not a directory or doesn't contain
+            :code:`extension`
+        :raises ValueError: if :code:`extension` is passed anything either 
+            than :code:`'.hdf5'` or :code:`'.csv'`
         """
+
 
         if extension in path_to_data:
             ## path_to_data points directly to a single .hdf5 file
@@ -629,10 +662,10 @@ class SimpleReader(Reader):
                 ## need to loop through each file and get the matching coordinates, 
                 ##  concatenating them.
                 for fname in fnames:
-                   coordinates = getHDF5Coordinates(fname,particle_group,coordinates) 
+                   coordinates = self.__getHDF5Coordinates(fname,particle_group,coordinates) 
             elif extension == '.csv':
                 ## each file corresponds to a single set of coordinates
-                coordinates = getCSVCoordinates(fnames[i]) 
+                coordinates = self.__getCSVCoordinates(fnames[i]) 
             else:
                 raise ValueError("Invalid extension %s, must be .hdf5 or .csv"%extension) 
 
@@ -649,68 +682,87 @@ class SimpleReader(Reader):
         ##  a single big JSON in self.JSON
         self.dumpToJSON(write_jsons_to_disk=write_jsons_to_disk)
 
-def getCSVCoordinates(fname):
-    """[summary]
+    def __getCSVCoordinates(self,fname):
+        """Simple parser for opening a CSV file and extracting
+            its coordinates.
 
-    :param fname: [description]
-    :type fname: [type]
-    :return: [description]
-    :rtype: [type]
-    """
-    full_df = pd.read_csv(fname,sep=' ')
-    coordinates = np.empty((full_df.shape[0],3))
+        :param fname: full filepath to :code:`.csv` file
+        :type fname: str
+        :return: :code:`coordinates`
+        :rtype: np.ndarray
+        """
+        full_df = pd.read_csv(fname,sep=' ')
+        coordinates = np.empty((full_df.shape[0],3))
 
-    if 'x' in full_df and 'y' in full_df and 'z' in full_df:
-        coordinates[:,0] = full_df['x']
-        coordinates[:,1] = full_df['y']
-        coordinates[:,2] = full_df['z']
-    else:
-        coordinates[:,0] = full_df.iloc[:,0]
-        coordinates[:,1] = full_df.iloc[:,1]
-        coordinates[:,2] = full_df.iloc[:,2]
+        if 'x' in full_df and 'y' in full_df and 'z' in full_df:
+            coordinates[:,0] = full_df['x']
+            coordinates[:,1] = full_df['y']
+            coordinates[:,2] = full_df['z']
+        else:
+            coordinates[:,0] = full_df.iloc[:,0]
+            coordinates[:,1] = full_df.iloc[:,1]
+            coordinates[:,2] = full_df.iloc[:,2]
 
-    return coordinates
+        return coordinates
 
-def getHDF5Coordinates(fname,particle_group,coordinates=None):
-    """[summary]
+    def __getHDF5Coordinates(
+        self,
+        fname,
+        particle_group=None,
+        coordinates=None): 
+        """Simple parser for opening an hdf5 file and extracting
+            its coordinates.
 
-    :param fname: [description]
-    :type fname: [type]
-    :param particle_group: [description]
-    :type particle_group: [type]
-    :param coordinates: [description], defaults to None
-    :type coordinates: [type], optional
-    :return: [description]
-    :rtype: [type]
-    """
-    with h5py.File(fname,'r') as handle:
-        ## (re)-initialize the coordinate array
-        if coordinates is None:
-            coordinates = np.empty((0,3))
+        :param fname: full filepath to :code:`.hdf5` file
+        :type fname: str
+        :param particle_group: :code:`group_name` in the :code:`.hdf5` file
+            that contains this particle type's coordinates. If :code:`None`
+            then it is assumed the Coordinates dataset is saved at the top level
+            of the file, defaults to None
+        :type particle_group: str
+        :param coordinates: existing coordinate array that should be appended to, defaults to None
+        :type coordinates: np.ndarray, optional
+        :raises TypeError: if :code:`coordinates` is not of type :code:`np.ndarray`
+        :raises np.AxisError: if :code:`coordinates` does not have shape (N,3)
+        :return: coordinates, the opened coordinate array from :code:`fname`
+        :rtype: np.ndarray
+        """
 
-        ## open the hdf5 group
-        h5_group = handle[particle_group]
-        
-        if "Coordinates" in h5_group.keys():
-            ## append the coordinates
-            coordinates = np.append(coordinates,h5_group['Coordinates'][()],axis=0)
+        with h5py.File(fname,'r') as handle:
+            ## valide the existing coordinate array or initialize it in the first place
+            if coordinates is None:
+                coordinates = np.empty((0,3))
+            elif type(coordinates)!= np.ndarray:
+                raise TypeError("Existing coordinate array must be of type np.ndarry")
+            if np.shape(coordinates)[-1] != 3:
+                raise np.AxisError("Last axis of existing coordinate array must be of size 3")
 
-        elif ("x" in h5_group.keys() and
-            "y" in h5_group.keys() and
-            "z" in h5_group.keys()):
+            ## open the hdf5 group
+            if particle_group is not None:
+                h5_group = handle[particle_group]
+            else:
+                h5_group = handle
+            
+            if "Coordinates" in h5_group.keys():
+                ## append the (N,3) coordinate array
+                coordinates = np.append(coordinates,h5_group['Coordinates'][()],axis=0)
 
-            ## read the coordinate data from x,y,z arrays
-            xs = h5_group['x'][()]
-            ys = h5_group['y'][()]
-            zs = h5_group['z'][()]
+            elif ("x" in h5_group.keys() and
+                "y" in h5_group.keys() and
+                "z" in h5_group.keys()):
 
-            ## initialize a temporary coordinate array to append
-            temp_coordinates = np.zeros((xs.size,3))
-            temp_coordinates[:,0] = xs
-            temp_coordinates[:,1] = ys
-            temp_coordinates[:,2] = zs
+                ## read the coordinate data from x,y,z arrays
+                xs = h5_group['x'][()]
+                ys = h5_group['y'][()]
+                zs = h5_group['z'][()]
 
-            ## append the coordinates
-            coordinates = np.append(coordinates,temp_coordinates,axis=0)
+                ## initialize a temporary coordinate array to append
+                temp_coordinates = np.zeros((xs.size,3))
+                temp_coordinates[:,0] = xs
+                temp_coordinates[:,1] = ys
+                temp_coordinates[:,2] = zs
 
-    return coordinates
+                ## append the coordinates
+                coordinates = np.append(coordinates,temp_coordinates,axis=0)
+
+        return coordinates
