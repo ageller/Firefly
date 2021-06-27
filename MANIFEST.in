@@ -3,3 +3,4 @@ recursive-include src/Firefly/templates *
 recursive-include src/Firefly/ntbks *
 include src/Firefly/index.html
 include src/Firefly/Firefly
+include src/Firefly/bin/make_new_repo.sh
