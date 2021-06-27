@@ -4,9 +4,9 @@ here=`pwd`
 REPONAME=`basename $here`
 TOKEN=$HOME/.github.token
 
-read -p "Name of new repo? (enter for $REPONAME): " ANS_REPONAME 
-read -p "Github username? (enter for $USER): " ANS_USER
-read -p "Path to github OAUTH token? (enter for $TOKEN): " ANS_TOKEN
+REPONAME=${1:-`read -p "Name of new repo? (enter for $REPONAME): " ANS_REPONAME `}
+USER=${2:-`read -p "Github username? (enter for $USER): " ANS_USER`}
+TOKEN=${3:-`read -p "Path to github OAUTH token? (enter for $TOKEN): " ANS_TOKEN`}
 
 TOKEN=${ANS_TOKEN:-${TOKEN}}
 
@@ -16,8 +16,6 @@ if [ ! -f $TOKEN ]; then
     exit 1
 else
     TOKEN=`cat $TOKEN`
-    REPONAME=${ANS_REPONAME:-${REPONAME}}
-    USER=${ANS_USER:-${USER}}
     ## create a new remote repository
     curl -u ${USER}:${TOKEN} https://api.github.com/user/repos -d "{\"name\": \"${REPONAME}\""
     
@@ -26,17 +24,20 @@ else
     
     ## make a dummy readme
     echo "# ${REPONAME}" > README.md
+    echo "This repository was created automatically by \
+    https://github.com/ageller/Firefly/blob/main/src/Firefly/bin/make_new_repo.sh \
+    you can make your own by installing Firefly." >> README.md
     git add README.md
     
     ## track the Firefly index.html
-    if [ -f index.html]; then
+    if [ -f index.html ]; then
         git add index.html
     else
         echo Missing index.html >& 2
         exit 1
     fi
     ## track the static source files
-    if [ -d static]; then
+    if [ -d static ]; then
         git add --all static
     else
         echo Missing static directory >& 2
@@ -55,5 +56,5 @@ else
 
     echo Check the status of your new github pages site at: \
     https://github.com/${USER}/${REPONAME}/settings/pages \
-    or visit it at ${USER}.github.io/${REPONAME}
+    or visit it at https://${USER}.github.io/${REPONAME}
 fi
