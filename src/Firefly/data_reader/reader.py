@@ -18,7 +18,7 @@ class Reader(object):
     """ This class provides a framework to unify the Settings and ParticleGroup classes
     to make sure that the user can easily produce Firefly compatible files. 
     You should use this Reader as a base class for any custom readers you may build
-    (see :class:`Firefly.data_reader.FIREreader` for example).
+    (see :class:`Firefly.data_reader.SimpleReader` or :class:`Firefly.data_reader.FIREreader` for example).
     """
     
     def __init__(self,
@@ -582,9 +582,6 @@ class Reader(object):
 class SimpleReader(Reader):
     """ A wrapper to :class:`Firefly.data_reader.Reader` that attempts to 
         flexibily open generically formatetd data with minimal interaction from the user.
-
-    :param Reader: [description]
-    :type Reader: [type]
     """
 
     def __init__(
