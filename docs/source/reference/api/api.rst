@@ -25,3 +25,14 @@ Pre-built Readers
     Firefly.data_reader.SimpleReader
     Firefly.data_reader.FIREreader
     Firefly.data_reader.SimpleFIREreader
+
+Server Utitities
+----------------
+
+.. autosummary::
+    :toctree: server
+    :recursive:
+
+    Firefly.server.startFireflyServer
+    Firefly.server.spawnFireflyServer
+    Firefly.server.killAllFireflyServers
