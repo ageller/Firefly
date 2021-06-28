@@ -1,7 +1,6 @@
 import pandas as pd
 import os
 
-
 def write_to_json(dictionary,path):
     return_value = pd.Series(dictionary)
     return_value = return_value.to_json(path,orient='index')

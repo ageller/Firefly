@@ -21,8 +21,8 @@ class Reader(object):
     """
     
     def __init__(self,
-        JSON_prefix='Data',
         JSONdir=None, 
+        JSON_prefix='Data',
         clean_JSONdir=False,
         max_npart_per_file=10**4,
         write_startup='append',
@@ -31,12 +31,12 @@ class Reader(object):
         """Base initialization method for Reader instances. A Reader will read data and produce
             Firefly compatible :code:`.json` files. 
 
-        :param JSON_prefix: Prefix for any :code:`.json` files created, :code:`.json` files will be of the format:
-            :code:`<JSON_prefix><parttype>_%d.json`, defaults to 'Data'
-        :type JSON_prefix: str, optional
         :param JSONdir: the sub-directory that will contain your JSON files, relative
             to your :code:`$HOME directory`. , defaults to :code:`$HOME/<JSON_prefix>`
         :type JSONdir: str, optional
+        :param JSON_prefix: Prefix for any :code:`.json` files created, :code:`.json` files will be of the format:
+            :code:`<JSON_prefix><parttype>_%d.json`, defaults to 'Data'
+        :type JSON_prefix: str, optional
         :param clean_JSONdir: flag to delete all :code:`.json` files in
             the :code:`JSONdir`. Strictly not necessary (since :code:`filenames.json` 
             will be updated) but it is good to clean up after yourself., defaults to False
