@@ -197,14 +197,10 @@ class Settings(object):
         :type UIcolorPicker: dict of UIname:bool, optional
         """
 
-        for key in locals():
-            if key in self.__particle_startup_settings and locals()[key] is None:
-                locals()[key] = dict()
-
         self.__particle_UI_settings = {
-            'UIparticle':UIparticle,             
-            'UIdropdown':UIdropdown,
-            'UIcolorPicker':UIcolorPicker, 
+            'UIparticle':dict() if UIparticle is None else UIparticle,
+            'UIdropdown':dict() if UIdropdown is None else UIdropdown,
+            'UIcolorPicker':dict() if UIcolorPicker is None else UIcolorPicker,
         }
 
     def camera_settings(
@@ -317,17 +313,13 @@ class Settings(object):
         :type showParts: dict of UIname:bool, optional
         """
 
-        for key in locals():
-            if key in self.__particle_startup_settings and locals()[key] is None:
-                locals()[key] = dict()
-
         self.__particle_startup_settings = {
-            'plotNmax':plotNmax, 
-            'showVel':showVel, 
-            'velType':velType,  
-            'color':color, 
-            'sizeMult':sizeMult, 
-            'showParts':showParts, 
+            'plotNmax':dict() if plotNmax is None else plotNmax,
+            'showVel':dict() if showVel is None else showVel,
+            'velType':dict() if velType is None else velType,
+            'color':dict() if color is None else color,
+            'sizeMult':dict() if sizeMult is None else sizeMult,
+            'showParts':dict() if showParts is None else showParts
         }
     
     def particle_filter_settings(
@@ -352,15 +344,9 @@ class Settings(object):
         :type filterVals: dict of UIname:dict of field:[min,max] range, optional
         """
 
-        for key in locals():
-            if key in self.__particle_startup_settings:
-                value = locals()[key]
-                if value is None:
-                    locals()[key] = dict()
-
         self.__particle_filter_settings = {
-            'filterLims':filterLims, 
-            'filterVals':filterVals, 
+            'filterLims':dict() if filterLims is None else filterLims, 
+            'filterVals':dict() if filterVals is None else filterVals, 
         }
 
     def particle_colormap_settings(
@@ -403,21 +389,16 @@ class Settings(object):
         :type showColormap: dict of UIname:bool, optional
         """
 
-        for key in locals():
-            if key in self.__particle_startup_settings:
-                value = locals()[key]
-                if value is None:
-                    locals()[key] = dict()
-
         ## settings that will define the initial values of the /colormap/ in the particle UI panes
         ##  and consequently what particles are colored at startup.
         self.__particle_colormap_settings = {
-            'colormapLims':colormapLims, 
-            'colormapVals':colormapVals,  
-            'colormap':colormap, 
-            'colormapVariable':colormapVariable,  
-            'showColormap':showColormap, 
+            'colormapLims':dict() if colormapLims is None else colormapLims, 
+            'colormapVals':dict() if colormapVals is None else colormapVals,  
+            'colormap':dict() if colormap is None else colormap, 
+            'colormapVariable':dict() if colormapVariable is None else colormapVariable,  
+            'showColormap':dict() if showColormap is None else showColormap, 
         }
+
 
     def addToSettings(
         self,
@@ -456,7 +437,7 @@ class Settings(object):
         for attr in self.__dict__.keys():
             ## loop through all attributes to locate all the sub-dictionaries
             if '_settings' in attr:
-                obj = getattr(getattr(self,attr))
+                obj = getattr(self,attr)
 
                 ## distinguish between methods and private dictionaries
                 if type(obj) == dict:
