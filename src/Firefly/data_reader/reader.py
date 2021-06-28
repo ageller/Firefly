@@ -28,7 +28,7 @@ class Reader(object):
         write_startup='append',
         settings=None,
         tweenParams=None):
-        """ Base initialization method for Reader instances. A Reader will read data and produce
+        """Base initialization method for Reader instances. A Reader will read data and produce
             Firefly compatible :code:`.json` files. 
 
         :param JSON_prefix: Prefix for any :code:`.json` files created, :code:`.json` files will be of the format:
@@ -450,7 +450,7 @@ class Reader(object):
         :param GHUSER: GitHub username, defaults to :code:`$USER`
         :type GHUSER: str, optional
         :param GHOAUTHTOKENPATH: filepath to a file containing only the OAUTH token generated at:
-            :url:`https://github.com/settings/tokens`, defaults to :code:`$HOME/.github.token`
+            https://github.com/settings/tokens, defaults to :code:`$HOME/.github.token`
         :type GHOAUTHTOKENPATH: str, optional
         :raises FileNotFoundError: if :code:`GHOAUTHTOKENPATH` cannot be resolved
         :raises FileNotFoundError: if :code:`Firefly/bin/make_new_repo.sh` cannot be found.
