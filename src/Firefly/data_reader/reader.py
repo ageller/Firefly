@@ -156,12 +156,11 @@ class Reader(object):
                 os.path.join(hard_data_path,"..","..")):
 
                 if loud:
-                    warnings.warn(FireflyWarning(
-                        "JSONdir: {} -- ".format(self.JSONdir)+
+                    print( "JSONdir: {} -- ".format(self.JSONdir)+
                         "is not a sub-directory of Firefly/static/data. "+
                         "\nThis may produce confusing or inoperable results. "+
                         "As such, we will create a symlink for you when you "+
-                        " dumpToJSON."))
+                        " dumpToJSON.")
 
                 self.needs_soft_link = True
                 break
@@ -520,7 +519,7 @@ class Reader(object):
             finally:
                 ## replace the old stat_data_dir
                 self.static_data_dir = old
-                self.hard_data_path,self.short_data_path = self.__splitAndValidateDatadir()
+                self.hard_data_path,self.short_data_path = self.__splitAndValidateDatadir(loud=False)
 
         ## attempts to initialize a github pages site in order to 
         ##  host this copied version of Firefly on the web.
