@@ -4,7 +4,6 @@ import numpy as np
 
 import os 
 
-from .errors import FireflyError,FireflyWarning,warnings
 from .json_utils import write_to_json
 
 class TweenParams(object):

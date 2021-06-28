@@ -3,7 +3,6 @@ import numpy as np
 
 import os 
 
-from .errors import FireflyError,FireflyWarning,FireflyMessage,warnings
 from .json_utils import write_to_json
 
 class ParticleGroup(object):
@@ -111,8 +110,7 @@ class ParticleGroup(object):
         try: 
             assert len(tracked_names) == len(tracked_filter_flags)
         except:
-            warnings.warn(FireflyWarning(
-                "Make sure each tracked_array has a tracked_filter_flag, assuming True."))
+            print("Make sure each tracked_array has a tracked_filter_flag, assuming True.")
             new_tracked_filter_flags = np.append(
                 tracked_filter_flags,
                 [True]*(len(tracked_names)-len(tracked_filter_flags)),axis=0
@@ -122,8 +120,7 @@ class ParticleGroup(object):
         try: 
             assert len(tracked_names) == len(tracked_colormap_flags)
         except:
-            warnings.warn(FireflyWarning(
-                "Make sure each tracked_array has a tracked_colormap_flag, assuming True."))
+            print("Make sure each tracked_array has a tracked_colormap_flag, assuming True.")
             new_tracked_colormap_flags = np.append(
                 tracked_colormap_flags,
                 [True]*(len(tracked_names)-len(tracked_colormap_flags)),axis=0
@@ -369,14 +366,13 @@ class ParticleGroup(object):
         if not os.path.isdir(full_path):
             os.makedirs(full_path)
         if loud:
-            FireflyMessage(
-                "You will need to add the sub-filenames to"+
+            print("You will need to add the sub-filenames to"+
                 " filenames.json if this was not called by a Reader instance.")
-            FireflyMessage("Writing:",self,"JSON to %s"%full_path)
+            print("Writing:",self,"JSON to %s"%full_path)
 
         ## do we want to delete any existing jsons here?
         if clean:
-            warnings.warn(FireflyWarning("Removing old JSON files from %s"%full_path))
+            print("Removing old JSON files from %s"%full_path)
             for fname in os.listdir(full_path):
                 if "json" in fname:
                     os.remove(os.path.join(full_path,fname))

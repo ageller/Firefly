@@ -11,7 +11,6 @@ import numpy as np
 from .settings import Settings
 from .tween import TweenParams
 from .particlegroup import ParticleGroup
-from .errors import FireflyWarning,FireflyMessage,warnings
 from .json_utils import write_to_json,load_from_json
 
 class Reader(object):
@@ -74,7 +73,7 @@ class Reader(object):
 
         if JSONdir is None:
             ## default to saving directly into the Firefly directory
-            FireflyMessage("JSONdir is None, defaulting to %s/%s"%(self.static_data_dir,JSON_prefix))
+            print("JSONdir is None, defaulting to %s/%s"%(self.static_data_dir,JSON_prefix))
             JSONdir = os.path.join(
                 self.static_data_dir,
                 JSON_prefix)
@@ -225,8 +224,7 @@ class Reader(object):
             ##  hard files in self.JSONdir and instead actually put them in 
             ##  Firefly/static/data/<short_data_path>
             if loud:
-                FireflyMessage(
-                    "Outputting files to: %s instead of: %s as originally specified."%(
+                print("Outputting files to: %s instead of: %s as originally specified."%(
                         static_data_path,
                         self.JSONdir))
 
@@ -270,7 +268,7 @@ class Reader(object):
         filenamesDict = {}
         for particleGroup in self.particleGroups:
             if loud:
-                FireflyMessage("Outputting:",particleGroup)
+                print("Outputting:",particleGroup)
 
             this_JSON_array,filenames_and_nparts = particleGroup.outputToJSON(
                 self.short_data_path,

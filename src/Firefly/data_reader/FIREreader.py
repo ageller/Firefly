@@ -3,7 +3,6 @@ import os
 
 from .settings import Settings
 from .reader import Reader,ParticleGroup
-from .errors import FireflyError,FireflyWarning,FireflyMessage,warnings
 
 from .snapshot_utils import openSnapshot
 
@@ -116,8 +115,7 @@ class FIREreader(Reader):
 
         ##  this I handle separately 
         if 'Coordinates' in returnKeys:
-            warnings.warn(FireflyWarning(
-                "Do not put Coordinates in returnKeys,removing it... (and its flags)"))
+            print("Do not put Coordinates in returnKeys,removing it... (and its flags)")
             returnKeys = list(returnKeys)
             filterFlags = list(filterFlags)
             colormapFlags = list(colormapFlags)
@@ -176,7 +174,7 @@ class FIREreader(Reader):
         (You're welcome!!). Also adds these particle groups to the reader's settings file.
         """
         for ptype,UIname,dec_factor in list(zip(self.ptypes,self.UInames,self.decimation_factors)):
-            FireflyMessage("Loading ptype %s"%ptype)
+            print("Loading ptype %s"%ptype)
             snapdict = openSnapshot(
                 self.snapdir,
                 self.snapnum,
