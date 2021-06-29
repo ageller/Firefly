@@ -1,4 +1,4 @@
-from .reader import Reader,SimpleReader
+from .reader import Reader,SimpleReader,ArrayReader
 
 from .settings import Settings
 

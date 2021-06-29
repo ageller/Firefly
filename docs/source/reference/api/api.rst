@@ -23,6 +23,7 @@ Pre-built Readers
     :recursive:
 
     Firefly.data_reader.SimpleReader
+    Firefly.data_reader.ArrayReader
     Firefly.data_reader.FIREreader
     Firefly.data_reader.SimpleFIREreader
 

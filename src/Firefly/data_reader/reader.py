@@ -588,7 +588,6 @@ class SimpleReader(Reader):
         decimation_factor=1,
         extension='.hdf5',
         loud=True,
-        coordinates=None,
         **kwargs):
         """A simple reader that will take as minimal input the path to a 
         (set of) .hdf5 file(s) and extract each top level group's
@@ -610,94 +609,70 @@ class SimpleReader(Reader):
         :type extension: str, optional
         :param loud: flag to print status information to the console, defaults to False
         :type loud: bool, optional
-        :param coordinates: raw coordinate data, ignores path_to_data if passed.
-            Can either pass N,3 np.array which is interpreted as a single particle group's 
-            coordinates or a jagged (M,N_m,3) list of np.arrays which is interpreted as M many 
-            particle groups with each having N_m particles, defaults to None (thereby reading from file)
-        :type coordinates: list, optional
         :raises ValueError: if :code:`path_to_data` is not a directory or doesn't contain
             :code:`extension`
         :raises ValueError: if :code:`extension` is passed anything either 
             than :code:`'.hdf5'` or :code:`'.csv'`
-        :raises np.AxisError: the raw coordinate data passed cannot be interpreted
+        :raises ValueError: if particle_groups is not None, extension = .csv, and 
+            len(particle_groups) != len(detected filenames in path_to_data)
         """
-
 
         ## create a default reader instance
         super().__init__(**kwargs)
 
-        if coordinates is None:
-            if extension in path_to_data:
-                ## path_to_data points directly to a single .hdf5 file
-                fnames = [path_to_data]
+        if extension in path_to_data:
+            ## path_to_data points directly to a single .hdf5 file
+            fnames = [path_to_data]
 
-            elif os.path.isdir(path_to_data):
-                ## path_to_data points to a directory containing .hdf5 data files
+        elif os.path.isdir(path_to_data):
+            ## path_to_data points to a directory containing .hdf5 data files
 
-                fnames = []
-                for this_fname in os.listdir(path_to_data):
-                    if extension in this_fname:
-                        fnames += [os.path.join(path_to_data,this_fname)]
-            else:
-                raise ValueError(
-                    "%s needs to point to an %s file or "%(path_to_data,extension)+
-                    "a directory containing %s files."%extension)
+            fnames = []
+            for this_fname in os.listdir(path_to_data):
+                if extension in this_fname:
+                    fnames += [os.path.join(path_to_data,this_fname)]
+        else:
+            raise ValueError(
+                "%s needs to point to an %s file or "%(path_to_data,extension)+
+                "a directory containing %s files."%extension)
 
+        if extension == '.hdf5':
+            ## take the contents of the "first" file to define particle groups and keys
+            with h5py.File(fnames[0],'r') as handle:
+                particle_groups = list(handle.keys())
+
+            ## Gadget data has a header as well as particle groups
+            ##  so we need to ignore it
+            if 'Header' in particle_groups:
+                particle_groups.pop(particle_groups.index("Header"))
+        elif extension == '.csv':
+            particle_groups = [fname.replace(extension,'').split(os.sep)[-1] for fname in fnames]
+        else:
+            raise ValueError("Invalid extension %s, must be .hdf5 or .csv"%extension) 
+
+        print("Opening %d files and %d particle types..."%(len(fnames),len(particle_groups)))
+
+        for i,particle_group in enumerate(particle_groups):
+            coordinates = None
             if extension == '.hdf5':
-                ## take the contents of the "first" file to define particle groups and keys
-                with h5py.File(fnames[0],'r') as handle:
-                    particle_groups = list(handle.keys())
-
-                ## Gadget data has a header as well as particle groups
-                ##  so we need to ignore it
-                if 'Header' in particle_groups:
-                    particle_groups.pop(particle_groups.index("Header"))
+                ## need to loop through each file and get the matching coordinates, 
+                ##  concatenating them.
+                for fname in fnames:
+                    coordinates = self.__getHDF5Coordinates(fname,particle_group,coordinates) 
             elif extension == '.csv':
-                particle_groups = [fname.replace(extension,'').split(os.sep)[-1] for fname in fnames]
+                ## each file corresponds to a single set of coordinates
+                coordinates = self.__getCSVCoordinates(fnames[i]) 
             else:
                 raise ValueError("Invalid extension %s, must be .hdf5 or .csv"%extension) 
 
-            print("Opening %d files and %d particle types..."%(len(fnames),len(particle_groups)))
-
-            for i,particle_group in enumerate(particle_groups):
-                coordinates = None
-                if extension == '.hdf5':
-                    ## need to loop through each file and get the matching coordinates, 
-                    ##  concatenating them.
-                    for fname in fnames:
-                        coordinates = self.__getHDF5Coordinates(fname,particle_group,coordinates) 
-                elif extension == '.csv':
-                    ## each file corresponds to a single set of coordinates
-                    coordinates = self.__getCSVCoordinates(fnames[i]) 
-                else:
-                    raise ValueError("Invalid extension %s, must be .hdf5 or .csv"%extension) 
-
-                ## initialize a firefly particle group instance
-                firefly_particleGroup = ParticleGroup(
-                    particle_group,
-                    coordinates,
-                    decimation_factor=decimation_factor)
-                ## attach the instance to the reader
-                self.addParticleGroup(firefly_particleGroup)
-        else:
-            if len(np.shape(coordinates[0]))==2:
-                ## passed a jagged array of different coordinates
-                pass
-            elif len(np.shape(coordinates))==2:
-                ## passed a single list of coordinates
-                coordinates = [coordinates]
-            else:
-                raise np.AxisError("Uninterpretable coordinate array, either pass a single (N,3) array\
-                    or a jagged list of 'shape' (M,N_m,3)")
-            ## loop through each of the particle groups
-            for i,coords in enumerate(coordinates):
-                ## initialize a firefly particle group instance
-                firefly_particleGroup = ParticleGroup(
-                    'PGroup%d'%i,
-                    coords,
-                    decimation_factor=decimation_factor)
-                ## attach the instance to the reader
-                self.addParticleGroup(firefly_particleGroup)
+            ## initialize a firefly particle group instance
+            firefly_particleGroup = ParticleGroup(
+                particle_group,
+                coordinates,
+                decimation_factor=decimation_factor)
+            ## attach the instance to the reader
+            self.addParticleGroup(firefly_particleGroup)
+        
 
         ## either write a bunch of mini JSONs to disk or store 
         ##  a single big JSON in self.JSON
@@ -789,3 +764,72 @@ class SimpleReader(Reader):
                 coordinates = np.append(coordinates,temp_coordinates,axis=0)
 
         return coordinates
+    
+    class ArrayReader(Reader):
+
+        def __init__(
+            self,
+            coordinates,
+            UInames=None,
+            decimation_factor=1,
+            write_jsons_to_disk=True,
+            loud=True,
+            **kwargs):
+            """Takes a list of opened numpy arrays and creates a :class:`Firefly.data_reader.Reader` instance
+                with their data. Takes :class:`Firefly.data_reader.Reader` passthrough kwargs.
+
+            :param coordinates: raw coordinate data, ignores path_to_data if passed.
+                Can either pass N,3 np.array which is interpreted as a single particle group's 
+                coordinates or a jagged (M,N_m,3) list of np.arrays which is interpreted as M many 
+                particle groups with each having N_m particles, defaults to None (thereby reading from file)
+            :type coordinates: list, optional
+            :param UInames: list of particle group UInames
+            :type UInames: list of str
+            :param decimation_factor: factor by which to reduce the data randomly 
+                i.e. :code:`data=data[::decimation_factor]`, defaults to 1
+            :type decimation_factor: int, optional
+            :param write_jsons_to_disk: flag that controls whether data is saved to disk (:code:`True`)
+                or only converted to a string and stored in :code:`self.JSON` (:code:`False`), defaults to True
+            :type write_jsons_to_disk: bool, optional
+            :param loud: flag to print status information to the console, defaults to False
+            :type loud: bool, optional
+            :raises np.AxisError: if the coordinate data cannot be interpreted
+            :raises ValueError: if the number of particle groups does not match the number of
+                coordinate arrays
+            """
+
+            super().__init__(**kwargs)
+
+            ## wrap coordinate array if necessary
+            if len(np.shape(coordinates)[0])==2 and np.shape(coordinates[0])[-1]==3:
+                ## passed a jagged array of different coordinates
+                pass
+            elif len(np.shape(coordinates))==2 and np.shape(coordinates)[-1]==3:
+                ## passed a single list of coordinates, prepend an axis for the single group
+                coordinates = [coordinates]
+            else:
+                raise np.AxisError("Uninterpretable coordinate array, either pass a single (N,3) array\
+                    or a jagged list of 'shape' (M,N_m,3)")
+
+            ## initialize default particle group names
+            if UInames is None: UInames = ['PGroup_%d'%i for i in range(len(coordinates))]
+            elif len(UInames) != len(coordinates): 
+                raise ValueError("%d UInames does not match passed\
+                number of %d coordinate arrays"%(len(UInames),len(coordinates)))
+
+            ## loop through each of the particle groups
+            for coords,UIname in zip(coordinates,UInames):
+                ## initialize a firefly particle group instance
+                firefly_particleGroup = ParticleGroup(
+                    UIname,
+                    coords,
+                    decimation_factor=decimation_factor)
+
+                ## attach the instance to the reader
+                self.addParticleGroup(firefly_particleGroup)
+
+            ## either write a bunch of mini JSONs to disk or store 
+            ##  a single big JSON in self.JSON
+            self.dumpToJSON(
+                write_jsons_to_disk=write_jsons_to_disk,
+                loud=loud)
