@@ -327,7 +327,7 @@ class Settings(object):
         filterLims=None,
         filterVals=None,
         **extra):
-        """Settings that will define the initial values of the /filters/ in the particle UI panes
+        """Settings that will define the initial values of the filters in the particle UI panes
         and consequently what particles are filtered at startup.
 
         :param filterLims: initial [min, max] limits to the filters. 
@@ -357,7 +357,7 @@ class Settings(object):
         colormapVariable=None,
         showColormap=None,
         **extra):
-        """[summary]
+        """Settings that will define the initial values of the colormaps in the particle UI panes.
 
         :param colormapLims: initial [min, max] limits to the colormaps. 
             This is a nested dict of the particle UInames, 

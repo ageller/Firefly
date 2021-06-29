@@ -766,6 +766,9 @@ class SimpleReader(Reader):
         return coordinates
     
     class ArrayReader(Reader):
+        """A wrapper to :class:`Firefly.data_reader.Reader` that stores 
+            raw numpy array data without opening anything from disk.
+        """
 
         def __init__(
             self,
