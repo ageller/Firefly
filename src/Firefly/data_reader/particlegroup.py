@@ -81,8 +81,7 @@ class ParticleGroup(object):
         attached_settings=None,
         doSPHrad=False,
         **settings_kwargs):
-        """
-            Accepts pass-through kwargs for :class:`Firefly.data_reader.Settings` whether one is attached
+        """Accepts pass-through kwargs for :class:`Firefly.data_reader.Settings` whether one is attached
             at initialization or not.
 
         :param UIname: Name of the particle group that shows up in the UI, 4-5 characters is best
@@ -106,7 +105,7 @@ class ParticleGroup(object):
         :type tracked_colormap_flags: list of bool with len = nfields, optional
         :param decimation_factor: factor by which to reduce the data randomly 
                 i.e. :code:`data=data[::decimation_factor]`, defaults to 1
-            :type decimation_factor: int, optional
+        :type decimation_factor: int, optional
         :param filenames_and_nparts: Allows you to manually control how the particles
             are distributed among the sub-JSON files, it is
             **highly recommended that you leave this to** None such that particles are equally

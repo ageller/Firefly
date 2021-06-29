@@ -2,8 +2,7 @@ import pandas as pd
 import os
 
 def write_to_json(dictionary,path=None):
-    """Simple utility function to write a dictionary to a path as
-        as :code:`.json` file.
+    """Simple utility function to write a dictionary to a path as :code:`.json` file.
         If path is None then instead a string is returned (thanks pandas!)
 
     :param dictionary: arbitrary data dictionary that we want to output

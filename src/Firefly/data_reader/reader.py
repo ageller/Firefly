@@ -197,10 +197,10 @@ class Reader(object):
         (and :func:`Firefly.data_reader.TweenParams.outputToJSON` if one is attached).
         :param loud: flag to print status information to the console, defaults to False
         :type loud: bool, optional
-        :param write_jsons_to_disk: flag that controls whether data is saved to disk (:code:`True`)
+        :param write_jsons_to_disk: flag that controls whether data is saved to disk (:code:`True`) 
             or only converted to a string and stored in :code:`self.JSON` (:code:`False`), defaults to True
         :type write_jsons_to_disk: bool, optional
-        :param symlink: flag for whether a soft link should be created between where the data is stored on
+        :param symlink: flag for whether a soft link should be created between where the data is stored on 
             disk and the :code:`self.static_data_dir` directory (:code:`True`) or whether it should be 
             saved directly to :code:`self.static_data_dir` directory (:code:`False`). 
             Note that :code:`symlink=False` will not _also_ save results in :code:`self.JSONdir`, defaults to True
@@ -765,74 +765,74 @@ class SimpleReader(Reader):
 
         return coordinates
     
-    class ArrayReader(Reader):
-        """A wrapper to :class:`Firefly.data_reader.Reader` that stores 
-            raw numpy array data without opening anything from disk.
+class ArrayReader(Reader):
+    """A wrapper to :class:`Firefly.data_reader.Reader` that stores 
+        raw numpy array data without opening anything from disk.
+    """
+
+    def __init__(
+        self,
+        coordinates,
+        UInames=None,
+        decimation_factor=1,
+        write_jsons_to_disk=True,
+        loud=True,
+        **kwargs):
+        """Takes a list of opened numpy arrays and creates a :class:`Firefly.data_reader.Reader` instance
+            with their data. Takes :class:`Firefly.data_reader.Reader` passthrough kwargs.
+
+        :param coordinates: raw coordinate data, ignores path_to_data if passed.
+            Can either pass N,3 np.array which is interpreted as a single particle group's 
+            coordinates or a jagged (M,N_m,3) list of np.arrays which is interpreted as M many 
+            particle groups with each having N_m particles, defaults to None (thereby reading from file)
+        :type coordinates: list, optional
+        :param UInames: list of particle group UInames
+        :type UInames: list of str
+        :param decimation_factor: factor by which to reduce the data randomly 
+            i.e. :code:`data=data[::decimation_factor]`, defaults to 1
+        :type decimation_factor: int, optional
+        :param write_jsons_to_disk: flag that controls whether data is saved to disk (:code:`True`)
+            or only converted to a string and stored in :code:`self.JSON` (:code:`False`), defaults to True
+        :type write_jsons_to_disk: bool, optional
+        :param loud: flag to print status information to the console, defaults to False
+        :type loud: bool, optional
+        :raises np.AxisError: if the coordinate data cannot be interpreted
+        :raises ValueError: if the number of particle groups does not match the number of
+            coordinate arrays
         """
 
-        def __init__(
-            self,
-            coordinates,
-            UInames=None,
-            decimation_factor=1,
-            write_jsons_to_disk=True,
-            loud=True,
-            **kwargs):
-            """Takes a list of opened numpy arrays and creates a :class:`Firefly.data_reader.Reader` instance
-                with their data. Takes :class:`Firefly.data_reader.Reader` passthrough kwargs.
+        super().__init__(**kwargs)
 
-            :param coordinates: raw coordinate data, ignores path_to_data if passed.
-                Can either pass N,3 np.array which is interpreted as a single particle group's 
-                coordinates or a jagged (M,N_m,3) list of np.arrays which is interpreted as M many 
-                particle groups with each having N_m particles, defaults to None (thereby reading from file)
-            :type coordinates: list, optional
-            :param UInames: list of particle group UInames
-            :type UInames: list of str
-            :param decimation_factor: factor by which to reduce the data randomly 
-                i.e. :code:`data=data[::decimation_factor]`, defaults to 1
-            :type decimation_factor: int, optional
-            :param write_jsons_to_disk: flag that controls whether data is saved to disk (:code:`True`)
-                or only converted to a string and stored in :code:`self.JSON` (:code:`False`), defaults to True
-            :type write_jsons_to_disk: bool, optional
-            :param loud: flag to print status information to the console, defaults to False
-            :type loud: bool, optional
-            :raises np.AxisError: if the coordinate data cannot be interpreted
-            :raises ValueError: if the number of particle groups does not match the number of
-                coordinate arrays
-            """
+        ## wrap coordinate array if necessary
+        if len(np.shape(coordinates)[0])==2 and np.shape(coordinates[0])[-1]==3:
+            ## passed a jagged array of different coordinates
+            pass
+        elif len(np.shape(coordinates))==2 and np.shape(coordinates)[-1]==3:
+            ## passed a single list of coordinates, prepend an axis for the single group
+            coordinates = [coordinates]
+        else:
+            raise np.AxisError("Uninterpretable coordinate array, either pass a single (N,3) array\
+                or a jagged list of 'shape' (M,N_m,3)")
 
-            super().__init__(**kwargs)
+        ## initialize default particle group names
+        if UInames is None: UInames = ['PGroup_%d'%i for i in range(len(coordinates))]
+        elif len(UInames) != len(coordinates): 
+            raise ValueError("%d UInames does not match passed\
+            number of %d coordinate arrays"%(len(UInames),len(coordinates)))
 
-            ## wrap coordinate array if necessary
-            if len(np.shape(coordinates)[0])==2 and np.shape(coordinates[0])[-1]==3:
-                ## passed a jagged array of different coordinates
-                pass
-            elif len(np.shape(coordinates))==2 and np.shape(coordinates)[-1]==3:
-                ## passed a single list of coordinates, prepend an axis for the single group
-                coordinates = [coordinates]
-            else:
-                raise np.AxisError("Uninterpretable coordinate array, either pass a single (N,3) array\
-                    or a jagged list of 'shape' (M,N_m,3)")
+        ## loop through each of the particle groups
+        for coords,UIname in zip(coordinates,UInames):
+            ## initialize a firefly particle group instance
+            firefly_particleGroup = ParticleGroup(
+                UIname,
+                coords,
+                decimation_factor=decimation_factor)
 
-            ## initialize default particle group names
-            if UInames is None: UInames = ['PGroup_%d'%i for i in range(len(coordinates))]
-            elif len(UInames) != len(coordinates): 
-                raise ValueError("%d UInames does not match passed\
-                number of %d coordinate arrays"%(len(UInames),len(coordinates)))
+            ## attach the instance to the reader
+            self.addParticleGroup(firefly_particleGroup)
 
-            ## loop through each of the particle groups
-            for coords,UIname in zip(coordinates,UInames):
-                ## initialize a firefly particle group instance
-                firefly_particleGroup = ParticleGroup(
-                    UIname,
-                    coords,
-                    decimation_factor=decimation_factor)
-
-                ## attach the instance to the reader
-                self.addParticleGroup(firefly_particleGroup)
-
-            ## either write a bunch of mini JSONs to disk or store 
-            ##  a single big JSON in self.JSON
-            self.dumpToJSON(
-                write_jsons_to_disk=write_jsons_to_disk,
-                loud=loud)
+        ## either write a bunch of mini JSONs to disk or store 
+        ##  a single big JSON in self.JSON
+        self.dumpToJSON(
+            write_jsons_to_disk=write_jsons_to_disk,
+            loud=loud)
