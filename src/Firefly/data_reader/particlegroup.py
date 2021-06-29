@@ -15,18 +15,27 @@ class ParticleGroup(object):
     """
 
     def __repr__(self):
+        """Implementation of builtin function __repr__
+
+        :return: mystr, the pretty rendering of a particle group
+        :rtype: str
         """
-        Implementation of builtin function __repr__
-        """
+        
         mystr = "\nParticleGroup: %s\n"%(self.UIname)
         mystr += "Contains %d particles (%d after decimation) and %d tracked fields"%(
             self.nparts,self.nparts//self.decimation_factor,len(self.tracked_names))
         return mystr
 
     def __getitem__(self,key):
+        """Implementation of builtin function __getitem__ to retreive tracked field data.
+
+        :param key: field array to extract
+        :type key: str 
+        :raises KeyError: if field is not one of the tracked fields
+        :return: field
+        :rtype: np.ndarray
         """
-        Implementation of builtin function __getitem__
-        """
+
         if key == 'Coordinates':
             return self.coordinates
 
@@ -36,64 +45,99 @@ class ParticleGroup(object):
             raise KeyError("%s is not a tracked array"%key)
     
     def __setitem__(self,key,value):
+        """Implementation of builtin function __setitem__ to replace
+            field data or track new fields. Filter flag and colormap flags
+            will be set to true, call :func:`Firefly.data_reader.ParticleGroup.trackArray`
+            directly if this is undesired.
+
+        :param key: name of field to alter or start tracking
+        :type key: str
+        :param value: field data to replace current field data with
+            or initially track
+        :type value: np.ndarray 
         """
-        Implementation of builtin function __setitem__
-        """
+
         if key == 'Coordinates':
+            ## replace the coordinates
             self.coordinates=value
         elif key in self.tracked_names:
+            ## replace a field array
             self.tracked_arrays[self.tracked_names.index(key)]=value
         else:
-            raise KeyError("%s is not a tracked array"%key)
+            ## track a key we haven't tracked yet,
+            ##  filter and colormap flags will be set to True by default.
+            self.trackArray(key,value)
         
     def __init__(
         self,
         UIname,
         coordinates,
-        tracked_arrays = None,
-        tracked_names = None,
-        tracked_filter_flags = None,
-        tracked_colormap_flags = None,
-        decimation_factor = 1,
-        filenames_and_nparts = None,
-        linked_settings=None,
+        tracked_arrays=None,
+        tracked_names=None,
+        tracked_filter_flags=None,
+        tracked_colormap_flags=None,
+        decimation_factor=1,
+        filenames_and_nparts=None,
+        attached_settings=None,
         doSPHrad=False,
-        **option_kwargs):
+        **settings_kwargs):
         """
-        `UIname` - Name of the particle group that shows up in the UI, 4-5 characters is best
+            Accepts pass-through kwargs for :class:`Firefly.data_reader.Settings` whether one is attached
+            at initialization or not.
 
-        `coordinates` - The coordinates of the points in 3d space, should have a shape of `(nparts,3)`.
-
-        `tracked_arrays=[]` - The arrays to associate with each coordinate in space, each array
-            should be one-dimensional and have `nparts` entries.
-
-        `tracked_names=[]` - Should be the same length as `tracked_arrays`, and gives a
-            name to each of the arrays when they show up in the UI dropdowns.
-
-        `tracked_filter_flags=[]` - Should be the same length as `tracked_arrays`,
-            and gives a flag for whether that array should be available as an interactive filter within Firefly.
-        `tracked_colormap_flags=[]` - Should be the same length as `tracked_arrays`,
-            and gives a flag for whether that array should be available to color points within Firefly.
-
-        `decimation_factor=1` - An integer factor to sub-sample the provided dataset at
-            (in addition to any manual subsampling you might do). This will choose
-            `nparts/decimation_factor` many points at random from the dataset to display in Firefly. 
-
-        `filenames_and_nparts=None` - Allows you to manually control how the particles
-            are distributed among the JSON files, **highly recommended that
-            you leave this to** `None`, but if for whatever reason you need fine-tuning
+        :param UIname: Name of the particle group that shows up in the UI, 4-5 characters is best
+            so that it doesn't spill out of the GUI.
+        :type UIname: str 
+        :param coordinates: The coordinates of the points in 3d space, should have a shape of `(nparts,3)`
+        :type coordinates: np.ndarray
+        :param tracked_arrays: The field data arrays to associate with each coordinate in space, each array
+            should be one-dimensional and have `nparts` entries., defaults to None
+        :type tracked_arrays: (nfields,nparts) np.ndarray, optional
+        :param tracked_names: Should be the same length as `tracked_arrays`, and gives a
+            name to each of the arrays when they show up in the UI dropdowns., defaults to None
+        :type tracked_names: list of str with len = nfields, optional
+        :param tracked_filter_flags: Should be the same length as `tracked_arrays`,
+            and gives a flag for whether that array should be available as an
+            interactive filter within the webapp, defaults to None
+        :type tracked_filter_flags: list of bool with len = nfields, optional
+        :param tracked_colormap_flags: Should be the same length as `tracked_arrays`,
+            and gives a flag for whether that field should be 
+            "colormappable" within the webapp, defaults to None
+        :type tracked_colormap_flags: list of bool with len = nfields, optional
+        :param decimation_factor: factor by which to reduce the data randomly 
+                i.e. :code:`data=data[::decimation_factor]`, defaults to 1
+            :type decimation_factor: int, optional
+        :param filenames_and_nparts: Allows you to manually control how the particles
+            are distributed among the sub-JSON files, it is
+            **highly recommended that you leave this to** None such that particles are equally
+            distributed among the :code:`.jsons` but if for whatever reason you need fine-tuning
             you should pass a list of tuples in the form 
-            `[("json_name0.json",nparts_this_file0),("json_name1.json",nparts_this_file1) ... ]`
-            where where the sum of `nparts_this_file%d` is exactly `nparts`. These files
-            will automatically be added to `filenames.json` if you use `reader.dumpToJSON`.
 
-        `doSPHrad=False` - flag to vary the opacity across a particle by the SPH cubic spline. Should
-            also provide SmoothingLength as a tracked_array. 
+            :code:`[("json_name0.json",nparts_this_file0),("json_name1.json",nparts_this_file1) ... ]`
 
-        `**option_kwargs` - allows you to set default settings like the color, particle sizes,
-            etc... for this particle group at the creation of the instance. You can see available
-            settings by looking at `list(particleGroup.settings_default.keys())`.
+            where where the sum of :code:`nparts_this_file%d` is exactly :code:`nparts`. These files
+            will automatically be added to :code:`filenames.json` if you use
+            an attached :class:`Firefly.data_reader.Reader` and 
+            its :class:`~Firefly.data_reader.Reader.dumpToJSON` method, defaults to None
+        :type filenames_and_nparts: list of tuple of (str,int), optional
+        :param attached_settings: :class:`~Firefly.data_reader.Settings` instance that should be linked
+            to this particle group such that GUI elements are connected correctly. If not provided here
+            can be attached after-the-fact using the
+            :func:`Firefly.data-reader.Settings.attachSettings` method, defaults to None
+        :type attached_settings: :class:`Firefly.data_reader.Settings`, optional
+        :param doSPHrad: flag to vary the opacity across a particle by a cubic spline 
+            (as commonly done in SPH).
+            Must then also provide :code:`SmoothingLength` as a tracked_array., defaults to False
+            **EXPERIMENTAL FEATURE**
+        :type doSPHrad: bool, optional
+        :raises ValueError: if len(tracked_names) != len(tracked arrays)
+        :raises ValueError: if a tracked_array has length other than len(coordinates)
+        :raises ValueError: if filenames_and_nparts is not a list of tuples and strs
+        :raises ValueError: if :code:`color` is passed as an option kwarg but the value is 
+            not an RGBA iterable
+        :raises KeyError: if passed an invalid option_kwarg
         """
+        
 
         ## handle default values for iterables
         tracked_arrays = [] if tracked_arrays is None else tracked_arrays
@@ -101,76 +145,79 @@ class ParticleGroup(object):
         tracked_filter_flags = [] if tracked_filter_flags is None else tracked_filter_flags
         tracked_colormap_flags = [] if tracked_colormap_flags is None else tracked_colormap_flags
 
-        ## assert statements and user-friendly error messages
-        try:
-            assert len(tracked_names) == len(tracked_arrays)
-        except:
-            raise ValueError("Make sure each tracked_array has a tracked_name")
+        ## bind input that will not be validated
+        self.UIname = UIname
+        self.decimation_factor = decimation_factor
+        self.coordinates = np.array(coordinates)
+        self.nparts = self.coordinates.shape[0]
+
+        ## reduce the decimation factor if someone has asked to skip
+        ##  too many particles for the given dataset so that a single particle
+        ##  is shown.
+        if self.decimation_factor > self.nparts:
+            self.decimation_factor = max(1,self.nparts-1)
+
+        ## check if each field is named
+        if len(tracked_names) != len(tracked_arrays):
+            raise ValueError("Make sure each tracked_array (%d) has a tracked_name (%d)"%(
+                len(tracked_names),len(tracked_arrays)))
+
+        ## check if each field is the right length
+        for name,array in zip(tracked_names,tracked_arrays):
+            if len(array) != self.nparts:
+                raise ValueError("You passed me %s with %d entries but only %d coordinates"%(
+                    name,len(array),self.nparts))
     
-        try: 
-            assert len(tracked_names) == len(tracked_filter_flags)
-        except:
-            print("Make sure each tracked_array has a tracked_filter_flag, assuming True.")
+        ## check if each field was specified to be filterable
+        if len(tracked_names) != len(tracked_filter_flags):
+            if loud:
+                print("Make sure each tracked_array (%d) has a tracked_filter_flag (%d), assuming True."%(
+                    len(tracked_names),len(tracked_colormap_flags)))
+
             new_tracked_filter_flags = np.append(
                 tracked_filter_flags,
                 [True]*(len(tracked_names)-len(tracked_filter_flags)),axis=0
             )
             tracked_filter_flags = new_tracked_filter_flags
 
-        try: 
-            assert len(tracked_names) == len(tracked_colormap_flags)
-        except:
-            print("Make sure each tracked_array has a tracked_colormap_flag, assuming True.")
+        ## check if each field was specified to be colormappable
+        if len(tracked_names) != len(tracked_colormap_flags):
+            if loud:
+                print("Make sure each tracked_array (%d) has a tracked_colormap_flag (%d), assuming True."%(
+                    len(tracked_names),len(tracked_colormap_flags)))
+
             new_tracked_colormap_flags = np.append(
                 tracked_colormap_flags,
                 [True]*(len(tracked_names)-len(tracked_colormap_flags)),axis=0
             )
             tracked_colormap_flags = new_tracked_colormap_flags
 
-        
-        self.filenames_and_nparts = filenames_and_nparts
+        ## bind validated input
+        self.tracked_names = tracked_names
+        self.tracked_arrays = tracked_arrays
+        self.tracked_filter_flags = np.array(tracked_filter_flags)
+        self.tracked_colormap_flags = np.array(tracked_colormap_flags)
 
-        if self.filenames_and_nparts is not None:
+        ## validate filenames and nparts if anyone was so foolhardy to
+        ##  send it in themselves
+        if filenames_and_nparts is not None:
             try:
                 assert type(filenames_and_nparts[0]) == tuple
                 assert type(filenames_and_nparts[0][0]) == str
                 assert type(filenames_and_nparts[0][1]) == int
             except AssertionError:
                 ValueError("filenames_and_nparts should be a list of tuples of strings and ints")
+
+        self.filenames_and_nparts = filenames_and_nparts
         
-        self.decimation_factor = decimation_factor
-        ## what do we want this to be called in the UI? 
-        self.UIname = UIname
-
-        ## the most important thing, where do you want these particles
-        ##  to live?
-        self.coordinates = np.array(coordinates)
-
-        if self.decimation_factor > self.coordinates.shape[0]:
-            self.decimation_factor = max(1,self.coordinates.shape[0]-1)
-
-        ## initialize this badboy
-        self.nparts = len(coordinates)
-
-        ## these are the values we're associating with each particle
-        ##  make sure each one has a name
-        for name,array in zip(tracked_names,tracked_arrays):
-            try:
-                assert len(array) == self.nparts
-            except:
-                raise ValueError("You passed me %s that is not the right shape!"%name)
-
-        self.tracked_names = tracked_names
-        self.tracked_arrays = tracked_arrays
-        self.tracked_filter_flags = np.array(tracked_filter_flags)
-        self.tracked_colormap_flags = np.array(tracked_colormap_flags)
-
 
         ## TODO how do these interface with javascript code?
         self.radiusFunction = None
         self.weightFunction = None
 
-        ## setup the settings for this particleGroup 
+        ######### setup the settings for this particleGroup 
+
+        ## start with the default
         self.settings_default = {
             'UIparticle':True,
             'UIdropdown':True,
@@ -200,40 +247,78 @@ class ParticleGroup(object):
         ## setup default values for the initial color limits (vals/lims represent the interactive
         ##  "displayed" particles and the available boundaries for the limits)
         for tracked_name,tracked_colormap_flag in zip(self.tracked_names,self.tracked_colormap_flags):
-            if tracked_filter_flag:
+            if tracked_colormap_flag:
                 self.settings_default['colormapVals'][tracked_name] = None
                 self.settings_default['colormapLims'][tracked_name] = None
         
         ## now let the user overwrite the defaults if they'd like (e.g. the color, likely
-        ##  the most popular thing users will like to do
-        for option_kwarg in option_kwargs:
-            if option_kwarg in self.settings_default.keys():
-                if option_kwarg == 'color':
-                    try:
-                        assert len(option_kwargs[option_kwarg]) == 4
-                    except AssertionError:
-                        raise ValueError("Make sure you pass the color as an RGBA array")
+        ##  the most popular thing users will like to do)
+        for settings_kwarg in settings_kwargs:
+            if settings_kwarg in self.settings_default.keys():
+                if settings_kwarg == 'color':
+                    color = settings_kwargs['color']
+                    if len(color) != 4:
+                        ## if passed an RGB color
+                        if len(color) == 3:
+                            ## assume alpha value of 1
+                            settings_kwarg['color'] = np.append(color,[1],axis=0)
+                        else:
+                            raise ValueError("Make sure you pass the color as an RGB(A) array")
                         
-                self.settings_default[option_kwarg] = option_kwargs[option_kwarg]
+                self.settings_default[settings_kwarg] = settings_kwargs[settings_kwarg]
             else:
-                raise KeyError("Invalid option kwarg")
-        self.linked_settings = linked_settings
+                raise KeyError("Invalid settings kwarg %s"%settings_kwarg)
+
+        self.attached_settings = attached_settings
         self.doSPHrad = doSPHrad
         
-    def trackArray(self,name,arr,filter_flag=1,colormap_flag=1):
+    def trackArray(
+        self,
+        field_name,
+        arr,
+        filter_flag=True,
+        colormap_flag=True,
+        filterLims=None,
+        filterVals=None,
+        colormapLims=None,
+        colormapVals=None):
+        """Adds an additional data field to the ParticleGroup's tracked fields arrays.
+
+        :param field_name: name to show in the GUI for this field
+        :type field_name: str
+        :param arr: data array for this field, should be self.nparts long
+        :type arr: np.ndarray
+        :param filter_flag: flag to make field filterable in the GUI, defaults to True
+        :type filter_flag: bool, optional
+        :param colormap_flag: flag to make field colormappable in the GUI, defaults to True
+        :type colormap_flag: bool, optional
+        :param filterLims: initial [min, max] limits to the filters. 
+            defaults to None and is set in the web app to [min, max] of the field
+        :type filterLims: list of float, optional
+        :param filterVals: initial location of the filter slider handles.
+            defaults to None and is set in the web app to [min, max] of the field
+        :type filterVals: list of float, optional
+        :param colormapLims: initial [min, max] limits to the colormaps. 
+            defaults to None and is set in the web app to [min, max] of the field
+        :type colormapLims: list of float, optional
+        :param colormapVals: initial location of the colormap slider handles.
+            defaults to None and is set in the web app to [min, max] of the field
+        :type colormapVals: list of float, optional
+        :raises ValueError: if the length of the field array is not self.nparts
         """
-        Adds a new "tracked" array to the particle group
-        Input:
-            name - name of the tracked array in the UI
-            arr - the array itself
-            filter_flag=1 - whether this array should be filterable in the app
-        """
+        
         ## check that it's the correct length
-        assert self.nparts == len(arr)
+        if self.nparts != len(arr):
+            raise ValueError("You passed me %s with %d entries but only %d coordinates"%(
+                field_name,len(arr),self.nparts))
 
         ## go ahead and put it in the tracked arrays
-        self.tracked_names = np.append(self.tracked_names,[name],axis=0)
-        self.tracked_arrays.append(arr)
+        self.tracked_names = np.append(
+            self.tracked_names,
+            [field_name],axis=0)
+        self.tracked_arrays= np.append(
+            self.tracked_arrays,
+            [arr],axis=0)
         self.tracked_filter_flags = np.append(
             self.tracked_filter_flags,
             [filter_flag],axis=0)
@@ -241,90 +326,96 @@ class ParticleGroup(object):
             self.tracked_colormap_flags,
             [colormap_flag],axis=0)
 
-        ## and add this to the filter limits arrays, see __init__ above
+        ## update the default settings with this array's filterVals/Lims
         if filter_flag: 
-            self.settings_default['filterVals'][name] = None
-            self.settings_default['filterLims'][name] = None
+            self.settings_default['filterLims'][field_name] = filterLims
+            self.settings_default['filterVals'][field_name] = filterVals 
 
-        ## and add this to the color limits arrays, see __init__ above
+        ## update the default settings with this array's colormapVals/Lims
         if colormap_flag: 
-            self.settings_default['colormapVals'][name] = None
-            self.settings_default['colormapLims'][name] = None
+            self.settings_default['colormapLims'][field_name] = colormapLims
+            self.settings_default['colormapVals'][field_name] = colormapVals
 
-        if self.linked_settings is not None:
-            self.linked_settings['filterVals'][self.UIname][name] = None
-            self.linked_settings['filterLims'][self.UIname][name] = None
+        ## update the attached settings if they're already there
+        if self.attached_settings is not None:
+            self.attached_settings['filterLims'][self.UIname][field_name] = filterLims
+            self.attached_settings['filterVals'][self.UIname][field_name] = filterVals
 
-            self.linked_settings['colormapVals'][self.UIname][name] = None
-            self.linked_settings['colormapLims'][self.UIname][name] = None
+            self.attached_settings['colormapLims'][self.UIname][field_name] = colormapLims
+            self.attached_settings['colormapVals'][self.UIname][field_name] = colormapVals
 
     def getDecimationIndexArray(self):
         """
         Creates a numpy index array to handle decimation (sub-sampling) of your
         data. Chooses nparts/decimation_factor many particles randomly without
-        replacement.
+        replacement. Binds it to self.dec_inds.
+        :return: dec_inds, indices corresponding to randomly chosen particles
+        :rtype: np.ndarray
         """
+        
         if self.decimation_factor > 1 and self.nparts > self.decimation_factor:
-            ## use an array of indices
+            ## we've been instructed to decimate and it makes sense to do so
+            ##  (decimation factor is not > self.nparts)
             self.dec_inds = np.random.choice(
                 np.arange(self.nparts),int(self.nparts/self.decimation_factor),
                 replace=False)
         else:
-            ## use a boolean mask instead
+            ## use a dummy boolean mask full of True instead
             self.dec_inds = np.ones(self.nparts,dtype=bool)
+
+        return self.dec_inds
 
     def outputToDict(
         self,
-        these_dec_inds=[None],
-        i_file=0,
-        verbose=False):
-        """
-        Outputs a subset of this ParticleGroup instance's 
+        dec_inds=None,
+        store_extra_keys=False,
+        loud=False):
+        """Outputs a subset of this ParticleGroup instance's 
             data to a dictionary. The subset is determined by the 
-            `these_dec_inds` input which should be an array of indices
-            matching the tracked arrays. If no input mask is provided 
-            it will default to np.arange(len(coordinates)).
-        Input:
-            these_dec_inds = [None] - the decimation indices to 
-                use, defining a subset of the particlegroup data to 
-                output.
-            i_file=0 - the index of the file (if looping through 
-                your particle group data and outputting a series 
-                of files). If the index is 0 the output dictionary
-                will include the colormap and filter keys.
-        Output:
-            outDict - a dictionary containing the particlegroup
-                information for the indices matching the tracked
-                arrays.
+            :code:`dec_inds` input which should be an array of indices
+            matching the tracked field arrays. 
+
+        :param dec_inds: the decimation indices to 
+                use, defining a subset of the :class:`~Firefly.data_reader.ParticleGroup` data to 
+                output, defaults to np.arange(self.nparts)
+        :type dec_inds: np.ndarray, optional
+        :param store_extra_keys: flag to store filter and colormap flags, defaults to True
+        :type store_extra_keys: bool, optional
+        :param loud: flag to print status information to the console, defaults to False
+        :type loud: bool, optional
+        :return: outDict of particle data
+        :rtype: dict
         """
         
         ## initialize the output dictionary
         outDict = dict()
 
-        ## initialize a default set of dec inds if none are 
-        ##  passed
-        if (these_dec_inds[0] == None):
-            these_dec_inds = np.arange(len(self.coordinates))
+        ## initialize a default set of dec inds if none are passed
+        if dec_inds == None:
+            dec_inds = np.arange(self.nparts)
         
         ## save the coordinates as a special case since they 
         ##  aren't in the tracked array
-        outDict['Coordinates'] = self.coordinates[these_dec_inds]
+        outDict['Coordinates'] = self.coordinates[dec_inds]
 
-        ## do the bulk of the work in a simple loop
+        ## store the field arrays
         for tracked_name,tracked_arr in zip(
             self.tracked_names,
             self.tracked_arrays):
 
-            outDict[tracked_name]=tracked_arr[these_dec_inds]
+            outDict[tracked_name]=tracked_arr[dec_inds]
 
-        ## if this is the first file, let's include the colormap
+        ## if this is the first file, let's also include the colormap
         ##  and filter keys
-        if i_file == 0:
-            if (verbose): print(self.tracked_names,
+        if store_extra_keys == 0:
+            if loud: print(
+                self.tracked_names,
                 'filter:',self.tracked_filter_flags,
                 'colormap:',self.tracked_colormap_flags)
+
             outDict['filterKeys'] = np.array(self.tracked_names)[np.array(
                  self.tracked_filter_flags,dtype=bool)]
+
             outDict['colormapKeys'] = np.array(self.tracked_names)[np.array(
                 self.tracked_colormap_flags,dtype=bool)]
 
@@ -339,23 +430,40 @@ class ParticleGroup(object):
         self,
         short_data_path,
         hard_data_path,
-        JSON_prefix,
-        loud=1,
-        nparts_per_file = 10**4,
-        clean=0,
+        JSON_prefix='',
+        loud=True,
+        nparts_per_file=10**4,
+        clean_JSONdir=False,
         write_jsons_to_disk=True):
+        """Outputs this ParticleGroup instance's data to JSON format, splitting it up into 
+            multiple sub-JSON files. Best used when coupled with a :class:`Firefly.data_reader.Reader`'s
+            :func:`~Firefly.data_reader.Reader.dumpToJSON` method.
+
+        :param short_data_path: the sub-directory you want to put these files into
+        :type short_data_path: str
+        :param hard_data_path: the path to the directory containing different datasets'
+            JSON sub-directories (often :code:`/path/toFirefly/static/data`)
+        :type hard_data_path: str
+        :param JSON_prefix: Prefix for any :code:`.json` files created, :code:`.json` files will be of the format:
+            :code:`<JSON_prefix><parttype>_%d.json`, defaults to ''
+        :type JSON_prefix: str, optional
+        :param loud: flag to print status information to the console, defaults to True
+        :type loud: bool, optional
+        :param max_npart_per_file: the maximum number of particles saved per :code:`.json` file,
+            don't use too large a number or you will have trouble loading
+            the individual files in., defaults to 10**4
+        :type max_npart_per_file: int, optional
+        :param clean_JSONdir: flag to delete all :code:`.json` files in
+            the :code:`JSONdir`. Strictly not necessary (since :code:`filenames.json` 
+            will be updated) but it is good to clean up after yourself., defaults to False
+        :type clean_JSONdir: bool, optional
+        :param write_jsons_to_disk: flag that controls whether data is saved to disk (:code:`True`)
+            or only converted to a string and returned (:code:`False`), defaults to True
+        :type write_jsons_to_disk: bool, optional
+        :return: filename, JSON_array (either a list full of filenames if
+            written to disk or a list of JSON strs)
+        :rtype: str, list of str
         """
-        Outputs this ParticleGroup instance's data to JSON format, best used when coupled with a Reader
-        instance's dumpToJSON method. 
-        Input:
-            path - the name of the sub-directory of Firefly/data you want to put these files into
-            hard_data_path - the the path to Firefly/data
-            JSON_prefix - the string you want to prepend to the data JSONs
-            loud=1 - flag to print warnings that you should hear if you're not using a
-                reader that does these things for you
-            nparts_per_file=10**4 - maximum number of particles per JSON file
-            clean=0 - flag for whether the JSON directory should be purged before writing your files.
-         """
 
         ## shuffle particles and decimate as necessary, save the output in dec_inds
         self.getDecimationIndexArray()
@@ -371,7 +479,7 @@ class ParticleGroup(object):
             print("Writing:",self,"JSON to %s"%full_path)
 
         ## do we want to delete any existing jsons here?
-        if clean:
+        if clean_JSONdir:
             print("Removing old JSON files from %s"%full_path)
             for fname in os.listdir(full_path):
                 if "json" in fname:
@@ -409,7 +517,9 @@ class ParticleGroup(object):
                 these_dec_inds = np.arange(cur_index,cur_index+nparts_this_file)
         
             ## format an output dictionary
-            outDict = self.outputToDict(these_dec_inds, i_file)
+            outDict = self.outputToDict(
+                these_dec_inds,
+                i_file==0)
 
             fname = os.path.join(hard_data_path,fname)
 
@@ -422,9 +532,3 @@ class ParticleGroup(object):
             cur_index += nparts_this_file
         
         return JSON_array,filenames_and_nparts
-
-    def outputToHDF5(self):
-        """
-        Hook for a future implementation of Firefly that can use HDF5 formats.
-        """
-        raise Exception("Unimplemented!")
