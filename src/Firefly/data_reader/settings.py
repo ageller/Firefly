@@ -7,44 +7,63 @@ import os
 from .json_utils import write_to_json,load_from_json
 
 class Settings(object):
-    """
-    This is a class for organizing the various settings you can pass to 
-    Firefly to customize how the app is initialized and what features 
-    the user has access to. 
+    """This is a class for organizing the various settings you can pass to 
+        Firefly to customize how the app is initialized and what features 
+        the user has access to. 
 
-    It is easiest to use when instances of Settings are passed to a 
-    :class:`Firefly.data_reader.Reader` instance when it is initialized.
+        It is easiest to use when instances of Settings are passed to a 
+        :class:`Firefly.data_reader.Reader` instance when it is initialized.
     """
     def __getitem__(self,key):
+        """Implementation of builtin function  __getitem__
+
+        :param key: key to read
+        :type key: str
+        :return: attr, the value from the settings dictionary
+        :rtype: object
         """
-        Implementation of builtin function  __getitem__ 
-        """
-        attr = self.findWhichSettingsDict(key)
+        attr = self.__findWhichSettingsDict(key)
         return getattr(self,attr)[key]
         
     def __setitem__(self,key,value):
+        """Implementation of builtin function __setitem__ 
+
+        :param key: key to set
+        :type key: str
+        :param value: value to set to key
+        :type value: object
         """
-        Implementation of builtin function __setitem__ 
-        """
-        attr = self.findWhichSettingsDict(key)
+        attr = self.__findWhichSettingsDict(key)
         ## set that dictonary's value
         getattr(self,attr)[key]=value
 
-    def findWhichSettingsDict(self,key):
-        """
-        Find which sub-dictionary a key belongs to
+    def __findWhichSettingsDict(self,key):
+        """ Find which sub-dictionary a key belongs to.
+
+        :param key: key to search for
+        :type key: str
+        :raises KeyError: if no sub-dictionary matches
+        :return: attr
+        :rtype: private str
         """
         for attr in self.__dict__.keys():
             if '_settings' in attr:
-                if key in getattr(self,attr).keys():
-                    return attr
-        raise KeyError("Invalid option key %s"%key)
+                obj = getattr(self,attr)
+
+                ## distinguish between methods and private dictionaries
+                if type(obj) == dict:
+                    if key in obj.keys():
+                        return attr
+
+        raise KeyError("Invalid settings key %s"%key)
         
-    def listKeys(self,values=True):
-        """ 
-        Pretty-prints the settings according to sub-dictionary.
-        Input:  
-            values=True - flag to print what the settings are set to, in addition to the key
+    def printKeys(
+        self,
+        values=True):
+        """Prints keys (and optionally their values) to the console in an organized (and pretty) fashion.
+
+        :param values: flag to print what the settings are set to, in addition to the key, defaults to True
+        :type values: bool, optional
         """
         for attr in self.__dict__.keys():
             if '_settings' in attr:
@@ -56,9 +75,7 @@ class Settings(object):
                     print(list(getattr(self,attr).keys()))
 
     def keys(self):
-        """ 
-        Returns a list of keys for all the different settings sub-dictionaries
-        """
+        """ Returns a list of keys for all the different settings sub-dictionaries """
         this_keys = [] 
         for attr in self.__dict__.keys():
             if '_settings' in attr:
@@ -113,7 +130,7 @@ class Settings(object):
         title='Firefly',
         annotation=None,
         **extra):
-        """[summary]
+        """Settings that affect the browser window
 
         :param title: the title of the webpage, shows up in browser tab,
             defaults to 'Firefly'
