@@ -135,10 +135,12 @@ class TweenParams(object):
         :param write_jsons_to_disk: flag that controls whether data is saved to disk (:code:`True`)
             or only converted to a string and returned (:code:`False`), defaults to True
         :type write_jsons_to_disk: bool, optional
-        :raises NotImplementedError: [description]
-        :return: filename, JSON(tween_params_dict) 
-            (either None if written to disk or a str)
-        :rtype: str, None/str
+        :raises NotImplementedError: if filename is anything but None 
+            TODO: need to check on this if the webapp actually requires it have 
+            a specific name.
+        :return: filename, JSON(tween_params_dict) (either a filename if
+            written to disk or a JSON strs)
+        :rtype: str, str
         """
 
         if filename is None:
