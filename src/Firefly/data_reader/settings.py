@@ -464,7 +464,7 @@ class Settings(object):
         :param filename: name of settings :code:`.json` file,
             defaults to self.settings_filename
         :type filename: str, optional
-        :param JSON_prefix: [description], defaults to ''
+        :param JSON_prefix: string that is prepended to filename, defaults to ''
         :type JSON_prefix: str, optional
         :param loud: flag to print status information to the console, defaults to True
         :type loud: bool, optional
