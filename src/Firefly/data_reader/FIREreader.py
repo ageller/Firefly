@@ -237,7 +237,7 @@ class FIREreader(Reader):
                 particleGroup.filenames_opened = snapdict['fnames']
 
             ## add this particle group to the reader's settings file
-            self.settings.addToSettings(self.particleGroups[-1])
+            self.settings.attachSettings(self.particleGroups[-1])
 
         return self.particleGroups
 

@@ -183,7 +183,7 @@ class Reader(object):
             [particleGroup],axis=0)
 
         ## add this particle group to the reader's settings file
-        self.settings.addToSettings(particleGroup)
+        self.settings.attachSettings(particleGroup)
 
     def dumpToJSON(
         self,
@@ -275,7 +275,7 @@ class Reader(object):
                 self.JSON_prefix,
                 loud=loud,
                 nparts_per_file=self.max_npart_per_file,
-                clean=self.clean_JSONdir if particleGroup is self.particleGroups[0] else False,
+                clean_JSONdir=self.clean_JSONdir if particleGroup is self.particleGroups[0] else False,
                 write_jsons_to_disk=write_jsons_to_disk)
 
             ## append the JSON arrays for this particle group

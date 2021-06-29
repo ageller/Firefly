@@ -400,7 +400,7 @@ class Settings(object):
         }
 
 
-    def addToSettings(
+    def attachSettings(
         self,
         particleGroup):
         """Adds a :class:`~Firefly.data_reader.ParticleGroup`'s settings to the
@@ -422,7 +422,7 @@ class Settings(object):
             self[key][particleGroup.UIname]=particleGroup.settings_default[key]
         
         ## and link the other way, this Settings instance to the particleGroup
-        particleGroup.linked_settings = self
+        particleGroup.attached_settings = self
 
     def outputToDict(
         self):
@@ -471,9 +471,9 @@ class Settings(object):
         :param write_jsons_to_disk: flag that controls whether data is saved to disk (:code:`True`)
             or only converted to a string and returned (:code:`False`), defaults to True
         :type write_jsons_to_disk: bool, optional
-        :return: filename, JSON(all_settings_dict) 
-            (either None if written to disk or a str)
-        :rtype: str, None/str
+        :return: filename, JSON(all_settings_dict) (either a filename if
+            written to disk or a JSON strs)
+        :rtype: str, str
         """
         
         ## determine where we're saving the file
