@@ -1,0 +1,250 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Managing multiple datasets &mdash; Firefly 2.0.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Sending data to a Firefly server via Flask" href="flask.html" />
+    <link rel="prev" title="Defining interpolated camera paths (tweening)" href="tween.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Firefly
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../webapp/index.html">Using Firefly</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../server/index.html">Hosting your own Firefly instance</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Reading your own data</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="files.html">Understanding Firefly’s input requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reader.html">The python frontend</a></li>
+<li class="toctree-l2"><a class="reference internal" href="settings.html">Customizing the interface</a></li>
+<li class="toctree-l2"><a class="reference internal" href="tween.html">Defining interpolated camera paths (tweening)</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Managing multiple datasets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="flask.html">Sending data to a Firefly server via Flask</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../networking.html">Accessing remote Firefly servers via port forwarding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../experimental/index.html">Experimental features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/api/api.html">API Reference</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Firefly</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="index.html">Reading your own data</a> &raquo;</li>
+        
+      <li>Managing multiple datasets</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/data_reader/multiple_datasets.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="managing-multiple-datasets">
+<h1>Managing multiple datasets<a class="headerlink" href="#managing-multiple-datasets" title="Permalink to this headline">¶</a></h1>
+<p>The code within [<cite>firefly_api</cite>](<a class="reference external" href="https://github.com/ageller/Firefly/tree/main/dataReader/firefly_api">https://github.com/ageller/Firefly/tree/main/dataReader/firefly_api</a>) will help you convert your data set into a format that is readable by Firefly. The converted data for Firefly is placed within the “data” directory within a sub-directory defined either by the snapshot number, or by the user-defined <cite>reader.JSONdir</cite>.  The python code also creates a file named <cite>startup.json</cite> in the “data” directory.  This file is the first thing read into Firefly, and tells Firefly where to find the rest of the data files;  it simply contains the name of the directory where your data resides.</p>
+<p>If <cite>startup.json</cite> does not exist, Firefly will display a button that will allow you to select the directory containing the files you want to load (the directory must contain a <cite>filelist.json</cite> file).  You may choose to simply remove the <cite>startup.json file</cite>, or set the option in your <cite>Reader</cite> instance to not create that file automatically.  In that case, you will always need to select a data directory when Firefly launches.</p>
+<p>If you already have a data set loaded and displayed in Firefly, you can load a new data set from within the user interface by clicking on the “Load New Data Button”.  Again, you will need to choose a directory that contains your json data files (and <cite>filelist.json</cite>).</p>
+<p>Note, some browsers may show a default warning message that you are about to upload many files to the site and to only do so if you trust the site.  Please allow Firefly to upload these files– you are not uploading them to the internet.</p>
+<p>Also, note that for most browsers, you will only be able to select a directory that is within your data directory.  You must keep your json files there or could use symbolic links within the data directory pointing to elsewhere on your local disk, e.g.,
+<code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">$</span> <span class="pre">ln</span> <span class="pre">-s</span> <span class="pre">/home/mydirectory/snapdir_XXX</span>
+<span class="pre">`</span></code>
+if you’d rather.</p>
+<p>If you have multiple data sets available on your computer and prefer to have a menu of these data files to choose from at the start of Firefly, you can append entries to the <cite>startup.json</cite> file to create a list of directories (using the <cite>Reader</cite> instance’s <cite>‘append’</cite> option for <cite>write_startup</cite>).  For instance, dataParser.py may create a <cite>startup.json</cite> file that contains the following:
+<code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">{&quot;0&quot;:&quot;data\/snapdir_001&quot;}</span>
+<span class="pre">`</span></code></p>
+<p>You could manually append this to contain the following:
+<a href="#id1"><span class="problematic" id="id2">``</span></a>`
+{“0”:”data/snapdir_001”</p>
+<blockquote>
+<div><p>“1”:”data/snapdir_002”
+“2”:”data/snapdir_003”
+“3”:”data/snapdir_004”}</p>
+</div></blockquote>
+<p><a href="#id3"><span class="problematic" id="id4">``</span></a>`
+Or use the <cite>‘append’</cite> option, as suggested above.</p>
+<p>With this <cite>startup.json</cite>, you would see a button when Firefly loads that, when clicked, will allow you to choose which data set to display.  In general, this method may be useful if you are [running Firefly on a remote computer](<a class="reference external" href="https://github.com/ageller/Firefly/wiki/Hosting-Firefly-on-a-Cluster-Environment">https://github.com/ageller/Firefly/wiki/Hosting-Firefly-on-a-Cluster-Environment</a>) that contains all your data and port forwarding to your local browser (which can only see your local file system).</p>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="flask.html" class="btn btn-neutral float-right" title="Sending data to a Firefly server via Flask" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="tween.html" class="btn btn-neutral float-left" title="Defining interpolated camera paths (tweening)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Alex Gurvich, Aaron Geller.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

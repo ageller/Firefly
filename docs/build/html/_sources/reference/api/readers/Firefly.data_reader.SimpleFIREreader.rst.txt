@@ -1,0 +1,11 @@
+﻿Firefly.data\_reader.SimpleFIREreader
+=====================================
+
+.. currentmodule:: Firefly.data_reader
+
+.. autoclass:: SimpleFIREreader
+   :members:
+   :special-members:
+   :show-inheritance:
+
+   .. autoclasstoc::

@@ -1,0 +1,739 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Firefly.data_reader.particlegroup &mdash; Firefly 2.0.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> Firefly
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../webapp/index.html">Using Firefly</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../server/index.html">Hosting your own Firefly instance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../data_reader/index.html">Reading your own data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../networking.html">Accessing remote Firefly servers via port forwarding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../experimental/index.html">Experimental features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/api/api.html">API Reference</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Firefly</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>Firefly.data_reader.particlegroup</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for Firefly.data_reader.particlegroup</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+
+<span class="kn">import</span> <span class="nn">os</span> 
+
+<span class="kn">from</span> <span class="nn">.json_utils</span> <span class="kn">import</span> <span class="n">write_to_json</span>
+
+<div class="viewcode-block" id="ParticleGroup"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.ParticleGroup.html#Firefly.data_reader.ParticleGroup">[docs]</a><span class="k">class</span> <span class="nc">ParticleGroup</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This is a class for organizing data that you want to interface with a </span>
+<span class="sd">    Reader instance. This class provides rudimentary data validation and </span>
+<span class="sd">    settings defaults specific to this data class. If you do not intend</span>
+<span class="sd">    to attach it to a Reader instance using that reader&#39;s addParticleGroup</span>
+<span class="sd">    method please be careful!!</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ParticleGroup.__repr__"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.ParticleGroup.html#Firefly.data_reader.ParticleGroup.__repr__">[docs]</a>    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Implementation of builtin function __repr__</span>
+
+<span class="sd">        :return: mystr, the pretty rendering of a particle group</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="n">mystr</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">ParticleGroup: </span><span class="si">%s</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">UIname</span><span class="p">)</span>
+        <span class="n">mystr</span> <span class="o">+=</span> <span class="s2">&quot;Contains </span><span class="si">%d</span><span class="s2"> particles (</span><span class="si">%d</span><span class="s2"> after decimation) and </span><span class="si">%d</span><span class="s2"> tracked fields&quot;</span><span class="o">%</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">nparts</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">nparts</span><span class="o">//</span><span class="bp">self</span><span class="o">.</span><span class="n">decimation_factor</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tracked_names</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">mystr</span></div>
+
+<div class="viewcode-block" id="ParticleGroup.__getitem__"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.ParticleGroup.html#Firefly.data_reader.ParticleGroup.__getitem__">[docs]</a>    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">key</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Implementation of builtin function __getitem__ to retreive tracked field data.</span>
+
+<span class="sd">        :param key: field array to extract</span>
+<span class="sd">        :type key: str </span>
+<span class="sd">        :raises KeyError: if field is not one of the tracked fields</span>
+<span class="sd">        :return: field</span>
+<span class="sd">        :rtype: np.ndarray</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;Coordinates&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span>
+
+        <span class="k">elif</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tracked_names</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">tracked_arrays</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">tracked_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">key</span><span class="p">)]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> is not a tracked array&quot;</span><span class="o">%</span><span class="n">key</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="ParticleGroup.__setitem__"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.ParticleGroup.html#Firefly.data_reader.ParticleGroup.__setitem__">[docs]</a>    <span class="k">def</span> <span class="fm">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">key</span><span class="p">,</span><span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Implementation of builtin function __setitem__ to replace</span>
+<span class="sd">            field data or track new fields. Filter flag and colormap flags</span>
+<span class="sd">            will be set to true, call :func:`Firefly.data_reader.ParticleGroup.trackArray`</span>
+<span class="sd">            directly if this is undesired.</span>
+
+<span class="sd">        :param key: name of field to alter or start tracking</span>
+<span class="sd">        :type key: str</span>
+<span class="sd">        :param value: field data to replace current field data with</span>
+<span class="sd">            or initially track</span>
+<span class="sd">        :type value: np.ndarray </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;Coordinates&#39;</span><span class="p">:</span>
+            <span class="c1">## replace the coordinates</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span><span class="o">=</span><span class="n">value</span>
+        <span class="k">elif</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tracked_names</span><span class="p">:</span>
+            <span class="c1">## replace a field array</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tracked_arrays</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">tracked_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">key</span><span class="p">)]</span><span class="o">=</span><span class="n">value</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1">## track a key we haven&#39;t tracked yet,</span>
+            <span class="c1">##  filter and colormap flags will be set to True by default.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">trackArray</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="n">value</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="ParticleGroup.__init__"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.ParticleGroup.html#Firefly.data_reader.ParticleGroup.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">UIname</span><span class="p">,</span>
+        <span class="n">coordinates</span><span class="p">,</span>
+        <span class="n">tracked_arrays</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">tracked_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">tracked_filter_flags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">tracked_colormap_flags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">decimation_factor</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">filenames_and_nparts</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">attached_settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">doSPHrad</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">settings_kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Accepts pass-through kwargs for :class:`Firefly.data_reader.Settings` whether one is attached</span>
+<span class="sd">            at initialization or not.</span>
+
+<span class="sd">        :param UIname: Name of the particle group that shows up in the UI, 4-5 characters is best</span>
+<span class="sd">            so that it doesn&#39;t spill out of the GUI.</span>
+<span class="sd">        :type UIname: str </span>
+<span class="sd">        :param coordinates: The coordinates of the points in 3d space, should have a shape of `(nparts,3)`</span>
+<span class="sd">        :type coordinates: np.ndarray</span>
+<span class="sd">        :param tracked_arrays: The field data arrays to associate with each coordinate in space, each array</span>
+<span class="sd">            should be one-dimensional and have `nparts` entries., defaults to None</span>
+<span class="sd">        :type tracked_arrays: (nfields,nparts) np.ndarray, optional</span>
+<span class="sd">        :param tracked_names: Should be the same length as `tracked_arrays`, and gives a</span>
+<span class="sd">            name to each of the arrays when they show up in the UI dropdowns., defaults to None</span>
+<span class="sd">        :type tracked_names: list of str with len = nfields, optional</span>
+<span class="sd">        :param tracked_filter_flags: Should be the same length as `tracked_arrays`,</span>
+<span class="sd">            and gives a flag for whether that array should be available as an</span>
+<span class="sd">            interactive filter within the webapp, defaults to None</span>
+<span class="sd">        :type tracked_filter_flags: list of bool with len = nfields, optional</span>
+<span class="sd">        :param tracked_colormap_flags: Should be the same length as `tracked_arrays`,</span>
+<span class="sd">            and gives a flag for whether that field should be </span>
+<span class="sd">            &quot;colormappable&quot; within the webapp, defaults to None</span>
+<span class="sd">        :type tracked_colormap_flags: list of bool with len = nfields, optional</span>
+<span class="sd">        :param decimation_factor: factor by which to reduce the data randomly </span>
+<span class="sd">                i.e. :code:`data=data[::decimation_factor]`, defaults to 1</span>
+<span class="sd">        :type decimation_factor: int, optional</span>
+<span class="sd">        :param filenames_and_nparts: Allows you to manually control how the particles</span>
+<span class="sd">            are distributed among the sub-JSON files, it is</span>
+<span class="sd">            **highly recommended that you leave this to** None such that particles are equally</span>
+<span class="sd">            distributed among the :code:`.jsons` but if for whatever reason you need fine-tuning</span>
+<span class="sd">            you should pass a list of tuples in the form </span>
+
+<span class="sd">            :code:`[(&quot;json_name0.json&quot;,nparts_this_file0),(&quot;json_name1.json&quot;,nparts_this_file1) ... ]`</span>
+
+<span class="sd">            where where the sum of :code:`nparts_this_file%d` is exactly :code:`nparts`. These files</span>
+<span class="sd">            will automatically be added to :code:`filenames.json` if you use</span>
+<span class="sd">            an attached :class:`Firefly.data_reader.Reader` and </span>
+<span class="sd">            its :class:`~Firefly.data_reader.Reader.dumpToJSON` method, defaults to None</span>
+<span class="sd">        :type filenames_and_nparts: list of tuple of (str,int), optional</span>
+<span class="sd">        :param attached_settings: :class:`~Firefly.data_reader.Settings` instance that should be linked</span>
+<span class="sd">            to this particle group such that GUI elements are connected correctly. If not provided here</span>
+<span class="sd">            can be attached after-the-fact using the</span>
+<span class="sd">            :func:`Firefly.data-reader.Settings.attachSettings` method, defaults to None</span>
+<span class="sd">        :type attached_settings: :class:`Firefly.data_reader.Settings`, optional</span>
+<span class="sd">        :param doSPHrad: flag to vary the opacity across a particle by a cubic spline </span>
+<span class="sd">            (as commonly done in SPH).</span>
+<span class="sd">            Must then also provide :code:`SmoothingLength` as a tracked_array., defaults to False</span>
+<span class="sd">            **EXPERIMENTAL FEATURE**</span>
+<span class="sd">        :type doSPHrad: bool, optional</span>
+<span class="sd">        :raises ValueError: if len(tracked_names) != len(tracked arrays)</span>
+<span class="sd">        :raises ValueError: if a tracked_array has length other than len(coordinates)</span>
+<span class="sd">        :raises ValueError: if filenames_and_nparts is not a list of tuples and strs</span>
+<span class="sd">        :raises ValueError: if :code:`color` is passed as an option kwarg but the value is </span>
+<span class="sd">            not an RGBA iterable</span>
+<span class="sd">        :raises KeyError: if passed an invalid option_kwarg</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+
+        <span class="c1">## handle default values for iterables</span>
+        <span class="n">tracked_arrays</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">tracked_arrays</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">tracked_arrays</span>
+        <span class="n">tracked_names</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">tracked_names</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">tracked_names</span>
+        <span class="n">tracked_filter_flags</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">tracked_filter_flags</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">tracked_filter_flags</span>
+        <span class="n">tracked_colormap_flags</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">tracked_colormap_flags</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">tracked_colormap_flags</span>
+
+        <span class="c1">## bind input that will not be validated</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">UIname</span> <span class="o">=</span> <span class="n">UIname</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decimation_factor</span> <span class="o">=</span> <span class="n">decimation_factor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nparts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1">## reduce the decimation factor if someone has asked to skip</span>
+        <span class="c1">##  too many particles for the given dataset so that a single particle</span>
+        <span class="c1">##  is shown.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">decimation_factor</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">nparts</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">decimation_factor</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">nparts</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1">## check if each field is named</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tracked_names</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">tracked_arrays</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Make sure each tracked_array (</span><span class="si">%d</span><span class="s2">) has a tracked_name (</span><span class="si">%d</span><span class="s2">)&quot;</span><span class="o">%</span><span class="p">(</span>
+                <span class="nb">len</span><span class="p">(</span><span class="n">tracked_names</span><span class="p">),</span><span class="nb">len</span><span class="p">(</span><span class="n">tracked_arrays</span><span class="p">)))</span>
+
+        <span class="c1">## check if each field is the right length</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span><span class="n">array</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">tracked_names</span><span class="p">,</span><span class="n">tracked_arrays</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">array</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nparts</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;You passed me </span><span class="si">%s</span><span class="s2"> with </span><span class="si">%d</span><span class="s2"> entries but only </span><span class="si">%d</span><span class="s2"> coordinates&quot;</span><span class="o">%</span><span class="p">(</span>
+                    <span class="n">name</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">array</span><span class="p">),</span><span class="bp">self</span><span class="o">.</span><span class="n">nparts</span><span class="p">))</span>
+    
+        <span class="c1">## check if each field was specified to be filterable</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tracked_names</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">tracked_filter_flags</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">loud</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Make sure each tracked_array (</span><span class="si">%d</span><span class="s2">) has a tracked_filter_flag (</span><span class="si">%d</span><span class="s2">), assuming True.&quot;</span><span class="o">%</span><span class="p">(</span>
+                    <span class="nb">len</span><span class="p">(</span><span class="n">tracked_names</span><span class="p">),</span><span class="nb">len</span><span class="p">(</span><span class="n">tracked_colormap_flags</span><span class="p">)))</span>
+
+            <span class="n">new_tracked_filter_flags</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">tracked_filter_flags</span><span class="p">,</span>
+                <span class="p">[</span><span class="kc">True</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tracked_names</span><span class="p">)</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">tracked_filter_flags</span><span class="p">)),</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span>
+            <span class="p">)</span>
+            <span class="n">tracked_filter_flags</span> <span class="o">=</span> <span class="n">new_tracked_filter_flags</span>
+
+        <span class="c1">## check if each field was specified to be colormappable</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">tracked_names</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">tracked_colormap_flags</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">loud</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Make sure each tracked_array (</span><span class="si">%d</span><span class="s2">) has a tracked_colormap_flag (</span><span class="si">%d</span><span class="s2">), assuming True.&quot;</span><span class="o">%</span><span class="p">(</span>
+                    <span class="nb">len</span><span class="p">(</span><span class="n">tracked_names</span><span class="p">),</span><span class="nb">len</span><span class="p">(</span><span class="n">tracked_colormap_flags</span><span class="p">)))</span>
+
+            <span class="n">new_tracked_colormap_flags</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">tracked_colormap_flags</span><span class="p">,</span>
+                <span class="p">[</span><span class="kc">True</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">tracked_names</span><span class="p">)</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">tracked_colormap_flags</span><span class="p">)),</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span>
+            <span class="p">)</span>
+            <span class="n">tracked_colormap_flags</span> <span class="o">=</span> <span class="n">new_tracked_colormap_flags</span>
+
+        <span class="c1">## bind validated input</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tracked_names</span> <span class="o">=</span> <span class="n">tracked_names</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tracked_arrays</span> <span class="o">=</span> <span class="n">tracked_arrays</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tracked_filter_flags</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">tracked_filter_flags</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tracked_colormap_flags</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">tracked_colormap_flags</span><span class="p">)</span>
+
+        <span class="c1">## validate filenames and nparts if anyone was so foolhardy to</span>
+        <span class="c1">##  send it in themselves</span>
+        <span class="k">if</span> <span class="n">filenames_and_nparts</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">filenames_and_nparts</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="nb">tuple</span>
+                <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">filenames_and_nparts</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="nb">str</span>
+                <span class="k">assert</span> <span class="nb">type</span><span class="p">(</span><span class="n">filenames_and_nparts</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span> <span class="o">==</span> <span class="nb">int</span>
+            <span class="k">except</span> <span class="ne">AssertionError</span><span class="p">:</span>
+                <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;filenames_and_nparts should be a list of tuples of strings and ints&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">filenames_and_nparts</span> <span class="o">=</span> <span class="n">filenames_and_nparts</span>
+        
+
+        <span class="c1">## TODO how do these interface with javascript code?</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">radiusFunction</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weightFunction</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1">######### setup the settings for this particleGroup </span>
+
+        <span class="c1">## start with the default</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings_default</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;UIparticle&#39;</span><span class="p">:</span><span class="kc">True</span><span class="p">,</span>
+            <span class="s1">&#39;UIdropdown&#39;</span><span class="p">:</span><span class="kc">True</span><span class="p">,</span>
+            <span class="s1">&#39;UIcolorPicker&#39;</span><span class="p">:</span><span class="kc">True</span><span class="p">,</span>
+            <span class="s1">&#39;color&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="mi">3</span><span class="p">),[</span><span class="mi">1</span><span class="p">]),</span>
+            <span class="s1">&#39;sizeMult&#39;</span><span class="p">:</span><span class="mf">1.</span><span class="p">,</span>
+            <span class="s1">&#39;showParts&#39;</span><span class="p">:</span><span class="kc">True</span><span class="p">,</span>
+            <span class="s1">&#39;filterVals&#39;</span><span class="p">:</span><span class="nb">dict</span><span class="p">(),</span>
+            <span class="s1">&#39;filterLims&#39;</span><span class="p">:</span><span class="nb">dict</span><span class="p">(),</span>
+            <span class="s1">&#39;colormapVals&#39;</span><span class="p">:</span><span class="nb">dict</span><span class="p">(),</span>
+            <span class="s1">&#39;colormapLims&#39;</span><span class="p">:</span><span class="nb">dict</span><span class="p">(),</span>
+            <span class="s1">&#39;colormap&#39;</span><span class="p">:</span><span class="mf">1.</span><span class="o">/</span><span class="mi">64</span><span class="p">,</span>
+            <span class="s1">&#39;colormapVariable&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span>
+            <span class="s1">&#39;showColormap&#39;</span><span class="p">:</span><span class="kc">False</span><span class="p">,</span>
+            <span class="s1">&#39;showVel&#39;</span><span class="p">:</span><span class="kc">False</span><span class="p">,</span>
+            <span class="s1">&#39;plotNmax&#39;</span><span class="p">:</span><span class="kc">None</span><span class="p">,</span>
+            <span class="s1">&#39;velType&#39;</span><span class="p">:</span><span class="kc">None</span>
+        <span class="p">}</span>
+        
+        <span class="c1">## setup default values for the initial filter limits (vals/lims represent the interactive</span>
+        <span class="c1">##  &quot;displayed&quot; particles and the available boundaries for the limits)</span>
+        <span class="k">for</span> <span class="n">tracked_name</span><span class="p">,</span><span class="n">tracked_filter_flag</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tracked_names</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">tracked_filter_flags</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">tracked_filter_flag</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">settings_default</span><span class="p">[</span><span class="s1">&#39;filterVals&#39;</span><span class="p">][</span><span class="n">tracked_name</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">settings_default</span><span class="p">[</span><span class="s1">&#39;filterLims&#39;</span><span class="p">][</span><span class="n">tracked_name</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1">## setup default values for the initial color limits (vals/lims represent the interactive</span>
+        <span class="c1">##  &quot;displayed&quot; particles and the available boundaries for the limits)</span>
+        <span class="k">for</span> <span class="n">tracked_name</span><span class="p">,</span><span class="n">tracked_colormap_flag</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tracked_names</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">tracked_colormap_flags</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">tracked_colormap_flag</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">settings_default</span><span class="p">[</span><span class="s1">&#39;colormapVals&#39;</span><span class="p">][</span><span class="n">tracked_name</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">settings_default</span><span class="p">[</span><span class="s1">&#39;colormapLims&#39;</span><span class="p">][</span><span class="n">tracked_name</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        
+        <span class="c1">## now let the user overwrite the defaults if they&#39;d like (e.g. the color, likely</span>
+        <span class="c1">##  the most popular thing users will like to do)</span>
+        <span class="k">for</span> <span class="n">settings_kwarg</span> <span class="ow">in</span> <span class="n">settings_kwargs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">settings_kwarg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings_default</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">settings_kwarg</span> <span class="o">==</span> <span class="s1">&#39;color&#39;</span><span class="p">:</span>
+                    <span class="n">color</span> <span class="o">=</span> <span class="n">settings_kwargs</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">color</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">:</span>
+                        <span class="c1">## if passed an RGB color</span>
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">color</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                            <span class="c1">## assume alpha value of 1</span>
+                            <span class="n">settings_kwarg</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">color</span><span class="p">,[</span><span class="mi">1</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Make sure you pass the color as an RGB(A) array&quot;</span><span class="p">)</span>
+                        
+                <span class="bp">self</span><span class="o">.</span><span class="n">settings_default</span><span class="p">[</span><span class="n">settings_kwarg</span><span class="p">]</span> <span class="o">=</span> <span class="n">settings_kwargs</span><span class="p">[</span><span class="n">settings_kwarg</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;Invalid settings kwarg </span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="n">settings_kwarg</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">attached_settings</span> <span class="o">=</span> <span class="n">attached_settings</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">doSPHrad</span> <span class="o">=</span> <span class="n">doSPHrad</span></div>
+        
+<div class="viewcode-block" id="ParticleGroup.trackArray"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.ParticleGroup.html#Firefly.data_reader.ParticleGroup.trackArray">[docs]</a>    <span class="k">def</span> <span class="nf">trackArray</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">field_name</span><span class="p">,</span>
+        <span class="n">arr</span><span class="p">,</span>
+        <span class="n">filter_flag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">colormap_flag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">filterLims</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">filterVals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">colormapLims</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">colormapVals</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Adds an additional data field to the ParticleGroup&#39;s tracked fields arrays.</span>
+
+<span class="sd">        :param field_name: name to show in the GUI for this field</span>
+<span class="sd">        :type field_name: str</span>
+<span class="sd">        :param arr: data array for this field, should be self.nparts long</span>
+<span class="sd">        :type arr: np.ndarray</span>
+<span class="sd">        :param filter_flag: flag to make field filterable in the GUI, defaults to True</span>
+<span class="sd">        :type filter_flag: bool, optional</span>
+<span class="sd">        :param colormap_flag: flag to make field colormappable in the GUI, defaults to True</span>
+<span class="sd">        :type colormap_flag: bool, optional</span>
+<span class="sd">        :param filterLims: initial [min, max] limits to the filters. </span>
+<span class="sd">            defaults to None and is set in the web app to [min, max] of the field</span>
+<span class="sd">        :type filterLims: list of float, optional</span>
+<span class="sd">        :param filterVals: initial location of the filter slider handles.</span>
+<span class="sd">            defaults to None and is set in the web app to [min, max] of the field</span>
+<span class="sd">        :type filterVals: list of float, optional</span>
+<span class="sd">        :param colormapLims: initial [min, max] limits to the colormaps. </span>
+<span class="sd">            defaults to None and is set in the web app to [min, max] of the field</span>
+<span class="sd">        :type colormapLims: list of float, optional</span>
+<span class="sd">        :param colormapVals: initial location of the colormap slider handles.</span>
+<span class="sd">            defaults to None and is set in the web app to [min, max] of the field</span>
+<span class="sd">        :type colormapVals: list of float, optional</span>
+<span class="sd">        :raises ValueError: if the length of the field array is not self.nparts</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="c1">## check that it&#39;s the correct length</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nparts</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">arr</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;You passed me </span><span class="si">%s</span><span class="s2"> with </span><span class="si">%d</span><span class="s2"> entries but only </span><span class="si">%d</span><span class="s2"> coordinates&quot;</span><span class="o">%</span><span class="p">(</span>
+                <span class="n">field_name</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">arr</span><span class="p">),</span><span class="bp">self</span><span class="o">.</span><span class="n">nparts</span><span class="p">))</span>
+
+        <span class="c1">## go ahead and put it in the tracked arrays</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tracked_names</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tracked_names</span><span class="p">,</span>
+            <span class="p">[</span><span class="n">field_name</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tracked_arrays</span><span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tracked_arrays</span><span class="p">,</span>
+            <span class="p">[</span><span class="n">arr</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tracked_filter_flags</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tracked_filter_flags</span><span class="p">,</span>
+            <span class="p">[</span><span class="n">filter_flag</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tracked_colormap_flags</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tracked_colormap_flags</span><span class="p">,</span>
+            <span class="p">[</span><span class="n">colormap_flag</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1">## update the default settings with this array&#39;s filterVals/Lims</span>
+        <span class="k">if</span> <span class="n">filter_flag</span><span class="p">:</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">settings_default</span><span class="p">[</span><span class="s1">&#39;filterLims&#39;</span><span class="p">][</span><span class="n">field_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">filterLims</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">settings_default</span><span class="p">[</span><span class="s1">&#39;filterVals&#39;</span><span class="p">][</span><span class="n">field_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">filterVals</span> 
+
+        <span class="c1">## update the default settings with this array&#39;s colormapVals/Lims</span>
+        <span class="k">if</span> <span class="n">colormap_flag</span><span class="p">:</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">settings_default</span><span class="p">[</span><span class="s1">&#39;colormapLims&#39;</span><span class="p">][</span><span class="n">field_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">colormapLims</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">settings_default</span><span class="p">[</span><span class="s1">&#39;colormapVals&#39;</span><span class="p">][</span><span class="n">field_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">colormapVals</span>
+
+        <span class="c1">## update the attached settings if they&#39;re already there</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">attached_settings</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">attached_settings</span><span class="p">[</span><span class="s1">&#39;filterLims&#39;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">UIname</span><span class="p">][</span><span class="n">field_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">filterLims</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">attached_settings</span><span class="p">[</span><span class="s1">&#39;filterVals&#39;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">UIname</span><span class="p">][</span><span class="n">field_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">filterVals</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">attached_settings</span><span class="p">[</span><span class="s1">&#39;colormapLims&#39;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">UIname</span><span class="p">][</span><span class="n">field_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">colormapLims</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">attached_settings</span><span class="p">[</span><span class="s1">&#39;colormapVals&#39;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">UIname</span><span class="p">][</span><span class="n">field_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">colormapVals</span></div>
+
+<div class="viewcode-block" id="ParticleGroup.getDecimationIndexArray"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.ParticleGroup.html#Firefly.data_reader.ParticleGroup.getDecimationIndexArray">[docs]</a>    <span class="k">def</span> <span class="nf">getDecimationIndexArray</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a numpy index array to handle decimation (sub-sampling) of your</span>
+<span class="sd">        data. Chooses nparts/decimation_factor many particles randomly without</span>
+<span class="sd">        replacement. Binds it to self.dec_inds.</span>
+<span class="sd">        :return: dec_inds, indices corresponding to randomly chosen particles</span>
+<span class="sd">        :rtype: np.ndarray</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">decimation_factor</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">nparts</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">decimation_factor</span><span class="p">:</span>
+            <span class="c1">## we&#39;ve been instructed to decimate and it makes sense to do so</span>
+            <span class="c1">##  (decimation factor is not &gt; self.nparts)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dec_inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nparts</span><span class="p">),</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nparts</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">decimation_factor</span><span class="p">),</span>
+                <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1">## use a dummy boolean mask full of True instead</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dec_inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nparts</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dec_inds</span></div>
+
+<div class="viewcode-block" id="ParticleGroup.outputToDict"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.ParticleGroup.html#Firefly.data_reader.ParticleGroup.outputToDict">[docs]</a>    <span class="k">def</span> <span class="nf">outputToDict</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">dec_inds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">store_extra_keys</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">loud</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Outputs a subset of this ParticleGroup instance&#39;s </span>
+<span class="sd">            data to a dictionary. The subset is determined by the </span>
+<span class="sd">            :code:`dec_inds` input which should be an array of indices</span>
+<span class="sd">            matching the tracked field arrays. </span>
+
+<span class="sd">        :param dec_inds: the decimation indices to </span>
+<span class="sd">                use, defining a subset of the :class:`~Firefly.data_reader.ParticleGroup` data to </span>
+<span class="sd">                output, defaults to np.arange(self.nparts)</span>
+<span class="sd">        :type dec_inds: np.ndarray, optional</span>
+<span class="sd">        :param store_extra_keys: flag to store filter and colormap flags, defaults to True</span>
+<span class="sd">        :type store_extra_keys: bool, optional</span>
+<span class="sd">        :param loud: flag to print status information to the console, defaults to False</span>
+<span class="sd">        :type loud: bool, optional</span>
+<span class="sd">        :return: outDict of particle data</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="c1">## initialize the output dictionary</span>
+        <span class="n">outDict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+        <span class="c1">## initialize a default set of dec inds if none are passed</span>
+        <span class="k">if</span> <span class="n">dec_inds</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">dec_inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nparts</span><span class="p">)</span>
+        
+        <span class="c1">## save the coordinates as a special case since they </span>
+        <span class="c1">##  aren&#39;t in the tracked array</span>
+        <span class="n">outDict</span><span class="p">[</span><span class="s1">&#39;Coordinates&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span><span class="p">[</span><span class="n">dec_inds</span><span class="p">]</span>
+
+        <span class="c1">## store the field arrays</span>
+        <span class="k">for</span> <span class="n">tracked_name</span><span class="p">,</span><span class="n">tracked_arr</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tracked_names</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tracked_arrays</span><span class="p">):</span>
+
+            <span class="n">outDict</span><span class="p">[</span><span class="n">tracked_name</span><span class="p">]</span><span class="o">=</span><span class="n">tracked_arr</span><span class="p">[</span><span class="n">dec_inds</span><span class="p">]</span>
+
+        <span class="c1">## if this is the first file, let&#39;s also include the colormap</span>
+        <span class="c1">##  and filter keys</span>
+        <span class="k">if</span> <span class="n">store_extra_keys</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">loud</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">tracked_names</span><span class="p">,</span>
+                <span class="s1">&#39;filter:&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">tracked_filter_flags</span><span class="p">,</span>
+                <span class="s1">&#39;colormap:&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">tracked_colormap_flags</span><span class="p">)</span>
+
+            <span class="n">outDict</span><span class="p">[</span><span class="s1">&#39;filterKeys&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tracked_names</span><span class="p">)[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                 <span class="bp">self</span><span class="o">.</span><span class="n">tracked_filter_flags</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)]</span>
+
+            <span class="n">outDict</span><span class="p">[</span><span class="s1">&#39;colormapKeys&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tracked_names</span><span class="p">)[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">tracked_colormap_flags</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)]</span>
+
+            <span class="c1">## TODO this needs to be changed, this is a flag for having the</span>
+            <span class="c1">##  opacity vary across a particle as the impact parameter projection</span>
+            <span class="c1">##  of cubic spline kernel</span>
+            <span class="n">outDict</span><span class="p">[</span><span class="s1">&#39;doSPHrad&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">doSPHrad</span><span class="p">]</span>
+        
+        <span class="k">return</span> <span class="n">outDict</span></div>
+
+<div class="viewcode-block" id="ParticleGroup.outputToJSON"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.ParticleGroup.html#Firefly.data_reader.ParticleGroup.outputToJSON">[docs]</a>    <span class="k">def</span> <span class="nf">outputToJSON</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">short_data_path</span><span class="p">,</span>
+        <span class="n">hard_data_path</span><span class="p">,</span>
+        <span class="n">JSON_prefix</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+        <span class="n">loud</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">nparts_per_file</span><span class="o">=</span><span class="mi">10</span><span class="o">**</span><span class="mi">4</span><span class="p">,</span>
+        <span class="n">clean_JSONdir</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">write_jsons_to_disk</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Outputs this ParticleGroup instance&#39;s data to JSON format, splitting it up into </span>
+<span class="sd">            multiple sub-JSON files. Best used when coupled with a :class:`Firefly.data_reader.Reader`&#39;s</span>
+<span class="sd">            :func:`~Firefly.data_reader.Reader.dumpToJSON` method.</span>
+
+<span class="sd">        :param short_data_path: the sub-directory you want to put these files into</span>
+<span class="sd">        :type short_data_path: str</span>
+<span class="sd">        :param hard_data_path: the path to the directory containing different datasets&#39;</span>
+<span class="sd">            JSON sub-directories (often :code:`/path/toFirefly/static/data`)</span>
+<span class="sd">        :type hard_data_path: str</span>
+<span class="sd">        :param JSON_prefix: Prefix for any :code:`.json` files created, :code:`.json` files will be of the format:</span>
+<span class="sd">            :code:`&lt;JSON_prefix&gt;&lt;parttype&gt;_%d.json`, defaults to &#39;&#39;</span>
+<span class="sd">        :type JSON_prefix: str, optional</span>
+<span class="sd">        :param loud: flag to print status information to the console, defaults to True</span>
+<span class="sd">        :type loud: bool, optional</span>
+<span class="sd">        :param max_npart_per_file: the maximum number of particles saved per :code:`.json` file,</span>
+<span class="sd">            don&#39;t use too large a number or you will have trouble loading</span>
+<span class="sd">            the individual files in., defaults to 10**4</span>
+<span class="sd">        :type max_npart_per_file: int, optional</span>
+<span class="sd">        :param clean_JSONdir: flag to delete all :code:`.json` files in</span>
+<span class="sd">            the :code:`JSONdir`. Strictly not necessary (since :code:`filenames.json` </span>
+<span class="sd">            will be updated) but it is good to clean up after yourself., defaults to False</span>
+<span class="sd">        :type clean_JSONdir: bool, optional</span>
+<span class="sd">        :param write_jsons_to_disk: flag that controls whether data is saved to disk (:code:`True`)</span>
+<span class="sd">            or only converted to a string and returned (:code:`False`), defaults to True</span>
+<span class="sd">        :type write_jsons_to_disk: bool, optional</span>
+<span class="sd">        :return: filename, JSON_array (either a list full of filenames if</span>
+<span class="sd">            written to disk or a list of JSON strs)</span>
+<span class="sd">        :rtype: str, list of str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1">## shuffle particles and decimate as necessary, save the output in dec_inds</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">getDecimationIndexArray</span><span class="p">()</span>
+
+        <span class="c1">## where are we saving this json to?</span>
+        <span class="n">full_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">hard_data_path</span><span class="p">,</span> <span class="n">short_data_path</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">full_path</span><span class="p">):</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">full_path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">loud</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;You will need to add the sub-filenames to&quot;</span><span class="o">+</span>
+                <span class="s2">&quot; filenames.json if this was not called by a Reader instance.&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Writing:&quot;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s2">&quot;JSON to </span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="n">full_path</span><span class="p">)</span>
+
+        <span class="c1">## do we want to delete any existing jsons here?</span>
+        <span class="k">if</span> <span class="n">clean_JSONdir</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Removing old JSON files from </span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="n">full_path</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">full_path</span><span class="p">):</span>
+                <span class="k">if</span> <span class="s2">&quot;json&quot;</span> <span class="ow">in</span> <span class="n">fname</span><span class="p">:</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">full_path</span><span class="p">,</span><span class="n">fname</span><span class="p">))</span>
+
+        <span class="n">filenames_and_nparts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">filenames_and_nparts</span>
+        <span class="c1">## if the user did not specify how we should partition the data between</span>
+        <span class="c1">##  sub-JSON files then we&#39;ll just do it equally</span>
+        <span class="k">if</span> <span class="n">filenames_and_nparts</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1">## determine if we were passed a boolean mask or a index array</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dec_inds</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="nb">bool</span><span class="p">:</span>
+                <span class="n">nparts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dec_inds</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">dec_inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dec_inds</span><span class="p">)</span> <span class="c1">## convert to an index array</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">nparts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dec_inds</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="c1">## how many sub-files are we going to need?</span>
+            <span class="n">nfiles</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">nparts</span><span class="o">/</span><span class="n">nparts_per_file</span> <span class="o">+</span> <span class="p">((</span><span class="n">nparts</span><span class="o">%</span><span class="n">nparts_per_file</span><span class="p">)</span><span class="o">!=</span><span class="mi">0</span><span class="p">))</span>
+
+            <span class="c1">## how many particles will each file have and what are they named?</span>
+            <span class="n">filenames</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">short_data_path</span><span class="p">,</span><span class="s2">&quot;</span><span class="si">%s%s%03d</span><span class="s2">.json&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">JSON_prefix</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">UIname</span><span class="p">,</span><span class="n">i_file</span><span class="p">))</span> <span class="k">for</span> <span class="n">i_file</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nfiles</span><span class="p">)]</span>
+            <span class="n">nparts</span> <span class="o">=</span> <span class="p">[</span><span class="nb">min</span><span class="p">(</span><span class="n">nparts_per_file</span><span class="p">,</span><span class="n">nparts</span><span class="o">-</span><span class="p">(</span><span class="n">i_file</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">nparts_per_file</span><span class="p">))</span> <span class="k">for</span> <span class="n">i_file</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nfiles</span><span class="p">)]</span>
+
+            <span class="n">filenames_and_nparts</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">filenames</span><span class="p">,</span><span class="n">nparts</span><span class="p">))</span>
+        
+        <span class="n">JSON_array</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1">## loop through the sub-files</span>
+        <span class="n">cur_index</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">i_file</span><span class="p">,(</span><span class="n">fname</span><span class="p">,</span><span class="n">nparts_this_file</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">filenames_and_nparts</span><span class="p">):</span>
+            <span class="c1">## pick out the indices for this file</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">decimation_factor</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">these_dec_inds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dec_inds</span><span class="p">[</span><span class="n">cur_index</span><span class="p">:</span><span class="n">cur_index</span><span class="o">+</span><span class="n">nparts_this_file</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1">## create a dummy index array that takes everything</span>
+                <span class="n">these_dec_inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">cur_index</span><span class="p">,</span><span class="n">cur_index</span><span class="o">+</span><span class="n">nparts_this_file</span><span class="p">)</span>
+        
+            <span class="c1">## format an output dictionary</span>
+            <span class="n">outDict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">outputToDict</span><span class="p">(</span>
+                <span class="n">these_dec_inds</span><span class="p">,</span>
+                <span class="n">i_file</span><span class="o">==</span><span class="mi">0</span><span class="p">)</span>
+
+            <span class="n">fname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">hard_data_path</span><span class="p">,</span><span class="n">fname</span><span class="p">)</span>
+
+            <span class="n">JSON_array</span> <span class="o">+=</span> <span class="p">[(</span>
+                <span class="n">fname</span><span class="p">,</span>
+                <span class="n">write_to_json</span><span class="p">(</span><span class="n">outDict</span><span class="p">,</span>
+                    <span class="n">fname</span> <span class="k">if</span> <span class="n">write_jsons_to_disk</span> <span class="k">else</span> <span class="kc">None</span><span class="p">))]</span> <span class="c1">## path=None -&gt; returns a string</span>
+
+            <span class="c1">## move onto the next file</span>
+            <span class="n">cur_index</span> <span class="o">+=</span> <span class="n">nparts_this_file</span>
+        
+        <span class="k">return</span> <span class="n">JSON_array</span><span class="p">,</span><span class="n">filenames_and_nparts</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Alex Gurvich, Aaron Geller.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

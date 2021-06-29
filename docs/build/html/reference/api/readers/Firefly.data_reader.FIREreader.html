@@ -1,0 +1,296 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Firefly.data_reader.FIREreader &mdash; Firefly 2.0.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Firefly.data_reader.SimpleFIREreader" href="Firefly.data_reader.SimpleFIREreader.html" />
+    <link rel="prev" title="Firefly.data_reader.ArrayReader" href="Firefly.data_reader.ArrayReader.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> Firefly
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../webapp/index.html">Using Firefly</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../server/index.html">Hosting your own Firefly instance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../data_reader/index.html">Reading your own data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../networking.html">Accessing remote Firefly servers via port forwarding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../experimental/index.html">Experimental features</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../api.html#base-classes">Base classes</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../api.html#pre-built-readers">Pre-built Readers</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="Firefly.data_reader.SimpleReader.html">Firefly.data_reader.SimpleReader</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Firefly.data_reader.ArrayReader.html">Firefly.data_reader.ArrayReader</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Firefly.data_reader.FIREreader</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Firefly.data_reader.SimpleFIREreader.html">Firefly.data_reader.SimpleFIREreader</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#server-utitities">Server Utitities</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Firefly</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../api.html">API Reference</a> &raquo;</li>
+        
+      <li>Firefly.data_reader.FIREreader</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../../../_sources/reference/api/readers/Firefly.data_reader.FIREreader.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="firefly-data-reader-firereader">
+<h1>Firefly.data_reader.FIREreader<a class="headerlink" href="#firefly-data-reader-firereader" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="Firefly.data_reader.FIREreader">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">Firefly.data_reader.</span></span><span class="sig-name descname"><span class="pre">FIREreader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">snapdir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snapnum</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ptypes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">UInames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimation_factors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fields</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filterFlags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colormapFlags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">magFlags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logFlags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/Firefly/data_reader/FIREreader.html#FIREreader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Firefly.data_reader.FIREreader" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="../classes/Firefly.data_reader.Reader.html#Firefly.data_reader.Reader" title="Firefly.data_reader.reader.Reader"><code class="xref py py-class docutils literal notranslate"><span class="pre">Firefly.data_reader.reader.Reader</span></code></a></p>
+<p>This is an example of a “custom” Reader that has been tuned to 
+open data from the FIRE galaxy formation collaboration 
+(<a class="reference external" href="https://fire.northwestern.edu">https://fire.northwestern.edu</a>).</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="Firefly.data_reader.FIREreader.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">snapdir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snapnum</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ptypes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">UInames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimation_factors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fields</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filterFlags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colormapFlags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">magFlags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logFlags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/Firefly/data_reader/FIREreader.html#FIREreader.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Firefly.data_reader.FIREreader.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Base initialization method for FIREreader instances.</dt><dd><p>A FIREreader will conveniently read FIRE collaboration data and produce
+Firefly compatible <code class="code docutils literal notranslate"><span class="pre">.json</span></code> files.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>snapdir</strong> (<em>str</em>) – directory that contains all the hdf5 data files</p></li>
+<li><p><strong>snapnum</strong> (<em>int</em>) – which snapshot to open</p></li>
+<li><p><strong>ptypes</strong> (<em>list of int</em><em>, </em><em>optional</em>) – which particle types to extract (e.g. <code class="code docutils literal notranslate"><span class="pre">'PartType%d'</span></code>),
+defaults to []</p></li>
+<li><p><strong>UInames</strong> (<em>list of str</em><em>, </em><em>optional</em>) – what should the particle groups be called in the webapp UI,
+defaults to <code class="code docutils literal notranslate"><span class="pre">['PartType%d</span> <span class="pre">for</span> <span class="pre">in</span> <span class="pre">in</span> <span class="pre">ptypes]</span></code></p></li>
+<li><p><strong>decimation_factors</strong> (<em>list of int</em><em>, </em><em>optional</em>) – factor by which to reduce the data randomly 
+i.e. <code class="code docutils literal notranslate"><span class="pre">data=data[::decimation_factor]</span></code>,
+defaults to <code class="code docutils literal notranslate"><span class="pre">[1</span> <span class="pre">for</span> <span class="pre">i</span> <span class="pre">in</span> <span class="pre">ptypes]</span></code></p></li>
+<li><p><strong>fields</strong> (<em>list of str</em><em>, </em><em>optional</em>) – names of fields to open from snapshot data
+(e.g. Temperature, AgeGyr, Velocities, Density). Shared between 
+particle types but if a particle type does not have a field 
+(e.g. PartType4 does not have Temperature, PartType0 does not have AgeGyr)
+then that field is skipped for that particle type.
+defaults to [‘Velocities’]</p></li>
+<li><p><strong>filterFlags</strong> (<em>list of bool</em><em>, </em><em>optional</em>) – flags to signal whether field should be in filter dropdown,
+defaults to [True for i in fields]</p></li>
+<li><p><strong>colormapFlags</strong> (<em>list of bool</em><em>, </em><em>optional</em>) – flags to signal whether field should be in colormap dropdown,
+defaults to [True for i in fields]</p></li>
+<li><p><strong>magFlags</strong> (<em>list of bool</em><em>, </em><em>optional</em>) – flags to signal whether the magnitude of the field should be taken,
+rather than the field itself (e.g. for vector quantities),
+defaults to [False for i in fields]</p></li>
+<li><p><strong>logFlags</strong> (<em>list of bool</em><em>, </em><em>optional</em>) – flags to signal whether the log of the field should be taken,
+defaults to [False for i in fields]</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – if the length of ptypes, UInames, and decimation factors
+does not match.</p></li>
+<li><p><strong>ValueError</strong> – if the length of fields, filterFlags,
+colormapFlags, magFlags, and logFlags does not match.</p></li>
+<li><p><strong>FileNotFoundError</strong> – if snapdir cannot be found</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="Firefly.data_reader.FIREreader.loadData">
+<span class="sig-name descname"><span class="pre">loadData</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/Firefly/data_reader/FIREreader.html#FIREreader.loadData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Firefly.data_reader.FIREreader.loadData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Loads FIRE snapshot data using Alex Gurvich’s
+<code class="xref py py-func docutils literal notranslate"><span class="pre">Firefly.data_reader.snapshot_utils.openSnapshot()</span></code>.
+(reproduced from <a class="reference external" href="https://github.com/agurvich/abg_python">https://github.com/agurvich/abg_python</a>) and binds it to a 
+corresponding <a class="reference internal" href="../classes/Firefly.data_reader.ParticleGroup.html#Firefly.data_reader.ParticleGroup" title="Firefly.data_reader.ParticleGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">Firefly.data_reader.ParticleGroup</span></code></a> instance.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="Firefly.data_reader.SimpleFIREreader.html" class="btn btn-neutral float-right" title="Firefly.data_reader.SimpleFIREreader" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="Firefly.data_reader.ArrayReader.html" class="btn btn-neutral float-left" title="Firefly.data_reader.ArrayReader" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Alex Gurvich, Aaron Geller.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

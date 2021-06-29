@@ -1,0 +1,11 @@
+﻿Firefly.data\_reader.TweenParams
+================================
+
+.. currentmodule:: Firefly.data_reader
+
+.. autoclass:: TweenParams
+   :members:
+   :special-members:
+   :show-inheritance:
+
+   .. autoclasstoc::
