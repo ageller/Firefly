@@ -715,7 +715,7 @@ class ArrayReader(Reader):
             for igroup in range(ngroups):
                 ## field names will be extracted from dictionary in ParticleGroup initialization
                 these_names = (["field%d"%j for j in range(nfieldss[igroup])] if
-                    type(fieldss[0]) != dict else None)
+                    type(fields[0]) != dict else None)
                 field_names.append(these_names)
 
         ## initialize default particle group names

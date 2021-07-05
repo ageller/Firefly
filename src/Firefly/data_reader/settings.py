@@ -59,16 +59,19 @@ class Settings(object):
         
     def printKeys(
         self,
+        pattern=None,
         values=True):
         """Prints keys (and optionally their values) to the console in an organized (and pretty) fashion.
 
+        :param pattern: string that settings group must contain to be printed, defaults to None
+        :type pattern: str, optional
         :param values: flag to print what the settings are set to, in addition to the key, defaults to True
         :type values: bool, optional
         """
         for attr in self.__dict__.keys():
             if '_settings' in attr:
                 obj = getattr(self,attr)
-                if type(obj) == dict:
+                if type(obj) == dict and (pattern is None or pattern in attr):
                     print('--',
                         attr.replace('_',' ').replace('  ',': '),
                         '--')
@@ -77,6 +80,7 @@ class Settings(object):
                             print(key,self[key],)
                     else:
                         print(list(getattr(self,attr).keys()))
+                    print()
 
     def keys(self):
         """ Returns a list of keys for all the different settings sub-dictionaries """
@@ -120,10 +124,10 @@ class Settings(object):
         self.settings_filename = settings_filename
 
         ## initialize default settings and apply any passed kwargs
-        self.window_settings(**kwargs)
         self.startup_settings(**kwargs)
-        self.camera_settings(**kwargs)
         self.UI_settings(**kwargs)
+        self.window_settings(**kwargs)
+        self.camera_settings(**kwargs)
         self.particle_startup_settings(**kwargs)
         self.particle_UI_settings(**kwargs)
         self.particle_filter_settings(**kwargs)
