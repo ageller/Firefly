@@ -116,7 +116,8 @@ class TweenParams(object):
         JSON_prefix='',
         filename=None,
         loud=1,
-        write_jsons_to_disk=True):
+        write_jsons_to_disk=True,
+        not_reader=True):
         """ Saves the current tween parameters to a JSON file.
 
         :param JSONdir: the sub-directory that will contain your JSON files, relative
@@ -135,6 +136,8 @@ class TweenParams(object):
         :param write_jsons_to_disk: flag that controls whether data is saved to disk (:code:`True`)
             or only converted to a string and returned (:code:`False`), defaults to True
         :type write_jsons_to_disk: bool, optional
+        :param not_reader: flag for whether to print the Reader :code:`filenames.json` warning, defaults to True
+        :type write_jsons_to_disk: bool, optional
         :raises NotImplementedError: if filename is anything but None 
             TODO: need to check on this if the webapp actually requires it have 
             a specific name.
@@ -152,6 +155,10 @@ class TweenParams(object):
         tween_params_dict = self.outputToDict()
 
         filename = os.path.join(JSONdir,JSON_prefix+filename)
+
+        if loud and not_reader:
+            print("You will need to add this tween params filename to"+
+                " filenames.json if this was not called by a Reader instance.")
 
         return filename,write_to_json(
             tween_params_dict,

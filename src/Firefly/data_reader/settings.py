@@ -67,12 +67,16 @@ class Settings(object):
         """
         for attr in self.__dict__.keys():
             if '_settings' in attr:
-                print('--',attr,'--')
-                if values:
-                    for key in list(getattr(self,attr).keys()):
-                        print(key,self[key],)
-                else:
-                    print(list(getattr(self,attr).keys()))
+                obj = getattr(self,attr)
+                if type(obj) == dict:
+                    print('--',
+                        attr.replace('_',' ').replace('  ',': '),
+                        '--')
+                    if values:
+                        for key in list(getattr(self,attr).keys()):
+                            print(key,self[key],)
+                    else:
+                        print(list(getattr(self,attr).keys()))
 
     def keys(self):
         """ Returns a list of keys for all the different settings sub-dictionaries """
@@ -117,11 +121,11 @@ class Settings(object):
 
         ## initialize default settings and apply any passed kwargs
         self.window_settings(**kwargs)
-        self.UI_settings(**kwargs)
-        self.particle_UI_settings(**kwargs)
-        self.camera_settings(**kwargs)
         self.startup_settings(**kwargs)
+        self.camera_settings(**kwargs)
+        self.UI_settings(**kwargs)
         self.particle_startup_settings(**kwargs)
+        self.particle_UI_settings(**kwargs)
         self.particle_filter_settings(**kwargs)
         self.particle_colormap_settings(**kwargs)
 
@@ -469,7 +473,8 @@ class Settings(object):
         JSON_prefix='',
         filename=None,
         loud=True,
-        write_jsons_to_disk=True):
+        write_jsons_to_disk=True,
+        not_reader=True):
         """ Saves the current settings to a JSON file.
 
         :param JSONdir: the sub-directory that will contain your JSON files, relative
@@ -488,6 +493,8 @@ class Settings(object):
         :param write_jsons_to_disk: flag that controls whether data is saved to disk (:code:`True`)
             or only converted to a string and returned (:code:`False`), defaults to True
         :type write_jsons_to_disk: bool, optional
+        :param not_reader: flag for whether to print the Reader :code:`filenames.json` warning, defaults to True
+        :type write_jsons_to_disk: bool, optional
         :return: filename, JSON(all_settings_dict) (either a filename if
             written to disk or a JSON strs)
         :rtype: str, str
@@ -500,7 +507,7 @@ class Settings(object):
         ## export settings to a dictionary
         all_settings_dict = self.outputToDict()
 
-        if loud:
+        if loud and not_reader:
             print("You will need to add this settings filename to"+
                 " filenames.json if this was not called by a Reader instance.")
 
