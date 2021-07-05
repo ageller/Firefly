@@ -19,8 +19,22 @@ class Reader(object):
     You should use this Reader as a base class for any custom readers you may build
     (see :class:`Firefly.data_reader.SimpleReader` or :class:`Firefly.data_reader.FIREreader` for example).
     """
+
+    def __repr__(self):
+        """Implementation of builtin function __repr__
+
+        :return: mystr, the pretty rendering of a reader
+        :rtype: str
+        """
+
+        my_str = str(self.__class__).split('.')[-1].replace("'>","")
+
+        my_str += " with %d particle groups" % len(self.particleGroups)
+
+        return my_str
     
-    def __init__(self,
+    def __init__(
+        self,
         JSONdir=None, 
         JSON_prefix='Data',
         clean_JSONdir=False,
@@ -276,7 +290,8 @@ class Reader(object):
                 loud=loud,
                 nparts_per_file=self.max_npart_per_file,
                 clean_JSONdir=self.clean_JSONdir if particleGroup is self.particleGroups[0] else False,
-                write_jsons_to_disk=write_jsons_to_disk)
+                write_jsons_to_disk=write_jsons_to_disk,
+                not_reader=False)
 
             ## append the JSON arrays for this particle group
             JSON_array += this_JSON_array
@@ -288,7 +303,8 @@ class Reader(object):
             JSONdir,
             JSON_prefix=self.JSON_prefix,
             loud=loud,
-            write_jsons_to_disk=write_jsons_to_disk)]
+            write_jsons_to_disk=write_jsons_to_disk,
+            not_reader=False)]
 
         ## format and output the filenames.json file
         filenamesDict['options'] = [(os.path.join(self.short_data_path,self.JSON_prefix+self.settings.settings_filename),0)]
@@ -306,7 +322,8 @@ class Reader(object):
                 JSONdir,
                 JSON_prefix=self.JSON_prefix,
                 loud=loud,
-                write_jsons_to_disk=write_jsons_to_disk)] ## None -> returns JSON string
+                write_jsons_to_disk=write_jsons_to_disk,
+                not_reader=False)] ## None -> returns JSON string
 
         ## handle the startup.json file, may need to append or totally overwrite
         startup_file = os.path.join(
@@ -542,8 +559,8 @@ class Reader(object):
             if GHUSER is None: GHUSER = os.environ['USER']
 
             if not os.path.isfile(GHOAUTHTOKENPATH):
-                raise FileNotFoundError(f"No OAUTH token file matching {GHOAUTHTOKENPATH}, generate one from \
-                https://github.com/settings/tokens and write it to disk somewhere.")
+                raise FileNotFoundError(f"No OAUTH token file matching {GHOAUTHTOKENPATH}, generate one from"+
+                " https://github.com/settings/tokens and write it to disk somewhere.")
 
             print(f"Initializing a new GitHub repository at {target} with\n" + 
                 f"\tGHREPONAME: {GHREPONAME}\n" + 
@@ -774,6 +791,8 @@ class ArrayReader(Reader):
         self,
         coordinates,
         UInames=None,
+        fields=None,
+        field_names=None,
         decimation_factor=1,
         write_jsons_to_disk=True,
         loud=True,
@@ -784,10 +803,19 @@ class ArrayReader(Reader):
         :param coordinates: raw coordinate data, ignores path_to_data if passed.
             Can either pass N,3 np.array which is interpreted as a single particle group's 
             coordinates or a jagged (M,N_m,3) list of np.arrays which is interpreted as M many 
-            particle groups with each having N_m particles, defaults to None (thereby reading from file)
+            particle groups with each having N_m particles
         :type coordinates: list, optional
         :param UInames: list of particle group UInames
         :type UInames: list of str
+        :param fields: list of field arrays corresponding to each point of the coordinate data, 
+            Can pass:
+            length N np.array which is interpreted as a single particle group's field,
+            (N_m,N_f) list which is interpreted as a single particle group's fields,
+            or a jagged (M,N_m,N_f) list of np.arrays which is interpreted as M many 
+            particle groups with each having N_m particles with N_f fields, defaults to []
+        :type fields: list of shape (M,N_f,N_m)
+        :param field_names: strings to name fields by, defaults to ['field%d' for field in fields]
+        :type field_names: list of strs
         :param decimation_factor: factor by which to reduce the data randomly 
             i.e. :code:`data=data[::decimation_factor]`, defaults to 1
         :type decimation_factor: int, optional
@@ -799,34 +827,93 @@ class ArrayReader(Reader):
         :raises np.AxisError: if the coordinate data cannot be interpreted
         :raises ValueError: if the number of particle groups does not match the number of
             coordinate arrays
+        :raises np.AxisError: if the field data cannot be interpreted
+        :raises np.AxisError: if the field names cannot be interpreted
         """
 
         super().__init__(**kwargs)
 
         ## wrap coordinate array if necessary
-        if len(np.shape(coordinates)[0])==2 and np.shape(coordinates[0])[-1]==3:
-            ## passed a jagged array of different coordinates
-            pass
-        elif len(np.shape(coordinates))==2 and np.shape(coordinates)[-1]==3:
+        if len(np.shape(coordinates))==2 and np.shape(coordinates)[-1]==3:
             ## passed a single list of coordinates, prepend an axis for the single group
             coordinates = [coordinates]
+        elif len(np.shape(coordinates[0]))==2 and np.shape(coordinates[0])[-1]==3:
+            ## passed a jagged array of different coordinates
+            pass
         else:
-            raise np.AxisError("Uninterpretable coordinate array, either pass a single (N,3) array\
-                or a jagged list of 'shape' (M,N_m,3)")
+            raise np.AxisError("Uninterpretable coordinate array, either pass a single (N,3) array"+ 
+                " or a jagged list of 'shape' (M,N_m,3)")
+
+        ngroups = len(coordinates)
+        npartss = np.array([len(coords) for coords in coordinates])
+        
+        ## check fields and wrap a single field for a single particle group
+        fielderror = np.AxisError("Uninterpretable field array, either pass a single N array"
+                        " or a jagged list of 'shape' (M,N_fm,N_pm)")
+        if fields is not None:
+            ## special case and want to allow convenient/inconsistent syntax,
+            ##  so let's just handle it independently
+            if ngroups == 1:
+                try: fields = np.reshape(fields,(1,-1,npartss[0]))
+                except: raise fielderror
+            else:
+                ## is everything square? unlikely but you know one can dream
+                try: fields = np.reshape(fields,(ngroups,-1,npartss[0]))
+                except:
+                    ## yeah okay i didn't think that was gonna work anyway
+                    ##  let's build up a jagged list
+                    temp_fields = []
+
+                    ## first check that we have enough fields for each group
+                    if len(fields) != ngroups: raise fielderror
+
+                    ## okay, we've got something to work with
+                    try:
+                        ## this should work *if* users passed correctly formatted input
+                        for igroup in range(ngroups):
+                            temp_fields.append(np.reshape(fields[igroup],(-1,npartss[igroup])))
+                    ## go read the documentation!
+                    except: raise fielderror
+
+                    ## swap the variable names
+                    fields = temp_fields
+
+            nfieldss = [len(this_fields) for this_fields in fields]
+
+        ## check field names and generate them if necessary
+        fieldnameerror = np.AxisError("Uninterpretable field array, either pass a single N array"+
+            " or a jagged list of 'shape' (M,N_fm,N_pm)")
+
+        if field_names is not None: 
+            ## special case and want to allow convenient/inconsistent syntax,
+            ##  so let's just handle it independently
+            if ngroups == 1: 
+                try: field_names = np.array(field_names).reshape(ngroups,nfieldss[0]).tolist()
+                except: raise fieldnameerror
+            else:
+                for igroup in range(ngroups):
+                    if len(field_names[igroup]) != nfieldss[igroup]: raise fieldnameerror
+
+        ## so some fields were passed but not field_names
+        elif fields is not None:
+            field_names = [["field%d"%j for j in range(nfieldss[igroup])] for igroup in range(ngroups)]
 
         ## initialize default particle group names
         if UInames is None: UInames = ['PGroup_%d'%i for i in range(len(coordinates))]
         elif len(UInames) != len(coordinates): 
-            raise ValueError("%d UInames does not match passed\
-            number of %d coordinate arrays"%(len(UInames),len(coordinates)))
+            raise ValueError("%d UInames does not match passed"+
+            " number of %d coordinate arrays"%(len(UInames),len(coordinates)))
 
         ## loop through each of the particle groups
-        for coords,UIname in zip(coordinates,UInames):
+        for i,(coords,UIname) in enumerate(zip(coordinates,UInames)):
+
             ## initialize a firefly particle group instance
             firefly_particleGroup = ParticleGroup(
                 UIname,
                 coords,
-                decimation_factor=decimation_factor)
+                decimation_factor=decimation_factor,
+                tracked_arrays=None if fields is None else fields[i],
+                tracked_names=None if field_names is None else field_names[i])
 
             ## attach the instance to the reader
             self.addParticleGroup(firefly_particleGroup)
