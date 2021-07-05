@@ -592,195 +592,6 @@ class Reader(object):
             finally:
                 ## move back to the current directory
                 os.chdir(old)
-
-class SimpleReader(Reader):
-    """ A wrapper to :class:`Firefly.data_reader.Reader` that attempts to 
-        flexibily open generically formatetd data with minimal interaction from the user.
-    """
-
-    def __init__(
-        self,
-        path_to_data,
-        write_jsons_to_disk=True,
-        decimation_factor=1,
-        extension='.hdf5',
-        loud=True,
-        **kwargs):
-        """A simple reader that will take as minimal input the path to a 
-        (set of) .hdf5 file(s) and extract each top level group's
-        'Coordinates' or 'x','y','z' values. Coordinate data must saved either as an (N,3) array 
-        or in 3 separate (N,) arrays indexed by x,y, and z. 
-
-        Keyword arguments are passed to the parent :class:`~Firefly.data_reader.Reader`.
-
-        :param path_to_data: path to .hdf5/csv file(s; can be a directory)
-        :type path_to_data: str 
-        :param write_jsons_to_disk: flag that controls whether data is saved to disk (:code:`True`)
-            or only converted to a string and stored in :code:`self.JSON` (:code:`False`), defaults to True
-        :type write_jsons_to_disk: bool, optional
-        :param decimation_factor: factor by which to reduce the data randomly 
-            i.e. :code:`data=data[::decimation_factor]`, defaults to 1
-        :type decimation_factor: int, optional
-        :param extension: file extension to attempt to open. 
-            Accepts only :code:`'.hdf5'` or :code:`'.csv'`, defaults to '.hdf5'
-        :type extension: str, optional
-        :param loud: flag to print status information to the console, defaults to False
-        :type loud: bool, optional
-        :raises ValueError: if :code:`path_to_data` is not a directory or doesn't contain
-            :code:`extension`
-        :raises ValueError: if :code:`extension` is passed anything either 
-            than :code:`'.hdf5'` or :code:`'.csv'`
-        :raises ValueError: if particle_groups is not None, extension = .csv, and 
-            len(particle_groups) != len(detected filenames in path_to_data)
-        """
-
-        ## create a default reader instance
-        super().__init__(**kwargs)
-
-        if extension in path_to_data:
-            ## path_to_data points directly to a single .hdf5 file
-            fnames = [path_to_data]
-
-        elif os.path.isdir(path_to_data):
-            ## path_to_data points to a directory containing .hdf5 data files
-
-            fnames = []
-            for this_fname in os.listdir(path_to_data):
-                if extension in this_fname:
-                    fnames += [os.path.join(path_to_data,this_fname)]
-        else:
-            raise ValueError(
-                "%s needs to point to an %s file or "%(path_to_data,extension)+
-                "a directory containing %s files."%extension)
-
-        if extension == '.hdf5':
-            ## take the contents of the "first" file to define particle groups and keys
-            with h5py.File(fnames[0],'r') as handle:
-                particle_groups = list(handle.keys())
-
-            ## Gadget data has a header as well as particle groups
-            ##  so we need to ignore it
-            if 'Header' in particle_groups:
-                particle_groups.pop(particle_groups.index("Header"))
-        elif extension == '.csv':
-            particle_groups = [fname.replace(extension,'').split(os.sep)[-1] for fname in fnames]
-        else:
-            raise ValueError("Invalid extension %s, must be .hdf5 or .csv"%extension) 
-
-        print("Opening %d files and %d particle types..."%(len(fnames),len(particle_groups)))
-
-        for i,particle_group in enumerate(particle_groups):
-            coordinates = None
-            if extension == '.hdf5':
-                ## need to loop through each file and get the matching coordinates, 
-                ##  concatenating them.
-                for fname in fnames:
-                    coordinates = self.__getHDF5Coordinates(fname,particle_group,coordinates) 
-            elif extension == '.csv':
-                ## each file corresponds to a single set of coordinates
-                coordinates = self.__getCSVCoordinates(fnames[i]) 
-            else:
-                raise ValueError("Invalid extension %s, must be .hdf5 or .csv"%extension) 
-
-            ## initialize a firefly particle group instance
-            firefly_particleGroup = ParticleGroup(
-                particle_group,
-                coordinates,
-                decimation_factor=decimation_factor)
-            ## attach the instance to the reader
-            self.addParticleGroup(firefly_particleGroup)
-        
-
-        ## either write a bunch of mini JSONs to disk or store 
-        ##  a single big JSON in self.JSON
-        self.dumpToJSON(
-            write_jsons_to_disk=write_jsons_to_disk,
-            loud=loud)
-
-    def __getCSVCoordinates(self,fname):
-        """Simple parser for opening a CSV file and extracting
-            its coordinates.
-
-        :param fname: full filepath to :code:`.csv` file
-        :type fname: str
-        :return: :code:`coordinates`
-        :rtype: np.ndarray
-        """
-        full_df = pd.read_csv(fname,sep=' ')
-        coordinates = np.empty((full_df.shape[0],3))
-
-        if 'x' in full_df and 'y' in full_df and 'z' in full_df:
-            coordinates[:,0] = full_df['x']
-            coordinates[:,1] = full_df['y']
-            coordinates[:,2] = full_df['z']
-        else:
-            coordinates[:,0] = full_df.iloc[:,0]
-            coordinates[:,1] = full_df.iloc[:,1]
-            coordinates[:,2] = full_df.iloc[:,2]
-
-        return coordinates
-
-    def __getHDF5Coordinates(
-        self,
-        fname,
-        particle_group=None,
-        coordinates=None): 
-        """Simple parser for opening an hdf5 file and extracting
-            its coordinates.
-
-        :param fname: full filepath to :code:`.hdf5` file
-        :type fname: str
-        :param particle_group: :code:`group_name` in the :code:`.hdf5` file
-            that contains this particle type's coordinates. If :code:`None`
-            then it is assumed the Coordinates dataset is saved at the top level
-            of the file, defaults to None
-        :type particle_group: str
-        :param coordinates: existing coordinate array that should be appended to, defaults to None
-        :type coordinates: np.ndarray, optional
-        :raises TypeError: if :code:`coordinates` is not of type :code:`np.ndarray`
-        :raises np.AxisError: if :code:`coordinates` does not have shape (N,3)
-        :return: coordinates, the opened coordinate array from :code:`fname`
-        :rtype: np.ndarray
-        """
-
-        with h5py.File(fname,'r') as handle:
-            ## valide the existing coordinate array or initialize it in the first place
-            if coordinates is None:
-                coordinates = np.empty((0,3))
-            elif type(coordinates)!= np.ndarray:
-                raise TypeError("Existing coordinate array must be of type np.ndarry")
-            if np.shape(coordinates)[-1] != 3:
-                raise np.AxisError("Last axis of existing coordinate array must be of size 3")
-
-            ## open the hdf5 group
-            if particle_group is not None:
-                h5_group = handle[particle_group]
-            else:
-                h5_group = handle
-            
-            if "Coordinates" in h5_group.keys():
-                ## append the (N,3) coordinate array
-                coordinates = np.append(coordinates,h5_group['Coordinates'][()],axis=0)
-
-            elif ("x" in h5_group.keys() and
-                "y" in h5_group.keys() and
-                "z" in h5_group.keys()):
-
-                ## read the coordinate data from x,y,z arrays
-                xs = h5_group['x'][()]
-                ys = h5_group['y'][()]
-                zs = h5_group['z'][()]
-
-                ## initialize a temporary coordinate array to append
-                temp_coordinates = np.zeros((xs.size,3))
-                temp_coordinates[:,0] = xs
-                temp_coordinates[:,1] = ys
-                temp_coordinates[:,2] = zs
-
-                ## append the coordinates
-                coordinates = np.append(coordinates,temp_coordinates,axis=0)
-
-        return coordinates
     
 class ArrayReader(Reader):
     """A wrapper to :class:`Firefly.data_reader.Reader` that stores 
@@ -854,8 +665,9 @@ class ArrayReader(Reader):
             ## special case and want to allow convenient/inconsistent syntax,
             ##  so let's just handle it independently
             if ngroups == 1:
-                try: fields = np.reshape(fields,(1,-1,npartss[0]))
-                except: raise fielderror
+                if type(fields) != dict and type(fields[0]) != dict:
+                    try: fields = np.reshape(fields,(1,-1,npartss[0]))
+                    except: raise fielderror
             else:
                 ## is everything square? unlikely but you know one can dream
                 try: fields = np.reshape(fields,(ngroups,-1,npartss[0]))
@@ -871,7 +683,10 @@ class ArrayReader(Reader):
                     try:
                         ## this should work *if* users passed correctly formatted input
                         for igroup in range(ngroups):
-                            temp_fields.append(np.reshape(fields[igroup],(-1,npartss[igroup])))
+                            this_fields = fields[igroup]
+                            ## if this_fields is a dictionary it will be understood by ParticleGroup below
+                            if type(this_fields) != dict: np.reshape(this_fields,(-1,npartss[igroup]))
+                            temp_fields.append(this_fields)
                     ## go read the documentation!
                     except: raise fielderror
 
@@ -896,7 +711,12 @@ class ArrayReader(Reader):
 
         ## so some fields were passed but not field_names
         elif fields is not None:
-            field_names = [["field%d"%j for j in range(nfieldss[igroup])] for igroup in range(ngroups)]
+            field_names = []
+            for igroup in range(ngroups):
+                ## field names will be extracted from dictionary in ParticleGroup initialization
+                these_names = (["field%d"%j for j in range(nfieldss[igroup])] if
+                    type(fieldss[0]) != dict else None)
+                field_names.append(these_names)
 
         ## initialize default particle group names
         if UInames is None: UInames = ['PGroup_%d'%i for i in range(len(coordinates))]
@@ -923,3 +743,245 @@ class ArrayReader(Reader):
         self.dumpToJSON(
             write_jsons_to_disk=write_jsons_to_disk,
             loud=loud)
+
+class SimpleReader(ArrayReader):
+    """ A wrapper to :class:`Firefly.data_reader.ArrayReader` that attempts to 
+        flexibily open generically formatetd data with minimal interaction from the user.
+    """
+
+    def __init__(
+        self,
+        path_to_data,
+        field_names=None,
+        write_jsons_to_disk=True,
+        extension='.hdf5',
+        loud=True,
+        **kwargs):
+        """A simple reader that will take as minimal input the path to a 
+        (set of) .hdf5 file(s) and extract each top level group's
+        'Coordinates' or 'x','y','z' values. Coordinate data must saved either as an (N,3) array 
+        or in 3 separate (N,) arrays indexed by x,y, and z. 
+
+        Keyword arguments are passed to the parent :class:`~Firefly.data_reader.Reader`.
+
+        :param path_to_data: path to .hdf5/csv file(s; can be a directory)
+        :type path_to_data: str 
+        :param field_names: strings to try and extract from .hdf5 file. If file format is .csv then there must be a header row
+        :type field_names: list of strs
+        :param extension: file extension to attempt to open. 
+            Accepts only :code:`'.hdf5'` or :code:`'.csv'`, defaults to '.hdf5'
+        :type extension: str, optional
+        :param loud: flag to print status information to the console, defaults to False
+        :type loud: bool, optional
+        :raises ValueError: if :code:`path_to_data` is not a directory or doesn't contain
+            :code:`extension`
+        :raises ValueError: if :code:`extension` is passed anything either 
+            than :code:`'.hdf5'` or :code:`'.csv'`
+        :raises ValueError: if particle_groups is not None, extension = .csv, and 
+            len(particle_groups) != len(detected filenames in path_to_data)
+        """
+
+        if extension in path_to_data:
+            ## path_to_data points directly to a single data file
+            fnames = [path_to_data]
+
+        elif os.path.isdir(path_to_data):
+            ## path_to_data points to a directory containing .hdf5 data files
+            fnames = []
+            ## gather the individual filenames
+            for this_fname in os.listdir(path_to_data):
+                if extension in this_fname:
+                    fnames += [os.path.join(path_to_data,this_fname)]
+        else:
+            ## couldn't interpret what we were given
+            raise ValueError(
+                "%s needs to point to an %s file or "%(path_to_data,extension)+
+                "a directory containing %s files."%extension)
+
+        if extension == '.hdf5':
+            ## take the contents of the "first" file to define particle groups and keys
+            with h5py.File(fnames[0],'r') as handle:
+                particle_groups = list(handle.keys())
+
+            ## Gadget data has a header as well as particle groups
+            ##  so we need to ignore it
+            if 'Header' in particle_groups:
+                particle_groups.pop(particle_groups.index("Header"))
+        elif extension == '.csv':
+            particle_groups = [fname.replace(extension,'').split(os.sep)[-1] for fname in fnames]
+        else:
+            raise ValueError("Invalid extension %s, must be .hdf5 or .csv"%extension) 
+
+        print("Opening %d files and %d particle types..."%(len(fnames),len(particle_groups)))
+
+        coordss = []
+
+        ## initialize bucket for holding field data
+        fieldsss = None if field_names is None else []
+
+        for i,particle_group in enumerate(particle_groups):
+            coordinates = None
+            fieldss = {}
+            if extension == '.hdf5':
+                ## need to loop through each file and get the matching coordinates, 
+                ##  concatenating them.
+                for fname in fnames:
+                    coordinates = self.__getHDF5Coordinates(fname,particle_group,coordinates) 
+                    fieldss = self.__getHDF5Fields(fname,particle_group,field_names,fieldss) 
+            elif extension == '.csv':
+                ## each file corresponds to a single set of coordinates and fields
+                coordinates = self.__getCSVCoordinates(fnames[i]) 
+                fieldss = self.__getCSVFields(fnames[i],field_names) 
+            else:
+                raise ValueError("Invalid extension %s, must be .hdf5 or .csv"%extension) 
+            coordss.append(coordinates)
+            if fieldsss is not None: fieldsss.append(fieldss)
+
+        ## create a default reader instance
+        super().__init__(
+            coordinates=coordss,
+            UInames=particle_groups,
+            fields=fieldsss,
+            write_jsons_to_disk=write_jsons_to_disk,
+            loud=loud)
+
+    def __getCSVCoordinates(self,fname):
+        """Simple parser for opening a CSV file and extracting
+            its coordinates.
+
+        :param fname: full filepath to :code:`.csv` file
+        :type fname: str
+        :return: :code:`coordinates`
+        :rtype: np.ndarray
+        """
+        full_df = pd.read_csv(fname,sep=' ')
+        coordinates = np.empty((full_df.shape[0],3))
+
+        if 'x' in full_df and 'y' in full_df and 'z' in full_df:
+            coordinates[:,0] = full_df['x']
+            coordinates[:,1] = full_df['y']
+            coordinates[:,2] = full_df['z']
+        else:
+            coordinates[:,0] = full_df.iloc[:,0]
+            coordinates[:,1] = full_df.iloc[:,1]
+            coordinates[:,2] = full_df.iloc[:,2]
+
+        return coordinates
+
+    def __getCSVFields(self,fname,field_names):
+        """Use pandas to interpret csv data in order to load field data matching
+            field names (field names that are not present are ignored).
+
+        :param fname: full filepath to :code:`.csv` file
+        :type fname: str
+        :param field_names: strings to try and extract from .csv. There must be a header row
+        :type field_names: list of strs
+        :return: dictionary of fields and field name pairings
+        :rtype: dict if field_names is not None else None
+        """
+
+        if field_names is None: return
+
+        fieldss = {}
+
+        ## trust pandas to open the .csv and detect if there's a header \_(ツ)_/
+        full_df = pd.read_csv(fname,sep=' ')
+        for field_name in field_names:
+            if field_name in full_df: fieldss[field_name] = full_df[field_name].to_numpy()
+        return fieldss
+
+    def __getHDF5Coordinates(
+        self,
+        fname,
+        particle_group=None,
+        coordinates=None): 
+        """Simple parser for opening an hdf5 file and extracting
+            its coordinates.
+
+        :param fname: full filepath to :code:`.hdf5` file
+        :type fname: str
+        :param particle_group: :code:`group_name` in the :code:`.hdf5` file
+            that contains this particle type's coordinates. If :code:`None`
+            then it is assumed the Coordinates dataset is saved at the top level
+            of the file, defaults to None
+        :type particle_group: str
+        :param coordinates: existing coordinate array that should be appended to, defaults to None
+        :type coordinates: np.ndarray, optional
+        :raises TypeError: if :code:`coordinates` is not of type :code:`np.ndarray`
+        :raises np.AxisError: if :code:`coordinates` does not have shape (N,3)
+        :return: coordinates, the opened coordinate array from :code:`fname`
+        :rtype: np.ndarray
+        """
+
+        with h5py.File(fname,'r') as handle:
+            ## valide the existing coordinate array or initialize it in the first place
+            if coordinates is None:
+                coordinates = np.empty((0,3))
+            elif type(coordinates)!= np.ndarray:
+                raise TypeError("Existing coordinate array must be of type np.ndarry")
+            if np.shape(coordinates)[-1] != 3:
+                raise np.AxisError("Last axis of existing coordinate array must be of size 3")
+
+            ## open the hdf5 group
+            if particle_group is not None:
+                h5_group = handle[particle_group]
+            else:
+                h5_group = handle
+            
+            if "Coordinates" in h5_group.keys():
+                ## append the (N,3) coordinate array
+                coordinates = np.append(coordinates,h5_group['Coordinates'][()],axis=0)
+
+            elif ("x" in h5_group.keys() and
+                "y" in h5_group.keys() and
+                "z" in h5_group.keys()):
+
+                ## read the coordinate data from x,y,z arrays
+                xs = h5_group['x'][()]
+                ys = h5_group['y'][()]
+                zs = h5_group['z'][()]
+
+                ## initialize a temporary coordinate array to append
+                temp_coordinates = np.zeros((xs.size,3))
+                temp_coordinates[:,0] = xs
+                temp_coordinates[:,1] = ys
+                temp_coordinates[:,2] = zs
+
+                ## append the coordinates
+                coordinates = np.append(coordinates,temp_coordinates,axis=0)
+
+        return coordinates
+
+    def __getHDF5Fields(self,fname,particle_group,field_names,fieldss):
+        """Extracts field data corresponding to particle positions from .hdf5 file
+            from particle_group matching field_names (field names that are not present 
+            are ignored.)
+
+        :param fname: path to hdf5 data file
+        :type fname: str
+        :param particle_group: name of hdf5 particle group naming
+        :type particle_group: str
+        :param field_names: strings to try and extract from .hdf5 file. 
+        :type field_names: list of strs
+        :param fieldss: dictionary contianing mapping between field_name:field_data
+        :type fieldss: dict
+        :return: fieldss
+        :rtype: dict if field_names is not None else None
+        """
+
+        if field_names is None: return
+
+        ## open the hdf5 file and read out field data
+        with h5py.File(fname,'r') as handle:
+            this_group = handle[particle_group]
+
+            for field_name in field_names:
+                ## allow users to pass a single array of fields that not all particle types
+                ##  will match
+                if field_name in this_group.keys():
+                    if field_name in fieldss:
+                        ## if it's already there append it
+                        fieldss[field_name] = np.append(fieldss[field_name],this_group[field_name])
+                    ## initialize it otherwise
+                    else: fieldss[field_name] = this_group[field_name]
+        return fieldss
