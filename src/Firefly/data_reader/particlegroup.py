@@ -159,6 +159,12 @@ class ParticleGroup(object):
         if self.decimation_factor > self.nparts:
             self.decimation_factor = max(1,self.nparts-1)
 
+        ## allow users to pass in field data as a dictionary rather than a list
+        ##  and use keys as field names
+        if type(tracked_arrays) == dict:
+            tracked_names = list(tracked_arrays.keys())
+            tracked_arrays = [tracked_arrays[key] for key in tracked_names]
+
         ## check if each field is named
         if len(tracked_names) != len(tracked_arrays):
             raise ValueError("Make sure each tracked_array (%d) has a tracked_name (%d)"%(
