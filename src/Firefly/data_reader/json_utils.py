@@ -13,7 +13,7 @@ def write_to_json(dictionary,path=None):
     :rtype: str
     """
     JSON = pd.Series(dictionary)
-    JSON = return_value.to_json(path,orient='index')
+    JSON = JSON.to_json(path,orient='index')
     if JSON is None: JSON = path
     return JSON
 
