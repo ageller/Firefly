@@ -6,6 +6,7 @@ Reading your own data
 
     files
     reader
+    particle_group
     settings 
     tween
     multiple_datasets
