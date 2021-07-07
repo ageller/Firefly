@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 import sys
+import os
 
+sys.path.insert(0,os.path.abspath(os.path.join(os.getcwd(),'..')))
 from Firefly.server import startFireflyServer
 
 def main():

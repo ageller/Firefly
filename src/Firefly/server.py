@@ -11,6 +11,7 @@ import json
 
 import os
 
+sys.path.insert(0,os.path.abspath(os.path.join(os.getcwd(),'..')))
 from Firefly.data_reader import SimpleReader
 
 #in principle, we could read in the data here...
@@ -272,7 +273,7 @@ def spawnFireflyServer(*args):
 
     run_server = os.path.join(os.path.dirname(__file__),'run_server.py')
     ## args must be positional, they are 1) port 2) fps 3) decimation_factor
-    return subprocess.Popen(["python", run_server]+np.array(args).astype('str').tolist())
+    return subprocess.Popen(["python3", run_server]+np.array(args).astype('str').tolist())
 
 def killAllFireflyServers(pid=None):
     """Kill python processes associated with hosting Flask web-servers.
