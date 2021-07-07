@@ -1,5 +1,3 @@
-from __future__ import print_function
-
 import h5py
 import os 
 import shutil 
@@ -257,16 +255,10 @@ class Reader(object):
                     os.symlink(JSONdir,static_data_path)
 
                 except FileExistsError:
-                    try:
+                    if os.path.islink(static_data_path):
                         ## remove the existing symlink
                         os.unlink(static_data_path)
-                    except PermissionError as e:
-                        print(e)
-                        raise ## TODO: make a check here that the issue is hard vs. soft and not like, 
-                        ## an actual permission error that should be respected
-
-                        ## trying to unlink a hard directory
-                        ##  raises a PermissionError, for some reason
+                    elif os.path.isdir(static_data_path):
                         shutil.rmtree(static_data_path)
 
                     ## create a symlink so that data can 
