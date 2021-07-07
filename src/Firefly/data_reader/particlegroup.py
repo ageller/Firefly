@@ -415,7 +415,7 @@ class ParticleGroup(object):
 
         ## if this is the first file, let's also include the colormap
         ##  and filter keys
-        if store_extra_keys == 0:
+        if store_extra_keys:
             if loud: print(
                 self.tracked_names,
                 'filter:',self.tracked_filter_flags,
