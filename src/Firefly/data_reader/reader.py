@@ -1,5 +1,3 @@
-from __future__ import print_function
-
 import h5py
 import os 
 import shutil 
@@ -19,8 +17,22 @@ class Reader(object):
     You should use this Reader as a base class for any custom readers you may build
     (see :class:`Firefly.data_reader.SimpleReader` or :class:`Firefly.data_reader.FIREreader` for example).
     """
+
+    def __repr__(self):
+        """Implementation of builtin function __repr__
+
+        :return: mystr, the pretty rendering of a reader
+        :rtype: str
+        """
+
+        my_str = str(self.__class__).split('.')[-1].replace("'>","")
+
+        my_str += " with %d particle groups" % len(self.particleGroups)
+
+        return my_str
     
-    def __init__(self,
+    def __init__(
+        self,
         JSONdir=None, 
         JSON_prefix='Data',
         clean_JSONdir=False,
@@ -243,16 +255,10 @@ class Reader(object):
                     os.symlink(JSONdir,static_data_path)
 
                 except FileExistsError:
-                    try:
+                    if os.path.islink(static_data_path):
                         ## remove the existing symlink
                         os.unlink(static_data_path)
-                    except PermissionError as e:
-                        print(e)
-                        raise ## TODO: make a check here that the issue is hard vs. soft and not like, 
-                        ## an actual permission error that should be respected
-
-                        ## trying to unlink a hard directory
-                        ##  raises a PermissionError, for some reason
+                    elif os.path.isdir(static_data_path):
                         shutil.rmtree(static_data_path)
 
                     ## create a symlink so that data can 
@@ -276,7 +282,8 @@ class Reader(object):
                 loud=loud,
                 nparts_per_file=self.max_npart_per_file,
                 clean_JSONdir=self.clean_JSONdir if particleGroup is self.particleGroups[0] else False,
-                write_jsons_to_disk=write_jsons_to_disk)
+                write_jsons_to_disk=write_jsons_to_disk,
+                not_reader=False)
 
             ## append the JSON arrays for this particle group
             JSON_array += this_JSON_array
@@ -288,7 +295,8 @@ class Reader(object):
             JSONdir,
             JSON_prefix=self.JSON_prefix,
             loud=loud,
-            write_jsons_to_disk=write_jsons_to_disk)]
+            write_jsons_to_disk=write_jsons_to_disk,
+            not_reader=False)]
 
         ## format and output the filenames.json file
         filenamesDict['options'] = [(os.path.join(self.short_data_path,self.JSON_prefix+self.settings.settings_filename),0)]
@@ -306,7 +314,8 @@ class Reader(object):
                 JSONdir,
                 JSON_prefix=self.JSON_prefix,
                 loud=loud,
-                write_jsons_to_disk=write_jsons_to_disk)] ## None -> returns JSON string
+                write_jsons_to_disk=write_jsons_to_disk,
+                not_reader=False)] ## None -> returns JSON string
 
         ## handle the startup.json file, may need to append or totally overwrite
         startup_file = os.path.join(
@@ -542,8 +551,8 @@ class Reader(object):
             if GHUSER is None: GHUSER = os.environ['USER']
 
             if not os.path.isfile(GHOAUTHTOKENPATH):
-                raise FileNotFoundError(f"No OAUTH token file matching {GHOAUTHTOKENPATH}, generate one from \
-                https://github.com/settings/tokens and write it to disk somewhere.")
+                raise FileNotFoundError(f"No OAUTH token file matching {GHOAUTHTOKENPATH}, generate one from"+
+                " https://github.com/settings/tokens and write it to disk somewhere.")
 
             print(f"Initializing a new GitHub repository at {target} with\n" + 
                 f"\tGHREPONAME: {GHREPONAME}\n" + 
@@ -575,17 +584,168 @@ class Reader(object):
             finally:
                 ## move back to the current directory
                 os.chdir(old)
+    
+class ArrayReader(Reader):
+    """A wrapper to :class:`Firefly.data_reader.Reader` that stores 
+        raw numpy array data without opening anything from disk.
+    """
 
-class SimpleReader(Reader):
-    """ A wrapper to :class:`Firefly.data_reader.Reader` that attempts to 
+    def __init__(
+        self,
+        coordinates,
+        UInames=None,
+        fields=None,
+        field_names=None,
+        decimation_factor=1,
+        write_jsons_to_disk=True,
+        loud=True,
+        **kwargs):
+        """Takes a list of opened numpy arrays and creates a :class:`Firefly.data_reader.Reader` instance
+            with their data. Takes :class:`Firefly.data_reader.Reader` passthrough kwargs.
+
+        :param coordinates: raw coordinate data, ignores path_to_data if passed.
+            Can either pass N,3 np.array which is interpreted as a single particle group's 
+            coordinates or a jagged (M,N_m,3) list of np.arrays which is interpreted as M many 
+            particle groups with each having N_m particles
+        :type coordinates: list, optional
+        :param UInames: list of particle group UInames
+        :type UInames: list of str
+        :param fields: list of field arrays corresponding to each point of the coordinate data, 
+            Can pass:
+            length N np.array which is interpreted as a single particle group's field,
+            (N_m,N_f) list which is interpreted as a single particle group's fields,
+            or a jagged (M,N_m,N_f) list of np.arrays which is interpreted as M many 
+            particle groups with each having N_m particles with N_f fields, defaults to []
+        :type fields: list of shape (M,N_f,N_m)
+        :param field_names: strings to name fields by, defaults to ['field%d' for field in fields]
+        :type field_names: list of strs
+        :param decimation_factor: factor by which to reduce the data randomly 
+            i.e. :code:`data=data[::decimation_factor]`, defaults to 1
+        :type decimation_factor: int, optional
+        :param write_jsons_to_disk: flag that controls whether data is saved to disk (:code:`True`)
+            or only converted to a string and stored in :code:`self.JSON` (:code:`False`), defaults to True
+        :type write_jsons_to_disk: bool, optional
+        :param loud: flag to print status information to the console, defaults to False
+        :type loud: bool, optional
+        :raises np.AxisError: if the coordinate data cannot be interpreted
+        :raises ValueError: if the number of particle groups does not match the number of
+            coordinate arrays
+        :raises np.AxisError: if the field data cannot be interpreted
+        :raises np.AxisError: if the field names cannot be interpreted
+        """
+
+        super().__init__(**kwargs)
+
+        ## wrap coordinate array if necessary
+        if len(np.shape(coordinates))==2 and np.shape(coordinates)[-1]==3:
+            ## passed a single list of coordinates, prepend an axis for the single group
+            coordinates = [coordinates]
+        elif len(np.shape(coordinates[0]))==2 and np.shape(coordinates[0])[-1]==3:
+            ## passed a jagged array of different coordinates
+            pass
+        else:
+            raise np.AxisError("Uninterpretable coordinate array, either pass a single (N,3) array"+ 
+                " or a jagged list of 'shape' (M,N_m,3)")
+
+        ngroups = len(coordinates)
+        npartss = np.array([len(coords) for coords in coordinates])
+        
+        ## check fields and wrap a single field for a single particle group
+        fielderror = np.AxisError("Uninterpretable field array, either pass a single N array"
+                        " or a jagged list of 'shape' (M,N_fm,N_pm)")
+        if fields is not None:
+            ## special case and want to allow convenient/inconsistent syntax,
+            ##  so let's just handle it independently
+            if ngroups == 1:
+                if type(fields) != dict and type(fields[0]) != dict:
+                    try: fields = np.reshape(fields,(1,-1,npartss[0]))
+                    except: raise fielderror
+            else:
+                ## is everything square? unlikely but you know one can dream
+                try: fields = np.reshape(fields,(ngroups,-1,npartss[0]))
+                except:
+                    ## yeah okay i didn't think that was gonna work anyway
+                    ##  let's build up a jagged list
+                    temp_fields = []
+
+                    ## first check that we have enough fields for each group
+                    if len(fields) != ngroups: raise fielderror
+
+                    ## okay, we've got something to work with
+                    try:
+                        ## this should work *if* users passed correctly formatted input
+                        for igroup in range(ngroups):
+                            this_fields = fields[igroup]
+                            ## if this_fields is a dictionary it will be understood by ParticleGroup below
+                            if type(this_fields) != dict: np.reshape(this_fields,(-1,npartss[igroup]))
+                            temp_fields.append(this_fields)
+                    ## go read the documentation!
+                    except: raise fielderror
+
+                    ## swap the variable names
+                    fields = temp_fields
+
+            nfieldss = [len(this_fields) for this_fields in fields]
+
+        ## check field names and generate them if necessary
+        fieldnameerror = np.AxisError("Uninterpretable field array, either pass a single N array"+
+            " or a jagged list of 'shape' (M,N_fm,N_pm)")
+
+        if field_names is not None: 
+            ## special case and want to allow convenient/inconsistent syntax,
+            ##  so let's just handle it independently
+            if ngroups == 1: 
+                try: field_names = np.array(field_names).reshape(ngroups,nfieldss[0]).tolist()
+                except: raise fieldnameerror
+            else:
+                for igroup in range(ngroups):
+                    if len(field_names[igroup]) != nfieldss[igroup]: raise fieldnameerror
+
+        ## so some fields were passed but not field_names
+        elif fields is not None:
+            field_names = []
+            for igroup in range(ngroups):
+                ## field names will be extracted from dictionary in ParticleGroup initialization
+                these_names = (["field%d"%j for j in range(nfieldss[igroup])] if
+                    type(fields[0]) != dict else None)
+                field_names.append(these_names)
+
+        ## initialize default particle group names
+        if UInames is None: UInames = ['PGroup_%d'%i for i in range(len(coordinates))]
+        elif len(UInames) != len(coordinates): 
+            raise ValueError("%d UInames does not match passed"+
+            " number of %d coordinate arrays"%(len(UInames),len(coordinates)))
+
+        ## loop through each of the particle groups
+        for i,(coords,UIname) in enumerate(zip(coordinates,UInames)):
+
+            ## initialize a firefly particle group instance
+            firefly_particleGroup = ParticleGroup(
+                UIname,
+                coords,
+                decimation_factor=decimation_factor,
+                tracked_arrays=None if fields is None else fields[i],
+                tracked_names=None if field_names is None else field_names[i])
+
+            ## attach the instance to the reader
+            self.addParticleGroup(firefly_particleGroup)
+
+        ## either write a bunch of mini JSONs to disk or store 
+        ##  a single big JSON in self.JSON
+        self.dumpToJSON(
+            write_jsons_to_disk=write_jsons_to_disk,
+            loud=loud)
+
+class SimpleReader(ArrayReader):
+    """ A wrapper to :class:`Firefly.data_reader.ArrayReader` that attempts to 
         flexibily open generically formatetd data with minimal interaction from the user.
     """
 
     def __init__(
         self,
         path_to_data,
+        field_names=None,
         write_jsons_to_disk=True,
-        decimation_factor=1,
         extension='.hdf5',
         loud=True,
         **kwargs):
@@ -598,12 +758,8 @@ class SimpleReader(Reader):
 
         :param path_to_data: path to .hdf5/csv file(s; can be a directory)
         :type path_to_data: str 
-        :param write_jsons_to_disk: flag that controls whether data is saved to disk (:code:`True`)
-            or only converted to a string and stored in :code:`self.JSON` (:code:`False`), defaults to True
-        :type write_jsons_to_disk: bool, optional
-        :param decimation_factor: factor by which to reduce the data randomly 
-            i.e. :code:`data=data[::decimation_factor]`, defaults to 1
-        :type decimation_factor: int, optional
+        :param field_names: strings to try and extract from .hdf5 file. If file format is .csv then there must be a header row
+        :type field_names: list of strs
         :param extension: file extension to attempt to open. 
             Accepts only :code:`'.hdf5'` or :code:`'.csv'`, defaults to '.hdf5'
         :type extension: str, optional
@@ -617,21 +773,19 @@ class SimpleReader(Reader):
             len(particle_groups) != len(detected filenames in path_to_data)
         """
 
-        ## create a default reader instance
-        super().__init__(**kwargs)
-
         if extension in path_to_data:
-            ## path_to_data points directly to a single .hdf5 file
+            ## path_to_data points directly to a single data file
             fnames = [path_to_data]
 
         elif os.path.isdir(path_to_data):
             ## path_to_data points to a directory containing .hdf5 data files
-
             fnames = []
+            ## gather the individual filenames
             for this_fname in os.listdir(path_to_data):
                 if extension in this_fname:
                     fnames += [os.path.join(path_to_data,this_fname)]
         else:
+            ## couldn't interpret what we were given
             raise ValueError(
                 "%s needs to point to an %s file or "%(path_to_data,extension)+
                 "a directory containing %s files."%extension)
@@ -652,31 +806,34 @@ class SimpleReader(Reader):
 
         print("Opening %d files and %d particle types..."%(len(fnames),len(particle_groups)))
 
+        coordss = []
+
+        ## initialize bucket for holding field data
+        fieldsss = None if field_names is None else []
+
         for i,particle_group in enumerate(particle_groups):
             coordinates = None
+            fieldss = {}
             if extension == '.hdf5':
                 ## need to loop through each file and get the matching coordinates, 
                 ##  concatenating them.
                 for fname in fnames:
                     coordinates = self.__getHDF5Coordinates(fname,particle_group,coordinates) 
+                    fieldss = self.__getHDF5Fields(fname,particle_group,field_names,fieldss) 
             elif extension == '.csv':
-                ## each file corresponds to a single set of coordinates
+                ## each file corresponds to a single set of coordinates and fields
                 coordinates = self.__getCSVCoordinates(fnames[i]) 
+                fieldss = self.__getCSVFields(fnames[i],field_names) 
             else:
                 raise ValueError("Invalid extension %s, must be .hdf5 or .csv"%extension) 
+            coordss.append(coordinates)
+            if fieldsss is not None: fieldsss.append(fieldss)
 
-            ## initialize a firefly particle group instance
-            firefly_particleGroup = ParticleGroup(
-                particle_group,
-                coordinates,
-                decimation_factor=decimation_factor)
-            ## attach the instance to the reader
-            self.addParticleGroup(firefly_particleGroup)
-        
-
-        ## either write a bunch of mini JSONs to disk or store 
-        ##  a single big JSON in self.JSON
-        self.dumpToJSON(
+        ## create a default reader instance
+        super().__init__(
+            coordinates=coordss,
+            UInames=particle_groups,
+            fields=fieldsss,
             write_jsons_to_disk=write_jsons_to_disk,
             loud=loud)
 
@@ -702,6 +859,28 @@ class SimpleReader(Reader):
             coordinates[:,2] = full_df.iloc[:,2]
 
         return coordinates
+
+    def __getCSVFields(self,fname,field_names):
+        """Use pandas to interpret csv data in order to load field data matching
+            field names (field names that are not present are ignored).
+
+        :param fname: full filepath to :code:`.csv` file
+        :type fname: str
+        :param field_names: strings to try and extract from .csv. There must be a header row
+        :type field_names: list of strs
+        :return: dictionary of fields and field name pairings
+        :rtype: dict if field_names is not None else None
+        """
+
+        if field_names is None: return
+
+        fieldss = {}
+
+        ## trust pandas to open the .csv and detect if there's a header \_(ツ)_/
+        full_df = pd.read_csv(fname,sep=' ')
+        for field_name in field_names:
+            if field_name in full_df: fieldss[field_name] = full_df[field_name].to_numpy()
+        return fieldss
 
     def __getHDF5Coordinates(
         self,
@@ -764,75 +943,37 @@ class SimpleReader(Reader):
                 coordinates = np.append(coordinates,temp_coordinates,axis=0)
 
         return coordinates
-    
-class ArrayReader(Reader):
-    """A wrapper to :class:`Firefly.data_reader.Reader` that stores 
-        raw numpy array data without opening anything from disk.
-    """
 
-    def __init__(
-        self,
-        coordinates,
-        UInames=None,
-        decimation_factor=1,
-        write_jsons_to_disk=True,
-        loud=True,
-        **kwargs):
-        """Takes a list of opened numpy arrays and creates a :class:`Firefly.data_reader.Reader` instance
-            with their data. Takes :class:`Firefly.data_reader.Reader` passthrough kwargs.
+    def __getHDF5Fields(self,fname,particle_group,field_names,fieldss):
+        """Extracts field data corresponding to particle positions from .hdf5 file
+            from particle_group matching field_names (field names that are not present 
+            are ignored.)
 
-        :param coordinates: raw coordinate data, ignores path_to_data if passed.
-            Can either pass N,3 np.array which is interpreted as a single particle group's 
-            coordinates or a jagged (M,N_m,3) list of np.arrays which is interpreted as M many 
-            particle groups with each having N_m particles, defaults to None (thereby reading from file)
-        :type coordinates: list, optional
-        :param UInames: list of particle group UInames
-        :type UInames: list of str
-        :param decimation_factor: factor by which to reduce the data randomly 
-            i.e. :code:`data=data[::decimation_factor]`, defaults to 1
-        :type decimation_factor: int, optional
-        :param write_jsons_to_disk: flag that controls whether data is saved to disk (:code:`True`)
-            or only converted to a string and stored in :code:`self.JSON` (:code:`False`), defaults to True
-        :type write_jsons_to_disk: bool, optional
-        :param loud: flag to print status information to the console, defaults to False
-        :type loud: bool, optional
-        :raises np.AxisError: if the coordinate data cannot be interpreted
-        :raises ValueError: if the number of particle groups does not match the number of
-            coordinate arrays
+        :param fname: path to hdf5 data file
+        :type fname: str
+        :param particle_group: name of hdf5 particle group naming
+        :type particle_group: str
+        :param field_names: strings to try and extract from .hdf5 file. 
+        :type field_names: list of strs
+        :param fieldss: dictionary contianing mapping between field_name:field_data
+        :type fieldss: dict
+        :return: fieldss
+        :rtype: dict if field_names is not None else None
         """
 
-        super().__init__(**kwargs)
+        if field_names is None: return
 
-        ## wrap coordinate array if necessary
-        if len(np.shape(coordinates)[0])==2 and np.shape(coordinates[0])[-1]==3:
-            ## passed a jagged array of different coordinates
-            pass
-        elif len(np.shape(coordinates))==2 and np.shape(coordinates)[-1]==3:
-            ## passed a single list of coordinates, prepend an axis for the single group
-            coordinates = [coordinates]
-        else:
-            raise np.AxisError("Uninterpretable coordinate array, either pass a single (N,3) array\
-                or a jagged list of 'shape' (M,N_m,3)")
+        ## open the hdf5 file and read out field data
+        with h5py.File(fname,'r') as handle:
+            this_group = handle[particle_group]
 
-        ## initialize default particle group names
-        if UInames is None: UInames = ['PGroup_%d'%i for i in range(len(coordinates))]
-        elif len(UInames) != len(coordinates): 
-            raise ValueError("%d UInames does not match passed\
-            number of %d coordinate arrays"%(len(UInames),len(coordinates)))
-
-        ## loop through each of the particle groups
-        for coords,UIname in zip(coordinates,UInames):
-            ## initialize a firefly particle group instance
-            firefly_particleGroup = ParticleGroup(
-                UIname,
-                coords,
-                decimation_factor=decimation_factor)
-
-            ## attach the instance to the reader
-            self.addParticleGroup(firefly_particleGroup)
-
-        ## either write a bunch of mini JSONs to disk or store 
-        ##  a single big JSON in self.JSON
-        self.dumpToJSON(
-            write_jsons_to_disk=write_jsons_to_disk,
-            loud=loud)
+            for field_name in field_names:
+                ## allow users to pass a single array of fields that not all particle types
+                ##  will match
+                if field_name in this_group.keys():
+                    if field_name in fieldss:
+                        ## if it's already there append it
+                        fieldss[field_name] = np.append(fieldss[field_name],this_group[field_name])
+                    ## initialize it otherwise
+                    else: fieldss[field_name] = this_group[field_name]
+        return fieldss

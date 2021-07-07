@@ -247,6 +247,7 @@ class SimpleFIREreader(FIREreader):
         self,
         path_to_snapshot,
         decimation_factor=10,
+        JSONdir=None,
         **kwargs):
         """ A wrapper to :class:`Firefly.data_reader.FIREreader` that will open 
             FIRE collaboration formatted data with minimal interaction from the user 
@@ -273,6 +274,9 @@ class SimpleFIREreader(FIREreader):
         :param decimation_factor: factor by which to reduce the data randomly 
             i.e. :code:`data=data[::decimation_factor]`, defaults to 10
         :type decimation_factor: int, optional
+        :param JSONdir: the sub-directory that will contain your JSON files, relative
+            to your :code:`$HOME directory`. , defaults to :code:`$HOME/<JSON_prefix>`
+        :type JSONdir: str, optional
         :raises ValueError: if a snapnum cannot be inferred from the path_to_snapshot
         """
 
@@ -288,18 +292,21 @@ class SimpleFIREreader(FIREreader):
                 "%s should be formatted as 'path/to/output/snapdir_xxx'"%path_to_snapshot+
                 " where xxx is an integer")
 
+        ## relative path -> symbolic link
+        if JSONdir is None: JSONdir="FIREData_%d"%snapnum
+
         ## initialize the reader object
         super().__init__(
             snapdir,
             snapnum,
             ptypes=[0,4], 
-            UInames=['gas','stars'],
+            UInames=['Gas','Stars'],
             decimation_factors=[decimation_factor,decimation_factor],
             fields=['AgeGyr','Temperature','Velocities','GCRadius'],
             magFlags=[False,False,True,False], 
             logFlags=[False,True,False,False], 
-            write_startup=True,
-            JSON_prefix='FIREData_%d'%snapnum,
+            JSON_prefix='Data',
+            JSONdir=JSONdir,
             **kwargs)
 
         ## load the data

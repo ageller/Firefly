@@ -21,9 +21,9 @@ class ParticleGroup(object):
         :rtype: str
         """
         
-        mystr = "\nParticleGroup: %s\n"%(self.UIname)
-        mystr += "Contains %d particles (%d after decimation) and %d tracked fields"%(
-            self.nparts,self.nparts//self.decimation_factor,len(self.tracked_names))
+        mystr = "%s "%(self.UIname)
+        mystr += "- %d/%d particles - %d tracked fields"%(
+            self.nparts//self.decimation_factor,self.nparts,len(self.tracked_names))
         return mystr
 
     def __getitem__(self,key):
@@ -80,6 +80,7 @@ class ParticleGroup(object):
         filenames_and_nparts=None,
         attached_settings=None,
         doSPHrad=False,
+        loud=True,
         **settings_kwargs):
         """Accepts pass-through kwargs for :class:`Firefly.data_reader.Settings` whether one is attached
             at initialization or not.
@@ -129,6 +130,8 @@ class ParticleGroup(object):
             Must then also provide :code:`SmoothingLength` as a tracked_array., defaults to False
             **EXPERIMENTAL FEATURE**
         :type doSPHrad: bool, optional
+        :param loud: flag to print status information to the console, defaults to False
+        :type loud: bool, optional
         :raises ValueError: if len(tracked_names) != len(tracked arrays)
         :raises ValueError: if a tracked_array has length other than len(coordinates)
         :raises ValueError: if filenames_and_nparts is not a list of tuples and strs
@@ -155,6 +158,12 @@ class ParticleGroup(object):
         ##  is shown.
         if self.decimation_factor > self.nparts:
             self.decimation_factor = max(1,self.nparts-1)
+
+        ## allow users to pass in field data as a dictionary rather than a list
+        ##  and use keys as field names
+        if type(tracked_arrays) == dict:
+            tracked_names = list(tracked_arrays.keys())
+            tracked_arrays = [tracked_arrays[key] for key in tracked_names]
 
         ## check if each field is named
         if len(tracked_names) != len(tracked_arrays):
@@ -390,7 +399,7 @@ class ParticleGroup(object):
         outDict = dict()
 
         ## initialize a default set of dec inds if none are passed
-        if dec_inds == None:
+        if dec_inds is None:
             dec_inds = np.arange(self.nparts)
         
         ## save the coordinates as a special case since they 
@@ -406,7 +415,7 @@ class ParticleGroup(object):
 
         ## if this is the first file, let's also include the colormap
         ##  and filter keys
-        if store_extra_keys == 0:
+        if store_extra_keys:
             if loud: print(
                 self.tracked_names,
                 'filter:',self.tracked_filter_flags,
@@ -433,7 +442,8 @@ class ParticleGroup(object):
         loud=True,
         nparts_per_file=10**4,
         clean_JSONdir=False,
-        write_jsons_to_disk=True):
+        write_jsons_to_disk=True,
+        not_reader=True):
         """Outputs this ParticleGroup instance's data to JSON format, splitting it up into 
             multiple sub-JSON files. Best used when coupled with a :class:`Firefly.data_reader.Reader`'s
             :func:`~Firefly.data_reader.Reader.dumpToJSON` method.
@@ -459,6 +469,8 @@ class ParticleGroup(object):
         :param write_jsons_to_disk: flag that controls whether data is saved to disk (:code:`True`)
             or only converted to a string and returned (:code:`False`), defaults to True
         :type write_jsons_to_disk: bool, optional
+        :param not_reader: flag for whether to print the Reader :code:`filenames.json` warning, defaults to True
+        :type write_jsons_to_disk: bool, optional
         :return: filename, JSON_array (either a list full of filenames if
             written to disk or a list of JSON strs)
         :rtype: str, list of str
@@ -472,7 +484,7 @@ class ParticleGroup(object):
 
         if not os.path.isdir(full_path):
             os.makedirs(full_path)
-        if loud:
+        if loud and not_reader:
             print("You will need to add the sub-filenames to"+
                 " filenames.json if this was not called by a Reader instance.")
             print("Writing:",self,"JSON to %s"%full_path)

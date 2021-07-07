@@ -24,8 +24,8 @@ build/*
 
 # docs #
 ###################
-docs/build/*
 docs/source/reference/api/*
+docs/build/html/.doctrees
 
 # python #
 ###################
