@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Firefly: a browser-based interactive data visualization platform &mdash; Firefly 2.0.0 documentation</title>
+  <title>Firefly: a browser-based interactive particle data visualization platform &mdash; Firefly 2.0.0 documentation</title>
   
 
   
@@ -88,10 +88,18 @@
             
               <ul>
 <li class="toctree-l1"><a class="reference internal" href="webapp/index.html">Using Firefly</a></li>
+</ul>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="server/index.html">Hosting your own Firefly instance</a></li>
+</ul>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="data_reader/index.html">Reading your own data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="networking.html">Accessing remote Firefly servers via port forwarding</a></li>
+</ul>
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="experimental/index.html">Experimental features</a></li>
+</ul>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="networking.html">Accessing remote Firefly servers via port forwarding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reference/api/api.html">API Reference</a></li>
 </ul>
 
@@ -141,7 +149,7 @@
     
       <li><a href="#" class="icon icon-home"></a> &raquo;</li>
         
-      <li>Firefly: a browser-based interactive data visualization platform</li>
+      <li>Firefly: a browser-based interactive particle data visualization platform</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -160,37 +168,75 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="firefly-a-browser-based-interactive-data-visualization-platform">
-<h1>Firefly: a browser-based interactive data visualization platform<a class="headerlink" href="#firefly-a-browser-based-interactive-data-visualization-platform" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="firefly-a-browser-based-interactive-particle-data-visualization-platform">
+<h1>Firefly: a browser-based interactive particle data visualization platform<a class="headerlink" href="#firefly-a-browser-based-interactive-particle-data-visualization-platform" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="requirements">
+<h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h2>
+<p>To use an existing copy of Firefly you will need:</p>
+<ul class="simple">
+<li><p>An internet browser; we recommend Firefox or Google Chrome</p></li>
+</ul>
+<p>To visualize your own data with Firefly you will need:</p>
+<ul>
+<li><p>A working Python installation; we recommend installing <a class="reference external" href="https://www.anaconda.com/download/">Anaconda</a> Python version 3.x, with the following packages:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>numpy</p></li>
+<li><p>h5py</p></li>
+<li><p>pandas</p></li>
+<li><p>eventlet</p></li>
+<li><p>flask-socketio</p></li>
+<li><p>flask</p></li>
+<li><p>requests</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
 <div class="section" id="installation">
-<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
-<p>You will also require an internet browser; we recommend Firefox or Google Chrome. To import your own data into Firefly, you will also require python; we recommend installing <a class="reference external" href="https://www.anaconda.com/download/">Anaconda</a> Python version 3.x .</p>
+<h3>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h3>
 <div class="section" id="stable-release">
-<h3>Stable release<a class="headerlink" href="#stable-release" title="Permalink to this headline">¶</a></h3>
+<h4>Stable release<a class="headerlink" href="#stable-release" title="Permalink to this headline">¶</a></h4>
 <p>To install the latest stable release you can <code class="code docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span></code> Firefly</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install firefly-vis
 </pre></div>
 </div>
+<p>This is the preferred way to install Firefly as it will
+automatically install the necessary requirements and put Firefly
+into your <code class="code docutils literal notranslate"><span class="pre">${PYTHONPATH}</span></code> environment variable so you can
+import it.</p>
 </div>
 <div class="section" id="build-from-source">
-<h3>Build from source<a class="headerlink" href="#build-from-source" title="Permalink to this headline">¶</a></h3>
-<p>Build the latest version from source by cloning/forking this repository</p>
+<h4>Build from source<a class="headerlink" href="#build-from-source" title="Permalink to this headline">¶</a></h4>
+<p>Build the latest version directly from the most up-to-date version
+of the source-code by cloning/forking the GitHub repository</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/ageller/Firefly.git
 </pre></div>
 </div>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git fork https://github.com/ageller/Firefly.git
-</pre></div>
-</div>
-<p>or download the zip file and unpack it. Once you have the source you can build Firefly and add it to your environment.</p>
+<p>or manually download the zip file and unpack it
+(though this is not recommended as the development version is
+inherently unstable and you would not be able to update without
+repeating this step).</p>
+<p>Once you have the source, you can build Firefly (and add it to your environment)
+by executing:</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python setup.py install
 </pre></div>
 </div>
+<p>in the top level directory. The required Python packages will automatically be
+installed as well.</p>
+<p>You can test your installation by looking for the Firefly
+executable built by the installation</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>which Firefly
+</pre></div>
 </div>
-<div class="section" id="using-with-yt">
-<h3>Using with yt<a class="headerlink" href="#using-with-yt" title="Permalink to this headline">¶</a></h3>
-<p>If you are using [yt](<a class="reference external" href="https://yt-project.org">https://yt-project.org</a>) you will be able to call <code class="code docutils literal notranslate"><span class="pre">region.outputToFirefly</span></code>. See the <a class="reference internal" href="reference/api/api.html#api"><span class="std std-ref">API reference</span></a>.</p>
-<div class="section" id="table-of-contents">
-<h4>Table of Contents<a class="headerlink" href="#table-of-contents" title="Permalink to this headline">¶</a></h4>
+<p>and by importing the Firefly Python frontend</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">Firefly</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="section" id="using-firefly">
+<h2>Using Firefly<a class="headerlink" href="#using-firefly" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="webapp/index.html">Using Firefly</a><ul>
@@ -199,12 +245,26 @@
 <li class="toctree-l2"><a class="reference internal" href="webapp/particle_controls.html">Particle controls</a></li>
 </ul>
 </li>
+</ul>
+</div>
+</div>
+<div class="section" id="hosting-your-own-firefly-instance">
+<h2>Hosting your own Firefly instance<a class="headerlink" href="#hosting-your-own-firefly-instance" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="server/index.html">Hosting your own Firefly instance</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="server/server.html">Hosting a local server</a></li>
 <li class="toctree-l2"><a class="reference internal" href="server/internet.html">Hosting a static version on the internet</a></li>
 <li class="toctree-l2"><a class="reference internal" href="server/jupyter.html">Using Firefly from within a Jupyter notebook</a></li>
 </ul>
 </li>
+</ul>
+</div>
+</div>
+<div class="section" id="reading-your-own-data">
+<h2>Reading your own data<a class="headerlink" href="#reading-your-own-data" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="data_reader/index.html">Reading your own data</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="data_reader/files.html">Understanding Firefly’s input requirements</a></li>
 <li class="toctree-l2"><a class="reference internal" href="data_reader/reader.html">The python frontend</a></li>
@@ -213,40 +273,31 @@
 <li class="toctree-l2"><a class="reference internal" href="data_reader/tween.html">Defining interpolated camera paths (tweening)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="data_reader/multiple_datasets.html">Managing multiple datasets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="data_reader/flask.html">Sending data to a Firefly server via Flask</a></li>
+<li class="toctree-l2"><a class="reference internal" href="data_reader/index.html#using-with-yt">Using with yt</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="networking.html">Accessing remote Firefly servers via port forwarding</a></li>
+</ul>
+</div>
+</div>
+<div class="section" id="experimental-features">
+<h2>Experimental features<a class="headerlink" href="#experimental-features" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
 <li class="toctree-l1"><a class="reference internal" href="experimental/index.html">Experimental features</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="experimental/streaming.html">Streaming the Firefly view</a></li>
 <li class="toctree-l2"><a class="reference internal" href="experimental/projection.html">Volume rendering with 2d projection</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="reference/api/api.html">API Reference</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="reference/api/api.html#base-classes">Base classes</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="reference/api/classes/Firefly.data_reader.Reader.html">Firefly.data_reader.Reader</a></li>
-<li class="toctree-l3"><a class="reference internal" href="reference/api/classes/Firefly.data_reader.ParticleGroup.html">Firefly.data_reader.ParticleGroup</a></li>
-<li class="toctree-l3"><a class="reference internal" href="reference/api/classes/Firefly.data_reader.Settings.html">Firefly.data_reader.Settings</a></li>
-<li class="toctree-l3"><a class="reference internal" href="reference/api/classes/Firefly.data_reader.TweenParams.html">Firefly.data_reader.TweenParams</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="reference/api/api.html#pre-built-readers">Pre-built Readers</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="reference/api/readers/Firefly.data_reader.SimpleReader.html">Firefly.data_reader.SimpleReader</a></li>
-<li class="toctree-l3"><a class="reference internal" href="reference/api/readers/Firefly.data_reader.ArrayReader.html">Firefly.data_reader.ArrayReader</a></li>
-<li class="toctree-l3"><a class="reference internal" href="reference/api/readers/Firefly.data_reader.FIREreader.html">Firefly.data_reader.FIREreader</a></li>
-<li class="toctree-l3"><a class="reference internal" href="reference/api/readers/Firefly.data_reader.SimpleFIREreader.html">Firefly.data_reader.SimpleFIREreader</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="reference/api/api.html#server-utitities">Server Utitities</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="reference/api/server/Firefly.server.startFireflyServer.html">Firefly.server.startFireflyServer</a></li>
-<li class="toctree-l3"><a class="reference internal" href="reference/api/server/Firefly.server.spawnFireflyServer.html">Firefly.server.spawnFireflyServer</a></li>
-<li class="toctree-l3"><a class="reference internal" href="reference/api/server/Firefly.server.killAllFireflyServers.html">Firefly.server.killAllFireflyServers</a></li>
-</ul>
-</li>
-</ul>
-</li>
 </ul>
 </div>
 </div>
+<div class="section" id="reference">
+<h2>Reference<a class="headerlink" href="#reference" title="Permalink to this headline">¶</a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="networking.html">Accessing remote Firefly servers via port forwarding</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/api/api.html">API Reference</a></li>
+</ul>
 </div>
 </div>
 </div>

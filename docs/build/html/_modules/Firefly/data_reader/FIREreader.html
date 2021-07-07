@@ -407,6 +407,7 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">path_to_snapshot</span><span class="p">,</span>
         <span class="n">decimation_factor</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">JSONdir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; A wrapper to :class:`Firefly.data_reader.FIREreader` that will open </span>
 <span class="sd">            FIRE collaboration formatted data with minimal interaction from the user </span>
@@ -433,6 +434,9 @@
 <span class="sd">        :param decimation_factor: factor by which to reduce the data randomly </span>
 <span class="sd">            i.e. :code:`data=data[::decimation_factor]`, defaults to 10</span>
 <span class="sd">        :type decimation_factor: int, optional</span>
+<span class="sd">        :param JSONdir: the sub-directory that will contain your JSON files, relative</span>
+<span class="sd">            to your :code:`$HOME directory`. , defaults to :code:`$HOME/&lt;JSON_prefix&gt;`</span>
+<span class="sd">        :type JSONdir: str, optional</span>
 <span class="sd">        :raises ValueError: if a snapnum cannot be inferred from the path_to_snapshot</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -448,28 +452,31 @@
                 <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> should be formatted as &#39;path/to/output/snapdir_xxx&#39;&quot;</span><span class="o">%</span><span class="n">path_to_snapshot</span><span class="o">+</span>
                 <span class="s2">&quot; where xxx is an integer&quot;</span><span class="p">)</span>
 
+        <span class="c1">## relative path -&gt; symbolic link</span>
+        <span class="k">if</span> <span class="n">JSONdir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">JSONdir</span><span class="o">=</span><span class="s2">&quot;FIREData_</span><span class="si">%d</span><span class="s2">&quot;</span><span class="o">%</span><span class="n">snapnum</span>
+
         <span class="c1">## initialize the reader object</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
             <span class="n">snapdir</span><span class="p">,</span>
             <span class="n">snapnum</span><span class="p">,</span>
             <span class="n">ptypes</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">4</span><span class="p">],</span> 
-            <span class="n">UInames</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;gas&#39;</span><span class="p">,</span><span class="s1">&#39;stars&#39;</span><span class="p">],</span>
+            <span class="n">UInames</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Gas&#39;</span><span class="p">,</span><span class="s1">&#39;Stars&#39;</span><span class="p">],</span>
             <span class="n">decimation_factors</span><span class="o">=</span><span class="p">[</span><span class="n">decimation_factor</span><span class="p">,</span><span class="n">decimation_factor</span><span class="p">],</span>
             <span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;AgeGyr&#39;</span><span class="p">,</span><span class="s1">&#39;Temperature&#39;</span><span class="p">,</span><span class="s1">&#39;Velocities&#39;</span><span class="p">,</span><span class="s1">&#39;GCRadius&#39;</span><span class="p">],</span>
             <span class="n">magFlags</span><span class="o">=</span><span class="p">[</span><span class="kc">False</span><span class="p">,</span><span class="kc">False</span><span class="p">,</span><span class="kc">True</span><span class="p">,</span><span class="kc">False</span><span class="p">],</span> 
             <span class="n">logFlags</span><span class="o">=</span><span class="p">[</span><span class="kc">False</span><span class="p">,</span><span class="kc">True</span><span class="p">,</span><span class="kc">False</span><span class="p">,</span><span class="kc">False</span><span class="p">],</span> 
-            <span class="n">write_startup</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="n">JSON_prefix</span><span class="o">=</span><span class="s1">&#39;FIREData_</span><span class="si">%d</span><span class="s1">&#39;</span><span class="o">%</span><span class="n">snapnum</span><span class="p">,</span>
+            <span class="n">JSON_prefix</span><span class="o">=</span><span class="s1">&#39;Data&#39;</span><span class="p">,</span>
+            <span class="n">JSONdir</span><span class="o">=</span><span class="n">JSONdir</span><span class="p">,</span>
             <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="c1">## load the data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">loadData</span><span class="p">()</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">][</span><span class="s1">&#39;gas&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">][</span><span class="s1">&#39;stars&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">][</span><span class="s1">&#39;Gas&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">][</span><span class="s1">&#39;Stars&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;sizeMult&#39;</span><span class="p">][</span><span class="s1">&#39;gas&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.5</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;sizeMult&#39;</span><span class="p">][</span><span class="s1">&#39;stars&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.5</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;sizeMult&#39;</span><span class="p">][</span><span class="s1">&#39;Gas&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.5</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;sizeMult&#39;</span><span class="p">][</span><span class="s1">&#39;Stars&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.5</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;camera&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">15</span><span class="p">]</span>
 

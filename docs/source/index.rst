@@ -3,13 +3,37 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Firefly: a browser-based interactive data visualization platform
+Firefly: a browser-based interactive particle data visualization platform
 ================================================================
+
+Requirements
+------------
+
+To use an existing copy of Firefly you will need:
+
+* An internet browser; we recommend Firefox or Google Chrome
+
+To visualize your own data with Firefly you will need:
+
+*  A working Python installation; we recommend installing `Anaconda <https://www.anaconda.com/download/>`_ Python version 3.x, with the following packages:
+
+    * numpy
+
+    * h5py
+    
+    * pandas
+    
+    * eventlet
+    
+    * flask-socketio
+    
+    * flask
+
+    * requests
 
 Installation
 ____________
 
-You will also require an internet browser; we recommend Firefox or Google Chrome. To import your own data into Firefly, you will also require python; we recommend installing `Anaconda <https://www.anaconda.com/download/>`_ Python version 3.x .
 
 Stable release
 ++++++++++++++
@@ -21,40 +45,82 @@ To install the latest stable release you can :code:`pip install` Firefly
 
     pip install firefly-vis
 
+This is the preferred way to install Firefly as it will
+automatically install the necessary requirements and put Firefly
+into your :code:`${PYTHONPATH}` environment variable so you can 
+import it.
+
 Build from source
 +++++++++++++++++
 
-Build the latest version from source by cloning/forking this repository 
+Build the latest version directly from the most up-to-date version
+of the source-code by cloning/forking the GitHub repository 
 
 .. code-block:: bash
 
     git clone https://github.com/ageller/Firefly.git
 
-.. code-block:: bash
+or manually download the zip file and unpack it 
+(though this is not recommended as the development version is
+inherently unstable and you would not be able to update without
+repeating this step).
 
-    git fork https://github.com/ageller/Firefly.git
-
-
-or download the zip file and unpack it. Once you have the source you can build Firefly and add it to your environment.
+Once you have the source, you can build Firefly (and add it to your environment)
+by executing:
 
 .. code-block:: bash
 
     python setup.py install
 
-Using with yt
-+++++++++++++
+in the top level directory. The required Python packages will automatically be 
+installed as well.
 
-If you are using [yt](https://yt-project.org) you will be able to call :code:`region.outputToFirefly`. See the :ref:`API reference<api>`. 
+You can test your installation by looking for the Firefly 
+executable built by the installation
 
+.. code-block:: bash
 
-Table of Contents
------------------
+    which Firefly
 
+and by importing the Firefly Python frontend
+
+.. code-block:: python
+
+    import Firefly
+
+Using Firefly
+-------------
 .. toctree::
 
     webapp/index
+
+Hosting your own Firefly instance
+---------------------------------
+.. toctree::
+
     server/index
+
+
+Reading your own data
+---------------------
+
+.. toctree::
+
     data_reader/index
-    networking
+
+Experimental features
+---------------------
+
+.. toctree::
+
     experimental/index
+
+
+Reference
+---------
+
+.. toctree::
+    :maxdepth: 1
+
+    networking
     reference/api/api
