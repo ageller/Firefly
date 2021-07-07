@@ -312,11 +312,11 @@ class SimpleFIREreader(FIREreader):
         ## load the data
         self.loadData()
 
-        self.settings['color']['gas'] = [1,0,0,1]
-        self.settings['color']['stars'] = [0,0,1,1]
+        self.settings['color']['Gas'] = [1,0,0,1]
+        self.settings['color']['Stars'] = [0,0,1,1]
 
-        self.settings['sizeMult']['gas'] = 0.5
-        self.settings['sizeMult']['stars'] = 0.5
+        self.settings['sizeMult']['Gas'] = 0.5
+        self.settings['sizeMult']['Stars'] = 0.5
 
         self.settings['camera'] = [0,0,-15]
 
