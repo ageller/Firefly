@@ -56,15 +56,15 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> Firefly
+            <a href="../index.html">
           
 
+          
+            
+            <img src="../_static/logo_banner.png" class="logo" alt="Logo"/>
           
           </a>
 
-          
-            
-            
           
 
           
@@ -88,16 +88,25 @@
             
             
               <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Quickstart</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Using Firefly</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Data controls</a></li>
-<li class="toctree-l2"><a class="reference internal" href="camera_controls.html">Camera controls</a></li>
-<li class="toctree-l2"><a class="reference internal" href="particle_controls.html">Particle controls</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#flying-with-the-mouse-or-keyboard">Flying with the mouse or keyboard</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html#using-the-user-interface">Using the user interface</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="index.html#the-top-bar">The top bar</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="index.html#sub-panels">Sub-panels</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Data controls</a></li>
+<li class="toctree-l4"><a class="reference internal" href="camera_controls.html">Camera controls</a></li>
+<li class="toctree-l4"><a class="reference internal" href="particle_controls.html">Particle controls</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../server/index.html">Hosting your own Firefly instance</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../data_reader/index.html">Reading your own data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../networking.html">Accessing remote Firefly servers via port forwarding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../experimental/index.html">Experimental features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../networking.html">Accessing remote Firefly servers via port forwarding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../reference/api/api.html">API Reference</a></li>
 </ul>
 
@@ -169,23 +178,88 @@
            <div itemprop="articleBody">
             
   <div class="section" id="data-controls">
-<h1>Data controls<a class="headerlink" href="#data-controls" title="Permalink to this headline">¶</a></h1>
-<p>### Decimation
-Below the Camera Controls is the Decimation slider and text entry box.  Larger values of decimation causes less particles to be drawn.  (The minimum value is 1.)</p>
-<p>### The top bar</p>
-<p>This contains the word Controls and an X or “hamburger” symbol.  Click in here to show or hide the Controls panel.  If you click and drag in the top bar, you can move the Controls panel.</p>
-<p>### Fullscreen</p>
-<p>Click on the green Fullscreen button to resize the window into fullscreen mode.  Use the escape key to go back to the previous view.</p>
-<p>### Take Snapshot</p>
-<p>This button will take a snapshot of the current view (without the Controls panel).  There are two text boxes with numbers that you can change (here showing 1920, 1200).  These define the width and height, respectively of the snapshot.  When you click this button, you should be prompted to download the snapshot as a png file.  This feature may work best in Firefox.</p>
-<p>### Save Preset</p>
-<p>This button will save a file names “preset.json” to your computer.  This preset file contains all the information needed to restart Firefly from the current configuration. In some browsers, this file will be downloaded automatically to your Downloads folder.  You can move this file wherever you want, and rename it (but do not change it’s contents.)</p>
-<p>### Reset to Default</p>
-<p>Click this button to reset all values to the defaults that were used when Firefly launched.</p>
-<p>### Reset to Preset</p>
-<p>Click this button to reset all values to a preset file that you either created with the python reader (see [here](<a class="reference external" href="https://github.com/ageller/Firefly/wiki/Python-Data-Converter">https://github.com/ageller/Firefly/wiki/Python-Data-Converter</a>)), or by clicking the Save Preset button.  When you click Reset to Preset, you will be prompted to locate a preset file on your computer.  Once you select it, Firefly will reset to the configuration saved in the preset file.</p>
-<p>### Load New Data</p>
-<p>Click this button to select a new data set to display in Firefly.  Once clicked, you will be prompted to select a directory on your computer that contains the json files produced by FIREreader.py.  Note, after you select the directory, some browsers may show a default warning message that you are about to upload many files to the site and to only do so if you trust the site. Please allow Firefly to upload these files.  Also, note that for most browsers, you will only be able to select a directory that is within your data directory. Please keep your json files there.</p>
+<span id="id1"></span><h1>Data controls<a class="headerlink" href="#data-controls" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="decimation">
+<h2>Decimation<a class="headerlink" href="#decimation" title="Permalink to this headline">¶</a></h2>
+<p>At the top of the data controls sub-panel is the Decimation slider
+and text entry box.
+Larger values of decimation causes less particles to be drawn by the
+corresponding factor
+(i.e. a decimation value of 10 will only plot 10% of the data.
+The minimum value is 1.).</p>
+</div>
+<div class="section" id="fullscreen">
+<h2>Fullscreen<a class="headerlink" href="#fullscreen" title="Permalink to this headline">¶</a></h2>
+<p>Click on the Fullscreen button to resize the window into fullscreen mode.
+Use the escape key to go back to the previous view.</p>
+</div>
+<div class="section" id="take-snapshot">
+<h2>Take Snapshot<a class="headerlink" href="#take-snapshot" title="Permalink to this headline">¶</a></h2>
+<p>This button will take a snapshot of the current view (without the Controls panel).
+There are two text boxes with numbers that you can change which default to the
+dimensions of the current Firefly canvas (here showing 1920, 1200).
+These define the width and height, respectively of the snapshot.
+When you click this button,
+you should be prompted to download the snapshot as a png file.
+This feature may work best in Firefox.</p>
+</div>
+<div class="section" id="save-settings">
+<span id="id2"></span><h2>Save Settings<a class="headerlink" href="#save-settings" title="Permalink to this headline">¶</a></h2>
+<p>This button will save a file named “preset.json” to your computer.
+This preset file contains all the information needed to restart Firefly
+from the current configuration.
+In some browsers, this file will be downloaded automatically
+to your Downloads folder.
+You can move this file wherever you want, and rename it
+(but do not change its contents.)</p>
+</div>
+<div class="section" id="default-settings">
+<h2>Default Settings<a class="headerlink" href="#default-settings" title="Permalink to this headline">¶</a></h2>
+<p>Click this button to reset all values to the defaults that were
+used when Firefly was launched.</p>
+</div>
+<div class="section" id="load-settings">
+<span id="id3"></span><h2>Load Settings<a class="headerlink" href="#load-settings" title="Permalink to this headline">¶</a></h2>
+<p>Click this button to reset all values to a preset file
+that you either created with the Python reader (see the <a class="reference internal" href="../reference/api/api.html#api"><span class="std std-ref">API Reference</span></a>),
+or by clicking the <a class="reference internal" href="#save-settings"><span class="std std-ref">Save Settings</span></a> button.
+When you click Load Settings, you will be prompted to locate
+a preset file on your computer.
+Once you select it, Firefly will reset to the configuration saved in
+the preset file.</p>
+</div>
+<div class="section" id="load-new-data">
+<span id="load-new-data-button"></span><h2>Load New Data<a class="headerlink" href="#load-new-data" title="Permalink to this headline">¶</a></h2>
+<p>Click this button to select a new data set to display in Firefly.
+Once clicked, you will be prompted to select a directory on your
+computer using your operating system’s standard file browser.
+The directory should contain the json files produced by a
+<code class="code docutils literal notranslate"><span class="pre">Firefly.data_reader.Reader</span></code> object.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>For most browsers, for security reasons only sub-directories
+of the current site are accessible (otherwise websites on the
+internet could read your personal files).
+As a result, Firefly can only parse data files that are within
+its static/data directory.
+See <a class="reference internal" href="../data_reader/multiple_datasets.html#multiple-datasets"><span class="std std-ref">Managing multiple datasets</span></a> for more details.</p>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>As a result of the above, this only works if you are hosting
+the Firefly webserver locally.
+See <a class="reference internal" href="../server/index.html#local"><span class="std std-ref">Hosting Firefly locally</span></a> for more details.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>After you select the directory, some browsers may show a
+default warning message that you are about to upload many files
+to the site and to only do so if you trust the site.
+You are only uploading the data to you <strong>browser</strong>, not to any
+online repository (even if you are using an instance of Firefly
+hosted on the internet).</p>
+</div>
+</div>
 </div>
 
 

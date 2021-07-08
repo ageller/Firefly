@@ -1,43 +1,95 @@
 Using Firefly
 =============
 
+Flying with the mouse or keyboard
+---------------------------------
 
-## Flying with the mouse or keyboard
+Trackball Controls
+++++++++++++++++++
 
-When you launch Firefly in the default configuration, you can use the mouse to rotate your view and zoom in and out.  To rotate the view, left click and drag.  To zoom, use the mouse wheel (or two-finger scroll).  The default view uses the "Trackball controls" from the three.js library.  Within this Trackball mode, your center is fixed, but can be moved with a right-click and drag.  You are always looking toward that center. And you can rotate your view around that center.
-
-Similar intuitive controls should work on a mobile device, though this has not been fully tested.
-
-If you press the space bar, or use the user interface (see below) to uncheck the center "Lock" button, or you provide your own initial camera rotation using the python tool (see [here](https://github.com/ageller/Firefly/wiki/Python-Data-Converter)).  You will switch to the "Fly controls" from the three.js library.  Fly controls utilize the keyboard:
-
-* **WASD** move
-* **R|F** up|down
-* **shift** reduces your speed by a factor of 10 (hold shift while pressing another key)
-
-<!---
-The three controls below are possible, but I commented them out in this version so that we can have a seamless transition between Fly and Trackball controls:
-* **Q|E** roll
-* **up|down** pitch
-* **left|right** yaw
--->
-
-Fly mode gives you more freedom to move about.  You are not constrained to a center position as you are in Trackball mode.  (If you are in Fly mode, pressing the space bar will switch you to Trackball mode, and vice versa.)
-
-One workflow could be to switch to Fly controls.  Fly around to a region of interest.  Then press the space bar (or click the "Lock" button on the user interface, see below).  This switches you to Trackball mode and locks the center on your region of interest.  Within Trackball mode, you can now view that region of interest from any angle, while always facing it.
-
-## User Interface
-
-![User Interface](https://github.com/ageller/Firefly/blob/master/src/docs/UI.png)
-
-Firefly also contains a user interface (pictured above) that enables further control over what data is displayed.  (This Controls interface is fully customizable, from within the python data converter; see [here](https://github.com/ageller/Firefly/wiki/Python-Data-Converter)).
-
-Within these Controls, you will find various sections that can be expanded by dropdown arrows, and within these sections you will have buttons, sliders and/or input boxes.  For all input boxes, you must hit ``enter" on your keyboard for the value to be recorded by Firefly.
- The various sections of these Controls include the following:
+When you launch Firefly in the default configuration, you can use the mouse to rotate your view and zoom in and out. 
+To rotate the view, left click and drag.  To zoom, use the mouse wheel (or two-finger scroll). 
+The default view uses the "Trackball controls" from the three.js library. 
+Within this Trackball mode, your center is fixed, but can be moved with a 
+right-click and drag. 
+You are always looking toward that center.
+And you can rotate your view around that center.
 
 
+Fly Controls
+++++++++++++
+
+If you press the space bar, or use the user interface
+to uncheck the center :ref:`lock button` button,
+you will switch to the "Fly controls" from the three.js library. 
+
+Fly mode gives you more freedom to move about because you are
+not constrained to a center position as you are in Trackball mode.
+
+Fly controls utilize the keyboard
+
+* **W/A/S/D** -  pan forward/left/backward/right
+* **R/F** - pan up/down
+* **shift** - reduces your speed by a factor of 10 while held in conjunction with another key
+
+in combination with the mouse.
+
+* **up/down** - pitch
+* **left/right** - yaw
+
+.. The three controls below are possible, but I commented them out in this version so that we can have a seamless transition between Fly and Trackball controls:
+    * **Q/E** - roll
+    * **up/down** - pitch
+    * **left/right** - yaw
+
+If you are in Fly mode, pressing the space bar will return you
+to Trackball mode now centered at your current location.
+
+.. note:: 
+
+    A common workflow is to use Fly controls 
+    to move the camera into the region of interest
+    then press the space bar to switch
+    to Trackball mode.
+    This will lock the center on your region of interest. 
+    Now in Trackball mode, you can **"orbit"** that region of interest,
+    while always facing it.
+
+.. _UI:
+Using the user interface
+------------------------
+
+The top bar
++++++++++++
+
+This contains the word Controls and an X or "hamburger" symbol.
+Click in here to show or hide the Controls panel.
+If you click and drag in the top bar, you can move the Controls panel.
+The user interface (UI) initializes in a collapsed state by default
+in the top left corner of the screen (represented by three vertically
+stacked black lines-- a "hamburger").
+
+Clicking on the hamburger will expose a number of "sub-panels" depending
+on how the number of groups of particles loaded in the dataset.
+Each will have a dropdown arrow that when clicked will reveal sets of buttons, 
+sliders, and/or input boxes. 
+For all input boxes,
+you must hit "enter" on your keyboard for the value to actually be recorded by Firefly.
+
+.. warning::
+
+    A common point of confusion is when input boxes don't seem to update
+    the view. Almost always, the culprit is that the "enter" did not register,
+    If something is not updating try hitting enter a couple more times.
+    If the issue persists submit a
+    `GitHub issue <https://github.com/ageller/Firefly/issues>`_ and select
+    the appropriate issue template.
+
+Sub-panels
+++++++++++
 .. toctree::
+    :maxdepth: 1
 
     data_controls
     camera_controls
     particle_controls
-

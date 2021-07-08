@@ -3,6 +3,17 @@
 API Reference
 =============
 
+.. _special field names:
+
+ Special field names
+ -------------------
+
+ there are some special field names:
+
+ * Velocities
+
+ * SPH radius
+
 Base classes
 ------------
 .. autosummary::

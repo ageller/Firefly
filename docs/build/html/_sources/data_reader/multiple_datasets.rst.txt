@@ -1,3 +1,5 @@
+.. _multiple datasets:
+
 Managing multiple datasets
 ==========================
 

@@ -56,15 +56,15 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> Firefly
+            <a href="../index.html">
           
 
+          
+            
+            <img src="../_static/logo_banner.png" class="logo" alt="Logo"/>
           
           </a>
 
-          
-            
-            
           
 
           
@@ -88,16 +88,25 @@
             
             
               <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Quickstart</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Using Firefly</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="data_controls.html">Data controls</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Camera controls</a></li>
-<li class="toctree-l2"><a class="reference internal" href="particle_controls.html">Particle controls</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#flying-with-the-mouse-or-keyboard">Flying with the mouse or keyboard</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html#using-the-user-interface">Using the user interface</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="index.html#the-top-bar">The top bar</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="index.html#sub-panels">Sub-panels</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="data_controls.html">Data controls</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Camera controls</a></li>
+<li class="toctree-l4"><a class="reference internal" href="particle_controls.html">Particle controls</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../server/index.html">Hosting your own Firefly instance</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../data_reader/index.html">Reading your own data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../networking.html">Accessing remote Firefly servers via port forwarding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../experimental/index.html">Experimental features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../networking.html">Accessing remote Firefly servers via port forwarding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../reference/api/api.html">API Reference</a></li>
 </ul>
 
@@ -169,13 +178,54 @@
            <div itemprop="articleBody">
             
   <div class="section" id="camera-controls">
-<h1>Camera controls<a class="headerlink" href="#camera-controls" title="Permalink to this headline">¶</a></h1>
-<p>### Camera Controls</p>
-<p>Upon startup this sub-panel will be collapsed (of the same size as the previous three buttons).  Click on the downward facing arrow on the right side to expand the sub-panel, as shown in the image above.  Within the Camera Controls, you will see the current values of the Center, Camera and Rotation.  These are updated as you change the view (with your mouse or keyboard; see above).  You cannot edit these fields directly.</p>
-<p>Next to the Center text boxes, you will see a checkbox labelled “Lock”.  This will allow you to switch between Trackball and Fly controls.  Please see the first section in this page for more details.</p>
-<p>Below, you will see three buttons.  “Save” allows you to mark the current location, which you can return to if you click the “Reset” button.  “Recenter” resets only the center back to the initial value (or the previous save, if clicked).</p>
-<p>Below those buttons, is the “Friction” slider and text entry box.  For Trackball mode, this controls the rate that the camera stops moving after you release the mouse.  For Fly mode this controls the speed that you move around while pressing the keyboard control buttons.</p>
-<p>Finally, there is a “Stereo” checkbox, slider and text entry box.  If you click the checkbox, the renderer changes to stereoscopic side-by-side mode.  The slider and text entry box controls the separation between the cameras in the stereoscopic mode.  This can be used with a 3D display and glasses that can overlay the two images to produce a 3D image.</p>
+<span id="id1"></span><h1>Camera controls<a class="headerlink" href="#camera-controls" title="Permalink to this headline">¶</a></h1>
+<p>Upon startup this sub-panel will be collapsed.
+Click on the downward facing arrow on the right side to expand
+the sub-panel, as shown in the image above.
+Within the Camera Controls, you will see the current values
+of the Center, Camera and Rotation.</p>
+<p>These are updated as you change the view
+(with your mouse or keyboard; see above).</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>You cannot edit these fields directly even though they appear
+as text input boxes. They are only for reference, i.e. if you
+want to use a different program to render your data from the same
+perspective.</p>
+</div>
+<div class="section" id="lock">
+<span id="lock-button"></span><h2>Lock<a class="headerlink" href="#lock" title="Permalink to this headline">¶</a></h2>
+<p>Next to the Center text boxes, you will see a checkbox labelled “Lock”.
+This will allow you to switch between Trackball and Fly controls.</p>
+</div>
+<div class="section" id="save-reset-recenter">
+<h2>Save/Reset/Recenter<a class="headerlink" href="#save-reset-recenter" title="Permalink to this headline">¶</a></h2>
+<p>Below the text boxes you will see three buttons.</p>
+<p>“Save” allows you to mark the current location,
+which you can return to if you click the “Reset” button.
+“Recenter” resets only the center back to the initial value
+(or the previous save, if clicked).</p>
+</div>
+<div class="section" id="friction">
+<h2>Friction<a class="headerlink" href="#friction" title="Permalink to this headline">¶</a></h2>
+<p>Below those buttons, is the “Friction” slider and text entry box.
+For Trackball mode, this controls the rate that the camera stops moving after you release the mouse.
+For Fly mode this controls the speed that you move around while pressing the keyboard control buttons.</p>
+</div>
+<div class="section" id="stereo">
+<h2>Stereo<a class="headerlink" href="#stereo" title="Permalink to this headline">¶</a></h2>
+<p>Finally, there is a “Stereo” checkbox, slider and text entry box.
+If you click the checkbox, the renderer changes to stereoscopic side-by-side mode.  The slider and text entry box controls the separation between the cameras in the stereoscopic mode.
+This can be used with a 3D display and glasses that can overlay
+the two images to produce a 3D image.</p>
+<p>The slider adjusts the image separation to adjust eye distance for the 3D
+effect.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>There is experimental support for VR using the stereoscopic mode,
+see <a class="reference internal" href="../experimental/index.html#experimental-features"><span class="std std-ref">Experimental features</span></a>.</p>
+</div>
+</div>
 </div>
 
 
