@@ -26,6 +26,8 @@ To visualize your own data with Firefly you will need:
 
     * requests
 
+.. _install: 
+
 Installation
 ------------
 

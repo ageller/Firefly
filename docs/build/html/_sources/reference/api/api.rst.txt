@@ -38,6 +38,9 @@ Pre-built Readers
     Firefly.data_reader.FIREreader
     Firefly.data_reader.SimpleFIREreader
 
+
+.. _server api:
+
 Server Utitities
 ----------------
 

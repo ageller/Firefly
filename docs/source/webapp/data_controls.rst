@@ -3,6 +3,9 @@
 Data controls
 =============
 
+.. image:: _static/data_controls.png
+    :align: center
+
 Decimation
 ----------
 At the top of the data controls sub-panel is the Decimation slider

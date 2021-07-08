@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Hosting a local server &mdash; Firefly 2.0.0 documentation</title>
+  <title>Hosting your own Firefly instance &mdash; Firefly 2.0.0 documentation</title>
   
 
   
@@ -40,9 +40,7 @@
 
     
     <link rel="index" title="Index" href="../genindex.html" />
-    <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Hosting a static version on the internet" href="internet.html" />
-    <link rel="prev" title="Hosting your own Firefly instance" href="index.html" /> 
+    <link rel="search" title="Search" href="../search.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -87,18 +85,11 @@
               
             
             
-              <ul class="current">
+              <ul>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../webapp/index.html">Using Firefly</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">Hosting your own Firefly instance</a><ul class="current">
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Hosting a local server</a></li>
-<li class="toctree-l2"><a class="reference internal" href="internet.html">Hosting a static version on the internet</a></li>
-<li class="toctree-l2"><a class="reference internal" href="jupyter.html">Using Firefly from within a Jupyter notebook</a></li>
-</ul>
-</li>
 <li class="toctree-l1"><a class="reference internal" href="../data_reader/index.html">Reading your own data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../experimental/index.html">Experimental features</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../networking.html">Accessing remote Firefly servers via port forwarding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../reference/api/api.html">API Reference</a></li>
 </ul>
 
@@ -148,9 +139,7 @@
     
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
-          <li><a href="index.html">Hosting your own Firefly instance</a> &raquo;</li>
-        
-      <li>Hosting a local server</li>
+      <li>Hosting your own Firefly instance</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -169,11 +158,48 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="hosting-a-local-server">
-<h1>Hosting a local server<a class="headerlink" href="#hosting-a-local-server" title="Permalink to this headline">¶</a></h1>
-<p>hosting with Firefly</p>
-<p>hosting with python flask</p>
-<p>hosting with python -m http.server</p>
+  <div class="section" id="hosting-your-own-firefly-instance">
+<h1>Hosting your own Firefly instance<a class="headerlink" href="#hosting-your-own-firefly-instance" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="hosting-firefly-locally">
+<span id="local"></span><h2>Hosting Firefly locally<a class="headerlink" href="#hosting-firefly-locally" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="using-run-server-py">
+<h3>Using run_server.py<a class="headerlink" href="#using-run-server-py" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="using-the-firefly-executable">
+<h3>Using the Firefly executable<a class="headerlink" href="#using-the-firefly-executable" title="Permalink to this headline">¶</a></h3>
+</div>
+<div class="section" id="using-python-m-http-server">
+<h3>Using python -m http.server<a class="headerlink" href="#using-python-m-http-server" title="Permalink to this headline">¶</a></h3>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The <a class="reference internal" href="../webapp/data_controls.html#load-new-data-button"><span class="std std-ref">Load New Data</span></a> only works in this mode.</p>
+</div>
+</div>
+</div>
+<div class="section" id="hosting-a-static-version-on-the-internet">
+<h2>Hosting a static version on the internet<a class="headerlink" href="#hosting-a-static-version-on-the-internet" title="Permalink to this headline">¶</a></h2>
+<p>github pages is a great way to host it, it will use index.html</p>
+<div class="toctree-wrapper compound">
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Hosting your own Firefly instance</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#hosting-firefly-locally">Hosting Firefly locally</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#using-run-server-py">Using run_server.py</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#using-the-firefly-executable">Using the Firefly executable</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#using-python-m-http-server">Using python -m http.server</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#hosting-a-static-version-on-the-internet">Hosting a static version on the internet</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="jupyter.html">Using Firefly from within a Jupyter notebook</a></li>
+<li class="toctree-l3"><a class="reference internal" href="networking.html">Accessing remote Firefly servers via port forwarding</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="jupyter.html">Using Firefly from within a Jupyter notebook</a></li>
+<li class="toctree-l1"><a class="reference internal" href="networking.html">Accessing remote Firefly servers via port forwarding</a></li>
+</ul>
+</div>
+</div>
 </div>
 
 
@@ -181,10 +207,6 @@
            
           </div>
           <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="internet.html" class="btn btn-neutral float-right" title="Hosting a static version on the internet" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="index.html" class="btn btn-neutral float-left" title="Hosting your own Firefly instance" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-    </div>
 
   <hr/>
 

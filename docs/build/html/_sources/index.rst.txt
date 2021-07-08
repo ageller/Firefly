@@ -22,7 +22,7 @@ Contents
 
     installation
     webapp/index
-    server/index
+    server
     data_reader/index
     experimental/index
     networking
