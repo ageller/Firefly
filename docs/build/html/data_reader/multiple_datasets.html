@@ -56,15 +56,15 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> Firefly
+            <a href="../index.html">
           
 
+          
+            
+            <img src="../_static/logo_banner.png" class="logo" alt="Logo"/>
           
           </a>
 
-          
-            
-            
           
 
           
@@ -88,6 +88,7 @@
             
             
               <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../webapp/index.html">Using Firefly</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../server/index.html">Hosting your own Firefly instance</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Reading your own data</a><ul class="current">
@@ -98,10 +99,11 @@
 <li class="toctree-l2"><a class="reference internal" href="tween.html">Defining interpolated camera paths (tweening)</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Managing multiple datasets</a></li>
 <li class="toctree-l2"><a class="reference internal" href="flask.html">Sending data to a Firefly server via Flask</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#using-with-yt">Using with yt</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../networking.html">Accessing remote Firefly servers via port forwarding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../experimental/index.html">Experimental features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../networking.html">Accessing remote Firefly servers via port forwarding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../reference/api/api.html">API Reference</a></li>
 </ul>
 
@@ -173,7 +175,7 @@
            <div itemprop="articleBody">
             
   <div class="section" id="managing-multiple-datasets">
-<h1>Managing multiple datasets<a class="headerlink" href="#managing-multiple-datasets" title="Permalink to this headline">¶</a></h1>
+<span id="multiple-datasets"></span><h1>Managing multiple datasets<a class="headerlink" href="#managing-multiple-datasets" title="Permalink to this headline">¶</a></h1>
 <p>The code within [<cite>firefly_api</cite>](<a class="reference external" href="https://github.com/ageller/Firefly/tree/main/dataReader/firefly_api">https://github.com/ageller/Firefly/tree/main/dataReader/firefly_api</a>) will help you convert your data set into a format that is readable by Firefly. The converted data for Firefly is placed within the “data” directory within a sub-directory defined either by the snapshot number, or by the user-defined <cite>reader.JSONdir</cite>.  The python code also creates a file named <cite>startup.json</cite> in the “data” directory.  This file is the first thing read into Firefly, and tells Firefly where to find the rest of the data files;  it simply contains the name of the directory where your data resides.</p>
 <p>If <cite>startup.json</cite> does not exist, Firefly will display a button that will allow you to select the directory containing the files you want to load (the directory must contain a <cite>filelist.json</cite> file).  You may choose to simply remove the <cite>startup.json file</cite>, or set the option in your <cite>Reader</cite> instance to not create that file automatically.  In that case, you will always need to select a data directory when Firefly launches.</p>
 <p>If you already have a data set loaded and displayed in Firefly, you can load a new data set from within the user interface by clicking on the “Load New Data Button”.  Again, you will need to choose a directory that contains your json data files (and <cite>filelist.json</cite>).</p>

@@ -42,7 +42,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Data controls" href="data_controls.html" />
-    <link rel="prev" title="Firefly: a browser-based interactive data visualization platform" href="../index.html" /> 
+    <link rel="prev" title="Quickstart" href="../installation.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -56,15 +56,15 @@
           
 
           
-            <a href="../index.html" class="icon icon-home"> Firefly
+            <a href="../index.html">
           
 
+          
+            
+            <img src="../_static/logo_banner.png" class="logo" alt="Logo"/>
           
           </a>
 
-          
-            
-            
           
 
           
@@ -88,16 +88,29 @@
             
             
               <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Quickstart</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Using Firefly</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="data_controls.html">Data controls</a></li>
-<li class="toctree-l2"><a class="reference internal" href="camera_controls.html">Camera controls</a></li>
-<li class="toctree-l2"><a class="reference internal" href="particle_controls.html">Particle controls</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#flying-with-the-mouse-or-keyboard">Flying with the mouse or keyboard</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#trackball-controls">Trackball Controls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fly-controls">Fly Controls</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#using-the-user-interface">Using the user interface</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#the-top-bar">The top bar</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sub-panels">Sub-panels</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="data_controls.html">Data controls</a></li>
+<li class="toctree-l4"><a class="reference internal" href="camera_controls.html">Camera controls</a></li>
+<li class="toctree-l4"><a class="reference internal" href="particle_controls.html">Particle controls</a></li>
+</ul>
+</li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../server/index.html">Hosting your own Firefly instance</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../data_reader/index.html">Reading your own data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../networking.html">Accessing remote Firefly servers via port forwarding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../experimental/index.html">Experimental features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../networking.html">Accessing remote Firefly servers via port forwarding</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../reference/api/api.html">API Reference</a></li>
 </ul>
 
@@ -168,36 +181,86 @@
             
   <div class="section" id="using-firefly">
 <h1>Using Firefly<a class="headerlink" href="#using-firefly" title="Permalink to this headline">¶</a></h1>
-<p>## Flying with the mouse or keyboard</p>
-<p>When you launch Firefly in the default configuration, you can use the mouse to rotate your view and zoom in and out.  To rotate the view, left click and drag.  To zoom, use the mouse wheel (or two-finger scroll).  The default view uses the “Trackball controls” from the three.js library.  Within this Trackball mode, your center is fixed, but can be moved with a right-click and drag.  You are always looking toward that center. And you can rotate your view around that center.</p>
-<p>Similar intuitive controls should work on a mobile device, though this has not been fully tested.</p>
-<p>If you press the space bar, or use the user interface (see below) to uncheck the center “Lock” button, or you provide your own initial camera rotation using the python tool (see [here](<a class="reference external" href="https://github.com/ageller/Firefly/wiki/Python-Data-Converter">https://github.com/ageller/Firefly/wiki/Python-Data-Converter</a>)).  You will switch to the “Fly controls” from the three.js library.  Fly controls utilize the keyboard:</p>
+<div class="section" id="flying-with-the-mouse-or-keyboard">
+<h2>Flying with the mouse or keyboard<a class="headerlink" href="#flying-with-the-mouse-or-keyboard" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="trackball-controls">
+<h3>Trackball Controls<a class="headerlink" href="#trackball-controls" title="Permalink to this headline">¶</a></h3>
+<p>When you launch Firefly in the default configuration, you can use the mouse to rotate your view and zoom in and out.
+To rotate the view, left click and drag.  To zoom, use the mouse wheel (or two-finger scroll).
+The default view uses the “Trackball controls” from the three.js library.
+Within this Trackball mode, your center is fixed, but can be moved with a
+right-click and drag.
+You are always looking toward that center.
+And you can rotate your view around that center.</p>
+</div>
+<div class="section" id="fly-controls">
+<h3>Fly Controls<a class="headerlink" href="#fly-controls" title="Permalink to this headline">¶</a></h3>
+<p>If you press the space bar, or use the user interface
+to uncheck the center <a class="reference internal" href="camera_controls.html#lock-button"><span class="std std-ref">Lock</span></a> button,
+you will switch to the “Fly controls” from the three.js library.</p>
+<p>Fly mode gives you more freedom to move about because you are
+not constrained to a center position as you are in Trackball mode.</p>
+<p>Fly controls utilize the keyboard</p>
 <ul class="simple">
-<li><p><strong>WASD</strong> move</p></li>
-<li><p><strong>R|F</strong> up|down</p></li>
-<li><p><strong>shift</strong> reduces your speed by a factor of 10 (hold shift while pressing another key)</p></li>
+<li><p><strong>W/A/S/D</strong> -  pan forward/left/backward/right</p></li>
+<li><p><strong>R/F</strong> - pan up/down</p></li>
+<li><p><strong>shift</strong> - reduces your speed by a factor of 10 while held in conjunction with another key</p></li>
 </ul>
-<p>&lt;!—
-The three controls below are possible, but I commented them out in this version so that we can have a seamless transition between Fly and Trackball controls:
-* <strong>Q|E</strong> roll
-* <strong>up|down</strong> pitch
-* <strong>left|right</strong> yaw
-–&gt;</p>
-<p>Fly mode gives you more freedom to move about.  You are not constrained to a center position as you are in Trackball mode.  (If you are in Fly mode, pressing the space bar will switch you to Trackball mode, and vice versa.)</p>
-<p>One workflow could be to switch to Fly controls.  Fly around to a region of interest.  Then press the space bar (or click the “Lock” button on the user interface, see below).  This switches you to Trackball mode and locks the center on your region of interest.  Within Trackball mode, you can now view that region of interest from any angle, while always facing it.</p>
-<p>## User Interface</p>
-<p>![User Interface](<a class="reference external" href="https://github.com/ageller/Firefly/blob/master/src/docs/UI.png">https://github.com/ageller/Firefly/blob/master/src/docs/UI.png</a>)</p>
-<p>Firefly also contains a user interface (pictured above) that enables further control over what data is displayed.  (This Controls interface is fully customizable, from within the python data converter; see [here](<a class="reference external" href="https://github.com/ageller/Firefly/wiki/Python-Data-Converter">https://github.com/ageller/Firefly/wiki/Python-Data-Converter</a>)).</p>
-<dl class="simple">
-<dt>Within these Controls, you will find various sections that can be expanded by dropdown arrows, and within these sections you will have buttons, sliders and/or input boxes.  For all input boxes, you must hit <a href="#id1"><span class="problematic" id="id2">``</span></a>enter” on your keyboard for the value to be recorded by Firefly.</dt><dd><p>The various sections of these Controls include the following:</p>
-</dd>
-</dl>
+<p>in combination with the mouse.</p>
+<ul class="simple">
+<li><p><strong>up/down</strong> - pitch</p></li>
+<li><p><strong>left/right</strong> - yaw</p></li>
+</ul>
+<p>If you are in Fly mode, pressing the space bar will return you
+to Trackball mode now centered at your current location.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A common workflow is to use Fly controls
+to move the camera into the region of interest
+then press the space bar to switch
+to Trackball mode.
+This will lock the center on your region of interest.
+Now in Trackball mode, you can <strong>“orbit”</strong> that region of interest,
+while always facing it.</p>
+</div>
+</div>
+</div>
+<div class="section" id="using-the-user-interface">
+<h2>Using the user interface<a class="headerlink" href="#using-the-user-interface" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="the-top-bar">
+<h3>The top bar<a class="headerlink" href="#the-top-bar" title="Permalink to this headline">¶</a></h3>
+<p>This contains the word Controls and an X or “hamburger” symbol.
+Click in here to show or hide the Controls panel.
+If you click and drag in the top bar, you can move the Controls panel.
+The user interface (UI) initializes in a collapsed state by default
+in the top left corner of the screen (represented by three vertically
+stacked black lines– a “hamburger”).</p>
+<p>Clicking on the hamburger will expose a number of “sub-panels” depending
+on how the number of groups of particles loaded in the dataset.
+Each will have a dropdown arrow that when clicked will reveal sets of buttons,
+sliders, and/or input boxes.
+For all input boxes,
+you must hit “enter” on your keyboard for the value to actually be recorded by Firefly.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>A common point of confusion is when input boxes don’t seem to update
+the view. Almost always, the culprit is that the “enter” did not register,
+If something is not updating try hitting enter a couple more times.
+If the issue persists submit a
+<a class="reference external" href="https://github.com/ageller/Firefly/issues">GitHub issue</a> and select
+the appropriate issue template.</p>
+</div>
+</div>
+<div class="section" id="sub-panels">
+<h3>Sub-panels<a class="headerlink" href="#sub-panels" title="Permalink to this headline">¶</a></h3>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="data_controls.html">Data controls</a></li>
 <li class="toctree-l1"><a class="reference internal" href="camera_controls.html">Camera controls</a></li>
 <li class="toctree-l1"><a class="reference internal" href="particle_controls.html">Particle controls</a></li>
 </ul>
+</div>
+</div>
 </div>
 </div>
 
@@ -208,7 +271,7 @@ The three controls below are possible, but I commented them out in this version 
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
         <a href="data_controls.html" class="btn btn-neutral float-right" title="Data controls" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="../index.html" class="btn btn-neutral float-left" title="Firefly: a browser-based interactive data visualization platform" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../installation.html" class="btn btn-neutral float-left" title="Quickstart" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>

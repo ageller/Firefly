@@ -1,37 +1,96 @@
+.. _data controls:
+
 Data controls
 =============
 
-### Decimation
-Below the Camera Controls is the Decimation slider and text entry box.  Larger values of decimation causes less particles to be drawn.  (The minimum value is 1.)
+Decimation
+----------
+At the top of the data controls sub-panel is the Decimation slider
+and text entry box.
+Larger values of decimation causes less particles to be drawn by the
+corresponding factor
+(i.e. a decimation value of 10 will only plot 10% of the data.
+The minimum value is 1.).
 
-### The top bar
+Fullscreen
+----------
 
+Click on the Fullscreen button to resize the window into fullscreen mode. 
+Use the escape key to go back to the previous view.
 
-This contains the word Controls and an X or "hamburger" symbol.  Click in here to show or hide the Controls panel.  If you click and drag in the top bar, you can move the Controls panel.
+Take Snapshot
+-------------
 
-### Fullscreen
+This button will take a snapshot of the current view (without the Controls panel). 
+There are two text boxes with numbers that you can change which default to the
+dimensions of the current Firefly canvas (here showing 1920, 1200). 
+These define the width and height, respectively of the snapshot. 
+When you click this button,
+you should be prompted to download the snapshot as a png file. 
+This feature may work best in Firefox.
 
-Click on the green Fullscreen button to resize the window into fullscreen mode.  Use the escape key to go back to the previous view.
+.. _save settings:
 
-### Take Snapshot
+Save Settings 
+-------------
 
-This button will take a snapshot of the current view (without the Controls panel).  There are two text boxes with numbers that you can change (here showing 1920, 1200).  These define the width and height, respectively of the snapshot.  When you click this button, you should be prompted to download the snapshot as a png file.  This feature may work best in Firefox.
+This button will save a file named "preset.json" to your computer. 
+This preset file contains all the information needed to restart Firefly
+from the current configuration.
+In some browsers, this file will be downloaded automatically
+to your Downloads folder. 
+You can move this file wherever you want, and rename it
+(but do not change its contents.)
 
-### Save Preset
+Default Settings
+----------------
 
-This button will save a file names "preset.json" to your computer.  This preset file contains all the information needed to restart Firefly from the current configuration. In some browsers, this file will be downloaded automatically to your Downloads folder.  You can move this file wherever you want, and rename it (but do not change it's contents.)
+Click this button to reset all values to the defaults that were
+used when Firefly was launched.
 
-### Reset to Default
+.. _load settings:
 
-Click this button to reset all values to the defaults that were used when Firefly launched.
+Load Settings
+-------------
 
-### Reset to Preset
+Click this button to reset all values to a preset file
+that you either created with the Python reader (see the :ref:`api`),
+or by clicking the :ref:`save settings` button. 
+When you click Load Settings, you will be prompted to locate
+a preset file on your computer. 
+Once you select it, Firefly will reset to the configuration saved in
+the preset file.
 
-Click this button to reset all values to a preset file that you either created with the python reader (see [here](https://github.com/ageller/Firefly/wiki/Python-Data-Converter)), or by clicking the Save Preset button.  When you click Reset to Preset, you will be prompted to locate a preset file on your computer.  Once you select it, Firefly will reset to the configuration saved in the preset file.
+.. _load new data button:
 
-### Load New Data
+Load New Data
+-------------
 
-Click this button to select a new data set to display in Firefly.  Once clicked, you will be prompted to select a directory on your computer that contains the json files produced by FIREreader.py.  Note, after you select the directory, some browsers may show a default warning message that you are about to upload many files to the site and to only do so if you trust the site. Please allow Firefly to upload these files.  Also, note that for most browsers, you will only be able to select a directory that is within your data directory. Please keep your json files there.
+Click this button to select a new data set to display in Firefly. 
+Once clicked, you will be prompted to select a directory on your
+computer using your operating system's standard file browser. 
+The directory should contain the json files produced by a 
+:code:`Firefly.data_reader.Reader` object.
 
+.. warning::
 
+	For most browsers, for security reasons only sub-directories
+	of the current site are accessible (otherwise websites on the 
+	internet could read your personal files). 
+	As a result, Firefly can only parse data files that are within 
+	its static/data directory. 
+	See :ref:`multiple datasets` for more details.
 
+.. seealso:: 
+	As a result of the above, this only works if you are hosting
+	the Firefly webserver locally. 
+	See :ref:`local` for more details.
+
+.. note:: 
+
+	After you select the directory, some browsers may show a
+	default warning message that you are about to upload many files
+	to the site and to only do so if you trust the site.
+	You are only uploading the data to you **browser**, not to any
+	online repository (even if you are using an instance of Firefly 
+	hosted on the internet).

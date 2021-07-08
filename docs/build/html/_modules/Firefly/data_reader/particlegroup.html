@@ -575,7 +575,7 @@
 
         <span class="c1">## if this is the first file, let&#39;s also include the colormap</span>
         <span class="c1">##  and filter keys</span>
-        <span class="k">if</span> <span class="n">store_extra_keys</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">store_extra_keys</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">loud</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">tracked_names</span><span class="p">,</span>
                 <span class="s1">&#39;filter:&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">tracked_filter_flags</span><span class="p">,</span>
