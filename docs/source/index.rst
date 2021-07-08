@@ -24,6 +24,6 @@ Contents
     webapp/index
     server
     data_reader/index
-    experimental/index
+    experimental
     networking
     reference/api/api

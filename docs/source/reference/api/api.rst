@@ -14,6 +14,10 @@ API Reference
 
  * SPH radius
 
+
+
+.. _frontend api:
+
 Base classes
 ------------
 .. autosummary::
