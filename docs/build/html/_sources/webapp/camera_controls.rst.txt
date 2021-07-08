@@ -3,6 +3,9 @@
 Camera controls
 ===============
 
+.. image:: _static/camera_controls.png
+    :align: center
+
 Upon startup this sub-panel will be collapsed.
 Click on the downward facing arrow on the right side to expand
 the sub-panel, as shown in the image above.

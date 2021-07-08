@@ -1,11 +1,31 @@
-Hosting a local server
-======================
+Hosting your own Firefly instance
+=================================
 
-hosting with Firefly
+.. _local:
 
-hosting with python flask
+Hosting Firefly locally
+-----------------------
 
-hosting with python -m http.server
+Using run_server.py
++++++++++++++++++++
+
+Using the Firefly executable
+++++++++++++++++++++++++++++
+
+Using python -m http.server
++++++++++++++++++++++++++++
 
 
+.. note:: 
 
+    The :ref:`load new data button` only works in this mode.
+
+Hosting a static version on the internet
+----------------------------------------
+github pages is a great way to host it, it will use index.html
+
+.. toctree::
+
+    server
+    jupyter
+    networking

@@ -6,12 +6,26 @@ Hosting your own Firefly instance
 Hosting Firefly locally
 -----------------------
 
+Using run_server.py
++++++++++++++++++++
+
+Using the Firefly executable
+++++++++++++++++++++++++++++
+
+Using python -m http.server
++++++++++++++++++++++++++++
+
+
 .. note:: 
 
     The :ref:`load new data button` only works in this mode.
 
+Hosting a static version on the internet
+----------------------------------------
+github pages is a great way to host it, it will use index.html
+
 .. toctree::
 
     server
-    internet
     jupyter
+    networking

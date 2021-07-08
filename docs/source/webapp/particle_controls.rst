@@ -1,6 +1,9 @@
 Particle controls
 =================
 
+.. image:: _static/particle_controls.png
+    :align: center
+
 Collapsed view
 --------------
 
