@@ -149,6 +149,8 @@ To make Firefly accessible via the internet, the
 
 
 
+.. _port forwarding:
+
 Accessing remote Firefly servers via port forwarding
 ----------------------------------------------------
 

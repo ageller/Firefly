@@ -1,3 +1,0 @@
-Streaming the Firefly view
-==========================
-

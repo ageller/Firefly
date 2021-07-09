@@ -55,6 +55,15 @@ to Trackball mode now centered at your current location.
     Now in Trackball mode, you can **"orbit"** that region of interest,
     while always facing it.
 
+Tweening
+--------
+
+When the **T** key is pressed on the keyboard the camera's position
+and orientation will be smoothly adjusted according to the keyframes 
+defined by the user in the :code:`TweenParams`. 
+
+See the :ref:`frontend documentation <frontend api>` for details.
+
 .. _UI:
 Using the user interface
 ------------------------
@@ -93,3 +102,40 @@ Sub-panels
     data_controls
     camera_controls
     particle_controls
+    flask
+
+
+Splitting the Viewer and GUI with Flask
+---------------------------------------
+
+.. image:: flask_gui.png
+    :align: center
+
+When Firefly is being hosted locally using a Flask server 
+(see :ref:`local` for details on how to accomplish this)
+the UI and viewer canvas can be split by visiting 
+:code:`localhost:xxxx/gui` and :code:`localhost:xxxx/viewer`. 
+
+The GUI will contain a multi-colored cube to help identify how the the 
+scene is being rotated. 
+
+All of the controls detailed in the sections above apply for
+the :code:`localhost:xxxx/gui` window. 
+The :code:`localhost:xxxx/viewer` window on the other hand will show only
+the particles and will react to any changes made on the viewer. 
+
+.. note::
+    
+    Two devices on the same network can access the same Firefly webserver.
+    Using one computer as the host which opens the
+    :code:`localhost:xxxx/viewer` and another device (say, an iPad)
+    which opens :code:`<host's ip address>:xxxx/gui` the view can 
+    be remotely controlled.
+
+    .. seealso::
+
+        This is not actually limited to only computers on the same network, 
+        if the host exposes their IP address to the internet by opening a port
+        on their router then one's Firefly view could be controlled remotely by
+        another user over the internet. 
+        See :ref:`port forwarding`.
