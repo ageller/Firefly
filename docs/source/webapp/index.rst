@@ -65,6 +65,7 @@ defined by the user in the :code:`TweenParams`.
 See the :ref:`frontend documentation <frontend api>` for details.
 
 .. _UI:
+
 Using the user interface
 ------------------------
 
@@ -102,7 +103,6 @@ Sub-panels
     data_controls
     camera_controls
     particle_controls
-    flask
 
 
 Splitting the Viewer and GUI with Flask

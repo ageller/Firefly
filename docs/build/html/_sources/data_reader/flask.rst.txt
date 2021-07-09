@@ -26,3 +26,7 @@ which will output the data contained in a
 :class:`~Firefly.data_reader.Reader` instance to a :code:`JSON`
 *string* and then :code:`POST` it to the data input endpoint of
 the specified localhost port.
+
+.. toctree::
+
+	flask_tutorial

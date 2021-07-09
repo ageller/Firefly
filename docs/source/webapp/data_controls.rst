@@ -1,5 +1,3 @@
-.. _data controls:
-
 Data controls
 =============
 
@@ -32,8 +30,6 @@ When you click this button,
 you should be prompted to download the snapshot as a png file. 
 This feature may work best in Firefox.
 
-.. _save settings:
-
 Save Settings 
 -------------
 
@@ -50,8 +46,6 @@ Default Settings
 
 Click this button to reset all values to the defaults that were
 used when Firefly was launched.
-
-.. _load settings:
 
 Load Settings
 -------------

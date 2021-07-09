@@ -17,7 +17,7 @@ Hosting Firefly locally
     must be hosted locally (vs. :ref:`hosted on the internet <internet host>`).
 
 Using :code:`python -m http.server` to host :code:`index.html`
-+++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 .. warning:: 
 
@@ -41,7 +41,7 @@ use the :ref:`load new data button` button.
 .. _flask host:
 
 Using :code:`run_server.py` to launch Flask
-+++++++++++++++++++
++++++++++++++++++++++++++++++++++++++++++++
 From within the the :code:`Firefly/src/Firefly` directory (or from within 
 the corresponding sub-directory in your site-packages directory) execute
 
@@ -50,7 +50,7 @@ the corresponding sub-directory in your site-packages directory) execute
     python run_server.py
 
 Using the :code:`Firefly` executable to launch Flask
-++++++++++++++++++++++++++++
+++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 The Firefly bash executable is a wrapper to 
 :code:`run_server.py` so that it can be initialized without having to 

@@ -35,6 +35,7 @@
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -178,8 +179,32 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="data-controls">
-<span id="id1"></span><h1>Data controls<a class="headerlink" href="#data-controls" title="Permalink to this headline">¶</a></h1>
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="data-controls">
+<h1>Data controls<a class="headerlink" href="#data-controls" title="Permalink to this headline">¶</a></h1>
 <img alt="webapp/_static/data_controls.png" class="align-center" src="webapp/_static/data_controls.png" />
 <div class="section" id="decimation">
 <h2>Decimation<a class="headerlink" href="#decimation" title="Permalink to this headline">¶</a></h2>
@@ -206,7 +231,7 @@ you should be prompted to download the snapshot as a png file.
 This feature may work best in Firefox.</p>
 </div>
 <div class="section" id="save-settings">
-<span id="id2"></span><h2>Save Settings<a class="headerlink" href="#save-settings" title="Permalink to this headline">¶</a></h2>
+<h2>Save Settings<a class="headerlink" href="#save-settings" title="Permalink to this headline">¶</a></h2>
 <p>This button will save a file named “preset.json” to your computer.
 This preset file contains all the information needed to restart Firefly
 from the current configuration.
@@ -221,7 +246,7 @@ You can move this file wherever you want, and rename it
 used when Firefly was launched.</p>
 </div>
 <div class="section" id="load-settings">
-<span id="id3"></span><h2>Load Settings<a class="headerlink" href="#load-settings" title="Permalink to this headline">¶</a></h2>
+<h2>Load Settings<a class="headerlink" href="#load-settings" title="Permalink to this headline">¶</a></h2>
 <p>Click this button to reset all values to a preset file
 that you either created with the Python reader (see the <a class="reference internal" href="../reference/api/api.html#api"><span class="std std-ref">API Reference</span></a>),
 or by clicking the <a class="reference internal" href="#save-settings"><span class="std std-ref">Save Settings</span></a> button.

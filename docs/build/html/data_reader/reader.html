@@ -35,13 +35,14 @@
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Managing multiple datasets" href="multiple_datasets.html" />
+    <link rel="next" title="Tutorial notebook: Using the Reader class" href="reader_tutorial.html" />
     <link rel="prev" title="Understanding Firefly’s input requirements" href="files.html" /> 
 </head>
 
@@ -89,14 +90,19 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Quickstart</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../webapp/index.html">Using Firefly</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../server.html">Hosting your own Firefly instance</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">Creating your own Firefly instance</a><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../webapp/index.html">Using an existing instance of Firefly</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Creating your own instance of Firefly</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="files.html">Understanding Firefly’s input requirements</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Producing Firefly formatted <code class="code docutils literal notranslate"><span class="pre">.json</span></code> files using the <span class="xref std std-ref">Python API</span></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#the-reader-class">The <code class="xref py py-class docutils literal notranslate"><span class="pre">Reader</span></code> class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#the-reader-class">The <code class="xref py py-class docutils literal notranslate"><span class="pre">Reader</span></code> class</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="reader_tutorial.html">Tutorial notebook: Using the <code class="docutils literal notranslate"><span class="pre">Reader</span></code> class</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="#the-particlegroup-class">The <code class="xref py py-class docutils literal notranslate"><span class="pre">ParticleGroup</span></code> class</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#the-settings-class">The <code class="xref py py-class docutils literal notranslate"><span class="pre">Settings</span></code> class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#the-settings-class">The <code class="xref py py-class docutils literal notranslate"><span class="pre">Settings</span></code> class</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="settings_tutorial.html">Tutorial notebook: Managing Custom Settings</a></li>
+</ul>
+</li>
 <li class="toctree-l3"><a class="reference internal" href="#the-tweenparams-class">The <code class="xref py py-class docutils literal notranslate"><span class="pre">TweenParams</span></code> class</a></li>
 </ul>
 </li>
@@ -104,6 +110,7 @@
 <li class="toctree-l2"><a class="reference internal" href="flask.html">Sending data to a Firefly server via Flask</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../server.html">Hosting a Firefly webserver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../experimental.html">Experimental features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../reference/api/api.html">API Reference</a></li>
 </ul>
@@ -154,7 +161,7 @@
     
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
-          <li><a href="index.html">Creating your own Firefly instance</a> &raquo;</li>
+          <li><a href="index.html">Creating your own instance of Firefly</a> &raquo;</li>
         
       <li>Producing Firefly formatted <code class="code docutils literal notranslate"><span class="pre">.json</span></code> files using the <span class="xref std std-ref">Python API</span></li>
     
@@ -175,7 +182,31 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="producing-firefly-formatted-json-files-using-the-python-api">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="producing-firefly-formatted-json-files-using-the-python-api">
 <h1>Producing Firefly formatted <code class="code docutils literal notranslate"><span class="pre">.json</span></code> files using the <a class="reference internal" href="../reference/api/api.html#api"><span class="std std-ref">Python API</span></a><a class="headerlink" href="#producing-firefly-formatted-json-files-using-the-python-api" title="Permalink to this headline">¶</a></h1>
 <p>While it is certainly possible to produce Firefly formatted <code class="code docutils literal notranslate"><span class="pre">.json</span></code> files
 manually (with say, a text editor) we have instead provided a convenient Python frontend
@@ -187,6 +218,17 @@ each of the below classes.
 Its <code class="xref py py-func docutils literal notranslate"><span class="pre">dumpToJSON()</span></code> method will take the data from each of the
 attached instances and collect it into a single <code class="code docutils literal notranslate"><span class="pre">JSONdir</span></code>, producing each of the
 necessary files listed in <a class="reference internal" href="files.html#files"><span class="std std-ref">Understanding Firefly’s input requirements</span></a> automatically.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="reader_tutorial.html">Tutorial notebook: Using the <code class="docutils literal notranslate"><span class="pre">Reader</span></code> class</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="reader_tutorial.html#Creating-a-Reader-instance">Creating a Reader instance</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reader_tutorial.html#Store-the-coordinates-in-a-ParticleGroup">Store the coordinates in a ParticleGroup</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reader_tutorial.html#Outputting-to-JSON">Outputting to JSON</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reader_tutorial.html#Using-an-ArrayReader-sub-class">Using an <code class="docutils literal notranslate"><span class="pre">ArrayReader</span></code> sub-class</a></li>
+</ul>
+</li>
+</ul>
+</div>
 </div>
 <div class="section" id="the-particlegroup-class">
 <span id="docsparticlegroup"></span><h2>The <a class="reference internal" href="../reference/api/classes/Firefly.data_reader.ParticleGroup.html#Firefly.data_reader.ParticleGroup" title="Firefly.data_reader.ParticleGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParticleGroup</span></code></a> class<a class="headerlink" href="#the-particlegroup-class" title="Permalink to this headline">¶</a></h2>
@@ -216,6 +258,17 @@ or <code class="code docutils literal notranslate"><span class="pre">particleGro
 </div>
 <p>The <a class="reference internal" href="../reference/api/classes/Firefly.data_reader.Settings.html#Firefly.data_reader.Settings" title="Firefly.data_reader.Settings"><code class="xref py py-class docutils literal notranslate"><span class="pre">Firefly.data_reader.Settings</span></code></a> documentation provides
 a comprehensive list of the relevant boolean flags and the UI elements they control.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="settings_tutorial.html">Tutorial notebook: Managing Custom Settings</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="settings_tutorial.html#Settings-can-be-changed-the-same-way-you-would-change-a-key-in-a-dictionary">Settings can be changed the same way you would change a key in a dictionary</a></li>
+<li class="toctree-l2"><a class="reference internal" href="settings_tutorial.html#Settings-are-most-useful-when-connected-to-a-Firefly.data_reader.Reader-object">Settings are most useful when connected to a <code class="docutils literal notranslate"><span class="pre">Firefly.data_reader.Reader</span></code> object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="settings_tutorial.html#Settings-can-also-be-imported-from-.json-files">Settings can also be imported from <code class="docutils literal notranslate"><span class="pre">.json</span></code> files</a></li>
+<li class="toctree-l2"><a class="reference internal" href="settings_tutorial.html#Attaching-a-ParticleGroup-to-a-Settings">Attaching a ParticleGroup to a Settings</a></li>
+</ul>
+</li>
+</ul>
+</div>
 </div>
 <div class="section" id="the-tweenparams-class">
 <span id="docstween"></span><h2>The <a class="reference internal" href="../reference/api/classes/Firefly.data_reader.TweenParams.html#Firefly.data_reader.TweenParams" title="Firefly.data_reader.TweenParams"><code class="xref py py-class docutils literal notranslate"><span class="pre">TweenParams</span></code></a> class<a class="headerlink" href="#the-tweenparams-class" title="Permalink to this headline">¶</a></h2>
@@ -238,7 +291,7 @@ when the <a class="reference internal" href="../reference/api/classes/Firefly.da
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="multiple_datasets.html" class="btn btn-neutral float-right" title="Managing multiple datasets" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="reader_tutorial.html" class="btn btn-neutral float-right" title="Tutorial notebook: Using the Reader class" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
         <a href="files.html" class="btn btn-neutral float-left" title="Understanding Firefly’s input requirements" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 

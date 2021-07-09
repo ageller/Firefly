@@ -4,7 +4,7 @@
    contain the root `toctree` directive.
 
 Firefly: a browser-based interactive particle data visualization platform
-================================================================
+=========================================================================
 
 Firefly is an interactive application for visualizing particle-based data 
 from within the web browser. In addition to the various source files 
@@ -25,5 +25,4 @@ Contents
     data_reader/index
     server
     experimental
-    networking
     reference/api/api

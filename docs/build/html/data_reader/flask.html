@@ -35,14 +35,15 @@
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Experimental features" href="../experimental.html" />
-    <link rel="prev" title="Managing multiple datasets" href="multiple_datasets.html" /> 
+    <link rel="next" title="Tutorial notebook: Sending data to a local Firefly server through Flask" href="flask_tutorial.html" />
+    <link rel="prev" title="Tutorial notebook: Managing multiple datasets with Firefly" href="multiple_datasets_tutorial.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -89,15 +90,18 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Quickstart</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../webapp/index.html">Using Firefly</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../server.html">Hosting your own Firefly instance</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">Creating your own Firefly instance</a><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../webapp/index.html">Using an existing instance of Firefly</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Creating your own instance of Firefly</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="files.html">Understanding Firefly’s input requirements</a></li>
 <li class="toctree-l2"><a class="reference internal" href="reader.html">Producing Firefly formatted <code class="code docutils literal notranslate"><span class="pre">.json</span></code> files using the <span class="xref std std-ref">Python API</span></a></li>
 <li class="toctree-l2"><a class="reference internal" href="multiple_datasets.html">Managing multiple datasets</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Sending data to a Firefly server via Flask</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Sending data to a Firefly server via Flask</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="flask_tutorial.html">Tutorial notebook: Sending data to a local Firefly server through Flask</a></li>
 </ul>
 </li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../server.html">Hosting a Firefly webserver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../experimental.html">Experimental features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../reference/api/api.html">API Reference</a></li>
 </ul>
@@ -148,7 +152,7 @@
     
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
-          <li><a href="index.html">Creating your own Firefly instance</a> &raquo;</li>
+          <li><a href="index.html">Creating your own instance of Firefly</a> &raquo;</li>
         
       <li>Sending data to a Firefly server via Flask</li>
     
@@ -169,7 +173,31 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="sending-data-to-a-firefly-server-via-flask">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="sending-data-to-a-firefly-server-via-flask">
 <span id="flask"></span><h1>Sending data to a Firefly server via Flask<a class="headerlink" href="#sending-data-to-a-firefly-server-via-flask" title="Permalink to this headline">¶</a></h1>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
@@ -192,6 +220,18 @@ which will output the data contained in a
 <a class="reference internal" href="../reference/api/classes/Firefly.data_reader.Reader.html#Firefly.data_reader.Reader" title="Firefly.data_reader.Reader"><code class="xref py py-class docutils literal notranslate"><span class="pre">Reader</span></code></a> instance to a <code class="code docutils literal notranslate"><span class="pre">JSON</span></code>
 <em>string</em> and then <code class="code docutils literal notranslate"><span class="pre">POST</span></code> it to the data input endpoint of
 the specified localhost port.</p>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="flask_tutorial.html">Tutorial notebook: Sending data to a local Firefly server through Flask</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="flask_tutorial.html#Start-the-Firefly-server-as-a-background-process">Start the Firefly server as a background process</a></li>
+<li class="toctree-l2"><a class="reference internal" href="flask_tutorial.html#Show-Firefly-in-an-IFrame">Show Firefly in an IFrame</a></li>
+<li class="toctree-l2"><a class="reference internal" href="flask_tutorial.html#Create-some-example-data-and-put-it-into-a-Firefly.data_reader.Reader-object">Create some example data and put it into a <code class="docutils literal notranslate"><span class="pre">Firefly.data_reader.Reader</span></code> object</a></li>
+<li class="toctree-l2"><a class="reference internal" href="flask_tutorial.html#Send-this-data-to-the-Flask-app">Send this data to the Flask app</a></li>
+<li class="toctree-l2"><a class="reference internal" href="flask_tutorial.html#Killing-the-Firefly-server-process-when-you’re-done">Killing the Firefly server process when you’re done</a></li>
+</ul>
+</li>
+</ul>
+</div>
 </div>
 
 
@@ -200,8 +240,8 @@ the specified localhost port.</p>
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="../experimental.html" class="btn btn-neutral float-right" title="Experimental features" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="multiple_datasets.html" class="btn btn-neutral float-left" title="Managing multiple datasets" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="flask_tutorial.html" class="btn btn-neutral float-right" title="Tutorial notebook: Sending data to a local Firefly server through Flask" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="multiple_datasets_tutorial.html" class="btn btn-neutral float-left" title="Tutorial notebook: Managing multiple datasets with Firefly" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>
