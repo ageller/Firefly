@@ -120,7 +120,7 @@ use the command:
     ## optionally accepts a single process id to kill
     killAllFireflyServers()
 
-Note that the pid is accessible from the original :code:`spawnFireflyServer`
+Note that the pid is accessible from the original :func:`~Firefly.server.spawnFireflyServer`
 call but that processes in general do not like to be killed and may sometimes
 survive the targeted attempt on their life. It's more reliable to indiscriminately 
 kill any process that has a Firefly server process name (the default).
@@ -142,7 +142,7 @@ To make Firefly accessible via the internet, the
 
 .. seealso:: 
 
-    :code:`reader.copyFireflySourceToTarget` takes an optional boolean
+    :func:`~Firefly.data_reader.Reader.copyFireflySourceToTarget` takes an optional boolean
     keyword argument :code:`init_gh_pages` that will attempt to 
     create a new repository and enable GitHub pages automatically.
     See :ref:`multiple datasets` for details.
@@ -157,10 +157,10 @@ Accessing remote Firefly servers via port forwarding
 Firefly can easily be hosted on a cluster environment for
 two main benefits:
 
-#. Data that is stored on the cluster can be rendered
+1. Data that is stored on the cluster can be rendered
 without having to transfer them to ones local machine
 
-#. Firefly can be embedded into an iframe within a Jupyter notebook
+2. Firefly can be embedded into an iframe within a Jupyter notebook
 hosted on the cluster
 
 .. note:: 
@@ -201,7 +201,7 @@ This can be done with a simple ssh command:
     but closing the pseudo-terminal window will terminate the
     port-forwarding.
 
-Once the port is forwarded, simply navigate to :code:`localhost:xxxx`
+Once the port is forwarded, simply navigate to `localhost:xxxx <http://localhost:xxxx>`_
 on your computer's browser and enjoy Firefly!
 
 .. note:: 

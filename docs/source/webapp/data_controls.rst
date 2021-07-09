@@ -73,7 +73,7 @@ Click this button to select a new data set to display in Firefly.
 Once clicked, you will be prompted to select a directory on your
 computer using your operating system's standard file browser. 
 The directory should contain the json files produced by a 
-:code:`Firefly.data_reader.Reader` object.
+:class:`Firefly.data_reader.Reader` object.
 
 .. warning::
 

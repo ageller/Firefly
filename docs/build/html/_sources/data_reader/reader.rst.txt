@@ -1,16 +1,72 @@
-The python frontend
-===================
+Producing Firefly formatted :code:`.json` files using the :ref:`Python API <api>` 
+=====================================================================
 
-Understanding Firefly's output requirements
-Firefly (currently) uses `JSON` to load data into the browser's javascript interpreter. There are four classes of `.json` file that Firefly requires:
+While it is certainly possible to produce Firefly formatted :code:`.json` files 
+manually (with say, a text editor) we have instead provided a convenient Python frontend
+for users to take advantage of.
 
-it may take a while for it to update but eventually it does...
+.. _docsreader:
 
-* `startup.json` - this is a specifically formatted configuration file that tells Firefly what dataset/visualization to load at startup. If it is in the form of an array Firefly will allow the user to select the dataset/visualization from a dropdown when Firefly is initialized. This must be contained within `Firefly/data`.
+The :class:`~Firefly.data_reader.Reader` class
+----------------------------------------------
 
-* `(options).json` - this is a `.json` file that contains the default options for various aspects of Firefly's UI, as well as default filter settings for each of the particle groups. It should be created using an Options instance and its corresponding `outputToJSON()` method. This lives in the `JSONdir` sub-directory described above. It can be named whatever you'd like as long as it is linked to correctly within `filenames.json`, described below.
+A :class:`~Firefly.data_reader.Reader` instance serves to link instances of
+each of the below classes. 
+Its :func:`~Firefly.data_reader.dumpToJSON` method will take the data from each of the 
+attached instances and collect it into a single :code:`JSONdir`, producing each of the 
+necessary files listed in :ref:`files` automatically.
 
-* `(prefix)(particleName)(fileNumber).json` - These are the main data files, and contain the particle coordinates and their corresponding array values. They should be created using a ParticleGroup instance's `outputToJSON()` method. These files live in the `JSONdir` sub-directory described above. They can be named whatever you'd like as long as they are linked to correctly within `filenames.json`, described below.
 
-* `filenames.json` - this is a specifically formatted configuration file that tells Firefly what `options.json` file to load and which data `.jsons` to load. This lives in the `JSONdir` sub-directory described above. The easiest way to create this file is to use a Reader instance's `dumpToJSON()` method that contains corresponding Options and ParticleGroup instances (see above). 
+.. _docsparticlegroup:
 
+The :class:`~Firefly.data_reader.ParticleGroup` class
+----------------------------------------------
+
+:class:`~Firefly.data_reader.ParticleGroup` instances organize coordinate array data
+alongside any corresponding field array data. 
+They also contain lists of boolean flags to signal to the Firefly webapp whether 
+someone who visits the webapp should be allowed to filter and/or colormap by a 
+particular field.
+
+Each :class:`~Firefly.data_reader.ParticleGroup` instance gets its own sub-panel in the UI,
+the contents of which can be customized using a :code:`Settings.json` file (described below).
+Filters and colormaps only apply to the particle groups to which they are attached, there are no 
+global filter options. 
+
+.. _docssettings:
+
+The :class:`~Firefly.data_reader.Settings` class
+----------------------------------------------
+
+:class:`~Firefly.data_reader.Settings` instances allow users to customize the 
+appearance of the webapp's UI. 
+Every element of the UI is toggleable and has a corresponding boolean flag.
+
+In this way, custom instances of Firefly can be created to catered to different audiences
+without having to change any of the Firefly source code. 
+
+.. note:: 
+
+	The appropriate settings can either be passed at the initialization of a
+	:class:`Firefly.data_reader.Reader` or :class:`Firefly.data_reader.ParticleGroup`
+	instance OR can be updated after the fact by accessing the :code:`reader.settings`
+	or :code:`particleGroup.attached_settings` attributes.
+
+The :class:`Firefly.data_reader.Settings` documentation provides 
+a comprehensive list of the relevant boolean flags and the UI elements they control.
+
+.. _docstween:
+
+The :class:`~Firefly.data_reader.TweenParams` class
+----------------------------------------------
+
+A :class:`~Firefly.data_reader.TweenParams` instance allows the user to 
+pre-define interpolated camera paths (tweening; from in-betweening) that visitors to the Firefly
+webapp can activate by pressing the **T** key on the keyboard. 
+Keyframe camera locations are specified and are linearly interpolated to produce a smoothly 
+varying camera path within the webapp. 
+This feature is available whenever a :code:`JSONdir` contains a 
+:code:`TweenParams.json` file.
+This file will be produced if a :class:`~Firefly.data_reader.Reader` has a 
+:class:`~Firefly.data_reader.TweenParams` attached to it
+when the :func:`~Firefly.data_reader.Reader.dumpToJSON` method is called.

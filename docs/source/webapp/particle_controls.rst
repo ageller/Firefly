@@ -52,7 +52,7 @@ direction of the velocity vector).
 
 .. seealso::
 	
-	:code:`"Velocities"` is a special field name, see :ref:`special field names`.
+	:code:`"Velocities"` is a special field name, see :ref:`field names`.
 
 Colormap
 --------
@@ -112,4 +112,4 @@ along the filter limits and update the view accordingly.
 Currently it is not possible for the user to redefine the
 playback speed (but you can change the size of the black bar)
 and it is discouraged from layering different playbacks
-(it _probably_ works but it might also break something).
+(it *probably* works but it might also break something).
