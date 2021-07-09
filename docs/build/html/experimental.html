@@ -4,7 +4,8 @@
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>Experimental features &mdash; Firefly 2.0.0 documentation</title>
@@ -192,22 +193,22 @@
     text-align: unset;
 }
 </style>
-<div class="section" id="experimental-features">
+<section id="experimental-features">
 <span id="id1"></span><h1>Experimental features<a class="headerlink" href="#experimental-features" title="Permalink to this headline">¶</a></h1>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>These features are not finalized, their functionality, API, and
 existence may be subject to change.</p>
 </div>
-<div class="section" id="scaling-particle-sizes-according-to-smoothinglength">
+<section id="scaling-particle-sizes-according-to-smoothinglength">
 <h2>Scaling particle sizes according to SmoothingLength<a class="headerlink" href="#scaling-particle-sizes-according-to-smoothinglength" title="Permalink to this headline">¶</a></h2>
 <p>If a field is named <em>specifically</em> “SmoothingLength” and the
 <code class="code docutils literal notranslate"><span class="pre">doSPHrad</span></code> flag in the settings file is set to <code class="code docutils literal notranslate"><span class="pre">True</span></code>
 then the particles in that group will be scaled by their smoothing
 lengths and have opacities that vary across their face according to
 a cubic spline.</p>
-</div>
-<div class="section" id="streaming-the-firefly-view">
+</section>
+<section id="streaming-the-firefly-view">
 <h2>Streaming the Firefly view<a class="headerlink" href="#streaming-the-firefly-view" title="Permalink to this headline">¶</a></h2>
 <p>A Firefly server hosted via Flask can be rendered remotely and streamed
 by visiting the <code class="code docutils literal notranslate"><span class="pre">localhost:xxxx/stream</span></code> URL.
@@ -218,8 +219,8 @@ we’re working on getting around this limitation).</p>
 see the <a class="reference internal" href="reference/api/api.html#server-api"><span class="std std-ref">documentation</span></a> for <a class="reference internal" href="reference/api/server/Firefly.server.startFireflyServer.html#Firefly.server.startFireflyServer" title="Firefly.server.startFireflyServer"><code class="xref py py-func docutils literal notranslate"><span class="pre">Firefly.server.startFireflyServer()</span></code></a>
 for details.
 The stream quality will degrade to ensure the target FPS  is achieved.</p>
-</div>
-<div class="section" id="volume-rendering-with-2d-projection">
+</section>
+<section id="volume-rendering-with-2d-projection">
 <h2>Volume rendering with 2d projection<a class="headerlink" href="#volume-rendering-with-2d-projection" title="Permalink to this headline">¶</a></h2>
 <p>When the <strong>p</strong> key is pressed on the keyboard a 2d histogram will be
 projected and colormapped.
@@ -231,16 +232,16 @@ interactively volume render! We will be dilligently working to
 appropriately resize points according to their SPH smoothing lengths
 and blend according to a user specified kernel. Be on the lookout for
 this exciting new feature!</p>
-</div>
-<div class="section" id="vr-support">
+</section>
+<section id="vr-support">
 <h2>VR support<a class="headerlink" href="#vr-support" title="Permalink to this headline">¶</a></h2>
 <p>There is limited Google cardboard support for VR.
 If a Flask server is being hosted on a computer, then visit
 <a class="reference external" href="http://localhost:xxxx/cardboard">&lt;local ip address&gt;:xxxx/cardboard</a> from
 a mobile phone connected on the same network and you should be
 able to look and move around.</p>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>

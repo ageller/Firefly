@@ -4,7 +4,8 @@
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>Tutorial notebook: Managing multiple datasets with Firefly &mdash; Firefly 2.0.0 documentation</title>
@@ -479,11 +480,11 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 </div>
-<div class="section" id="Tutorial-notebook:-Managing-multiple-datasets-with-Firefly">
+<section id="Tutorial-notebook:-Managing-multiple-datasets-with-Firefly">
 <h1>Tutorial notebook: Managing multiple datasets with Firefly<a class="headerlink" href="#Tutorial-notebook:-Managing-multiple-datasets-with-Firefly" title="Permalink to this headline">¶</a></h1>
 <p>There are two ways to manage multiple datasets with Firefly 1. listing multiple entries in startup.json 2. creating a “standalone” iteration of Firefly</p>
 <p>1 and 2 can be combined so that visitors to different “standalone” iterations of Firefly can select between different sets of multiple datasets using a dropdown see this example.</p>
-<div class="section" id="Editing-the-entries-of-startup.json">
+<section id="Editing-the-entries-of-startup.json">
 <h2>Editing the entries of <code class="docutils literal notranslate"><span class="pre">startup.json</span></code><a class="headerlink" href="#Editing-the-entries-of-startup.json" title="Permalink to this headline">¶</a></h2>
 <p>When the Firefly webapp starts up it looks for a <code class="docutils literal notranslate"><span class="pre">Firefly/static/data/startup.json</span></code> file to tell it which dataset to display. If only a single entry is present then it will automatically begin loading that dataset. If multiple entries are listed then it will present the user with a dropdown box to select which dataset to load. See the documentation for managing multiple datasets for how to format the <code class="docutils literal notranslate"><span class="pre">startup.json</span></code> file to list multiple entries manually. We provide a method of easily adding
 datasets to the <code class="docutils literal notranslate"><span class="pre">startup.json</span></code> file using the <code class="docutils literal notranslate"><span class="pre">write_startup</span></code> keyword argument of the <code class="docutils literal notranslate"><span class="pre">Firefly.data_reader.Reader</span></code> (sub-)class(es).</p>
@@ -585,8 +586,8 @@ Outputting: PGroup_1 - 8000/8000 particles - 2 tracked fields
 </pre></div></div>
 </div>
 <p>Notice that the “NullData” <code class="docutils literal notranslate"><span class="pre">JSONdir</span></code> is not listed because we set <code class="docutils literal notranslate"><span class="pre">write_startup=False</span></code>.</p>
-</div>
-<div class="section" id="Creating-a-standalone-iteration-of-Firefly">
+</section>
+<section id="Creating-a-standalone-iteration-of-Firefly">
 <h2>Creating a standalone iteration of Firefly<a class="headerlink" href="#Creating-a-standalone-iteration-of-Firefly" title="Permalink to this headline">¶</a></h2>
 <p>You can copy the necessary Firefly source files by creating a <code class="docutils literal notranslate"><span class="pre">Reader</span></code> object containing your data and using the <code class="docutils literal notranslate"><span class="pre">copyFireflySourceToTarget</span></code>. We’ve also included a script that will automatically create a new Github repository and enable GitHub pages so that your data can be visited by users over the internet via URL. For instructions on how to configure this feature and details for copying the Firefly source see the documentation for managing multiple datasets.</p>
 <div class="nbinput docutils container">
@@ -642,8 +643,8 @@ index.html <span class="ansi-blue-fg">static</span>
 <span class="ansi-blue-fg">Data</span>         startup.json
 </pre></div></div>
 </div>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>

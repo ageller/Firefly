@@ -4,7 +4,8 @@
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>Tutorial notebook: Managing Custom Settings &mdash; Firefly 2.0.0 documentation</title>
@@ -476,7 +477,7 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 </div>
-<div class="section" id="Tutorial-notebook:-Managing-Custom-Settings">
+<section id="Tutorial-notebook:-Managing-Custom-Settings">
 <h1>Tutorial notebook: Managing Custom Settings<a class="headerlink" href="#Tutorial-notebook:-Managing-Custom-Settings" title="Permalink to this headline">¶</a></h1>
 <p>One of the core features of Firefly is the ability to customize the user interface (UI) and the startup behavior to make bespoke iterations of Firefly using ones own data. We have organized the different options that one can customize into different settings groups that fall into two categories: those that affect the app as a whole and those that are particular to an individual group of particles.</p>
 <table class="docutils align-default">
@@ -551,7 +552,7 @@ div.rendered_html tbody tr:hover {
 
 </pre></div></div>
 </div>
-<div class="section" id="Settings-can-be-changed-the-same-way-you-would-change-a-key-in-a-dictionary">
+<section id="Settings-can-be-changed-the-same-way-you-would-change-a-key-in-a-dictionary">
 <h2>Settings can be changed the same way you would change a key in a dictionary<a class="headerlink" href="#Settings-can-be-changed-the-same-way-you-would-change-a-key-in-a-dictionary" title="Permalink to this headline">¶</a></h2>
 <p>There is key validation (so you can’t attempt to set a setting that doesn’t exist) but there is no value validation, so be careful that you use appropriate values or your app might not work. See the settings documentation for details on what values each setting can take.</p>
 <div class="nbinput docutils container">
@@ -590,8 +591,8 @@ annotation None
 
 </pre></div></div>
 </div>
-</div>
-<div class="section" id="Settings-are-most-useful-when-connected-to-a-Firefly.data_reader.Reader-object">
+</section>
+<section id="Settings-are-most-useful-when-connected-to-a-Firefly.data_reader.Reader-object">
 <h2>Settings are most useful when connected to a <code class="docutils literal notranslate"><span class="pre">Firefly.data_reader.Reader</span></code> object<a class="headerlink" href="#Settings-are-most-useful-when-connected-to-a-Firefly.data_reader.Reader-object" title="Permalink to this headline">¶</a></h2>
 <p>Doing so allows many of the necessary settings to be automatically generated as additional particle groups are added.</p>
 <div class="nbinput nblast docutils container">
@@ -769,8 +770,8 @@ You will need to add this settings filename to filenames.json if this was not ca
 (&#39;./exampleSettings.json&#39;, &#39;./exampleSettings.json&#39;)
 </pre></div></div>
 </div>
-</div>
-<div class="section" id="Settings-can-also-be-imported-from-.json-files">
+</section>
+<section id="Settings-can-also-be-imported-from-.json-files">
 <h2>Settings can also be imported from <code class="docutils literal notranslate"><span class="pre">.json</span></code> files<a class="headerlink" href="#Settings-can-also-be-imported-from-.json-files" title="Permalink to this headline">¶</a></h2>
 <p>Only settings defined in the file will be overwritten, so you can also mix-and-match settings files.</p>
 <div class="nbinput docutils container">
@@ -827,8 +828,8 @@ replacing showColormap
 {} --&gt; {&#39;PGroup_0&#39;: False, &#39;PGroup_1&#39;: False}
 </pre></div></div>
 </div>
-</div>
-<div class="section" id="Attaching-a-ParticleGroup-to-a-Settings">
+</section>
+<section id="Attaching-a-ParticleGroup-to-a-Settings">
 <h2>Attaching a ParticleGroup to a Settings<a class="headerlink" href="#Attaching-a-ParticleGroup-to-a-Settings" title="Permalink to this headline">¶</a></h2>
 <p>One other thing you may want to do (perhaps in the course of building your own custom <code class="docutils literal notranslate"><span class="pre">Reader</span></code> sub-class) is link a <code class="docutils literal notranslate"><span class="pre">Firefly.data_reader.ParticleGroup</span></code> object to a <code class="docutils literal notranslate"><span class="pre">Settings</span></code> object so that the different particle settings can be imported. <code class="docutils literal notranslate"><span class="pre">ParticleGroup</span></code> settings can be changed in <code class="docutils literal notranslate"><span class="pre">settings_default</span></code> attribute (which is just a normal python dictionary).</p>
 <div class="nbinput nblast docutils container">
@@ -891,8 +892,8 @@ showColormap {&#39;PGroup_0&#39;: False, &#39;PGroup_1&#39;: False, &#39;test&#3
 </pre></div></div>
 </div>
 <p>Notice that the <code class="docutils literal notranslate"><span class="pre">'test'</span></code> particle group now appears in the particle settings dictionaries (and in particular, note that <code class="docutils literal notranslate"><span class="pre">settings['color']['test']</span> <span class="pre">=</span> <span class="pre">[0,0,1,1]</span></code>.</p>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
