@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Hosting your own Firefly instance &mdash; Firefly 2.0.0 documentation</title>
+  <title>Hosting a Firefly webserver &mdash; Firefly 2.0.0 documentation</title>
   
 
   
@@ -41,8 +41,8 @@
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Creating your own Firefly instance" href="data_reader/index.html" />
-    <link rel="prev" title="Particle controls" href="webapp/particle_controls.html" /> 
+    <link rel="next" title="Experimental features" href="experimental.html" />
+    <link rel="prev" title="Sending data to a Firefly server via Flask" href="data_reader/flask.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -89,8 +89,9 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Quickstart</a></li>
-<li class="toctree-l1"><a class="reference internal" href="webapp/index.html">Using Firefly</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Hosting your own Firefly instance</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="webapp/index.html">Using an existing instance of Firefly</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_reader/index.html">Creating your own instance of Firefly</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Hosting a Firefly webserver</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#hosting-firefly-locally">Hosting Firefly locally</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#using-python-m-http-server-to-host-index-html">Using <code class="code docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">http.server</span></code> to host <code class="code docutils literal notranslate"><span class="pre">index.html</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#using-run-server-py-to-launch-flask">Using <code class="code docutils literal notranslate"><span class="pre">run_server.py</span></code> to launch Flask</a></li>
@@ -106,7 +107,6 @@
 <li class="toctree-l2"><a class="reference internal" href="#accessing-remote-firefly-servers-via-port-forwarding">Accessing remote Firefly servers via port forwarding</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="data_reader/index.html">Creating your own Firefly instance</a></li>
 <li class="toctree-l1"><a class="reference internal" href="experimental.html">Experimental features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reference/api/api.html">API Reference</a></li>
 </ul>
@@ -157,7 +157,7 @@
     
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
         
-      <li>Hosting your own Firefly instance</li>
+      <li>Hosting a Firefly webserver</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -176,8 +176,8 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="hosting-your-own-firefly-instance">
-<h1>Hosting your own Firefly instance<a class="headerlink" href="#hosting-your-own-firefly-instance" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="hosting-a-firefly-webserver">
+<h1>Hosting a Firefly webserver<a class="headerlink" href="#hosting-a-firefly-webserver" title="Permalink to this headline">¶</a></h1>
 <p>Because Firefly is fundamentally a web application it must be served
 to your browser from a web server.
 That server can either be located on the internet or can be hosted
@@ -360,8 +360,8 @@ the consequences should attempt this!</p>
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="data_reader/index.html" class="btn btn-neutral float-right" title="Creating your own Firefly instance" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="webapp/particle_controls.html" class="btn btn-neutral float-left" title="Particle controls" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="experimental.html" class="btn btn-neutral float-right" title="Experimental features" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="data_reader/flask.html" class="btn btn-neutral float-left" title="Sending data to a Firefly server via Flask" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>

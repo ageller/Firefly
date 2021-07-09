@@ -22,8 +22,8 @@ Contents
 
     installation
     webapp/index
-    server
     data_reader/index
+    server
     experimental
     networking
     reference/api/api
