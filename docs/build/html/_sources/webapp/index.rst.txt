@@ -1,5 +1,5 @@
-Using Firefly
-=============
+Using an existing instance of Firefly
+=====================================
 
 Flying with the mouse or keyboard
 ---------------------------------

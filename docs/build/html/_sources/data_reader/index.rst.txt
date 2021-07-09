@@ -1,5 +1,5 @@
-Creating your own Firefly instance
-==================================
+Creating your own instance of Firefly 
+=====================================
 
 .. toctree::
 

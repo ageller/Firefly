@@ -1,5 +1,5 @@
-Hosting your own Firefly instance
-=================================
+Hosting a Firefly webserver
+===========================
 
 Because Firefly is fundamentally a web application it must be served
 to your browser from a web server. 
