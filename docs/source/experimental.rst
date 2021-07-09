@@ -51,4 +51,6 @@ VR support
 
 There is limited Google cardboard support for VR. 
 If a Flask server is being hosted on a computer, then visit 
-`localhost:xxxx/cardboard <http://localhost:xxxx/cardboard>`_
+`<local ip address>:xxxx/cardboard <http://localhost:xxxx/cardboard>`_ from 
+a mobile phone connected on the same network and you should be 
+able to look and move around. 
