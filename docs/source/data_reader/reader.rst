@@ -1,5 +1,5 @@
 Producing Firefly formatted :code:`.json` files using the :ref:`Python API <api>` 
-=====================================================================
+==================================================================================
 
 While it is certainly possible to produce Firefly formatted :code:`.json` files 
 manually (with say, a text editor) we have instead provided a convenient Python frontend
@@ -16,11 +16,15 @@ Its :func:`~Firefly.data_reader.dumpToJSON` method will take the data from each 
 attached instances and collect it into a single :code:`JSONdir`, producing each of the 
 necessary files listed in :ref:`files` automatically.
 
+.. toctree::
+	
+	reader_tutorial
+
 
 .. _docsparticlegroup:
 
 The :class:`~Firefly.data_reader.ParticleGroup` class
-----------------------------------------------
+-----------------------------------------------------
 
 :class:`~Firefly.data_reader.ParticleGroup` instances organize coordinate array data
 alongside any corresponding field array data. 
@@ -36,7 +40,7 @@ global filter options.
 .. _docssettings:
 
 The :class:`~Firefly.data_reader.Settings` class
-----------------------------------------------
+------------------------------------------------
 
 :class:`~Firefly.data_reader.Settings` instances allow users to customize the 
 appearance of the webapp's UI. 
@@ -55,10 +59,15 @@ without having to change any of the Firefly source code.
 The :class:`Firefly.data_reader.Settings` documentation provides 
 a comprehensive list of the relevant boolean flags and the UI elements they control.
 
+.. toctree::
+
+	settings_tutorial
+
+
 .. _docstween:
 
 The :class:`~Firefly.data_reader.TweenParams` class
-----------------------------------------------
+---------------------------------------------------
 
 A :class:`~Firefly.data_reader.TweenParams` instance allows the user to 
 pre-define interpolated camera paths (tweening; from in-betweening) that visitors to the Firefly

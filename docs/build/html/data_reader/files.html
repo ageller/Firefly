@@ -35,6 +35,7 @@
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -42,7 +43,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Producing Firefly formatted .json files using the Python API" href="reader.html" />
-    <link rel="prev" title="Creating your own Firefly instance" href="index.html" /> 
+    <link rel="prev" title="Creating your own instance of Firefly" href="index.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -89,9 +90,8 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Quickstart</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../webapp/index.html">Using Firefly</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../server.html">Hosting your own Firefly instance</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">Creating your own Firefly instance</a><ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../webapp/index.html">Using an existing instance of Firefly</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Creating your own instance of Firefly</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Understanding Firefly’s input requirements</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#the-startup-file-startup-json">The startup file, <code class="code docutils literal notranslate"><span class="pre">startup.json</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#the-settings-file-settings-json">The settings file, <code class="code docutils literal notranslate"><span class="pre">&lt;settings&gt;.json</span></code></a></li>
@@ -104,6 +104,7 @@
 <li class="toctree-l2"><a class="reference internal" href="flask.html">Sending data to a Firefly server via Flask</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="../server.html">Hosting a Firefly webserver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../experimental.html">Experimental features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../reference/api/api.html">API Reference</a></li>
 </ul>
@@ -154,7 +155,7 @@
     
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
-          <li><a href="index.html">Creating your own Firefly instance</a> &raquo;</li>
+          <li><a href="index.html">Creating your own instance of Firefly</a> &raquo;</li>
         
       <li>Understanding Firefly’s input requirements</li>
     
@@ -175,7 +176,31 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="understanding-firefly-s-input-requirements">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="understanding-firefly-s-input-requirements">
 <span id="files"></span><h1>Understanding Firefly’s input requirements<a class="headerlink" href="#understanding-firefly-s-input-requirements" title="Permalink to this headline">¶</a></h1>
 <p>Firefly uses JSON to load data into a web browser’s javascript interpreter.
 The <code class="code docutils literal notranslate"><span class="pre">.json</span></code> file required to run an individual instance of Firefly
@@ -257,7 +282,7 @@ of particles in each file along with the default settings file to use.</p>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
         <a href="reader.html" class="btn btn-neutral float-right" title="Producing Firefly formatted .json files using the Python API" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="index.html" class="btn btn-neutral float-left" title="Creating your own Firefly instance" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="index.html" class="btn btn-neutral float-left" title="Creating your own instance of Firefly" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>

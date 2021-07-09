@@ -2,6 +2,8 @@ Creating your own instance of Firefly
 =====================================
 
 .. toctree::
+    :titlesonly:
+    :maxdepth: 2
 
     files
     reader

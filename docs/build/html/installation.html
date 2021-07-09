@@ -35,13 +35,14 @@
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="_static/js/theme.js"></script>
 
     
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Using Firefly" href="webapp/index.html" />
+    <link rel="next" title="Using an existing instance of Firefly" href="webapp/index.html" />
     <link rel="prev" title="Firefly: a browser-based interactive particle data visualization platform" href="index.html" /> 
 </head>
 
@@ -97,9 +98,9 @@
 </li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="webapp/index.html">Using Firefly</a></li>
-<li class="toctree-l1"><a class="reference internal" href="server.html">Hosting your own Firefly instance</a></li>
-<li class="toctree-l1"><a class="reference internal" href="data_reader/index.html">Creating your own Firefly instance</a></li>
+<li class="toctree-l1"><a class="reference internal" href="webapp/index.html">Using an existing instance of Firefly</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_reader/index.html">Creating your own instance of Firefly</a></li>
+<li class="toctree-l1"><a class="reference internal" href="server.html">Hosting a Firefly webserver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="experimental.html">Experimental features</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reference/api/api.html">API Reference</a></li>
 </ul>
@@ -169,7 +170,31 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="quickstart">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="quickstart">
 <h1>Quickstart<a class="headerlink" href="#quickstart" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="requirements">
 <h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h2>
@@ -244,7 +269,7 @@ executable built by the installation</p>
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="webapp/index.html" class="btn btn-neutral float-right" title="Using Firefly" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="webapp/index.html" class="btn btn-neutral float-right" title="Using an existing instance of Firefly" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
         <a href="index.html" class="btn btn-neutral float-left" title="Firefly: a browser-based interactive particle data visualization platform" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 

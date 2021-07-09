@@ -1,5 +1,3 @@
-.. _camera controls:
-
 Camera controls
 ===============
 

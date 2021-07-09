@@ -35,6 +35,7 @@
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     
     <script type="text/javascript" src="../_static/js/theme.js"></script>
 
@@ -89,7 +90,7 @@
             
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Quickstart</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../webapp/index.html">Using Firefly</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../webapp/index.html">Using an existing instance of Firefly</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Creating your own instance of Firefly</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="files.html">Understanding Firefly’s input requirements</a></li>
 <li class="toctree-l2"><a class="reference internal" href="reader.html">Producing Firefly formatted <code class="code docutils literal notranslate"><span class="pre">.json</span></code> files using the <span class="xref std std-ref">Python API</span></a></li>
@@ -167,30 +168,48 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="creating-your-own-instance-of-firefly">
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<div class="section" id="creating-your-own-instance-of-firefly">
 <h1>Creating your own instance of Firefly<a class="headerlink" href="#creating-your-own-instance-of-firefly" title="Permalink to this headline">¶</a></h1>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="files.html">Understanding Firefly’s input requirements</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="files.html#the-startup-file-startup-json">The startup file, <code class="code docutils literal notranslate"><span class="pre">startup.json</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="files.html#the-settings-file-settings-json">The settings file, <code class="code docutils literal notranslate"><span class="pre">&lt;settings&gt;.json</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="files.html#the-particle-group-files-prefix-particlegroup-filenumber-json">The particle group files, <code class="code docutils literal notranslate"><span class="pre">&lt;prefix&gt;&lt;particleGroup&gt;&lt;fileNumber&gt;.json</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="files.html#the-manifest-file-filenames-json">The manifest file, <code class="code docutils literal notranslate"><span class="pre">filenames.json</span></code></a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="files.html">Understanding Firefly’s input requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="reader.html">Producing Firefly formatted <code class="code docutils literal notranslate"><span class="pre">.json</span></code> files using the <span class="xref std std-ref">Python API</span></a><ul>
-<li class="toctree-l2"><a class="reference internal" href="reader.html#the-reader-class">The <code class="xref py py-class docutils literal notranslate"><span class="pre">Reader</span></code> class</a></li>
-<li class="toctree-l2"><a class="reference internal" href="reader.html#the-particlegroup-class">The <code class="xref py py-class docutils literal notranslate"><span class="pre">ParticleGroup</span></code> class</a></li>
-<li class="toctree-l2"><a class="reference internal" href="reader.html#the-settings-class">The <code class="xref py py-class docutils literal notranslate"><span class="pre">Settings</span></code> class</a></li>
-<li class="toctree-l2"><a class="reference internal" href="reader.html#the-tweenparams-class">The <code class="xref py py-class docutils literal notranslate"><span class="pre">TweenParams</span></code> class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reader_tutorial.html">Tutorial notebook: Using the <code class="docutils literal notranslate"><span class="pre">Reader</span></code> class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="settings_tutorial.html">Tutorial notebook: Managing Custom Settings</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="multiple_datasets.html">Managing multiple datasets</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="multiple_datasets.html#with-startup-json">With <code class="code docutils literal notranslate"><span class="pre">startup.json</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="multiple_datasets.html#with-separate-firefly-source-directories">With separate Firefly source directories</a></li>
+<li class="toctree-l2"><a class="reference internal" href="multiple_datasets_tutorial.html">Tutorial notebook: Managing multiple datasets with Firefly</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="flask.html">Sending data to a Firefly server via Flask</a></li>
+<li class="toctree-l1"><a class="reference internal" href="flask.html">Sending data to a Firefly server via Flask</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="flask_tutorial.html">Tutorial notebook: Sending data to a local Firefly server through Flask</a></li>
+</ul>
+</li>
 </ul>
 </div>
 </div>
