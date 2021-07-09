@@ -4,7 +4,8 @@
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>Hosting a Firefly webserver &mdash; Firefly 2.0.0 documentation</title>
@@ -201,20 +202,20 @@
     text-align: unset;
 }
 </style>
-<div class="section" id="hosting-a-firefly-webserver">
+<section id="hosting-a-firefly-webserver">
 <h1>Hosting a Firefly webserver<a class="headerlink" href="#hosting-a-firefly-webserver" title="Permalink to this headline">¶</a></h1>
 <p>Because Firefly is fundamentally a web application it must be served
 to your browser from a web server.
 That server can either be located on the internet or can be hosted
 locally (and accessed through the <code class="code docutils literal notranslate"><span class="pre">localhost</span></code> url).</p>
-<div class="section" id="hosting-firefly-locally">
+<section id="hosting-firefly-locally">
 <span id="local"></span><h2>Hosting Firefly locally<a class="headerlink" href="#hosting-firefly-locally" title="Permalink to this headline">¶</a></h2>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>For the <a class="reference internal" href="webapp/data_controls.html#load-new-data-button"><span class="std std-ref">Load New Data</span></a> button to work Firefly
 must be hosted locally (vs. <a class="reference internal" href="#internet-host"><span class="std std-ref">hosted on the internet</span></a>).</p>
 </div>
-<div class="section" id="using-python-m-http-server-to-host-index-html">
+<section id="using-python-m-http-server-to-host-index-html">
 <h3>Using <code class="code docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">http.server</span></code> to host <code class="code docutils literal notranslate"><span class="pre">index.html</span></code><a class="headerlink" href="#using-python-m-http-server-to-host-index-html" title="Permalink to this headline">¶</a></h3>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
@@ -232,16 +233,16 @@ executed.
 This will host a version of Firefly identical to the one hosted on
 <a class="reference internal" href="#internet-host"><span class="std std-ref">the internet</span></a> with the exception that you can
 use the <a class="reference internal" href="webapp/data_controls.html#load-new-data-button"><span class="std std-ref">Load New Data</span></a> button.</p>
-</div>
-<div class="section" id="using-run-server-py-to-launch-flask">
+</section>
+<section id="using-run-server-py-to-launch-flask">
 <span id="flask-host"></span><h3>Using <code class="code docutils literal notranslate"><span class="pre">run_server.py</span></code> to launch Flask<a class="headerlink" href="#using-run-server-py-to-launch-flask" title="Permalink to this headline">¶</a></h3>
 <p>From within the the <code class="code docutils literal notranslate"><span class="pre">Firefly/src/Firefly</span></code> directory (or from within
 the corresponding sub-directory in your site-packages directory) execute</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python run_server.py
 </pre></div>
 </div>
-</div>
-<div class="section" id="using-the-firefly-executable-to-launch-flask">
+</section>
+<section id="using-the-firefly-executable-to-launch-flask">
 <h3>Using the <code class="code docutils literal notranslate"><span class="pre">Firefly</span></code> executable to launch Flask<a class="headerlink" href="#using-the-firefly-executable-to-launch-flask" title="Permalink to this headline">¶</a></h3>
 <p>The Firefly bash executable is a wrapper to
 <code class="code docutils literal notranslate"><span class="pre">run_server.py</span></code> so that it can be initialized without having to
@@ -256,16 +257,16 @@ will be added to your <code class="code docutils literal notranslate"><span clas
 </pre></div>
 </div>
 <p>from any directory to launch a Firefly Flask server.</p>
-</div>
-</div>
-<div class="section" id="using-firefly-from-within-a-jupyter-notebook">
+</section>
+</section>
+<section id="using-firefly-from-within-a-jupyter-notebook">
 <h2>Using Firefly from within a Jupyter notebook<a class="headerlink" href="#using-firefly-from-within-a-jupyter-notebook" title="Permalink to this headline">¶</a></h2>
 <p>Jupyter notebooks are powerful analysis tools that allow you to
 interactively explore your data, much like Firefly!</p>
 <p>Because Firefly is built as a webpage it can easily be displayed,
 with its full functionality, within a Jupyter notebook using an iframe.</p>
 <img alt="_images/jupyter_embed.png" class="align-center" src="_images/jupyter_embed.png" />
-<div class="section" id="embedding-within-an-iframe">
+<section id="embedding-within-an-iframe">
 <h3>Embedding within an iframe<a class="headerlink" href="#embedding-within-an-iframe" title="Permalink to this headline">¶</a></h3>
 <p>With a Firefly server hosted at <cite>localhost:xxxx</cite> you can access it
 by creating an iframe with the command:</p>
@@ -275,8 +276,8 @@ by creating an iframe with the command:</p>
 <span class="n">IFrame</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">700</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">700</span><span class="p">)</span>
 </pre></div>
 </div>
-</div>
-<div class="section" id="hosting-a-firefly-server-within-a-notebook">
+</section>
+<section id="hosting-a-firefly-server-within-a-notebook">
 <h3>Hosting a Firefly server within a notebook<a class="headerlink" href="#hosting-a-firefly-server-within-a-notebook" title="Permalink to this headline">¶</a></h3>
 <p>You can even host a Firefly Flask server without going back to the
 command line from within a Jupyter notebook as well.</p>
@@ -301,9 +302,9 @@ survive the targeted attempt on their life. It’s more reliable to indiscrimina
 kill any process that has a Firefly server process name (the default).</p>
 <p>For the details of the usage of these functions,
 consult the <a class="reference internal" href="reference/api/api.html#server-api"><span class="std std-ref">server API documentation</span></a>.</p>
-</div>
-</div>
-<div class="section" id="hosting-a-static-version-on-the-internet">
+</section>
+</section>
+<section id="hosting-a-static-version-on-the-internet">
 <span id="internet-host"></span><h2>Hosting a static version on the internet<a class="headerlink" href="#hosting-a-static-version-on-the-internet" title="Permalink to this headline">¶</a></h2>
 <p>To make Firefly accessible via the internet, the</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">reader</span><span class="o">.</span><span class="n">copyFireflySourceToTarget</span><span class="p">(</span><span class="s2">&quot;my_Firefly&quot;</span><span class="p">)</span>
@@ -316,8 +317,8 @@ keyword argument <code class="code docutils literal notranslate"><span class="pr
 create a new repository and enable GitHub pages automatically.
 See <a class="reference internal" href="data_reader/multiple_datasets.html#multiple-datasets"><span class="std std-ref">Managing multiple datasets</span></a> for details.</p>
 </div>
-</div>
-<div class="section" id="accessing-remote-firefly-servers-via-port-forwarding">
+</section>
+<section id="accessing-remote-firefly-servers-via-port-forwarding">
 <span id="port-forwarding"></span><h2>Accessing remote Firefly servers via port forwarding<a class="headerlink" href="#accessing-remote-firefly-servers-via-port-forwarding" title="Permalink to this headline">¶</a></h2>
 <p>Firefly can easily be hosted on a cluster environment for
 two main benefits:</p>
@@ -376,8 +377,8 @@ how to accomplish this because only those who understand
 the consequences should attempt this!</p>
 </div>
 </div>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>

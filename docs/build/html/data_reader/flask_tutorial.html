@@ -4,7 +4,8 @@
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>Tutorial notebook: Sending data to a local Firefly server through Flask &mdash; Firefly 2.0.0 documentation</title>
@@ -484,11 +485,11 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 </div>
-<div class="section" id="Tutorial-notebook:-Sending-data-to-a-local-Firefly-server-through-Flask">
+<section id="Tutorial-notebook:-Sending-data-to-a-local-Firefly-server-through-Flask">
 <h1>Tutorial notebook: Sending data to a local Firefly server through Flask<a class="headerlink" href="#Tutorial-notebook:-Sending-data-to-a-local-Firefly-server-through-Flask" title="Permalink to this headline">¶</a></h1>
 <p>A drawback of using <code class="docutils literal notranslate"><span class="pre">.json</span></code> files on disk to pass data between the Python frontend and the Firefly webapp is that these <code class="docutils literal notranslate"><span class="pre">.json</span></code> files can 1. take up a lot of unnecessary disk space 2. take a long time to read from disk</p>
 <p>To address these problems, we use Flask to host a webserver and parse data directly from Python at a data upload endpoint. This procedure is detailed in the server documentation. From the user’s perspective, all they need to do is POST their data to a specific port on their local machine and they will be able to explore their own data without ever having to write a file to disk.</p>
-<div class="section" id="Start-the-Firefly-server-as-a-background-process">
+<section id="Start-the-Firefly-server-as-a-background-process">
 <h2>Start the Firefly server as a background process<a class="headerlink" href="#Start-the-Firefly-server-as-a-background-process" title="Permalink to this headline">¶</a></h2>
 <p>In this tutorial we’ll demonstrate how to update the data being shown in a live instance of Firefly running on a local webserver through Flask. Before attempting this tutorial read through the server documentation which explains how to specify the listening port and different methods of hosting a Flask Firefly server (here we use the <code class="docutils literal notranslate"><span class="pre">Firefly.server.spawnFireflyServer</span></code> function which starts a background process).</p>
 <div class="nbinput nblast docutils container">
@@ -501,8 +502,8 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 </div>
-</div>
-<div class="section" id="Show-Firefly-in-an-IFrame">
+</section>
+<section id="Show-Firefly-in-an-IFrame">
 <h2>Show Firefly in an IFrame<a class="headerlink" href="#Show-Firefly-in-an-IFrame" title="Permalink to this headline">¶</a></h2>
 <p>IPython allows one to embed webpages into a notebook using an IFrame, we’ll take advantage of that to embed Firefly here (you can also visit the localhost:5000 url in your browser if you’d prefer).</p>
 <div class="nbinput docutils container">
@@ -528,8 +529,8 @@ div.rendered_html tbody tr:hover {
     allowfullscreen
 ></iframe></div>
 </div>
-</div>
-<div class="section" id="Create-some-example-data-and-put-it-into-a-Firefly.data_reader.Reader-object">
+</section>
+<section id="Create-some-example-data-and-put-it-into-a-Firefly.data_reader.Reader-object">
 <h2>Create some example data and put it into a <code class="docutils literal notranslate"><span class="pre">Firefly.data_reader.Reader</span></code> object<a class="headerlink" href="#Create-some-example-data-and-put-it-into-a-Firefly.data_reader.Reader-object" title="Permalink to this headline">¶</a></h2>
 <p>See the reader documentation or the <code class="docutils literal notranslate"><span class="pre">reader_tutorial.ipynb</span></code> example notebook.</p>
 <div class="nbinput nblast docutils container">
@@ -572,8 +573,8 @@ Make sure each tracked_array (1) has a tracked_colormap_flag (0), assuming True.
 Outputting: PGroup_0 - 8000/8000 particles - 1 tracked fields
 </pre></div></div>
 </div>
-</div>
-<div class="section" id="Send-this-data-to-the-Flask-app">
+</section>
+<section id="Send-this-data-to-the-Flask-app">
 <h2>Send this data to the Flask app<a class="headerlink" href="#Send-this-data-to-the-Flask-app" title="Permalink to this headline">¶</a></h2>
 <p>The data will be sent to the Firefly server via a POST request, we can do this in python using the <code class="docutils literal notranslate"><span class="pre">requests</span></code> module. One the POST has been made scroll back up to the window above and see the new data (if you don’t see new data, it’s possible that you’ve overwritten the default <code class="docutils literal notranslate"><span class="pre">startup.json</span></code> that shipped with Firefly by following some of the other tutorials. That’s okay! See the multiple datasets documentation or the <code class="docutils literal notranslate"><span class="pre">multiple_datasets.ipynb</span></code> example notebook to learn more about the
 <code class="docutils literal notranslate"><span class="pre">startup.json</span></code> file.</p>
@@ -626,8 +627,8 @@ sending to Firefly 425651
 Posting...data posted!
 </pre></div></div>
 </div>
-</div>
-<div class="section" id="Killing-the-Firefly-server-process-when-you’re-done">
+</section>
+<section id="Killing-the-Firefly-server-process-when-you’re-done">
 <h2>Killing the Firefly server process when you’re done<a class="headerlink" href="#Killing-the-Firefly-server-process-when-you’re-done" title="Permalink to this headline">¶</a></h2>
 <p>Because the Firefly server was started in the background, the process will persist even when you’re done with it. You should make sure to kill it using the <code class="docutils literal notranslate"><span class="pre">Firefly.server.killAllFireflyServers</span></code> function. If you supply a process id (which is returned by the <code class="docutils literal notranslate"><span class="pre">spawnFireflyServer</span></code> function) then it will only kill that one process. However, processes are a bit defensive and sometimes we’ve found they survive the attempt on their life and then hide under a different PID. In which case, it’s
 always safest to just kill all the servers indiscriminately. Generally the two are interchangeable unless you’re hosting multiple local servers of Firefly on different ports. This is pretty uncommon/advanced in which case you hopefully know what you’re doing.</p>
@@ -640,8 +641,8 @@ always safest to just kill all the servers indiscriminately. Generally the two a
 </pre></div>
 </div>
 </div>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>

@@ -4,7 +4,8 @@
 <html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8" />
-  
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <title>Understanding Firefly’s input requirements &mdash; Firefly 2.0.0 documentation</title>
@@ -200,13 +201,13 @@
     text-align: unset;
 }
 </style>
-<div class="section" id="understanding-firefly-s-input-requirements">
+<section id="understanding-firefly-s-input-requirements">
 <span id="files"></span><h1>Understanding Firefly’s input requirements<a class="headerlink" href="#understanding-firefly-s-input-requirements" title="Permalink to this headline">¶</a></h1>
 <p>Firefly uses JSON to load data into a web browser’s javascript interpreter.
 The <code class="code docutils literal notranslate"><span class="pre">.json</span></code> file required to run an individual instance of Firefly
 are collected into :code:<a href="#id1"><span class="problematic" id="id2">`</span></a>JSONdir`s.</p>
 <p>There are four classes of <code class="code docutils literal notranslate"><span class="pre">.json</span></code> file that Firefly requires:</p>
-<div class="section" id="the-startup-file-startup-json">
+<section id="the-startup-file-startup-json">
 <span id="docsstartup"></span><h2>The startup file, <code class="code docutils literal notranslate"><span class="pre">startup.json</span></code><a class="headerlink" href="#the-startup-file-startup-json" title="Permalink to this headline">¶</a></h2>
 <p>This is a configuration file that specifies which <code class="code docutils literal notranslate"><span class="pre">JSONdir</span></code> Firefly
 should attempt to open at startup. It should be formatted as a dictionary
@@ -225,8 +226,8 @@ select the dataset from a dropdown when the webapp is initialized.</p>
 <p class="admonition-title">Note</p>
 <p><code class="code docutils literal notranslate"><span class="pre">startup.json</span></code> must reside within <code class="code docutils literal notranslate"><span class="pre">Firefly/static/data</span></code>.</p>
 </div>
-</div>
-<div class="section" id="the-settings-file-settings-json">
+</section>
+<section id="the-settings-file-settings-json">
 <h2>The settings file, <code class="code docutils literal notranslate"><span class="pre">&lt;settings&gt;.json</span></code><a class="headerlink" href="#the-settings-file-settings-json" title="Permalink to this headline">¶</a></h2>
 <p>This is a <code class="code docutils literal notranslate"><span class="pre">.json</span></code> file that contains the default settings for
 various aspects of Firefly’s UI.</p>
@@ -236,8 +237,8 @@ and its corresponding <a class="reference internal" href="../reference/api/class
 This lives in the <code class="code docutils literal notranslate"><span class="pre">JSONdir</span></code> sub-directory described above.
 It can be named whatever you’d like as long as it is linked to correctly
 within <code class="code docutils literal notranslate"><span class="pre">filenames.json</span></code>, described below.</p>
-</div>
-<div class="section" id="the-particle-group-files-prefix-particlegroup-filenumber-json">
+</section>
+<section id="the-particle-group-files-prefix-particlegroup-filenumber-json">
 <h2>The particle group files, <code class="code docutils literal notranslate"><span class="pre">&lt;prefix&gt;&lt;particleGroup&gt;&lt;fileNumber&gt;.json</span></code><a class="headerlink" href="#the-particle-group-files-prefix-particlegroup-filenumber-json" title="Permalink to this headline">¶</a></h2>
 <p>These are the main data files, and contain the particle coordinates and their
 corresponding field values. They should exclusively be created using a
@@ -254,8 +255,8 @@ You should not purposefully circumvent this feature by setting the <code class="
 keyword argument of <a class="reference internal" href="../reference/api/classes/Firefly.data_reader.ParticleGroup.html#Firefly.data_reader.ParticleGroup.outputToJSON" title="Firefly.data_reader.ParticleGroup.outputToJSON"><code class="xref py py-func docutils literal notranslate"><span class="pre">Firefly.data_reader.ParticleGroup.outputToJSON()</span></code></a>
 to a very large value.</p>
 </div>
-</div>
-<div class="section" id="the-manifest-file-filenames-json">
+</section>
+<section id="the-manifest-file-filenames-json">
 <span id="docsfilename"></span><h2>The manifest file, <code class="code docutils literal notranslate"><span class="pre">filenames.json</span></code><a class="headerlink" href="#the-manifest-file-filenames-json" title="Permalink to this headline">¶</a></h2>
 <p>This is a <code class="code docutils literal notranslate"><span class="pre">.json</span></code> file that identifies
 the different files within the selected
@@ -272,8 +273,8 @@ of particles in each file along with the default settings file to use.</p>
 <a class="reference internal" href="../reference/api/classes/Firefly.data_reader.Reader.html#Firefly.data_reader.Reader" title="Firefly.data_reader.Reader"><code class="xref py py-class docutils literal notranslate"><span class="pre">Firefly.data_reader.Reader</span></code></a> instance containing
 <code class="xref py py-class docutils literal notranslate"><span class="pre">Firefly.data_reader.Options</span></code> and
 <a class="reference internal" href="../reference/api/classes/Firefly.data_reader.ParticleGroup.html#Firefly.data_reader.ParticleGroup" title="Firefly.data_reader.ParticleGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">Firefly.data_reader.ParticleGroup</span></code></a> instances.</p>
-</div>
-</div>
+</section>
+</section>
 
 
            </div>
