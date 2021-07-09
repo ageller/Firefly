@@ -42,7 +42,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Sending data to a Firefly server via Flask" href="flask.html" />
-    <link rel="prev" title="Defining interpolated camera paths (tweening)" href="tween.html" /> 
+    <link rel="prev" title="Producing Firefly formatted .json files using the Python API" href="reader.html" /> 
 </head>
 
 <body class="wy-body-for-nav">
@@ -91,15 +91,15 @@
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../webapp/index.html">Using Firefly</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../server.html">Hosting your own Firefly instance</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="index.html">Reading your own data</a><ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Creating your own Firefly instance</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="files.html">Understanding Firefly’s input requirements</a></li>
-<li class="toctree-l2"><a class="reference internal" href="reader.html">The python frontend</a></li>
-<li class="toctree-l2"><a class="reference internal" href="particle_group.html">Organizing data into groups of particle</a></li>
-<li class="toctree-l2"><a class="reference internal" href="settings.html">Customizing the interface</a></li>
-<li class="toctree-l2"><a class="reference internal" href="tween.html">Defining interpolated camera paths (tweening)</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Managing multiple datasets</a></li>
+<li class="toctree-l2"><a class="reference internal" href="reader.html">Producing Firefly formatted <code class="code docutils literal notranslate"><span class="pre">.json</span></code> files using the <span class="xref std std-ref">Python API</span></a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Managing multiple datasets</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#with-startup-json">With <code class="code docutils literal notranslate"><span class="pre">startup.json</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#with-separate-firefly-source-directories">With separate Firefly source directories</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="flask.html">Sending data to a Firefly server via Flask</a></li>
-<li class="toctree-l2"><a class="reference internal" href="index.html#using-with-yt">Using with yt</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../experimental.html">Experimental features</a></li>
@@ -152,7 +152,7 @@
     
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
         
-          <li><a href="index.html">Reading your own data</a> &raquo;</li>
+          <li><a href="index.html">Creating your own Firefly instance</a> &raquo;</li>
         
       <li>Managing multiple datasets</li>
     
@@ -175,30 +175,95 @@
             
   <div class="section" id="managing-multiple-datasets">
 <span id="multiple-datasets"></span><h1>Managing multiple datasets<a class="headerlink" href="#managing-multiple-datasets" title="Permalink to this headline">¶</a></h1>
-<p>The code within [<cite>firefly_api</cite>](<a class="reference external" href="https://github.com/ageller/Firefly/tree/main/dataReader/firefly_api">https://github.com/ageller/Firefly/tree/main/dataReader/firefly_api</a>) will help you convert your data set into a format that is readable by Firefly. The converted data for Firefly is placed within the “data” directory within a sub-directory defined either by the snapshot number, or by the user-defined <cite>reader.JSONdir</cite>.  The python code also creates a file named <cite>startup.json</cite> in the “data” directory.  This file is the first thing read into Firefly, and tells Firefly where to find the rest of the data files;  it simply contains the name of the directory where your data resides.</p>
-<p>If <cite>startup.json</cite> does not exist, Firefly will display a button that will allow you to select the directory containing the files you want to load (the directory must contain a <cite>filelist.json</cite> file).  You may choose to simply remove the <cite>startup.json file</cite>, or set the option in your <cite>Reader</cite> instance to not create that file automatically.  In that case, you will always need to select a data directory when Firefly launches.</p>
-<p>If you already have a data set loaded and displayed in Firefly, you can load a new data set from within the user interface by clicking on the “Load New Data Button”.  Again, you will need to choose a directory that contains your json data files (and <cite>filelist.json</cite>).</p>
-<p>Note, some browsers may show a default warning message that you are about to upload many files to the site and to only do so if you trust the site.  Please allow Firefly to upload these files– you are not uploading them to the internet.</p>
-<p>Also, note that for most browsers, you will only be able to select a directory that is within your data directory.  You must keep your json files there or could use symbolic links within the data directory pointing to elsewhere on your local disk, e.g.,
-<code class="docutils literal notranslate"><span class="pre">`</span>
-<span class="pre">$</span> <span class="pre">ln</span> <span class="pre">-s</span> <span class="pre">/home/mydirectory/snapdir_XXX</span>
-<span class="pre">`</span></code>
-if you’d rather.</p>
-<p>If you have multiple data sets available on your computer and prefer to have a menu of these data files to choose from at the start of Firefly, you can append entries to the <cite>startup.json</cite> file to create a list of directories (using the <cite>Reader</cite> instance’s <cite>‘append’</cite> option for <cite>write_startup</cite>).  For instance, dataParser.py may create a <cite>startup.json</cite> file that contains the following:
-<code class="docutils literal notranslate"><span class="pre">`</span>
-<span class="pre">{&quot;0&quot;:&quot;data\/snapdir_001&quot;}</span>
-<span class="pre">`</span></code></p>
-<p>You could manually append this to contain the following:
-<a href="#id1"><span class="problematic" id="id2">``</span></a>`
-{“0”:”data/snapdir_001”</p>
-<blockquote>
-<div><p>“1”:”data/snapdir_002”
-“2”:”data/snapdir_003”
-“3”:”data/snapdir_004”}</p>
-</div></blockquote>
-<p><a href="#id3"><span class="problematic" id="id4">``</span></a>`
-Or use the <cite>‘append’</cite> option, as suggested above.</p>
-<p>With this <cite>startup.json</cite>, you would see a button when Firefly loads that, when clicked, will allow you to choose which data set to display.  In general, this method may be useful if you are [running Firefly on a remote computer](<a class="reference external" href="https://github.com/ageller/Firefly/wiki/Hosting-Firefly-on-a-Cluster-Environment">https://github.com/ageller/Firefly/wiki/Hosting-Firefly-on-a-Cluster-Environment</a>) that contains all your data and port forwarding to your local browser (which can only see your local file system).</p>
+<div class="section" id="with-startup-json">
+<h2>With <code class="code docutils literal notranslate"><span class="pre">startup.json</span></code><a class="headerlink" href="#with-startup-json" title="Permalink to this headline">¶</a></h2>
+<p>When Firefly first opens it searches for <a class="reference internal" href="files.html#docsstartup"><span class="std std-ref">the startup file</span></a>, <code class="code docutils literal notranslate"><span class="pre">startup.json</span></code>,
+in <code class="code docutils literal notranslate"><span class="pre">Firefly/static/data</span></code>. If <code class="code docutils literal notranslate"><span class="pre">startup.json</span></code> does not exist,
+Firefly will display a button that will allow you to
+select the directory containing the files you want to
+load (the directory must contain a <a class="reference internal" href="files.html#docsfilename"><span class="std std-ref">manifest file</span></a>, <code class="code docutils literal notranslate"><span class="pre">filenames.json</span></code>).</p>
+<p>This interface can also be accessed if you already have a dataset loaded
+and displayed in Firefly from within the UI by clicking on
+the <a class="reference internal" href="../webapp/data_controls.html#load-new-data-button"><span class="std std-ref">Load New Data</span></a> button.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Some browsers may show a default warning message that you
+are about to upload many files to the site and
+to only do so if you trust the site.
+Please allow Firefly to upload these files–
+you are not uploading them to the internet,
+only to your browser.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>For most browsers, you will only be able to select a
+directory that is a sub-directory of <code class="code docutils literal notranslate"><span class="pre">Firefly/static/data</span></code>.
+You must keep your <code class="code docutils literal notranslate"><span class="pre">.json</span></code> files there or
+could use symbolic links within
+the data directory pointing to elsewhere on your local
+disk, e.g.,</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ln -s /home/mydirectory/snapdir_XXX
+</pre></div>
+</div>
+<p><a class="reference internal" href="../reference/api/classes/Firefly.data_reader.Reader.html#Firefly.data_reader.Reader.dumpToJSON" title="Firefly.data_reader.Reader.dumpToJSON"><code class="xref py py-func docutils literal notranslate"><span class="pre">Firefly.data_reader.Reader.dumpToJSON()</span></code></a> will automatically
+create a symbolic link if it detects that the <code class="code docutils literal notranslate"><span class="pre">JSONdir</span></code> you
+specified is not a sub-directory of <code class="code docutils literal notranslate"><span class="pre">Firefly/static/data</span></code>.</p>
+</div>
+<p>If you have multiple data sets available on your computer
+and prefer to have a menu of these data files to choose
+from at the start of Firefly, you can append entries to the
+<code class="code docutils literal notranslate"><span class="pre">startup.json</span></code> file to create a list of directories
+.  For instance, a <a class="reference internal" href="../reference/api/classes/Firefly.data_reader.Reader.html#Firefly.data_reader.Reader" title="Firefly.data_reader.Reader"><code class="xref py py-class docutils literal notranslate"><span class="pre">Reader</span></code></a> may create a
+<code class="code docutils literal notranslate"><span class="pre">startup.json</span></code> file that contains the following:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s2">&quot;0&quot;</span><span class="p">:</span><span class="s2">&quot;data\/snapdir_001&quot;</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>You could manually append this to contain the following:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s2">&quot;0&quot;</span><span class="p">:</span><span class="s2">&quot;data\/snapdir_001&quot;</span><span class="p">,</span>
+<span class="s2">&quot;1&quot;</span><span class="p">:</span><span class="s2">&quot;data\/snapdir_002&quot;</span><span class="p">,</span>
+<span class="s2">&quot;2&quot;</span><span class="p">:</span><span class="s2">&quot;data\/snapdir_003&quot;</span><span class="p">,</span>
+<span class="s2">&quot;3&quot;</span><span class="p">:</span><span class="s2">&quot;data\/snapdir_004&quot;</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>Or use the <code class="code docutils literal notranslate"><span class="pre">write_startup=append</span></code>
+keyword argument of <a class="reference internal" href="../reference/api/classes/Firefly.data_reader.Reader.html#Firefly.data_reader.Reader.__init__" title="Firefly.data_reader.Reader.__init__"><code class="xref py py-func docutils literal notranslate"><span class="pre">__init__()</span></code></a>
+when initializing your second dataset.</p>
+<p>With this <code class="code docutils literal notranslate"><span class="pre">startup.json</span></code>, you would see a button when
+Firefly loads that, when clicked, will allow you to choose
+which data set to display.
+In general, this method may be useful if the Firefly webserver
+you are accessing is not <a class="reference internal" href="../server.html#local"><span class="std std-ref">hosted locally</span></a> and is instead
+being <a class="reference internal" href="../server.html#port-forwarding"><span class="std std-ref">port forwarded</span></a>
+to your local browser (which can only see your local file system).</p>
+</div>
+<div class="section" id="with-separate-firefly-source-directories">
+<h2>With separate Firefly source directories<a class="headerlink" href="#with-separate-firefly-source-directories" title="Permalink to this headline">¶</a></h2>
+<p>Alternatively, one could make many copies of the Firefly source directory,
+each with their own <code class="code docutils literal notranslate"><span class="pre">startup.json</span></code>.</p>
+<p>To facilitate this, we provide the
+<a class="reference internal" href="../reference/api/classes/Firefly.data_reader.Reader.html#Firefly.data_reader.Reader.copyFireflySourceToTarget" title="Firefly.data_reader.Reader.copyFireflySourceToTarget"><code class="xref py py-func docutils literal notranslate"><span class="pre">Firefly.data_reader.Reader.copyFireflySourceToTarget()</span></code></a>
+method which will create a new directory and copy the necessary source
+files to run Firefly within it (without the Python frontend API).</p>
+<p>You can optionally specify to also copy the necessary Flask files to
+run a flask local server by keyword argument but this is disabled by default.
+Instead, this feature is envisioned to enable users to quickly create instances of
+Firefly that <a class="reference internal" href="../server.html#internet-host"><span class="std std-ref">they can host on the internet</span></a>.</p>
+<p>To streamline this process even further, we provide an optional
+<code class="code docutils literal notranslate"><span class="pre">init_gh_pages</span></code> keyword argument that will even attempt to make
+a new GitHub repository with GitHub pages, a free webhosting service offered
+by GitHub, enabled.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>To use the <code class="code docutils literal notranslate"><span class="pre">init_gh_pages</span></code> keyword argument you must have created
+a GitHub OAUTH token somewhere on your system and passed it to
+<a class="reference internal" href="../reference/api/classes/Firefly.data_reader.Reader.html#Firefly.data_reader.Reader.copyFireflySourceToTarget" title="Firefly.data_reader.Reader.copyFireflySourceToTarget"><code class="xref py py-func docutils literal notranslate"><span class="pre">copyFireflySourceToTarget()</span></code></a>
+using the <code class="code docutils literal notranslate"><span class="pre">GHOAUTHTOKENPATH</span></code> keyword argument (which defaults
+to <code class="code docutils literal notranslate"><span class="pre">$HOME/.github.token</span></code>.
+Attempting to use the <code class="code docutils literal notranslate"><span class="pre">init_gh_pages</span></code> flag without doing so
+will raise an error message with instructions for how to generate
+a GitHub OAUTH token.</p>
+</div>
+</div>
 </div>
 
 
@@ -208,7 +273,7 @@ Or use the <cite>‘append’</cite> option, as suggested above.</p>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
         <a href="flask.html" class="btn btn-neutral float-right" title="Sending data to a Firefly server via Flask" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="tween.html" class="btn btn-neutral float-left" title="Defining interpolated camera paths (tweening)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="reader.html" class="btn btn-neutral float-left" title="Producing Firefly formatted .json files using the Python API" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>

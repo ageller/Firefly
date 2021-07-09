@@ -91,9 +91,14 @@
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../webapp/index.html">Using Firefly</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../server.html">Hosting your own Firefly instance</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../data_reader/index.html">Reading your own data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../data_reader/index.html">Creating your own Firefly instance</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../experimental.html">Experimental features</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">API Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#special-field-names">Special field names</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#velocities">Velocities</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#smoothinglength">SmoothingLength</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#base-classes">Base classes</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="classes/Firefly.data_reader.Reader.html">Firefly.data_reader.Reader</a></li>
 <li class="toctree-l3"><a class="reference internal" href="classes/Firefly.data_reader.ParticleGroup.html">Firefly.data_reader.ParticleGroup</a></li>
@@ -185,13 +190,28 @@
             
   <div class="section" id="api-reference">
 <span id="api"></span><h1>API Reference<a class="headerlink" href="#api-reference" title="Permalink to this headline">¶</a></h1>
-<blockquote id="special-field-names">
-<div><p>there are some special field names:</p>
-<ul class="simple">
-<li><p>Velocities</p></li>
-<li><p>SPH radius</p></li>
-</ul>
-</div></blockquote>
+<div class="section" id="special-field-names">
+<span id="field-names"></span><h2>Special field names<a class="headerlink" href="#special-field-names" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="velocities">
+<h3>Velocities<a class="headerlink" href="#velocities" title="Permalink to this headline">¶</a></h3>
+<p>Allows one to visualize vector field data by checking the
+“Show Velocity Vectors” checkbox in a particle group UI sub-panel.
+This checkbox will only appear if one of the fields is named
+<em>specifically</em> “Velocities.”</p>
+</div>
+<div class="section" id="smoothinglength">
+<h3>SmoothingLength<a class="headerlink" href="#smoothinglength" title="Permalink to this headline">¶</a></h3>
+<p>If a field is named <em>specifically</em> “SmoothingLength” and the
+<code class="code docutils literal notranslate"><span class="pre">doSPHrad</span></code> flag in the settings file is set to <code class="code docutils literal notranslate"><span class="pre">True</span></code>
+then the particles in that group will be scaled by their smoothing
+lengths and have opacities that vary across their face according to
+a cubic spline.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This feature is <a class="reference internal" href="../../experimental.html#experimental-features"><span class="std std-ref">experimental</span></a>.</p>
+</div>
+</div>
+</div>
 <div class="section" id="base-classes">
 <span id="frontend-api"></span><h2>Base classes<a class="headerlink" href="#base-classes" title="Permalink to this headline">¶</a></h2>
 <table class="longtable docutils align-default">

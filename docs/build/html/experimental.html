@@ -91,12 +91,12 @@
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="webapp/index.html">Using Firefly</a></li>
 <li class="toctree-l1"><a class="reference internal" href="server.html">Hosting your own Firefly instance</a></li>
-<li class="toctree-l1"><a class="reference internal" href="data_reader/index.html">Reading your own data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_reader/index.html">Creating your own Firefly instance</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Experimental features</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#scaling-particle-sizes-according-to-smoothinglength">Scaling particle sizes according to SmoothingLength</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#streaming-the-firefly-view">Streaming the Firefly view</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#volume-rendering-with-2d-projection">Volume rendering with 2d projection</a><ul class="simple">
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="#volume-rendering-with-2d-projection">Volume rendering with 2d projection</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#vr-support">VR support</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="reference/api/api.html">API Reference</a></li>
@@ -174,6 +174,14 @@
 <p>These features are not finalized, their functionality, API, and
 existence may be subject to change.</p>
 </div>
+<div class="section" id="scaling-particle-sizes-according-to-smoothinglength">
+<h2>Scaling particle sizes according to SmoothingLength<a class="headerlink" href="#scaling-particle-sizes-according-to-smoothinglength" title="Permalink to this headline">¶</a></h2>
+<p>If a field is named <em>specifically</em> “SmoothingLength” and the
+<code class="code docutils literal notranslate"><span class="pre">doSPHrad</span></code> flag in the settings file is set to <code class="code docutils literal notranslate"><span class="pre">True</span></code>
+then the particles in that group will be scaled by their smoothing
+lengths and have opacities that vary across their face according to
+a cubic spline.</p>
+</div>
 <div class="section" id="streaming-the-firefly-view">
 <h2>Streaming the Firefly view<a class="headerlink" href="#streaming-the-firefly-view" title="Permalink to this headline">¶</a></h2>
 <p>A Firefly server hosted via Flask can be rendered remotely and streamed
@@ -182,7 +190,7 @@ For security reasons, this currently does not work if the host is not the curren
 (which defeats the purpose of streaming the view in the first place,
 we’re working on getting around this limitation).</p>
 <p>The FPS of the stream can be specified when starting the Flask server
-see the <a class="reference internal" href="reference/api/api.html#server-api"><span class="std std-ref">documentation</span></a> for <code class="code docutils literal notranslate"><span class="pre">startFireflyServer</span></code>
+see the <a class="reference internal" href="reference/api/api.html#server-api"><span class="std std-ref">documentation</span></a> for <a class="reference internal" href="reference/api/server/Firefly.server.startFireflyServer.html#Firefly.server.startFireflyServer" title="Firefly.server.startFireflyServer"><code class="xref py py-func docutils literal notranslate"><span class="pre">Firefly.server.startFireflyServer()</span></code></a>
 for details.
 The stream quality will degrade to ensure the target FPS  is achieved.</p>
 </div>
@@ -198,8 +206,12 @@ interactively volume render! We will be dilligently working to
 appropriately resize points according to their SPH smoothing lengths
 and blend according to a user specified kernel. Be on the lookout for
 this exciting new feature!</p>
-<div class="toctree-wrapper compound">
 </div>
+<div class="section" id="vr-support">
+<h2>VR support<a class="headerlink" href="#vr-support" title="Permalink to this headline">¶</a></h2>
+<p>There is limited Google cardboard support for VR.
+If a Flask server is being hosted on a computer, then visit
+<a class="reference external" href="http://localhost:xxxx/cardboard">localhost:xxxx/cardboard</a></p>
 </div>
 </div>
 
