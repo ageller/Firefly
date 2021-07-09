@@ -3,6 +3,10 @@
 Managing multiple datasets
 ==========================
 
+.. toctree::
+
+	multiple_datasets_tutorial
+
 
 With :code:`startup.json`
 -------------------------
@@ -107,7 +111,3 @@ by GitHub, enabled.
 	Attempting to use the :code:`init_gh_pages` flag without doing so 
 	will raise an error message with instructions for how to generate
 	a GitHub OAUTH token. 
-
-.. toctree::
-
-	multiple_datasets_tutorial
