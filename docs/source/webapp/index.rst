@@ -108,7 +108,7 @@ Sub-panels
 Splitting the Viewer and GUI with Flask
 ---------------------------------------
 
-.. image:: flask_gui.png
+.. image:: _static/flask_gui.png
     :align: center
 
 When Firefly is being hosted locally using a Flask server 
