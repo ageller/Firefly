@@ -6,6 +6,8 @@
 Firefly: a browser-based interactive particle data visualization platform
 =========================================================================
 
+.. image:: _static/screenGrab.png
+
 Firefly is an interactive application for visualizing particle-based data 
 from within the web browser. In addition to the various source files 
 that power the webapp there is a Python frontend to enable users to 
