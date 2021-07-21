@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 import sys
+import os
 
+## make sure we are importing from wherever this file is, rather than the system 
+##  installation of Firefly. Saves us devs a lot of confusion and is equivalent 
+##  if you're only using a pip installed version
+sys.path.insert(0,os.path.abspath(os.path.join(os.getcwd(),'..')))
 from Firefly.server import startFireflyServer
 
 def main():

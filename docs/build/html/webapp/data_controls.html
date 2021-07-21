@@ -1,0 +1,344 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Data controls &mdash; Firefly 2.0.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Camera controls" href="camera_controls.html" />
+    <link rel="prev" title="Using an existing instance of Firefly" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html">
+          
+
+          
+            
+            <img src="../_static/logo_banner.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Quickstart</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Using an existing instance of Firefly</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="index.html#flying-with-the-mouse-or-keyboard">Flying with the mouse or keyboard</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#tweening">Tweening</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html#using-the-user-interface">Using the user interface</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="index.html#the-top-bar">The top bar</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="index.html#sub-panels">Sub-panels</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Data controls</a></li>
+<li class="toctree-l4"><a class="reference internal" href="camera_controls.html">Camera controls</a></li>
+<li class="toctree-l4"><a class="reference internal" href="particle_controls.html">Particle controls</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#splitting-the-viewer-and-gui-with-flask">Splitting the Viewer and GUI with Flask</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../data_reader/index.html">Creating your own instance of Firefly</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../server.html">Hosting a Firefly webserver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../experimental.html">Experimental features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/api/api.html">API Reference</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Firefly</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="index.html">Using an existing instance of Firefly</a> &raquo;</li>
+        
+      <li>Data controls</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="../_sources/webapp/data_controls.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<section id="data-controls">
+<h1>Data controls<a class="headerlink" href="#data-controls" title="Permalink to this headline">¶</a></h1>
+<img alt="../_images/data_controls.png" src="../_images/data_controls.png" />
+<p>Upon startup this sub-panel will be collapsed.
+Click on the downward facing arrow on the right side to expand
+the sub-panel, as shown in the image above.</p>
+<section id="decimation">
+<h2>Decimation<a class="headerlink" href="#decimation" title="Permalink to this headline">¶</a></h2>
+<p>At the top of the data controls sub-panel is the Decimation slider
+and text entry box.
+Larger values of decimation causes less particles to be drawn by the
+corresponding factor
+(i.e. a decimation value of 10 will only plot 10% of the data.
+The minimum value is 1.).</p>
+</section>
+<section id="fullscreen">
+<h2>Fullscreen<a class="headerlink" href="#fullscreen" title="Permalink to this headline">¶</a></h2>
+<p>Click on the Fullscreen button to resize the window into fullscreen mode.
+Use the escape key to go back to the previous view.</p>
+</section>
+<section id="take-snapshot">
+<h2>Take Snapshot<a class="headerlink" href="#take-snapshot" title="Permalink to this headline">¶</a></h2>
+<p>This button will take a snapshot of the current view (without the Controls panel).
+There are two text boxes with numbers that you can change which default to the
+dimensions of the current Firefly canvas (here showing 1920, 1200).
+These define the width and height, respectively of the snapshot.
+When you click this button,
+you should be prompted to download the snapshot as a png file.
+This feature may work best in Firefox.</p>
+</section>
+<section id="save-settings">
+<h2>Save Settings<a class="headerlink" href="#save-settings" title="Permalink to this headline">¶</a></h2>
+<p>This button will save a file named “preset.json” to your computer.
+This preset file contains all the information needed to restart Firefly
+from the current configuration.
+In some browsers, this file will be downloaded automatically
+to your Downloads folder.
+You can move this file wherever you want, and rename it
+(but do not change its contents.)</p>
+</section>
+<section id="default-settings">
+<h2>Default Settings<a class="headerlink" href="#default-settings" title="Permalink to this headline">¶</a></h2>
+<p>Click this button to reset all values to the defaults that were
+used when Firefly was launched.</p>
+</section>
+<section id="load-settings">
+<h2>Load Settings<a class="headerlink" href="#load-settings" title="Permalink to this headline">¶</a></h2>
+<p>Click this button to reset all values to a preset file
+that you either created with the Python reader (see the <a class="reference internal" href="../reference/api/api.html#api"><span class="std std-ref">API Reference</span></a>),
+or by clicking the <a class="reference internal" href="#save-settings"><span class="std std-ref">Save Settings</span></a> button.
+When you click Load Settings, you will be prompted to locate
+a preset file on your computer.
+Once you select it, Firefly will reset to the configuration saved in
+the preset file.</p>
+</section>
+<section id="load-new-data">
+<span id="load-new-data-button"></span><h2>Load New Data<a class="headerlink" href="#load-new-data" title="Permalink to this headline">¶</a></h2>
+<p>Click this button to select a new data set to display in Firefly.
+Once clicked, you will be prompted to select a directory on your
+computer using your operating system’s standard file browser.
+The directory should contain the json files produced by a
+<a class="reference internal" href="../reference/api/classes/Firefly.data_reader.Reader.html#Firefly.data_reader.Reader" title="Firefly.data_reader.Reader"><code class="xref py py-class docutils literal notranslate"><span class="pre">Firefly.data_reader.Reader</span></code></a> object.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>For most browsers, for security reasons only sub-directories
+of the current site are accessible (otherwise websites on the
+internet could read your personal files).
+As a result, Firefly can only parse data files that are within
+its static/data directory.
+See <a class="reference internal" href="../data_reader/multiple_datasets.html#multiple-datasets"><span class="std std-ref">Managing multiple datasets</span></a> for more details.</p>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>As a result of the above, this only works if you are hosting
+the Firefly webserver locally.
+See <a class="reference internal" href="../server.html#local"><span class="std std-ref">Hosting Firefly locally</span></a> for more details.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>After you select the directory, some browsers may show a
+default warning message that you are about to upload many files
+to the site and to only do so if you trust the site.
+You are only uploading the data to you <strong>browser</strong>, not to any
+online repository (even if you are using an instance of Firefly
+hosted on the internet).</p>
+</div>
+</section>
+</section>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="camera_controls.html" class="btn btn-neutral float-right" title="Camera controls" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="index.html" class="btn btn-neutral float-left" title="Using an existing instance of Firefly" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Alex Gurvich, Aaron Geller.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

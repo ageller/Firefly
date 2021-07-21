@@ -1,0 +1,531 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Firefly.data_reader.FIREreader &mdash; Firefly 2.0.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html">
+          
+
+          
+            
+            <img src="../../../_static/logo_banner.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../webapp/index.html">Using an existing instance of Firefly</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../data_reader/index.html">Creating your own instance of Firefly</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../server.html">Hosting a Firefly webserver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../experimental.html">Experimental features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/api/api.html">API Reference</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Firefly</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>Firefly.data_reader.FIREreader</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for Firefly.data_reader.FIREreader</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="kn">from</span> <span class="nn">.reader</span> <span class="kn">import</span> <span class="n">Reader</span><span class="p">,</span><span class="n">ParticleGroup</span>
+
+<span class="kn">from</span> <span class="nn">.snapshot_utils</span> <span class="kn">import</span> <span class="n">openSnapshot</span>
+
+<div class="viewcode-block" id="FIREreader"><a class="viewcode-back" href="../../../reference/api/readers/Firefly.data_reader.FIREreader.html#Firefly.data_reader.FIREreader">[docs]</a><span class="k">class</span> <span class="nc">FIREreader</span><span class="p">(</span><span class="n">Reader</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This is an example of a &quot;custom&quot; Reader that has been tuned to </span>
+<span class="sd">    open data from the FIRE galaxy formation collaboration </span>
+<span class="sd">    (https://fire.northwestern.edu).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+<div class="viewcode-block" id="FIREreader.__init__"><a class="viewcode-back" href="../../../reference/api/readers/Firefly.data_reader.FIREreader.html#Firefly.data_reader.FIREreader.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+        <span class="n">snapdir</span><span class="p">,</span>
+        <span class="n">snapnum</span><span class="p">,</span> 
+        <span class="n">ptypes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">UInames</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">decimation_factors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">fields</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+        <span class="n">filterFlags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+        <span class="n">colormapFlags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">magFlags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+        <span class="n">logFlags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Base initialization method for FIREreader instances.</span>
+<span class="sd">            A FIREreader will conveniently read FIRE collaboration data and produce</span>
+<span class="sd">            Firefly compatible :code:`.json` files.</span>
+
+<span class="sd">        :param snapdir: directory that contains all the hdf5 data files</span>
+<span class="sd">        :type snapdir: str</span>
+<span class="sd">        :param snapnum: which snapshot to open</span>
+<span class="sd">        :type snapnum: int </span>
+<span class="sd">        :param ptypes: which particle types to extract (e.g. :code:`&#39;PartType%d&#39;`),</span>
+<span class="sd">            defaults to []</span>
+<span class="sd">        :type ptypes: list of int, optional</span>
+<span class="sd">        :param UInames: what should the particle groups be called in the webapp UI,</span>
+<span class="sd">            defaults to :code:`[&#39;PartType%d for in in ptypes]`</span>
+<span class="sd">        :type UInames: list of str, optional</span>
+<span class="sd">        :param decimation_factors: factor by which to reduce the data randomly </span>
+<span class="sd">            i.e. :code:`data=data[::decimation_factor]`,</span>
+<span class="sd">            defaults to :code:`[1 for i in ptypes]`</span>
+<span class="sd">        :type decimation_factors: list of int, optional</span>
+<span class="sd">        :param fields: names of fields to open from snapshot data</span>
+<span class="sd">            (e.g. Temperature, AgeGyr, Velocities, Density). Shared between </span>
+<span class="sd">            particle types but if a particle type does not have a field </span>
+<span class="sd">            (e.g. PartType4 does not have Temperature, PartType0 does not have AgeGyr)</span>
+<span class="sd">            then that field is skipped for that particle type.</span>
+<span class="sd">            defaults to [&#39;Velocities&#39;]</span>
+<span class="sd">        :type fields: list of str, optional</span>
+<span class="sd">        :param filterFlags: flags to signal whether field should be in filter dropdown,</span>
+<span class="sd">            defaults to [True for i in fields]</span>
+<span class="sd">        :type filterFlags: list of bool, optional</span>
+<span class="sd">        :param colormapFlags: flags to signal whether field should be in colormap dropdown,</span>
+<span class="sd">            defaults to [True for i in fields]</span>
+<span class="sd">        :type colormapFlags: list of bool, optional</span>
+<span class="sd">        :param magFlags: flags to signal whether the magnitude of the field should be taken,</span>
+<span class="sd">            rather than the field itself (e.g. for vector quantities),</span>
+<span class="sd">            defaults to [False for i in fields]</span>
+<span class="sd">        :type magFlags: list of bool, optional</span>
+<span class="sd">        :param logFlags: flags to signal whether the log of the field should be taken,</span>
+<span class="sd">            defaults to [False for i in fields]</span>
+<span class="sd">        :type logFlags: list of bool, optional</span>
+<span class="sd">        :raises ValueError: if the length of ptypes, UInames, and decimation factors</span>
+<span class="sd">            does not match.</span>
+<span class="sd">        :raises ValueError: if the length of fields, filterFlags,</span>
+<span class="sd">            colormapFlags, magFlags, and logFlags does not match.</span>
+<span class="sd">        :raises FileNotFoundError: if snapdir cannot be found</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1">## handle default input for particle groups</span>
+        <span class="k">if</span> <span class="n">ptypes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">ptypes</span> <span class="o">=</span> <span class="p">[]</span> 
+        <span class="k">if</span> <span class="n">UInames</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">UInames</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;PartType</span><span class="si">%d</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ptypes</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">decimation_factors</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">decimation_factors</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ptypes</span><span class="p">]</span>
+
+        <span class="c1">## handle default input for fields</span>
+        <span class="k">if</span> <span class="n">fields</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Velocities&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">filterFlags</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">filterFlags</span> <span class="o">=</span> <span class="p">[</span><span class="kc">True</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">colormapFlags</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">colormapFlags</span> <span class="o">=</span> <span class="p">[</span><span class="kc">True</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">magFlags</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">magFlags</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">logFlags</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">logFlags</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">]</span>
+
+        <span class="c1">## input validation</span>
+        <span class="c1">##  ptypes</span>
+        <span class="n">lists</span> <span class="o">=</span> <span class="p">[</span><span class="n">decimation_factors</span><span class="p">,</span><span class="n">UInames</span><span class="p">]</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;decimation_factors&#39;</span><span class="p">,</span><span class="s1">&#39;UInames&#39;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span><span class="n">llist</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">names</span><span class="p">,</span><span class="n">lists</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">llist</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ptypes</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> is not the same length as ptypes (</span><span class="si">%d</span><span class="s2">,</span><span class="si">%d</span><span class="s2">)&quot;</span><span class="o">%</span><span class="p">(</span>
+                    <span class="n">name</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">llist</span><span class="p">),</span><span class="nb">len</span><span class="p">(</span><span class="n">ptypes</span><span class="p">)))</span>
+
+        <span class="c1">##  fields</span>
+        <span class="n">lists</span> <span class="o">=</span> <span class="p">[</span><span class="n">filterFlags</span><span class="p">,</span><span class="n">colormapFlags</span><span class="p">,</span><span class="n">magFlags</span><span class="p">,</span><span class="n">logFlags</span><span class="p">]</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;filterFlags&#39;</span><span class="p">,</span><span class="s1">&#39;colormapFlags&#39;</span><span class="p">,</span><span class="s1">&#39;magFlags&#39;</span><span class="p">,</span><span class="s1">&#39;logFlags&#39;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span><span class="n">llist</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">names</span><span class="p">,</span><span class="n">lists</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">llist</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">fields</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> is not the same length as fields (</span><span class="si">%d</span><span class="s2">,</span><span class="si">%d</span><span class="s2">)&quot;</span><span class="o">%</span><span class="p">(</span>
+                    <span class="n">name</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">llist</span><span class="p">),</span><span class="nb">len</span><span class="p">(</span><span class="n">fields</span><span class="p">)))</span>
+    
+        <span class="c1">##  IO/snapshots</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">snapdir</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="s2">&quot;Cannot find </span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="n">snapdir</span><span class="p">)</span>
+
+        <span class="c1">##  this I handle separately </span>
+        <span class="k">if</span> <span class="s1">&#39;Coordinates&#39;</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Do not put Coordinates in fields, removing it... (and its corresponding flags)&quot;</span><span class="p">)</span>
+            <span class="n">fields</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span>
+            <span class="n">filterFlags</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">filterFlags</span><span class="p">)</span>
+            <span class="n">colormapFlags</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">colormapFlags</span><span class="p">)</span>
+            <span class="n">magFlags</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">magFlags</span><span class="p">)</span>
+            <span class="n">logFlags</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">logFlags</span><span class="p">)</span>
+
+            <span class="n">index</span> <span class="o">=</span> <span class="n">fields</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;Coordinates&#39;</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">llist</span> <span class="ow">in</span> <span class="p">[</span><span class="n">fields</span><span class="p">,</span><span class="n">filterFlags</span><span class="p">,</span><span class="n">magFlags</span><span class="p">,</span><span class="n">logFlags</span><span class="p">]:</span>
+                <span class="n">llist</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+
+        <span class="c1">## where to find the HDF5 files</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">snapdir</span> <span class="o">=</span> <span class="n">snapdir</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">snapnum</span> <span class="o">=</span> <span class="n">snapnum</span>
+
+        <span class="c1">## which particles we want to extract</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ptypes</span> <span class="o">=</span> <span class="n">ptypes</span>
+
+        <span class="c1">## what do we want to call those particles in the UI</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">UInames</span> <span class="o">=</span> <span class="n">UInames</span>
+        
+        <span class="c1">## do we want to decimate the arrays at all?</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decimation_factors</span> <span class="o">=</span> <span class="n">decimation_factors</span>
+
+        <span class="c1">## what attributes do we want to load of that particle type?</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fields</span> <span class="o">=</span> <span class="n">fields</span>
+        
+        <span class="c1">## do we want to filter on that attribute?</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filterFlags</span> <span class="o">=</span> <span class="n">filterFlags</span>
+
+        <span class="c1">## do we want to color by that attribute?</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">colormapFlags</span> <span class="o">=</span> <span class="n">colormapFlags</span>
+        
+        <span class="c1">## do we need to take the magnitude of it? (velocity? typically not..)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">magFlags</span> <span class="o">=</span> <span class="n">magFlags</span>
+        
+        <span class="c1">## do we need to take the log of it </span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logFlags</span> <span class="o">=</span> <span class="n">logFlags</span>
+
+        <span class="c1">####### execute generic Reader __init__ below #######</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="FIREreader.loadData"><a class="viewcode-back" href="../../../reference/api/readers/Firefly.data_reader.FIREreader.html#Firefly.data_reader.FIREreader.loadData">[docs]</a>    <span class="k">def</span> <span class="nf">loadData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Loads FIRE snapshot data using Alex Gurvich&#39;s</span>
+<span class="sd">        :func:`Firefly.data_reader.snapshot_utils.openSnapshot`.</span>
+<span class="sd">        (reproduced from https://github.com/agurvich/abg_python) and binds it to a </span>
+<span class="sd">        corresponding :class:`Firefly.data_reader.ParticleGroup` instance.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">for</span> <span class="n">ptype</span><span class="p">,</span><span class="n">UIname</span><span class="p">,</span><span class="n">dec_factor</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span>
+            <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptypes</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">UInames</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">decimation_factors</span><span class="p">)):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Loading ptype </span><span class="si">%d</span><span class="s2">&quot;</span><span class="o">%</span><span class="n">ptype</span><span class="p">)</span>
+
+            <span class="c1">## load each particle type&#39;s snapshot data</span>
+            <span class="n">snapdict</span> <span class="o">=</span> <span class="n">openSnapshot</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">snapdir</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">snapnum</span><span class="p">,</span>
+                <span class="nb">int</span><span class="p">(</span><span class="n">ptype</span><span class="p">),</span> <span class="c1">## ptype should be 1,2,3,4,etc...</span>
+                <span class="n">keys_to_extract</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Coordinates&#39;</span><span class="p">]</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">fields</span>
+            <span class="p">)</span>
+
+            <span class="c1">## initialize output arrays for fields</span>
+            <span class="n">tracked_names</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">tracked_arrays</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">tracked_filter_flags</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">tracked_colormap_flags</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="k">for</span> <span class="n">field</span><span class="p">,</span><span class="n">filterFlag</span><span class="p">,</span><span class="n">colormapFlag</span><span class="p">,</span><span class="n">magFlag</span><span class="p">,</span><span class="n">logFlag</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">filterFlags</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">colormapFlags</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">magFlags</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logFlags</span><span class="p">)):</span>
+
+                <span class="c1">## easypeasy, just read from the snapdict</span>
+                <span class="k">if</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">snapdict</span><span class="p">:</span>
+                    <span class="n">arr</span> <span class="o">=</span> <span class="n">snapdict</span><span class="p">[</span><span class="n">field</span><span class="p">]</span>
+
+                <span class="c1">## if asked to compute galactocentric radius from the coordinates</span>
+                <span class="k">elif</span> <span class="n">field</span> <span class="o">==</span> <span class="s1">&#39;GCRadius&#39;</span><span class="p">:</span>
+                    <span class="n">arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">snapdict</span><span class="p">[</span><span class="s1">&#39;Coordinates&#39;</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+                <span class="c1">## elif field == &#39; &#39;:</span>
+                <span class="c1">## NOTE: define custom shortcut field here</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">continue</span>
+
+                <span class="c1">## take the log and/or magnitude if requested</span>
+                <span class="k">if</span> <span class="n">magFlag</span><span class="p">:</span>
+                    <span class="n">arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="n">field</span> <span class="o">=</span> <span class="s1">&#39;mag</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="n">field</span>
+                <span class="k">if</span> <span class="n">logFlag</span><span class="p">:</span>
+                    <span class="n">arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>
+                    <span class="n">field</span> <span class="o">=</span> <span class="s1">&#39;log10</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="n">field</span>
+                
+
+                <span class="c1">## append this field into the arrays</span>
+                <span class="n">tracked_names</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">tracked_names</span><span class="p">,</span>
+                    <span class="p">[</span><span class="n">field</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+                <span class="n">tracked_filter_flags</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">tracked_filter_flags</span><span class="p">,</span>
+                    <span class="p">[</span><span class="n">filterFlag</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+                <span class="n">tracked_colormap_flags</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">tracked_colormap_flags</span><span class="p">,</span>
+                    <span class="p">[</span><span class="n">colormapFlag</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+                <span class="n">tracked_arrays</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>
+                
+            <span class="c1">## initialize a particleGroup instance</span>
+            <span class="c1">##  for this particle type</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">particleGroups</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">particleGroups</span><span class="p">,</span>
+                <span class="p">[</span><span class="n">ParticleGroup</span><span class="p">(</span>
+                    <span class="n">UIname</span><span class="p">,</span>
+                    <span class="n">snapdict</span><span class="p">[</span><span class="s1">&#39;Coordinates&#39;</span><span class="p">],</span>
+                    <span class="n">tracked_names</span><span class="o">=</span><span class="n">tracked_names</span><span class="p">,</span>
+                    <span class="n">tracked_arrays</span><span class="o">=</span><span class="n">tracked_arrays</span><span class="p">,</span>
+                    <span class="n">decimation_factor</span><span class="o">=</span><span class="n">dec_factor</span><span class="p">,</span>
+                    <span class="n">tracked_filter_flags</span><span class="o">=</span><span class="n">tracked_filter_flags</span><span class="p">,</span>
+                    <span class="n">tracked_colormap_flags</span><span class="o">=</span><span class="n">tracked_colormap_flags</span><span class="p">,</span>
+                    <span class="n">doSPHrad</span> <span class="o">=</span> <span class="s1">&#39;SmoothingLength&#39;</span> <span class="ow">in</span> <span class="n">tracked_names</span><span class="p">)],</span>
+                <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+            <span class="c1">## save the filenames that were opened </span>
+            <span class="c1">##  so you can re-open them yourself in that order if you need to</span>
+            <span class="k">for</span> <span class="n">particleGroup</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">particleGroups</span><span class="p">:</span>
+                <span class="n">particleGroup</span><span class="o">.</span><span class="n">filenames_opened</span> <span class="o">=</span> <span class="n">snapdict</span><span class="p">[</span><span class="s1">&#39;fnames&#39;</span><span class="p">]</span>
+
+            <span class="c1">## add this particle group to the reader&#39;s settings file</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">attachSettings</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">particleGroups</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">particleGroups</span></div></div>
+
+<div class="viewcode-block" id="SimpleFIREreader"><a class="viewcode-back" href="../../../reference/api/readers/Firefly.data_reader.SimpleFIREreader.html#Firefly.data_reader.SimpleFIREreader">[docs]</a><span class="k">class</span> <span class="nc">SimpleFIREreader</span><span class="p">(</span><span class="n">FIREreader</span><span class="p">):</span>
+    
+<div class="viewcode-block" id="SimpleFIREreader.__init__"><a class="viewcode-back" href="../../../reference/api/readers/Firefly.data_reader.SimpleFIREreader.html#Firefly.data_reader.SimpleFIREreader.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">path_to_snapshot</span><span class="p">,</span>
+        <span class="n">decimation_factor</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">JSONdir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; A wrapper to :class:`Firefly.data_reader.FIREreader` that will open </span>
+<span class="sd">            FIRE collaboration formatted data with minimal interaction from the user </span>
+<span class="sd">            and use a &quot;standard&quot; Firefly setup with:</span>
+<span class="sd">                :code:`ptypes = [0,4]`</span>
+
+<span class="sd">                :code:`UInames = [&#39;gas&#39;,&#39;stars&#39;]`</span>
+
+<span class="sd">                :code:`fields = [&#39;Velocities&#39;,&#39;AgeGyr&#39;,&#39;Temperature&#39;,&#39;GCRadius&#39;]`</span>
+
+<span class="sd">            along  with some &quot;standard&quot; settings with:</span>
+<span class="sd">                :code:`settings[&#39;color&#39;][&#39;gas&#39;] = [1,0,0,1]`</span>
+
+<span class="sd">                :code:`settings[&#39;color&#39;][&#39;stars&#39;] = [0,0,1,1]`</span>
+
+<span class="sd">                :code:`settings[&#39;sizeMult&#39;][&#39;gas&#39;] = 0.5`</span>
+
+<span class="sd">                :code:`settings[&#39;sizeMult&#39;][&#39;stars&#39;] = 0.5`</span>
+
+<span class="sd">                :code:`settings[&#39;camera&#39;] = [0,0,-15]`</span>
+
+<span class="sd">        :param path_to_snapshot: path to .hdf5 file(s; can be a directory)</span>
+<span class="sd">        :type path_to_snapshot: str </span>
+<span class="sd">        :param decimation_factor: factor by which to reduce the data randomly </span>
+<span class="sd">            i.e. :code:`data=data[::decimation_factor]`, defaults to 10</span>
+<span class="sd">        :type decimation_factor: int, optional</span>
+<span class="sd">        :param JSONdir: the sub-directory that will contain your JSON files, relative</span>
+<span class="sd">            to your :code:`$HOME directory`. , defaults to :code:`$HOME/&lt;JSON_prefix&gt;`</span>
+<span class="sd">        :type JSONdir: str, optional</span>
+<span class="sd">        :raises ValueError: if a snapnum cannot be inferred from the path_to_snapshot</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1">## strip off a trailing / if it&#39;s there</span>
+        <span class="k">if</span> <span class="n">path_to_snapshot</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">:]</span> <span class="o">==</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="p">:</span>
+            <span class="n">path_to_snapshot</span> <span class="o">=</span> <span class="n">path_to_snapshot</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">snapdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">path_to_snapshot</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">snapnum</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">path_to_snapshot</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> should be formatted as &#39;path/to/output/snapdir_xxx&#39;&quot;</span><span class="o">%</span><span class="n">path_to_snapshot</span><span class="o">+</span>
+                <span class="s2">&quot; where xxx is an integer&quot;</span><span class="p">)</span>
+
+        <span class="c1">## relative path -&gt; symbolic link</span>
+        <span class="k">if</span> <span class="n">JSONdir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">JSONdir</span><span class="o">=</span><span class="s2">&quot;FIREData_</span><span class="si">%d</span><span class="s2">&quot;</span><span class="o">%</span><span class="n">snapnum</span>
+
+        <span class="c1">## initialize the reader object</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">snapdir</span><span class="p">,</span>
+            <span class="n">snapnum</span><span class="p">,</span>
+            <span class="n">ptypes</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">4</span><span class="p">],</span> 
+            <span class="n">UInames</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Gas&#39;</span><span class="p">,</span><span class="s1">&#39;Stars&#39;</span><span class="p">],</span>
+            <span class="n">decimation_factors</span><span class="o">=</span><span class="p">[</span><span class="n">decimation_factor</span><span class="p">,</span><span class="n">decimation_factor</span><span class="p">],</span>
+            <span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;AgeGyr&#39;</span><span class="p">,</span><span class="s1">&#39;Temperature&#39;</span><span class="p">,</span><span class="s1">&#39;Velocities&#39;</span><span class="p">,</span><span class="s1">&#39;GCRadius&#39;</span><span class="p">],</span>
+            <span class="n">magFlags</span><span class="o">=</span><span class="p">[</span><span class="kc">False</span><span class="p">,</span><span class="kc">False</span><span class="p">,</span><span class="kc">True</span><span class="p">,</span><span class="kc">False</span><span class="p">],</span> 
+            <span class="n">logFlags</span><span class="o">=</span><span class="p">[</span><span class="kc">False</span><span class="p">,</span><span class="kc">True</span><span class="p">,</span><span class="kc">False</span><span class="p">,</span><span class="kc">False</span><span class="p">],</span> 
+            <span class="n">JSON_prefix</span><span class="o">=</span><span class="s1">&#39;Data&#39;</span><span class="p">,</span>
+            <span class="n">JSONdir</span><span class="o">=</span><span class="n">JSONdir</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1">## load the data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loadData</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">][</span><span class="s1">&#39;Gas&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">][</span><span class="s1">&#39;Stars&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;sizeMult&#39;</span><span class="p">][</span><span class="s1">&#39;Gas&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.5</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;sizeMult&#39;</span><span class="p">][</span><span class="s1">&#39;Stars&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.5</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;camera&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">15</span><span class="p">]</span>
+
+        <span class="c1">## dump the JSON files</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dumpToJSON</span><span class="p">(</span><span class="n">loud</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Alex Gurvich, Aaron Geller.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

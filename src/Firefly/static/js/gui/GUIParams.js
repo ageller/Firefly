@@ -65,15 +65,21 @@ function defineGUIParams(){
 
 		//for setting the width
 		this.containerWidth = 300; //pixels
-		
-		//list of all colormaps
-		this.colormapList = ['viridis', 'plasma', 'inferno', 'magma', 
-		'Greys', 'Purples', 'Blues', 'Greens', 'Oranges',
-		'binary', 'gist_yarg', 'gist_gray', 'gray', 'afmhot',
-		'PiYG', 'PRGn', 'BrBG', 'RdGy', 'coolwarm', 'bwr',
-		'Pastel1', 'Pastel2', 'Paired', 'Accent', 'Dark2', 'Set1',
-	 	'flag', 'prism', 'ocean', 'gist_earth', 'terrain', 'gist_stern'];
-	 	
+
+		var name_file = "static/textures/colormap_names.json";
+
+		var colormapList = [];
+
+		// ABG: this was the best I could do to load a colormap names list...
+		d3.json(name_file,  function(name_file) {
+			for (i=0; i <32; i++){
+				colormapList.push(name_file['names'][i])
+			}
+			console.log(colormapList)
+		});
+
+		this.colormapList = colormapList
+
 
 		///////////////////
 		// these below are shared with viewerParams (passed from viewerParams to GUIParams)

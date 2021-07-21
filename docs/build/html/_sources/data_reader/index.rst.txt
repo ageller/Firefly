@@ -1,0 +1,15 @@
+Creating your own instance of Firefly 
+=====================================
+
+.. toctree::
+    :titlesonly:
+    :maxdepth: 2
+
+    files
+    reader
+    multiple_datasets
+    flask
+
+.. Using with yt
++++++++++++++
+If you are using [yt](https://yt-project.org) you will be able to call :code:`region.outputToFirefly`. See the :ref:`API reference<api>`.

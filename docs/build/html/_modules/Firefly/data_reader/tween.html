@@ -1,0 +1,372 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>Firefly.data_reader.tween &mdash; Firefly 2.0.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html">
+          
+
+          
+            
+            <img src="../../../_static/logo_banner.png" class="logo" alt="Logo"/>
+          
+          </a>
+
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Quickstart</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../webapp/index.html">Using an existing instance of Firefly</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../data_reader/index.html">Creating your own instance of Firefly</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../server.html">Hosting a Firefly webserver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../experimental.html">Experimental features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/api/api.html">API Reference</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Firefly</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>Firefly.data_reader.tween</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for Firefly.data_reader.tween</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">import</span> <span class="nn">os</span> 
+
+<span class="kn">from</span> <span class="nn">.json_utils</span> <span class="kn">import</span> <span class="n">write_to_json</span>
+
+<div class="viewcode-block" id="TweenParams"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.TweenParams.html#Firefly.data_reader.TweenParams">[docs]</a><span class="k">class</span> <span class="nc">TweenParams</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A class to store tween parameters and make an output file&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="TweenParams.__init__"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.TweenParams.html#Firefly.data_reader.TweenParams.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">coords</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">duration</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+        <span class="n">loop</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create a new tween parameter object, allowing the user to press :code:`t` from within</span>
+<span class="sd">            the webapp to move between keyframe camera locations smoothly and automatically.</span>
+
+<span class="sd">        :param coords: keyframe camera coordinates, list of positions that camera</span>
+<span class="sd">            will move between. 3 acceptable input formats:</span>
+<span class="sd">            * [x,y,z] single keyframe</span>
+<span class="sd">            * [[x1,y1,z1],[x2,y2,z2],...] multiple keyframes</span>
+<span class="sd">            * [x1,y1,z1,x2,y2,z2,...] multiple flattened keyframes,</span>
+<span class="sd">            defaults to []</span>
+<span class="sd">        :type coords: list of float</span>
+<span class="sd">        :param duration: duration to approach keyframe in seconds. 3 acceptable input formats:</span>
+<span class="sd">            * d single duration (will be repeated)</span>
+<span class="sd">            * [d] single duration in list (will be repeated)</span>
+<span class="sd">            * [d1,d2,...] multiple durations (corresponding to number of keyframes or</span>
+<span class="sd">                raises an error),</span>
+<span class="sd">            defaults to 5</span>
+<span class="sd">        :type duration: float/list of float</span>
+<span class="sd">        :param loop: flag to loop after reaching the last keyframe, defaults to True</span>
+<span class="sd">        :type loop: bool, optional</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1">## initialize containers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coordss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">durations</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
+
+        <span class="c1">## store loop flag</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loop</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">loop</span><span class="p">)</span>
+        
+        <span class="c1">## add keyframes if any were passed</span>
+        <span class="k">if</span> <span class="n">coords</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">addKeyframe</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span><span class="n">duration</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TweenParams.addKeyframe"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.TweenParams.html#Firefly.data_reader.TweenParams.addKeyframe">[docs]</a>    <span class="k">def</span> <span class="nf">addKeyframe</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">coords</span><span class="p">,</span>
+        <span class="n">duration</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; </span>
+<span class="sd">        Adds a new keyframe to an existing TweenParams object. </span>
+
+<span class="sd">        :param coords: keyframe camera coordinates, list of positions that camera</span>
+<span class="sd">            will move between 3 acceptable input formats:</span>
+<span class="sd">                * [x,y,z] single keyframe</span>
+<span class="sd">                * [[x1,y1,z1],[x2,y2,z2],...] multiple keyframes</span>
+<span class="sd">                * [x1,y1,z1,x2,y2,z2,...] multiple flattened keyframes</span>
+<span class="sd">        :type coords: list of float </span>
+<span class="sd">        :param duration: duration to approach keyframe, 3 acceptable input formats:</span>
+<span class="sd">                * d single duration (will be repeated)</span>
+<span class="sd">                * [d] single duration in list (will be repeated)</span>
+<span class="sd">                * [d1,d2,...] multiple durations (corresponding to number of keyframes or</span>
+<span class="sd">                    raises an error)</span>
+<span class="sd">        :type duration: float/list of float </span>
+<span class="sd">        :raises np.AxisError: if len of coords is not divisible by 3</span>
+<span class="sd">        :raises np.AxisError: if len of durations does not match len of coords</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1">## cast to numpy array and reorder coords at the same time for </span>
+            <span class="c1">##  convenient input</span>
+            <span class="n">coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">np</span><span class="o">.</span><span class="n">AxisError</span><span class="p">(</span><span class="s2">&quot;coords should either be a 2d Nx3 numpy array or&quot;</span><span class="o">+</span>
+                <span class="s2">&quot;a 3N list/array.&quot;</span><span class="p">)</span>
+
+        <span class="c1">## convert duration to a 1d numpy array, however it was passed</span>
+        <span class="n">duration</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">duration</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">duration</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span> <span class="n">duration</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">duration</span><span class="p">,</span><span class="n">coords</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="c1">## ensure there is a duration per keyframe transition</span>
+        <span class="c1">##  TODO: shouldn&#39;t durations be 1 less than coordss?</span>
+        <span class="k">if</span> <span class="n">duration</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">!=</span><span class="n">coords</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="n">np</span><span class="o">.</span><span class="n">AxisError</span><span class="p">(</span>
+                <span class="s2">&quot;Mismatching coords and duration shape (</span><span class="si">%d</span><span class="s2">,</span><span class="si">%d</span><span class="s2">)&quot;</span><span class="o">%</span><span class="p">(</span>
+                    <span class="n">coords</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                    <span class="n">duration</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">coordss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coordss</span><span class="p">,</span><span class="n">coords</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">durations</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">durations</span><span class="p">,</span><span class="n">duration</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="TweenParams.outputToDict"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.TweenParams.html#Firefly.data_reader.TweenParams.outputToDict">[docs]</a>    <span class="k">def</span> <span class="nf">outputToDict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Converts stored data into a single python dictionary.</span>
+
+<span class="sd">        :return: tween_params_dict</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">xs</span><span class="p">,</span><span class="n">ys</span><span class="p">,</span><span class="n">zs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coordss</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">keyframe_dicts</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">{</span><span class="s1">&#39;x&#39;</span><span class="p">:</span><span class="n">xs</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="s1">&#39;y&#39;</span><span class="p">:</span><span class="n">ys</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="s1">&#39;z&#39;</span><span class="p">:</span><span class="n">zs</span><span class="p">[</span><span class="n">i</span><span class="p">]}</span> 
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">xs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
+
+        <span class="n">tween_params_dict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;loop&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">loop</span><span class="p">,</span>
+            <span class="s1">&#39;duration&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">durations</span><span class="p">,</span>
+            <span class="s1">&#39;position&#39;</span><span class="p">:</span><span class="n">keyframe_dicts</span>
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">tween_params_dict</span></div>
+
+<div class="viewcode-block" id="TweenParams.outputToJSON"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.TweenParams.html#Firefly.data_reader.TweenParams.outputToJSON">[docs]</a>    <span class="k">def</span> <span class="nf">outputToJSON</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">JSONdir</span><span class="p">,</span>
+        <span class="n">JSON_prefix</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+        <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">loud</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">write_jsons_to_disk</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">not_reader</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Saves the current tween parameters to a JSON file.</span>
+
+<span class="sd">        :param JSONdir: the sub-directory that will contain your JSON files, relative</span>
+<span class="sd">            to your :code:`$HOME directory`. , defaults to :code:`$HOME/&lt;JSON_prefix&gt;`</span>
+<span class="sd">        :type JSONdir: str, optional</span>
+<span class="sd">        :param JSON_prefix: Prefix for any :code:`.json` files created, :code:`.json` files will be of the format:</span>
+<span class="sd">            :code:`&lt;JSON_prefix&gt;&lt;filename&gt;.json`, defaults to &#39;Data&#39;</span>
+<span class="sd">        :type JSON_prefix: str, optional</span>
+<span class="sd">        :param filename: name of settings :code:`.json` file,</span>
+<span class="sd">            defaults to self.settings_filename</span>
+<span class="sd">        :type filename: str, optional</span>
+<span class="sd">        :param JSON_prefix: string that is prepended to filename, defaults to &#39;&#39;</span>
+<span class="sd">        :type JSON_prefix: str, optional</span>
+<span class="sd">        :param loud: flag to print status information to the console, defaults to True</span>
+<span class="sd">        :type loud: bool, optional</span>
+<span class="sd">        :param write_jsons_to_disk: flag that controls whether data is saved to disk (:code:`True`)</span>
+<span class="sd">            or only converted to a string and returned (:code:`False`), defaults to True</span>
+<span class="sd">        :type write_jsons_to_disk: bool, optional</span>
+<span class="sd">        :param not_reader: flag for whether to print the Reader :code:`filenames.json` warning, defaults to True</span>
+<span class="sd">        :type write_jsons_to_disk: bool, optional</span>
+<span class="sd">        :raises NotImplementedError: if filename is anything but None </span>
+<span class="sd">            TODO: need to check on this if the webapp actually requires it have </span>
+<span class="sd">            a specific name.</span>
+<span class="sd">        :return: filename, JSON(tween_params_dict) (either a filename if</span>
+<span class="sd">            written to disk or a JSON strs)</span>
+<span class="sd">        :rtype: str, str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">filename</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="s1">&#39;tweenParams.json&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1">##filename = self.settings_filename if filename is None else filename</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Tween params must be named TweenParams.json&quot;</span><span class="p">)</span>
+
+        <span class="n">tween_params_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">outputToDict</span><span class="p">()</span>
+
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">JSONdir</span><span class="p">,</span><span class="n">JSON_prefix</span><span class="o">+</span><span class="n">filename</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">loud</span> <span class="ow">and</span> <span class="n">not_reader</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;You will need to add this tween params filename to&quot;</span><span class="o">+</span>
+                <span class="s2">&quot; filenames.json if this was not called by a Reader instance.&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">filename</span><span class="p">,</span><span class="n">write_to_json</span><span class="p">(</span>
+            <span class="n">tween_params_dict</span><span class="p">,</span>
+            <span class="n">filename</span> <span class="k">if</span> <span class="n">write_jsons_to_disk</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span> <span class="c1">## None-&gt; returns a string</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2021, Alex Gurvich, Aaron Geller.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
