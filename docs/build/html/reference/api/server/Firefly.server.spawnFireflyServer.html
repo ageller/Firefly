@@ -204,14 +204,28 @@
 <h1>Firefly.server.spawnFireflyServer<a class="headerlink" href="#firefly-server-spawnfireflyserver" title="Permalink to this headline">¶</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="Firefly.server.spawnFireflyServer">
-<span class="sig-prename descclassname"><span class="pre">Firefly.server.</span></span><span class="sig-name descname"><span class="pre">spawnFireflyServer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/Firefly/server.html#spawnFireflyServer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Firefly.server.spawnFireflyServer" title="Permalink to this definition">¶</a></dt>
+<span class="sig-prename descclassname"><span class="pre">Firefly.server.</span></span><span class="sig-name descname"><span class="pre">spawnFireflyServer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frames_per_second</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimation_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/Firefly/server.html#spawnFireflyServer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Firefly.server.spawnFireflyServer" title="Permalink to this definition">¶</a></dt>
 <dd><p>Wrapper to <a class="reference internal" href="Firefly.server.startFireflyServer.html#Firefly.server.startFireflyServer" title="Firefly.server.startFireflyServer"><code class="xref py py-func docutils literal notranslate"><span class="pre">Firefly.server.startFireflyServer()</span></code></a> that instead starts a background process.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>subprocess.Popen</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>port</strong> (<em>int</em><em>, </em><em>optional</em>) – port number to serve the <code class="code docutils literal notranslate"><span class="pre">.html</span></code> files on, defaults to 5000</p></li>
+<li><p><strong>frames_per_second</strong> (<em>int</em><em>, </em><em>optional</em>) – enforced FPS for stream quality, used only if
+localhost:&lt;port&gt;/stream is accessed, defaults to 30</p></li>
+<li><p><strong>decimation_factor</strong> (<em>int</em><em>, </em><em>optional</em>) – factor to decimate data that is being passed through
+localhost:&lt;port&gt;/data_input, defaults to 1</p></li>
+<li><p><strong>max_time</strong> (<em>float</em><em>, </em><em>optional</em>) – maximum amount of time to wait for a Firefly server
+to be available.</p></li>
+</ul>
 </dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p>subprocess handler</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>subprocess.Popen</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>subprocess handler</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>RuntimeError</strong> – if max_time elapses without a successful Firefly server being initialized.</p>
 </dd>
 </dl>
 </dd></dl>
