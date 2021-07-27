@@ -6,10 +6,12 @@ import sys
 import numpy as np
 
 import subprocess,signal
+import socket,requests
 
 import json
 
 import os
+import time
 
 ## make sure we are importing from wherever this file is, rather than the system 
 ##  installation of Firefly. Saves us devs a lot of confusion and is equivalent 
@@ -267,16 +269,56 @@ def startFireflyServer(port=5000, frames_per_second=30, decimation_factor=1):
     finally:
         os.chdir(old_dir)
 
-def spawnFireflyServer(*args):
+def spawnFireflyServer(port=5000,frames_per_second=30,decimation_factor=1,max_time=10):
     """Wrapper to :func:`Firefly.server.startFireflyServer` that instead starts a background process.
 
+    :param port: port number to serve the :code:`.html` files on, defaults to 5000
+    :type port: int, optional
+    :param frames_per_second: enforced FPS for stream quality, used only if
+		localhost:<port>/stream is accessed, defaults to 30
+    :type frames_per_second: int, optional
+    :param decimation_factor: factor to decimate data that is being passed through
+		localhost:<port>/data_input, defaults to 1
+    :type decimation_factor: int, optional
+    :param max_time: maximum amount of time to wait for a Firefly server
+        to be available. 
+    :type max_time: float, optional
     :return: subprocess.Popen
     :rtype: subprocess handler
+    :raises RuntimeError: if max_time elapses without a successful Firefly server being initialized.
     """
 
+    ## wrap passed arguments into a list of strings
+    args = ["%d"%port,"%d"%frames_per_second,"%d"%decimation_factor]
+
     run_server = os.path.join(os.path.dirname(__file__),'run_server.py')
-    ## args must be positional, they are 1) port 2) fps 3) decimation_factor
-    return subprocess.Popen(["python3", run_server]+np.array(args).astype('str').tolist())
+    process = subprocess.Popen(["python3", run_server]+args)
+
+    init_time = time.time()
+    ## check if port is in use
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        print(
+            "Waiting up to %d seconds for background Firefly server to start"%max_time,
+            end="")
+        while True:
+            try: 
+                requests.post(f'http://localhost:{port:d}',json="test")
+                break
+            except: 
+            ## need to re-check the connection each iteration
+            #if s.connect_ex(('localhost', port)) != 0:
+                #break
+
+                if time.time()-init_time >= max_time: raise RuntimeError(
+                    "Hit max wait-time of %d seconds."%max_time+
+                    " A Firefly server could not be opened in the background.")
+                else: 
+                    print(".",end="")
+                    time.sleep(1)
+            
+    print("done! Your server is available at - http://localhost:%d"%port)
+
+    return process
 
 def killAllFireflyServers(pid=None):
     """Kill python processes associated with hosting Flask web-servers.
@@ -288,7 +330,7 @@ def killAllFireflyServers(pid=None):
     """
     if pid is None:
         ## kill indiscriminately
-        return_code = os.system("ps aux | grep 'FireflyFlaskApp.py' | awk '{print $2}' | xargs kill")
+        return_code = os.system("ps aux | grep 'run_server.py' | awk '{print $2}' | xargs kill")
     else:
         ## kill only the pid we were passed, ideally from the subprocess.Popen().pid but
         ##  you know I don't judge.  
