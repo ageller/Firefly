@@ -5,10 +5,10 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="Firefly-vis",
-    version="2.0.0",
+    version="2.0.1",
     author = 'Alex Gurvich, Aaron Geller',
     author_email = 'agurvich@u.northwestern.edu, ageller@northwestern.edu',
-    description="A small example package",
+    description="A browser-based particle visualization platform",
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/ageller/Firefly",
