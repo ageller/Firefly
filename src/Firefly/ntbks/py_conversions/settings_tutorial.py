@@ -1,14 +1,31 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+# `Firefly/ntbks/settings_tutorial.ipynb`
+
 # In[1]:
 
 
 get_ipython().run_line_magic('load_ext', 'autoreload')
 get_ipython().run_line_magic('autoreload', '2')
+from IPython.display import YouTubeVideo
 
+
+# A recording of this jupyter notebook in action is available at:
 
 # In[2]:
+
+
+YouTubeVideo("Xt1vce_2DYo")
+
+
+# In[3]:
+
+
+YouTubeVideo("ft0Y3XNJhl4")
+
+
+# In[4]:
 
 
 import sys
@@ -17,7 +34,7 @@ import numpy as np
 from Firefly.data_reader import ParticleGroup,Settings,ArrayReader
 
 
-# # Managing Custom Settings
+# # Tutorial notebook: Managing Custom Settings
 # One of the core features of Firefly is the ability to customize the user interface (UI) and the startup behavior to make bespoke iterations of Firefly using ones own data. We have organized the different options that one can customize into different settings groups that fall into two categories: those that affect the app as a whole and those that are particular to an individual group of particles.
 # 
 # **App Settings** |     |**Particle Group Settings**
@@ -35,7 +52,7 @@ from Firefly.data_reader import ParticleGroup,Settings,ArrayReader
 # 1. manually save it to a file using the `outputToJSON()` method or
 # 2. connect it to a `Firefly.data_reader.Reader` object in order to link it to a specific visualization (see the <a href="https://ageller.github.io/Firefly/docs/build/html/data_reader/reader.html">reader documentation</a> for details on how to use a `Reader` object).
 
-# In[4]:
+# In[5]:
 
 
 ## let's create an settings object with the default keys
@@ -49,7 +66,7 @@ settings.printKeys(values=False)
 # ## Settings can be changed the same way you would change a key in a dictionary
 # There is key validation (so you can't attempt to set a setting that doesn't exist) but there is no value validation, so be careful that you use appropriate values or your app might not work. See the <a href="https://ageller.github.io/Firefly/docs/build/html/data_reader/settings.html">settings documentation</a> for details on what values each setting can take.
 
-# In[5]:
+# In[6]:
 
 
 ## let's change the title that shows up in the browser's tab list
@@ -66,7 +83,7 @@ settings.printKeys(pattern='window')
 # ## Settings are most useful when connected to a `Firefly.data_reader.Reader` object
 # Doing so allows many of the necessary settings to be automatically generated as additional particle groups are added.
 
-# In[6]:
+# In[7]:
 
 
 ## let's create some sample data, a grid of points in a 3d cube
@@ -81,7 +98,7 @@ fields = np.random.random(size=xs.size)
 
 # Before we've attached the `Settings` object the particle settings are all empty.
 
-# In[7]:
+# In[8]:
 
 
 
@@ -90,7 +107,7 @@ settings.printKeys(pattern='particle')
 
 # We'll use a `Firefly.data_reader.ArrayReader`, a workhorse `Firefly.data_reader.Reader` sub-class with many convenient functions. See the <a href="https://ageller.github.io/Firefly/docs/build/html/data_reader/reader.html">reader documentation</a> for details that are outside the scope of this tutorial.
 
-# In[8]:
+# In[9]:
 
 
 ## initialize an ArrayReader
@@ -103,7 +120,7 @@ reader = ArrayReader(
 
 # The original `Settings` object is stored in `reader.settings`.
 
-# In[9]:
+# In[10]:
 
 
 ## demonstrate that reader.settings is the original settings object
@@ -120,7 +137,7 @@ reader.settings.printKeys(pattern='particle')
 
 # for the purposes of this tutorial, we'll just go ahead and output the `Settings` object we have manually
 
-# In[10]:
+# In[11]:
 
 
 ## output the example settings file to a .json in this directory
@@ -130,21 +147,21 @@ settings.outputToJSON('.','example')
 # ## Settings can also be imported from `.json` files
 # Only settings defined in the file will be overwritten, so you can also mix-and-match settings files.
 
-# In[11]:
+# In[12]:
 
 
 ## initialize a new settings object
 new_settings = Settings()
 
 ## import the settings from what we just saved above; prints the settings that are updated
-new_settings.loadFromJSON("./mySettings.json")
+new_settings.loadFromJSON("./exampleSettings.json")
 
 
 # ## Attaching a ParticleGroup to a Settings
 # One other thing you may want to do (perhaps in the course of building your own custom `Reader` sub-class) is link a `Firefly.data_reader.ParticleGroup` object to a `Settings` object so that the different particle settings can be imported. 
 # `ParticleGroup` settings can be changed in `settings_default` attribute (which is just a normal python dictionary). 
 
-# In[12]:
+# In[13]:
 
 
 ## create a test particle group
@@ -153,7 +170,7 @@ particleGroup = ParticleGroup('test',coords)
 particleGroup.settings_default['color'] = [0,0,1,1]
 
 
-# In[13]:
+# In[14]:
 
 
 ## attach the particle group to the settings object

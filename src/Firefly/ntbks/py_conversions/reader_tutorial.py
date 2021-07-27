@@ -1,14 +1,25 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+# `Firefly/ntbks/reader_tutorial.ipynb`
+
 # In[1]:
 
 
 get_ipython().run_line_magic('load_ext', 'autoreload')
 get_ipython().run_line_magic('autoreload', '2')
+from IPython.display import YouTubeVideo
 
+
+# A recording of this jupyter notebook in action is available at:
 
 # In[2]:
+
+
+YouTubeVideo("lYPGa6DibOk")
+
+
+# In[3]:
 
 
 import sys
@@ -18,7 +29,7 @@ sys.path.insert(0,"/Users/agurvich/research/repos/Firefly/src/")
 from Firefly.data_reader import Reader,ArrayReader,ParticleGroup
 
 
-# # Loading in your Custom Data
+# # Tutorial notebook: Using the `Reader` class
 # One of the main purposes of Firefly is to enable users to interactively explore their *own* data (or else interactively explore someone else's respective own data). While it is possible to format one's data manually using a text editor we have provided a python API for producing the `.json` files that are necessary to run an iteration of Firefly.
 # 
 # The central piece of that API is the `Firefly.data_reader.Reader` class, which acts to collect the different parts of the API together to produce consistently formatted and linked `.json` files that the Firefly webapp can interpret. The `Reader` class is <a href="https://ageller.github.io/Firefly/docs/build/html/data_reader/reader.html">documented here</a> but here we only provide a brief example of how to use the API. 
@@ -28,7 +39,7 @@ from Firefly.data_reader import Reader,ArrayReader,ParticleGroup
 # 
 # Perhaps the most important keyword argument is the `JSONdir`, which tells your `Reader` object where it should collect the different `.json` files it will produce. The `.json` files have to be readable from the `Firefly/static/data` directory of the iteration of Firefly that's trying to open the data. The `Reader` class will automatically create a shortcut to the directory if you don't choose a path that lives in `Firefly/static/data`. If you enter a relative path it will assume you mean relative to your `${HOME}` directory. If no `JSONdir` is provided then it will default to `${HOME}/<JSONprefix>` (which itself defaults to `Data` if nothing is passed). 
 
-# In[3]:
+# In[4]:
 
 
 ## initialize a Reader object, cwd will be Firefly/ntbks
@@ -36,7 +47,7 @@ JSONdir = os.path.abspath(os.path.join(os.getcwd(),'..','static','data','tutoria
 my_reader = Reader(JSONdir=JSONdir)
 
 
-# In[4]:
+# In[5]:
 
 
 ## let's create some sample data, a grid of points in a 3d cube
@@ -57,7 +68,7 @@ fields = np.random.random(size=xs.size)
 # **Note:**
 # Sometimes data is too large to load directly into Firefly, we encourage users who are trying a new dataset for the first time to use the `decimation_factor` keyword argument to reduce the dataset size by the factor specified (the implementation is just a `shuffle(coords)[::decimation_factor]`). 
 
-# In[5]:
+# In[6]:
 
 
 ## create a particle group that contains our test coordinates
@@ -82,7 +93,7 @@ my_decimated_particleGroup = ParticleGroup(
 
 # All that's left is to connect the `ParticleGroup` object to the `Reader` object using the `.addParticleGroup` method. 
 
-# In[6]:
+# In[7]:
 
 
 ## instructs my_reader to keep track of my_particleGroup
@@ -97,7 +108,7 @@ print(my_reader.particleGroups)
 # ## Outputting to JSON
 # At this point we're ready to output our data to `.json` format in order to load in with Firefly. The `Reader` object will automatically dump all of the necessary files associated with each of the `ParticleGroup` objects and `Settings` objects we've attached to it as described in the <a href="https://ageller.github.io/Firefly/docs/build/html/data_reader/reader.html">reader documentation</a>.
 
-# In[7]:
+# In[8]:
 
 
 ## have the reader dump all its data to the different JSON files
@@ -106,7 +117,7 @@ my_reader.dumpToJSON(loud=True)
 
 # Notice that `.dumpToJSON` returned an empty string, this is because the `.json` files were written to disk. Another option is instead to produce a single `.json` formatted string with all the data that would've been written to disk. This is useful for transmitting data through Flask, which is the subject of another tutorial.
 
-# In[8]:
+# In[9]:
 
 
 ## have the reader dump all its data to a single big string
@@ -119,7 +130,7 @@ print("big_JSON has %d characters"%len(big_JSON))
 # 
 # The procedure outlined above is a common use case, and so we've provided a sub-class to `Firefly.data_reader.Reader`, `Firefly.data_reader.ArrayReader` which wraps the `ParticleGroup` and `.addParticleGroup` so the user can get a `Reader` containing their data with a single initialization. It will automatically name particle groups and fields unless they are specified directly (see <a href="https://ageller.github.io/Firefly/docs/build/html/data_reader/reader.html">reader documentation</a>).
 
-# In[9]:
+# In[10]:
 
 
 my_arrayReader = ArrayReader(
