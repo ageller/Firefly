@@ -148,15 +148,21 @@ class FIREreader(Reader):
         ####### execute generic Reader __init__ below #######
         super().__init__(**kwargs)
 
-    def loadData(self):
+    def loadData(self,com_offset=False):
         """Loads FIRE snapshot data using Alex Gurvich's
         :func:`Firefly.data_reader.snapshot_utils.openSnapshot`.
         (reproduced from https://github.com/agurvich/abg_python) and binds it to a 
         corresponding :class:`Firefly.data_reader.ParticleGroup` instance.
+
+        :param com_offset: flag to offset all coordinates by the COM of the 
+            snapshot, defaults to False 
+        :type com_offset: bool, optional
         """
 
+        com = None
+
         for ptype,UIname,dec_factor in list(
-            zip(self.ptypes,self.UInames,self.decimation_factors)):
+            zip(self.ptypes,self.UInames,self.decimation_factors))[::-1]:
             print("Loading ptype %d"%ptype)
 
             ## load each particle type's snapshot data
@@ -164,8 +170,46 @@ class FIREreader(Reader):
                 self.snapdir,
                 self.snapnum,
                 int(ptype), ## ptype should be 1,2,3,4,etc...
-                keys_to_extract = ['Coordinates']+self.fields
+                keys_to_extract = ['Coordinates']+self.fields+['Masses']*com_offset
             )
+
+            if com_offset and com is None:
+                com = np.zeros(3)
+                ## use concentric shells to find an estimate
+                ##  for the center of mass
+                for i in range(4):
+                    rs = np.sqrt(np.sum(snapdict['Coordinates']**2,axis=1))
+                    rmax = np.nanmax(rs)/10**i
+
+
+                    rmask = rs <= rmax
+
+                    if np.sum(rmask) == 0:
+                        break
+
+                    print("Centering on particles within %.2f kpc"%rmax)
+
+                    ## compute the center of mass of the particles within this shell
+                    this_com = (np.sum(snapdict['Coordinates'][rmask] *
+                        snapdict['Masses'][rmask][:,None],axis=0) / 
+                        np.sum(snapdict['Masses'][rmask]))
+
+
+                    snapdict['Coordinates']-=this_com
+
+                    ## keep track of total com
+                    com += this_com
+
+                vcom = (np.sum(snapdict['Velocities'][rmask] *
+                    snapdict['Masses'][rmask][:,None],axis=0) /
+                    np.sum(snapdict['Masses'][rmask]))
+
+                snapdict['Velocities']-=vcom
+
+            elif com is not None: 
+                snapdict['Coordinates']-=com
+                snapdict['Velocities']-=vcom
+
 
             ## initialize output arrays for fields
             tracked_names = []
@@ -231,13 +275,17 @@ class FIREreader(Reader):
                     doSPHrad = 'SmoothingLength' in tracked_names)],
                 axis=0)
 
-            ## save the filenames that were opened 
-            ##  so you can re-open them yourself in that order if you need to
-            for particleGroup in self.particleGroups:
-                particleGroup.filenames_opened = snapdict['fnames']
+
+        ## reverse the order to match specified ptypes order
+        self.particleGroups = self.particleGroups[::-1]
+
+        ## save the filenames that were opened 
+        ##  so you can re-open them yourself in that order if you need to
+        for particleGroup in self.particleGroups:
+            particleGroup.filenames_opened = snapdict['fnames']
 
             ## add this particle group to the reader's settings file
-            self.settings.attachSettings(self.particleGroups[-1])
+            self.settings.attachSettings(particleGroup)
 
         return self.particleGroups
 
@@ -248,6 +296,8 @@ class SimpleFIREreader(FIREreader):
         path_to_snapshot,
         decimation_factor=10,
         JSONdir=None,
+        write_jsons_to_disk=True,
+        com_offset=False,
         **kwargs):
         """ A wrapper to :class:`Firefly.data_reader.FIREreader` that will open 
             FIRE collaboration formatted data with minimal interaction from the user 
@@ -263,9 +313,9 @@ class SimpleFIREreader(FIREreader):
 
                 :code:`settings['color']['stars'] = [0,0,1,1]`
 
-                :code:`settings['sizeMult']['gas'] = 0.5`
+                :code:`settings['sizeMult']['gas'] = 1`
 
-                :code:`settings['sizeMult']['stars'] = 0.5`
+                :code:`settings['sizeMult']['stars'] = 1`
 
                 :code:`settings['camera'] = [0,0,-15]`
 
@@ -277,6 +327,12 @@ class SimpleFIREreader(FIREreader):
         :param JSONdir: the sub-directory that will contain your JSON files, relative
             to your :code:`$HOME directory`. , defaults to :code:`$HOME/<JSON_prefix>`
         :type JSONdir: str, optional
+        :param write_jsons_to_disk: flag that controls whether data is saved to disk (:code:`True`) 
+            or only converted to a string and stored in :code:`self.JSON` (:code:`False`), defaults to True
+        :type write_jsons_to_disk: bool, optional
+        :param com_offset: flag to offset all coordinates by the COM of the 
+            snapshot, defaults to False 
+        :type com_offset: bool, optional
         :raises ValueError: if a snapnum cannot be inferred from the path_to_snapshot
         """
 
@@ -303,22 +359,22 @@ class SimpleFIREreader(FIREreader):
             UInames=['Gas','Stars'],
             decimation_factors=[decimation_factor,decimation_factor],
             fields=['AgeGyr','Temperature','Velocities','GCRadius'],
-            magFlags=[False,False,True,False], 
+            magFlags=[False,False,False,False], 
             logFlags=[False,True,False,False], 
             JSON_prefix='Data',
             JSONdir=JSONdir,
             **kwargs)
 
         ## load the data
-        self.loadData()
+        self.loadData(com_offset=com_offset)
 
         self.settings['color']['Gas'] = [1,0,0,1]
         self.settings['color']['Stars'] = [0,0,1,1]
 
-        self.settings['sizeMult']['Gas'] = 0.5
-        self.settings['sizeMult']['Stars'] = 0.5
+        self.settings['sizeMult']['Gas'] = 1
+        self.settings['sizeMult']['Stars'] = 1
 
         self.settings['camera'] = [0,0,-15]
 
         ## dump the JSON files
-        self.dumpToJSON(loud=True)
+        self.dumpToJSON(loud=True,write_jsons_to_disk=write_jsons_to_disk)

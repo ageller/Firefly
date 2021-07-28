@@ -462,11 +462,57 @@ div.rendered_html tbody tr:hover {
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="o">%</span><span class="k">load_ext</span> autoreload
 <span class="o">%</span><span class="k">autoreload</span> 2
+<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">YouTubeVideo</span>
 </pre></div>
 </div>
 </div>
-<div class="nbinput nblast docutils container">
+<p>A recording of this jupyter notebook in action is available at:</p>
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">YouTubeVideo</span><span class="p">(</span><span class="s2">&quot;Xt1vce_2DYo&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<iframe
+    width="400"
+    height="300"
+    src="https://www.youtube.com/embed/Xt1vce_2DYo"
+    frameborder="0"
+    allowfullscreen
+></iframe></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">YouTubeVideo</span><span class="p">(</span><span class="s2">&quot;ft0Y3XNJhl4&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<iframe
+    width="400"
+    height="300"
+    src="https://www.youtube.com/embed/ft0Y3XNJhl4"
+    frameborder="0"
+    allowfullscreen
+></iframe></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -508,7 +554,7 @@ div.rendered_html tbody tr:hover {
 <p>Specific information for each key can be found in this documentation.</p>
 <p>To create the necessary JSON files one should use the <code class="docutils literal notranslate"><span class="pre">Firefly.data_reader.Settings</span></code> class to create a <code class="docutils literal notranslate"><span class="pre">Settings</span></code> object. Once you have a <code class="docutils literal notranslate"><span class="pre">Settings</span></code> object you can manipulate the settings as you see fit and then either 1. manually save it to a file using the <code class="docutils literal notranslate"><span class="pre">outputToJSON()</span></code> method or 2. connect it to a <code class="docutils literal notranslate"><span class="pre">Firefly.data_reader.Reader</span></code> object in order to link it to a specific visualization (see the reader documentation for details on how to use a <code class="docutils literal notranslate"><span class="pre">Reader</span></code> object).</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -556,7 +602,7 @@ div.rendered_html tbody tr:hover {
 <h2>Settings can be changed the same way you would change a key in a dictionary<a class="headerlink" href="#Settings-can-be-changed-the-same-way-you-would-change-a-key-in-a-dictionary" title="Permalink to this headline">¶</a></h2>
 <p>There is key validation (so you can’t attempt to set a setting that doesn’t exist) but there is no value validation, so be careful that you use appropriate values or your app might not work. See the settings documentation for details on what values each setting can take.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -596,7 +642,7 @@ annotation None
 <h2>Settings are most useful when connected to a <code class="docutils literal notranslate"><span class="pre">Firefly.data_reader.Reader</span></code> object<a class="headerlink" href="#Settings-are-most-useful-when-connected-to-a-Firefly.data_reader.Reader-object" title="Permalink to this headline">¶</a></h2>
 <p>Doing so allows many of the necessary settings to be automatically generated as additional particle groups are added.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -613,7 +659,7 @@ annotation None
 </div>
 <p>Before we’ve attached the <code class="docutils literal notranslate"><span class="pre">Settings</span></code> object the particle settings are all empty.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -655,7 +701,7 @@ showColormap {}
 </div>
 <p>We’ll use a <code class="docutils literal notranslate"><span class="pre">Firefly.data_reader.ArrayReader</span></code>, a workhorse <code class="docutils literal notranslate"><span class="pre">Firefly.data_reader.Reader</span></code> sub-class with many convenient functions. See the reader documentation for details that are outside the scope of this tutorial.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -685,15 +731,13 @@ Outputting: PGroup_1 - 8000/8000 particles - 2 tracked fields
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/Users/agurvich/miniconda3/envs/pypi_test/lib/python3.9/site-packages/numpy-1.21.0-py3.9-macosx-10.9-x86_64.egg/numpy/core/fromnumeric.py:1970: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify &#39;dtype=object&#39; when creating the ndarray.
-  result = asarray(a).shape
-/Users/agurvich/miniconda3/envs/pypi_test/lib/python3.9/site-packages/numpy-1.21.0-py3.9-macosx-10.9-x86_64.egg/numpy/core/fromnumeric.py:43: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify &#39;dtype=object&#39; when creating the ndarray.
-  result = getattr(asarray(obj), method)(*args, **kwds)
+/Users/agurvich/miniconda3/envs/firefly/lib/python3.9/site-packages/numpy/core/_asarray.py:102: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify &#39;dtype=object&#39; when creating the ndarray.
+  return array(a, dtype, copy=False, order=order)
 </pre></div></div>
 </div>
 <p>The original <code class="docutils literal notranslate"><span class="pre">Settings</span></code> object is stored in <code class="docutils literal notranslate"><span class="pre">reader.settings</span></code>.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -716,7 +760,7 @@ Outputting: PGroup_1 - 8000/8000 particles - 2 tracked fields
 plotNmax {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None}
 showVel {&#39;PGroup_0&#39;: False, &#39;PGroup_1&#39;: False}
 velType {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None}
-color {&#39;PGroup_0&#39;: array([0.82714818, 0.91926459, 0.16732225, 1.        ]), &#39;PGroup_1&#39;: array([0.5381936 , 0.13206462, 0.37324155, 1.        ])}
+color {&#39;PGroup_0&#39;: array([0.09532231, 0.24132833, 0.13068872, 1.        ]), &#39;PGroup_1&#39;: array([0.9250689 , 0.38517182, 0.57390387, 1.        ])}
 sizeMult {&#39;PGroup_0&#39;: 1.0, &#39;PGroup_1&#39;: 1.0}
 showParts {&#39;PGroup_0&#39;: True, &#39;PGroup_1&#39;: True}
 
@@ -744,7 +788,7 @@ showColormap {&#39;PGroup_0&#39;: False, &#39;PGroup_1&#39;: False}
 </div>
 <p>for the purposes of this tutorial, we’ll just go ahead and output the <code class="docutils literal notranslate"><span class="pre">Settings</span></code> object we have manually</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -762,7 +806,7 @@ You will need to add this settings filename to filenames.json if this was not ca
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -775,7 +819,7 @@ You will need to add this settings filename to filenames.json if this was not ca
 <h2>Settings can also be imported from <code class="docutils literal notranslate"><span class="pre">.json</span></code> files<a class="headerlink" href="#Settings-can-also-be-imported-from-.json-files" title="Permalink to this headline">¶</a></h2>
 <p>Only settings defined in the file will be overwritten, so you can also mix-and-match settings files.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -783,7 +827,7 @@ You will need to add this settings filename to filenames.json if this was not ca
 <span class="n">new_settings</span> <span class="o">=</span> <span class="n">Settings</span><span class="p">()</span>
 
 <span class="c1">## import the settings from what we just saved above; prints the settings that are updated</span>
-<span class="n">new_settings</span><span class="o">.</span><span class="n">loadFromJSON</span><span class="p">(</span><span class="s2">&quot;./mySettings.json&quot;</span><span class="p">)</span>
+<span class="n">new_settings</span><span class="o">.</span><span class="n">loadFromJSON</span><span class="p">(</span><span class="s2">&quot;./exampleSettings.json&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -801,7 +845,7 @@ replacing showVel
 replacing velType
 {} --&gt; {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None}
 replacing color
-{} --&gt; {&#39;PGroup_0&#39;: [0.047194449400000005, 0.40002020730000004, 0.5540686418, 1.0], &#39;PGroup_1&#39;: [0.8691639814000001, 0.9023603707000001, 0.7737615901, 1.0]}
+{} --&gt; {&#39;PGroup_0&#39;: [0.0953223144, 0.24132833010000002, 0.13068871810000002, 1.0], &#39;PGroup_1&#39;: [0.9250688992, 0.38517182310000003, 0.5739038666, 1.0]}
 replacing sizeMult
 {} --&gt; {&#39;PGroup_0&#39;: 1.0, &#39;PGroup_1&#39;: 1.0}
 replacing showParts
@@ -833,7 +877,7 @@ replacing showColormap
 <h2>Attaching a ParticleGroup to a Settings<a class="headerlink" href="#Attaching-a-ParticleGroup-to-a-Settings" title="Permalink to this headline">¶</a></h2>
 <p>One other thing you may want to do (perhaps in the course of building your own custom <code class="docutils literal notranslate"><span class="pre">Reader</span></code> sub-class) is link a <code class="docutils literal notranslate"><span class="pre">Firefly.data_reader.ParticleGroup</span></code> object to a <code class="docutils literal notranslate"><span class="pre">Settings</span></code> object so that the different particle settings can be imported. <code class="docutils literal notranslate"><span class="pre">ParticleGroup</span></code> settings can be changed in <code class="docutils literal notranslate"><span class="pre">settings_default</span></code> attribute (which is just a normal python dictionary).</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -845,7 +889,7 @@ replacing showColormap
 </div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -869,7 +913,7 @@ replacing showColormap
 plotNmax {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None, &#39;test&#39;: None}
 showVel {&#39;PGroup_0&#39;: False, &#39;PGroup_1&#39;: False, &#39;test&#39;: False}
 velType {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None, &#39;test&#39;: None}
-color {&#39;PGroup_0&#39;: [0.047194449400000005, 0.40002020730000004, 0.5540686418, 1.0], &#39;PGroup_1&#39;: [0.8691639814000001, 0.9023603707000001, 0.7737615901, 1.0], &#39;test&#39;: [0, 0, 1, 1]}
+color {&#39;PGroup_0&#39;: [0.0953223144, 0.24132833010000002, 0.13068871810000002, 1.0], &#39;PGroup_1&#39;: [0.9250688992, 0.38517182310000003, 0.5739038666, 1.0], &#39;test&#39;: [0, 0, 1, 1]}
 sizeMult {&#39;PGroup_0&#39;: 1.0, &#39;PGroup_1&#39;: 1.0, &#39;test&#39;: 1.0}
 showParts {&#39;PGroup_0&#39;: True, &#39;PGroup_1&#39;: True, &#39;test&#39;: True}
 

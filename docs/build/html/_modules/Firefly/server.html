@@ -167,10 +167,12 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">import</span> <span class="nn">subprocess</span><span class="o">,</span><span class="nn">signal</span>
+<span class="kn">import</span> <span class="nn">socket</span><span class="o">,</span><span class="nn">requests</span>
 
 <span class="kn">import</span> <span class="nn">json</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">time</span>
 
 <span class="c1">## make sure we are importing from wherever this file is, rather than the system </span>
 <span class="c1">##  installation of Firefly. Saves us devs a lot of confusion and is equivalent </span>
@@ -428,16 +430,56 @@
     <span class="k">finally</span><span class="p">:</span>
         <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">old_dir</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="spawnFireflyServer"><a class="viewcode-back" href="../../reference/api/server/Firefly.server.spawnFireflyServer.html#Firefly.server.spawnFireflyServer">[docs]</a><span class="k">def</span> <span class="nf">spawnFireflyServer</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+<div class="viewcode-block" id="spawnFireflyServer"><a class="viewcode-back" href="../../reference/api/server/Firefly.server.spawnFireflyServer.html#Firefly.server.spawnFireflyServer">[docs]</a><span class="k">def</span> <span class="nf">spawnFireflyServer</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span><span class="n">frames_per_second</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span><span class="n">decimation_factor</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">max_time</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Wrapper to :func:`Firefly.server.startFireflyServer` that instead starts a background process.</span>
 
+<span class="sd">    :param port: port number to serve the :code:`.html` files on, defaults to 5000</span>
+<span class="sd">    :type port: int, optional</span>
+<span class="sd">    :param frames_per_second: enforced FPS for stream quality, used only if</span>
+<span class="sd">		localhost:&lt;port&gt;/stream is accessed, defaults to 30</span>
+<span class="sd">    :type frames_per_second: int, optional</span>
+<span class="sd">    :param decimation_factor: factor to decimate data that is being passed through</span>
+<span class="sd">		localhost:&lt;port&gt;/data_input, defaults to 1</span>
+<span class="sd">    :type decimation_factor: int, optional</span>
+<span class="sd">    :param max_time: maximum amount of time to wait for a Firefly server</span>
+<span class="sd">        to be available. </span>
+<span class="sd">    :type max_time: float, optional</span>
 <span class="sd">    :return: subprocess.Popen</span>
 <span class="sd">    :rtype: subprocess handler</span>
+<span class="sd">    :raises RuntimeError: if max_time elapses without a successful Firefly server being initialized.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="c1">## wrap passed arguments into a list of strings</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;</span><span class="si">%d</span><span class="s2">&quot;</span><span class="o">%</span><span class="n">port</span><span class="p">,</span><span class="s2">&quot;</span><span class="si">%d</span><span class="s2">&quot;</span><span class="o">%</span><span class="n">frames_per_second</span><span class="p">,</span><span class="s2">&quot;</span><span class="si">%d</span><span class="s2">&quot;</span><span class="o">%</span><span class="n">decimation_factor</span><span class="p">]</span>
+
     <span class="n">run_server</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span><span class="s1">&#39;run_server.py&#39;</span><span class="p">)</span>
-    <span class="c1">## args must be positional, they are 1) port 2) fps 3) decimation_factor</span>
-    <span class="k">return</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">([</span><span class="s2">&quot;python3&quot;</span><span class="p">,</span> <span class="n">run_server</span><span class="p">]</span><span class="o">+</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">args</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;str&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span></div>
+    <span class="n">process</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">([</span><span class="s2">&quot;python3&quot;</span><span class="p">,</span> <span class="n">run_server</span><span class="p">]</span><span class="o">+</span><span class="n">args</span><span class="p">)</span>
+
+    <span class="n">init_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="c1">## check if port is in use</span>
+    <span class="k">with</span> <span class="n">socket</span><span class="o">.</span><span class="n">socket</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">SOCK_STREAM</span><span class="p">)</span> <span class="k">as</span> <span class="n">s</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="s2">&quot;Waiting up to </span><span class="si">%d</span><span class="s2"> seconds for background Firefly server to start&quot;</span><span class="o">%</span><span class="n">max_time</span><span class="p">,</span>
+            <span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span> 
+                <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;http://localhost:</span><span class="si">{</span><span class="n">port</span><span class="si">:</span><span class="s1">d</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span><span class="n">json</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">)</span>
+                <span class="k">break</span>
+            <span class="k">except</span><span class="p">:</span> 
+            <span class="c1">## need to re-check the connection each iteration</span>
+            <span class="c1">#if s.connect_ex((&#39;localhost&#39;, port)) != 0:</span>
+                <span class="c1">#break</span>
+
+                <span class="k">if</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="n">init_time</span> <span class="o">&gt;=</span> <span class="n">max_time</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                    <span class="s2">&quot;Hit max wait-time of </span><span class="si">%d</span><span class="s2"> seconds.&quot;</span><span class="o">%</span><span class="n">max_time</span><span class="o">+</span>
+                    <span class="s2">&quot; A Firefly server could not be opened in the background.&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span> 
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span><span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+                    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;done! Your server is available at - http://localhost:</span><span class="si">%d</span><span class="s2">&quot;</span><span class="o">%</span><span class="n">port</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">process</span></div>
 
 <div class="viewcode-block" id="killAllFireflyServers"><a class="viewcode-back" href="../../reference/api/server/Firefly.server.killAllFireflyServers.html#Firefly.server.killAllFireflyServers">[docs]</a><span class="k">def</span> <span class="nf">killAllFireflyServers</span><span class="p">(</span><span class="n">pid</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Kill python processes associated with hosting Flask web-servers.</span>
@@ -449,7 +491,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">pid</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="c1">## kill indiscriminately</span>
-        <span class="n">return_code</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">&quot;ps aux | grep &#39;FireflyFlaskApp.py&#39; | awk &#39;{print $2}&#39; | xargs kill&quot;</span><span class="p">)</span>
+        <span class="n">return_code</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">&quot;ps aux | grep &#39;run_server.py&#39; | awk &#39;{print $2}&#39; | xargs kill&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="c1">## kill only the pid we were passed, ideally from the subprocess.Popen().pid but</span>
         <span class="c1">##  you know I don&#39;t judge.  </span>

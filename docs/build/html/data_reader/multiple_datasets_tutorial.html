@@ -462,11 +462,35 @@ div.rendered_html tbody tr:hover {
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
 <span></span><span class="o">%</span><span class="k">load_ext</span> autoreload
 <span class="o">%</span><span class="k">autoreload</span> 2
+<span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">YouTubeVideo</span>
 </pre></div>
 </div>
 </div>
-<div class="nbinput nblast docutils container">
+<p>A recording of this jupyter notebook in action is available at:</p>
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
+<span></span><span class="n">YouTubeVideo</span><span class="p">(</span><span class="s2">&quot;TMq3IvnxGY8&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
+</pre></div>
+</div>
+<div class="output_area rendered_html docutils container">
+<iframe
+    width="400"
+    height="300"
+    src="https://www.youtube.com/embed/TMq3IvnxGY8"
+    frameborder="0"
+    allowfullscreen
+></iframe></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -474,7 +498,6 @@ div.rendered_html tbody tr:hover {
 <span class="kn">import</span> <span class="nn">os</span>
 
 <span class="kn">import</span> <span class="nn">sys</span>
-<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;/Users/ageller/VISUALIZATIONS/Firefly&#39;</span><span class="p">)</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;/Users/agurvich/research/repos/Firefly/src&#39;</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">Firefly.data_reader</span> <span class="kn">import</span> <span class="n">ArrayReader</span>
 </pre></div>
@@ -489,7 +512,7 @@ div.rendered_html tbody tr:hover {
 <p>When the Firefly webapp starts up it looks for a <code class="docutils literal notranslate"><span class="pre">Firefly/static/data/startup.json</span></code> file to tell it which dataset to display. If only a single entry is present then it will automatically begin loading that dataset. If multiple entries are listed then it will present the user with a dropdown box to select which dataset to load. See the documentation for managing multiple datasets for how to format the <code class="docutils literal notranslate"><span class="pre">startup.json</span></code> file to list multiple entries manually. We provide a method of easily adding
 datasets to the <code class="docutils literal notranslate"><span class="pre">startup.json</span></code> file using the <code class="docutils literal notranslate"><span class="pre">write_startup</span></code> keyword argument of the <code class="docutils literal notranslate"><span class="pre">Firefly.data_reader.Reader</span></code> (sub-)class(es).</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -506,7 +529,7 @@ datasets to the <code class="docutils literal notranslate"><span class="pre">sta
 </div>
 <p>We’ll overwrite whatever file is existing with a new <code class="docutils literal notranslate"><span class="pre">startup.json</span></code> with only 1 entry in it. Then we’ll append a second entry. Then we’ll create a reader and specify that it should not be added to the <code class="docutils literal notranslate"><span class="pre">startup.json</span></code> file.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -561,15 +584,13 @@ Outputting: PGroup_1 - 8000/8000 particles - 2 tracked fields
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/Users/agurvich/miniconda3/envs/pypi_test/lib/python3.9/site-packages/numpy-1.21.0-py3.9-macosx-10.9-x86_64.egg/numpy/core/fromnumeric.py:1970: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify &#39;dtype=object&#39; when creating the ndarray.
-  result = asarray(a).shape
-/Users/agurvich/miniconda3/envs/pypi_test/lib/python3.9/site-packages/numpy-1.21.0-py3.9-macosx-10.9-x86_64.egg/numpy/core/fromnumeric.py:43: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify &#39;dtype=object&#39; when creating the ndarray.
-  result = getattr(asarray(obj), method)(*args, **kwds)
+/Users/agurvich/miniconda3/envs/firefly/lib/python3.9/site-packages/numpy/core/_asarray.py:102: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify &#39;dtype=object&#39; when creating the ndarray.
+  return array(a, dtype, copy=False, order=order)
 </pre></div></div>
 </div>
 <p>Let’s read the content of the <code class="docutils literal notranslate"><span class="pre">startup.json</span></code> file:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -591,7 +612,7 @@ Outputting: PGroup_1 - 8000/8000 particles - 2 tracked fields
 <h2>Creating a standalone iteration of Firefly<a class="headerlink" href="#Creating-a-standalone-iteration-of-Firefly" title="Permalink to this headline">¶</a></h2>
 <p>You can copy the necessary Firefly source files by creating a <code class="docutils literal notranslate"><span class="pre">Reader</span></code> object containing your data and using the <code class="docutils literal notranslate"><span class="pre">copyFireflySourceToTarget</span></code>. We’ve also included a script that will automatically create a new Github repository and enable GitHub pages so that your data can be visited by users over the internet via URL. For instructions on how to configure this feature and details for copying the Firefly source see the documentation for managing multiple datasets.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -600,7 +621,7 @@ Outputting: PGroup_1 - 8000/8000 particles - 2 tracked fields
 </div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -610,7 +631,7 @@ Outputting: PGroup_1 - 8000/8000 particles - 2 tracked fields
 </div>
 <p>Let’s read the contents of the new <code class="docutils literal notranslate"><span class="pre">my_Firefly</span></code> directory:</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
@@ -627,7 +648,7 @@ index.html <span class="ansi-blue-fg">static</span>
 </pre></div></div>
 </div>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>

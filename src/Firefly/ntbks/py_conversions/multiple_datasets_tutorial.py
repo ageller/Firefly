@@ -1,26 +1,36 @@
 #!/usr/bin/env python
 # coding: utf-8
 
+# `Firefly/ntbks/multiple_datasets_tutorial.ipynb`
+
 # In[1]:
 
 
 get_ipython().run_line_magic('load_ext', 'autoreload')
 get_ipython().run_line_magic('autoreload', '2')
+from IPython.display import YouTubeVideo
 
+
+# A recording of this jupyter notebook in action is available at:
 
 # In[2]:
+
+
+YouTubeVideo("TMq3IvnxGY8")
+
+
+# In[3]:
 
 
 import numpy as np
 import os
 
 import sys
-sys.path.insert(0, '/Users/ageller/VISUALIZATIONS/Firefly')
 sys.path.insert(0,'/Users/agurvich/research/repos/Firefly/src')
 from Firefly.data_reader import ArrayReader
 
 
-# # Managing multiple datasets with Firefly
+# # Tutorial notebook: Managing multiple datasets with Firefly
 # There are two ways to manage multiple datasets with Firefly
 # 1. listing multiple entries in startup.json
 # 2. creating a "standalone" iteration of Firefly
@@ -30,7 +40,7 @@ from Firefly.data_reader import ArrayReader
 # ## Editing the entries of `startup.json`
 # When the Firefly webapp starts up it looks for a `Firefly/static/data/startup.json` file to tell it which dataset to display. If only a single entry is present then it will automatically begin loading that dataset. If multiple entries are listed then it will present the user with a dropdown box to select which dataset to load. See the <a href="https://ageller.github.io/Firefly/docs/build/html/data_reader/multiple_datasets.html">documentation for managing multiple datasets</a> for how to format the `startup.json` file to list multiple entries manually. We provide a method of easily adding datasets to the `startup.json` file using the `write_startup` keyword argument of the `Firefly.data_reader.Reader` (sub-)class(es). 
 
-# In[3]:
+# In[4]:
 
 
 ## let's create some sample data, a grid of points in a 3d cube
@@ -45,7 +55,7 @@ fields = np.random.random(size=xs.size)
 
 # We'll overwrite whatever file is existing with a new `startup.json` with only 1 entry in it. Then we'll append a second entry. Then we'll create a reader and specify that it should not be added to the `startup.json` file. 
 
-# In[4]:
+# In[5]:
 
 
 ## initialize an ArrayReader
@@ -71,7 +81,7 @@ null_reader = ArrayReader(
 
 # Let's read the content of the `startup.json` file:
 
-# In[5]:
+# In[6]:
 
 
 get_ipython().system('cat /Users/agurvich/research/repos/Firefly/src/Firefly/static/data/startup.json')
@@ -84,7 +94,7 @@ get_ipython().system('cat /Users/agurvich/research/repos/Firefly/src/Firefly/sta
 # We've also included a script that will automatically create a new Github repository and enable GitHub pages so that your data can be visited by users over the internet via URL. 
 # For instructions on how to configure this feature and details for copying the Firefly source see the <a href="https://ageller.github.io/Firefly/docs/build/html/data_reader/multiple_datasets.html">documentation for managing multiple datasets</a>.
 
-# In[6]:
+# In[7]:
 
 
 reader.copyFireflySourceToTarget(init_gh_pages=False)
@@ -92,13 +102,13 @@ reader.copyFireflySourceToTarget(init_gh_pages=False)
 
 # Let's read the contents of the new `my_Firefly` directory:
 
-# In[7]:
+# In[8]:
 
 
 get_ipython().system('ls /Users/agurvich/my_Firefly/')
 
 
-# In[8]:
+# In[9]:
 
 
 get_ipython().system('ls /Users/agurvich/my_Firefly/static/data/')
