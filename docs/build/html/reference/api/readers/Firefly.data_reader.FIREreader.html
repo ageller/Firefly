@@ -261,11 +261,17 @@ colormapFlags, magFlags, and logFlags does not match.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="Firefly.data_reader.FIREreader.loadData">
-<span class="sig-name descname"><span class="pre">loadData</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/Firefly/data_reader/FIREreader.html#FIREreader.loadData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Firefly.data_reader.FIREreader.loadData" title="Permalink to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">loadData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">com_offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/Firefly/data_reader/FIREreader.html#FIREreader.loadData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Firefly.data_reader.FIREreader.loadData" title="Permalink to this definition">¶</a></dt>
 <dd><p>Loads FIRE snapshot data using Alex Gurvich’s
 <code class="xref py py-func docutils literal notranslate"><span class="pre">Firefly.data_reader.snapshot_utils.openSnapshot()</span></code>.
 (reproduced from <a class="reference external" href="https://github.com/agurvich/abg_python">https://github.com/agurvich/abg_python</a>) and binds it to a 
 corresponding <a class="reference internal" href="../classes/Firefly.data_reader.ParticleGroup.html#Firefly.data_reader.ParticleGroup" title="Firefly.data_reader.ParticleGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">Firefly.data_reader.ParticleGroup</span></code></a> instance.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>com_offset</strong> (<em>bool</em><em>, </em><em>optional</em>) – flag to offset all coordinates by the COM of the 
+snapshot, defaults to False</p>
+</dd>
+</dl>
 </dd></dl>
 
 </dd></dl>
