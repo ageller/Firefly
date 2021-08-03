@@ -137,6 +137,7 @@ class Settings(object):
         self,
         title='Firefly',
         annotation=None,
+        showfps=False,
         **extra):
         """Settings that affect the browser window
 
@@ -146,6 +147,9 @@ class Settings(object):
         :param annotation: text to include at the top of the
             Firefly window as an annotation, defaults to None
         :type annotation: str, optional
+        :param showfps: flag to display the FPS (frames per second) of the 
+            Firefly scene, defaults to False
+        :type showfps: bool, optional
         """
 
         self.__window_settings = {
@@ -153,7 +157,8 @@ class Settings(object):
             ## used in the web app to check if the settings have been read in
             ##  this should not be modified
             'loaded':True, 
-            'annotation':annotation 
+            'annotation':annotation ,
+            'showfps':showfps
         }
 
     def UI_settings(
@@ -261,6 +266,7 @@ class Settings(object):
         stereo=False,
         stereoSep=0.06,
         decimate=None,
+        start_tween=False,
         **extra):
         """General settings that affect the state app state
 
@@ -288,6 +294,10 @@ class Settings(object):
             decimate > 1 here).  
             This is a single value (not a dict), defaults to None
         :type decimate: int, optional
+        :param start_tween: flag to initialize the Firefly scene in tween mode, 
+            requires a valid tweenParams.json file to be present in the JSONdir,
+            defaults to False
+        :type start_tween: bool, optional
         """
 
         self.__startup_settings = {
@@ -297,6 +307,7 @@ class Settings(object):
             'stereo':stereo,
             'stereoSep':stereoSep,
             'decimate':decimate,
+            'start_tween':start_tween
         }
     
     def particle_startup_settings(
