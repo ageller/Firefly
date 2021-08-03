@@ -225,15 +225,6 @@ function applyOptions(){
 		}
 	}
 
-    // add an annotation to the top if necessary
-	if (viewerParams.parts.options.hasOwnProperty('annotation')){
-            if (viewerParams.parts.options.annotation != null){
-                elm = document.getElementById('annotate_container');
-                elm.innerHTML=viewerParams.parts.options.annotation;
-                elm.style.display='block';
-            }
-    }
-
 	//maximum range in calculating the length the velocity vectors
 	if (viewerParams.parts.options.hasOwnProperty("maxVrange")){
 		if (viewerParams.parts.options.maxVrange != null){
@@ -246,6 +237,31 @@ function applyOptions(){
 			}
 		}
 	}
+
+    // add an annotation to the top if necessary
+	if (viewerParams.parts.options.hasOwnProperty('annotation')){
+		if (viewerParams.parts.options.annotation != null){
+			elm = document.getElementById('annotate_container');
+			elm.innerHTML=viewerParams.parts.options.annotation;
+			elm.style.display='block';
+		}
+    }
+
+	// flag to show fps in top right corner
+	if (viewerParams.parts.options.hasOwnProperty('showfps')){
+		if (viewerParams.parts.options.showfps != null){
+			viewerParams.showfps = viewerParams.parts.options.showfps;
+		}
+    }
+
+	// flag to show fps in top right corner
+	if (viewerParams.parts.options.hasOwnProperty('start_tween')){
+		if (viewerParams.parts.options.start_tween){
+			viewerParams.updateTween = true	
+			setTweenviewerParams();
+		}
+	}
+
 	//particle specific options
 	for (var i=0; i<viewerParams.partsKeys.length; i++){
 		var p = viewerParams.partsKeys[i];
