@@ -907,6 +907,8 @@ function initColumnDensity(){
 
 /* HELPER FUNCTIONS */
 // makeViewer ->
+// continuously check if viewerParams attributes that
+// should be initialized here are null, if so, keep waiting
 function confirmViewerInit(){
 	var keys = ["partsKeys", "PsizeMult", "plotNmax", "decimate", "stereoSepMax", "friction", "Pcolors", "showParts", "showVel", "velopts", "velType", "ckeys", "colormapVals", "colormapLims", "colormapVariable", "colormap", "showColormap", "fkeys", "filterVals", "filterLims", "renderer", "scene", "controls","camera","parts"];
 
@@ -1197,6 +1199,14 @@ function drawLoadingBar(){
 	window.addEventListener('resize', moveLoadingBar);
 
 }
+
+// drawLoadingBar ->
+function moveLoadingBar(){
+	var screenWidth = parseFloat(window.innerWidth);
+	d3.selectAll('#loadingRectOutline').attr('x', (screenWidth - viewerParams.loadingSizeX)/2);
+	d3.selectAll('#loadingRect').attr('x', (screenWidth - viewerParams.loadingSizeX)/2);
+}
+
 // compileData ->
 function updateLoadingBar(){
 	//console.log(viewerParams.loadfrac, viewerParams.loadingSizeX*viewerParams.loadfrac)
@@ -1274,13 +1284,6 @@ function calcVelVals(p){
 	for (var i=0; i<viewerParams.parts[p].Velocities.length; i++){
 		viewerParams.parts[p].NormVel.push( THREE.Math.clamp((viewerParams.parts[p].magVelocities[i] - min) / vdif, 0., 1.));
 	}
-}
-
-// drawLoadingBar ->
-function moveLoadingBar(){
-	var screenWidth = parseFloat(window.innerWidth);
-	d3.selectAll('#loadingRectOutline').attr('x', (screenWidth - viewerParams.loadingSizeX)/2);
-	d3.selectAll('#loadingRect').attr('x', (screenWidth - viewerParams.loadingSizeX)/2);
 }
 
 // initControls ->
