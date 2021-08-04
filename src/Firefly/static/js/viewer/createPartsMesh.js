@@ -156,6 +156,8 @@ function drawScene(pdraw = viewerParams.partsKeys)
 					vindex++;
 				}
 
+				// fill flattened color array from pre-computed colormap values
+				// stored in viewerParams.parts[p]["colorArray"]
 				//probably a better way to deal with this
 				if (viewerParams.parts[p].hasOwnProperty("colorArray")){
 					colorArray[colorIndex] = viewerParams.parts[p].colorArray[j][0]
