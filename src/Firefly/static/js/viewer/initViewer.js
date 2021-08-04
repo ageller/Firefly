@@ -1,54 +1,376 @@
-function initControls(){
+/////////////////////
+//// for sockets
+/////////////////////
+//https://blog.miguelgrinberg.com/post/easy-websockets-with-flask-and-gevent
+//https://github.com/miguelgrinberg/Flask-SocketIO
+function connectViewerSocket(){
+	//$(document).ready(function() {
+	document.addEventListener("DOMContentLoaded", function(event) { 
+		// Event handler for new connections.
+		// The callback function is invoked when a connection with the
+		// server is established.
+		socketParams.socket.on('connect', function() {
+			socketParams.socket.emit('connection_test', {data: 'Viewer connected!'});
+		});
+		socketParams.socket.on('connection_response', function(msg) {
+			console.log('connection response', msg);
+		});     
+		// Event handler for server sent data.
+		// The callback function is invoked whenever the server emits data
+		// to the client. The data is then displayed in the "Received"
+		// section of the page.
+		//updates from GUI
+		socketParams.socket.on('update_viewerParams', function(msg) {
+			setParams(msg);
+		});
 
-	var forGUI = []
-	forGUI.push({'setGUIParamByKey':[viewerParams.useTrackball, "useTrackball"]})
+		socketParams.socket.on('show_loader', function(msg) {
+			d3.select("#splashdivLoader").selectAll('svg').remove();
+			d3.select("#splashdiv5").text("Loading...");
+			d3.select("#loader").style("display","visible");
+			viewerParams.loaded = false;
+			viewerParams.pauseAnimation = true;
 
-	if (viewerParams.useTrackball) {
-		var xx = new THREE.Vector3(0,0,0);
-		viewerParams.camera.getWorldDirection(xx);
-		viewerParams.controls = new THREE.TrackballControls( viewerParams.camera, viewerParams.renderer.domElement );
-		viewerParams.controls.target = new THREE.Vector3(viewerParams.camera.position.x + xx.x, viewerParams.camera.position.y + xx.y, viewerParams.camera.position.z + xx.z);
-		if (viewerParams.parts.hasOwnProperty('options') && !viewerParams.switchControls){
-			if (viewerParams.parts.options.hasOwnProperty('center') ){
-				if (viewerParams.parts.options.center != null){
-					viewerParams.controls.target = new THREE.Vector3(viewerParams.parts.options.center[0], viewerParams.parts.options.center[1], viewerParams.parts.options.center[2]);
+			viewerParams.loadfrac = 0.;
+			drawLoadingBar();
 
+			showSplash();
+		});
+
+		socketParams.socket.on('input_data', function(msg) {
+			//only tested for local (GUI + viewer in one window)
+			console.log("======== have new data : ", Object.keys(msg));
+
+
+			//first compile the data from multiple calls
+			if ('status' in msg){
+				if (msg.status == 'start') {
+					var socketCheck = viewerParams.usingSocket;
+					var localCheck = viewerParams.local;
+					//in case it's already waiting, which will happen if loading an hdf5 file from the gui
+					clearInterval(viewerParams.waitForInit);
+					defineViewerParams();
+					viewerParams.pauseAnimation = true;
+					viewerParams.usingSocket = socketCheck; 
+					viewerParams.local = localCheck; 
+
+					viewerParams.newInternalData.data = {};
+					viewerParams.newInternalData.len = msg.length;
+					viewerParams.newInternalData.count = 0;
+				}
+				if (msg.status == 'data') {
+					viewerParams.newInternalData.count += 1;
+					//I will update the loading bar here, but I'm not sure what fraction of the time this should take (using 0.8 for now)
+					viewerParams.loadfrac = (viewerParams.newInternalData.count/viewerParams.newInternalData.len)*0.8; 
+					updateLoadingBar();
+					Object.keys(msg).forEach(function(key,i){
+						if (key != 'status'){
+							viewerParams.newInternalData.data[key] = JSON.parse(msg[key]);
+							if (key.includes('filenames.json')){
+								viewerParams.filenames = JSON.parse(msg[key]);
+							}
+						}
+					})
+				}
+				if (msg.status == 'done'){
+					console.log('======== have all data', viewerParams.newInternalData, viewerParams.filenames);
+					loadData(initInputData, prefix='', internalData=viewerParams.newInternalData.data, initialLoadFrac=viewerParams.loadfrac)
 				}
 			}
-			if (viewerParams.parts.options.hasOwnProperty('cameraUp') ){
-				if (viewerParams.parts.options.cameraUp != null){
-					viewerParams.camera.up.set(viewerParams.parts.options.cameraUp[0], viewerParams.parts.options.cameraUp[1], viewerParams.parts.options.cameraUp[2]);
-				}
-			}
-			//this does not work (a bug/feature of trackballControls)
-			if (viewerParams.parts.options.hasOwnProperty('cameraRotation') ){
-				if (viewerParams.parts.options.cameraRotation != null){
-					viewerParams.camera.rotation.set(viewerParams.parts.options.cameraRotation[0], viewerParams.parts.options.cameraRotation[1], viewerParams.parts.options.cameraRotation[2]);
-				}
-			}
 
-		} 
+		});
 
-		viewerParams.controls.dynamicDampingFactor = viewerParams.friction;
-		viewerParams.controls.addEventListener('change', sendCameraInfoToGUI);
-	} else if (viewerParams.useOrientationControls) {
-		viewerParams.controls = new THREE.DeviceOrientationControls(viewerParams.camera);
-		viewerParams.controls.updateAlphaOffsetAngle(THREE.Math.degToRad(-90));
-	} else {
-		viewerParams.controls = new THREE.FlyControls( viewerParams.camera , viewerParams.renderer.domElement);
-		viewerParams.controls.movementSpeed = 1. - Math.pow(viewerParams.friction, viewerParams.flyffac);
-	}
+		socketParams.socket.on('update_streamer', function(msg) {
+			viewerParams.streamReady = true;
+		});
+		socketParams.socket.on('reload_viewer', function(msg) {
+			console.log('!!! reloading viewer');
+			location.reload();
+		});
+	});
+}
 
-	if (viewerParams.haveUI){
-		var evalString = 'elm = document.getElementById("CenterCheckBox"); elm.checked = '+viewerParams.useTrackball+'; elm.value = '+viewerParams.useTrackball+';'
-		forGUI.push({'evalCommand':evalString});
-	}
+function initInputData(){
+	console.log('======== remaking gui and viewer')
+	var forGUIprepend = [];
+	forGUIprepend.push({'clearGUIinterval':null});
+	forGUIprepend.push({'defineGUIParams':null});
 
-	viewerParams.switchControls = false;
-	sendToGUI(forGUI);
+	var forGUIappend = [];
+	forGUIappend.push({'setGUIParamByKey':[viewerParams.usingSocket, "usingSocket"]});
+	forGUIappend.push({'setGUIParamByKey':[viewerParams.local, "local"]});
+	forGUIappend.push({'makeUI':viewerParams.local});
+
+	//I think I need to wait a moment because sometimes this doesn't fire (?)
+	setTimeout(function(){
+		makeViewer(null, forGUIprepend, forGUIappend);
+		WebGLStart();
+	}, 1000);
+
+
 
 }
 
+//so that it can run locally also without using Flask
+function runLocal(useSockets=true, showGUI=true, useOrientationControls=false, startStereo=false, pSize=null){
+	viewerParams.local = true;
+	viewerParams.usingSocket = useSockets;
+	forGUI = [];
+	forGUI.push({'setGUIParamByKey':[viewerParams.usingSocket, "usingSocket"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.local, "local"]});
+	sendToGUI(forGUI);
+
+	viewerParams.useStereo = startStereo;
+	viewerParams.useOrientationControls = useOrientationControls;
+	viewerParams.useTrackball = !useOrientationControls;
+	
+	//both of these start setIntervals to wait for the proper variables to be set
+	makeViewer(pSize);
+	if (showGUI) {
+		makeUI(local=true);
+	} else {
+		d3.selectAll('.UIcontainer').classed('hidden', true)
+	}
+	
+	//This will  load the data, and then start the WebGL rendering
+	getFilenames(prefix = "static/");
+}
+
+//wait for all the input before loading
+function makeViewer(pSize=null, prepend=[], append=[]){
+	viewerParams.haveUI = false;
+	viewerParams.ready = false; 
+	console.log("Waiting for viewer init ...")
+	clearInterval(viewerParams.waitForInit);
+	viewerParams.waitForInit = setInterval(function(){ 
+		var ready = confirmViewerInit();
+		if (ready){
+			console.log("Viewer ready.")
+			clearInterval(viewerParams.waitForInit);
+			viewerParams.ready = true;
+			viewerParams.pauseAnimation = false;
+			viewerParams.parts.options0 = createPreset(); //this might break things if the presets don't work...
+			console.log("initial options", viewerParams.parts.options)
+
+			//to test
+			if (pSize) {
+				viewerParams.PsizeMult.Gas = pSize;
+				console.log('new Psize', pSize)
+			}
+			sendInitGUI(prepend=prepend, append=append);
+		}
+	}, 100);
+}
+
+//if startup.json exists, this is called first
+function getFilenames(prefix=""){
+	d3.json(prefix+viewerParams.startup,  function(dir) {
+		console.log(prefix, dir, viewerParams.startup, viewerParams)
+		if (dir != null){
+			var i = 0;
+			viewerParams.dir = dir;
+			if (Object.keys(viewerParams.dir).length > 1){
+				i = null
+				console.log("multiple file options in startup:", Object.keys(viewerParams.dir).length, viewerParams.dir);
+				var forGUI = [];
+				forGUI.push({'setGUIParamByKey':[viewerParams.dir, "dir"]});
+				forGUI.push({'showLoadingButton':'#selectStartupButton'});
+				forGUI.push({'selectFromStartup':prefix});
+				sendToGUI(forGUI);
+			} 
+			if (i != null && i < Object.keys(viewerParams.dir).length){
+				d3.json(prefix+viewerParams.dir[i] + "/filenames.json",  function(files) {
+					if (files != null){
+						callLoadData([files, prefix]);
+					} else {
+						sendToGUI([{'showLoadingButton':'#loadDataButton'}]);
+						alert("Cannot load data. Please select another directory.");
+					}
+				});
+			}
+		} else {
+			sendToGUI([{'showLoadingButton':'#loadDataButton'}]);
+		}
+	});
+}
+
+//once a data directory is identified, this will define the parameters, draw the loading bar and, load in the data
+function callLoadData(args){
+	var files = args[0];
+	var prefix = "";
+	if (args.length > 0) prefix = args[1];
+
+	var dir = {};
+	if (viewerParams.hasOwnProperty('dir')){
+		dir = viewerParams.dir;
+	}
+	viewerParams.dir = dir;
+	sendToGUI([{'setGUIParamByKey':[viewerParams.dir, "dir"]}]);
+
+	drawLoadingBar();
+	viewerParams.filenames = files;
+	console.log("loading new data", files)
+	loadData(WebGLStart, prefix);
+}
+
+// launch the app control flow, >> ends in animate <<
+function WebGLStart(){
+
+	//reset the window title
+	if (viewerParams.parts.hasOwnProperty('options')){
+		if (viewerParams.parts.options.hasOwnProperty('title')){
+			window.document.title = viewerParams.parts.options.title
+		}
+	}
+
+	document.addEventListener('mousedown', handleMouseDown);
+
+	//initialize various values for the parts dict from the input data file, 
+	initPVals();
+
+	initScene();
+	
+	initColumnDensity();
+
+	//draw everything
+	Promise.all([
+		drawScene(),
+	]).then(function(){
+		//searchOctree();
+		
+		//begin the animation
+		// keep track of runtime for crashing the app rather than the computer
+		var currentTime = new Date();
+		var seconds = currentTime.getTime()/1000;
+		viewerParams.currentTime = seconds;
+
+		viewerParams.pauseAnimation = false;
+		animate();
+
+	})
+
+
+
+}
+
+//initialize various values for the parts dict from the input data file, 
+function initPVals(){
+
+	for (var i=0; i<viewerParams.partsKeys.length; i++){
+		var p = viewerParams.partsKeys[i];
+		if (! viewerParams.reset){
+			viewerParams.partsMesh[p] = [];
+		}
+
+		//misc
+		viewerParams.plotNmax[p] = viewerParams.parts[p].Coordinates.length;
+		viewerParams.PsizeMult[p] = 1.;
+		viewerParams.showParts[p] = true;
+		viewerParams.updateOnOff[p] = false;
+
+		//filter
+		viewerParams.updateFilter[p] = false;
+		viewerParams.filterLims[p] = {};
+		viewerParams.filterVals[p] = {};
+		viewerParams.invertFilter[p] = {};
+		viewerParams.fkeys[p] = [];
+
+		//colormap
+		viewerParams.ckeys[p] = [];
+		viewerParams.colormapVariable[p] = 0;
+		viewerParams.colormap[p] = 4/256;
+		viewerParams.showColormap[p] = false;
+		viewerParams.updateColormap[p] = false;
+		viewerParams.colormapVals[p] = {};
+		viewerParams.colormapLims[p] = {};
+
+		//velocities
+		viewerParams.showVel[p] = false;
+		if (viewerParams.parts[p].Velocities != null){
+			if (!viewerParams.reset){
+				calcVelVals(p);
+				if(!viewerParams.parts[p].hasOwnProperty("filterKeys")){
+					viewerParams.parts[p].filterKeys = [];
+				}
+			 
+			}
+			viewerParams.velType[p] = 'line';
+			//console.log(p, viewerParams.parts[p].VelVals, viewerParams.parts[p].Velocities)
+		}
+		
+		//filters
+		//in case there are no filter possibilities (but will be overwritten below)
+		viewerParams.fkeys[p] = ["None"];
+		viewerParams.filterLims[p]["None"] = [0,1];
+		viewerParams.filterVals[p]["None"] = [0,1]; 
+		var haveCurrentFilter = true;
+		if (viewerParams.parts[p].currentlyShownFilter == undefined) {
+			viewerParams.parts[p].currentlyShownFilter = ["None"];
+			haveCurrentFilter = false;
+		}
+		if (viewerParams.parts[p].hasOwnProperty("filterKeys")){
+			viewerParams.fkeys[p] = viewerParams.parts[p].filterKeys;
+			viewerParams.parts[p]['playbackTicks'] = 0;
+			viewerParams.parts[p]['playbackTickRate'] = 10;   
+			for (var k=0; k<viewerParams.fkeys[p].length; k++){
+				if (viewerParams.fkeys[p][k] == "Velocities"){
+					viewerParams.fkeys[p][k] = "magVelocities";
+				}
+				var fkey = viewerParams.fkeys[p][k];
+				//calculate limits for the filters
+				if (viewerParams.parts[p][fkey] != null){
+					var m = calcMinMax(p,fkey)
+					viewerParams.filterLims[p][fkey] = [m.min, m.max];
+					viewerParams.filterVals[p][fkey] = [m.min, m.max];
+					viewerParams.invertFilter[p][fkey] = false;
+					// set the currently shown filter for each part type at startup
+					// so the first click isn't broken
+					if (!haveCurrentFilter) {
+						viewerParams.parts[p].currentlyShownFilter = fkey;
+						haveCurrentFilter = true;
+					}
+				}
+			}
+		}
+		//colormap
+		//in case there are no colormap possibilities (but will be overwritten below)
+		viewerParams.ckeys[p] = ["None"];
+		viewerParams.colormapLims[p]["None"] = [0,1];
+		viewerParams.colormapVals[p]["None"] = [0,1];
+		if (viewerParams.parts[p].hasOwnProperty("colormapKeys")){
+			if (viewerParams.parts[p].colormapKeys.length > 0){
+				viewerParams.ckeys[p] = viewerParams.parts[p].colormapKeys;
+				for (var k=0; k<viewerParams.ckeys[p].length; k++){
+					if (viewerParams.ckeys[p][k] == "Velocities"){
+						viewerParams.ckeys[p][k] = "magVelocities";
+					}
+					var ckey = viewerParams.ckeys[p][k];
+					viewerParams.colormapLims[p][ckey] = [0,1];
+					viewerParams.colormapVals[p][ckey] = [0,1];
+					if (viewerParams.parts[p][ckey] != null){
+						//could probably take results from filter to save time, but will do this again to be safe
+						var m = calcMinMax(p,ckey)
+						viewerParams.colormapLims[p][ckey] = [m.min, m.max];
+						viewerParams.colormapVals[p][ckey] = [m.min, m.max];
+					}
+////////////////////////////////////////////////////////////////////////                    
+////////////// I am not sure where to put this
+////////////////////////////////////////////////////////////////////////                    
+					if (i == viewerParams.partsKeys.length - 1 && k == viewerParams.ckeys[p].length -1) viewerParams.ready = true;
+////////////////////////////////////////////////////////////////////////                    
+////////////////////////////////////////////////////////////////////////                    
+				}
+			}
+		}
+
+
+	}
+
+
+
+}
+
+// size the window and optionally initialize stereo view
 function initScene() {
 	var screenWidth = window.innerWidth;
 	var screenHeight = window.innerHeight;
@@ -136,8 +458,7 @@ function initScene() {
 	// console.log(gl.getParameter(gl.ALIASED_POINT_SIZE_RANGE), gl.getParameter(gl.POINT_SMOOTH));
 }
 
-
-
+// apply any settings from options file
 function applyOptions(){
 
 	//initialize center
@@ -492,23 +813,59 @@ function applyOptions(){
 
 }
 
-function calcMinMax(p,key, addFac = true){
-	var i=0;
-	min = viewerParams.parts[p][key][i];
-	max = viewerParams.parts[p][key][i];
-	for (i=0; i< viewerParams.parts[p][key].length; i++){
-		min = Math.min(min, viewerParams.parts[p][key][i]);
-		max = Math.max(max, viewerParams.parts[p][key][i]);
+// connect fly/trackball controls
+function initControls(){
+
+	var forGUI = []
+	forGUI.push({'setGUIParamByKey':[viewerParams.useTrackball, "useTrackball"]})
+
+	if (viewerParams.useTrackball) {
+		var xx = new THREE.Vector3(0,0,0);
+		viewerParams.camera.getWorldDirection(xx);
+		viewerParams.controls = new THREE.TrackballControls( viewerParams.camera, viewerParams.renderer.domElement );
+		viewerParams.controls.target = new THREE.Vector3(viewerParams.camera.position.x + xx.x, viewerParams.camera.position.y + xx.y, viewerParams.camera.position.z + xx.z);
+		if (viewerParams.parts.hasOwnProperty('options') && !viewerParams.switchControls){
+			if (viewerParams.parts.options.hasOwnProperty('center') ){
+				if (viewerParams.parts.options.center != null){
+					viewerParams.controls.target = new THREE.Vector3(viewerParams.parts.options.center[0], viewerParams.parts.options.center[1], viewerParams.parts.options.center[2]);
+
+				}
+			}
+			if (viewerParams.parts.options.hasOwnProperty('cameraUp') ){
+				if (viewerParams.parts.options.cameraUp != null){
+					viewerParams.camera.up.set(viewerParams.parts.options.cameraUp[0], viewerParams.parts.options.cameraUp[1], viewerParams.parts.options.cameraUp[2]);
+				}
+			}
+			//this does not work (a bug/feature of trackballControls)
+			if (viewerParams.parts.options.hasOwnProperty('cameraRotation') ){
+				if (viewerParams.parts.options.cameraRotation != null){
+					viewerParams.camera.rotation.set(viewerParams.parts.options.cameraRotation[0], viewerParams.parts.options.cameraRotation[1], viewerParams.parts.options.cameraRotation[2]);
+				}
+			}
+
+		} 
+
+		viewerParams.controls.dynamicDampingFactor = viewerParams.friction;
+		viewerParams.controls.addEventListener('change', sendCameraInfoToGUI);
+	} else if (viewerParams.useOrientationControls) {
+		viewerParams.controls = new THREE.DeviceOrientationControls(viewerParams.camera);
+		viewerParams.controls.updateAlphaOffsetAngle(THREE.Math.degToRad(-90));
+	} else {
+		viewerParams.controls = new THREE.FlyControls( viewerParams.camera , viewerParams.renderer.domElement);
+		viewerParams.controls.movementSpeed = 1. - Math.pow(viewerParams.friction, viewerParams.flyffac);
 	}
-	if (addFac){
-		//need to add a small factor here because of the precision of noUIslider
-		min -= 0.001;
-		max += 0.001;
+
+	if (viewerParams.haveUI){
+		var evalString = 'elm = document.getElementById("CenterCheckBox"); elm.checked = '+viewerParams.useTrackball+'; elm.value = '+viewerParams.useTrackball+';'
+		forGUI.push({'evalCommand':evalString});
 	}
-	return {"min":min, "max":max}
+
+	viewerParams.switchControls = false;
+	sendToGUI(forGUI);
+
 }
 
-
+// create CD texture buffers and parameters
 function initColumnDensity(){
 	//following this example: https://threejs.org/examples/webgl_rtt.html
 	var screenWidth = window.innerWidth;
@@ -548,471 +905,8 @@ function initColumnDensity(){
 	viewerParams.sceneCD.add(viewerParams.cameraCD);  
 }
 
-
-function calcVelVals(p){
-	viewerParams.parts[p].VelVals = [];
-	viewerParams.parts[p].magVelocities = [];
-	viewerParams.parts[p].NormVel = [];
-	var mag, angx, angy, v;
-	var max = -1.;
-	var min = 1.e20;
-	var vdif = 1.;
-	for (var i=0; i<viewerParams.parts[p].Velocities.length; i++){
-		v = viewerParams.parts[p].Velocities[i];
-		mag = Math.sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
-		angx = Math.atan2(v[1],v[0]);
-		angy = Math.acos(v[2]/mag);
-		if (mag > max){
-			max = mag;
-		}
-		if (mag < min){
-			min = mag;
-		}
-		viewerParams.parts[p].VelVals.push([v[0],v[1],v[2]]);
-		viewerParams.parts[p].magVelocities.push(mag);
-	}
-	vdif = Math.min(max - min, viewerParams.maxVrange);
-	for (var i=0; i<viewerParams.parts[p].Velocities.length; i++){
-		viewerParams.parts[p].NormVel.push( THREE.Math.clamp((viewerParams.parts[p].magVelocities[i] - min) / vdif, 0., 1.));
-	}
-}
-
-
-//initialize various values for the parts dict from the input data file, 
-function initPVals(){
-
-	for (var i=0; i<viewerParams.partsKeys.length; i++){
-		var p = viewerParams.partsKeys[i];
-		if (! viewerParams.reset){
-			viewerParams.partsMesh[p] = [];
-		}
-
-		//misc
-		viewerParams.plotNmax[p] = viewerParams.parts[p].Coordinates.length;
-		viewerParams.PsizeMult[p] = 1.;
-		viewerParams.showParts[p] = true;
-		viewerParams.updateOnOff[p] = false;
-
-		//filter
-		viewerParams.updateFilter[p] = false;
-		viewerParams.filterLims[p] = {};
-		viewerParams.filterVals[p] = {};
-		viewerParams.invertFilter[p] = {};
-		viewerParams.fkeys[p] = [];
-
-		//colormap
-		viewerParams.ckeys[p] = [];
-		viewerParams.colormapVariable[p] = 0;
-		viewerParams.colormap[p] = 4/256;
-		viewerParams.showColormap[p] = false;
-		viewerParams.updateColormap[p] = false;
-		viewerParams.colormapVals[p] = {};
-		viewerParams.colormapLims[p] = {};
-
-		//velocities
-		viewerParams.showVel[p] = false;
-		if (viewerParams.parts[p].Velocities != null){
-			if (!viewerParams.reset){
-				calcVelVals(p);
-				if(!viewerParams.parts[p].hasOwnProperty("filterKeys")){
-					viewerParams.parts[p].filterKeys = [];
-				}
-			 
-			}
-			viewerParams.velType[p] = 'line';
-			//console.log(p, viewerParams.parts[p].VelVals, viewerParams.parts[p].Velocities)
-		}
-		
-		//filters
-		//in case there are no filter possibilities (but will be overwritten below)
-		viewerParams.fkeys[p] = ["None"];
-		viewerParams.filterLims[p]["None"] = [0,1];
-		viewerParams.filterVals[p]["None"] = [0,1]; 
-		var haveCurrentFilter = true;
-		if (viewerParams.parts[p].currentlyShownFilter == undefined) {
-			viewerParams.parts[p].currentlyShownFilter = ["None"];
-			haveCurrentFilter = false;
-		}
-		if (viewerParams.parts[p].hasOwnProperty("filterKeys")){
-			viewerParams.fkeys[p] = viewerParams.parts[p].filterKeys;
-			viewerParams.parts[p]['playbackTicks'] = 0;
-			viewerParams.parts[p]['playbackTickRate'] = 10;   
-			for (var k=0; k<viewerParams.fkeys[p].length; k++){
-				if (viewerParams.fkeys[p][k] == "Velocities"){
-					viewerParams.fkeys[p][k] = "magVelocities";
-				}
-				var fkey = viewerParams.fkeys[p][k];
-				//calculate limits for the filters
-				if (viewerParams.parts[p][fkey] != null){
-					var m = calcMinMax(p,fkey)
-					viewerParams.filterLims[p][fkey] = [m.min, m.max];
-					viewerParams.filterVals[p][fkey] = [m.min, m.max];
-					viewerParams.invertFilter[p][fkey] = false;
-					// set the currently shown filter for each part type at startup
-					// so the first click isn't broken
-					if (!haveCurrentFilter) {
-						viewerParams.parts[p].currentlyShownFilter = fkey;
-						haveCurrentFilter = true;
-					}
-				}
-			}
-		}
-		//colormap
-		//in case there are no colormap possibilities (but will be overwritten below)
-		viewerParams.ckeys[p] = ["None"];
-		viewerParams.colormapLims[p]["None"] = [0,1];
-		viewerParams.colormapVals[p]["None"] = [0,1];
-		if (viewerParams.parts[p].hasOwnProperty("colormapKeys")){
-			if (viewerParams.parts[p].colormapKeys.length > 0){
-				viewerParams.ckeys[p] = viewerParams.parts[p].colormapKeys;
-				for (var k=0; k<viewerParams.ckeys[p].length; k++){
-					if (viewerParams.ckeys[p][k] == "Velocities"){
-						viewerParams.ckeys[p][k] = "magVelocities";
-					}
-					var ckey = viewerParams.ckeys[p][k];
-					viewerParams.colormapLims[p][ckey] = [0,1];
-					viewerParams.colormapVals[p][ckey] = [0,1];
-					if (viewerParams.parts[p][ckey] != null){
-						//could probably take results from filter to save time, but will do this again to be safe
-						var m = calcMinMax(p,ckey)
-						viewerParams.colormapLims[p][ckey] = [m.min, m.max];
-						viewerParams.colormapVals[p][ckey] = [m.min, m.max];
-					}
-////////////////////////////////////////////////////////////////////////                    
-////////////// I am not sure where to put this
-////////////////////////////////////////////////////////////////////////                    
-					if (i == viewerParams.partsKeys.length - 1 && k == viewerParams.ckeys[p].length -1) viewerParams.ready = true;
-////////////////////////////////////////////////////////////////////////                    
-////////////////////////////////////////////////////////////////////////                    
-				}
-			}
-		}
-
-
-	}
-
-
-
-}
-
-function setCenter(coords){
-	var sum = [0., 0., 0.];
-	for( var i = 0; i < coords.length; i++ ){
-		sum[0] += coords[i][0];
-		sum[1] += coords[i][1];
-		sum[2] += coords[i][2];
-	}
-	viewerParams.center = new THREE.Vector3(sum[0]/coords.length, sum[1]/coords.length, sum[2]/coords.length);
-
-	setBoxSize(coords);
-
-}
-
-function setBoxSize(coords){
-	var fee, foo;
-	for( var i = 0; i < coords.length; i++ ){
-		foo = new THREE.Vector3(coords[i][0], coords[i][0], coords[i][0]);
-		fee = viewerParams.center.distanceTo(foo)
-		if (fee > viewerParams.boxSize){
-			viewerParams.boxSize = fee;
-		}
-	}
-}
-
-function countParts(){
-	var num = 0.;
-	viewerParams.counting = true;
-	viewerParams.partsKeys.forEach( function(p, i) {
-		if (viewerParams.parts.hasOwnProperty(p)){
-			if (viewerParams.parts[p].hasOwnProperty('Coordinates')){
-				num += viewerParams.parts[p].Coordinates.length;
-			}
-		}
-		if (i == viewerParams.partsKeys.length - 1) viewerParams.counting = false;
-	})
-	return num;
-}
-
-//if startup.json exists, this is called first
-function getFilenames(prefix=""){
-	d3.json(prefix+viewerParams.startup,  function(dir) {
-		console.log(prefix, dir, viewerParams.startup, viewerParams)
-		if (dir != null){
-			var i = 0;
-			viewerParams.dir = dir;
-			if (Object.keys(viewerParams.dir).length > 1){
-				i = null
-				console.log("multiple file options in startup:", Object.keys(viewerParams.dir).length, viewerParams.dir);
-				var forGUI = [];
-				forGUI.push({'setGUIParamByKey':[viewerParams.dir, "dir"]});
-				forGUI.push({'showLoadingButton':'#selectStartupButton'});
-				forGUI.push({'selectFromStartup':prefix});
-				sendToGUI(forGUI);
-			} 
-			if (i != null && i < Object.keys(viewerParams.dir).length){
-				d3.json(prefix+viewerParams.dir[i] + "/filenames.json",  function(files) {
-					if (files != null){
-						callLoadData([files, prefix]);
-					} else {
-						sendToGUI([{'showLoadingButton':'#loadDataButton'}]);
-						alert("Cannot load data. Please select another directory.");
-					}
-				});
-			}
-		} else {
-			sendToGUI([{'showLoadingButton':'#loadDataButton'}]);
-		}
-	});
-}
-
-
-
-//once a data directory is identified, this will define the parameters, draw the loading bar and, load in the data
-function callLoadData(args){
-	var files = args[0];
-	var prefix = "";
-	if (args.length > 0) prefix = args[1];
-
-	var dir = {};
-	if (viewerParams.hasOwnProperty('dir')){
-		dir = viewerParams.dir;
-	}
-	viewerParams.dir = dir;
-	sendToGUI([{'setGUIParamByKey':[viewerParams.dir, "dir"]}]);
-
-	drawLoadingBar();
-	viewerParams.filenames = files;
-	console.log("loading new data", files)
-	loadData(WebGLStart, prefix);
-}
-function compileData(data, p, callback, initialLoadFrac=0){
-	//console.log('in compile data', p, data)
-	Object.keys(data).forEach(function(k, jj) {
-		//console.log("k = ", k, jj)
-		if (viewerParams.parts[p].hasOwnProperty(k)){
-			viewerParams.parts[p][k] = viewerParams.parts[p][k].concat(data[k]);
-			//console.log('appending', k, p, viewerParams.parts[p])
-
-		} else {
-			viewerParams.parts[p][k] = data[k];
-			//console.log('creating', k, p, viewerParams.parts[p], data[k])
-		}
-	});
-
-
-	var num = 0;
-	if (!viewerParams.counting){
-		var num = countParts()
-		var loadfrac = (num/viewerParams.parts.totalSize)*(1. - initialLoadFrac) + initialLoadFrac;
-		//some if statment like this seems necessary.  Otherwise the loading bar doesn't update (I suppose from too many calls)
-		if (loadfrac - viewerParams.loadfrac > 0.5 || loadfrac == 1){
-			viewerParams.loadfrac = loadfrac;
-			updateLoadingBar();
-		}
-	}
-	if ('options' in viewerParams.parts){
-		//console.log(d3.selectAll('#loadingRect').node().getBoundingClientRect().width)
-		//console.log("counting", countParts(), viewerParams.parts.totalSize, viewerParams.loadfrac)
-		if (countParts() ==  viewerParams.parts.totalSize && viewerParams.parts.options.loaded){
-			//console.log("here")
-
-			var index = viewerParams.partsKeys.indexOf('options');
-			if (index > -1) {
-				viewerParams.partsKeys.splice(index, 1);
-				viewerParams.parts.options0 = JSON.parse(JSON.stringify(viewerParams.parts.options));
-			}
-
-			callback(); 
-		}
-	}
-}
-function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
-
-	viewerParams.parts = {};
-	viewerParams.parts.totalSize = 0.;
-
-
-	//console.log(files)
-	viewerParams.partsKeys = Object.keys(viewerParams.filenames);
-	viewerParams.partsKeys.forEach( function(p, i) {
-		viewerParams.filenames[p].forEach( function(f, j) {
-			if (f.constructor == Array){ 
-				viewerParams.parts.totalSize += parseFloat(f[1]);
-			} else if (j == 1){
-				viewerParams.parts.totalSize += parseFloat(f);
-			}
-		});
-	});
-
-	viewerParams.partsKeys.forEach( function(p, i) {
-		viewerParams.parts[p] = {};
-
-		viewerParams.filenames[p].forEach( function(f, j) {
-			//console.log("f = ", f)
-			if (internalData){
-				console.log('==== compiling internal data', f)
-				Object.keys(internalData).forEach(function(key,k){
-					//if I was sent a prefix, this could be simplified
-					if (key.includes(f[0])) compileData(internalData[key], p, callback, initialLoadFrac=initialLoadFrac)
-				})
-			} else {
-				var readf = null;
-				if (f.constructor == Array){
-					readf = "data/"+f[0];
-				} else if (j == 0){
-					readf = "data/"+f
-				}
-				//console.log(readf)
-				if (readf != null){
-					d3.json(prefix+readf,  function(foo) {
-						compileData(foo, p, callback, initialLoadFrac=initialLoadFrac);
-					});
-				}
-			}
-		});
-		if (internalData && i == viewerParams.partsKeys.length - 1 && j == viewerParams.filenames[p].length - 1){
-			viewerParams.newInternalData = {};
-		}
-	});
-
- 
-
-}
-
-function drawLoadingBar(){
-	d3.select('#loadDataButton').style('display','none');
-	d3.select('#selectStartupButton').style('display','none');
-
-	var screenWidth = parseFloat(window.innerWidth);
-
-	//Make an SVG Container
-	var splash = d3.select("#splashdivLoader")
-
-	splash.selectAll('svg').remove();
-
-	var svg = splash.append("svg")
-		.attr("width", screenWidth)
-		.attr("height", viewerParams.loadingSizeY);
-
-	viewerParams.svgContainer = svg.append("g")
-
-
-	viewerParams.svgContainer.append("rect")
-		.attr('id','loadingRectOutline')
-		.attr("x", (screenWidth - viewerParams.loadingSizeX)/2)
-		.attr("y", 0)
-		.attr("width",viewerParams.loadingSizeX)
-		.attr("height",viewerParams.loadingSizeY)
-		.attr('fill','rgba(0,0,0,0)')
-		.attr('stroke','var(--logo-color1)')
-		.attr('stroke-width', '3')
-
-	viewerParams.svgContainer.append("rect")
-		.attr('id','loadingRect')
-		.attr("x", (screenWidth - viewerParams.loadingSizeX)/2)
-		.attr("y", 0)//(screenHeight - sizeY)/2)
-		.attr("height",viewerParams.loadingSizeY)
-		.attr('fill','var(--logo-color1)')
-		.attr("width",viewerParams.loadingSizeX*viewerParams.loadfrac);
-
-
-	window.addEventListener('resize', moveLoadingBar);
-
-}
-function updateLoadingBar(){
-	//console.log(viewerParams.loadfrac, viewerParams.loadingSizeX*viewerParams.loadfrac)
-	d3.selectAll('#loadingRect').transition().attr("width", viewerParams.loadingSizeX*viewerParams.loadfrac);
-
-}
-
-function moveLoadingBar(){
-	var screenWidth = parseFloat(window.innerWidth);
-	d3.selectAll('#loadingRectOutline').attr('x', (screenWidth - viewerParams.loadingSizeX)/2);
-	d3.selectAll('#loadingRect').attr('x', (screenWidth - viewerParams.loadingSizeX)/2);
-}
-
-//check if the data is loaded
-function clearloading(){
-	viewerParams.loaded = true;
-	viewerParams.reset = false;
-
-	//show the rest of the page
-	d3.select("#ContentContainer").style("visibility","visible")
-
-	console.log("loaded")
-	d3.select("#loader").style("display","none")
-	if (viewerParams.local){
-		d3.select("#splashdiv5").text("Click to begin.");
-	} else {
-		showSplash(false);
-	}
-
-}
-
-function WebGLStart(){
-
-//reset the window title
-	if (viewerParams.parts.hasOwnProperty('options')){
-		if (viewerParams.parts.options.hasOwnProperty('title')){
-			window.document.title = viewerParams.parts.options.title
-		}
-	}
-
-	document.addEventListener('mousedown', handleMouseDown);
-
-	initPVals();
-
-	initScene();
-	
-	initColumnDensity();
-
-	//draw everything
-	Promise.all([
-		drawScene(),
-	]).then(function(){
-		//searchOctree();
-		
-		//begin the animation
-		// keep track of runtime for crashing the app rather than the computer
-		var currentTime = new Date();
-		var seconds = currentTime.getTime()/1000;
-		viewerParams.currentTime = seconds;
-
-		viewerParams.pauseAnimation = false;
-		animate();
-
-	})
-
-
-
-}
-
-//wait for all the input before loading
-function makeViewer(pSize=null, prepend=[], append=[]){
-	viewerParams.haveUI = false;
-	viewerParams.ready = false; 
-	console.log("Waiting for viewer init ...")
-	clearInterval(viewerParams.waitForInit);
-	viewerParams.waitForInit = setInterval(function(){ 
-		var ready = confirmViewerInit();
-		if (ready){
-			console.log("Viewer ready.")
-			clearInterval(viewerParams.waitForInit);
-			viewerParams.ready = true;
-			viewerParams.pauseAnimation = false;
-			viewerParams.parts.options0 = createPreset(); //this might break things if the presets don't work...
-			console.log("initial options", viewerParams.parts.options)
-
-			//to test
-			if (pSize) {
-				viewerParams.PsizeMult.Gas = pSize;
-				console.log('new Psize', pSize)
-			}
-			sendInitGUI(prepend=prepend, append=append);
-		}
-	}, 100);
-}
-
+/* HELPER FUNCTIONS */
+// makeViewer ->
 function confirmViewerInit(){
 	var keys = ["partsKeys", "PsizeMult", "plotNmax", "decimate", "stereoSepMax", "friction", "Pcolors", "showParts", "showVel", "velopts", "velType", "ckeys", "colormapVals", "colormapLims", "colormapVariable", "colormap", "showColormap", "fkeys", "filterVals", "filterLims", "renderer", "scene", "controls","camera","parts"];
 
@@ -1037,17 +931,7 @@ function confirmViewerInit(){
 	return ready;
 }
 
-function updateViewerCamera(){
-	if (viewerParams.useTrackball) viewerParams.controls.target = new THREE.Vector3(viewerParams.controlsTarget.x, viewerParams.controlsTarget.y, viewerParams.controlsTarget.z);
-
-	if (viewerParams.camera){
-		viewerParams.camera.position.set(viewerParams.cameraPosition.x, viewerParams.cameraPosition.y, viewerParams.cameraPosition.z);
-		viewerParams.camera.rotation.set(viewerParams.cameraRotation._x, viewerParams.cameraRotation._y, viewerParams.cameraRotation._z);
-		viewerParams.camera.up.set(viewerParams.cameraUp.x, viewerParams.cameraUp.y, viewerParams.cameraUp.z);
-	}
-	//console.log(viewerParams.camera.position, viewerParams.camera.rotation, viewerParams.camera.up);
-}
-
+// makeViewer ->
 function sendInitGUI(prepend=[], append=[]){
 	//general particle settings
 	console.log('Sending init to GUI', viewerParams);
@@ -1160,6 +1044,246 @@ function sendInitGUI(prepend=[], append=[]){
 
 }
 
+// callLoadData ->
+function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
+
+	viewerParams.parts = {};
+	viewerParams.parts.totalSize = 0.;
+
+
+	//console.log(files)
+	viewerParams.partsKeys = Object.keys(viewerParams.filenames);
+	viewerParams.partsKeys.forEach( function(p, i) {
+		viewerParams.filenames[p].forEach( function(f, j) {
+			if (f.constructor == Array){ 
+				viewerParams.parts.totalSize += parseFloat(f[1]);
+			} else if (j == 1){
+				viewerParams.parts.totalSize += parseFloat(f);
+			}
+		});
+	});
+
+	viewerParams.partsKeys.forEach( function(p, i) {
+		viewerParams.parts[p] = {};
+
+		viewerParams.filenames[p].forEach( function(f, j) {
+			//console.log("f = ", f)
+			if (internalData){
+				console.log('==== compiling internal data', f)
+				Object.keys(internalData).forEach(function(key,k){
+					//if I was sent a prefix, this could be simplified
+					if (key.includes(f[0])) compileData(internalData[key], p, callback, initialLoadFrac=initialLoadFrac)
+				})
+			} else {
+				var readf = null;
+				if (f.constructor == Array){
+					readf = "data/"+f[0];
+				} else if (j == 0){
+					readf = "data/"+f
+				}
+				//console.log(readf)
+				if (readf != null){
+					d3.json(prefix+readf,  function(foo) {
+						compileData(foo, p, callback, initialLoadFrac=initialLoadFrac);
+					});
+				}
+			}
+		});
+		if (internalData && i == viewerParams.partsKeys.length - 1 && j == viewerParams.filenames[p].length - 1){
+			viewerParams.newInternalData = {};
+		}
+	});
+
+ 
+
+}
+
+// loadData ->
+function compileData(data, p, callback, initialLoadFrac=0){
+	//console.log('in compile data', p, data)
+	Object.keys(data).forEach(function(k, jj) {
+		//console.log("k = ", k, jj)
+		if (viewerParams.parts[p].hasOwnProperty(k)){
+			viewerParams.parts[p][k] = viewerParams.parts[p][k].concat(data[k]);
+			//console.log('appending', k, p, viewerParams.parts[p])
+
+		} else {
+			viewerParams.parts[p][k] = data[k];
+			//console.log('creating', k, p, viewerParams.parts[p], data[k])
+		}
+	});
+
+
+	var num = 0;
+	if (!viewerParams.counting){
+		var num = countParts()
+		var loadfrac = (num/viewerParams.parts.totalSize)*(1. - initialLoadFrac) + initialLoadFrac;
+		//some if statment like this seems necessary.  Otherwise the loading bar doesn't update (I suppose from too many calls)
+		if (loadfrac - viewerParams.loadfrac > 0.5 || loadfrac == 1){
+			viewerParams.loadfrac = loadfrac;
+			updateLoadingBar();
+		}
+	}
+	if ('options' in viewerParams.parts){
+		//console.log(d3.selectAll('#loadingRect').node().getBoundingClientRect().width)
+		//console.log("counting", countParts(), viewerParams.parts.totalSize, viewerParams.loadfrac)
+		if (countParts() ==  viewerParams.parts.totalSize && viewerParams.parts.options.loaded){
+			//console.log("here")
+
+			var index = viewerParams.partsKeys.indexOf('options');
+			if (index > -1) {
+				viewerParams.partsKeys.splice(index, 1);
+				viewerParams.parts.options0 = JSON.parse(JSON.stringify(viewerParams.parts.options));
+			}
+
+			callback(); 
+		}
+	}
+}
+
+// compileData ->
+function countParts(){
+	var num = 0.;
+	viewerParams.counting = true;
+	viewerParams.partsKeys.forEach( function(p, i) {
+		if (viewerParams.parts.hasOwnProperty(p)){
+			if (viewerParams.parts[p].hasOwnProperty('Coordinates')){
+				num += viewerParams.parts[p].Coordinates.length;
+			}
+		}
+		if (i == viewerParams.partsKeys.length - 1) viewerParams.counting = false;
+	})
+	return num;
+}
+
+// callLoadData -> , connectViewerSocket ->
+function drawLoadingBar(){
+	d3.select('#loadDataButton').style('display','none');
+	d3.select('#selectStartupButton').style('display','none');
+
+	var screenWidth = parseFloat(window.innerWidth);
+
+	//Make an SVG Container
+	var splash = d3.select("#splashdivLoader")
+
+	splash.selectAll('svg').remove();
+
+	var svg = splash.append("svg")
+		.attr("width", screenWidth)
+		.attr("height", viewerParams.loadingSizeY);
+
+	viewerParams.svgContainer = svg.append("g")
+
+
+	viewerParams.svgContainer.append("rect")
+		.attr('id','loadingRectOutline')
+		.attr("x", (screenWidth - viewerParams.loadingSizeX)/2)
+		.attr("y", 0)
+		.attr("width",viewerParams.loadingSizeX)
+		.attr("height",viewerParams.loadingSizeY)
+		.attr('fill','rgba(0,0,0,0)')
+		.attr('stroke','var(--logo-color1)')
+		.attr('stroke-width', '3')
+
+	viewerParams.svgContainer.append("rect")
+		.attr('id','loadingRect')
+		.attr("x", (screenWidth - viewerParams.loadingSizeX)/2)
+		.attr("y", 0)//(screenHeight - sizeY)/2)
+		.attr("height",viewerParams.loadingSizeY)
+		.attr('fill','var(--logo-color1)')
+		.attr("width",viewerParams.loadingSizeX*viewerParams.loadfrac);
+
+
+	window.addEventListener('resize', moveLoadingBar);
+
+}
+// compileData ->
+function updateLoadingBar(){
+	//console.log(viewerParams.loadfrac, viewerParams.loadingSizeX*viewerParams.loadfrac)
+	d3.selectAll('#loadingRect').transition().attr("width", viewerParams.loadingSizeX*viewerParams.loadfrac);
+
+}
+
+// initPVals -> 
+function calcMinMax(p,key, addFac = true){
+	var i=0;
+	min = viewerParams.parts[p][key][i];
+	max = viewerParams.parts[p][key][i];
+	for (i=0; i< viewerParams.parts[p][key].length; i++){
+		min = Math.min(min, viewerParams.parts[p][key][i]);
+		max = Math.max(max, viewerParams.parts[p][key][i]);
+	}
+	if (addFac){
+		//need to add a small factor here because of the precision of noUIslider
+		min -= 0.001;
+		max += 0.001;
+	}
+	return {"min":min, "max":max}
+}
+
+// initScene -> 
+function setCenter(coords){
+	var sum = [0., 0., 0.];
+	for( var i = 0; i < coords.length; i++ ){
+		sum[0] += coords[i][0];
+		sum[1] += coords[i][1];
+		sum[2] += coords[i][2];
+	}
+	viewerParams.center = new THREE.Vector3(sum[0]/coords.length, sum[1]/coords.length, sum[2]/coords.length);
+
+	setBoxSize(coords);
+
+}
+
+// setCenter ->
+function setBoxSize(coords){
+	var fee, foo;
+	for( var i = 0; i < coords.length; i++ ){
+		foo = new THREE.Vector3(coords[i][0], coords[i][0], coords[i][0]);
+		fee = viewerParams.center.distanceTo(foo)
+		if (fee > viewerParams.boxSize){
+			viewerParams.boxSize = fee;
+		}
+	}
+}
+
+// applyOptions -> 
+function calcVelVals(p){
+	viewerParams.parts[p].VelVals = [];
+	viewerParams.parts[p].magVelocities = [];
+	viewerParams.parts[p].NormVel = [];
+	var mag, angx, angy, v;
+	var max = -1.;
+	var min = 1.e20;
+	var vdif = 1.;
+	for (var i=0; i<viewerParams.parts[p].Velocities.length; i++){
+		v = viewerParams.parts[p].Velocities[i];
+		mag = Math.sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
+		angx = Math.atan2(v[1],v[0]);
+		angy = Math.acos(v[2]/mag);
+		if (mag > max){
+			max = mag;
+		}
+		if (mag < min){
+			min = mag;
+		}
+		viewerParams.parts[p].VelVals.push([v[0],v[1],v[2]]);
+		viewerParams.parts[p].magVelocities.push(mag);
+	}
+	vdif = Math.min(max - min, viewerParams.maxVrange);
+	for (var i=0; i<viewerParams.parts[p].Velocities.length; i++){
+		viewerParams.parts[p].NormVel.push( THREE.Math.clamp((viewerParams.parts[p].magVelocities[i] - min) / vdif, 0., 1.));
+	}
+}
+
+// drawLoadingBar ->
+function moveLoadingBar(){
+	var screenWidth = parseFloat(window.innerWidth);
+	d3.selectAll('#loadingRectOutline').attr('x', (screenWidth - viewerParams.loadingSizeX)/2);
+	d3.selectAll('#loadingRect').attr('x', (screenWidth - viewerParams.loadingSizeX)/2);
+}
+
+// initControls ->
 function sendCameraInfoToGUI(foo, updateCam=false){
 
 	var xx = new THREE.Vector3(0,0,0);
@@ -1180,144 +1304,42 @@ function sendCameraInfoToGUI(foo, updateCam=false){
 
 	sendToGUI(forGUI);
 }
-//so that it can run locally also without using Flask
-function runLocal(useSockets=true, showGUI=true, useOrientationControls=false, startStereo=false, pSize=null){
-	viewerParams.local = true;
-	viewerParams.usingSocket = useSockets;
-	forGUI = [];
-	forGUI.push({'setGUIParamByKey':[viewerParams.usingSocket, "usingSocket"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.local, "local"]});
-	sendToGUI(forGUI);
 
-	viewerParams.useStereo = startStereo;
-	viewerParams.useOrientationControls = useOrientationControls;
-	viewerParams.useTrackball = !useOrientationControls;
-	
-	//both of these start setIntervals to wait for the proper variables to be set
-	makeViewer(pSize);
-	if (showGUI) {
-		makeUI(local=true);
+//for fly controls
+document.addEventListener("keydown", sendCameraInfoToGUI);
+
+// called numerous times outside this file
+//check if the data is loaded
+function clearloading(){
+	viewerParams.loaded = true;
+	viewerParams.reset = false;
+
+	//show the rest of the page
+	d3.select("#ContentContainer").style("visibility","visible")
+
+	console.log("loaded")
+	d3.select("#loader").style("display","none")
+	if (viewerParams.local){
+		d3.select("#splashdiv5").text("Click to begin.");
 	} else {
-		d3.selectAll('.UIcontainer').classed('hidden', true)
+		showSplash(false);
 	}
-	
-	//This will  load the data, and then start the WebGL rendering
-	getFilenames(prefix = "static/");
-}
-
-/////////////////////
-//// for sockets
-/////////////////////
-//https://blog.miguelgrinberg.com/post/easy-websockets-with-flask-and-gevent
-//https://github.com/miguelgrinberg/Flask-SocketIO
-function connectViewerSocket(){
-	//$(document).ready(function() {
-	document.addEventListener("DOMContentLoaded", function(event) { 
-		// Event handler for new connections.
-		// The callback function is invoked when a connection with the
-		// server is established.
-		socketParams.socket.on('connect', function() {
-			socketParams.socket.emit('connection_test', {data: 'Viewer connected!'});
-		});
-		socketParams.socket.on('connection_response', function(msg) {
-			console.log('connection response', msg);
-		});     
-		// Event handler for server sent data.
-		// The callback function is invoked whenever the server emits data
-		// to the client. The data is then displayed in the "Received"
-		// section of the page.
-		//updates from GUI
-		socketParams.socket.on('update_viewerParams', function(msg) {
-			setParams(msg);
-		});
-
-		socketParams.socket.on('show_loader', function(msg) {
-			d3.select("#splashdivLoader").selectAll('svg').remove();
-			d3.select("#splashdiv5").text("Loading...");
-			d3.select("#loader").style("display","visible");
-			viewerParams.loaded = false;
-			viewerParams.pauseAnimation = true;
-
-			viewerParams.loadfrac = 0.;
-			drawLoadingBar();
-
-			showSplash();
-		});
-
-		socketParams.socket.on('input_data', function(msg) {
-			//only tested for local (GUI + viewer in one window)
-			console.log("======== have new data : ", Object.keys(msg));
-
-
-			//first compile the data from multiple calls
-			if ('status' in msg){
-				if (msg.status == 'start') {
-					var socketCheck = viewerParams.usingSocket;
-					var localCheck = viewerParams.local;
-					//in case it's already waiting, which will happen if loading an hdf5 file from the gui
-					clearInterval(viewerParams.waitForInit);
-					defineViewerParams();
-					viewerParams.pauseAnimation = true;
-					viewerParams.usingSocket = socketCheck; 
-					viewerParams.local = localCheck; 
-
-					viewerParams.newInternalData.data = {};
-					viewerParams.newInternalData.len = msg.length;
-					viewerParams.newInternalData.count = 0;
-				}
-				if (msg.status == 'data') {
-					viewerParams.newInternalData.count += 1;
-					//I will update the loading bar here, but I'm not sure what fraction of the time this should take (using 0.8 for now)
-					viewerParams.loadfrac = (viewerParams.newInternalData.count/viewerParams.newInternalData.len)*0.8; 
-					updateLoadingBar();
-					Object.keys(msg).forEach(function(key,i){
-						if (key != 'status'){
-							viewerParams.newInternalData.data[key] = JSON.parse(msg[key]);
-							if (key.includes('filenames.json')){
-								viewerParams.filenames = JSON.parse(msg[key]);
-							}
-						}
-					})
-				}
-				if (msg.status == 'done'){
-					console.log('======== have all data', viewerParams.newInternalData, viewerParams.filenames);
-					loadData(initInputData, prefix='', internalData=viewerParams.newInternalData.data, initialLoadFrac=viewerParams.loadfrac)
-				}
-			}
-
-		});
-
-		socketParams.socket.on('update_streamer', function(msg) {
-			viewerParams.streamReady = true;
-		});
-		socketParams.socket.on('reload_viewer', function(msg) {
-			console.log('!!! reloading viewer');
-			location.reload();
-		});
-	});
-}
-
-function initInputData(){
-	console.log('======== remaking gui and viewer')
-	var forGUIprepend = [];
-	forGUIprepend.push({'clearGUIinterval':null});
-	forGUIprepend.push({'defineGUIParams':null});
-
-	var forGUIappend = [];
-	forGUIappend.push({'setGUIParamByKey':[viewerParams.usingSocket, "usingSocket"]});
-	forGUIappend.push({'setGUIParamByKey':[viewerParams.local, "local"]});
-	forGUIappend.push({'makeUI':viewerParams.local});
-
-	//I think I need to wait a moment because sometimes this doesn't fire (?)
-	setTimeout(function(){
-		makeViewer(null, forGUIprepend, forGUIappend);
-		WebGLStart();
-	}, 1000);
-
-
 
 }
 
+// not sure where this is called
+function updateViewerCamera(){
+	if (viewerParams.useTrackball) viewerParams.controls.target = new THREE.Vector3(viewerParams.controlsTarget.x, viewerParams.controlsTarget.y, viewerParams.controlsTarget.z);
+
+	if (viewerParams.camera){
+		viewerParams.camera.position.set(viewerParams.cameraPosition.x, viewerParams.cameraPosition.y, viewerParams.cameraPosition.z);
+		viewerParams.camera.rotation.set(viewerParams.cameraRotation._x, viewerParams.cameraRotation._y, viewerParams.cameraRotation._z);
+		viewerParams.camera.up.set(viewerParams.cameraUp.x, viewerParams.cameraUp.y, viewerParams.cameraUp.z);
+	}
+	//console.log(viewerParams.camera.position, viewerParams.camera.rotation, viewerParams.camera.up);
+}
+
+/* FLASK HELPER FUNCTIONS USED A TON */
 //function to send events to the GUI
 function sendToGUI(GUIInput){
 	if (viewerParams.usingSocket){
@@ -1353,10 +1375,7 @@ function setViewerParamByKey(args){
 	//console.log(args)
 }
 
-//for fly controls
-document.addEventListener("keydown", sendCameraInfoToGUI);
-
-
+/*  why is this here? */
 function changeSnapSizes(){
 	//size of the snapshot (from text input)
 	var oldW = 0+viewerParams.renderWidth;
@@ -1376,6 +1395,3 @@ function changeSnapSizes(){
 	}
 }
 window.addEventListener('resize', changeSnapSizes);
-
-
-
