@@ -108,3 +108,23 @@ function hideSleep(){
 	viewerParams.currentTime = seconds;
 	viewerParams.pauseAnimation = false;
 }
+
+function changeSnapSizes(){
+	//size of the snapshot (from text input)
+	var oldW = 0+viewerParams.renderWidth;
+	var oldH = 0+viewerParams.renderHeight;
+
+	viewerParams.renderWidth = window.innerWidth;
+	viewerParams.renderHeight = window.innerHeight;
+
+	if (oldW != viewerParams.renderWidth || oldH != viewerParams.renderHeight){
+		var forGUI = [];
+		forGUI.push({'setGUIParamByKey':[viewerParams.renderWidth, 'renderWidth']});
+		forGUI.push({'setGUIParamByKey':[viewerParams.renderHeight, 'renderHeight'] });
+
+		forGUI.push({'changeUISnapSizes':null});
+
+		sendToGUI(forGUI);
+	}
+}
+window.addEventListener('resize', changeSnapSizes);
