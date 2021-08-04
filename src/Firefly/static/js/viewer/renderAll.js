@@ -231,6 +231,7 @@ function update(time){
 
 function render() {
 
+	// 2d projection to texture and then remap according to colormap
 	if (viewerParams.columnDensity){
 		//see if I can change the opacity to negative values?
 		//requires uncommenting a line in the fragment_pass2.glsl.js code
@@ -273,13 +274,15 @@ function render() {
 		//for now, just use the colormap from the first particle group
 		var p = viewerParams.partsKeys[0];
 		viewerParams.quadCD.material.uniforms.colormap.value = viewerParams.colormap[p];
-		//console.log(viewerParams.quadCD)
+
 		viewerParams.renderer.setRenderTarget(null)
 		viewerParams.renderer.render( viewerParams.sceneCD, viewerParams.cameraCD );
 	} else {
+		// render straight to the canvas
 		viewerParams.renderer.render( viewerParams.scene, viewerParams.camera );
 	}
 
+	// copy the canvas to the stream if active
 	if (viewerParams.streamerActive){
 		viewerParams.usingSocket = true;
 		//send the image through flask to the stream webpage
