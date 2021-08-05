@@ -30,7 +30,8 @@ setuptools.setup(
           'eventlet',
           'flask-socketio',
           'flask',
-          'requests'
+          'requests',
+          'abg_python'
       ],
     include_package_data=True,
     scripts=["src/Firefly/bin/Firefly"]
