@@ -6,7 +6,9 @@
 ![logo banner](https://github.com/ageller/Firefly/blob/main/docs/source/_static/logo_banner_gradient.png?raw=true)
 
 
-Firefly is an interactive viewer for any particle-based data. A live version is available [here](https://ageller.github.io/Firefly/).
+Firefly is an interactive viewer for any particle-based data. A live example is available [here](https://ageller.github.io/Firefly/).
+
+To get started creating your own interactive viewer, [click here](https://ageller.github.io/Firefly/docs/build/html/data_reader/index.html)!
 
 If you use Firefly, please cite us using the [ADS listing](http://adsabs.harvard.edu/abs/2018ascl.soft10021G) that points to our Astrophysics Source Code Library (ASCL) entry.
 
