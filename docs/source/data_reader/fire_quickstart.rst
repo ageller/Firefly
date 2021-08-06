@@ -1,35 +1,21 @@
-.. _viz-creation:
-Creating your own instance of Firefly 
-=====================================
+.. _fire-viz-creation:
+Using Firefly to view FIRE data
+===============================
 
 Quickstart
 ----------
 
-Imagine you have some particle data, such as this:
-
-.. code-block:: python
-
-    # Some random particle data, including locations and a property
-    import numpy as np
-    coords = np.random.random(size=(10000,3))
-    fields = np.random.random(size=coords[:,0].size)
-
-.. note::
-    If you are using FIRE data, check out :ref:`the FIRE quickstart<fire-viz-creation>`!
-
-**To format your data for Firefly** (after :ref:`installing<install>`):
+**To easily create a Firefly visualization of FIRE data**:
 
 .. code-block:: python
 
     # Import Firefly API
-    from Firefly.data_reader import ArrayReader
+    from Firefly.data_reader import SimpleFIREreader
 
-    # Output it to a Firefly-compatible JSON!
-    my_arrayReader = ArrayReader(
-        coords,
-        fields = fields,
-        JSONdir = JSONdir,
-        write_jsons_to_disk = True
+    # The simple reader only needs the snapshot location
+    # Here we're using the shared Stampede2 directory as an example
+    reader = SimpleFIREreader(
+	'/scratch/projects/xsede/GalaxiesOnFIRE/core/m12i_res7100/output/snapdir_600',
     )
 
 **To view the Firefly visualization** of your formatted data:
@@ -45,10 +31,12 @@ Imagine you have some particle data, such as this:
     IFrame("http://localhost:5000", width=1000, height=500)
 
     # Send the data to the visualization!
-    my_arrayReader.sendDataViaFlask()
+    reader.sendDataViaFlask()
 
+
+* A more in-depth example of formatting **FIRE** data `is available here <https://github.com/ageller/Firefly/blob/main/src/Firefly/ntbks/convert_FIRE_data.ipynb>`_.
+* If you're running Firefly on an external computer, `don't forget to create an SSH tunnel to the port the server is on <https://docs.anaconda.com/anaconda/user-guide/tasks/remote-jupyter-notebook/>`_ (5000 in the above example).
 * The above assumes you are executing the code in a `Python notebook <https://jupyter.org>`_.
-* A more in-depth example of formatting data :ref:`is available here<producing-files>`.
 * A more in-depth example of viewing your data in a Python notebook :ref:`is available here.<flask>`
 * For additional ways to view your Firefly visualization :ref:`see here<servers>`.
 * To understand how to fly through and manipulate your visualization, :ref:`see here<viz-navigation>`.
