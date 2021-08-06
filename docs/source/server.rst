@@ -1,3 +1,4 @@
+.. _servers:
 Hosting a Firefly webserver
 ===========================
 
