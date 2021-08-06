@@ -3,7 +3,7 @@ import os
 
 from .reader import Reader,ParticleGroup
 
-from .snapshot_utils import openSnapshot
+from abg_python.snapshot_utils import openSnapshot
 
 class FIREreader(Reader):
     """This is an example of a "custom" Reader that has been tuned to 
