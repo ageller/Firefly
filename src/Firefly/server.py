@@ -13,10 +13,6 @@ import json
 import os
 import time
 
-## make sure we are importing from wherever this file is, rather than the system 
-##  installation of Firefly. Saves us devs a lot of confusion and is equivalent 
-##  if you're only using a pip installed version
-sys.path.insert(0,os.path.abspath(os.path.join(os.getcwd(),'..')))
 from Firefly.data_reader import SimpleReader
 
 #in principle, we could read in the data here...
@@ -292,7 +288,7 @@ def spawnFireflyServer(port=5000,frames_per_second=30,decimation_factor=1,max_ti
     args = ["%d"%port,"%d"%frames_per_second,"%d"%decimation_factor]
 
     run_server = os.path.join(os.path.dirname(__file__),'run_server.py')
-    process = subprocess.Popen(["python3", run_server]+args)
+    process = subprocess.Popen([sys.executable, run_server]+args)
 
     init_time = time.time()
     ## check if port is in use
