@@ -27,9 +27,9 @@ description: >- # this means to ignore newlines until "baseurl:"
 twitter_username: jekyllrb
 github_username:  jekyll
 
-domain: alexbgurvi.ch/webtest       # if you want to force HTTPS, specify the domain without the http at the start, e.g. example.com
-url: https://alexbgurvi.ch/webtest  # the base hostname and protocol for your site, e.g. http://example.com
-baseurl: "/webtest" # the subpath of your site, e.g. /blog
+domain: alexbgurvi.ch/Firefly       # if you want to force HTTPS, specify the domain without the http at the start, e.g. example.com
+url: https://alexbgurvi.ch/Firefly  # the base hostname and protocol for your site, e.g. http://example.com
+baseurl: "/Firefly" # the subpath of your site, e.g. /blog
 
 # Build settings
 #theme: minima
