@@ -4,9 +4,9 @@ description: A blog about lorem ipsum dolor sit amet
 # baseurl: "/particle" # the subpath of your site, e.g. /blog
 # url: "localhost:3000" # the base hostname & protocol for your site e.g. http://willianjusten.com.br
 
-url: https://alexbgurvi.ch/Firefly  # the base hostname and protocol for your site, e.g. http://example.com
-domain: alexbgurvi.ch/Firefly       # if you want to force HTTPS, specify the domain without the http at the start, e.g. example.com
-baseurl: "/Firefly" # the subpath of your site, e.g. /blog
+url: https://alexbgurvi.ch/Firefly/website  # the base hostname and protocol for your site, e.g. http://example.com
+domain: alexbgurvi.ch/Firefly/website       # if you want to force HTTPS, specify the domain without the http at the start, e.g. example.com
+baseurl: "/Firefly/website" # the subpath of your site, e.g. /blog
 
 # User settings
 username: Firefly
