@@ -6,7 +6,7 @@ description: A blog about lorem ipsum dolor sit amet
 
 url: https://alexbgurvi.ch/Firefly/website/_site  # the base hostname and protocol for your site, e.g. http://example.com
 domain: alexbgurvi.ch/Firefly/website/_site       # if you want to force HTTPS, specify the domain without the http at the start, e.g. example.com
-baseurl: "/Firefly/website/_site" # the subpath of your site, e.g. /blog
+#baseurl: "" # the subpath of your site, e.g. /blog
 
 # User settings
 username: Firefly
