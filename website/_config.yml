@@ -10,11 +10,11 @@ domain: alexbgurvi.ch/Firefly/website/_site       # if you want to force HTTPS, 
 
 # User settings
 username: Firefly
-user_description: Firefly is a particle visualization app
-user_title: Software Developer
-email: anon@anon.com
+user_description: user_description
+user_title: a browser-based interactive particle visualization app
+email: agurvich@u.northwestern.edu
 #twitter_username: lorem_ipsum
-#github_username:  lorem_ipsum
+github_username:  agurvich/Firefly
 #gplus_username:  lorem_ipsum
 
 # Google-analytics
