@@ -1,30 +1,22 @@
  <div class="user-details">
-  <h1> My Expertise </h1>
-  <p> {{site.user_description}} </p>
+  <h1> What is Firefly? </h1>
 </div>
   <div class="user">
-    <div class="tech">
-      <h2>Design</h2>
-      <i class="devicon-html5-plain-wordmark"></i>
-      <i class="devicon-bootstrap-plain-wordmark colored"></i>
-      <i class="devicon-sass-original colored"></i>
-      <p>Mumblecore hexagon kombucha, pitchfork four loko raclette intelligentsia master cleanse.
-        Vinyl XOXO lumbersexual</p>
-    </div>
-    <div class="tech">
-      <h2>Code</h2>
+    <div class="tech" style="width:auto; margin-left:auto; margin-right:auto">
+      <i class="devicon-html5-plain-wordmark colored"></i>
+      <i class="devicon-css3-plain-wordmark colored"></i>
       <i class="devicon-javascript-plain colored"></i>
-      <i class="devicon-react-original-wordmark colored"></i>
-      <i class="devicon-nodejs-plain-wordmark"></i>
-      <p>Mumblecore hexagon kombucha, pitchfork four loko raclette intelligentsia master cleanse.
-        Vinyl XOXO lumbersexual</p>
-    </div>
-    <div class="tech">
-      <h2>Tools</h2>
-      <i class="devicon-git-plain"></i>
-      <i class="devicon-gulp-plain colored"></i>
-      <i class="devicon-atom-original-wordmark"></i>
-      <p>Mumblecore hexagon kombucha, pitchfork four loko raclette intelligentsia master cleanse.
-        Vinyl XOXO lumbersexual</p>
+      <i class="devicon-d3js-plain colored"></i>
+      <i class="devicon-python-plain colored"></i>
+      <br>
+      <img src="assets/img/threejs_icon_wordmark.png" style="height:70px"> </img> 
+      <img src="assets/img/WebGL_Logo.png" style="height:70px"> </img> 
+      <img src="assets/img/flask-logo.png" style="height:70px"> </img> 
+      
+      <p>Firefly is web application that allows users to interactively explore their 3D particle data.
+      At its core, it is a Javascript app that uses WebGL to efficiently render millions of particles in an interactive three.js scene.
+      In addition to traditional static html and css, the user interface is procedurally generated using d3.js according to a configuration file, allowing visualization creators to ship different versions of their visualization for different audiences without changing the underlying code or data.
+      On top of this framework, we provide a python frontend that allows users to generate their own Firefly visualizations and host virtual webservers using Flask, enabling users to control their visualization via a remote device (i.e. an iPad), livestream the output of their visualization from a remote server (like a supercomputing cluster), or load new data directly from a Python interpreter without having to read it in from disk.
+      </p>
     </div>
 </div>
