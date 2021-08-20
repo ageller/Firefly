@@ -45,6 +45,7 @@ This will update your web prowser or IFrame.
 
 * A more in-depth example of formatting **FIRE** data `is available here <https://github.com/ageller/Firefly/blob/main/src/Firefly/ntbks/convert_FIRE_data.ipynb>`_.
 * If you're running Firefly on an external computer, `don't forget to create an SSH tunnel to the port the server is on <https://docs.anaconda.com/anaconda/user-guide/tasks/remote-jupyter-notebook/>`_ (5000 in the above example).
+* In some cases the data may be hosted on a server --- :ref:`tutorials and tips for this are available here.<servers>`
 * A more in-depth example of viewing your data in a Python notebook :ref:`is available here.<flask>`
 * For additional ways to view your Firefly visualization :ref:`see here<servers>`.
 * To understand how to fly through and manipulate your visualization, :ref:`see here<viz-navigation>`.
