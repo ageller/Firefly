@@ -17,7 +17,9 @@ Starting with some particle data, for example:
 .. note::
     If you are using FIRE data, check out :ref:`the FIRE quickstart<fire-viz-creation>`!
 
-**To format your data for Firefly** (after :ref:`installing<install>`):
+To format your data for Firefly
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+After following the :ref:`install instructions<install>`:
 
 .. code-block:: python
 
@@ -32,7 +34,8 @@ Starting with some particle data, for example:
         write_jsons_to_disk = True
     )
 
-**To view the Firefly visualization** of your formatted data:
+To view the Firefly visualization
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: python
 
