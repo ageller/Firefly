@@ -15,7 +15,7 @@ Python frontend.
 
 :ref:`Quickly create your own visualization! <viz-creation>`
 
-Or :ref:`learn how to fly through a visualization! <viz-navigation>`
+:ref:`Learn how to fly through a visualization! <viz-navigation>`
 
 Contents
 --------
