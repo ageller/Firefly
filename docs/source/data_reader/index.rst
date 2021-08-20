@@ -61,8 +61,8 @@ This will update your web prowser or IFrame.
     my_arrayReader.sendDataViaFlask()
 
 * A more in-depth example of formatting data :ref:`is available here<producing-files>`.
-* A more in-depth example of viewing your data in a Python notebook :ref:`is available here.<flask>`
-* For additional ways to view your Firefly visualization :ref:`see here<servers>`.
+* In some cases the data may be hosted on a server --- :ref:`tutorials and tips for this are available here.<servers>`
+* :ref:`The same page<servers>` from the previous point describes additional ways to view your Firefly visualization.
 * To understand how to fly through and manipulate your visualization, :ref:`see here<viz-navigation>`.
 
 Advanced
