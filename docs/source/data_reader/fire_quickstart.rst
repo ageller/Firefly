@@ -26,17 +26,25 @@ Quickstart
     from Firefly.server import spawnFireflyServer
     process = spawnFireflyServer()
 
+Now navigate to `http://localhost:5000 <http://localhost:5000>`_ in your web browser.
+Alternatively, if you're using a `Jupyter notebook <https://jupyter.org>`_, you can setup an IFrame:
+
+.. code-block:: python
+
+    # Jupyter notebook alternative:
     # Create a window to view the data
     from IPython.display import IFrame
     IFrame("http://localhost:5000", width=1000, height=500)
 
-    # Send the data to the visualization!
-    reader.sendDataViaFlask()
+Regardless of browser or notebook, the final step is to send the data to the visualization!
+This will update your web prowser or IFrame.
 
+.. code-block:: python
+
+    my_arrayReader.sendDataViaFlask()
 
 * A more in-depth example of formatting **FIRE** data `is available here <https://github.com/ageller/Firefly/blob/main/src/Firefly/ntbks/convert_FIRE_data.ipynb>`_.
 * If you're running Firefly on an external computer, `don't forget to create an SSH tunnel to the port the server is on <https://docs.anaconda.com/anaconda/user-guide/tasks/remote-jupyter-notebook/>`_ (5000 in the above example).
-* The above assumes you are executing the code in a `Python notebook <https://jupyter.org>`_.
 * A more in-depth example of viewing your data in a Python notebook :ref:`is available here.<flask>`
 * For additional ways to view your Firefly visualization :ref:`see here<servers>`.
 * To understand how to fly through and manipulate your visualization, :ref:`see here<viz-navigation>`.
