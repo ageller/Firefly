@@ -5,7 +5,7 @@ Creating your own instance of Firefly
 Quickstart
 ----------
 
-Imagine you have some particle data, such as this:
+Starting with some particle data, for example:
 
 .. code-block:: python
 
