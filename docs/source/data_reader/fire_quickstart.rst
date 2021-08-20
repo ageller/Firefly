@@ -5,7 +5,10 @@ Using Firefly to view FIRE data
 Quickstart
 ----------
 
-**To easily create a Firefly visualization of FIRE data**:
+To easily create a FIRE Firefly visualization
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+After following the :ref:`install instructions<install>`:
 
 .. code-block:: python
 
@@ -18,7 +21,8 @@ Quickstart
 	'/scratch/projects/xsede/GalaxiesOnFIRE/core/m12i_res7100/output/snapdir_600',
     )
 
-**To view the Firefly visualization** of your formatted data:
+To view the Firefly visualization
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. code-block:: python
 
