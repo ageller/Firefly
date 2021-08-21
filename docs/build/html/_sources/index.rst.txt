@@ -13,7 +13,7 @@ from within the web browser.
 Firefly can also be run from entirely within a Jupyter notebook using the
 Python frontend.
 
-Learn how to fly through a Firefly visualization :ref:here `<viz-navigation>`
+Learn how to fly through a Firefly visualization :ref:`here <viz-navigation>`
 or :ref:`quickly create your own <viz-creation>`.
 
 
