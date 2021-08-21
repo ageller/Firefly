@@ -6,9 +6,9 @@ Quickstart
 ----------
 
 To easily create a FIRE Firefly visualization
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
++++++++++++++++++++++++++++++++++++++++++++++
 
-After following the :ref:`install instructions<install>`:
+After following the :ref:`installation instructions<install>`:
 
 .. code-block:: python
 
@@ -22,7 +22,7 @@ After following the :ref:`install instructions<install>`:
     )
 
 To view the Firefly visualization
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
++++++++++++++++++++++++++++++++++
 
 .. code-block:: python
 
@@ -40,31 +40,12 @@ Alternatively, if you're using a `Jupyter notebook <https://jupyter.org>`_, you 
     from IPython.display import IFrame
     IFrame("http://localhost:5000", width=1000, height=500)
 
-Regardless of browser or notebook, the final step is to send the data to the visualization!
-This will update your web prowser or IFrame.
+Regardless of browser or notebook, the final step is to send the data to the visualization.
+This will update your web browser or IFrame.
 
 .. code-block:: python
 
     my_arrayReader.sendDataViaFlask()
 
-* A more in-depth example of formatting **FIRE** data `is available here <https://github.com/ageller/Firefly/blob/main/src/Firefly/ntbks/convert_FIRE_data.ipynb>`_.
-* If you're running Firefly on an external computer, `don't forget to create an SSH tunnel to the port the server is on <https://docs.anaconda.com/anaconda/user-guide/tasks/remote-jupyter-notebook/>`_ (5000 in the above example).
-* In some cases the data may be hosted on a server --- :ref:`tutorials and tips for this are available here.<servers>`
-* :ref:`The same page<servers>` from the previous point describes additional ways to view your Firefly visualization.
-* To understand how to fly through and manipulate your visualization, :ref:`see here<viz-navigation>`.
-
-Advanced
---------
-
-.. toctree::
-    :titlesonly:
-    :maxdepth: 2
-
-    files
-    reader
-    multiple_datasets
-    flask
-
-.. Using with yt
-++++++++++++++++
-If you are using [yt](https://yt-project.org) you will be able to call :code:`region.outputToFirefly`. See the :ref:`API reference<api>`.
+.. seealso:: 
+    A more in-depth example of formatting **FIRE** data `is available here <https://ageller.github.io/Firefly/docs/build/html/data_reader/convert_FIRE_data.html>`_.
