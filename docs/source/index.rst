@@ -9,12 +9,13 @@ Firefly: a browser-based interactive particle data visualization platform
 .. image:: _static/screenGrab.png
 
 Firefly is an interactive application for visualizing particle-based data 
-from within the web browser. In addition to the various source files 
-that power the webapp there is a Python frontend to enable users to 
-load their own datasets into Firefly. 
-
-Firefly can be run from entirely within a Jupyter notebook using the
+from within the web browser.
+Firefly can also be run from entirely within a Jupyter notebook using the
 Python frontend.
+
+:ref:`Quickly create your own visualization! <viz-creation>`
+
+:ref:`Learn how to fly through a visualization! <viz-navigation>`
 
 Contents
 --------

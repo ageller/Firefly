@@ -1,37 +1,24 @@
-.. _viz-creation:
-Creating your own instance of Firefly 
-=====================================
+.. _fire-viz-creation:
+Using Firefly to view FIRE data
+===============================
 
 Quickstart
 ----------
 
-Starting with some particle data, for example:
+To easily create a FIRE Firefly visualization
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. code-block:: python
-
-    # Some random particle data, including locations and a property
-    import numpy as np
-    coords = np.random.random(size=(10000,3))
-    fields = np.random.random(size=coords[:,0].size)
-
-.. note::
-    If you are using FIRE data, check out :ref:`the FIRE quickstart<fire-viz-creation>`!
-
-To format your data for Firefly
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 After following the :ref:`install instructions<install>`:
 
 .. code-block:: python
 
     # Import Firefly API
-    from Firefly.data_reader import ArrayReader
+    from Firefly.data_reader import SimpleFIREreader
 
-    # Output it to a Firefly-compatible JSON!
-    my_arrayReader = ArrayReader(
-        coords,
-        fields = fields,
-        JSONdir = JSONdir,
-        write_jsons_to_disk = True
+    # The simple reader only needs the snapshot location
+    # Here we're using the shared Stampede2 directory as an example
+    reader = SimpleFIREreader(
+	'/scratch/projects/xsede/GalaxiesOnFIRE/core/m12i_res7100/output/snapdir_600',
     )
 
 To view the Firefly visualization
@@ -60,7 +47,8 @@ This will update your web prowser or IFrame.
 
     my_arrayReader.sendDataViaFlask()
 
-* A more in-depth example of formatting data :ref:`is available here<producing-files>`.
+* A more in-depth example of formatting **FIRE** data `is available here <https://github.com/ageller/Firefly/blob/main/src/Firefly/ntbks/convert_FIRE_data.ipynb>`_.
+* If you're running Firefly on an external computer, `don't forget to create an SSH tunnel to the port the server is on <https://docs.anaconda.com/anaconda/user-guide/tasks/remote-jupyter-notebook/>`_ (5000 in the above example).
 * In some cases the data may be hosted on a server --- :ref:`tutorials and tips for this are available here.<servers>`
 * :ref:`The same page<servers>` from the previous point describes additional ways to view your Firefly visualization.
 * To understand how to fly through and manipulate your visualization, :ref:`see here<viz-navigation>`.

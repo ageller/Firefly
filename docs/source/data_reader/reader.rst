@@ -1,9 +1,12 @@
+.. _producing-files:
 Producing Firefly formatted :code:`.json` files using the :ref:`Python API <api>` 
 ==================================================================================
 
+Firefly reads formatted JSON files.
 While it is certainly possible to produce Firefly formatted :code:`.json` files 
 manually (with say, a text editor) we have instead provided a convenient Python frontend
 for users to take advantage of.
+
 
 .. _docsreader:
 
@@ -20,7 +23,7 @@ necessary files listed in :ref:`files` automatically.
 	
 	reader_tutorial
 
-To quickly opening your own data, you can sub-class :class:`~Firefly.data_reader.Reader`
+To quickly open your own data, you can sub-class :class:`~Firefly.data_reader.Reader`
 (e.g. :class:`Firefly.data_reader.SimpleReader`) to parse and re-format your
 data while maintaining all of the inherited functionality that the 
 :class:`~Firefly.data_reader.Reader` class offers.
@@ -31,9 +34,7 @@ and are explained in the corresponding example notebook.
 .. toctree::
 	
     convert_FIRE_data
-
-
-
+    
 .. _docsparticlegroup:
 
 The :class:`~Firefly.data_reader.ParticleGroup` class
