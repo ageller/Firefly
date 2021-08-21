@@ -20,6 +20,19 @@ necessary files listed in :ref:`files` automatically.
 	
 	reader_tutorial
 
+To quickly opening your own data, you can sub-class :class:`~Firefly.data_reader.Reader`
+(e.g. :class:`Firefly.data_reader.SimpleReader`) to parse and re-format your
+data while maintaining all of the inherited functionality that the 
+:class:`~Firefly.data_reader.Reader` class offers.
+Example sub-classes customized for FIRE simulation data ship with Firefly 
+(:class:`Firefly.data_reader.FIREreader` and :class:`Firefly.data_reader.SimpleFIREreader`)
+and are explained in the corresponding example notebook.
+
+.. toctree::
+	
+    convert_FIRE_data
+
+
 
 .. _docsparticlegroup:
 
