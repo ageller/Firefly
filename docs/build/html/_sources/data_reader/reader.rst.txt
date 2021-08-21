@@ -29,7 +29,7 @@ data while maintaining all of the inherited functionality that the
 :class:`~Firefly.data_reader.Reader` class offers.
 Example sub-classes customized for FIRE simulation data ship with Firefly 
 (:class:`Firefly.data_reader.FIREreader` and :class:`Firefly.data_reader.SimpleFIREreader`)
-and are explained in the corresponding example notebook.
+and are demonstrated in the corresponding example notebook.
 
 .. toctree::
 	

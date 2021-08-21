@@ -1,4 +1,5 @@
 .. _viz-creation:
+
 Creating your own instance of Firefly 
 =====================================
 
@@ -15,8 +16,8 @@ Starting with some particle data, for example:
     fields = np.random.random(size=coords[:,0].size)
 
 .. note::
-    If you are using FIRE data, check out :ref:`the FIRE quickstart<fire-viz-creation>`
-    which shows how to create a Firefly visualization with only the path to a FIRE
+    If you are using FIRE data, check out :ref:`the FIRE quickstart page<fire-viz-creation>`
+    which demonstrates how to create a Firefly visualization with only the path to a FIRE
     snapshot.
 
 To format your data for Firefly
@@ -74,6 +75,12 @@ Next steps
     multiple_datasets
     flask
 
-.. Using with yt
-----------------
+.. toctree::
+    :hidden:
+
+    fire_quickstart
+
+Using with yt
+-------------
 If you are using [yt](https://yt-project.org) you will be able to call :code:`region.outputToFirefly`. See the :ref:`API reference<api>`.
+
