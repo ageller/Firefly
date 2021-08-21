@@ -263,10 +263,7 @@
         <span class="c1">## determine whether the directory we&#39;re saving the</span>
         <span class="c1">##  actual data in is a sub-directory of Firefly/static/data.</span>
         <span class="c1">##  if not, set self.needs_soft_link = True</span>
-        <span class="c1">##  hard_data_path is where the JSONs *actually* live on disk</span>
-        <span class="c1">##  short_data_path is the name of the directory in Firefly/static/data</span>
-        <span class="c1">##  that the JSONs will live in (either on disk or by symlink)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">hard_data_path</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">short_data_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__splitAndValidateDatadir</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__splitAndValidateDatadir</span><span class="p">()</span>
 
         <span class="c1">## how are we managing multiple datasets?</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">write_startup</span> <span class="o">=</span> <span class="n">write_startup</span>
@@ -385,7 +382,7 @@
         <span class="c1">## path where data needs to be visible to Firefly</span>
         <span class="n">static_data_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">static_data_dir</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">short_data_path</span><span class="p">)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">JSONdir</span><span class="p">))</span>
 
         <span class="c1">## where to put hard JSON files, if no symlink then we will</span>
         <span class="c1">##  need to save directly to static_data_path</span>
@@ -399,6 +396,7 @@
                 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Outputting files to: </span><span class="si">%s</span><span class="s2"> instead of: </span><span class="si">%s</span><span class="s2"> as originally specified.&quot;</span><span class="o">%</span><span class="p">(</span>
                         <span class="n">static_data_path</span><span class="p">,</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">JSONdir</span><span class="p">))</span>
+
 
         <span class="c1">## if we don&#39;t actually want to write to disk then we don&#39;t need</span>
         <span class="c1">##  to do any filesystem tasks</span>
@@ -437,8 +435,8 @@
                 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Outputting:&quot;</span><span class="p">,</span><span class="n">particleGroup</span><span class="p">)</span>
 
             <span class="n">this_JSON_array</span><span class="p">,</span><span class="n">filenames_and_nparts</span> <span class="o">=</span> <span class="n">particleGroup</span><span class="o">.</span><span class="n">outputToJSON</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">short_data_path</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">hard_data_path</span><span class="p">,</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">JSONdir</span><span class="p">),</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">JSONdir</span><span class="p">),</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">JSON_prefix</span><span class="p">,</span>
                 <span class="n">loud</span><span class="o">=</span><span class="n">loud</span><span class="p">,</span>
                 <span class="n">nparts_per_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_npart_per_file</span><span class="p">,</span>
@@ -460,7 +458,9 @@
             <span class="n">not_reader</span><span class="o">=</span><span class="kc">False</span><span class="p">)]</span>
 
         <span class="c1">## format and output the filenames.json file</span>
-        <span class="n">filenamesDict</span><span class="p">[</span><span class="s1">&#39;options&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">short_data_path</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">JSON_prefix</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">settings_filename</span><span class="p">),</span><span class="mi">0</span><span class="p">)]</span>
+        <span class="n">filenamesDict</span><span class="p">[</span><span class="s1">&#39;options&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">JSONdir</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">JSON_prefix</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">settings_filename</span><span class="p">),</span><span class="mi">0</span><span class="p">)]</span>
 
         <span class="n">filename</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">JSONdir</span><span class="p">,</span><span class="s1">&#39;filenames.json&#39;</span><span class="p">)</span>
         <span class="n">JSON_array</span> <span class="o">+=</span><span class="p">[(</span>
@@ -485,7 +485,7 @@
 
         <span class="c1">## relative path from .js interpreter (which runs in /Firefly/static) </span>
         <span class="c1">##  to this dataset</span>
-        <span class="n">startup_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">short_data_path</span><span class="p">)</span>
+        <span class="n">startup_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">JSONdir</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">write_startup</span> <span class="o">==</span> <span class="s1">&#39;append&#39;</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">startup_file</span><span class="p">):</span>
             <span class="n">startup_dict</span> <span class="o">=</span> <span class="n">load_from_json</span><span class="p">(</span><span class="n">startup_file</span><span class="p">)</span>
@@ -679,8 +679,7 @@
                 <span class="n">old</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">static_data_dir</span>
 
                 <span class="c1">## dump to this dummy target</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">hard_data_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">static_data_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">target</span><span class="p">,</span><span class="s1">&#39;static&#39;</span><span class="p">,</span><span class="s1">&#39;data&#39;</span><span class="p">)</span>
-
+                <span class="bp">self</span><span class="o">.</span><span class="n">static_data_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">target</span><span class="p">,</span><span class="s1">&#39;static&#39;</span><span class="p">,</span><span class="s1">&#39;data&#39;</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">static_data_dir</span><span class="p">):</span> <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">static_data_dir</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">dumpToJSON</span><span class="p">(</span><span class="n">symlink</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -689,7 +688,6 @@
             <span class="k">finally</span><span class="p">:</span>
                 <span class="c1">## replace the old stat_data_dir</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">static_data_dir</span> <span class="o">=</span> <span class="n">old</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">hard_data_path</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">short_data_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__splitAndValidateDatadir</span><span class="p">(</span><span class="n">loud</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="c1">## attempts to initialize a github pages site in order to </span>
         <span class="c1">##  host this copied version of Firefly on the web.</span>

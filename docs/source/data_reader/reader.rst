@@ -6,11 +6,6 @@ Firefly reads formatted JSON files.
 While it is certainly possible to produce Firefly formatted :code:`.json` files 
 manually (with say, a text editor) we have instead provided a convenient Python frontend
 for users to take advantage of.
-Below is a tutorial that will allow you to jump right in.
-
-.. toctree::
-	
-	reader_tutorial
 
 
 .. _docsreader:
@@ -24,7 +19,22 @@ Its :func:`~Firefly.data_reader.dumpToJSON` method will take the data from each 
 attached instances and collect it into a single :code:`JSONdir`, producing each of the 
 necessary files listed in :ref:`files` automatically.
 
+.. toctree::
+	
+	reader_tutorial
 
+To quickly open your own data, you can sub-class :class:`~Firefly.data_reader.Reader`
+(e.g. :class:`Firefly.data_reader.SimpleReader`) to parse and re-format your
+data while maintaining all of the inherited functionality that the 
+:class:`~Firefly.data_reader.Reader` class offers.
+Example sub-classes customized for FIRE simulation data ship with Firefly 
+(:class:`Firefly.data_reader.FIREreader` and :class:`Firefly.data_reader.SimpleFIREreader`)
+and are explained in the corresponding example notebook.
+
+.. toctree::
+	
+    convert_FIRE_data
+    
 .. _docsparticlegroup:
 
 The :class:`~Firefly.data_reader.ParticleGroup` class

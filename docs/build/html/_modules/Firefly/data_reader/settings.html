@@ -298,6 +298,7 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Firefly&#39;</span><span class="p">,</span>
         <span class="n">annotation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">showfps</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="o">**</span><span class="n">extra</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Settings that affect the browser window</span>
 
@@ -307,6 +308,9 @@
 <span class="sd">        :param annotation: text to include at the top of the</span>
 <span class="sd">            Firefly window as an annotation, defaults to None</span>
 <span class="sd">        :type annotation: str, optional</span>
+<span class="sd">        :param showfps: flag to display the FPS (frames per second) of the </span>
+<span class="sd">            Firefly scene, defaults to False</span>
+<span class="sd">        :type showfps: bool, optional</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">__window_settings</span> <span class="o">=</span> <span class="p">{</span>
@@ -314,7 +318,8 @@
             <span class="c1">## used in the web app to check if the settings have been read in</span>
             <span class="c1">##  this should not be modified</span>
             <span class="s1">&#39;loaded&#39;</span><span class="p">:</span><span class="kc">True</span><span class="p">,</span> 
-            <span class="s1">&#39;annotation&#39;</span><span class="p">:</span><span class="n">annotation</span> 
+            <span class="s1">&#39;annotation&#39;</span><span class="p">:</span><span class="n">annotation</span> <span class="p">,</span>
+            <span class="s1">&#39;showfps&#39;</span><span class="p">:</span><span class="n">showfps</span>
         <span class="p">}</span></div>
 
 <div class="viewcode-block" id="Settings.UI_settings"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.Settings.html#Firefly.data_reader.Settings.UI_settings">[docs]</a>    <span class="k">def</span> <span class="nf">UI_settings</span><span class="p">(</span>
@@ -422,6 +427,7 @@
         <span class="n">stereo</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">stereoSep</span><span class="o">=</span><span class="mf">0.06</span><span class="p">,</span>
         <span class="n">decimate</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">start_tween</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="o">**</span><span class="n">extra</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;General settings that affect the state app state</span>
 
@@ -449,6 +455,10 @@
 <span class="sd">            decimate &gt; 1 here).  </span>
 <span class="sd">            This is a single value (not a dict), defaults to None</span>
 <span class="sd">        :type decimate: int, optional</span>
+<span class="sd">        :param start_tween: flag to initialize the Firefly scene in tween mode, </span>
+<span class="sd">            requires a valid tweenParams.json file to be present in the JSONdir,</span>
+<span class="sd">            defaults to False</span>
+<span class="sd">        :type start_tween: bool, optional</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">__startup_settings</span> <span class="o">=</span> <span class="p">{</span>
@@ -458,6 +468,7 @@
             <span class="s1">&#39;stereo&#39;</span><span class="p">:</span><span class="n">stereo</span><span class="p">,</span>
             <span class="s1">&#39;stereoSep&#39;</span><span class="p">:</span><span class="n">stereoSep</span><span class="p">,</span>
             <span class="s1">&#39;decimate&#39;</span><span class="p">:</span><span class="n">decimate</span><span class="p">,</span>
+            <span class="s1">&#39;start_tween&#39;</span><span class="p">:</span><span class="n">start_tween</span>
         <span class="p">}</span></div>
     
 <div class="viewcode-block" id="Settings.particle_startup_settings"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.Settings.html#Firefly.data_reader.Settings.particle_startup_settings">[docs]</a>    <span class="k">def</span> <span class="nf">particle_startup_settings</span><span class="p">(</span>

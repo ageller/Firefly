@@ -102,10 +102,7 @@ class Reader(object):
         ## determine whether the directory we're saving the
         ##  actual data in is a sub-directory of Firefly/static/data.
         ##  if not, set self.needs_soft_link = True
-        ##  hard_data_path is where the JSONs *actually* live on disk
-        ##  short_data_path is the name of the directory in Firefly/static/data
-        ##  that the JSONs will live in (either on disk or by symlink)
-        self.hard_data_path,self.short_data_path = self.__splitAndValidateDatadir()
+        self.__splitAndValidateDatadir()
 
         ## how are we managing multiple datasets?
         self.write_startup = write_startup
@@ -224,7 +221,7 @@ class Reader(object):
         ## path where data needs to be visible to Firefly
         static_data_path = os.path.join(
             self.static_data_dir,
-            self.short_data_path)
+            os.path.basename(self.JSONdir))
 
         ## where to put hard JSON files, if no symlink then we will
         ##  need to save directly to static_data_path
@@ -238,6 +235,7 @@ class Reader(object):
                 print("Outputting files to: %s instead of: %s as originally specified."%(
                         static_data_path,
                         self.JSONdir))
+
 
         ## if we don't actually want to write to disk then we don't need
         ##  to do any filesystem tasks
@@ -276,8 +274,8 @@ class Reader(object):
                 print("Outputting:",particleGroup)
 
             this_JSON_array,filenames_and_nparts = particleGroup.outputToJSON(
-                self.short_data_path,
-                self.hard_data_path,
+                os.path.basename(JSONdir),
+                os.path.dirname(JSONdir),
                 self.JSON_prefix,
                 loud=loud,
                 nparts_per_file=self.max_npart_per_file,
@@ -299,7 +297,9 @@ class Reader(object):
             not_reader=False)]
 
         ## format and output the filenames.json file
-        filenamesDict['options'] = [(os.path.join(self.short_data_path,self.JSON_prefix+self.settings.settings_filename),0)]
+        filenamesDict['options'] = [(os.path.join(
+            os.path.basename(JSONdir),
+            self.JSON_prefix+self.settings.settings_filename),0)]
 
         filename=os.path.join(JSONdir,'filenames.json')
         JSON_array +=[(
@@ -324,7 +324,7 @@ class Reader(object):
 
         ## relative path from .js interpreter (which runs in /Firefly/static) 
         ##  to this dataset
-        startup_path = os.path.join("data",self.short_data_path)
+        startup_path = os.path.join("data",os.path.basename(JSONdir))
 
         if self.write_startup == 'append' and os.path.isfile(startup_file):
             startup_dict = load_from_json(startup_file)
@@ -518,8 +518,7 @@ class Reader(object):
                 old = self.static_data_dir
 
                 ## dump to this dummy target
-                self.hard_data_path = self.static_data_dir = os.path.join(target,'static','data')
-
+                self.static_data_dir = os.path.join(target,'static','data')
 
                 if not os.path.isdir(self.static_data_dir): os.makedirs(self.static_data_dir)
                 self.dumpToJSON(symlink=False)
@@ -528,7 +527,6 @@ class Reader(object):
             finally:
                 ## replace the old stat_data_dir
                 self.static_data_dir = old
-                self.hard_data_path,self.short_data_path = self.__splitAndValidateDatadir(loud=False)
 
         ## attempts to initialize a github pages site in order to 
         ##  host this copied version of Firefly on the web.

@@ -197,6 +197,8 @@
 
         <span class="c1">## initialize containers</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">coordss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span> <span class="nb">iter</span><span class="p">(</span><span class="n">duration</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span> <span class="n">duration</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">duration</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span><span class="o">//</span><span class="mi">3</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">durations</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
 
         <span class="c1">## store loop flag</span>
@@ -263,10 +265,15 @@
             <span class="p">{</span><span class="s1">&#39;x&#39;</span><span class="p">:</span><span class="n">xs</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="s1">&#39;y&#39;</span><span class="p">:</span><span class="n">ys</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="s1">&#39;z&#39;</span><span class="p">:</span><span class="n">zs</span><span class="p">[</span><span class="n">i</span><span class="p">]}</span> 
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">xs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
 
+        <span class="n">rotation_dicts</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">{</span><span class="s1">&#39;x&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;z&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">}</span> 
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">xs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
+
         <span class="n">tween_params_dict</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s1">&#39;loop&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">loop</span><span class="p">,</span>
+            <span class="s1">&#39;position&#39;</span><span class="p">:</span><span class="n">keyframe_dicts</span><span class="p">,</span>
+            <span class="s1">&#39;rotation&#39;</span><span class="p">:</span><span class="n">rotation_dicts</span><span class="p">,</span>
             <span class="s1">&#39;duration&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">durations</span><span class="p">,</span>
-            <span class="s1">&#39;position&#39;</span><span class="p">:</span><span class="n">keyframe_dicts</span>
+            <span class="s1">&#39;loop&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">loop</span>
         <span class="p">}</span>
 
         <span class="k">return</span> <span class="n">tween_params_dict</span></div>
@@ -315,7 +322,8 @@
 
         <span class="n">tween_params_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">outputToDict</span><span class="p">()</span>
 
-        <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">JSONdir</span><span class="p">,</span><span class="n">JSON_prefix</span><span class="o">+</span><span class="n">filename</span><span class="p">)</span>
+        <span class="c1">## JSON_prefix+</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">JSONdir</span><span class="p">,</span><span class="n">filename</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">loud</span> <span class="ow">and</span> <span class="n">not_reader</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;You will need to add this tween params filename to&quot;</span><span class="o">+</span>

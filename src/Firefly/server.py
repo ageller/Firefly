@@ -259,7 +259,7 @@ def startFireflyServer(port=5000, frames_per_second=30, decimation_factor=1):
         fps = frames_per_second
         dec = decimation_factor
 
-        socketio.run(app, host='0.0.0.0', port=port, use_reloader=True)
+        socketio.run(app, host='0.0.0.0', port=port, use_reloader=False)
     except:
         raise
     finally:
