@@ -175,5 +175,8 @@ function defineViewerParams(){
 
 		//for internal data
 		this.newInternalData = {};
+
+		// for debugging
+		this.showfps = false;
 	};
 }

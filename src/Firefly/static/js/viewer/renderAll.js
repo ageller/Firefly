@@ -61,6 +61,14 @@ function update(time){
 
 	var currentTime = new Date();
 	var seconds = currentTime.getTime()/1000;
+
+	var fps = 1/(seconds-viewerParams.currentTime);
+
+	if (viewerParams.showfps){
+		elm = document.getElementById("fps_container");
+		elm.innerHTML=Math.round(fps);
+		elm.style.display='block';
+	}
 	
 	//console.log((seconds-viewerParams.currentTime))
 	// if we spent more than 1.5 seconds drawing the last frame, send the app to sleep

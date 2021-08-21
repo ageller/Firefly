@@ -36,6 +36,8 @@ class TweenParams(object):
 
         ## initialize containers
         self.coordss = np.array([]).reshape(0,3)
+        try: iter(duration)
+        except: duration = np.repeat(duration,np.size(coords)//3)
         self.durations = np.array([])
 
         ## store loop flag
@@ -102,10 +104,15 @@ class TweenParams(object):
             {'x':xs[i],'y':ys[i],'z':zs[i]} 
             for i in range(xs.shape[0])]
 
+        rotation_dicts = [
+            {'x':0,'y':0,'z':0} 
+            for i in range(xs.shape[0])]
+
         tween_params_dict = {
-            'loop':self.loop,
+            'position':keyframe_dicts,
+            'rotation':rotation_dicts,
             'duration':self.durations,
-            'position':keyframe_dicts
+            'loop':self.loop
         }
 
         return tween_params_dict
@@ -154,7 +161,8 @@ class TweenParams(object):
 
         tween_params_dict = self.outputToDict()
 
-        filename = os.path.join(JSONdir,JSON_prefix+filename)
+        ## JSON_prefix+
+        filename = os.path.join(JSONdir,filename)
 
         if loud and not_reader:
             print("You will need to add this tween params filename to"+
