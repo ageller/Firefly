@@ -90,26 +90,23 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../installation.html">Quickstart</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../webapp/index.html">Using an existing instance of Firefly</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../webapp/index.html">Interacting with a Firefly visualization</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Creating your own instance of Firefly</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="files.html">Understanding Firefly’s input requirements</a></li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Producing Firefly formatted <code class="code docutils literal notranslate"><span class="pre">.json</span></code> files using the <span class="xref std std-ref">Python API</span></a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#the-reader-class">The <code class="xref py py-class docutils literal notranslate"><span class="pre">Reader</span></code> class</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="reader_tutorial.html">Tutorial notebook: Using the <code class="docutils literal notranslate"><span class="pre">Reader</span></code> class</a></li>
-<li class="toctree-l4"><a class="reference internal" href="convert_FIRE_data.html">Convert FIRE data</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#quickstart">Quickstart</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html#next-steps">Next steps</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="files.html">Understanding Firefly’s input requirements</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Producing Firefly formatted <code class="code docutils literal notranslate"><span class="pre">.json</span></code> files using the <span class="xref std std-ref">Python API</span></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#the-reader-class">The <code class="xref py py-class docutils literal notranslate"><span class="pre">Reader</span></code> class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#the-particlegroup-class">The <code class="xref py py-class docutils literal notranslate"><span class="pre">ParticleGroup</span></code> class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#the-settings-class">The <code class="xref py py-class docutils literal notranslate"><span class="pre">Settings</span></code> class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#the-tweenparams-class">The <code class="xref py py-class docutils literal notranslate"><span class="pre">TweenParams</span></code> class</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#the-particlegroup-class">The <code class="xref py py-class docutils literal notranslate"><span class="pre">ParticleGroup</span></code> class</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#the-settings-class">The <code class="xref py py-class docutils literal notranslate"><span class="pre">Settings</span></code> class</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="settings_tutorial.html">Tutorial notebook: Managing Custom Settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="multiple_datasets.html">Managing multiple datasets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="flask.html">Sending data to a Firefly server via Flask</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="#the-tweenparams-class">The <code class="xref py py-class docutils literal notranslate"><span class="pre">TweenParams</span></code> class</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="multiple_datasets.html">Managing multiple datasets</a></li>
-<li class="toctree-l2"><a class="reference internal" href="flask.html">Sending data to a Firefly server via Flask</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../server.html">Hosting a Firefly webserver</a></li>
@@ -210,7 +207,8 @@
 </style>
 <section id="producing-firefly-formatted-json-files-using-the-python-api">
 <h1>Producing Firefly formatted <code class="code docutils literal notranslate"><span class="pre">.json</span></code> files using the <a class="reference internal" href="../reference/api/api.html#api"><span class="std std-ref">Python API</span></a><a class="headerlink" href="#producing-firefly-formatted-json-files-using-the-python-api" title="Permalink to this headline">¶</a></h1>
-<p>While it is certainly possible to produce Firefly formatted <code class="code docutils literal notranslate"><span class="pre">.json</span></code> files
+<p>Firefly reads formatted JSON files.
+While it is certainly possible to produce Firefly formatted <code class="code docutils literal notranslate"><span class="pre">.json</span></code> files
 manually (with say, a text editor) we have instead provided a convenient Python frontend
 for users to take advantage of.</p>
 <section id="the-reader-class">
@@ -231,7 +229,7 @@ necessary files listed in <a class="reference internal" href="files.html#files">
 </li>
 </ul>
 </div>
-<p>To quickly opening your own data, you can sub-class <a class="reference internal" href="../reference/api/classes/Firefly.data_reader.Reader.html#Firefly.data_reader.Reader" title="Firefly.data_reader.Reader"><code class="xref py py-class docutils literal notranslate"><span class="pre">Reader</span></code></a>
+<p>To quickly open your own data, you can sub-class <a class="reference internal" href="../reference/api/classes/Firefly.data_reader.Reader.html#Firefly.data_reader.Reader" title="Firefly.data_reader.Reader"><code class="xref py py-class docutils literal notranslate"><span class="pre">Reader</span></code></a>
 (e.g. <a class="reference internal" href="../reference/api/readers/Firefly.data_reader.SimpleReader.html#Firefly.data_reader.SimpleReader" title="Firefly.data_reader.SimpleReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">Firefly.data_reader.SimpleReader</span></code></a>) to parse and re-format your
 data while maintaining all of the inherited functionality that the
 <a class="reference internal" href="../reference/api/classes/Firefly.data_reader.Reader.html#Firefly.data_reader.Reader" title="Firefly.data_reader.Reader"><code class="xref py py-class docutils literal notranslate"><span class="pre">Reader</span></code></a> class offers.
