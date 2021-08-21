@@ -1,6 +1,6 @@
 .. _producing-files:
 Producing Firefly formatted :code:`.json` files using the :ref:`Python API <api>` 
-==================================================================================
+================================================================================= 
 
 Firefly reads formatted JSON files.
 While it is certainly possible to produce Firefly formatted :code:`.json` files 
@@ -34,7 +34,16 @@ and are demonstrated in the corresponding example notebook.
 .. toctree::
 	
     convert_FIRE_data
+
+
+Using with yt
++++++++++++++
+
+If you are using `yt <https://yt-project.org>`_ can use the :code:`dataset.create_firefly_object`
+method to create a :class:`~Firefly.data_reader.Reader` instance.
+For more information see the `Firefly page in the yt documentation <https://yt-project.org/docs/dev/visualizing/visualizing_particle_datasets_with_firefly.html>`_.
     
+
 .. _docsparticlegroup:
 
 The :class:`~Firefly.data_reader.ParticleGroup` class
