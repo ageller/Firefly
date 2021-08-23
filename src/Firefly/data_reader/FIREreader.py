@@ -387,10 +387,10 @@ class STARFORGEreader(FIREreader):
         write_jsons_to_disk=True,
         com_offset=False, 
         **kwargs):
-        """ A wrapper to :class:`Firefly.data_reader.FIREreader` that will open 
-            FIRE collaboration formatted data with minimal interaction from the user 
+        """ A wrapper to :class:`Firefly.data_reader.STARFORGEreader` that will open 
+            STARFORGE collaboration formatted data (starforge.space) with minimal interaction from the user 
             and use a "standard" Firefly setup with:
-                :code:`ptypes = [0,4]`
+                :code:`ptypes = [0,5]`
 
                 :code:`UInames = ['gas','stars']`
 
