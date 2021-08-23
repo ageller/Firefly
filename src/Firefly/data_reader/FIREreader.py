@@ -289,15 +289,14 @@ class FIREreader(Reader):
 
         return self.particleGroups
 
-class SimpleFIREreader(FIREreader):
-    
+class SimpleFIREreader(FIREreader):    
     def __init__(
         self,
         path_to_snapshot,
         decimation_factor=10,
         JSONdir=None,
         write_jsons_to_disk=True,
-        com_offset=False,
+        com_offset=False, 
         **kwargs):
         """ A wrapper to :class:`Firefly.data_reader.FIREreader` that will open 
             FIRE collaboration formatted data with minimal interaction from the user 
@@ -356,6 +355,95 @@ class SimpleFIREreader(FIREreader):
             snapdir,
             snapnum,
             ptypes=[0,4], 
+            UInames=['Gas','Stars'],
+            decimation_factors=[decimation_factor,decimation_factor],
+            fields=['AgeGyr','Temperature','Velocities','GCRadius'],
+            magFlags=[False,False,False,False], 
+            logFlags=[False,True,False,False], 
+            JSON_prefix='Data',
+            JSONdir=JSONdir,
+            **kwargs)
+
+        ## load the data
+        self.loadData(com_offset=com_offset)
+
+        self.settings['color']['Gas'] = [1,0,0,1]
+        self.settings['color']['Stars'] = [0,0,1,1]
+
+        self.settings['sizeMult']['Gas'] = 1
+        self.settings['sizeMult']['Stars'] = 1
+
+        self.settings['camera'] = [0,0,-15]
+
+        ## dump the JSON files
+        self.dumpToJSON(loud=True,write_jsons_to_disk=write_jsons_to_disk)
+
+class STARFORGEreader(FIREreader):
+    def __init__(
+        self,
+        path_to_snapshot,
+        decimation_factor=10,
+        JSONdir=None,
+        write_jsons_to_disk=True,
+        com_offset=False, 
+        **kwargs):
+        """ A wrapper to :class:`Firefly.data_reader.FIREreader` that will open 
+            FIRE collaboration formatted data with minimal interaction from the user 
+            and use a "standard" Firefly setup with:
+                :code:`ptypes = [0,4]`
+
+                :code:`UInames = ['gas','stars']`
+
+                :code:`fields = ['Velocities','AgeGyr','Temperature','GCRadius']`
+
+            along  with some "standard" settings with:
+                :code:`settings['color']['gas'] = [1,0,0,1]`
+
+                :code:`settings['color']['stars'] = [0,0,1,1]`
+
+                :code:`settings['sizeMult']['gas'] = 1`
+
+                :code:`settings['sizeMult']['stars'] = 1`
+
+                :code:`settings['camera'] = [0,0,-15]`
+
+        :param path_to_snapshot: path to .hdf5 file(s; can be a directory)
+        :type path_to_snapshot: str 
+        :param decimation_factor: factor by which to reduce the data randomly 
+            i.e. :code:`data=data[::decimation_factor]`, defaults to 10
+        :type decimation_factor: int, optional
+        :param JSONdir: the sub-directory that will contain your JSON files, relative
+            to your :code:`$HOME directory`. , defaults to :code:`$HOME/<JSON_prefix>`
+        :type JSONdir: str, optional
+        :param write_jsons_to_disk: flag that controls whether data is saved to disk (:code:`True`) 
+            or only converted to a string and stored in :code:`self.JSON` (:code:`False`), defaults to True
+        :type write_jsons_to_disk: bool, optional
+        :param com_offset: flag to offset all coordinates by the COM of the 
+            snapshot, defaults to False 
+        :type com_offset: bool, optional
+        :raises ValueError: if a snapnum cannot be inferred from the path_to_snapshot
+        """
+
+        ## strip off a trailing / if it's there
+        if path_to_snapshot[-1:] == os.sep:
+            path_to_snapshot = path_to_snapshot[:-1]
+
+        snapdir = os.path.dirname(path_to_snapshot)
+        try:
+            snapnum = int(path_to_snapshot.split('_')[-1])
+        except:
+            raise ValueError(
+                "%s should be formatted as 'path/to/output/snapdir_xxx'"%path_to_snapshot+
+                " where xxx is an integer")
+
+        ## relative path -> symbolic link
+        if JSONdir is None: JSONdir="STARFORGEData_%d"%snapnum
+
+        ## initialize the reader object
+        super().__init__(
+            snapdir,
+            snapnum,
+            ptypes=[0,5], 
             UInames=['Gas','Stars'],
             decimation_factors=[decimation_factor,decimation_factor],
             fields=['AgeGyr','Temperature','Velocities','GCRadius'],

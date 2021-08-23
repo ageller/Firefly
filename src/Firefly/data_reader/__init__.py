@@ -6,5 +6,5 @@ from .particlegroup import ParticleGroup
 
 from .tween import TweenParams
 
-from .FIREreader import FIREreader,SimpleFIREreader
+from .FIREreader import FIREreader,SimpleFIREreader,STARFORGEreader
 
