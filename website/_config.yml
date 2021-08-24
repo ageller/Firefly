@@ -19,3 +19,6 @@ github_username:  agurvich/Firefly
   #id: ""
 
 exclude: ['package.json', 'src' , 'node_modules']
+
+collections:
+  - gallery 

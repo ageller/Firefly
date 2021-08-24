@@ -283,3 +283,101 @@ sub,sup{
 	margin: 0;
 	text-decoration: none;
 }
+
+/* from : https://alijafarian.com/tutorial/responsive-image-grids-using-css/ */
+
+ul.rig {
+	list-style: none;
+	font-size: 0px;
+	margin-left: -1%; /* should match li left margin */
+}
+ul.rig li {
+	display: inline-block;
+	padding: 0px;
+	margin: 0 0 0 1%; /* 2.5% 2.5%;*/
+	background: #fff;
+	/* 
+	border: 1px solid #ddd;
+	box-shadow: 0 0 5px #ddd;
+	*/
+	font-size: 16px;
+	font-size: 1rem;
+	vertical-align: top;
+	box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+}
+ul.rig li img {
+	max-width: 100%;
+	height: auto;
+	margin: 0 0 5px 0;
+	margin-bottom:1px;
+}
+ul.rig li h3 {
+	margin: 0 0 5px;
+	text-align:center;
+	vertical-align: middle;
+	color:white;
+	padding:0;
+	margin:0;
+}
+ul.rig li p {
+	font-size: .9em;
+	line-height: 1.5em;
+	color: white;
+	text-align:center;
+	vertical-align: middle;
+	margin:0;
+}
+
+ul.rig li .info{
+	top:-80px;
+	position:relative;
+	background: rgba(29, 106, 154, 0.72);
+	visibility: hidden;
+	opacity: 0;
+
+	/* transition effect. not necessary */
+	transition: opacity .2s, visibility .2s;
+	height:auto;
+	}
+
+ul.rig li a:hover + .info{
+	visibility: visible;
+	opacity: 1;
+}
+
+ul.rig li .info:hover{
+	visibility: visible;
+	opacity: 1;
+	}
+
+/* class for 2 columns */
+ul.rig.columns-2 li {
+	width: 47.5%; /* this value + 2.5 should = 50% */
+}
+/* class for 3 columns */
+ul.rig.columns-3 li {
+	width: 30.83%; /* this value + 2.5 should = 33% */
+}
+/* class for 4 columns */
+ul.rig.columns-4 li {
+	width: 22.5%; /* this value + 2.5 should = 25% */
+}
+ 
+@media (max-width: 480px) {
+	ul.grid-nav li {
+		display: block;
+		margin: 0 0 5px;
+	}
+	ul.grid-nav li a {
+		display: block;
+	}
+	ul.rig {
+		margin-left: 0;
+	}
+	ul.rig li {
+		width: 100% !important; /* over-ride all li styles */
+		margin: 0 0 20px;
+	}
+}
