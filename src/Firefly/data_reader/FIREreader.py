@@ -7,8 +7,7 @@ from abg_python.snapshot_utils import openSnapshot
 
 class FIREreader(Reader):
     """This is an example of a "custom" Reader that has been tuned to 
-    open data from the FIRE galaxy formation collaboration 
-    (https://fire.northwestern.edu).
+    open data from the `FIRE galaxy formation collaboration <https://fire.northwestern.edu>`_.
     """
     
     def __init__(self,
@@ -24,8 +23,8 @@ class FIREreader(Reader):
         logFlags=None, 
         **kwargs):
         """Base initialization method for FIREreader instances.
-            A FIREreader will conveniently read FIRE collaboration data and produce
-            Firefly compatible :code:`.json` files.
+            A FIREreader will conveniently read `FIRE collaboration <http://fire.northwestern.edu>`_ 
+            data and produce Firefly compatible :code:`.json` files.
 
         :param snapdir: directory that contains all the hdf5 data files
         :type snapdir: str
@@ -387,8 +386,8 @@ class STARFORGEreader(FIREreader):
         write_jsons_to_disk=True,
         com_offset=False, 
         **kwargs):
-        """ A wrapper to :class:`Firefly.data_reader.STARFORGEreader` that will open 
-            STARFORGE collaboration formatted data (starforge.space) with minimal interaction from the user 
+        """ A wrapper to :class:`Firefly.data_reader.FIREreader` that will open 
+            `STARFORGE collaboration <http://starforge.space>`_ formatted data with minimal interaction from the user 
             and use a "standard" Firefly setup with:
                 :code:`ptypes = [0,5]`
 
