@@ -62,18 +62,20 @@ function update(time){
 	var currentTime = new Date();
 	var seconds = currentTime.getTime()/1000;
 
-	var fps = 1/(seconds-viewerParams.currentTime);
+	viewerParams.fps_list.push(1/(seconds-viewerParams.currentTime));
+	viewerParams.fps_list = viewerParams.fps_list.slice(-100);
 
 	if (viewerParams.showfps){
 		elm = document.getElementById("fps_container");
-		elm.innerHTML=Math.round(fps);
+		elm.innerHTML=Math.round(
+			viewerParams.fps_list.reduce((a, b) => a + b, 0)/viewerParams.fps_list.length);
 		elm.style.display='block';
 	}
 	
 	//console.log((seconds-viewerParams.currentTime))
 	// if we spent more than 1.5 seconds drawing the last frame, send the app to sleep
 	if ( (seconds-viewerParams.currentTime) > 1.5){
-		console.log("Putting the app to sleep, taking too long!",(seconds-viewerParams.currentTime))
+		console.log("Putting the app to sleep, taking too long!",(seconds-viewerParams.currentTime));
 		viewerParams.pauseAnimation=true;
 		showSleep();
 	}

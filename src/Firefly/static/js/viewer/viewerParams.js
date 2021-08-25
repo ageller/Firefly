@@ -178,5 +178,6 @@ function defineViewerParams(){
 
 		// for debugging
 		this.showfps = false;
+		this.fps_list = [];
 	};
 }
