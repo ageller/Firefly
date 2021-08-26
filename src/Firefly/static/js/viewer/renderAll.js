@@ -1,31 +1,44 @@
 function animate(time) {
 	viewerParams.animating = true;
+
+	// check if app should be put to sleep
 	if (!viewerParams.pauseAnimation){
+		// check UI and update viewerParams or partsMesh
 		update(time);
+
+		// render partsMesh to target
 		render();
 	}
+
+	// recursively loop this function
 	requestAnimationFrame( animate );
 }
 
 function update(time){
+
+	// get new camera position if we're in a tween loop
 	if (viewerParams.updateTween){
 		TWEEN.update(time);
 	}
+
+	// check for keypresses
 	viewerParams.keyboard.update();
+
+	// show help screen
 	if (viewerParams.keyboard.down("H")){
 		viewerParams.helpMessage=!viewerParams.helpMessage;
 		showSplash(viewerParams.helpMessage);
 	}
+
+	// toggle camera controls
 	if (viewerParams.keyboard.down("space")){
 		viewerParams.useTrackball = !viewerParams.useTrackball;
 		viewerParams.switchControls = true;
 		viewerParams.controls.dispose();
 		initControls();
 	}
-	
-	if (viewerParams.keyboard.down("C")) {
-		console.log(viewerParams.camera.position, viewerParams.camera.rotation);
-	}
+
+	// toggle tween loop
 	if (viewerParams.keyboard.down("T")) {
 		if (viewerParams.inTween){
 			viewerParams.updateTween = false
@@ -37,42 +50,18 @@ function update(time){
 		}
 	}
 
+	// toggle column density projection
 	if (viewerParams.keyboard.down("P")){
 		viewerParams.columnDensity = !viewerParams.columnDensity;
 	}
 
-	//this is affecting the rotation of the camera somehow, I would have thought that I should turn this off for the tweens to work as expected, but it appears that this helps (at least in this example)
-	// if (!viewerParams.inTween){
-		viewerParams.controls.update();
-	// }
+	// ABG: what does this do? TODO
+	viewerParams.controls.update();
 
-
-	// camera's direction
-	//I'm not sure if this is actually needed 
-	//if (!viewerParams.usingSocket) viewerParams.camera.getWorldDirection(viewerParams.cameraDirection);
-
-	
-	// find the camera's x and y axes 
-	// quaternion is orientation of the camera WRT data space
-	var cameraX =  new THREE.Vector3(1,0,0);
-	var cameraY =  new THREE.Vector3(0,1,0);
-	cameraX.applyQuaternion(viewerParams.camera.quaternion);
-	cameraY.applyQuaternion(viewerParams.camera.quaternion);
-
+	// check previous frame rendering time and pause app
 	var currentTime = new Date();
 	var seconds = currentTime.getTime()/1000;
 
-	viewerParams.fps_list.push(1/(seconds-viewerParams.currentTime));
-	viewerParams.fps_list = viewerParams.fps_list.slice(-100);
-
-	if (viewerParams.showfps){
-		elm = document.getElementById("fps_container");
-		elm.innerHTML=Math.round(
-			viewerParams.fps_list.reduce((a, b) => a + b, 0)/viewerParams.fps_list.length);
-		elm.style.display='block';
-	}
-	
-	//console.log((seconds-viewerParams.currentTime))
 	// if we spent more than 1.5 seconds drawing the last frame, send the app to sleep
 	if ( (seconds-viewerParams.currentTime) > 1.5){
 		console.log("Putting the app to sleep, taking too long!",(seconds-viewerParams.currentTime));
@@ -80,6 +69,24 @@ function update(time){
 		showSleep();
 	}
 
+	// use previous frame rendering time to calculate FPS. 
+	// use average of previous 100 frames so FPS is a bit more stable.
+	viewerParams.fps_list.push(1/(seconds-viewerParams.currentTime));
+	viewerParams.fps_list = viewerParams.fps_list.slice(-100);
+
+	// fill FPS container div with calculated FPS
+	if (viewerParams.showfps){
+		elm = document.getElementById("fps_container");
+		elm.innerHTML=Math.round(
+			viewerParams.fps_list.reduce((a, b) => a + b, 0)/viewerParams.fps_list.length);
+		elm.style.display='block';
+	}
+
+	// update the stored current time from the last time we were here
+	viewerParams.currentTime=seconds;
+
+	// TODO playback should be moved to full UI tweening in the future
+	// handle filter playblack 
 	viewerParams.partsKeys.forEach(function(p,i){
 		//change filter limits if playback is enabled
 		if (viewerParams.parts[p]['playbackEnabled']){
@@ -139,78 +146,118 @@ function update(time){
 					"double"// type
 					]});
 				sendToGUI(forGUI);
-				//viewerParams.SliderF[p][fkey].noUiSlider.set(viewerParams.filterVals[p][fkey]);
 			}
 		}
+
+		// find the camera's x and y axes 
+		// quaternion is orientation of the camera WRT data space
+		var cameraX =  new THREE.Vector3(1,0,0);
+		var cameraY =  new THREE.Vector3(0,1,0);
+		cameraX.applyQuaternion(viewerParams.camera.quaternion);
+		cameraY.applyQuaternion(viewerParams.camera.quaternion);
+
 		//check on all the UI inputs for each particle type
 		viewerParams.partsMesh[p].forEach( function( m, j ) {
 			
+			// send velocity vector type (line/arrow/cone) to material buffer
 			m.material.uniforms.velType.value = viewerParams.velopts[viewerParams.velType[p]];
+
+			// send column density flag to the material buffer
 			m.material.uniforms.columnDensity.value = viewerParams.columnDensity;
+
 			if (viewerParams.showParts[p]) {
 
+				// apply global decimation
 				m.geometry.setDrawRange( 0, viewerParams.plotNmax[p]*(1./viewerParams.decimate) )
+
+				// apply particle size scale factor 
 				m.material.uniforms.uVertexScale.value = viewerParams.PsizeMult[p];
 
-				//for colormap
+				// apply colormap limits and flag for colormapping at all
 				m.material.uniforms.colormapMin.value = viewerParams.colormapVals[p][viewerParams.ckeys[p][viewerParams.colormapVariable[p]]][0];
 				m.material.uniforms.colormapMax.value = viewerParams.colormapVals[p][viewerParams.ckeys[p][viewerParams.colormapVariable[p]]][1];
 				m.material.uniforms.colormap.value = viewerParams.colormap[p];
 				m.material.uniforms.showColormap.value = viewerParams.showColormap[p];
 
-				m.material.uniforms.color.value = new THREE.Vector4( viewerParams.Pcolors[p][0], viewerParams.Pcolors[p][1], viewerParams.Pcolors[p][2], viewerParams.Pcolors[p][3]);
+				// apply static color
+				m.material.uniforms.color.value = new THREE.Vector4(
+					viewerParams.Pcolors[p][0],
+					viewerParams.Pcolors[p][1],
+					viewerParams.Pcolors[p][2],
+					viewerParams.Pcolors[p][3]);
 				
+				// handle velocity vectors
 				if (viewerParams.showVel[p]){
-					// pass camera orientation to the shader
+					// enable velocity vectors
+					m.material.uniforms.oID.value = 1.;
+					// pass camera orientation to the shader so we can project each particle's
+					// velocity vector in the vertex shader
 					m.material.uniforms.cameraX.value = [cameraX.x,cameraX.y,cameraX.z];
 					m.material.uniforms.cameraY.value = [cameraY.x,cameraY.y,cameraY.z];
-					m.material.uniforms.oID.value = 1.;
+					// scale maximum velocity vector length
 					m.material.uniforms.uVertexScale.value *= viewerParams.vSizeMult;
-
-				} else {
+				} 
+				else{
+					// disable velocity vectors
 					m.material.uniforms.oID.value = 0.;
 				}
 
 				//switching back to previous method of filtering, but now setting radii to zero, and also setting to sizes back to 1 for all particles (in case turned off below)
+				// if the filter has been updated for this particle type,
+				// or if the particle type has been switched off,
+				// or if the colormap has been changed. Flags are set in the UI
+				// ABG: TODO why do we enter this conditional for updateOnOff or updateColormap?
 				if (viewerParams.updateFilter[p] || viewerParams.updateOnOff[p] || viewerParams.updateColormap[p]){
 					var radiusScale = m.geometry.attributes.radiusScale.array;
 					var alpha = m.geometry.attributes.alpha.array;
 					var fk;
+					// loop through this particle group's particles
 					for( var ii = 0; ii < radiusScale.length; ii ++ ) {
+						// fill radiusScale array (alias for geometry buffer's radius scale)
+						// with default values
 						if ('SmoothingLength' in viewerParams.parts[p]){
 							radiusScale[ii] = viewerParams.parts[p].SmoothingLength[ii];
 						}
-						else{
-							radiusScale[ii] = 1.;
-						}
+						else{radiusScale[ii] = 1.;}
+
+						// set default alpha to 1
 						alpha[ii] = 1.;
+
+						// if the UI has told us the filter needs to be updated
 						if (viewerParams.updateFilter[p]){
+							// apply each filter additively, loop over each filter key
 							for (k=0; k<viewerParams.fkeys[p].length; k++){
 								fk = viewerParams.fkeys[p][k];
+
+								// if the field value for this particle exists:
 								if (viewerParams.parts[p][fk] != null) {
 									val = viewerParams.parts[p][fk][ii];
-									//if ( val < viewerParams.filterVals[p][fk][0] || val > viewerParams.filterVals[p][fk][1] ){
-									if ( (!viewerParams.invertFilter[p][fk] &&  // we want to hide this particle
+									// we want to hide this particle
+									if ( (!viewerParams.invertFilter[p][fk] &&  
 										(val < viewerParams.filterVals[p][fk][0] || 
 										val > viewerParams.filterVals[p][fk][1])) || 
 										( (viewerParams.invertFilter[p][fk] && 
 										(val > viewerParams.filterVals[p][fk][0] && 
 										val < viewerParams.filterVals[p][fk][1])))   ){
+
+										// set the radius to 0 and the alpha to 0
 										radiusScale[ii] = 0.;
 										alpha[ii] = 0.;
 									} 
-								}
-							}
-						}
-					}
+								}// if (viewerParams.parts[p][fk] != null) 
+							}// for (k=0; k<viewerParams.fkeys[p].length; k++)
+						}// if (viewerParams.updateFilter[p])
+					}// for( var ii = 0; ii < radiusScale.length; ii ++ ) 
+
 					m.geometry.attributes.radiusScale.needsUpdate = true;
 					m.geometry.attributes.alpha.needsUpdate = true;					
 					viewerParams.updateFilter[p] = false;
 					viewerParams.updateOnOff[p] = false;
 					viewerParams.updateColormap[p] = false;
-				}
-			} else { 
-				//don't need to set alphas here because I am setting the entire color to 0 (RGBA)
+				}// if (viewerParams.updateFilter[p] || viewerParams.updateOnOff[p] || viewerParams.updateColormap[p])
+			} // if (viewerParams.showParts[p])
+			else { 
+				// disable the entire particle group, set color to 0,0,0,0 and radius to 0
 				m.material.uniforms.color.value = new THREE.Vector4(0);
 				m.material.uniforms.oID.value = -1;
 				var radiusScale = m.geometry.attributes.radiusScale.array;
@@ -220,13 +267,9 @@ function update(time){
 				m.geometry.attributes.radiusScale.needsUpdate = true;
 				viewerParams.updateOnOff[p] = false;
 			}
-
-		});
-	});
-	// update the current time
-	viewerParams.currentTime=seconds;
-
-}
+		});// viewerParams.partsMesh[p].forEach( function( m, j )
+	});// viewerParams.partsKeys.forEach(function(p,i)
+}// function update(time)
 
 
 function render() {
