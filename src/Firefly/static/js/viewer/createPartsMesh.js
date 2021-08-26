@@ -13,7 +13,7 @@ function clearPartsMesh(pClear = viewerParams.partsKeys) {
 	}
 }
 
-function drawScene(pdraw = viewerParams.partsKeys)
+function createPartsMesh(pdraw = viewerParams.partsKeys)
 {
 	clearPartsMesh(pClear = pdraw);
 	console.log("drawing", pdraw, viewerParams.plotNmax,viewerParams.decimate)

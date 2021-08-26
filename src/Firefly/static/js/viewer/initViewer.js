@@ -234,7 +234,7 @@ function WebGLStart(){
 
 	//draw everything
 	Promise.all([
-		drawScene(),
+		createPartsMesh(),
 	]).then(function(){
 		//searchOctree();
 		

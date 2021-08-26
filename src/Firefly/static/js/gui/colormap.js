@@ -16,7 +16,7 @@ function selectColormap() {
 
 	// redraw particle type if colormap is on
 	if (GUIParams.showColormap[p]){
-		//drawScene(pDraw = [p]);
+		//createPartsMesh(pDraw = [p]);
 		fillColorbarContainer(p);
 	}
 }
@@ -49,7 +49,7 @@ function selectColormapVariable() {
 
 	// redraw particle type if colormap is on
 	if (GUIParams.showColormap[p]){
-		sendToViewer({'drawScene':[[p]]})
+		sendToViewer({'createPartsMesh':[[p]]})
 		fillColorbarContainer(p);
 	}
 }
