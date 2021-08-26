@@ -43,7 +43,6 @@ function createTweens(){
 	var saveRot = Object.assign({}, cRot); 
 	var cdur = 3000;
 
-
 	viewerParams.tweenviewerParams.position.unshift(cPos)
 	viewerParams.tweenviewerParams.rotation.unshift(cRot)
 	viewerParams.tweenviewerParams.duration.push(cdur)
