@@ -10,7 +10,7 @@ function resetViewer(){
 	//reset all the parts specific values to the initial ones
 	initPVals();
 	initScene();
-	drawScene();
+	createPartsMesh();
 
 	//recreate the GUI
 	clearInterval(viewerParams.waitForInit);
@@ -230,7 +230,7 @@ function checkColormapBox(args){
 	console.log(p, " showColormap:", viewerParams.showColormap[p])
 
 	// redraw particle type (this seems necessary to enable the correct blending)
-	drawScene(pDraw = [p]);
+	createPartsMesh(pDraw = [p]);
 
 
 }
