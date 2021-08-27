@@ -113,11 +113,14 @@
 		</script>
 		<script src="static/js/misc/utils.js"></script>
 		<script src="static/js/misc/windowEvents.js"></script>
+		<script src="static/js/gui/GUIsocket.js"></script>
 		<script src="static/js/gui/initGUI.js"></script>
 		<script src="static/js/gui/sliders.js"></script>
 		<script src="static/js/gui/colormap.js"></script>
 		<script src="static/js/gui/filters.js"></script>
 		<script src="static/js/gui/UI.js"></script>
+
+		<!-- applyUISelections must be loaded after GUIsocket to overwrite updateFriction -->
 		<script src="static/js/viewer/applyUISelections.js"></script>
 		<script src="static/js/viewer/createPartsMesh.js"></script>
 		<script src="static/js/viewer/renderLoop.js"></script>
