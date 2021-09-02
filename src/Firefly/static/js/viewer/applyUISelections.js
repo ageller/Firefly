@@ -229,9 +229,7 @@ function checkColormapBox(args){
 	sendToGUI(forGUI);
 	console.log(p, " showColormap:", viewerParams.showColormap[p])
 
-	// redraw particle type (this seems necessary to enable the correct blending)
-	drawScene(pDraw = [p]);
-
+	updateColormapVariable(p)
 
 }
 
