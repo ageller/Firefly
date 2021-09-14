@@ -69,6 +69,7 @@ function initScene() {
 		if ( Detector.webgl ) {
 			viewerParams.renderer = new THREE.WebGLRenderer( {
 				antialias:true,
+				logarithmicDepthBuffer:true
 				//preserveDrawingBuffer: true , //so that we can save the image
 			} );
 
@@ -134,6 +135,13 @@ function initScene() {
 	// var canvas = d3.select('canvas').node();
 	// var gl = canvas.getContext('webgl');
 	// console.log(gl.getParameter(gl.ALIASED_POINT_SIZE_RANGE), gl.getParameter(gl.POINT_SMOOTH));
+
+	//investigating raycaster
+	//https://threejs.org/docs/#api/en/core/Raycaster
+	//https://github.com/mrdoob/three.js/blob/master/examples/webgl_interactive_raycasting_points.html
+	viewerParams.raycaster = new THREE.Raycaster();
+	viewerParams.raycaster.params.Points.threshold = 0.1;
+	viewerParams.pointer = new THREE.Vector2();
 }
 
 

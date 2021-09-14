@@ -226,6 +226,17 @@ function update(time){
 	// update the current time
 	viewerParams.currentTime=seconds;
 
+	//playing with raycaster
+	viewerParams.raycaster.setFromCamera( viewerParams.pointer, viewerParams.camera );
+	const intersections = viewerParams.raycaster.intersectObjects( viewerParams.partsMesh['Gas'] );
+	//console.log("intersection", intersections);
+}
+
+//playing with raycaster
+document.addEventListener( 'pointermove', onPointerMove );
+function onPointerMove( event ) {
+	viewerParams.pointer.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+	viewerParams.pointer.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
 }
 
 
