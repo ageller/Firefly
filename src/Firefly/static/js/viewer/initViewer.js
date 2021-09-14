@@ -142,6 +142,19 @@ function initScene() {
 	viewerParams.raycaster = new THREE.Raycaster();
 	viewerParams.raycaster.params.Points.threshold = 0.1;
 	viewerParams.pointer = new THREE.Vector2();
+	document.addEventListener( 'pointermove', onPointerMove );
+
+	viewerParams.rayPlanes = [];
+	viewerParams.rayPlanesIndex = 0;
+	const planeGeometry = new THREE.PlaneGeometry( 0.1, 0.1 );
+	const planeMaterial = new THREE.MeshBasicMaterial( { color: 0xffffff } );
+
+	for ( let i = 0; i < 40; i ++ ) {
+		const plane = new THREE.Mesh( planeGeometry, planeMaterial );
+		viewerParams.scene.add( plane );
+		viewerParams.rayPlanes.push( plane );
+	}
+
 }
 
 

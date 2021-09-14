@@ -227,13 +227,42 @@ function update(time){
 	viewerParams.currentTime=seconds;
 
 	//playing with raycaster
-	viewerParams.raycaster.setFromCamera( viewerParams.pointer, viewerParams.camera );
-	const intersections = viewerParams.raycaster.intersectObjects( viewerParams.partsMesh['Gas'] );
-	//console.log("intersection", intersections);
+	//if we try to use this for the HST style images I would need to:
+	// - run a grid over the full image, rather than using the point
+	// - at each point in the grid, I would need to add to a render texture
+	// - after completing the grid, I would show that texture.
+
+	//define a grid (probably better to define a number of grid points, or separation in params)
+	//even for this VERY course grid, it is slow.  I don't think this is a viable option. 
+	var pt = new THREE.Vector2();
+	for (var ii = -1; ii < 1; ii += 0.5){
+		for (var jj = -1; jj < 1; jj += 0.5){
+			pt.x = ii;
+			pt.j = jj;
+			viewerParams.raycaster.setFromCamera( pt, viewerParams.camera );
+			//get the intersections and reverse the order
+			var intersections = viewerParams.raycaster.intersectObjects( viewerParams.partsMesh['Gas'] ).reverse();
+		}
+	}
+
+	//this test will draw planes at the mouse cursor position
+	// viewerParams.raycaster.setFromCamera( viewerParams.pointer, viewerParams.camera );
+	// var intersections = viewerParams.raycaster.intersectObjects( viewerParams.partsMesh['Gas'] );
+	// //reverse the order
+	// intersections = intersections.reverse();
+	// console.log("intersection", viewerParams.pointer, intersections);
+	// if (intersections ) {
+	// 	intersections.forEach(function(intersection){
+	// 		viewerParams.rayPlanes[ viewerParams.rayPlanesIndex ].position.copy( intersection.point );
+	// 		viewerParams.rayPlanes[ viewerParams.rayPlanesIndex ].scale.set( 1, 1, 1 );
+	// 		viewerParams.rayPlanes[ viewerParams.rayPlanesIndex ].quaternion.copy( viewerParams.camera.quaternion )
+	// 		viewerParams.rayPlanesIndex = ( viewerParams.rayPlanesIndex + 1 ) % viewerParams.rayPlanes.length;
+	// 	})
+
+	// }
 }
 
 //playing with raycaster
-document.addEventListener( 'pointermove', onPointerMove );
 function onPointerMove( event ) {
 	viewerParams.pointer.x = ( event.clientX / window.innerWidth ) * 2 - 1;
 	viewerParams.pointer.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
