@@ -8,6 +8,7 @@ varying float vColormapMag;
 varying float vAlpha;
 varying float vPointSize;
 varying vec4 vColor;
+varying float vCameraDist;
 
 uniform bool showColormap;
 uniform float colormap;
@@ -17,6 +18,7 @@ uniform float velType; //0 = line, 1 = arrow, 2 = triangle
 uniform sampler2D colormapTexture;
 uniform bool columnDensity;
 uniform float scaleCD;
+
 
 //http://www.neilmendoza.com/glsl-rotation-about-an-arbitrary-axis/
 mat4 rotationMatrix(vec3 axis, float angle)
@@ -63,7 +65,7 @@ void main(void) {
 				gl_FragColor.a *= alpha_SPH;
 			} 
 			else {
-				gl_FragColor.a *= dMax - dist;
+				gl_FragColor.a *= (dMax - dist);
 			}
 		}
 	} else { //velocities, lines (Note: requiring vID == 1. breaks in windows for some reason)
@@ -118,7 +120,11 @@ void main(void) {
 	if (vColor[3] >= 0.) {
 		gl_FragColor.rgb = vColor.rgb;
 		gl_FragColor.a *= vColor[3];
-	}
+	}	
 
+	//try to get the z position of the particles to write to the buffer for HST-style imaging
+	//might need to store the log + 1? since I don't really know the scale that we'd be dealing
+	// gl_FragColor.rgb = vec3(0);
+	// gl_FragColor.r = vCameraDist/20.;
 }
 `;

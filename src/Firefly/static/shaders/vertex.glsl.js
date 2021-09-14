@@ -13,6 +13,7 @@ varying float vAlpha;
 varying vec2 vUv; //for the column density 
 varying float vPointSize;
 varying vec4 vColor;
+varying float vCameraDist;
 
 uniform float colormapMax;
 uniform float colormapMin;
@@ -67,6 +68,8 @@ void main(void) {
 	vColor = colorArray;
 
 	gl_Position = projectionMatrix * mvPosition;
+
+	vCameraDist = cameraDist;
 
 }
 
