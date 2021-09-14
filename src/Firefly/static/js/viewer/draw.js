@@ -39,6 +39,7 @@ function drawScene(pdraw = viewerParams.partsKeys)
 		var dWrite = false;
 		var dTest = false;
 		var transp = true;
+
 		if (viewerParams.showColormap[p]){
 			blend = THREE.NormalBlending;
 			dWrite = true;
@@ -234,7 +235,6 @@ function drawScene(pdraw = viewerParams.partsKeys)
 
 function updateColormapVariable(p){
 	//replace the colormap variable
-
 	if (viewerParams.parts[p][viewerParams.ckeys[p][viewerParams.colormapVariable[p]]] != null){
 		//I think there should only be one mesh per particle set, but to be safe...
 		viewerParams.partsMesh[p].forEach( function( m, j ) {
@@ -246,5 +246,25 @@ function updateColormapVariable(p){
 
 		})
 	}
+
+	//update the blending mode for all particles (otherwise non-colormapped particles will blend with colormapped particles)
+	var blend = THREE.AdditiveBlending;
+	var dWrite = false;
+	var dTest = false;
+
+	if (viewerParams.showColormap[p]){
+		blend = THREE.NormalBlending;
+		dWrite = true;
+		dTest = true;
+	}
+	viewerParams.partsKeys.forEach(function(pp,i){
+		viewerParams.partsMesh[pp].forEach( function( m, j ) {
+			console.log('checking', pp, dWrite, dTest, blend, m)
+			m.material.depthWrite = dWrite;
+			m.material.depthTest = dTest;
+			m.material.blending = blend;
+			m.material.needsUpdate = true;
+		});
+	});
 
 }
