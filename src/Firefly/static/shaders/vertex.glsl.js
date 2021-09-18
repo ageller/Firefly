@@ -13,6 +13,7 @@ varying float vAlpha;
 varying vec2 vUv; //for the column density 
 varying float vPointSize;
 varying vec4 vColor;
+varying float vCameraDist;
 
 uniform float colormapMax;
 uniform float colormapMin;
@@ -39,6 +40,7 @@ void main(void) {
 	vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
 
 	float cameraDist = length(mvPosition.xyz);
+	vCameraDist = cameraDist;
 	float pointScale = 1./cameraDist;//maxDistance/cameraDist;
 	pointScale = clamp(pointScale, minPointScale, maxPointScale);
 	

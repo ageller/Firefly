@@ -179,5 +179,23 @@ function defineViewerParams(){
 		// for debugging
 		this.showfps = false;
 		this.fps_list = [];
+
+		//for the telescope image
+		this.luminousPart = 'Stars'; //probably don't want to hard code this name in here
+		this.opacityPart = 'Gas'; //probably don't want to hard code this name in here
+		this.telescopeImage = false;
+		this.textureTDist = null;
+		this.materialDist = null;
+		this.meshDist = null;
+		this.sceneDist = null;
+		this.cameraDist = null;
+		this.textureTOpac = null;
+		this.textureTLum = null;
+		this.materialTI = null;
+		this.sceneTI = null;
+		this.cameraTI = null;
+		this.quadTI = null; //for the column density 
+		this.firstTimeTest = true;
+
 	};
 }

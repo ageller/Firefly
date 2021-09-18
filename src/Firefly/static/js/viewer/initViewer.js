@@ -548,6 +548,72 @@ function initColumnDensity(){
 	viewerParams.sceneCD.add(viewerParams.cameraCD);  
 }
 
+function initTelescopeImage(){
+	//currently very similar to initColumnDensity, but eventually I want the second render pass to be similar to the first (not to render on a billboard)
+	//following this example: https://threejs.org/examples/webgl_rtt.html
+	var screenWidth = window.innerWidth;
+	var screenHeight = window.innerHeight;
+	var aspect = screenWidth / screenHeight;
+
+	//render textures
+	viewerParams.textureTLum = new THREE.WebGLRenderTarget( screenWidth, screenHeight, {
+		minFilter: THREE.LinearFilter, 
+		magFilter: THREE.NearestFilter, 
+		format: THREE.RGBAFormat,
+	} );
+	viewerParams.textureTDist = new THREE.WebGLRenderTarget( screenWidth, screenHeight, {
+		minFilter: THREE.LinearFilter, 
+		magFilter: THREE.NearestFilter, 
+		format: THREE.RGBAFormat,
+
+	} );
+	viewerParams.textureTOpac = new THREE.WebGLRenderTarget( screenWidth, screenHeight, {
+		minFilter: THREE.LinearFilter, 
+		magFilter: THREE.NearestFilter, 
+		format: THREE.RGBAFormat 
+	} );
+
+
+	//for the distance render
+	//the color will be reset later on
+	viewerParams.materialDist = new THREE.ShaderMaterial( {
+		uniforms: { //add uniform variable here
+			uVertexScale: {value: 1.}, //will be updated later
+		},
+		vertexShader: myDistVertexShader,
+		fragmentShader: myDistFragmentShader,
+		depthWrite: true,
+		depthTest:  true,
+		transparent: true,
+		alphaTest: false,
+		blending:THREE.NormalBlending,
+	} );
+	viewerParams.sceneDist = new THREE.Scene();     
+	viewerParams.sceneDist.add(viewerParams.camera);  
+
+
+
+	//to test the textures
+	viewerParams.materialTI = new THREE.ShaderMaterial( {
+		uniforms: { 
+			tex: { value: viewerParams.textureTDist.texture }, 
+		},
+		vertexShader: myVertexShader,
+		fragmentShader: myFragmentShader_texture,
+		depthWrite: false
+	} );
+	var plane = new THREE.PlaneBufferGeometry( screenWidth, screenHeight );
+	viewerParams.quadTI = new THREE.Mesh( plane, viewerParams.materialTI );
+	viewerParams.quadTI.position.z = -100;
+	viewerParams.sceneTI = new THREE.Scene();
+	viewerParams.sceneTI.add( viewerParams.quadTI );
+
+	// camera
+	viewerParams.cameraTI = new THREE.OrthographicCamera( screenWidth/-2, screenWidth/2, screenHeight/2, screenHeight/-2, -10000, 10000 );
+	viewerParams.cameraTI.position.z = 100;
+	viewerParams.cameraTI.up.set(0, -1, 0);
+	viewerParams.sceneTI.add(viewerParams.cameraTI);  
+}
 
 function calcVelVals(p){
 	viewerParams.parts[p].VelVals = [];
@@ -965,6 +1031,7 @@ function WebGLStart(){
 	initScene();
 	
 	initColumnDensity();
+	initTelescopeImage();
 
 	//draw everything
 	Promise.all([

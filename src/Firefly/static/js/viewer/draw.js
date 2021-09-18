@@ -64,7 +64,9 @@ function drawScene(pdraw = viewerParams.partsKeys)
 				colormapMin: {value: viewerParams.colormapVals[p][viewerParams.ckeys[p][viewerParams.colormapVariable[p]]][0]},
 				colormapMax: {value: viewerParams.colormapVals[p][viewerParams.ckeys[p][viewerParams.colormapVariable[p]]][1]},
 				columnDensity: {value: viewerParams.columnDensity},
+				opacityImage: {value: false},
 				scaleCD: {value: viewerParams.scaleCD},
+				distTex: {value: viewerParams.textureTDist.texture}, //this will contain distance information for stars for the telescope image mode
 			},
 
 			vertexShader: myVertexShader,
@@ -259,7 +261,7 @@ function updateColormapVariable(p){
 	}
 	viewerParams.partsKeys.forEach(function(pp,i){
 		viewerParams.partsMesh[pp].forEach( function( m, j ) {
-			console.log('checking', pp, dWrite, dTest, blend, m)
+			//console.log('checking', pp, dWrite, dTest, blend, m)
 			m.material.depthWrite = dWrite;
 			m.material.depthTest = dTest;
 			m.material.blending = blend;
