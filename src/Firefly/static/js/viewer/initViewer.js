@@ -579,7 +579,7 @@ function initTelescopeImage(){
 	viewerParams.materialDist = new THREE.ShaderMaterial( {
 		uniforms: { //add uniform variable here
 			uVertexScale: {value: 1.}, //will be updated later
-			lnBoxSize: {value: Math.log(viewerParams.boxSize)},
+			boxSize: {value: viewerParams.boxSize},
 		},
 		vertexShader: myDistVertexShader,
 		fragmentShader: myDistFragmentShader,

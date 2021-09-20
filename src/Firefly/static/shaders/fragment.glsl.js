@@ -22,7 +22,7 @@ uniform sampler2D colormapTexture;
 
 uniform bool opacityImage;
 uniform sampler2D distTex;
-uniform float lnBoxSize;
+uniform float boxSize;
 
 uniform bool columnDensity;
 uniform float scaleCD;
@@ -132,9 +132,13 @@ void main(void) {
 		float x = vPosition.x/vPosition.w;
 		float y = vPosition.y/vPosition.w;
 		vec2 texCoord = vec2(0.5*x + 0.5, 0.5*y + 0.5);
-		vec4 distFromTex = texture2D(distTex, texCoord);
+		vec4 d = texture2D(distTex, texCoord);
+		//reconstruct the distance from the tex color
+		//float distFromTex = d.r + d.g/1000. + d.b/1000000.;
+		float distFromTex = d.r;
 		//decide whether to include gas (using the same normalization for distance as for distMap... which should be improved)
-		if ( log(vCameraDist)/lnBoxSize > (1. - distFromTex.r)){
+		float invDist = 1. - vCameraDist/(boxSize/2.); 
+		if ( invDist < distFromTex ){
 			discard;
 		}
 

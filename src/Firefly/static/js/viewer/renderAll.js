@@ -330,7 +330,7 @@ function render() {
 			viewerParams.partsMesh[p].forEach( function( m, j ) {
 				if (p == viewerParams.opacityPart){ 
 					//reset the size and color
-					m.material.uniforms.color.value = new THREE.Vector4( 0.1, 0.2, 0.3); //this will be some proxy for the opacity that will add up
+					m.material.uniforms.color.value = new THREE.Vector4( 0.1, 0.2, 0.3, viewerParams.Pcolors[p][3]); //this will be some proxy for the opacity that will add up
 					m.material.uniforms.oID.value = 0;
 					var radiusScale = m.geometry.attributes.radiusScale.array;
 					for( var ii = 0; ii < radiusScale.length; ii ++ ) {
@@ -368,15 +368,15 @@ function render() {
 		//render this to a different texture, but supply the distance texture
 		viewerParams.renderer.setRenderTarget(viewerParams.textureTOpac);
 		viewerParams.renderer.render( viewerParams.scene, viewerParams.camera);
-
+		viewerParams.quadTI.material.uniforms.luminTex.value = viewerParams.textureTLum.texture;
+		viewerParams.quadTI.material.uniforms.opacityTex.value = viewerParams.textureTOpac.texture;
 
 		//to test the textures
 		//viewerParams.quadTI.material.uniforms.luminTex.value = viewerParams.textureTDist.texture;
 		//viewerParams.quadTI.material.uniforms.luminTex.value = viewerParams.textureTOpac.texture;
 		//viewerParams.quadTI.material.uniforms.luminTex.value = viewerParams.textureTLum.texture;
 
-		viewerParams.quadTI.material.uniforms.luminTex.value = viewerParams.textureTLum.texture;
-		viewerParams.quadTI.material.uniforms.opacityTex.value = viewerParams.textureTOpac.texture;
+
 		viewerParams.quadTI.material.needsUpdate = true;
 		viewerParams.renderer.setRenderTarget(null)
 		viewerParams.renderer.render( viewerParams.sceneTI, viewerParams.cameraTI );
