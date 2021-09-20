@@ -10,7 +10,7 @@ function resetViewer(){
 	//reset all the parts specific values to the initial ones
 	initPVals();
 	initScene();
-	drawScene();
+	createPartsMesh();
 
 	//recreate the GUI
 	clearInterval(viewerParams.waitForInit);

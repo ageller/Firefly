@@ -51,8 +51,6 @@ function defineViewerParams(){
 		this.zmin = 1;
 		this.fov = 45.
 
-
-
 		//camera controls
 		this.useOrientationControls = false;
 		this.useTrackball = true;
@@ -125,8 +123,6 @@ function defineViewerParams(){
 
 		//check if we need to update the colormap when rendering
 		this.updateColormap = {};
-
-
 
 		//tweening
 		this.inTween = false;

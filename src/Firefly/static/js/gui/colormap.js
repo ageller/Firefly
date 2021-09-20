@@ -16,7 +16,7 @@ function selectColormap() {
 
 	// redraw particle type if colormap is on
 	if (GUIParams.showColormap[p]){
-		//drawScene(pDraw = [p]);
+		//createPartsMesh(pDraw = [p]);
 		fillColorbarContainer(p);
 	}
 }
