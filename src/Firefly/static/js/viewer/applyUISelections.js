@@ -224,14 +224,12 @@ function checkColormapBox(args){
 	}
 
 
-	forGUI.push({'setGUIParamByKey':[viewerParams.showColormap, "showColormap"]})
-	forGUI.push({'fillColorbarContainer':p})
+	forGUI.push({'setGUIParamByKey':[viewerParams.showColormap, "showColormap"]});
+	forGUI.push({'fillColorbarContainer':p});
 	sendToGUI(forGUI);
-	console.log(p, " showColormap:", viewerParams.showColormap[p])
+	console.log(p, " showColormap:", viewerParams.showColormap[p]);
 
-	// redraw particle type (this seems necessary to enable the correct blending)
-	createPartsMesh(pDraw = [p]);
-
+	updateColormapVariable(p);
 
 }
 

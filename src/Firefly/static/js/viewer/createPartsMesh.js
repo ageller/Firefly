@@ -39,6 +39,7 @@ function createPartsMesh(pdraw = viewerParams.partsKeys)
 		var dWrite = false;
 		var dTest = false;
 		var transp = true;
+
 		if (viewerParams.showColormap[p]){
 			blend = THREE.NormalBlending;
 			dWrite = true;
@@ -96,19 +97,21 @@ function createPartsMesh(pdraw = viewerParams.partsKeys)
 		var velVals = new Float32Array( viewerParams.plotNmax[p] * 4); // unit vector (vx, vy, vz), scaled magnitude
 		geo.addAttribute( 'velVals', new THREE.BufferAttribute( velVals, 4 ) );
 
-		//individual colors
+		//if user supplies individual per-particle colors (otherwise this is not used, but still need in shader)
 		if (viewerParams.parts[p].hasOwnProperty("colorArray")) console.log("have color Array")
 		var colorArray = new Float32Array( viewerParams.plotNmax[p] * 4); // RGBA
 		geo.addAttribute( 'colorArray', new THREE.BufferAttribute( colorArray, 4 ) );
+		
+		// create array to hold colormap variable values
+		var colormapArray = new Float32Array( viewerParams.plotNmax[p]); 
+		geo.addAttribute('colormapArray', new THREE.BufferAttribute( colormapArray, 1));
 
 		geo.setDrawRange( 0, viewerParams.plotNmax[p] );
 
 		var mesh = new THREE.Points(geo, material);
 		viewerParams.scene.add(mesh);
 
-		// create array to hold colormap variable values
-		var colormapArray = new Float32Array( viewerParams.plotNmax[p]); 
-		geo.addAttribute('colormapArray', new THREE.BufferAttribute( colormapArray, 1));
+
 
 		//var positions = mesh.geometry.attributes.position.array;
 		var cindex = 0;
@@ -168,7 +171,7 @@ function createPartsMesh(pdraw = viewerParams.partsKeys)
 					colorIndex++;
 					colorArray[colorIndex] = viewerParams.parts[p].colorArray[j][3];
 					colorIndex++;
-				} else {
+				 } else {
 					colorArray[colorIndex] = 0.;
 					colorIndex++;
 					colorArray[colorIndex] = 0.;
@@ -229,5 +232,41 @@ function createPartsMesh(pdraw = viewerParams.partsKeys)
 
 	//}
 	return true;
+
+}
+
+function updateColormapVariable(p){
+	//replace the colormap variable
+	if (viewerParams.parts[p][viewerParams.ckeys[p][viewerParams.colormapVariable[p]]] != null){
+		//I think there should only be one mesh per particle set, but to be safe...
+		viewerParams.partsMesh[p].forEach( function( m, j ) {
+			var colormapArray = m.geometry.attributes.colormapArray.array;
+			for( var ii = 0; ii < m.geometry.attributes.colormapArray.array.length; ii ++ ) {
+				colormapArray[ii] = viewerParams.parts[p][viewerParams.ckeys[p][viewerParams.colormapVariable[p]]][ii];
+			}
+			m.geometry.attributes.colormapArray.needsUpdate = true;
+
+		})
+	}
+
+	//update the blending mode for all particles (otherwise non-colormapped particles will blend with colormapped particles)
+	var blend = THREE.AdditiveBlending;
+	var dWrite = false;
+	var dTest = false;
+
+	if (viewerParams.showColormap[p]){
+		blend = THREE.NormalBlending;
+		dWrite = true;
+		dTest = true;
+	}
+	viewerParams.partsKeys.forEach(function(pp,i){
+		viewerParams.partsMesh[pp].forEach( function( m, j ) {
+			console.log('checking', pp, dWrite, dTest, blend, m)
+			m.material.depthWrite = dWrite;
+			m.material.depthTest = dTest;
+			m.material.blending = blend;
+			m.material.needsUpdate = true;
+		});
+	});
 
 }
