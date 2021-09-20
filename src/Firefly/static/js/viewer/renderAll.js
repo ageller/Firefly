@@ -291,47 +291,41 @@ function render() {
 
 
 		//first pass to get the luminous particles distances in a texture using the material created for this purpose
-		if (viewerParams.firstTimeTest){
-			viewerParams.firstTimeTest = false;
-			viewerParams.renderer.setRenderTarget(viewerParams.textureTDist);
-			viewerParams.renderer.render( viewerParams.sceneDist, viewerParams.camera);
-			viewerParams.textureTDist.needsUpdate = true; //is this needed?
-		}
-		//this appears to work
-		// //now render the luminous particles with additive blendingto get the desired colors
-		// viewerParams.partsKeys.forEach(function(p,i){
-		// 	viewerParams.partsMesh[p].forEach( function( m, j ) {
-		// 		if (p == viewerParams.luminousPart){ 
-		// 			//update the blending mode
-		// 			m.material.depthWrite = false;
-		// 			m.material.depthTest = false;
-		// 			m.material.transparent = true;
-		// 			m.material.blending = THREE.AdditiveBlending;
+		viewerParams.renderer.setRenderTarget(viewerParams.textureTDist);
+		viewerParams.renderer.render( viewerParams.sceneDist, viewerParams.camera);
+		viewerParams.textureTDist.needsUpdate = true; //is this needed?
 
-		// 			m.material.uniforms.distMap.value = false;
+		//now render the luminous particles with additive blendingto get the desired colors
+		viewerParams.partsKeys.forEach(function(p,i){
+			viewerParams.partsMesh[p].forEach( function( m, j ) {
+				if (p == viewerParams.luminousPart){ 
+					//update the blending mode
+					m.material.depthWrite = false;
+					m.material.depthTest = false;
+					m.material.transparent = true;
+					m.material.blending = THREE.AdditiveBlending;
+					m.material.needsUpdate = true;
+				} else {
+					//turn off any other particle group
 
-		// 			m.material.needsUpdate = true;
-		// 		} else {
-		// 			//turn off any other particle group
+					m.material.uniforms.color.value = new THREE.Vector4(0);
+					m.material.uniforms.oID.value = -1;
+					var radiusScale = m.geometry.attributes.radiusScale.array;
+					for( var ii = 0; ii < radiusScale.length; ii ++ ) {
+						radiusScale[ii] = 0.;
+					}
+					m.geometry.attributes.radiusScale.needsUpdate = true;
+					viewerParams.updateOnOff[p] = true;
 
-		// 			m.material.uniforms.color.value = new THREE.Vector4(0);
-		// 			m.material.uniforms.oID.value = -1;
-		// 			var radiusScale = m.geometry.attributes.radiusScale.array;
-		// 			for( var ii = 0; ii < radiusScale.length; ii ++ ) {
-		// 				radiusScale[ii] = 0.;
-		// 			}
-		// 			m.geometry.attributes.radiusScale.needsUpdate = true;
-		// 			viewerParams.updateOnOff[p] = true;
+				}
+			});
+		});
+		//render this to a different texture
+		viewerParams.renderer.setRenderTarget(viewerParams.textureTLum);
+		viewerParams.renderer.render( viewerParams.scene, viewerParams.camera);
 
-		// 		}
-		// 	});
-		// });
-		// //render this to a different texture
-		// viewerParams.renderer.setRenderTarget(viewerParams.textureTLum);
-		// viewerParams.renderer.render( viewerParams.scene, viewerParams.camera);
-
-		//this does not work; it appears that sometimes it works, but mostly it does not -- maybe the browser is requesting a frame before it's ready? but when I only render the dist texture once it still doesn't work???
 		//now turn off the stars and turn on the gas to render for the ?subtraction?
+		//I'm seeing some strange artifacts toward the edge of the image, as if the texCoord position is not set correctly...
 		viewerParams.partsKeys.forEach(function(p,i){
 			viewerParams.partsMesh[p].forEach( function( m, j ) {
 				if (p == viewerParams.opacityPart){ 
@@ -349,18 +343,7 @@ function render() {
 					m.material.depthWrite = false;
 					m.material.depthTest = false;
 					m.material.transparent = true;
-					//m.material.blending = THREE.MultiplyBlending;
 					m.material.blending = THREE.AdditiveBlending;
-
-					//do I need to set this again?
-					//m.material.uniforms.distTex.value = viewerParams.textureTDist.texture;
-
-					//https://threejs.org/examples/webgl_materials_blending_custom.html
-					//https://github.com/timoxley/threejs/blob/master/examples/webgl_materials_blending_custom.html
-					// m.material.blending = THREE.CustomBlending;
-					// m.material.blendSrc = THREE.OneFactor;
-					// m.material.blendDst = THREE.OneMinusSrcAlphaFactor;
-					// m.material.blendEquation = THREE.SubtractEquation;
 
 					m.material.uniforms.opacityImage.value = true;
 
@@ -388,23 +371,15 @@ function render() {
 
 
 		//to test the textures
-		//viewerParams.quadTI.material.uniforms.tex.value = viewerParams.textureTDist.texture;
-		//viewerParams.quadTI.material.uniforms.tex.value = viewerParams.textureTLum.texture;
-		viewerParams.quadTI.material.uniforms.tex.value = viewerParams.textureTOpac.texture;
+		//viewerParams.quadTI.material.uniforms.luminTex.value = viewerParams.textureTDist.texture;
+		//viewerParams.quadTI.material.uniforms.luminTex.value = viewerParams.textureTOpac.texture;
+		//viewerParams.quadTI.material.uniforms.luminTex.value = viewerParams.textureTLum.texture;
 
+		viewerParams.quadTI.material.uniforms.luminTex.value = viewerParams.textureTLum.texture;
+		viewerParams.quadTI.material.uniforms.opacityTex.value = viewerParams.textureTOpac.texture;
 		viewerParams.quadTI.material.needsUpdate = true;
 		viewerParams.renderer.setRenderTarget(null)
 		viewerParams.renderer.render( viewerParams.sceneTI, viewerParams.cameraTI );
-
-
-		// //clone the textures so that I can use them in the same shader that I just used to render to texture
-		// viewerParams.textureTLumClone = viewerParams.textureTLum.clone();
-		// viewerParams.textureTLumClone.needsUpdate = true;
-		// viewerParams.textureTDistClone = viewerParams.textureTDist.clone();
-		// viewerParams.textureTDistClone.needsUpdate = true;
-
-		// viewerParams.renderer.setRenderTarget(null);
-		// viewerParams.renderer.render( viewerParams.scene, viewerParams.camera );
 
 		renderDone = true;
 	}

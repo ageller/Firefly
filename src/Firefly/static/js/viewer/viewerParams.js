@@ -195,7 +195,6 @@ function defineViewerParams(){
 		this.sceneTI = null;
 		this.cameraTI = null;
 		this.quadTI = null; //for the column density 
-		this.firstTimeTest = true;
 
 	};
 }

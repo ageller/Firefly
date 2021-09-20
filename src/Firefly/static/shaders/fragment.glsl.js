@@ -11,6 +11,7 @@ varying float vAlpha;
 varying float vPointSize;
 varying vec4 vColor;
 varying float vCameraDist;
+varying vec4 vPosition;
 
 uniform bool showColormap;
 uniform float colormap;
@@ -21,6 +22,7 @@ uniform sampler2D colormapTexture;
 
 uniform bool opacityImage;
 uniform sampler2D distTex;
+uniform float lnBoxSize;
 
 uniform bool columnDensity;
 uniform float scaleCD;
@@ -127,12 +129,17 @@ void main(void) {
 
 	if (opacityImage){
 		//read the distance from the texture
-		//vec4 distFromTex = texture2D(distTex, vUv);
-		gl_FragColor = texture2D(distTex, vUv);;
-		// //decide whether to include gas (using the same normalization for distance as for distMap... which should be improved)
-		// if ( log(vCameraDist)/2. > distFromTex.r){
-		// 	discard;
-		// }
+		float x = vPosition.x/vPosition.w;
+		float y = vPosition.y/vPosition.w;
+		vec2 texCoord = vec2(0.5*x + 0.5, 0.5*y + 0.5);
+		vec4 distFromTex = texture2D(distTex, texCoord);
+		//decide whether to include gas (using the same normalization for distance as for distMap... which should be improved)
+		if ( log(vCameraDist)/lnBoxSize > (1. - distFromTex.r)){
+			discard;
+		}
+
+		// gl_FragColor.rgb =  vec3(texCoord,0.);//distFromTex;
+		// gl_FragColor =  distFromTex;
 	}
 
 

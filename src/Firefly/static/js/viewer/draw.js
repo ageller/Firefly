@@ -67,6 +67,7 @@ function drawScene(pdraw = viewerParams.partsKeys)
 				opacityImage: {value: false},
 				scaleCD: {value: viewerParams.scaleCD},
 				distTex: {value: viewerParams.textureTDist.texture}, //this will contain distance information for stars for the telescope image mode
+				lnBoxSize: {value: Math.log(viewerParams.boxSize)},
 			},
 
 			vertexShader: myVertexShader,

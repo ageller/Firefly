@@ -579,6 +579,7 @@ function initTelescopeImage(){
 	viewerParams.materialDist = new THREE.ShaderMaterial( {
 		uniforms: { //add uniform variable here
 			uVertexScale: {value: 1.}, //will be updated later
+			lnBoxSize: {value: Math.log(viewerParams.boxSize)},
 		},
 		vertexShader: myDistVertexShader,
 		fragmentShader: myDistFragmentShader,
@@ -593,13 +594,14 @@ function initTelescopeImage(){
 
 
 
-	//to test the textures
+	//to create the final image
 	viewerParams.materialTI = new THREE.ShaderMaterial( {
 		uniforms: { 
-			tex: { value: viewerParams.textureTDist.texture }, 
+			luminTex: { value: viewerParams.textureTLum.texture }, 
+			opacityTex: { value: viewerParams.textureTOpac.texture }, 
 		},
 		vertexShader: myVertexShader,
-		fragmentShader: myFragmentShader_texture,
+		fragmentShader: myFragmentShader_telescope,
 		depthWrite: false
 	} );
 	var plane = new THREE.PlaneBufferGeometry( screenWidth, screenHeight );

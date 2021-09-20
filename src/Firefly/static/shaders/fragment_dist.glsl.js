@@ -1,6 +1,7 @@
 var myDistFragmentShader = `
 
 //precision mediump float;
+uniform float lnBoxSize;
 
 varying float vPointSize;
 varying float vCameraDist;
@@ -15,9 +16,10 @@ void main(void) {
 	// fix for the minimum point size imposed by WebGL context gl.ALIASED_POINT_SIZE_RANGE = [1, ~8000]
 	float dMax = min(1., vPointSize);
 
+	//set the color based on the distance, but I want to invert it so that the black background is the large distance
+	//probably some better way to normalize this number
+	gl_FragColor.rgb = vec3(1. - log(vCameraDist)/lnBoxSize); 
 
-
-	gl_FragColor.rgb = vec3(log(vCameraDist)/2.); //probably some better way to normalize this number
 	gl_FragColor.a = 1.;
 	if (dist > dMax){
 		discard;
