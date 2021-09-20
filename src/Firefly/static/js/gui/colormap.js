@@ -282,5 +282,6 @@ function fillColorbarContainer( particle_group_UIname){
 
 	//show/hide the colorbardiv
 	d3.select('#colorbar_container').classed('hidden', !GUIParams.showColormap[particle_group_UIname])
-
+	if (!GUIParams.showColormap[particle_group_UIname]) d3.select('#colorbar_container').style('visibility','hidden' );
+	else d3.select('#colorbar_container').style('visibility','visible' );
 }
