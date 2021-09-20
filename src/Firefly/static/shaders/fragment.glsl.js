@@ -21,6 +21,7 @@ uniform float velType; //0 = line, 1 = arrow, 2 = triangle
 uniform sampler2D colormapTexture;
 
 uniform bool opacityImage;
+uniform bool reflectImage;
 uniform sampler2D distTex;
 uniform float boxSize;
 
@@ -127,7 +128,7 @@ void main(void) {
 	}
 
 
-	if (opacityImage){
+	if (opacityImage || reflectImage){
 		//read the distance from the texture
 		float x = vPosition.x/vPosition.w;
 		float y = vPosition.y/vPosition.w;
@@ -138,14 +139,18 @@ void main(void) {
 		float distFromTex = d.r;
 		//decide whether to include gas (using the same normalization for distance as for distMap... which should be improved)
 		float invDist = 1. - vCameraDist/(boxSize/2.); 
-		if ( invDist < distFromTex ){
+		//only take those in front of the stars
+
+		if (opacityImage && (invDist <= distFromTex || length(distFromTex) == 0.0)){
 			discard;
 		}
 
+		if (reflectImage && invDist <= distFromTex){
+			discard;
+		}
 		// gl_FragColor.rgb =  vec3(texCoord,0.);//distFromTex;
 		// gl_FragColor =  distFromTex;
 	}
-
 
 	//I think this is for setting individual colors(?)
 	if (vColor[3] >= 0.) {

@@ -556,23 +556,30 @@ function initTelescopeImage(){
 	var aspect = screenWidth / screenHeight;
 
 	//render textures
+	//luminous objects
 	viewerParams.textureTLum = new THREE.WebGLRenderTarget( screenWidth, screenHeight, {
 		minFilter: THREE.LinearFilter, 
 		magFilter: THREE.NearestFilter, 
 		format: THREE.RGBAFormat,
 	} );
+	//distance to luminous objects
 	viewerParams.textureTDist = new THREE.WebGLRenderTarget( screenWidth, screenHeight, {
 		minFilter: THREE.LinearFilter, 
 		magFilter: THREE.NearestFilter, 
 		format: THREE.RGBAFormat,
-
 	} );
+	//opacity for gas in front of luminous objects
 	viewerParams.textureTOpac = new THREE.WebGLRenderTarget( screenWidth, screenHeight, {
 		minFilter: THREE.LinearFilter, 
 		magFilter: THREE.NearestFilter, 
 		format: THREE.RGBAFormat 
 	} );
-
+	//reflected light for gas behind luminous objects
+	viewerParams.textureTRefl = new THREE.WebGLRenderTarget( screenWidth, screenHeight, {
+		minFilter: THREE.LinearFilter, 
+		magFilter: THREE.NearestFilter, 
+		format: THREE.RGBAFormat 
+	} );
 
 	//for the distance render
 	//the color will be reset later on
@@ -599,6 +606,7 @@ function initTelescopeImage(){
 		uniforms: { 
 			luminTex: { value: viewerParams.textureTLum.texture }, 
 			opacityTex: { value: viewerParams.textureTOpac.texture }, 
+			reflectTex: { value: viewerParams.textureTRefl.texture }, 
 		},
 		vertexShader: myVertexShader,
 		fragmentShader: myFragmentShader_telescope,

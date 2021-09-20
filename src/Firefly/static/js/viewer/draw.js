@@ -65,6 +65,7 @@ function drawScene(pdraw = viewerParams.partsKeys)
 				colormapMax: {value: viewerParams.colormapVals[p][viewerParams.ckeys[p][viewerParams.colormapVariable[p]]][1]},
 				columnDensity: {value: viewerParams.columnDensity},
 				opacityImage: {value: false},
+				reflectImage: {value: false},
 				scaleCD: {value: viewerParams.scaleCD},
 				distTex: {value: viewerParams.textureTDist.texture}, //this will contain distance information for stars for the telescope image mode
 				boxSize: {value: viewerParams.boxSize},

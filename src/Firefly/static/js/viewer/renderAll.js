@@ -298,6 +298,8 @@ function render() {
 		//now render the luminous particles with additive blendingto get the desired colors
 		viewerParams.partsKeys.forEach(function(p,i){
 			viewerParams.partsMesh[p].forEach( function( m, j ) {
+				m.material.uniforms.opacityImage.value = false;
+				m.material.uniforms.reflectImage.value = false;
 				if (p == viewerParams.luminousPart){ 
 					//update the blending mode
 					m.material.depthWrite = false;
@@ -325,7 +327,6 @@ function render() {
 		viewerParams.renderer.render( viewerParams.scene, viewerParams.camera);
 
 		//now turn off the stars and turn on the gas to render for the ?subtraction?
-		//I'm seeing some strange artifacts toward the edge of the image, as if the texCoord position is not set correctly...
 		viewerParams.partsKeys.forEach(function(p,i){
 			viewerParams.partsMesh[p].forEach( function( m, j ) {
 				if (p == viewerParams.opacityPart){ 
@@ -346,6 +347,7 @@ function render() {
 					m.material.blending = THREE.AdditiveBlending;
 
 					m.material.uniforms.opacityImage.value = true;
+					m.material.uniforms.reflectImage.value = false;
 
 					m.material.needsUpdate = true;
 
@@ -368,8 +370,23 @@ function render() {
 		//render this to a different texture, but supply the distance texture
 		viewerParams.renderer.setRenderTarget(viewerParams.textureTOpac);
 		viewerParams.renderer.render( viewerParams.scene, viewerParams.camera);
+
+		//do this again for reflected light
+		//make the color a little redder than the star color
+		var p = viewerParams.luminousPart;
+		var co = new THREE.Vector4(viewerParams.Pcolors[p][0] + 0.1, viewerParams.Pcolors[p][1], viewerParams.Pcolors[p][2], 0.05*viewerParams.Pcolors[p][3]);
+		var mat = viewerParams.partsMesh[viewerParams.opacityPart][0].material;
+		mat.uniforms.color.value = co;
+		mat.uniforms.opacityImage.value = false;
+		mat.uniforms.reflectImage.value = true;
+		mat.needsUpdate = true;
+		viewerParams.renderer.setRenderTarget(viewerParams.textureTRefl);
+		viewerParams.renderer.render( viewerParams.scene, viewerParams.camera);
+
+		//send the textures to the telescope imaging shader
 		viewerParams.quadTI.material.uniforms.luminTex.value = viewerParams.textureTLum.texture;
 		viewerParams.quadTI.material.uniforms.opacityTex.value = viewerParams.textureTOpac.texture;
+		viewerParams.quadTI.material.uniforms.reflectTex.value = viewerParams.textureTRefl.texture;
 
 		//to test the textures
 		//viewerParams.quadTI.material.uniforms.luminTex.value = viewerParams.textureTDist.texture;
@@ -440,6 +457,7 @@ function resetBlendMode(){
 
 			m.material.uniforms.columnDensity.value = viewerParams.columnDensity;
 			m.material.uniforms.opacityImage.value = false;
+			m.material.uniforms.reflectImage.value = false;
 
 			m.material.fragmentShader = myFragmentShader;
 
