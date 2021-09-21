@@ -184,13 +184,14 @@ function defineViewerParams(){
 		this.luminousPart = 'Stars'; //probably don't want to hard code this name in here
 		this.opacityPart = 'Gas'; //probably don't want to hard code this name in here
 		this.telescopeImage = false;
-		this.textureTDist = null;
+		this.textureDist = null;
 		this.materialDist = null;
 		this.meshDist = null;
 		this.sceneDist = null;
-		this.cameraDist = null;
-		this.textureTOpac = null;
-		this.textureTLum = null;
+		this.materialTel = null;
+		this.meshTel = null;
+		this.sceneTel = null;
+
 		this.materialTI = null;
 		this.sceneTI = null;
 		this.cameraTI = null;

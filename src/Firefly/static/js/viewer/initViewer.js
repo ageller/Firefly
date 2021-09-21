@@ -556,25 +556,21 @@ function initTelescopeImage(){
 	var aspect = screenWidth / screenHeight;
 
 	//render textures
-	//luminous objects
-	viewerParams.textureTLum = new THREE.WebGLRenderTarget( screenWidth, screenHeight, {
+	//positions of opacity objects; each pixel will store a different particle
+	//first I will determine the texture size (could I just create a very long line?)
+	var tDim = Math.ceil(Math.sqrt(viewerParams.plotNmax[viewerParams.opacityPart]));
+	viewerParams.textureDist = new THREE.WebGLRenderTarget( tDim, tDim, {
 		minFilter: THREE.LinearFilter, 
 		magFilter: THREE.NearestFilter, 
 		format: THREE.RGBAFormat,
 	} );
-	//distance to luminous objects
-	viewerParams.textureTDist = new THREE.WebGLRenderTarget( screenWidth, screenHeight, {
-		minFilter: THREE.LinearFilter, 
-		magFilter: THREE.NearestFilter, 
-		format: THREE.RGBAFormat,
-	} );
-	//opacity for gas in front of luminous objects
-	viewerParams.textureTOpac = new THREE.WebGLRenderTarget( screenWidth, screenHeight, {
+	//also store all the gas so that I loop through this when I do the final image
+	viewerParams.textureTOpac = new THREE.WebGLRenderTarget( tDim, tDim, {
 		minFilter: THREE.LinearFilter, 
 		magFilter: THREE.NearestFilter, 
 		format: THREE.RGBAFormat 
 	} );
-	//reflected light for gas behind luminous objects
+	//reflected light for gas behind luminous objects (not using now)
 	viewerParams.textureTRefl = new THREE.WebGLRenderTarget( screenWidth, screenHeight, {
 		minFilter: THREE.LinearFilter, 
 		magFilter: THREE.NearestFilter, 
@@ -585,8 +581,8 @@ function initTelescopeImage(){
 	//the color will be reset later on
 	viewerParams.materialDist = new THREE.ShaderMaterial( {
 		uniforms: { //add uniform variable here
-			uVertexScale: {value: 1.}, //will be updated later
 			boxSize: {value: viewerParams.boxSize},
+			texSize: {value: tDim},
 		},
 		vertexShader: myDistVertexShader,
 		fragmentShader: myDistFragmentShader,
@@ -599,17 +595,38 @@ function initTelescopeImage(){
 	viewerParams.sceneDist = new THREE.Scene();     
 	viewerParams.sceneDist.add(viewerParams.camera);  
 
+	//for the final render
+	//the color will be reset later on
+	var p = viewerParams.luminousPart;
+	viewerParams.materialTel = new THREE.ShaderMaterial( {
+		uniforms: { //add uniform variable here
+			boxSize: {value: viewerParams.boxSize},
+			texSize: {value: tDim},
+			distTex: {value: viewerParams.textureDist.texture},
+			opacity: {value: new THREE.Vector4( 0.1, 0.2, 0.3, 1.)}, //some proxy for opacity; but this is reset in renderAll (to update the alpha value)
+			uVertexScale: {value: viewerParams.PsizeMult[p]},
+			color: {value: new THREE.Vector4( viewerParams.Pcolors[p][0], viewerParams.Pcolors[p][1], viewerParams.Pcolors[p][2], viewerParams.Pcolors[p][3])},
+
+		},
+		vertexShader: myTelescopeVertexShader,
+		fragmentShader: myTelescopeFragmentShader,
+		depthWrite: false,
+		depthTest:  false,
+		transparent: true,
+		alphaTest: false,
+		blending:THREE.AdditiveBlending,
+	} );
+	viewerParams.sceneTel = new THREE.Scene();     
+	viewerParams.sceneTel.add(viewerParams.camera);  
 
 
-	//to create the final image
+	//to test the textures
 	viewerParams.materialTI = new THREE.ShaderMaterial( {
 		uniforms: { 
-			luminTex: { value: viewerParams.textureTLum.texture }, 
-			opacityTex: { value: viewerParams.textureTOpac.texture }, 
-			reflectTex: { value: viewerParams.textureTRefl.texture }, 
+			tex: { value: viewerParams.textureDist.texture }, 
 		},
 		vertexShader: myVertexShader,
-		fragmentShader: myFragmentShader_telescope,
+		fragmentShader: myFragmentShader_texture,
 		depthWrite: false
 	} );
 	var plane = new THREE.PlaneBufferGeometry( screenWidth, screenHeight );

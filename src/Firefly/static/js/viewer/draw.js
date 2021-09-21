@@ -67,7 +67,7 @@ function drawScene(pdraw = viewerParams.partsKeys)
 				opacityImage: {value: false},
 				reflectImage: {value: false},
 				scaleCD: {value: viewerParams.scaleCD},
-				distTex: {value: viewerParams.textureTDist.texture}, //this will contain distance information for stars for the telescope image mode
+				distTex: {value: viewerParams.textureDist.texture}, //this will contain distance information for stars for the telescope image mode
 				boxSize: {value: viewerParams.boxSize},
 			},
 
@@ -101,6 +101,10 @@ function drawScene(pdraw = viewerParams.partsKeys)
 		var velVals = new Float32Array( viewerParams.plotNmax[p] * 4); // unit vector (vx, vy, vz), scaled magnitude
 		geo.addAttribute( 'velVals', new THREE.BufferAttribute( velVals, 4 ) );
 
+		//unique identifier (attributes cannot be ints)
+		var iden = new Float32Array( viewerParams.plotNmax[p] ); 
+		geo.addAttribute( 'iden', new THREE.BufferAttribute( iden, 1 ) );
+
 		//if user supplies individual per-particle colors (otherwise this is not used, but still need in shader)
 		if (viewerParams.parts[p].hasOwnProperty("colorArray")) console.log("have color Array")
 		var colorArray = new Float32Array( viewerParams.plotNmax[p] * 4); // RGBA
@@ -124,7 +128,7 @@ function drawScene(pdraw = viewerParams.partsKeys)
 		var vindex = 0;
 		var rindex = 0;
 		var aindex = 0;
-
+		var iindex = 0;
 		var includePoint = true;
 		//for (var j=0; j<viewerParams.parts[p].Coordinates.length/viewerParams.decimate; j++){
 		for (var j=0; j<viewerParams.plotNmax[p]; j++){
@@ -204,6 +208,9 @@ function drawScene(pdraw = viewerParams.partsKeys)
 				alpha[aindex] = 1.;
 				aindex++;
 				
+				iden[iindex] = iindex;
+				iindex++;
+
 				ndraw += 1;
 				if (ndraw % ndiv < 1 || ndraw == viewerParams.parts.totalSize){
 					viewerParams.drawfrac = (1 + ndraw/viewerParams.parts.totalSize)*0.5;

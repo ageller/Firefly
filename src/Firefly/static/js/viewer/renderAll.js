@@ -291,112 +291,128 @@ function render() {
 
 
 		//first pass to get the luminous particles distances in a texture using the material created for this purpose
-		viewerParams.renderer.setRenderTarget(viewerParams.textureTDist);
+		viewerParams.renderer.setRenderTarget(viewerParams.textureDist);
 		viewerParams.renderer.render( viewerParams.sceneDist, viewerParams.camera);
-		viewerParams.textureTDist.needsUpdate = true; //is this needed?
-
-		//now render the luminous particles with additive blendingto get the desired colors
-		viewerParams.partsKeys.forEach(function(p,i){
-			viewerParams.partsMesh[p].forEach( function( m, j ) {
-				m.material.uniforms.opacityImage.value = false;
-				m.material.uniforms.reflectImage.value = false;
-				if (p == viewerParams.luminousPart){ 
-					//update the blending mode
-					m.material.depthWrite = false;
-					m.material.depthTest = false;
-					m.material.transparent = true;
-					m.material.blending = THREE.AdditiveBlending;
-					m.material.needsUpdate = true;
-				} else {
-					//turn off any other particle group
-
-					m.material.uniforms.color.value = new THREE.Vector4(0);
-					m.material.uniforms.oID.value = -1;
-					var radiusScale = m.geometry.attributes.radiusScale.array;
-					for( var ii = 0; ii < radiusScale.length; ii ++ ) {
-						radiusScale[ii] = 0.;
-					}
-					m.geometry.attributes.radiusScale.needsUpdate = true;
-					viewerParams.updateOnOff[p] = true;
-
-				}
-			});
-		});
-		//render this to a different texture
-		viewerParams.renderer.setRenderTarget(viewerParams.textureTLum);
-		viewerParams.renderer.render( viewerParams.scene, viewerParams.camera);
-
-		//now turn off the stars and turn on the gas to render for the ?subtraction?
-		viewerParams.partsKeys.forEach(function(p,i){
-			viewerParams.partsMesh[p].forEach( function( m, j ) {
-				if (p == viewerParams.opacityPart){ 
-					//reset the size and color
-					m.material.uniforms.color.value = new THREE.Vector4( 0.1, 0.2, 0.3, viewerParams.Pcolors[p][3]); //this will be some proxy for the opacity that will add up
-					m.material.uniforms.oID.value = 0;
-					var radiusScale = m.geometry.attributes.radiusScale.array;
-					for( var ii = 0; ii < radiusScale.length; ii ++ ) {
-						radiusScale[ii] = 1.;
-					}
-					m.geometry.attributes.radiusScale.needsUpdate = true;
-					viewerParams.updateOnOff[p] = true;
-
-					//update the blending mode
-					m.material.depthWrite = false;
-					m.material.depthTest = false;
-					m.material.transparent = true;
-					m.material.blending = THREE.AdditiveBlending;
-
-					m.material.uniforms.opacityImage.value = true;
-					m.material.uniforms.reflectImage.value = false;
-
-					m.material.needsUpdate = true;
+		viewerParams.textureDist.needsUpdate = true; //is this needed?
 
 
-				} else {
-					//turn off any other particle group
+	//second pass to get the opacity using the material created for this purpose
 
-					m.material.uniforms.color.value = new THREE.Vector4(0);
-					m.material.uniforms.oID.value = -1;
-					var radiusScale = m.geometry.attributes.radiusScale.array;
-					for( var ii = 0; ii < radiusScale.length; ii ++ ) {
-						radiusScale[ii] = 0.;
-					}
-					m.geometry.attributes.radiusScale.needsUpdate = true;
-					viewerParams.updateOnOff[p] = true;
-
-				}
-			});
-		});
-		//render this to a different texture, but supply the distance texture
-		viewerParams.renderer.setRenderTarget(viewerParams.textureTOpac);
-		viewerParams.renderer.render( viewerParams.scene, viewerParams.camera);
-
-		//do this again for reflected light
-		//make the color a little redder than the star color
 		var p = viewerParams.luminousPart;
-		var co = new THREE.Vector4(viewerParams.Pcolors[p][0] + 0.1, viewerParams.Pcolors[p][1], viewerParams.Pcolors[p][2], 0.05*viewerParams.Pcolors[p][3]);
-		var mat = viewerParams.partsMesh[viewerParams.opacityPart][0].material;
-		mat.uniforms.color.value = co;
-		mat.uniforms.opacityImage.value = false;
-		mat.uniforms.reflectImage.value = true;
+		var mat = viewerParams.meshTel.material;
+		mat.uniforms.opacity.value = new THREE.Vector4( 0.1, 0.2, 0.3, viewerParams.Pcolors[viewerParams.opacityPart][3]); 
+		mat.uniforms.color.value = new THREE.Vector4( viewerParams.Pcolors[p][0], viewerParams.Pcolors[p][1], viewerParams.Pcolors[p][2], viewerParams.Pcolors[p][3]);
+		mat.uniforms.distTex.value = viewerParams.textureDist.texture;
 		mat.needsUpdate = true;
-		viewerParams.renderer.setRenderTarget(viewerParams.textureTRefl);
-		viewerParams.renderer.render( viewerParams.scene, viewerParams.camera);
+		viewerParams.renderer.setRenderTarget(null)
+		viewerParams.renderer.render( viewerParams.sceneTel, viewerParams.camera );
 
-		//send the textures to the telescope imaging shader
-		viewerParams.quadTI.material.uniforms.luminTex.value = viewerParams.textureTLum.texture;
-		viewerParams.quadTI.material.uniforms.opacityTex.value = viewerParams.textureTOpac.texture;
-		viewerParams.quadTI.material.uniforms.reflectTex.value = viewerParams.textureTRefl.texture;
+		// viewerParams.renderer.setRenderTarget(viewerParams.textureOpac);
+		// viewerParams.renderer.render( viewerParams.sceneOpac viewerParams.camera);
+		// viewerParams.textureOpac.needsUpdate = true; //is this needed?
+
+		// //now render the luminous particles with additive blendingto get the desired colors
+		// viewerParams.partsKeys.forEach(function(p,i){
+		// 	viewerParams.partsMesh[p].forEach( function( m, j ) {
+		// 		m.material.uniforms.opacityImage.value = false;
+		// 		m.material.uniforms.reflectImage.value = false;
+		// 		if (p == viewerParams.luminousPart){ 
+		// 			//update the blending mode
+		// 			m.material.depthWrite = false;
+		// 			m.material.depthTest = false;
+		// 			m.material.transparent = true;
+		// 			m.material.blending = THREE.AdditiveBlending;
+		// 			m.material.needsUpdate = true;
+		// 		} else {
+		// 			//turn off any other particle group
+
+		// 			m.material.uniforms.color.value = new THREE.Vector4(0);
+		// 			m.material.uniforms.oID.value = -1;
+		// 			var radiusScale = m.geometry.attributes.radiusScale.array;
+		// 			for( var ii = 0; ii < radiusScale.length; ii ++ ) {
+		// 				radiusScale[ii] = 0.;
+		// 			}
+		// 			m.geometry.attributes.radiusScale.needsUpdate = true;
+		// 			viewerParams.updateOnOff[p] = true;
+
+		// 		}
+		// 	});
+		// });
+		// //render this to a different texture
+		// viewerParams.renderer.setRenderTarget(viewerParams.textureTLum);
+		// viewerParams.renderer.render( viewerParams.scene, viewerParams.camera);
+
+		// //now turn off the stars and turn on the gas to render for the ?subtraction?
+		// viewerParams.partsKeys.forEach(function(p,i){
+		// 	viewerParams.partsMesh[p].forEach( function( m, j ) {
+		// 		if (p == viewerParams.opacityPart){ 
+		// 			//reset the size and color
+		// 			m.material.uniforms.color.value = new THREE.Vector4( 0.1, 0.2, 0.3, viewerParams.Pcolors[p][3]); //this will be some proxy for the opacity that will add up
+		// 			m.material.uniforms.oID.value = 0;
+		// 			var radiusScale = m.geometry.attributes.radiusScale.array;
+		// 			for( var ii = 0; ii < radiusScale.length; ii ++ ) {
+		// 				radiusScale[ii] = 1.;
+		// 			}
+		// 			m.geometry.attributes.radiusScale.needsUpdate = true;
+		// 			viewerParams.updateOnOff[p] = true;
+
+		// 			//update the blending mode
+		// 			m.material.depthWrite = false;
+		// 			m.material.depthTest = false;
+		// 			m.material.transparent = true;
+		// 			m.material.blending = THREE.AdditiveBlending;
+
+		// 			m.material.uniforms.opacityImage.value = true;
+		// 			m.material.uniforms.reflectImage.value = false;
+
+		// 			m.material.needsUpdate = true;
+
+
+		// 		} else {
+		// 			//turn off any other particle group
+
+		// 			m.material.uniforms.color.value = new THREE.Vector4(0);
+		// 			m.material.uniforms.oID.value = -1;
+		// 			var radiusScale = m.geometry.attributes.radiusScale.array;
+		// 			for( var ii = 0; ii < radiusScale.length; ii ++ ) {
+		// 				radiusScale[ii] = 0.;
+		// 			}
+		// 			m.geometry.attributes.radiusScale.needsUpdate = true;
+		// 			viewerParams.updateOnOff[p] = true;
+
+		// 		}
+		// 	});
+		// });
+		// //render this to a different texture, but supply the distance texture
+		// viewerParams.renderer.setRenderTarget(viewerParams.textureTOpac);
+		// viewerParams.renderer.render( viewerParams.scene, viewerParams.camera);
+
+		// //do this again for reflected light (given how I'm using this, I could simply render this with the TLum texture above... that would save compute time)
+		// //make the color a little redder than the star color
+		// var p = viewerParams.luminousPart;
+		// var co = new THREE.Vector4(viewerParams.Pcolors[p][0] + 0.1, viewerParams.Pcolors[p][1], viewerParams.Pcolors[p][2], 0.05*viewerParams.Pcolors[p][3]);
+		// var mat = viewerParams.partsMesh[viewerParams.opacityPart][0].material;
+		// mat.uniforms.color.value = co;
+		// mat.uniforms.opacityImage.value = false;
+		// mat.uniforms.reflectImage.value = true;
+		// mat.needsUpdate = true;
+		// viewerParams.renderer.setRenderTarget(viewerParams.textureTRefl);
+		// viewerParams.renderer.render( viewerParams.scene, viewerParams.camera);
+
+		// //send the textures to the telescope imaging shader
+		// viewerParams.quadTI.material.uniforms.luminTex.value = viewerParams.textureTLum.texture;
+		// viewerParams.quadTI.material.uniforms.opacityTex.value = viewerParams.textureTOpac.texture;
+		// viewerParams.quadTI.material.uniforms.reflectTex.value = viewerParams.textureTRefl.texture;
 
 		//to test the textures
-		//viewerParams.quadTI.material.uniforms.luminTex.value = viewerParams.textureTDist.texture;
-		//viewerParams.quadTI.material.uniforms.luminTex.value = viewerParams.textureTOpac.texture;
-		//viewerParams.quadTI.material.uniforms.luminTex.value = viewerParams.textureTLum.texture;
+		// viewerParams.quadTI.material.uniforms.tex.value = viewerParams.textureDist.texture;
+		// //viewerParams.quadTI.material.uniforms.luminTex.value = viewerParams.textureTOpac.texture;
+		// //viewerParams.quadTI.material.uniforms.luminTex.value = viewerParams.textureTLum.texture;
 
 
-		viewerParams.quadTI.material.needsUpdate = true;
-		viewerParams.renderer.setRenderTarget(null)
-		viewerParams.renderer.render( viewerParams.sceneTI, viewerParams.cameraTI );
+		// viewerParams.quadTI.material.needsUpdate = true;
+		// viewerParams.renderer.setRenderTarget(null)
+		// viewerParams.renderer.render( viewerParams.sceneTI, viewerParams.cameraTI );
 
 		renderDone = true;
 	}
@@ -436,16 +452,22 @@ function render() {
 function initializeTelescopeImager(){
 	if (viewerParams.telescopeImage){
 
-		//add the luminous particle to the distance render mesh for the render texture
-		var geo = viewerParams.partsMesh[viewerParams.luminousPart][0].geometry;
-		viewerParams.materialDist.uniforms.uVertexScale.value = viewerParams.PsizeMult[viewerParams.luminousPart];
-		viewerParams.materialDist.needsUpdate = true;
+		//add the opacity particle to the distance render mesh for the render texture
+		//var geo = viewerParams.partsMesh[viewerParams.luminousPart][0].geometry;
+		var geo = viewerParams.partsMesh[viewerParams.opacityPart][0].geometry;
 		viewerParams.meshDist = new THREE.Points(geo, viewerParams.materialDist);
 		viewerParams.sceneDist.add(viewerParams.meshDist);
+
+
+		//add the opacity particle to the opacity render mesh for the render texture
+		var geo = viewerParams.partsMesh[viewerParams.opacityPart][0].geometry;
+		viewerParams.meshTel = new THREE.Points(geo, viewerParams.materialTel);
+		viewerParams.sceneTel.add(viewerParams.meshTel);
 
 	} else {
 		//now remove to save memory -- is there anything else that I have to do?
 		viewerParams.sceneDist.remove( viewerParams.meshDist );
+		viewerParams.sceneTel.remove( viewerParams.meshTel );
 	}
 }
 function resetBlendMode(){
