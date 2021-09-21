@@ -65,8 +65,6 @@ void main(void) {
 
 	vPointSize = gl_PointSize;
 
-	//glPointSize = gl_PointSize;
-
 	vColor = colorArray;
 
 	gl_Position = projectionMatrix * mvPosition;
