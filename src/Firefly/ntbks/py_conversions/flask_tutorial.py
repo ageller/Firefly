@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# `Firefly/ntbks/flask_tutorial.ipynb`
+# `firefly/ntbks/flask_tutorial.ipynb`
 
 # In[1]:
 
@@ -30,9 +30,9 @@ import requests
 
 import sys
 sys.path.insert(0, '/Users/ageller/VISUALIZATIONS/Firefly')
-sys.path.insert(0,'/Users/agurvich/research/repos/Firefly/src')
-from Firefly.data_reader import ArrayReader
-from Firefly.server import spawnFireflyServer,killAllFireflyServers
+sys.path.insert(0,'/Users/agurvich/research/repos/firefly/src')
+from firefly.data_reader import ArrayReader
+from firefly.server import spawnFireflyServer,killAllFireflyServers
 
 
 # # Tutorial notebook: Sending data to a local Firefly server through Flask
@@ -43,7 +43,7 @@ from Firefly.server import spawnFireflyServer,killAllFireflyServers
 # To address these problems, we use Flask to host a webserver and parse data directly from Python at a data upload endpoint. This procedure is detailed in the <a href="https://ageller.github.io/Firefly/docs/build/html/server/index.html">server documentation</a>. From the user's perspective, all they need to do is POST their data to a specific port on their local machine and they will be able to explore their own data without ever having to write a file to disk. 
 
 # ## Start the Firefly server as a background process
-# In this tutorial we'll demonstrate how to update the data being shown in a live instance of Firefly running on a local webserver through Flask. Before attempting this tutorial read through the <a href="https://ageller.github.io/Firefly/docs/build/html/server/index.html">server documentation</a> which explains how to specify the listening port and different methods of hosting a Flask Firefly server (here we use the `Firefly.server.spawnFireflyServer` function which starts a background process).
+# In this tutorial we'll demonstrate how to update the data being shown in a live instance of Firefly running on a local webserver through Flask. Before attempting this tutorial read through the <a href="https://ageller.github.io/Firefly/docs/build/html/server/index.html">server documentation</a> which explains how to specify the listening port and different methods of hosting a Flask Firefly server (here we use the `firefly.server.spawnFireflyServer` function which starts a background process).
 
 # In[4]:
 
@@ -61,7 +61,7 @@ url = "http://localhost:5000"
 IFrame(url, width=1000, height=500)
 
 
-# ## Create some example data and put it into a `Firefly.data_reader.Reader` object
+# ## Create some example data and put it into a `firefly.data_reader.Reader` object
 # See the <a href="https://ageller.github.io/Firefly/docs/build/html/data_reader/reader.html">reader documentation</a> or the `reader_tutorial.ipynb` example notebook. 
 
 # In[6]:
@@ -111,7 +111,7 @@ my_arrayReader.sendDataViaFlask()
 
 
 # ## Killing the Firefly server process when you're done
-# Because the Firefly server was started in the background, the process will persist even when you're done with it. You should make sure to kill it using the `Firefly.server.killAllFireflyServers` function. If you supply a process id (which is returned by the `spawnFireflyServer` function) then it will only kill that one process. However, processes are a bit defensive and sometimes we've found they survive the attempt on their life and then hide under a different PID. In which case, it's always safest to just kill all the servers indiscriminately. Generally the two are interchangeable unless you're hosting multiple local servers of Firefly on different ports. This is pretty uncommon/advanced in which case you hopefully know what you're doing. 
+# Because the Firefly server was started in the background, the process will persist even when you're done with it. You should make sure to kill it using the `firefly.server.killAllFireflyServers` function. If you supply a process id (which is returned by the `spawnFireflyServer` function) then it will only kill that one process. However, processes are a bit defensive and sometimes we've found they survive the attempt on their life and then hide under a different PID. In which case, it's always safest to just kill all the servers indiscriminately. Generally the two are interchangeable unless you're hosting multiple local servers of Firefly on different ports. This is pretty uncommon/advanced in which case you hopefully know what you're doing. 
 
 # In[10]:
 

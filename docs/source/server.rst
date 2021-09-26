@@ -143,7 +143,7 @@ To make Firefly accessible via the internet, the
 
 .. seealso:: 
 
-    :func:`~Firefly.data_reader.Reader.copyFireflySourceToTarget` takes an optional boolean
+    :func:`~firefly.data_reader.Reader.copyFireflySourceToTarget` takes an optional boolean
     keyword argument :code:`init_gh_pages` that will attempt to 
     create a new repository and enable GitHub pages automatically.
     See :ref:`multiple datasets` for details.

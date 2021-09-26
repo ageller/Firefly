@@ -12,7 +12,7 @@ class Settings(object):
         the user has access to. 
 
         It is easiest to use when instances of Settings are passed to a 
-        :class:`Firefly.data_reader.Reader` instance when it is initialized.
+        :class:`firefly.data_reader.Reader` instance when it is initialized.
     """
     def __getitem__(self,key):
         """Implementation of builtin function  __getitem__
@@ -94,25 +94,25 @@ class Settings(object):
         settings_filename='Settings.json',
         **kwargs):
         """Base initialization method for Settings instances. A Settings will store
-            the app state and produce Firefly compatible :code:`.json` files.
+            the app state and produce firefly compatible :code:`.json` files.
 
             accepts passthrough kwargs from:
 
-            :func:`Firefly.data_reader.Settings.window_settings`
+            :func:`firefly.data_reader.Settings.window_settings`
 
-            :func:`Firefly.data_reader.Settings.UI_settings`
+            :func:`firefly.data_reader.Settings.UI_settings`
 
-            :func:`Firefly.data_reader.Settings.particle_UI_settings`
+            :func:`firefly.data_reader.Settings.particle_UI_settings`
 
-            :func:`Firefly.data_reader.Settings.camera_settings`
+            :func:`firefly.data_reader.Settings.camera_settings`
 
-            :func:`Firefly.data_reader.Settings.startup_settings`
+            :func:`firefly.data_reader.Settings.startup_settings`
 
-            :func:`Firefly.data_reader.Settings.particle_startup_settings`
+            :func:`firefly.data_reader.Settings.particle_startup_settings`
 
-            :func:`Firefly.data_reader.Settings.particle_filter_settings`
+            :func:`firefly.data_reader.Settings.particle_filter_settings`
 
-            :func:`Firefly.data_reader.Settings.particle_colormap_settings`
+            :func:`firefly.data_reader.Settings.particle_colormap_settings`
             
 
         :param settings_filename: name of settings :code:`.json` file,
@@ -289,7 +289,7 @@ class Settings(object):
         :param decimate: set the initial global decimation 
             (e.g, you could load in all the data by setting 
             the :code:`decimation_factor` to 1 for any individual
-            :class:`Firefly.data_reader.ParticleGroup`,
+            :class:`firefly.data_reader.ParticleGroup`,
             but only _display_ some fraction by setting
             decimate > 1 here).  
             This is a single value (not a dict), defaults to None
@@ -408,7 +408,7 @@ class Settings(object):
             defaults to None and is set in the web app to [min, max] of that field
         :type colormapVals: dict of UIname:dict of field:[min,max] range, optional
         :param colormap: index of the colormap to use for each gas particle,
-            defined by the grid of colors in Firefly/static/textures/colormap.png
+            defined by the grid of colors in firefly/static/textures/colormap.png
             TODO: (index + 0.5) * (8/256)
             This is a dict with keys of the particle UInames mapped to floats,
             (e.g. {'Gas':0.015625, 'Stars':0.015625}),
@@ -439,12 +439,12 @@ class Settings(object):
     def attachSettings(
         self,
         particleGroup):
-        """Adds a :class:`~Firefly.data_reader.ParticleGroup`'s settings to the
+        """Adds a :class:`~firefly.data_reader.ParticleGroup`'s settings to the
         relevant settings dictionaries.
 
-        :param particleGroup: the :class:`~Firefly.data_reader.ParticleGroup`
-            that you want to link to this :class:`~Firefly.data_reader.Settings`.
-        :type particleGroup: :class:`Firefly.data_reader.ParticleGroup`
+        :param particleGroup: the :class:`~firefly.data_reader.ParticleGroup`
+            that you want to link to this :class:`~firefly.data_reader.Settings`.
+        :type particleGroup: :class:`firefly.data_reader.ParticleGroup`
         """
 
         ## transfer keys from particle group

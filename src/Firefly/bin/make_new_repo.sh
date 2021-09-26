@@ -25,11 +25,11 @@ else
     ## make a dummy readme
     echo "# ${REPONAME}" > README.md
     echo "This repository was created automatically by \
-    https://github.com/ageller/Firefly/blob/main/src/Firefly/bin/make_new_repo.sh \
-    you can make your own by installing Firefly." >> README.md
+    https://github.com/ageller/Firefly/blob/main/src/firefly/bin/make_new_repo.sh \
+    you can make your own by installing firefly." >> README.md
     git add README.md
     
-    ## track the Firefly index.html
+    ## track the firefly index.html
     if [ -f index.html ]; then
         git add index.html
     else

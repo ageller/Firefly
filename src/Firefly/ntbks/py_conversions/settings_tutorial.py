@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# `Firefly/ntbks/settings_tutorial.ipynb`
+# `firefly/ntbks/settings_tutorial.ipynb`
 
 # In[1]:
 
@@ -31,7 +31,7 @@ YouTubeVideo("ft0Y3XNJhl4")
 import sys
 import os
 import numpy as np
-from Firefly.data_reader import ParticleGroup,Settings,ArrayReader
+from firefly.data_reader import ParticleGroup,Settings,ArrayReader
 
 
 # # Tutorial notebook: Managing Custom Settings
@@ -48,9 +48,9 @@ from Firefly.data_reader import ParticleGroup,Settings,ArrayReader
 # 
 # Specific information for each key can be found in <a href="https://ageller.github.io/Firefly/docs/build/html/data_reader/settings.html">this documentation</a>.  
 # 
-# To create the necessary JSON files one should use the `Firefly.data_reader.Settings` class to create a `Settings` object. Once you have a `Settings` object you can manipulate the settings as you see fit and then either 
+# To create the necessary JSON files one should use the `firefly.data_reader.Settings` class to create a `Settings` object. Once you have a `Settings` object you can manipulate the settings as you see fit and then either 
 # 1. manually save it to a file using the `outputToJSON()` method or
-# 2. connect it to a `Firefly.data_reader.Reader` object in order to link it to a specific visualization (see the <a href="https://ageller.github.io/Firefly/docs/build/html/data_reader/reader.html">reader documentation</a> for details on how to use a `Reader` object).
+# 2. connect it to a `firefly.data_reader.Reader` object in order to link it to a specific visualization (see the <a href="https://ageller.github.io/Firefly/docs/build/html/data_reader/reader.html">reader documentation</a> for details on how to use a `Reader` object).
 
 # In[5]:
 
@@ -80,7 +80,7 @@ print("after:")
 settings.printKeys(pattern='window')
 
 
-# ## Settings are most useful when connected to a `Firefly.data_reader.Reader` object
+# ## Settings are most useful when connected to a `firefly.data_reader.Reader` object
 # Doing so allows many of the necessary settings to be automatically generated as additional particle groups are added.
 
 # In[7]:
@@ -105,7 +105,7 @@ fields = np.random.random(size=xs.size)
 settings.printKeys(pattern='particle')
 
 
-# We'll use a `Firefly.data_reader.ArrayReader`, a workhorse `Firefly.data_reader.Reader` sub-class with many convenient functions. See the <a href="https://ageller.github.io/Firefly/docs/build/html/data_reader/reader.html">reader documentation</a> for details that are outside the scope of this tutorial.
+# We'll use a `firefly.data_reader.ArrayReader`, a workhorse `firefly.data_reader.Reader` sub-class with many convenient functions. See the <a href="https://ageller.github.io/Firefly/docs/build/html/data_reader/reader.html">reader documentation</a> for details that are outside the scope of this tutorial.
 
 # In[9]:
 
@@ -158,7 +158,7 @@ new_settings.loadFromJSON("./exampleSettings.json")
 
 
 # ## Attaching a ParticleGroup to a Settings
-# One other thing you may want to do (perhaps in the course of building your own custom `Reader` sub-class) is link a `Firefly.data_reader.ParticleGroup` object to a `Settings` object so that the different particle settings can be imported. 
+# One other thing you may want to do (perhaps in the course of building your own custom `Reader` sub-class) is link a `firefly.data_reader.ParticleGroup` object to a `Settings` object so that the different particle settings can be imported. 
 # `ParticleGroup` settings can be changed in `settings_default` attribute (which is just a normal python dictionary). 
 
 # In[13]:

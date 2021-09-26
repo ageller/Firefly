@@ -87,8 +87,8 @@
             
             
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Quickstart</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../webapp/index.html">Using an existing instance of Firefly</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../webapp/index.html">Interacting with a Firefly visualization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../data_reader/index.html">Creating your own instance of Firefly</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../server.html">Hosting a Firefly webserver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../experimental.html">Experimental features</a></li>
@@ -174,9 +174,9 @@
 
 <div class="viewcode-block" id="Reader"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.Reader.html#Firefly.data_reader.Reader">[docs]</a><span class="k">class</span> <span class="nc">Reader</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; This class provides a framework to unify the Settings and ParticleGroup classes</span>
-<span class="sd">    to make sure that the user can easily produce Firefly compatible files. </span>
+<span class="sd">    to make sure that the user can easily produce firefly compatible files. </span>
 <span class="sd">    You should use this Reader as a base class for any custom readers you may build</span>
-<span class="sd">    (see :class:`Firefly.data_reader.SimpleReader` or :class:`Firefly.data_reader.FIREreader` for example).</span>
+<span class="sd">    (see :class:`firefly.data_reader.SimpleReader` or :class:`firefly.data_reader.FIREreader` for example).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
 <div class="viewcode-block" id="Reader.__repr__"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.Reader.html#Firefly.data_reader.Reader.__repr__">[docs]</a>    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -202,7 +202,7 @@
         <span class="n">settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">tweenParams</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Base initialization method for Reader instances. A Reader will read data and produce</span>
-<span class="sd">            Firefly compatible :code:`.json` files. </span>
+<span class="sd">            firefly compatible :code:`.json` files. </span>
 
 <span class="sd">        :param JSONdir: the sub-directory that will contain your JSON files, relative</span>
 <span class="sd">            to your :code:`$HOME directory`. , defaults to :code:`$HOME/&lt;JSON_prefix&gt;`</span>
@@ -225,14 +225,14 @@
 <span class="sd">            :code:`False`: does not alter :code:`startup.json`, </span>
 <span class="sd">            , defaults to &#39;append&#39;</span>
 <span class="sd">        :type write_startup: str/bool, optional</span>
-<span class="sd">        :param settings: a :class:`Firefly.data_reader.Settings` instance, defaults to </span>
-<span class="sd">            a new default :class:`Firefly.data_reader.Settings` instance.</span>
-<span class="sd">        :type settings: :class:`Firefly.data_reader.Settings`, optional</span>
-<span class="sd">        :param tweenParams: :class:`Firefly.data_reader.TweenParams` instance, defaults to None</span>
-<span class="sd">        :type tweenParams: :class:`Firefly.data_reader.TweenParams`, optional</span>
-<span class="sd">        :raises TypeError: raised if anything other than a :class:`Firefly.data_reader.Settings` </span>
+<span class="sd">        :param settings: a :class:`firefly.data_reader.Settings` instance, defaults to </span>
+<span class="sd">            a new default :class:`firefly.data_reader.Settings` instance.</span>
+<span class="sd">        :type settings: :class:`firefly.data_reader.Settings`, optional</span>
+<span class="sd">        :param tweenParams: :class:`firefly.data_reader.TweenParams` instance, defaults to None</span>
+<span class="sd">        :type tweenParams: :class:`firefly.data_reader.TweenParams`, optional</span>
+<span class="sd">        :raises TypeError: raised if anything other than a :class:`firefly.data_reader.Settings` </span>
 <span class="sd">            instance is passed to :code:`settings`</span>
-<span class="sd">        :raises TypeError: raised if anything other than a :class:`Firefly.data_reader.TweenParams` </span>
+<span class="sd">        :raises TypeError: raised if anything other than a :class:`firefly.data_reader.TweenParams` </span>
 <span class="sd">            instance is passed to :code:`tweenParams`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -245,7 +245,7 @@
                 <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;static&#39;</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="n">JSONdir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1">## default to saving directly into the Firefly directory</span>
+            <span class="c1">## default to saving directly into the firefly directory</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;JSONdir is None, defaulting to </span><span class="si">%s</span><span class="s2">/</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">static_data_dir</span><span class="p">,</span><span class="n">JSON_prefix</span><span class="p">))</span>
             <span class="n">JSONdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">static_data_dir</span><span class="p">,</span>
@@ -261,7 +261,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">JSONdir</span> <span class="o">=</span> <span class="n">JSONdir</span>
 
         <span class="c1">## determine whether the directory we&#39;re saving the</span>
-        <span class="c1">##  actual data in is a sub-directory of Firefly/static/data.</span>
+        <span class="c1">##  actual data in is a sub-directory of firefly/static/data.</span>
         <span class="c1">##  if not, set self.needs_soft_link = True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__splitAndValidateDatadir</span><span class="p">()</span>
 
@@ -284,7 +284,7 @@
             <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">!=</span> <span class="s1">&#39;Settings&#39;</span><span class="p">:</span>
                 <span class="c1">## fun fact, assert isinstance(settings,Settings) won&#39;t work with jupyter notebooks</span>
                 <span class="c1">##  that use %load_ext autoreload</span>
-                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Make sure you use a Settings instance to specify Firefly settings.&quot;</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Make sure you use a Settings instance to specify firefly settings.&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1">## we&#39;ll use the default ones then</span>
             <span class="n">settings</span> <span class="o">=</span> <span class="n">Settings</span><span class="p">()</span>
@@ -307,7 +307,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Ensures that files will be output to a location that Firefly </span>
+<span class="sd">        Ensures that files will be output to a location that firefly </span>
 <span class="sd">        can read, as well as splits the path so that filenames.json </span>
 <span class="sd">        references files correctly.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -327,7 +327,7 @@
 
                 <span class="k">if</span> <span class="n">loud</span><span class="p">:</span>
                     <span class="nb">print</span><span class="p">(</span> <span class="s2">&quot;JSONdir: </span><span class="si">{}</span><span class="s2"> -- &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">JSONdir</span><span class="p">)</span><span class="o">+</span>
-                        <span class="s2">&quot;is not a sub-directory of Firefly/static/data. &quot;</span><span class="o">+</span>
+                        <span class="s2">&quot;is not a sub-directory of firefly/static/data. &quot;</span><span class="o">+</span>
                         <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">This may produce confusing or inoperable results. &quot;</span><span class="o">+</span>
                         <span class="s2">&quot;As such, we will create a symlink for you when you &quot;</span><span class="o">+</span>
                         <span class="s2">&quot; dumpToJSON.&quot;</span><span class="p">)</span>
@@ -338,13 +338,13 @@
         <span class="k">return</span> <span class="n">hard_data_path</span><span class="p">,</span><span class="n">short_data_path</span>
 
 <div class="viewcode-block" id="Reader.addParticleGroup"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.Reader.html#Firefly.data_reader.Reader.addParticleGroup">[docs]</a>    <span class="k">def</span> <span class="nf">addParticleGroup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">particleGroup</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Track a new :class:`~Firefly.data_reader.ParticleGroup` instance in </span>
-<span class="sd">            this :class:`Firefly.data_reader.Reader` instance&#39;s :code:`particleGroups` array</span>
-<span class="sd">            and to the attached :class:`Firefly.data_reader.Settings` instance.</span>
+        <span class="sd">&quot;&quot;&quot; Track a new :class:`~firefly.data_reader.ParticleGroup` instance in </span>
+<span class="sd">            this :class:`firefly.data_reader.Reader` instance&#39;s :code:`particleGroups` array</span>
+<span class="sd">            and to the attached :class:`firefly.data_reader.Settings` instance.</span>
 
-<span class="sd">        :param particleGroup: a :class:`~Firefly.data_reader.ParticleGroup` instance</span>
+<span class="sd">        :param particleGroup: a :class:`~firefly.data_reader.ParticleGroup` instance</span>
 <span class="sd">            that contains particle data for an individual UI element.</span>
-<span class="sd">        :type particleGroup: :class:`Firefly.data_reader.ParticleGroup`</span>
+<span class="sd">        :type particleGroup: :class:`firefly.data_reader.ParticleGroup`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1">## data validation of new ParticleGroup happened in its initialization</span>
@@ -360,11 +360,11 @@
         <span class="n">loud</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">write_jsons_to_disk</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">symlink</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Creates all the necessary JSON files to run Firefly and ensures they are</span>
+        <span class="sd">&quot;&quot;&quot;Creates all the necessary JSON files to run firefly and ensures they are</span>
 <span class="sd">        properly linked and cross-referenced correctly using the</span>
-<span class="sd">        :func:`Firefly.data_reader.Settings.outputToJSON` and</span>
-<span class="sd">        :func:`Firefly.data_reader.ParticleGroup.outputToJSON` methods</span>
-<span class="sd">        (and :func:`Firefly.data_reader.TweenParams.outputToJSON` if one is attached).</span>
+<span class="sd">        :func:`firefly.data_reader.Settings.outputToJSON` and</span>
+<span class="sd">        :func:`firefly.data_reader.ParticleGroup.outputToJSON` methods</span>
+<span class="sd">        (and :func:`firefly.data_reader.TweenParams.outputToJSON` if one is attached).</span>
 <span class="sd">        :param loud: flag to print status information to the console, defaults to False</span>
 <span class="sd">        :type loud: bool, optional</span>
 <span class="sd">        :param write_jsons_to_disk: flag that controls whether data is saved to disk (:code:`True`) </span>
@@ -379,7 +379,7 @@
 <span class="sd">        :rtype: str</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         
-        <span class="c1">## path where data needs to be visible to Firefly</span>
+        <span class="c1">## path where data needs to be visible to firefly</span>
         <span class="n">static_data_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">static_data_dir</span><span class="p">,</span>
             <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">JSONdir</span><span class="p">))</span>
@@ -391,7 +391,7 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">symlink</span><span class="p">:</span>
             <span class="c1">## we&#39;ve been asked to ignore the request to put the</span>
             <span class="c1">##  hard files in self.JSONdir and instead actually put them in </span>
-            <span class="c1">##  Firefly/static/data/&lt;short_data_path&gt;</span>
+            <span class="c1">##  firefly/static/data/&lt;short_data_path&gt;</span>
             <span class="k">if</span> <span class="n">loud</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Outputting files to: </span><span class="si">%s</span><span class="s2"> instead of: </span><span class="si">%s</span><span class="s2"> as originally specified.&quot;</span><span class="o">%</span><span class="p">(</span>
                         <span class="n">static_data_path</span><span class="p">,</span>
@@ -405,8 +405,8 @@
             <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">JSONdir</span><span class="p">):</span>
                 <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">JSONdir</span><span class="p">)</span>
 
-            <span class="c1">## soft link between the &quot;hard&quot; data and Firefly/static/data</span>
-            <span class="c1">##  Firefly can be run locally</span>
+            <span class="c1">## soft link between the &quot;hard&quot; data and firefly/static/data</span>
+            <span class="c1">##  firefly can be run locally</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">needs_soft_link</span> <span class="ow">and</span> <span class="n">symlink</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="c1">## create a symlink so that data can </span>
@@ -483,7 +483,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">static_data_dir</span><span class="p">,</span>
             <span class="s1">&#39;startup.json&#39;</span><span class="p">)</span>
 
-        <span class="c1">## relative path from .js interpreter (which runs in /Firefly/static) </span>
+        <span class="c1">## relative path from .js interpreter (which runs in /firefly/static) </span>
         <span class="c1">##  to this dataset</span>
         <span class="n">startup_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">JSONdir</span><span class="p">))</span>
 
@@ -532,13 +532,13 @@
 <div class="viewcode-block" id="Reader.outputToDict"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.Reader.html#Firefly.data_reader.Reader.outputToDict">[docs]</a>    <span class="k">def</span> <span class="nf">outputToDict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Formats the data in the reader to a python dictionary using</span>
 <span class="sd">            the attached</span>
-<span class="sd">            :func:`Firefly.data_reader.Settings.outputToDict` and</span>
-<span class="sd">            :func:`Firefly.data_reader.ParticleGroup.outputToDict` methods</span>
-<span class="sd">            (and :func:`Firefly.data_reader.TweenParams.outputToDict` if one is attached).</span>
+<span class="sd">            :func:`firefly.data_reader.Settings.outputToDict` and</span>
+<span class="sd">            :func:`firefly.data_reader.ParticleGroup.outputToDict` methods</span>
+<span class="sd">            (and :func:`firefly.data_reader.TweenParams.outputToDict` if one is attached).</span>
 
 <span class="sd">        :return: :code:`outputDict`, a dictionary structured like the javascript object in</span>
-<span class="sd">            the Firefly webapp. Can be sent to the js interpreter via Flask using the</span>
-<span class="sd">            :func:`Firefly.data_reader.Reader.sendDataViaFlask` method.</span>
+<span class="sd">            the firefly webapp. Can be sent to the js interpreter via Flask using the</span>
+<span class="sd">            :func:`firefly.data_reader.Reader.sendDataViaFlask` method.</span>
 <span class="sd">        :rtype: dict</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         
@@ -560,7 +560,7 @@
 <span class="sd">            but instead stores it as a string. Then feeds this string</span>
 <span class="sd">            to the js interpreter via Flask.</span>
 
-<span class="sd">        :param port: port that the Firefly Flask server is being hosted on,</span>
+<span class="sd">        :param port: port that the firefly Flask server is being hosted on,</span>
 <span class="sd">            defaults to 5000</span>
 <span class="sd">        :type port: int, optional</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -580,7 +580,7 @@
             <span class="n">json</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">JSON</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;data posted!&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Reader.copyFireflySourceToTarget"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.Reader.html#Firefly.data_reader.Reader.copyFireflySourceToTarget">[docs]</a>    <span class="k">def</span> <span class="nf">copyFireflySourceToTarget</span><span class="p">(</span>
+<div class="viewcode-block" id="Reader.copyfireflySourceToTarget"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.Reader.html#Firefly.data_reader.Reader.copyfireflySourceToTarget">[docs]</a>    <span class="k">def</span> <span class="nf">copyfireflySourceToTarget</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">target</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">flask_templates</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -590,26 +590,26 @@
         <span class="n">GHREPONAME</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">GHUSER</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">GHOAUTHTOKENPATH</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; Copies the necessary source files to run a stand-alone instance of Firefly</span>
+        <span class="sd">&quot;&quot;&quot; Copies the necessary source files to run a stand-alone instance of firefly</span>
 <span class="sd">            on the web. Optionally, will also initialize a new GitHub repository with </span>
 <span class="sd">            GitHub pages, a free web-hosting service, so that this stand-alone instance </span>
 <span class="sd">            can be accessed by anyone over the internet.</span>
 
-<span class="sd">        :param target: target directory to save Firefly source files to,</span>
-<span class="sd">            defaults to :code:`$HOME/my_Firefly`</span>
+<span class="sd">        :param target: target directory to save firefly source files to,</span>
+<span class="sd">            defaults to :code:`$HOME/my_firefly`</span>
 <span class="sd">        :type target: str, optional</span>
 <span class="sd">        :param flask_templates: flag for whether the flask template files should also be</span>
-<span class="sd">            copied. In general, these files are not required to run Firefly over the internet</span>
-<span class="sd">            but may be useful if one intends to run Firefly locally in this new directory,</span>
+<span class="sd">            copied. In general, these files are not required to run firefly over the internet</span>
+<span class="sd">            but may be useful if one intends to run firefly locally in this new directory,</span>
 <span class="sd">            defaults to False</span>
 <span class="sd">        :type flask_templates: bool, optional</span>
 <span class="sd">        :param dump_data: flag for whether the data stored in this reader should also be saved</span>
-<span class="sd">            to this new stand-alone Firefly directory (vs. only the Firefly source files), defaults to True</span>
+<span class="sd">            to this new stand-alone firefly directory (vs. only the firefly source files), defaults to True</span>
 <span class="sd">        :type dump_data: bool, optional</span>
 <span class="sd">        :param overwrite: flag for whether the existing target directory should be purged</span>
 <span class="sd">            before anything is copied over or written to disk, defaults to True</span>
 <span class="sd">        :type overwrite: bool, optional</span>
-<span class="sd">        :param init_gh_pages: flag to run :code:`Firefly/bin/make_new_repo.sh` in an attempt to initialize</span>
+<span class="sd">        :param init_gh_pages: flag to run :code:`firefly/bin/make_new_repo.sh` in an attempt to initialize</span>
 <span class="sd">            a new github repository with GitHub Pages, a free web-hosting service provided by GitHub, enabled,</span>
 <span class="sd">            defaults to False</span>
 <span class="sd">        :type init_gh_pages: bool, optional</span>
@@ -622,14 +622,14 @@
 <span class="sd">            https://github.com/settings/tokens, defaults to :code:`$HOME/.github.token`</span>
 <span class="sd">        :type GHOAUTHTOKENPATH: str, optional</span>
 <span class="sd">        :raises FileNotFoundError: if :code:`GHOAUTHTOKENPATH` cannot be resolved</span>
-<span class="sd">        :raises FileNotFoundError: if :code:`Firefly/bin/make_new_repo.sh` cannot be found.</span>
+<span class="sd">        :raises FileNotFoundError: if :code:`firefly/bin/make_new_repo.sh` cannot be found.</span>
 <span class="sd">        :return: returns a list of strings, :code:`[target]` if :code:`init_git_pages=False` otherwise</span>
-<span class="sd">            the output of running :code:`Firefly/bin/make_new_repo.sh`.</span>
+<span class="sd">            the output of running :code:`firefly/bin/make_new_repo.sh`.</span>
 <span class="sd">        :rtype: list of str</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1">## handle default argument(s)</span>
-        <span class="k">if</span> <span class="n">target</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">target</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;HOME&#39;</span><span class="p">],</span><span class="s1">&#39;my_Firefly&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">target</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">target</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;HOME&#39;</span><span class="p">],</span><span class="s1">&#39;my_firefly&#39;</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">target</span><span class="p">[:</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="p">:</span> <span class="n">target</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;HOME&#39;</span><span class="p">],</span><span class="n">target</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">target</span><span class="p">):</span> 
@@ -690,7 +690,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">static_data_dir</span> <span class="o">=</span> <span class="n">old</span>
 
         <span class="c1">## attempts to initialize a github pages site in order to </span>
-        <span class="c1">##  host this copied version of Firefly on the web.</span>
+        <span class="c1">##  host this copied version of firefly on the web.</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">init_gh_pages</span><span class="p">:</span>
             <span class="k">return</span> <span class="p">[</span><span class="n">target</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
@@ -745,7 +745,7 @@
                 <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">old</span><span class="p">)</span></div></div>
     
 <div class="viewcode-block" id="ArrayReader"><a class="viewcode-back" href="../../../reference/api/readers/Firefly.data_reader.ArrayReader.html#Firefly.data_reader.ArrayReader">[docs]</a><span class="k">class</span> <span class="nc">ArrayReader</span><span class="p">(</span><span class="n">Reader</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;A wrapper to :class:`Firefly.data_reader.Reader` that stores </span>
+    <span class="sd">&quot;&quot;&quot;A wrapper to :class:`firefly.data_reader.Reader` that stores </span>
 <span class="sd">        raw numpy array data without opening anything from disk.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -759,8 +759,8 @@
         <span class="n">write_jsons_to_disk</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">loud</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Takes a list of opened numpy arrays and creates a :class:`Firefly.data_reader.Reader` instance</span>
-<span class="sd">            with their data. Takes :class:`Firefly.data_reader.Reader` passthrough kwargs.</span>
+        <span class="sd">&quot;&quot;&quot;Takes a list of opened numpy arrays and creates a :class:`firefly.data_reader.Reader` instance</span>
+<span class="sd">            with their data. Takes :class:`firefly.data_reader.Reader` passthrough kwargs.</span>
 
 <span class="sd">        :param coordinates: raw coordinate data, ignores path_to_data if passed.</span>
 <span class="sd">            Can either pass N,3 np.array which is interpreted as a single particle group&#39;s </span>
@@ -896,7 +896,7 @@
             <span class="n">loud</span><span class="o">=</span><span class="n">loud</span><span class="p">)</span></div></div>
 
 <div class="viewcode-block" id="SimpleReader"><a class="viewcode-back" href="../../../reference/api/readers/Firefly.data_reader.SimpleReader.html#Firefly.data_reader.SimpleReader">[docs]</a><span class="k">class</span> <span class="nc">SimpleReader</span><span class="p">(</span><span class="n">ArrayReader</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; A wrapper to :class:`Firefly.data_reader.ArrayReader` that attempts to </span>
+    <span class="sd">&quot;&quot;&quot; A wrapper to :class:`firefly.data_reader.ArrayReader` that attempts to </span>
 <span class="sd">        flexibily open generically formatetd data with minimal interaction from the user.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -913,7 +913,7 @@
 <span class="sd">        &#39;Coordinates&#39; or &#39;x&#39;,&#39;y&#39;,&#39;z&#39; values. Coordinate data must saved either as an (N,3) array </span>
 <span class="sd">        or in 3 separate (N,) arrays indexed by x,y, and z. </span>
 
-<span class="sd">        Keyword arguments are passed to the parent :class:`~Firefly.data_reader.Reader`.</span>
+<span class="sd">        Keyword arguments are passed to the parent :class:`~firefly.data_reader.Reader`.</span>
 
 <span class="sd">        :param path_to_data: path to .hdf5/csv file(s; can be a directory)</span>
 <span class="sd">        :type path_to_data: str </span>

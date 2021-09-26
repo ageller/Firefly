@@ -92,22 +92,23 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../installation.html">Quickstart</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../webapp/index.html">Using an existing instance of Firefly</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../webapp/index.html">Interacting with a Firefly visualization</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Creating your own instance of Firefly</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="files.html">Understanding Firefly’s input requirements</a></li>
-<li class="toctree-l2"><a class="reference internal" href="reader.html">Producing Firefly formatted <code class="code docutils literal notranslate"><span class="pre">.json</span></code> files using the <span class="xref std std-ref">Python API</span></a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="multiple_datasets.html">Managing multiple datasets</a><ul class="current">
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Tutorial notebook: Managing multiple datasets with Firefly</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#Editing-the-entries-of-startup.json">Editing the entries of <code class="docutils literal notranslate"><span class="pre">startup.json</span></code></a></li>
-<li class="toctree-l4"><a class="reference internal" href="#Creating-a-standalone-iteration-of-Firefly">Creating a standalone iteration of Firefly</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#quickstart">Quickstart</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html#next-steps">Next steps</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="files.html">Understanding Firefly’s input requirements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reader.html">Producing Firefly formatted <code class="code docutils literal notranslate"><span class="pre">.json</span></code> files using the <span class="xref std std-ref">Python API</span></a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="multiple_datasets.html">Managing multiple datasets</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Tutorial notebook: Managing multiple datasets with Firefly</a></li>
+<li class="toctree-l4"><a class="reference internal" href="multiple_datasets.html#with-startup-json">With <code class="code docutils literal notranslate"><span class="pre">startup.json</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="multiple_datasets.html#with-separate-firefly-source-directories">With separate Firefly source directories</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="multiple_datasets.html#with-startup-json">With <code class="code docutils literal notranslate"><span class="pre">startup.json</span></code></a></li>
-<li class="toctree-l3"><a class="reference internal" href="multiple_datasets.html#with-separate-firefly-source-directories">With separate Firefly source directories</a></li>
+<li class="toctree-l3"><a class="reference internal" href="flask.html">Sending data to a Firefly server via Flask</a></li>
+<li class="toctree-l3"><a class="reference internal" href="fire_quickstart.html">Using Firefly to view FIRE data</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="flask.html">Sending data to a Firefly server via Flask</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../server.html">Hosting a Firefly webserver</a></li>
@@ -454,7 +455,7 @@ div.rendered_html tbody tr:hover {
     text-align: unset;
 }
 </style>
-<p><code class="docutils literal notranslate"><span class="pre">Firefly/ntbks/multiple_datasets_tutorial.ipynb</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">firefly/ntbks/multiple_datasets_tutorial.ipynb</span></code></p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
@@ -498,8 +499,8 @@ div.rendered_html tbody tr:hover {
 <span class="kn">import</span> <span class="nn">os</span>
 
 <span class="kn">import</span> <span class="nn">sys</span>
-<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;/Users/agurvich/research/repos/Firefly/src&#39;</span><span class="p">)</span>
-<span class="kn">from</span> <span class="nn">Firefly.data_reader</span> <span class="kn">import</span> <span class="n">ArrayReader</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;/Users/agurvich/research/repos/firefly/src&#39;</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">firefly.data_reader</span> <span class="kn">import</span> <span class="n">ArrayReader</span>
 </pre></div>
 </div>
 </div>
@@ -510,7 +511,7 @@ div.rendered_html tbody tr:hover {
 <section id="Editing-the-entries-of-startup.json">
 <h2>Editing the entries of <code class="docutils literal notranslate"><span class="pre">startup.json</span></code><a class="headerlink" href="#Editing-the-entries-of-startup.json" title="Permalink to this headline">¶</a></h2>
 <p>When the Firefly webapp starts up it looks for a <code class="docutils literal notranslate"><span class="pre">Firefly/static/data/startup.json</span></code> file to tell it which dataset to display. If only a single entry is present then it will automatically begin loading that dataset. If multiple entries are listed then it will present the user with a dropdown box to select which dataset to load. See the documentation for managing multiple datasets for how to format the <code class="docutils literal notranslate"><span class="pre">startup.json</span></code> file to list multiple entries manually. We provide a method of easily adding
-datasets to the <code class="docutils literal notranslate"><span class="pre">startup.json</span></code> file using the <code class="docutils literal notranslate"><span class="pre">write_startup</span></code> keyword argument of the <code class="docutils literal notranslate"><span class="pre">Firefly.data_reader.Reader</span></code> (sub-)class(es).</p>
+datasets to the <code class="docutils literal notranslate"><span class="pre">startup.json</span></code> file using the <code class="docutils literal notranslate"><span class="pre">write_startup</span></code> keyword argument of the <code class="docutils literal notranslate"><span class="pre">firefly.data_reader.Reader</span></code> (sub-)class(es).</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
@@ -560,7 +561,7 @@ datasets to the <code class="docutils literal notranslate"><span class="pre">sta
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-JSONdir is None, defaulting to /Users/agurvich/research/repos/Firefly/src/Firefly/static/data/Data
+JSONdir is None, defaulting to /Users/agurvich/research/repos/firefly/src/firefly/static/data/Data
 Make sure each tracked_array (2) has a tracked_filter_flag (0), assuming True.
 Make sure each tracked_array (2) has a tracked_colormap_flag (0), assuming True.
 Outputting: PGroup_0 - 7999/7999 particles - 0 tracked fields
@@ -594,7 +595,7 @@ Outputting: PGroup_1 - 8000/8000 particles - 2 tracked fields
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="o">!</span>cat /Users/agurvich/research/repos/Firefly/src/Firefly/static/data/startup.json
+<span></span><span class="o">!</span>cat /Users/agurvich/research/repos/firefly/src/firefly/static/data/startup.json
 </pre></div>
 </div>
 </div>

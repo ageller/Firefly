@@ -45,7 +45,7 @@
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Hosting a Firefly webserver" href="../server.html" />
+    <link rel="next" title="Using Firefly to view FIRE data" href="fire_quickstart.html" />
     <link rel="prev" title="Sending data to a Firefly server via Flask" href="flask.html" /> 
 </head>
 
@@ -92,21 +92,19 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../installation.html">Quickstart</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../webapp/index.html">Using an existing instance of Firefly</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../webapp/index.html">Interacting with a Firefly visualization</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Creating your own instance of Firefly</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="files.html">Understanding Firefly’s input requirements</a></li>
-<li class="toctree-l2"><a class="reference internal" href="reader.html">Producing Firefly formatted <code class="code docutils literal notranslate"><span class="pre">.json</span></code> files using the <span class="xref std std-ref">Python API</span></a></li>
-<li class="toctree-l2"><a class="reference internal" href="multiple_datasets.html">Managing multiple datasets</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="flask.html">Sending data to a Firefly server via Flask</a><ul class="current">
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Tutorial notebook: Sending data to a local Firefly server through Flask</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#Start-the-Firefly-server-as-a-background-process">Start the Firefly server as a background process</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#Show-Firefly-in-an-IFrame">Show Firefly in an IFrame</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#Create-some-example-data-and-put-it-into-a-Firefly.data_reader.Reader-object">Create some example data and put it into a <code class="docutils literal notranslate"><span class="pre">Firefly.data_reader.Reader</span></code> object</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#Send-this-data-to-the-Flask-app">Send this data to the Flask app</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#Killing-the-Firefly-server-process-when-you’re-done">Killing the Firefly server process when you’re done</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#quickstart">Quickstart</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html#next-steps">Next steps</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="files.html">Understanding Firefly’s input requirements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reader.html">Producing Firefly formatted <code class="code docutils literal notranslate"><span class="pre">.json</span></code> files using the <span class="xref std std-ref">Python API</span></a></li>
+<li class="toctree-l3"><a class="reference internal" href="multiple_datasets.html">Managing multiple datasets</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="flask.html">Sending data to a Firefly server via Flask</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Tutorial notebook: Sending data to a local Firefly server through Flask</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="fire_quickstart.html">Using Firefly to view FIRE data</a></li>
 </ul>
 </li>
 </ul>
@@ -455,7 +453,7 @@ div.rendered_html tbody tr:hover {
     text-align: unset;
 }
 </style>
-<p><code class="docutils literal notranslate"><span class="pre">Firefly/ntbks/flask_tutorial.ipynb</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">firefly/ntbks/flask_tutorial.ipynb</span></code></p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
@@ -503,9 +501,9 @@ div.rendered_html tbody tr:hover {
 
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;/Users/ageller/VISUALIZATIONS/Firefly&#39;</span><span class="p">)</span>
-<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;/Users/agurvich/research/repos/Firefly/src&#39;</span><span class="p">)</span>
-<span class="kn">from</span> <span class="nn">Firefly.data_reader</span> <span class="kn">import</span> <span class="n">ArrayReader</span>
-<span class="kn">from</span> <span class="nn">Firefly.server</span> <span class="kn">import</span> <span class="n">spawnFireflyServer</span><span class="p">,</span><span class="n">killAllFireflyServers</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;/Users/agurvich/research/repos/firefly/src&#39;</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">firefly.data_reader</span> <span class="kn">import</span> <span class="n">ArrayReader</span>
+<span class="kn">from</span> <span class="nn">firefly.server</span> <span class="kn">import</span> <span class="n">spawnFireflyServer</span><span class="p">,</span><span class="n">killAllFireflyServers</span>
 </pre></div>
 </div>
 </div>
@@ -515,7 +513,7 @@ div.rendered_html tbody tr:hover {
 <p>To address these problems, we use Flask to host a webserver and parse data directly from Python at a data upload endpoint. This procedure is detailed in the server documentation. From the user’s perspective, all they need to do is POST their data to a specific port on their local machine and they will be able to explore their own data without ever having to write a file to disk.</p>
 <section id="Start-the-Firefly-server-as-a-background-process">
 <h2>Start the Firefly server as a background process<a class="headerlink" href="#Start-the-Firefly-server-as-a-background-process" title="Permalink to this headline">¶</a></h2>
-<p>In this tutorial we’ll demonstrate how to update the data being shown in a live instance of Firefly running on a local webserver through Flask. Before attempting this tutorial read through the server documentation which explains how to specify the listening port and different methods of hosting a Flask Firefly server (here we use the <code class="docutils literal notranslate"><span class="pre">Firefly.server.spawnFireflyServer</span></code> function which starts a background process).</p>
+<p>In this tutorial we’ll demonstrate how to update the data being shown in a live instance of Firefly running on a local webserver through Flask. Before attempting this tutorial read through the server documentation which explains how to specify the listening port and different methods of hosting a Flask Firefly server (here we use the <code class="docutils literal notranslate"><span class="pre">firefly.server.spawnFireflyServer</span></code> function which starts a background process).</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
@@ -561,8 +559,8 @@ Waiting up to 10 seconds for background Firefly server to start...done! Your ser
 ></iframe></div>
 </div>
 </section>
-<section id="Create-some-example-data-and-put-it-into-a-Firefly.data_reader.Reader-object">
-<h2>Create some example data and put it into a <code class="docutils literal notranslate"><span class="pre">Firefly.data_reader.Reader</span></code> object<a class="headerlink" href="#Create-some-example-data-and-put-it-into-a-Firefly.data_reader.Reader-object" title="Permalink to this headline">¶</a></h2>
+<section id="Create-some-example-data-and-put-it-into-a-firefly.data_reader.Reader-object">
+<h2>Create some example data and put it into a <code class="docutils literal notranslate"><span class="pre">firefly.data_reader.Reader</span></code> object<a class="headerlink" href="#Create-some-example-data-and-put-it-into-a-firefly.data_reader.Reader-object" title="Permalink to this headline">¶</a></h2>
 <p>See the reader documentation or the <code class="docutils literal notranslate"><span class="pre">reader_tutorial.ipynb</span></code> example notebook.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
@@ -598,7 +596,7 @@ Waiting up to 10 seconds for background Firefly server to start...done! Your ser
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-JSONdir is None, defaulting to /Users/agurvich/research/repos/Firefly/src/Firefly/static/data/Data
+JSONdir is None, defaulting to /Users/agurvich/research/repos/firefly/src/firefly/static/data/Data
 Make sure each tracked_array (1) has a tracked_filter_flag (0), assuming True.
 Make sure each tracked_array (1) has a tracked_colormap_flag (0), assuming True.
 Outputting: PGroup_0 - 8000/8000 particles - 1 tracked fields
@@ -661,7 +659,7 @@ Posting...data posted!
 </section>
 <section id="Killing-the-Firefly-server-process-when-you’re-done">
 <h2>Killing the Firefly server process when you’re done<a class="headerlink" href="#Killing-the-Firefly-server-process-when-you’re-done" title="Permalink to this headline">¶</a></h2>
-<p>Because the Firefly server was started in the background, the process will persist even when you’re done with it. You should make sure to kill it using the <code class="docutils literal notranslate"><span class="pre">Firefly.server.killAllFireflyServers</span></code> function. If you supply a process id (which is returned by the <code class="docutils literal notranslate"><span class="pre">spawnFireflyServer</span></code> function) then it will only kill that one process. However, processes are a bit defensive and sometimes we’ve found they survive the attempt on their life and then hide under a different PID. In which case, it’s
+<p>Because the Firefly server was started in the background, the process will persist even when you’re done with it. You should make sure to kill it using the <code class="docutils literal notranslate"><span class="pre">firefly.server.killAllFireflyServers</span></code> function. If you supply a process id (which is returned by the <code class="docutils literal notranslate"><span class="pre">spawnFireflyServer</span></code> function) then it will only kill that one process. However, processes are a bit defensive and sometimes we’ve found they survive the attempt on their life and then hide under a different PID. In which case, it’s
 always safest to just kill all the servers indiscriminately. Generally the two are interchangeable unless you’re hosting multiple local servers of Firefly on different ports. This is pretty uncommon/advanced in which case you hopefully know what you’re doing.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
@@ -690,7 +688,7 @@ always safest to just kill all the servers indiscriminately. Generally the two a
           </div>
           <footer>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="../server.html" class="btn btn-neutral float-right" title="Hosting a Firefly webserver" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="fire_quickstart.html" class="btn btn-neutral float-right" title="Using Firefly to view FIRE data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
         <a href="flask.html" class="btn btn-neutral float-left" title="Sending data to a Firefly server via Flask" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 

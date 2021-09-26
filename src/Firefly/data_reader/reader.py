@@ -13,9 +13,9 @@ from .json_utils import write_to_json,load_from_json
 
 class Reader(object):
     """ This class provides a framework to unify the Settings and ParticleGroup classes
-    to make sure that the user can easily produce Firefly compatible files. 
+    to make sure that the user can easily produce firefly compatible files. 
     You should use this Reader as a base class for any custom readers you may build
-    (see :class:`Firefly.data_reader.SimpleReader` or :class:`Firefly.data_reader.FIREreader` for example).
+    (see :class:`firefly.data_reader.SimpleReader` or :class:`firefly.data_reader.FIREreader` for example).
     """
 
     def __repr__(self):
@@ -41,7 +41,7 @@ class Reader(object):
         settings=None,
         tweenParams=None):
         """Base initialization method for Reader instances. A Reader will read data and produce
-            Firefly compatible :code:`.json` files. 
+            firefly compatible :code:`.json` files. 
 
         :param JSONdir: the sub-directory that will contain your JSON files, relative
             to your :code:`$HOME directory`. , defaults to :code:`$HOME/<JSON_prefix>`
@@ -64,14 +64,14 @@ class Reader(object):
             :code:`False`: does not alter :code:`startup.json`, 
             , defaults to 'append'
         :type write_startup: str/bool, optional
-        :param settings: a :class:`Firefly.data_reader.Settings` instance, defaults to 
-            a new default :class:`Firefly.data_reader.Settings` instance.
-        :type settings: :class:`Firefly.data_reader.Settings`, optional
-        :param tweenParams: :class:`Firefly.data_reader.TweenParams` instance, defaults to None
-        :type tweenParams: :class:`Firefly.data_reader.TweenParams`, optional
-        :raises TypeError: raised if anything other than a :class:`Firefly.data_reader.Settings` 
+        :param settings: a :class:`firefly.data_reader.Settings` instance, defaults to 
+            a new default :class:`firefly.data_reader.Settings` instance.
+        :type settings: :class:`firefly.data_reader.Settings`, optional
+        :param tweenParams: :class:`firefly.data_reader.TweenParams` instance, defaults to None
+        :type tweenParams: :class:`firefly.data_reader.TweenParams`, optional
+        :raises TypeError: raised if anything other than a :class:`firefly.data_reader.Settings` 
             instance is passed to :code:`settings`
-        :raises TypeError: raised if anything other than a :class:`Firefly.data_reader.TweenParams` 
+        :raises TypeError: raised if anything other than a :class:`firefly.data_reader.TweenParams` 
             instance is passed to :code:`tweenParams`
         """
 
@@ -84,7 +84,7 @@ class Reader(object):
                 '..', '..', 'static', 'data'))
 
         if JSONdir is None:
-            ## default to saving directly into the Firefly directory
+            ## default to saving directly into the firefly directory
             print("JSONdir is None, defaulting to %s/%s"%(self.static_data_dir,JSON_prefix))
             JSONdir = os.path.join(
                 self.static_data_dir,
@@ -100,7 +100,7 @@ class Reader(object):
         self.JSONdir = JSONdir
 
         ## determine whether the directory we're saving the
-        ##  actual data in is a sub-directory of Firefly/static/data.
+        ##  actual data in is a sub-directory of firefly/static/data.
         ##  if not, set self.needs_soft_link = True
         self.__splitAndValidateDatadir()
 
@@ -123,7 +123,7 @@ class Reader(object):
             if settings.__class__.__name__ != 'Settings':
                 ## fun fact, assert isinstance(settings,Settings) won't work with jupyter notebooks
                 ##  that use %load_ext autoreload
-                raise TypeError("Make sure you use a Settings instance to specify Firefly settings.")
+                raise TypeError("Make sure you use a Settings instance to specify firefly settings.")
         else:
             ## we'll use the default ones then
             settings = Settings()
@@ -146,7 +146,7 @@ class Reader(object):
         """
 
         """
-        Ensures that files will be output to a location that Firefly 
+        Ensures that files will be output to a location that firefly 
         can read, as well as splits the path so that filenames.json 
         references files correctly.
         """
@@ -166,7 +166,7 @@ class Reader(object):
 
                 if loud:
                     print( "JSONdir: {} -- ".format(self.JSONdir)+
-                        "is not a sub-directory of Firefly/static/data. "+
+                        "is not a sub-directory of firefly/static/data. "+
                         "\nThis may produce confusing or inoperable results. "+
                         "As such, we will create a symlink for you when you "+
                         " dumpToJSON.")
@@ -177,13 +177,13 @@ class Reader(object):
         return hard_data_path,short_data_path
 
     def addParticleGroup(self,particleGroup):
-        """ Track a new :class:`~Firefly.data_reader.ParticleGroup` instance in 
-            this :class:`Firefly.data_reader.Reader` instance's :code:`particleGroups` array
-            and to the attached :class:`Firefly.data_reader.Settings` instance.
+        """ Track a new :class:`~firefly.data_reader.ParticleGroup` instance in 
+            this :class:`firefly.data_reader.Reader` instance's :code:`particleGroups` array
+            and to the attached :class:`firefly.data_reader.Settings` instance.
 
-        :param particleGroup: a :class:`~Firefly.data_reader.ParticleGroup` instance
+        :param particleGroup: a :class:`~firefly.data_reader.ParticleGroup` instance
             that contains particle data for an individual UI element.
-        :type particleGroup: :class:`Firefly.data_reader.ParticleGroup`
+        :type particleGroup: :class:`firefly.data_reader.ParticleGroup`
         """
 
         ## data validation of new ParticleGroup happened in its initialization
@@ -199,11 +199,11 @@ class Reader(object):
         loud=False,
         write_jsons_to_disk=True,
         symlink=True):
-        """Creates all the necessary JSON files to run Firefly and ensures they are
+        """Creates all the necessary JSON files to run firefly and ensures they are
         properly linked and cross-referenced correctly using the
-        :func:`Firefly.data_reader.Settings.outputToJSON` and
-        :func:`Firefly.data_reader.ParticleGroup.outputToJSON` methods
-        (and :func:`Firefly.data_reader.TweenParams.outputToJSON` if one is attached).
+        :func:`firefly.data_reader.Settings.outputToJSON` and
+        :func:`firefly.data_reader.ParticleGroup.outputToJSON` methods
+        (and :func:`firefly.data_reader.TweenParams.outputToJSON` if one is attached).
         :param loud: flag to print status information to the console, defaults to False
         :type loud: bool, optional
         :param write_jsons_to_disk: flag that controls whether data is saved to disk (:code:`True`) 
@@ -218,7 +218,7 @@ class Reader(object):
         :rtype: str
         """
         
-        ## path where data needs to be visible to Firefly
+        ## path where data needs to be visible to firefly
         static_data_path = os.path.join(
             self.static_data_dir,
             os.path.basename(self.JSONdir))
@@ -230,7 +230,7 @@ class Reader(object):
         if not symlink:
             ## we've been asked to ignore the request to put the
             ##  hard files in self.JSONdir and instead actually put them in 
-            ##  Firefly/static/data/<short_data_path>
+            ##  firefly/static/data/<short_data_path>
             if loud:
                 print("Outputting files to: %s instead of: %s as originally specified."%(
                         static_data_path,
@@ -244,8 +244,8 @@ class Reader(object):
             if not os.path.isdir(JSONdir):
                 os.makedirs(JSONdir)
 
-            ## soft link between the "hard" data and Firefly/static/data
-            ##  Firefly can be run locally
+            ## soft link between the "hard" data and firefly/static/data
+            ##  firefly can be run locally
             if self.needs_soft_link and symlink:
                 try:
                     ## create a symlink so that data can 
@@ -322,7 +322,7 @@ class Reader(object):
             self.static_data_dir,
             'startup.json')
 
-        ## relative path from .js interpreter (which runs in /Firefly/static) 
+        ## relative path from .js interpreter (which runs in /firefly/static) 
         ##  to this dataset
         startup_path = os.path.join("data",os.path.basename(JSONdir))
 
@@ -371,13 +371,13 @@ class Reader(object):
     def outputToDict(self):
         """ Formats the data in the reader to a python dictionary using
             the attached
-            :func:`Firefly.data_reader.Settings.outputToDict` and
-            :func:`Firefly.data_reader.ParticleGroup.outputToDict` methods
-            (and :func:`Firefly.data_reader.TweenParams.outputToDict` if one is attached).
+            :func:`firefly.data_reader.Settings.outputToDict` and
+            :func:`firefly.data_reader.ParticleGroup.outputToDict` methods
+            (and :func:`firefly.data_reader.TweenParams.outputToDict` if one is attached).
 
         :return: :code:`outputDict`, a dictionary structured like the javascript object in
-            the Firefly webapp. Can be sent to the js interpreter via Flask using the
-            :func:`Firefly.data_reader.Reader.sendDataViaFlask` method.
+            the firefly webapp. Can be sent to the js interpreter via Flask using the
+            :func:`firefly.data_reader.Reader.sendDataViaFlask` method.
         :rtype: dict
         """
         
@@ -399,7 +399,7 @@ class Reader(object):
             but instead stores it as a string. Then feeds this string
             to the js interpreter via Flask.
 
-        :param port: port that the Firefly Flask server is being hosted on,
+        :param port: port that the firefly Flask server is being hosted on,
             defaults to 5000
         :type port: int, optional
         """
@@ -429,26 +429,26 @@ class Reader(object):
         GHREPONAME=None,
         GHUSER=None,
         GHOAUTHTOKENPATH=None):
-        """ Copies the necessary source files to run a stand-alone instance of Firefly
+        """ Copies the necessary source files to run a stand-alone instance of firefly
             on the web. Optionally, will also initialize a new GitHub repository with 
             GitHub pages, a free web-hosting service, so that this stand-alone instance 
             can be accessed by anyone over the internet.
 
-        :param target: target directory to save Firefly source files to,
+        :param target: target directory to save firefly source files to,
             defaults to :code:`$HOME/my_Firefly`
         :type target: str, optional
         :param flask_templates: flag for whether the flask template files should also be
-            copied. In general, these files are not required to run Firefly over the internet
-            but may be useful if one intends to run Firefly locally in this new directory,
+            copied. In general, these files are not required to run firefly over the internet
+            but may be useful if one intends to run firefly locally in this new directory,
             defaults to False
         :type flask_templates: bool, optional
         :param dump_data: flag for whether the data stored in this reader should also be saved
-            to this new stand-alone Firefly directory (vs. only the Firefly source files), defaults to True
+            to this new stand-alone firefly directory (vs. only the firefly source files), defaults to True
         :type dump_data: bool, optional
         :param overwrite: flag for whether the existing target directory should be purged
             before anything is copied over or written to disk, defaults to True
         :type overwrite: bool, optional
-        :param init_gh_pages: flag to run :code:`Firefly/bin/make_new_repo.sh` in an attempt to initialize
+        :param init_gh_pages: flag to run :code:`firefly/bin/make_new_repo.sh` in an attempt to initialize
             a new github repository with GitHub Pages, a free web-hosting service provided by GitHub, enabled,
             defaults to False
         :type init_gh_pages: bool, optional
@@ -461,9 +461,9 @@ class Reader(object):
             https://github.com/settings/tokens, defaults to :code:`$HOME/.github.token`
         :type GHOAUTHTOKENPATH: str, optional
         :raises FileNotFoundError: if :code:`GHOAUTHTOKENPATH` cannot be resolved
-        :raises FileNotFoundError: if :code:`Firefly/bin/make_new_repo.sh` cannot be found.
+        :raises FileNotFoundError: if :code:`firefly/bin/make_new_repo.sh` cannot be found.
         :return: returns a list of strings, :code:`[target]` if :code:`init_git_pages=False` otherwise
-            the output of running :code:`Firefly/bin/make_new_repo.sh`.
+            the output of running :code:`firefly/bin/make_new_repo.sh`.
         :rtype: list of str
         """
 
@@ -529,7 +529,7 @@ class Reader(object):
                 self.static_data_dir = old
 
         ## attempts to initialize a github pages site in order to 
-        ##  host this copied version of Firefly on the web.
+        ##  host this copied version of firefly on the web.
         if not init_gh_pages:
             return [target]
         else:
@@ -584,7 +584,7 @@ class Reader(object):
                 os.chdir(old)
     
 class ArrayReader(Reader):
-    """A wrapper to :class:`Firefly.data_reader.Reader` that stores 
+    """A wrapper to :class:`firefly.data_reader.Reader` that stores 
         raw numpy array data without opening anything from disk.
     """
 
@@ -598,8 +598,8 @@ class ArrayReader(Reader):
         write_jsons_to_disk=True,
         loud=True,
         **kwargs):
-        """Takes a list of opened numpy arrays and creates a :class:`Firefly.data_reader.Reader` instance
-            with their data. Takes :class:`Firefly.data_reader.Reader` passthrough kwargs.
+        """Takes a list of opened numpy arrays and creates a :class:`firefly.data_reader.Reader` instance
+            with their data. Takes :class:`firefly.data_reader.Reader` passthrough kwargs.
 
         :param coordinates: raw coordinate data, ignores path_to_data if passed.
             Can either pass N,3 np.array which is interpreted as a single particle group's 
@@ -735,7 +735,7 @@ class ArrayReader(Reader):
             loud=loud)
 
 class SimpleReader(ArrayReader):
-    """ A wrapper to :class:`Firefly.data_reader.ArrayReader` that attempts to 
+    """ A wrapper to :class:`firefly.data_reader.ArrayReader` that attempts to 
         flexibily open generically formatetd data with minimal interaction from the user.
     """
 
@@ -752,7 +752,7 @@ class SimpleReader(ArrayReader):
         'Coordinates' or 'x','y','z' values. Coordinate data must saved either as an (N,3) array 
         or in 3 separate (N,) arrays indexed by x,y, and z. 
 
-        Keyword arguments are passed to the parent :class:`~Firefly.data_reader.Reader`.
+        Keyword arguments are passed to the parent :class:`~firefly.data_reader.Reader`.
 
         :param path_to_data: path to .hdf5/csv file(s; can be a directory)
         :type path_to_data: str 

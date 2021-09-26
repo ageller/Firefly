@@ -47,7 +47,7 @@ class ParticleGroup(object):
     def __setitem__(self,key,value):
         """Implementation of builtin function __setitem__ to replace
             field data or track new fields. Filter flag and colormap flags
-            will be set to true, call :func:`Firefly.data_reader.ParticleGroup.trackArray`
+            will be set to true, call :func:`firefly.data_reader.ParticleGroup.trackArray`
             directly if this is undesired.
 
         :param key: name of field to alter or start tracking
@@ -82,7 +82,7 @@ class ParticleGroup(object):
         doSPHrad=False,
         loud=True,
         **settings_kwargs):
-        """Accepts pass-through kwargs for :class:`Firefly.data_reader.Settings` whether one is attached
+        """Accepts pass-through kwargs for :class:`firefly.data_reader.Settings` whether one is attached
             at initialization or not.
 
         :param UIname: Name of the particle group that shows up in the UI, 4-5 characters is best
@@ -117,14 +117,14 @@ class ParticleGroup(object):
 
             where where the sum of :code:`nparts_this_file%d` is exactly :code:`nparts`. These files
             will automatically be added to :code:`filenames.json` if you use
-            an attached :class:`Firefly.data_reader.Reader` and 
-            its :class:`~Firefly.data_reader.Reader.dumpToJSON` method, defaults to None
+            an attached :class:`firefly.data_reader.Reader` and 
+            its :class:`~firefly.data_reader.Reader.dumpToJSON` method, defaults to None
         :type filenames_and_nparts: list of tuple of (str,int), optional
-        :param attached_settings: :class:`~Firefly.data_reader.Settings` instance that should be linked
+        :param attached_settings: :class:`~firefly.data_reader.Settings` instance that should be linked
             to this particle group such that GUI elements are connected correctly. If not provided here
             can be attached after-the-fact using the
-            :func:`Firefly.data-reader.Settings.attachSettings` method, defaults to None
-        :type attached_settings: :class:`Firefly.data_reader.Settings`, optional
+            :func:`firefly.data-reader.Settings.attachSettings` method, defaults to None
+        :type attached_settings: :class:`firefly.data_reader.Settings`, optional
         :param doSPHrad: flag to vary the opacity across a particle by a cubic spline 
             (as commonly done in SPH).
             Must then also provide :code:`SmoothingLength` as a tracked_array., defaults to False
@@ -384,7 +384,7 @@ class ParticleGroup(object):
             matching the tracked field arrays. 
 
         :param dec_inds: the decimation indices to 
-                use, defining a subset of the :class:`~Firefly.data_reader.ParticleGroup` data to 
+                use, defining a subset of the :class:`~firefly.data_reader.ParticleGroup` data to 
                 output, defaults to np.arange(self.nparts)
         :type dec_inds: np.ndarray, optional
         :param store_extra_keys: flag to store filter and colormap flags, defaults to True
@@ -445,13 +445,13 @@ class ParticleGroup(object):
         write_jsons_to_disk=True,
         not_reader=True):
         """Outputs this ParticleGroup instance's data to JSON format, splitting it up into 
-            multiple sub-JSON files. Best used when coupled with a :class:`Firefly.data_reader.Reader`'s
-            :func:`~Firefly.data_reader.Reader.dumpToJSON` method.
+            multiple sub-JSON files. Best used when coupled with a :class:`firefly.data_reader.Reader`'s
+            :func:`~firefly.data_reader.Reader.dumpToJSON` method.
 
         :param short_data_path: the sub-directory you want to put these files into
         :type short_data_path: str
         :param hard_data_path: the path to the directory containing different datasets'
-            JSON sub-directories (often :code:`/path/toFirefly/static/data`)
+            JSON sub-directories (often :code:`/path/to/firefly/static/data`)
         :type hard_data_path: str
         :param JSON_prefix: Prefix for any :code:`.json` files created, :code:`.json` files will be of the format:
             :code:`<JSON_prefix><parttype>_%d.json`, defaults to ''

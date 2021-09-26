@@ -16,12 +16,12 @@ import os
 
 import sys
 sys.path.insert(0, '/Users/ageller/VISUALIZATIONS/Firefly')
-sys.path.insert(0,'/Users/agurvich/research/repos/Firefly/src')
-from Firefly.data_reader import FIREreader,SimpleFIREreader
+sys.path.insert(0,'/Users/agurvich/research/repos/firefly/src')
+from firefly.data_reader import FIREreader,SimpleFIREreader
 
 
 # # Convert FIRE data
-# In this example notebook we demonstrate how to use the `Firefly.data_reader.FIREreader` sub-class which creates specialized data files for FIRE formatted data. The details of how the `FIREreader` class is "specialized" see the <a href="https://ageller.github.io/Firefly/docs/build/html/reference/api/api.html">API documentation</a> and to see the example of this output visit <a href="https://ageller.github.io/Firefly/src/Firefly/index.html">the live demo version</a>.
+# In this example notebook we demonstrate how to use the `firefly.data_reader.FIREreader` sub-class which creates specialized data files for FIRE formatted data. The details of how the `FIREreader` class is "specialized" see the <a href="https://ageller.github.io/Firefly/docs/build/html/reference/api/api.html">API documentation</a> and to see the example of this output visit <a href="https://ageller.github.io/firefly/src/firefly/index.html">the live demo version</a>.
 
 # In[3]:
 
@@ -41,8 +41,7 @@ reader = FIREreader(
     ## what fields would we like to extract
     fields=['Density','Velocities','Temperature'],
     ## do we want to take the magnitude of any of these fields?
-    ##  typically answer is yes for vector fields like Velocity
-    magFlags=[False,True,False],
+    magFlags=[False,False,False],
     ## do we want to take the log? 
     logFlags=[True,False,True],
     ## which fields do we want to be able to filter on?
@@ -71,8 +70,8 @@ reader.settings['camera'] = [0,0,-15]
 reader.dumpToJSON()
 
 
-# ## Using `Firefly.data_reader.SimpleFIREreader`
-# To simplify this process we have provided `Firefly.data_reader.SimpleFIREreader` which takes a path to a FIRE snapshot and creates a "standard" iteration of Firefly given only a path to the data.
+# ## Using `firefly.data_reader.SimpleFIREreader`
+# To simplify this process we have provided `firefly.data_reader.SimpleFIREreader` which takes a path to a FIRE snapshot and creates a "standard" iteration of Firefly given only a path to the data.
 
 # In[4]:
 

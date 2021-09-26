@@ -24,7 +24,7 @@ class FIREreader(Reader):
         **kwargs):
         """Base initialization method for FIREreader instances.
             A FIREreader will conveniently read `FIRE collaboration <http://fire.northwestern.edu>`_ 
-            data and produce Firefly compatible :code:`.json` files.
+            data and produce firefly compatible :code:`.json` files.
 
         :param snapdir: directory that contains all the hdf5 data files
         :type snapdir: str
@@ -149,9 +149,9 @@ class FIREreader(Reader):
 
     def loadData(self,com_offset=False):
         """Loads FIRE snapshot data using Alex Gurvich's
-        :func:`Firefly.data_reader.snapshot_utils.openSnapshot`.
+        :func:`firefly.data_reader.snapshot_utils.openSnapshot`.
         (reproduced from https://github.com/agurvich/abg_python) and binds it to a 
-        corresponding :class:`Firefly.data_reader.ParticleGroup` instance.
+        corresponding :class:`firefly.data_reader.ParticleGroup` instance.
 
         :param com_offset: flag to offset all coordinates by the COM of the 
             snapshot, defaults to False 
@@ -297,9 +297,9 @@ class SimpleFIREreader(FIREreader):
         write_jsons_to_disk=True,
         com_offset=False, 
         **kwargs):
-        """ A wrapper to :class:`Firefly.data_reader.FIREreader` that will open 
+        """ A wrapper to :class:`firefly.data_reader.FIREreader` that will open 
             FIRE collaboration formatted data with minimal interaction from the user 
-            and use a "standard" Firefly setup with:
+            and use a "standard" firefly setup with:
                 :code:`ptypes = [0,4]`
 
                 :code:`UInames = ['gas','stars']`
@@ -386,9 +386,9 @@ class STARFORGEreader(FIREreader):
         write_jsons_to_disk=True,
         com_offset=False, 
         **kwargs):
-        """ A wrapper to :class:`Firefly.data_reader.FIREreader` that will open 
+        """ A wrapper to :class:`firefly.data_reader.FIREreader` that will open 
             `STARFORGE collaboration <http://starforge.space>`_ formatted data with minimal interaction from the user 
-            and use a "standard" Firefly setup with:
+            and use a "standard" firefly setup with:
                 :code:`ptypes = [0,5]`
 
                 :code:`UInames = ['gas','stars']`

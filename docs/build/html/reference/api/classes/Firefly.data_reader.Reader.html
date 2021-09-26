@@ -90,8 +90,8 @@
             
             
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Quickstart</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../webapp/index.html">Using an existing instance of Firefly</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../webapp/index.html">Interacting with a Firefly visualization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../data_reader/index.html">Creating your own instance of Firefly</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../server.html">Hosting a Firefly webserver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../experimental.html">Experimental features</a></li>
@@ -208,14 +208,14 @@
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">Firefly.data_reader.</span></span><span class="sig-name descname"><span class="pre">Reader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">JSONdir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">JSON_prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Data'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clean_JSONdir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_npart_per_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_startup</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'append'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">settings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tweenParams</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/Firefly/data_reader/reader.html#Reader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Firefly.data_reader.Reader" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>This class provides a framework to unify the Settings and ParticleGroup classes
-to make sure that the user can easily produce Firefly compatible files. 
+to make sure that the user can easily produce firefly compatible files. 
 You should use this Reader as a base class for any custom readers you may build
-(see <a class="reference internal" href="../readers/Firefly.data_reader.SimpleReader.html#Firefly.data_reader.SimpleReader" title="Firefly.data_reader.SimpleReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">Firefly.data_reader.SimpleReader</span></code></a> or <a class="reference internal" href="../readers/Firefly.data_reader.FIREreader.html#Firefly.data_reader.FIREreader" title="Firefly.data_reader.FIREreader"><code class="xref py py-class docutils literal notranslate"><span class="pre">Firefly.data_reader.FIREreader</span></code></a> for example).</p>
+(see <code class="xref py py-class docutils literal notranslate"><span class="pre">firefly.data_reader.SimpleReader</span></code> or <code class="xref py py-class docutils literal notranslate"><span class="pre">firefly.data_reader.FIREreader</span></code> for example).</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="Firefly.data_reader.Reader.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">JSONdir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">JSON_prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Data'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clean_JSONdir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_npart_per_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_startup</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'append'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">settings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tweenParams</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/Firefly/data_reader/reader.html#Reader.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Firefly.data_reader.Reader.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="simple">
-<dt>Base initialization method for Reader instances. A Reader will read data and produce</dt><dd><p>Firefly compatible <code class="code docutils literal notranslate"><span class="pre">.json</span></code> files.</p>
+<dt>Base initialization method for Reader instances. A Reader will read data and produce</dt><dd><p>firefly compatible <code class="code docutils literal notranslate"><span class="pre">.json</span></code> files.</p>
 </dd>
 </dl>
 <dl class="field-list simple">
@@ -237,16 +237,16 @@ Takes three values:
 <code class="code docutils literal notranslate"><span class="pre">True</span></code>: overwrites <code class="code docutils literal notranslate"><span class="pre">startup.json</span></code> with a single entry, <code class="code docutils literal notranslate"><span class="pre">JSONdir</span></code>, 
 <code class="code docutils literal notranslate"><span class="pre">False</span></code>: does not alter <code class="code docutils literal notranslate"><span class="pre">startup.json</span></code>, 
 , defaults to ‘append’</p></li>
-<li><p><strong>settings</strong> (<a class="reference internal" href="Firefly.data_reader.Settings.html#Firefly.data_reader.Settings" title="Firefly.data_reader.Settings"><code class="xref py py-class docutils literal notranslate"><span class="pre">Firefly.data_reader.Settings</span></code></a>, optional) – a <a class="reference internal" href="Firefly.data_reader.Settings.html#Firefly.data_reader.Settings" title="Firefly.data_reader.Settings"><code class="xref py py-class docutils literal notranslate"><span class="pre">Firefly.data_reader.Settings</span></code></a> instance, defaults to 
-a new default <a class="reference internal" href="Firefly.data_reader.Settings.html#Firefly.data_reader.Settings" title="Firefly.data_reader.Settings"><code class="xref py py-class docutils literal notranslate"><span class="pre">Firefly.data_reader.Settings</span></code></a> instance.</p></li>
-<li><p><strong>tweenParams</strong> (<a class="reference internal" href="Firefly.data_reader.TweenParams.html#Firefly.data_reader.TweenParams" title="Firefly.data_reader.TweenParams"><code class="xref py py-class docutils literal notranslate"><span class="pre">Firefly.data_reader.TweenParams</span></code></a>, optional) – <a class="reference internal" href="Firefly.data_reader.TweenParams.html#Firefly.data_reader.TweenParams" title="Firefly.data_reader.TweenParams"><code class="xref py py-class docutils literal notranslate"><span class="pre">Firefly.data_reader.TweenParams</span></code></a> instance, defaults to None</p></li>
+<li><p><strong>settings</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">firefly.data_reader.Settings</span></code>, optional) – a <code class="xref py py-class docutils literal notranslate"><span class="pre">firefly.data_reader.Settings</span></code> instance, defaults to 
+a new default <code class="xref py py-class docutils literal notranslate"><span class="pre">firefly.data_reader.Settings</span></code> instance.</p></li>
+<li><p><strong>tweenParams</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">firefly.data_reader.TweenParams</span></code>, optional) – <code class="xref py py-class docutils literal notranslate"><span class="pre">firefly.data_reader.TweenParams</span></code> instance, defaults to None</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises</dt>
 <dd class="field-even"><ul class="simple">
-<li><p><strong>TypeError</strong> – raised if anything other than a <a class="reference internal" href="Firefly.data_reader.Settings.html#Firefly.data_reader.Settings" title="Firefly.data_reader.Settings"><code class="xref py py-class docutils literal notranslate"><span class="pre">Firefly.data_reader.Settings</span></code></a> 
+<li><p><strong>TypeError</strong> – raised if anything other than a <code class="xref py py-class docutils literal notranslate"><span class="pre">firefly.data_reader.Settings</span></code> 
 instance is passed to <code class="code docutils literal notranslate"><span class="pre">settings</span></code></p></li>
-<li><p><strong>TypeError</strong> – raised if anything other than a <a class="reference internal" href="Firefly.data_reader.TweenParams.html#Firefly.data_reader.TweenParams" title="Firefly.data_reader.TweenParams"><code class="xref py py-class docutils literal notranslate"><span class="pre">Firefly.data_reader.TweenParams</span></code></a> 
+<li><p><strong>TypeError</strong> – raised if anything other than a <code class="xref py py-class docutils literal notranslate"><span class="pre">firefly.data_reader.TweenParams</span></code> 
 instance is passed to <code class="code docutils literal notranslate"><span class="pre">tweenParams</span></code></p></li>
 </ul>
 </dd>
@@ -277,23 +277,23 @@ instance is passed to <code class="code docutils literal notranslate"><span clas
 <dt class="sig sig-object py" id="Firefly.data_reader.Reader.addParticleGroup">
 <span class="sig-name descname"><span class="pre">addParticleGroup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">particleGroup</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/Firefly/data_reader/reader.html#Reader.addParticleGroup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Firefly.data_reader.Reader.addParticleGroup" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="simple">
-<dt>Track a new <a class="reference internal" href="Firefly.data_reader.ParticleGroup.html#Firefly.data_reader.ParticleGroup" title="Firefly.data_reader.ParticleGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParticleGroup</span></code></a> instance in </dt><dd><p>this <a class="reference internal" href="#Firefly.data_reader.Reader" title="Firefly.data_reader.Reader"><code class="xref py py-class docutils literal notranslate"><span class="pre">Firefly.data_reader.Reader</span></code></a> instance’s <code class="code docutils literal notranslate"><span class="pre">particleGroups</span></code> array
-and to the attached <a class="reference internal" href="Firefly.data_reader.Settings.html#Firefly.data_reader.Settings" title="Firefly.data_reader.Settings"><code class="xref py py-class docutils literal notranslate"><span class="pre">Firefly.data_reader.Settings</span></code></a> instance.</p>
+<dt>Track a new <code class="xref py py-class docutils literal notranslate"><span class="pre">ParticleGroup</span></code> instance in </dt><dd><p>this <code class="xref py py-class docutils literal notranslate"><span class="pre">firefly.data_reader.Reader</span></code> instance’s <code class="code docutils literal notranslate"><span class="pre">particleGroups</span></code> array
+and to the attached <code class="xref py py-class docutils literal notranslate"><span class="pre">firefly.data_reader.Settings</span></code> instance.</p>
 </dd>
 </dl>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>particleGroup</strong> (<a class="reference internal" href="Firefly.data_reader.ParticleGroup.html#Firefly.data_reader.ParticleGroup" title="Firefly.data_reader.ParticleGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">Firefly.data_reader.ParticleGroup</span></code></a>) – a <a class="reference internal" href="Firefly.data_reader.ParticleGroup.html#Firefly.data_reader.ParticleGroup" title="Firefly.data_reader.ParticleGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParticleGroup</span></code></a> instance
+<dd class="field-odd"><p><strong>particleGroup</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">firefly.data_reader.ParticleGroup</span></code>) – a <code class="xref py py-class docutils literal notranslate"><span class="pre">ParticleGroup</span></code> instance
 that contains particle data for an individual UI element.</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="Firefly.data_reader.Reader.copyFireflySourceToTarget">
-<span class="sig-name descname"><span class="pre">copyFireflySourceToTarget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flask_templates</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dump_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_gh_pages</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">GHREPONAME</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">GHUSER</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">GHOAUTHTOKENPATH</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/Firefly/data_reader/reader.html#Reader.copyFireflySourceToTarget"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Firefly.data_reader.Reader.copyFireflySourceToTarget" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="Firefly.data_reader.Reader.copyfireflySourceToTarget">
+<span class="sig-name descname"><span class="pre">copyfireflySourceToTarget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">flask_templates</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dump_data</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_gh_pages</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">GHREPONAME</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">GHUSER</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">GHOAUTHTOKENPATH</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/Firefly/data_reader/reader.html#Reader.copyfireflySourceToTarget"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Firefly.data_reader.Reader.copyfireflySourceToTarget" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="simple">
-<dt>Copies the necessary source files to run a stand-alone instance of Firefly</dt><dd><p>on the web. Optionally, will also initialize a new GitHub repository with 
+<dt>Copies the necessary source files to run a stand-alone instance of firefly</dt><dd><p>on the web. Optionally, will also initialize a new GitHub repository with 
 GitHub pages, a free web-hosting service, so that this stand-alone instance 
 can be accessed by anyone over the internet.</p>
 </dd>
@@ -301,17 +301,17 @@ can be accessed by anyone over the internet.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>target</strong> (<em>str</em><em>, </em><em>optional</em>) – target directory to save Firefly source files to,
-defaults to <code class="code docutils literal notranslate"><span class="pre">$HOME/my_Firefly</span></code></p></li>
+<li><p><strong>target</strong> (<em>str</em><em>, </em><em>optional</em>) – target directory to save firefly source files to,
+defaults to <code class="code docutils literal notranslate"><span class="pre">$HOME/my_firefly</span></code></p></li>
 <li><p><strong>flask_templates</strong> (<em>bool</em><em>, </em><em>optional</em>) – flag for whether the flask template files should also be
-copied. In general, these files are not required to run Firefly over the internet
-but may be useful if one intends to run Firefly locally in this new directory,
+copied. In general, these files are not required to run firefly over the internet
+but may be useful if one intends to run firefly locally in this new directory,
 defaults to False</p></li>
 <li><p><strong>dump_data</strong> (<em>bool</em><em>, </em><em>optional</em>) – flag for whether the data stored in this reader should also be saved
-to this new stand-alone Firefly directory (vs. only the Firefly source files), defaults to True</p></li>
+to this new stand-alone firefly directory (vs. only the firefly source files), defaults to True</p></li>
 <li><p><strong>overwrite</strong> (<em>bool</em><em>, </em><em>optional</em>) – flag for whether the existing target directory should be purged
 before anything is copied over or written to disk, defaults to True</p></li>
-<li><p><strong>init_gh_pages</strong> (<em>bool</em><em>, </em><em>optional</em>) – flag to run <code class="code docutils literal notranslate"><span class="pre">Firefly/bin/make_new_repo.sh</span></code> in an attempt to initialize
+<li><p><strong>init_gh_pages</strong> (<em>bool</em><em>, </em><em>optional</em>) – flag to run <code class="code docutils literal notranslate"><span class="pre">firefly/bin/make_new_repo.sh</span></code> in an attempt to initialize
 a new github repository with GitHub Pages, a free web-hosting service provided by GitHub, enabled,
 defaults to False</p></li>
 <li><p><strong>GHREPONAME</strong> (<em>str</em><em>, </em><em>optional</em>) – repository name that we should attempt to create (note that a non-critical error will be raised
@@ -324,12 +324,12 @@ if the repo already exists), defaults to the last sub-directory of <code class="
 <dt class="field-even">Raises</dt>
 <dd class="field-even"><ul class="simple">
 <li><p><strong>FileNotFoundError</strong> – if <code class="code docutils literal notranslate"><span class="pre">GHOAUTHTOKENPATH</span></code> cannot be resolved</p></li>
-<li><p><strong>FileNotFoundError</strong> – if <code class="code docutils literal notranslate"><span class="pre">Firefly/bin/make_new_repo.sh</span></code> cannot be found.</p></li>
+<li><p><strong>FileNotFoundError</strong> – if <code class="code docutils literal notranslate"><span class="pre">firefly/bin/make_new_repo.sh</span></code> cannot be found.</p></li>
 </ul>
 </dd>
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>returns a list of strings, <code class="code docutils literal notranslate"><span class="pre">[target]</span></code> if <code class="code docutils literal notranslate"><span class="pre">init_git_pages=False</span></code> otherwise
-the output of running <code class="code docutils literal notranslate"><span class="pre">Firefly/bin/make_new_repo.sh</span></code>.</p>
+the output of running <code class="code docutils literal notranslate"><span class="pre">firefly/bin/make_new_repo.sh</span></code>.</p>
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p>list of str</p>
@@ -340,11 +340,11 @@ the output of running <code class="code docutils literal notranslate"><span clas
 <dl class="py method">
 <dt class="sig sig-object py" id="Firefly.data_reader.Reader.dumpToJSON">
 <span class="sig-name descname"><span class="pre">dumpToJSON</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">loud</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_jsons_to_disk</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symlink</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/Firefly/data_reader/reader.html#Reader.dumpToJSON"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Firefly.data_reader.Reader.dumpToJSON" title="Permalink to this definition">¶</a></dt>
-<dd><p>Creates all the necessary JSON files to run Firefly and ensures they are
+<dd><p>Creates all the necessary JSON files to run firefly and ensures they are
 properly linked and cross-referenced correctly using the
-<a class="reference internal" href="Firefly.data_reader.Settings.html#Firefly.data_reader.Settings.outputToJSON" title="Firefly.data_reader.Settings.outputToJSON"><code class="xref py py-func docutils literal notranslate"><span class="pre">Firefly.data_reader.Settings.outputToJSON()</span></code></a> and
-<a class="reference internal" href="Firefly.data_reader.ParticleGroup.html#Firefly.data_reader.ParticleGroup.outputToJSON" title="Firefly.data_reader.ParticleGroup.outputToJSON"><code class="xref py py-func docutils literal notranslate"><span class="pre">Firefly.data_reader.ParticleGroup.outputToJSON()</span></code></a> methods
-(and <a class="reference internal" href="Firefly.data_reader.TweenParams.html#Firefly.data_reader.TweenParams.outputToJSON" title="Firefly.data_reader.TweenParams.outputToJSON"><code class="xref py py-func docutils literal notranslate"><span class="pre">Firefly.data_reader.TweenParams.outputToJSON()</span></code></a> if one is attached).
+<code class="xref py py-func docutils literal notranslate"><span class="pre">firefly.data_reader.Settings.outputToJSON()</span></code> and
+<code class="xref py py-func docutils literal notranslate"><span class="pre">firefly.data_reader.ParticleGroup.outputToJSON()</span></code> methods
+(and <code class="xref py py-func docutils literal notranslate"><span class="pre">firefly.data_reader.TweenParams.outputToJSON()</span></code> if one is attached).
 :param loud: flag to print status information to the console, defaults to False
 :type loud: bool, optional
 :param write_jsons_to_disk: flag that controls whether data is saved to disk (<code class="code docutils literal notranslate"><span class="pre">True</span></code>)</p>
@@ -372,16 +372,16 @@ Note that <code class="code docutils literal notranslate"><span class="pre">syml
 <span class="sig-name descname"><span class="pre">outputToDict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/Firefly/data_reader/reader.html#Reader.outputToDict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Firefly.data_reader.Reader.outputToDict" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="simple">
 <dt>Formats the data in the reader to a python dictionary using</dt><dd><p>the attached
-<a class="reference internal" href="Firefly.data_reader.Settings.html#Firefly.data_reader.Settings.outputToDict" title="Firefly.data_reader.Settings.outputToDict"><code class="xref py py-func docutils literal notranslate"><span class="pre">Firefly.data_reader.Settings.outputToDict()</span></code></a> and
-<a class="reference internal" href="Firefly.data_reader.ParticleGroup.html#Firefly.data_reader.ParticleGroup.outputToDict" title="Firefly.data_reader.ParticleGroup.outputToDict"><code class="xref py py-func docutils literal notranslate"><span class="pre">Firefly.data_reader.ParticleGroup.outputToDict()</span></code></a> methods
-(and <a class="reference internal" href="Firefly.data_reader.TweenParams.html#Firefly.data_reader.TweenParams.outputToDict" title="Firefly.data_reader.TweenParams.outputToDict"><code class="xref py py-func docutils literal notranslate"><span class="pre">Firefly.data_reader.TweenParams.outputToDict()</span></code></a> if one is attached).</p>
+<code class="xref py py-func docutils literal notranslate"><span class="pre">firefly.data_reader.Settings.outputToDict()</span></code> and
+<code class="xref py py-func docutils literal notranslate"><span class="pre">firefly.data_reader.ParticleGroup.outputToDict()</span></code> methods
+(and <code class="xref py py-func docutils literal notranslate"><span class="pre">firefly.data_reader.TweenParams.outputToDict()</span></code> if one is attached).</p>
 </dd>
 </dl>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p><code class="code docutils literal notranslate"><span class="pre">outputDict</span></code>, a dictionary structured like the javascript object in
-the Firefly webapp. Can be sent to the js interpreter via Flask using the
-<a class="reference internal" href="#Firefly.data_reader.Reader.sendDataViaFlask" title="Firefly.data_reader.Reader.sendDataViaFlask"><code class="xref py py-func docutils literal notranslate"><span class="pre">Firefly.data_reader.Reader.sendDataViaFlask()</span></code></a> method.</p>
+the firefly webapp. Can be sent to the js interpreter via Flask using the
+<code class="xref py py-func docutils literal notranslate"><span class="pre">firefly.data_reader.Reader.sendDataViaFlask()</span></code> method.</p>
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p>dict</p>
@@ -399,7 +399,7 @@ to the js interpreter via Flask.</p>
 </dl>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>port</strong> (<em>int</em><em>, </em><em>optional</em>) – port that the Firefly Flask server is being hosted on,
+<dd class="field-odd"><p><strong>port</strong> (<em>int</em><em>, </em><em>optional</em>) – port that the firefly Flask server is being hosted on,
 defaults to 5000</p>
 </dd>
 </dl>

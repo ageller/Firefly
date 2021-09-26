@@ -87,8 +87,8 @@
             
             
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Quickstart</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../webapp/index.html">Using an existing instance of Firefly</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../webapp/index.html">Interacting with a Firefly visualization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../data_reader/index.html">Creating your own instance of Firefly</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../server.html">Hosting a Firefly webserver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../experimental.html">Experimental features</a></li>
@@ -208,7 +208,7 @@
 <div class="viewcode-block" id="ParticleGroup.__setitem__"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.ParticleGroup.html#Firefly.data_reader.ParticleGroup.__setitem__">[docs]</a>    <span class="k">def</span> <span class="fm">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">key</span><span class="p">,</span><span class="n">value</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Implementation of builtin function __setitem__ to replace</span>
 <span class="sd">            field data or track new fields. Filter flag and colormap flags</span>
-<span class="sd">            will be set to true, call :func:`Firefly.data_reader.ParticleGroup.trackArray`</span>
+<span class="sd">            will be set to true, call :func:`firefly.data_reader.ParticleGroup.trackArray`</span>
 <span class="sd">            directly if this is undesired.</span>
 
 <span class="sd">        :param key: name of field to alter or start tracking</span>
@@ -243,7 +243,7 @@
         <span class="n">doSPHrad</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">loud</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="o">**</span><span class="n">settings_kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Accepts pass-through kwargs for :class:`Firefly.data_reader.Settings` whether one is attached</span>
+        <span class="sd">&quot;&quot;&quot;Accepts pass-through kwargs for :class:`firefly.data_reader.Settings` whether one is attached</span>
 <span class="sd">            at initialization or not.</span>
 
 <span class="sd">        :param UIname: Name of the particle group that shows up in the UI, 4-5 characters is best</span>
@@ -278,14 +278,14 @@
 
 <span class="sd">            where where the sum of :code:`nparts_this_file%d` is exactly :code:`nparts`. These files</span>
 <span class="sd">            will automatically be added to :code:`filenames.json` if you use</span>
-<span class="sd">            an attached :class:`Firefly.data_reader.Reader` and </span>
-<span class="sd">            its :class:`~Firefly.data_reader.Reader.dumpToJSON` method, defaults to None</span>
+<span class="sd">            an attached :class:`firefly.data_reader.Reader` and </span>
+<span class="sd">            its :class:`~firefly.data_reader.Reader.dumpToJSON` method, defaults to None</span>
 <span class="sd">        :type filenames_and_nparts: list of tuple of (str,int), optional</span>
-<span class="sd">        :param attached_settings: :class:`~Firefly.data_reader.Settings` instance that should be linked</span>
+<span class="sd">        :param attached_settings: :class:`~firefly.data_reader.Settings` instance that should be linked</span>
 <span class="sd">            to this particle group such that GUI elements are connected correctly. If not provided here</span>
 <span class="sd">            can be attached after-the-fact using the</span>
-<span class="sd">            :func:`Firefly.data-reader.Settings.attachSettings` method, defaults to None</span>
-<span class="sd">        :type attached_settings: :class:`Firefly.data_reader.Settings`, optional</span>
+<span class="sd">            :func:`firefly.data-reader.Settings.attachSettings` method, defaults to None</span>
+<span class="sd">        :type attached_settings: :class:`firefly.data_reader.Settings`, optional</span>
 <span class="sd">        :param doSPHrad: flag to vary the opacity across a particle by a cubic spline </span>
 <span class="sd">            (as commonly done in SPH).</span>
 <span class="sd">            Must then also provide :code:`SmoothingLength` as a tracked_array., defaults to False</span>
@@ -545,7 +545,7 @@
 <span class="sd">            matching the tracked field arrays. </span>
 
 <span class="sd">        :param dec_inds: the decimation indices to </span>
-<span class="sd">                use, defining a subset of the :class:`~Firefly.data_reader.ParticleGroup` data to </span>
+<span class="sd">                use, defining a subset of the :class:`~firefly.data_reader.ParticleGroup` data to </span>
 <span class="sd">                output, defaults to np.arange(self.nparts)</span>
 <span class="sd">        :type dec_inds: np.ndarray, optional</span>
 <span class="sd">        :param store_extra_keys: flag to store filter and colormap flags, defaults to True</span>
@@ -606,13 +606,13 @@
         <span class="n">write_jsons_to_disk</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">not_reader</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Outputs this ParticleGroup instance&#39;s data to JSON format, splitting it up into </span>
-<span class="sd">            multiple sub-JSON files. Best used when coupled with a :class:`Firefly.data_reader.Reader`&#39;s</span>
-<span class="sd">            :func:`~Firefly.data_reader.Reader.dumpToJSON` method.</span>
+<span class="sd">            multiple sub-JSON files. Best used when coupled with a :class:`firefly.data_reader.Reader`&#39;s</span>
+<span class="sd">            :func:`~firefly.data_reader.Reader.dumpToJSON` method.</span>
 
 <span class="sd">        :param short_data_path: the sub-directory you want to put these files into</span>
 <span class="sd">        :type short_data_path: str</span>
 <span class="sd">        :param hard_data_path: the path to the directory containing different datasets&#39;</span>
-<span class="sd">            JSON sub-directories (often :code:`/path/toFirefly/static/data`)</span>
+<span class="sd">            JSON sub-directories (often :code:`/path/to/firefly/static/data`)</span>
 <span class="sd">        :type hard_data_path: str</span>
 <span class="sd">        :param JSON_prefix: Prefix for any :code:`.json` files created, :code:`.json` files will be of the format:</span>
 <span class="sd">            :code:`&lt;JSON_prefix&gt;&lt;parttype&gt;_%d.json`, defaults to &#39;&#39;</span>
