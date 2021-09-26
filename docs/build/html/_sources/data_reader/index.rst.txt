@@ -27,7 +27,7 @@ After following the :ref:`install instructions<install>`:
 .. code-block:: python
 
     # Import Firefly API
-    from Firefly.data_reader import ArrayReader
+    from firefly.data_reader import ArrayReader
 
     # Output it to a Firefly-compatible JSON!
     my_arrayReader = ArrayReader(

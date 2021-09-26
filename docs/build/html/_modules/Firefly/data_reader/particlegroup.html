@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Firefly.data_reader.particlegroup &mdash; Firefly 2.0.0 documentation</title>
+  <title>firefly.data_reader.particlegroup &mdash; Firefly 2.0.5 documentation</title>
   
 
   
@@ -143,7 +143,7 @@
         
           <li><a href="../../index.html">Module code</a> &raquo;</li>
         
-      <li>Firefly.data_reader.particlegroup</li>
+      <li>firefly.data_reader.particlegroup</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -158,7 +158,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <h1>Source code for Firefly.data_reader.particlegroup</h1><div class="highlight"><pre>
+  <h1>Source code for firefly.data_reader.particlegroup</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 
@@ -166,7 +166,7 @@
 
 <span class="kn">from</span> <span class="nn">.json_utils</span> <span class="kn">import</span> <span class="n">write_to_json</span>
 
-<div class="viewcode-block" id="ParticleGroup"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.ParticleGroup.html#Firefly.data_reader.ParticleGroup">[docs]</a><span class="k">class</span> <span class="nc">ParticleGroup</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="ParticleGroup"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.ParticleGroup.html#firefly.data_reader.ParticleGroup">[docs]</a><span class="k">class</span> <span class="nc">ParticleGroup</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This is a class for organizing data that you want to interface with a </span>
 <span class="sd">    Reader instance. This class provides rudimentary data validation and </span>
@@ -175,7 +175,7 @@
 <span class="sd">    method please be careful!!</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="ParticleGroup.__repr__"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.ParticleGroup.html#Firefly.data_reader.ParticleGroup.__repr__">[docs]</a>    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ParticleGroup.__repr__"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.ParticleGroup.html#firefly.data_reader.ParticleGroup.__repr__">[docs]</a>    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Implementation of builtin function __repr__</span>
 
 <span class="sd">        :return: mystr, the pretty rendering of a particle group</span>
@@ -187,7 +187,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">nparts</span><span class="o">//</span><span class="bp">self</span><span class="o">.</span><span class="n">decimation_factor</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">nparts</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tracked_names</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">mystr</span></div>
 
-<div class="viewcode-block" id="ParticleGroup.__getitem__"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.ParticleGroup.html#Firefly.data_reader.ParticleGroup.__getitem__">[docs]</a>    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">key</span><span class="p">):</span>
+<div class="viewcode-block" id="ParticleGroup.__getitem__"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.ParticleGroup.html#firefly.data_reader.ParticleGroup.__getitem__">[docs]</a>    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">key</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Implementation of builtin function __getitem__ to retreive tracked field data.</span>
 
 <span class="sd">        :param key: field array to extract</span>
@@ -205,7 +205,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> is not a tracked array&quot;</span><span class="o">%</span><span class="n">key</span><span class="p">)</span></div>
     
-<div class="viewcode-block" id="ParticleGroup.__setitem__"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.ParticleGroup.html#Firefly.data_reader.ParticleGroup.__setitem__">[docs]</a>    <span class="k">def</span> <span class="fm">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">key</span><span class="p">,</span><span class="n">value</span><span class="p">):</span>
+<div class="viewcode-block" id="ParticleGroup.__setitem__"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.ParticleGroup.html#firefly.data_reader.ParticleGroup.__setitem__">[docs]</a>    <span class="k">def</span> <span class="fm">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">key</span><span class="p">,</span><span class="n">value</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Implementation of builtin function __setitem__ to replace</span>
 <span class="sd">            field data or track new fields. Filter flag and colormap flags</span>
 <span class="sd">            will be set to true, call :func:`firefly.data_reader.ParticleGroup.trackArray`</span>
@@ -229,7 +229,7 @@
             <span class="c1">##  filter and colormap flags will be set to True by default.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">trackArray</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="n">value</span><span class="p">)</span></div>
         
-<div class="viewcode-block" id="ParticleGroup.__init__"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.ParticleGroup.html#Firefly.data_reader.ParticleGroup.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<div class="viewcode-block" id="ParticleGroup.__init__"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.ParticleGroup.html#firefly.data_reader.ParticleGroup.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">UIname</span><span class="p">,</span>
         <span class="n">coordinates</span><span class="p">,</span>
@@ -441,7 +441,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">attached_settings</span> <span class="o">=</span> <span class="n">attached_settings</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">doSPHrad</span> <span class="o">=</span> <span class="n">doSPHrad</span></div>
         
-<div class="viewcode-block" id="ParticleGroup.trackArray"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.ParticleGroup.html#Firefly.data_reader.ParticleGroup.trackArray">[docs]</a>    <span class="k">def</span> <span class="nf">trackArray</span><span class="p">(</span>
+<div class="viewcode-block" id="ParticleGroup.trackArray"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.ParticleGroup.html#firefly.data_reader.ParticleGroup.trackArray">[docs]</a>    <span class="k">def</span> <span class="nf">trackArray</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">field_name</span><span class="p">,</span>
         <span class="n">arr</span><span class="p">,</span>
@@ -513,7 +513,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">attached_settings</span><span class="p">[</span><span class="s1">&#39;colormapLims&#39;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">UIname</span><span class="p">][</span><span class="n">field_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">colormapLims</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">attached_settings</span><span class="p">[</span><span class="s1">&#39;colormapVals&#39;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">UIname</span><span class="p">][</span><span class="n">field_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">colormapVals</span></div>
 
-<div class="viewcode-block" id="ParticleGroup.getDecimationIndexArray"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.ParticleGroup.html#Firefly.data_reader.ParticleGroup.getDecimationIndexArray">[docs]</a>    <span class="k">def</span> <span class="nf">getDecimationIndexArray</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ParticleGroup.getDecimationIndexArray"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.ParticleGroup.html#firefly.data_reader.ParticleGroup.getDecimationIndexArray">[docs]</a>    <span class="k">def</span> <span class="nf">getDecimationIndexArray</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Creates a numpy index array to handle decimation (sub-sampling) of your</span>
 <span class="sd">        data. Chooses nparts/decimation_factor many particles randomly without</span>
@@ -534,7 +534,7 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dec_inds</span></div>
 
-<div class="viewcode-block" id="ParticleGroup.outputToDict"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.ParticleGroup.html#Firefly.data_reader.ParticleGroup.outputToDict">[docs]</a>    <span class="k">def</span> <span class="nf">outputToDict</span><span class="p">(</span>
+<div class="viewcode-block" id="ParticleGroup.outputToDict"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.ParticleGroup.html#firefly.data_reader.ParticleGroup.outputToDict">[docs]</a>    <span class="k">def</span> <span class="nf">outputToDict</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">dec_inds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">store_extra_keys</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -595,7 +595,7 @@
         
         <span class="k">return</span> <span class="n">outDict</span></div>
 
-<div class="viewcode-block" id="ParticleGroup.outputToJSON"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.ParticleGroup.html#Firefly.data_reader.ParticleGroup.outputToJSON">[docs]</a>    <span class="k">def</span> <span class="nf">outputToJSON</span><span class="p">(</span>
+<div class="viewcode-block" id="ParticleGroup.outputToJSON"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.ParticleGroup.html#firefly.data_reader.ParticleGroup.outputToJSON">[docs]</a>    <span class="k">def</span> <span class="nf">outputToJSON</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">short_data_path</span><span class="p">,</span>
         <span class="n">hard_data_path</span><span class="p">,</span>

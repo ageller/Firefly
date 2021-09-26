@@ -13,7 +13,7 @@ import json
 import os
 import time
 
-from Firefly.data_reader import SimpleReader
+from firefly.data_reader import SimpleReader
 
 #in principle, we could read in the data here...
 
@@ -267,7 +267,7 @@ def startFireflyServer(port=5000, frames_per_second=30, decimation_factor=1):
         os.chdir(old_dir)
 
 def spawnFireflyServer(port=5000,frames_per_second=30,decimation_factor=1,max_time=10):
-    """Wrapper to :func:`Firefly.server.startFireflyServer` that instead starts a background process.
+    """Wrapper to :func:`firefly.server.startFireflyServer` that instead starts a background process.
 
     :param port: port number to serve the :code:`.html` files on, defaults to 5000
     :type port: int, optional

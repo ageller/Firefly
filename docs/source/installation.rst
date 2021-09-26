@@ -70,16 +70,16 @@ or
 in the top level directory. The required Python packages will automatically be 
 installed as well.
 
-You can test your installation by looking for the Firefly 
+You can test your installation by looking for the firefly 
 executable built by the installation
 
 .. code-block:: bash
 
-    which Firefly
+    which firefly
 
 and by importing the Firefly Python frontend in Python
 
 .. code-block:: python
 
-    import Firefly
+    import firefly
 

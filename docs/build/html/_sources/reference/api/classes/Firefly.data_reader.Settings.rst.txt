@@ -1,7 +1,7 @@
-﻿Firefly.data\_reader.Settings
+﻿firefly.data\_reader.Settings
 =============================
 
-.. currentmodule:: Firefly.data_reader
+.. currentmodule:: firefly.data_reader
 
 .. autoclass:: Settings
    :members:

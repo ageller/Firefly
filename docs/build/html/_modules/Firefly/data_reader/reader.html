@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Firefly.data_reader.reader &mdash; Firefly 2.0.0 documentation</title>
+  <title>firefly.data_reader.reader &mdash; Firefly 2.0.5 documentation</title>
   
 
   
@@ -143,7 +143,7 @@
         
           <li><a href="../../index.html">Module code</a> &raquo;</li>
         
-      <li>Firefly.data_reader.reader</li>
+      <li>firefly.data_reader.reader</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -158,7 +158,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <h1>Source code for Firefly.data_reader.reader</h1><div class="highlight"><pre>
+  <h1>Source code for firefly.data_reader.reader</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">h5py</span>
 <span class="kn">import</span> <span class="nn">os</span> 
 <span class="kn">import</span> <span class="nn">shutil</span> 
@@ -172,14 +172,14 @@
 <span class="kn">from</span> <span class="nn">.particlegroup</span> <span class="kn">import</span> <span class="n">ParticleGroup</span>
 <span class="kn">from</span> <span class="nn">.json_utils</span> <span class="kn">import</span> <span class="n">write_to_json</span><span class="p">,</span><span class="n">load_from_json</span>
 
-<div class="viewcode-block" id="Reader"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.Reader.html#Firefly.data_reader.Reader">[docs]</a><span class="k">class</span> <span class="nc">Reader</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="Reader"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Reader.html#firefly.data_reader.Reader">[docs]</a><span class="k">class</span> <span class="nc">Reader</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; This class provides a framework to unify the Settings and ParticleGroup classes</span>
 <span class="sd">    to make sure that the user can easily produce firefly compatible files. </span>
 <span class="sd">    You should use this Reader as a base class for any custom readers you may build</span>
 <span class="sd">    (see :class:`firefly.data_reader.SimpleReader` or :class:`firefly.data_reader.FIREreader` for example).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="Reader.__repr__"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.Reader.html#Firefly.data_reader.Reader.__repr__">[docs]</a>    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Reader.__repr__"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Reader.html#firefly.data_reader.Reader.__repr__">[docs]</a>    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Implementation of builtin function __repr__</span>
 
 <span class="sd">        :return: mystr, the pretty rendering of a reader</span>
@@ -192,7 +192,7 @@
 
         <span class="k">return</span> <span class="n">my_str</span></div>
     
-<div class="viewcode-block" id="Reader.__init__"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.Reader.html#Firefly.data_reader.Reader.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<div class="viewcode-block" id="Reader.__init__"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Reader.html#firefly.data_reader.Reader.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">JSONdir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
         <span class="n">JSON_prefix</span><span class="o">=</span><span class="s1">&#39;Data&#39;</span><span class="p">,</span>
@@ -337,7 +337,7 @@
 
         <span class="k">return</span> <span class="n">hard_data_path</span><span class="p">,</span><span class="n">short_data_path</span>
 
-<div class="viewcode-block" id="Reader.addParticleGroup"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.Reader.html#Firefly.data_reader.Reader.addParticleGroup">[docs]</a>    <span class="k">def</span> <span class="nf">addParticleGroup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">particleGroup</span><span class="p">):</span>
+<div class="viewcode-block" id="Reader.addParticleGroup"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Reader.html#firefly.data_reader.Reader.addParticleGroup">[docs]</a>    <span class="k">def</span> <span class="nf">addParticleGroup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">particleGroup</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Track a new :class:`~firefly.data_reader.ParticleGroup` instance in </span>
 <span class="sd">            this :class:`firefly.data_reader.Reader` instance&#39;s :code:`particleGroups` array</span>
 <span class="sd">            and to the attached :class:`firefly.data_reader.Settings` instance.</span>
@@ -355,7 +355,7 @@
         <span class="c1">## add this particle group to the reader&#39;s settings file</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">attachSettings</span><span class="p">(</span><span class="n">particleGroup</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Reader.dumpToJSON"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.Reader.html#Firefly.data_reader.Reader.dumpToJSON">[docs]</a>    <span class="k">def</span> <span class="nf">dumpToJSON</span><span class="p">(</span>
+<div class="viewcode-block" id="Reader.dumpToJSON"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Reader.html#firefly.data_reader.Reader.dumpToJSON">[docs]</a>    <span class="k">def</span> <span class="nf">dumpToJSON</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">loud</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">write_jsons_to_disk</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -529,7 +529,7 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">JSON</span></div>
 
-<div class="viewcode-block" id="Reader.outputToDict"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.Reader.html#Firefly.data_reader.Reader.outputToDict">[docs]</a>    <span class="k">def</span> <span class="nf">outputToDict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Reader.outputToDict"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Reader.html#firefly.data_reader.Reader.outputToDict">[docs]</a>    <span class="k">def</span> <span class="nf">outputToDict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Formats the data in the reader to a python dictionary using</span>
 <span class="sd">            the attached</span>
 <span class="sd">            :func:`firefly.data_reader.Settings.outputToDict` and</span>
@@ -555,7 +555,7 @@
 
         <span class="k">return</span> <span class="n">outputDict</span></div>
 
-<div class="viewcode-block" id="Reader.sendDataViaFlask"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.Reader.html#Firefly.data_reader.Reader.sendDataViaFlask">[docs]</a>    <span class="k">def</span> <span class="nf">sendDataViaFlask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">port</span><span class="o">=</span><span class="mi">5000</span><span class="p">):</span>
+<div class="viewcode-block" id="Reader.sendDataViaFlask"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Reader.html#firefly.data_reader.Reader.sendDataViaFlask">[docs]</a>    <span class="k">def</span> <span class="nf">sendDataViaFlask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">port</span><span class="o">=</span><span class="mi">5000</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Exports the data as if it were being dumped to disk</span>
 <span class="sd">            but instead stores it as a string. Then feeds this string</span>
 <span class="sd">            to the js interpreter via Flask.</span>
@@ -580,7 +580,7 @@
             <span class="n">json</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">JSON</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;data posted!&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Reader.copyfireflySourceToTarget"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.Reader.html#Firefly.data_reader.Reader.copyfireflySourceToTarget">[docs]</a>    <span class="k">def</span> <span class="nf">copyfireflySourceToTarget</span><span class="p">(</span>
+<div class="viewcode-block" id="Reader.copyFireflySourceToTarget"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Reader.html#firefly.data_reader.Reader.copyFireflySourceToTarget">[docs]</a>    <span class="k">def</span> <span class="nf">copyFireflySourceToTarget</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">target</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">flask_templates</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -596,7 +596,7 @@
 <span class="sd">            can be accessed by anyone over the internet.</span>
 
 <span class="sd">        :param target: target directory to save firefly source files to,</span>
-<span class="sd">            defaults to :code:`$HOME/my_firefly`</span>
+<span class="sd">            defaults to :code:`$HOME/my_Firefly`</span>
 <span class="sd">        :type target: str, optional</span>
 <span class="sd">        :param flask_templates: flag for whether the flask template files should also be</span>
 <span class="sd">            copied. In general, these files are not required to run firefly over the internet</span>
@@ -629,7 +629,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1">## handle default argument(s)</span>
-        <span class="k">if</span> <span class="n">target</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">target</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;HOME&#39;</span><span class="p">],</span><span class="s1">&#39;my_firefly&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">target</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">target</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;HOME&#39;</span><span class="p">],</span><span class="s1">&#39;my_Firefly&#39;</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">target</span><span class="p">[:</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="p">:</span> <span class="n">target</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;HOME&#39;</span><span class="p">],</span><span class="n">target</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">target</span><span class="p">):</span> 
@@ -744,12 +744,12 @@
                 <span class="c1">## move back to the current directory</span>
                 <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">old</span><span class="p">)</span></div></div>
     
-<div class="viewcode-block" id="ArrayReader"><a class="viewcode-back" href="../../../reference/api/readers/Firefly.data_reader.ArrayReader.html#Firefly.data_reader.ArrayReader">[docs]</a><span class="k">class</span> <span class="nc">ArrayReader</span><span class="p">(</span><span class="n">Reader</span><span class="p">):</span>
+<div class="viewcode-block" id="ArrayReader"><a class="viewcode-back" href="../../../reference/api/readers/firefly.data_reader.ArrayReader.html#firefly.data_reader.ArrayReader">[docs]</a><span class="k">class</span> <span class="nc">ArrayReader</span><span class="p">(</span><span class="n">Reader</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;A wrapper to :class:`firefly.data_reader.Reader` that stores </span>
 <span class="sd">        raw numpy array data without opening anything from disk.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="ArrayReader.__init__"><a class="viewcode-back" href="../../../reference/api/readers/Firefly.data_reader.ArrayReader.html#Firefly.data_reader.ArrayReader.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<div class="viewcode-block" id="ArrayReader.__init__"><a class="viewcode-back" href="../../../reference/api/readers/firefly.data_reader.ArrayReader.html#firefly.data_reader.ArrayReader.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">coordinates</span><span class="p">,</span>
         <span class="n">UInames</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -895,12 +895,12 @@
             <span class="n">write_jsons_to_disk</span><span class="o">=</span><span class="n">write_jsons_to_disk</span><span class="p">,</span>
             <span class="n">loud</span><span class="o">=</span><span class="n">loud</span><span class="p">)</span></div></div>
 
-<div class="viewcode-block" id="SimpleReader"><a class="viewcode-back" href="../../../reference/api/readers/Firefly.data_reader.SimpleReader.html#Firefly.data_reader.SimpleReader">[docs]</a><span class="k">class</span> <span class="nc">SimpleReader</span><span class="p">(</span><span class="n">ArrayReader</span><span class="p">):</span>
+<div class="viewcode-block" id="SimpleReader"><a class="viewcode-back" href="../../../reference/api/readers/firefly.data_reader.SimpleReader.html#firefly.data_reader.SimpleReader">[docs]</a><span class="k">class</span> <span class="nc">SimpleReader</span><span class="p">(</span><span class="n">ArrayReader</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; A wrapper to :class:`firefly.data_reader.ArrayReader` that attempts to </span>
 <span class="sd">        flexibily open generically formatetd data with minimal interaction from the user.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-<div class="viewcode-block" id="SimpleReader.__init__"><a class="viewcode-back" href="../../../reference/api/readers/Firefly.data_reader.SimpleReader.html#Firefly.data_reader.SimpleReader.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<div class="viewcode-block" id="SimpleReader.__init__"><a class="viewcode-back" href="../../../reference/api/readers/firefly.data_reader.SimpleReader.html#firefly.data_reader.SimpleReader.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">path_to_data</span><span class="p">,</span>
         <span class="n">field_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>

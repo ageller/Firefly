@@ -12,7 +12,7 @@ With :code:`startup.json`
 -------------------------
 
 When Firefly first opens it searches for :ref:`the startup file <docsstartup>`, :code:`startup.json`, 
-in :code:`Firefly/static/data`. If :code:`startup.json` does not exist,
+in :code:`firefly/static/data`. If :code:`startup.json` does not exist,
 Firefly will display a button that will allow you to
 select the directory containing the files you want to
 load (the directory must contain a :ref:`manifest file <docsfilename>`, :code:`filenames.json`).
@@ -33,7 +33,7 @@ the :ref:`load new data button` button.
 .. warning::
 
 	For most browsers, you will only be able to select a
-	directory that is a sub-directory of :code:`Firefly/static/data`. 
+	directory that is a sub-directory of :code:`firefly/static/data`. 
 	You must keep your :code:`.json` files there or
 	could use symbolic links within
 	the data directory pointing to elsewhere on your local
@@ -43,15 +43,15 @@ the :ref:`load new data button` button.
 
 		ln -s /home/mydirectory/snapdir_XXX
 	
-	:func:`Firefly.data_reader.Reader.dumpToJSON` will automatically
+	:func:`firefly.data_reader.Reader.dumpToJSON` will automatically
 	create a symbolic link if it detects that the :code:`JSONdir` you
-	specified is not a sub-directory of :code:`Firefly/static/data`.
+	specified is not a sub-directory of :code:`firefly/static/data`.
 
 If you have multiple data sets available on your computer
 and prefer to have a menu of these data files to choose
 from at the start of Firefly, you can append entries to the
 :code:`startup.json` file to create a list of directories
-.  For instance, a :class:`~Firefly.data_reader.Reader` may create a
+.  For instance, a :class:`~firefly.data_reader.Reader` may create a
 :code:`startup.json` file that contains the following:
 
 .. code-block:: 
@@ -68,7 +68,7 @@ You could manually append this to contain the following:
 	"3":"data\/snapdir_004"}
 
 Or use the :code:`write_startup=append` 
-keyword argument of :func:`~Firefly.data_reader.Reader.__init__` 
+keyword argument of :func:`~firefly.data_reader.Reader.__init__` 
 when initializing your second dataset.
 
 
@@ -87,7 +87,7 @@ Alternatively, one could make many copies of the Firefly source directory,
 each with their own :code:`startup.json`. 
 
 To facilitate this, we provide the 
-:func:`Firefly.data_reader.Reader.copyFireflySourceToTarget`
+:func:`firefly.data_reader.Reader.copyFireflySourceToTarget`
 method which will create a new directory and copy the necessary source
 files to run Firefly within it (without the Python frontend API). 
 
@@ -105,7 +105,7 @@ by GitHub, enabled.
 	
 	To use the :code:`init_gh_pages` keyword argument you must have created
 	a GitHub OAUTH token somewhere on your system and passed it to 
-	:func:`~Firefly.data_reader.Reader.copyFireflySourceToTarget`
+	:func:`~firefly.data_reader.Reader.copyFireflySourceToTarget`
 	using the :code:`GHOAUTHTOKENPATH` keyword argument (which defaults
 	to :code:`$HOME/.github.token`.
 	Attempting to use the :code:`init_gh_pages` flag without doing so 

@@ -34,6 +34,6 @@ setuptools.setup(
           'abg_python>=1.0.2'
       ],
     include_package_data=True,
-    scripts=["src/Firefly/bin/Firefly"]
+    scripts=["src/Firefly/bin/firefly"]
 )
 

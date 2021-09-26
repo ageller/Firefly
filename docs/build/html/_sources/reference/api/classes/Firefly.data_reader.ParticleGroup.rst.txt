@@ -1,7 +1,7 @@
-﻿Firefly.data\_reader.ParticleGroup
+﻿firefly.data\_reader.ParticleGroup
 ==================================
 
-.. currentmodule:: Firefly.data_reader
+.. currentmodule:: firefly.data_reader
 
 .. autoclass:: ParticleGroup
    :members:

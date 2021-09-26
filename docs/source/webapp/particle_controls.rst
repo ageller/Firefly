@@ -82,7 +82,7 @@ for fine adjustment using the slider between the new limits.
 	It is not currently possible to use a custom colormap but the
 	enterprising user could consider replacing the corresponding 
 	row in the texture map located at:
-	:code:`Firefly/src/Firefly/static/textures/colormap.png`. 
+	:code:`Firefly/src/firefly/static/textures/colormap.png`. 
 	The name in the UI can't be changed but you'll be able to colormap 
 	your data nonetheless.
 

@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Firefly.data_reader.tween &mdash; Firefly 2.0.0 documentation</title>
+  <title>firefly.data_reader.tween &mdash; Firefly 2.0.5 documentation</title>
   
 
   
@@ -143,7 +143,7 @@
         
           <li><a href="../../index.html">Module code</a> &raquo;</li>
         
-      <li>Firefly.data_reader.tween</li>
+      <li>firefly.data_reader.tween</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -158,7 +158,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <h1>Source code for Firefly.data_reader.tween</h1><div class="highlight"><pre>
+  <h1>Source code for firefly.data_reader.tween</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -167,9 +167,9 @@
 
 <span class="kn">from</span> <span class="nn">.json_utils</span> <span class="kn">import</span> <span class="n">write_to_json</span>
 
-<div class="viewcode-block" id="TweenParams"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.TweenParams.html#Firefly.data_reader.TweenParams">[docs]</a><span class="k">class</span> <span class="nc">TweenParams</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="TweenParams"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.TweenParams.html#firefly.data_reader.TweenParams">[docs]</a><span class="k">class</span> <span class="nc">TweenParams</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;A class to store tween parameters and make an output file&quot;&quot;&quot;</span>
-<div class="viewcode-block" id="TweenParams.__init__"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.TweenParams.html#Firefly.data_reader.TweenParams.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<div class="viewcode-block" id="TweenParams.__init__"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.TweenParams.html#firefly.data_reader.TweenParams.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">coords</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">duration</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
@@ -208,7 +208,7 @@
         <span class="k">if</span> <span class="n">coords</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">addKeyframe</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span><span class="n">duration</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="TweenParams.addKeyframe"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.TweenParams.html#Firefly.data_reader.TweenParams.addKeyframe">[docs]</a>    <span class="k">def</span> <span class="nf">addKeyframe</span><span class="p">(</span>
+<div class="viewcode-block" id="TweenParams.addKeyframe"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.TweenParams.html#firefly.data_reader.TweenParams.addKeyframe">[docs]</a>    <span class="k">def</span> <span class="nf">addKeyframe</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">coords</span><span class="p">,</span>
         <span class="n">duration</span><span class="p">):</span>
@@ -254,7 +254,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">coordss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coordss</span><span class="p">,</span><span class="n">coords</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">durations</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">durations</span><span class="p">,</span><span class="n">duration</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="TweenParams.outputToDict"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.TweenParams.html#Firefly.data_reader.TweenParams.outputToDict">[docs]</a>    <span class="k">def</span> <span class="nf">outputToDict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TweenParams.outputToDict"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.TweenParams.html#firefly.data_reader.TweenParams.outputToDict">[docs]</a>    <span class="k">def</span> <span class="nf">outputToDict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Converts stored data into a single python dictionary.</span>
 
 <span class="sd">        :return: tween_params_dict</span>
@@ -278,7 +278,7 @@
 
         <span class="k">return</span> <span class="n">tween_params_dict</span></div>
 
-<div class="viewcode-block" id="TweenParams.outputToJSON"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.TweenParams.html#Firefly.data_reader.TweenParams.outputToJSON">[docs]</a>    <span class="k">def</span> <span class="nf">outputToJSON</span><span class="p">(</span>
+<div class="viewcode-block" id="TweenParams.outputToJSON"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.TweenParams.html#firefly.data_reader.TweenParams.outputToJSON">[docs]</a>    <span class="k">def</span> <span class="nf">outputToJSON</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">JSONdir</span><span class="p">,</span>
         <span class="n">JSON_prefix</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>

@@ -37,10 +37,10 @@ Base classes
     :toctree: classes
     :recursive:
 
-    Firefly.data_reader.Reader
-    Firefly.data_reader.ParticleGroup
-    Firefly.data_reader.Settings
-    Firefly.data_reader.TweenParams
+    firefly.data_reader.Reader
+    firefly.data_reader.ParticleGroup
+    firefly.data_reader.Settings
+    firefly.data_reader.TweenParams
 
 
 Pre-built Readers
@@ -50,10 +50,10 @@ Pre-built Readers
     :toctree: readers
     :recursive:
 
-    Firefly.data_reader.SimpleReader
-    Firefly.data_reader.ArrayReader
-    Firefly.data_reader.FIREreader
-    Firefly.data_reader.SimpleFIREreader
+    firefly.data_reader.SimpleReader
+    firefly.data_reader.ArrayReader
+    firefly.data_reader.FIREreader
+    firefly.data_reader.SimpleFIREreader
 
 
 .. _server api:
@@ -65,6 +65,6 @@ Server Utitities
     :toctree: server
     :recursive:
 
-    Firefly.server.startFireflyServer
-    Firefly.server.spawnFireflyServer
-    Firefly.server.killAllFireflyServers
+    firefly.server.startFireflyServer
+    firefly.server.spawnFireflyServer
+    firefly.server.killAllFireflyServers

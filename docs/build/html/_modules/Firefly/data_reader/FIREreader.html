@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Firefly.data_reader.FIREreader &mdash; Firefly 2.0.0 documentation</title>
+  <title>firefly.data_reader.FIREreader &mdash; Firefly 2.0.5 documentation</title>
   
 
   
@@ -143,7 +143,7 @@
         
           <li><a href="../../index.html">Module code</a> &raquo;</li>
         
-      <li>Firefly.data_reader.FIREreader</li>
+      <li>firefly.data_reader.FIREreader</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -158,7 +158,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <h1>Source code for Firefly.data_reader.FIREreader</h1><div class="highlight"><pre>
+  <h1>Source code for firefly.data_reader.FIREreader</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">os</span>
 
@@ -166,12 +166,12 @@
 
 <span class="kn">from</span> <span class="nn">abg_python.snapshot_utils</span> <span class="kn">import</span> <span class="n">openSnapshot</span>
 
-<div class="viewcode-block" id="FIREreader"><a class="viewcode-back" href="../../../reference/api/readers/Firefly.data_reader.FIREreader.html#Firefly.data_reader.FIREreader">[docs]</a><span class="k">class</span> <span class="nc">FIREreader</span><span class="p">(</span><span class="n">Reader</span><span class="p">):</span>
+<div class="viewcode-block" id="FIREreader"><a class="viewcode-back" href="../../../reference/api/readers/firefly.data_reader.FIREreader.html#firefly.data_reader.FIREreader">[docs]</a><span class="k">class</span> <span class="nc">FIREreader</span><span class="p">(</span><span class="n">Reader</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;This is an example of a &quot;custom&quot; Reader that has been tuned to </span>
 <span class="sd">    open data from the `FIRE galaxy formation collaboration &lt;https://fire.northwestern.edu&gt;`_.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     
-<div class="viewcode-block" id="FIREreader.__init__"><a class="viewcode-back" href="../../../reference/api/readers/Firefly.data_reader.FIREreader.html#Firefly.data_reader.FIREreader.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+<div class="viewcode-block" id="FIREreader.__init__"><a class="viewcode-back" href="../../../reference/api/readers/firefly.data_reader.FIREreader.html#firefly.data_reader.FIREreader.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
         <span class="n">snapdir</span><span class="p">,</span>
         <span class="n">snapnum</span><span class="p">,</span> 
         <span class="n">ptypes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -308,7 +308,7 @@
         <span class="c1">####### execute generic Reader __init__ below #######</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="FIREreader.loadData"><a class="viewcode-back" href="../../../reference/api/readers/Firefly.data_reader.FIREreader.html#Firefly.data_reader.FIREreader.loadData">[docs]</a>    <span class="k">def</span> <span class="nf">loadData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">com_offset</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="FIREreader.loadData"><a class="viewcode-back" href="../../../reference/api/readers/firefly.data_reader.FIREreader.html#firefly.data_reader.FIREreader.loadData">[docs]</a>    <span class="k">def</span> <span class="nf">loadData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">com_offset</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Loads FIRE snapshot data using Alex Gurvich&#39;s</span>
 <span class="sd">        :func:`firefly.data_reader.snapshot_utils.openSnapshot`.</span>
 <span class="sd">        (reproduced from https://github.com/agurvich/abg_python) and binds it to a </span>
@@ -449,8 +449,8 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">particleGroups</span></div></div>
 
-<div class="viewcode-block" id="SimpleFIREreader"><a class="viewcode-back" href="../../../reference/api/readers/Firefly.data_reader.SimpleFIREreader.html#Firefly.data_reader.SimpleFIREreader">[docs]</a><span class="k">class</span> <span class="nc">SimpleFIREreader</span><span class="p">(</span><span class="n">FIREreader</span><span class="p">):</span>    
-<div class="viewcode-block" id="SimpleFIREreader.__init__"><a class="viewcode-back" href="../../../reference/api/readers/Firefly.data_reader.SimpleFIREreader.html#Firefly.data_reader.SimpleFIREreader.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<div class="viewcode-block" id="SimpleFIREreader"><a class="viewcode-back" href="../../../reference/api/readers/firefly.data_reader.SimpleFIREreader.html#firefly.data_reader.SimpleFIREreader">[docs]</a><span class="k">class</span> <span class="nc">SimpleFIREreader</span><span class="p">(</span><span class="n">FIREreader</span><span class="p">):</span>    
+<div class="viewcode-block" id="SimpleFIREreader.__init__"><a class="viewcode-back" href="../../../reference/api/readers/firefly.data_reader.SimpleFIREreader.html#firefly.data_reader.SimpleFIREreader.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">path_to_snapshot</span><span class="p">,</span>
         <span class="n">decimation_factor</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>

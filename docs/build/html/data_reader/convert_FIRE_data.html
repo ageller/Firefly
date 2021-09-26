@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Convert FIRE data &mdash; Firefly 2.0.0 documentation</title>
+  <title>Convert FIRE data &mdash; Firefly 2.0.5 documentation</title>
   
 
   
@@ -476,14 +476,14 @@ div.rendered_html tbody tr:hover {
 
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;/Users/ageller/VISUALIZATIONS/Firefly&#39;</span><span class="p">)</span>
-<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;/Users/agurvich/research/repos/Firefly/src&#39;</span><span class="p">)</span>
-<span class="kn">from</span> <span class="nn">Firefly.data_reader</span> <span class="kn">import</span> <span class="n">FIREreader</span><span class="p">,</span><span class="n">SimpleFIREreader</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;/Users/agurvich/research/repos/firefly/src&#39;</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">firefly.data_reader</span> <span class="kn">import</span> <span class="n">FIREreader</span><span class="p">,</span><span class="n">SimpleFIREreader</span>
 </pre></div>
 </div>
 </div>
 <section id="Convert-FIRE-data">
 <h1>Convert FIRE data<a class="headerlink" href="#Convert-FIRE-data" title="Permalink to this headline">¶</a></h1>
-<p>In this example notebook we demonstrate how to use the <code class="docutils literal notranslate"><span class="pre">Firefly.data_reader.FIREreader</span></code> sub-class which creates specialized data files for FIRE formatted data. The details of how the <code class="docutils literal notranslate"><span class="pre">FIREreader</span></code> class is “specialized” see the API documentation and to see the example of this output visit the live demo version.</p>
+<p>In this example notebook we demonstrate how to use the <code class="docutils literal notranslate"><span class="pre">firefly.data_reader.FIREreader</span></code> sub-class which creates specialized data files for FIRE formatted data. The details of how the <code class="docutils literal notranslate"><span class="pre">FIREreader</span></code> class is “specialized” see the API documentation and to see the example of this output visit the live demo version.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
@@ -513,7 +513,7 @@ div.rendered_html tbody tr:hover {
     <span class="n">colormapFlags</span><span class="o">=</span><span class="p">[</span><span class="kc">True</span><span class="p">,</span><span class="kc">True</span><span class="p">,</span><span class="kc">True</span><span class="p">],</span>
     <span class="c1">## where should the output .json files be saved to?</span>
     <span class="c1">##  if a relative path is given, like here, saves to $HOME/&lt;JSONdir&gt;</span>
-    <span class="c1">##  and creates a soft-link to Firefly/static/data</span>
+    <span class="c1">##  and creates a soft-link to firefly/static/data</span>
     <span class="n">JSONdir</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span><span class="s1">&#39;..&#39;</span><span class="p">,</span><span class="s1">&#39;static&#39;</span><span class="p">,</span><span class="s1">&#39;data&#39;</span><span class="p">,</span><span class="s1">&#39;FIREData_50&#39;</span><span class="p">)),</span>
     <span class="c1">## overwrite the existing startup.json file</span>
     <span class="n">write_startup</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -554,9 +554,9 @@ Loading ptype 0
 &#39;&#39;
 </pre></div></div>
 </div>
-<section id="Using-Firefly.data_reader.SimpleFIREreader">
-<h2>Using <code class="docutils literal notranslate"><span class="pre">Firefly.data_reader.SimpleFIREreader</span></code><a class="headerlink" href="#Using-Firefly.data_reader.SimpleFIREreader" title="Permalink to this headline">¶</a></h2>
-<p>To simplify this process we have provided <code class="docutils literal notranslate"><span class="pre">Firefly.data_reader.SimpleFIREreader</span></code> which takes a path to a FIRE snapshot and creates a “standard” iteration of Firefly given only a path to the data.</p>
+<section id="Using-firefly.data_reader.SimpleFIREreader">
+<h2>Using <code class="docutils literal notranslate"><span class="pre">firefly.data_reader.SimpleFIREreader</span></code><a class="headerlink" href="#Using-firefly.data_reader.SimpleFIREreader" title="Permalink to this headline">¶</a></h2>
+<p>To simplify this process we have provided <code class="docutils literal notranslate"><span class="pre">firefly.data_reader.SimpleFIREreader</span></code> which takes a path to a FIRE snapshot and creates a “standard” iteration of Firefly given only a path to the data.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>

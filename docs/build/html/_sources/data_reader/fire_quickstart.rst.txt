@@ -13,7 +13,7 @@ After following the :ref:`installation instructions<install>`:
 .. code-block:: python
 
     # Import Firefly API
-    from Firefly.data_reader import SimpleFIREreader
+    from firefly.data_reader import SimpleFIREreader
 
     # The simple reader only needs the snapshot location
     # Here we're using the shared Stampede2 directory as an example

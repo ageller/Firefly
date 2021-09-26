@@ -25,7 +25,7 @@ Using :code:`python -m http.server` to host :code:`index.html`
     :ref:`Features that require Flask <flask>`
     will not work if Firefly is hosted this way.
 
-From within the the :code:`Firefly/src/Firefly` directory (or from within 
+From within the the :code:`Firefly/src/firefly` directory (or from within 
 the corresponding sub-directory in your site-packages directory) execute
 
 .. code-block:: bash
@@ -43,7 +43,7 @@ use the :ref:`load new data button` button.
 
 Using :code:`run_server.py` to launch Flask
 +++++++++++++++++++++++++++++++++++++++++++
-From within the the :code:`Firefly/src/Firefly` directory (or from within 
+From within the the :code:`Firefly/src/firefly` directory (or from within 
 the corresponding sub-directory in your site-packages directory) execute
 
 .. code-block:: bash 
@@ -55,10 +55,10 @@ Using the :code:`Firefly` executable to launch Flask
 
 The Firefly bash executable is a wrapper to 
 :code:`run_server.py` so that it can be initialized without having to 
-be in :code:`Firefly/src/Firefly` directory.
+be in :code:`Firefly/src/firefly` directory.
 
 It is distributed along with the Firefly source
-files and Python API and is located in :code:`Firefly/src/Firefly/bin`
+files and Python API and is located in :code:`Firefly/src/firefly/bin`
 (or the corresponding sub-directory in your site-packages directory).
 When Firefly is :ref:`correctly installed <install>` then this directory
 will be added to your :code:`${PATH}$` variable. 
@@ -104,7 +104,7 @@ command line from within a Jupyter notebook as well.
 
 .. code-block:: 
 
-    from Firefly.server import spawnFireflyServer
+    from firefly.server import spawnFireflyServer
 
     ## optionally accepts port as positional argument
     spawnFireflyServer()
@@ -116,12 +116,12 @@ use the command:
 
 .. code-block:: 
 
-    from Firefly.server import killAllFireflyServers
+    from firefly.server import killAllFireflyServers
 
     ## optionally accepts a single process id to kill
     killAllFireflyServers()
 
-Note that the pid is accessible from the original :func:`~Firefly.server.spawnFireflyServer`
+Note that the pid is accessible from the original :func:`~firefly.server.spawnFireflyServer`
 call but that processes in general do not like to be killed and may sometimes
 survive the targeted attempt on their life. It's more reliable to indiscriminately 
 kill any process that has a Firefly server process name (the default).
@@ -143,7 +143,7 @@ To make Firefly accessible via the internet, the
 
 .. seealso:: 
 
-    :func:`~Firefly.data_reader.Reader.copyFireflySourceToTarget` takes an optional boolean
+    :func:`~firefly.data_reader.Reader.copyFireflySourceToTarget` takes an optional boolean
     keyword argument :code:`init_gh_pages` that will attempt to 
     create a new repository and enable GitHub pages automatically.
     See :ref:`multiple datasets` for details.

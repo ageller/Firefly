@@ -50,7 +50,7 @@ reader = FIREreader(
     colormapFlags=[True,True,True],
     ## where should the output .json files be saved to? 
     ##  if a relative path is given, like here, saves to $HOME/<JSONdir>
-    ##  and creates a soft-link to Firefly/static/data
+    ##  and creates a soft-link to firefly/static/data
     JSONdir=os.path.abspath(os.path.join(os.getcwd(),'..','static','data','FIREData_50')),
     ## overwrite the existing startup.json file
     write_startup=True)

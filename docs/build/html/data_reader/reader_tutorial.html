@@ -8,7 +8,7 @@
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
-  <title>Tutorial notebook: Using the Reader class &mdash; Firefly 2.0.0 documentation</title>
+  <title>Tutorial notebook: Using the Reader class &mdash; Firefly 2.0.5 documentation</title>
   
 
   
@@ -511,7 +511,7 @@ div.rendered_html tbody tr:hover {
 <section id="Creating-a-Reader-instance">
 <h2>Creating a Reader instance<a class="headerlink" href="#Creating-a-Reader-instance" title="Permalink to this headline">¶</a></h2>
 <p>To begin, we’ll start by initializing a <code class="docutils literal notranslate"><span class="pre">Reader</span></code> object. Users are encouraged to familiarize themselves with the different keyword arguments through the documentation linked above.</p>
-<p>Perhaps the most important keyword argument is the <code class="docutils literal notranslate"><span class="pre">JSONdir</span></code>, which tells your <code class="docutils literal notranslate"><span class="pre">Reader</span></code> object where it should collect the different <code class="docutils literal notranslate"><span class="pre">.json</span></code> files it will produce. The <code class="docutils literal notranslate"><span class="pre">.json</span></code> files have to be readable from the <code class="docutils literal notranslate"><span class="pre">Firefly/static/data</span></code> directory of the iteration of Firefly that’s trying to open the data. The <code class="docutils literal notranslate"><span class="pre">Reader</span></code> class will automatically create a shortcut to the directory if you don’t choose a path that lives in <code class="docutils literal notranslate"><span class="pre">Firefly/static/data</span></code>. If you enter a relative path it will assume
+<p>Perhaps the most important keyword argument is the <code class="docutils literal notranslate"><span class="pre">JSONdir</span></code>, which tells your <code class="docutils literal notranslate"><span class="pre">Reader</span></code> object where it should collect the different <code class="docutils literal notranslate"><span class="pre">.json</span></code> files it will produce. The <code class="docutils literal notranslate"><span class="pre">.json</span></code> files have to be readable from the <code class="docutils literal notranslate"><span class="pre">firefly/static/data</span></code> directory of the iteration of Firefly that’s trying to open the data. The <code class="docutils literal notranslate"><span class="pre">Reader</span></code> class will automatically create a shortcut to the directory if you don’t choose a path that lives in <code class="docutils literal notranslate"><span class="pre">firefly/static/data</span></code>. If you enter a relative path it will assume
 you mean relative to your <code class="docutils literal notranslate"><span class="pre">${HOME}</span></code> directory. If no <code class="docutils literal notranslate"><span class="pre">JSONdir</span></code> is provided then it will default to <code class="docutils literal notranslate"><span class="pre">${HOME}/&lt;JSONprefix&gt;</span></code> (which itself defaults to <code class="docutils literal notranslate"><span class="pre">Data</span></code> if nothing is passed).</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:

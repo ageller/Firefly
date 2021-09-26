@@ -21,9 +21,9 @@ written to disk) that is :code:`POST`'d to the data input
 endpoint using the :code:`requests` Python module. 
 
 To facilitate this, we provide the
-:func:`Firefly.data_reader.Reader.sendDataViaFlask` method, 
+:func:`firefly.data_reader.Reader.sendDataViaFlask` method, 
 which will output the data contained in a
-:class:`~Firefly.data_reader.Reader` instance to a :code:`JSON`
+:class:`~firefly.data_reader.Reader` instance to a :code:`JSON`
 *string* and then :code:`POST` it to the data input endpoint of
 the specified localhost port.
 
