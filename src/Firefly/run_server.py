@@ -6,7 +6,7 @@ import os
 ##  installation of Firefly. Saves us devs a lot of confusion and is equivalent 
 ##  if you're only using a pip installed version
 sys.path.insert(0,os.path.abspath(os.path.join(os.getcwd(),'..')))
-from Firefly.server import startFireflyServer
+from firefly.server import startFireflyServer
 
 def main():
     #app.run(host='0.0.0.0')
