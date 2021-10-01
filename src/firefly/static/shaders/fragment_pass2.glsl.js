@@ -5,20 +5,30 @@ varying vec2 vUv;
 uniform sampler2D tex;
 uniform sampler2D cmap;
 uniform float colormap;
+uniform float CDmin;
+uniform float CDmax;
+uniform float lognorm;
 
 void main() {
 	vec4 color = texture2D(tex, vUv);
 
-	float density = clamp(length(color.rgb), 0., 1.);
+	float density_renorm;
+	if (lognorm > 0.){
+		density_renorm = (log(length(color.rgb))/log(10.)-CDmin)/(CDmax-CDmin);
+	}
+	else{
+		density_renorm = (length(color.rgb)-CDmin)/(CDmax-CDmin);
+	}
 
-	//could be used to block light from stars if gas is given red color and stars are given blue color
-	//float density = clamp(color.b - color.r, 0., 1.);
+	// clip renormalized values to be between 0 and 1
+	float density_clamp = clamp(density_renorm, 0., 1.);
 
-	gl_FragColor.rgb = texture2D(cmap, vec2(density, colormap)).rgb;
 
-	//if (color.b == 0. && color.r == 0.) gl_FragColor.rgba = vec4(0.);
+	// sample the colormap using the renormalized CD values
+	gl_FragColor.rgb = texture2D(cmap, vec2(density_clamp, colormap)).rgb;
+
 	
-	if (density <= 0.){
+	if (density_clamp <= 0.){
 		gl_FragColor.rgb = vec3(0);
 	} 
 	
@@ -26,3 +36,7 @@ void main() {
 	
 }
 `;
+
+//could be used to block light from stars if gas is given red color and stars are given blue color
+//float density = clamp(color.b - color.r, 0., 1.);
+//if (color.b == 0. && color.r == 0.) gl_FragColor.rgba = vec4(0.);
