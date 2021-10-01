@@ -398,7 +398,8 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">center</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">camera</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">cameraRotation</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">cameraRotation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">extra</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Settings that affect the position and orientation of the camera</span>
 
 <span class="sd">        :param center: do you want to explicilty define the initial camera focus/</span>
@@ -428,6 +429,10 @@
         <span class="n">stereoSep</span><span class="o">=</span><span class="mf">0.06</span><span class="p">,</span>
         <span class="n">decimate</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">start_tween</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">CDmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">CDmax</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">CDlognorm</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">columnDensity</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
         <span class="o">**</span><span class="n">extra</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;General settings that affect the state app state</span>
 
@@ -459,6 +464,18 @@
 <span class="sd">            requires a valid tweenParams.json file to be present in the JSONdir,</span>
 <span class="sd">            defaults to False</span>
 <span class="sd">        :type start_tween: bool, optional</span>
+<span class="sd">        :param CDmin: bottom of the renormalization for the experimental column density</span>
+<span class="sd">            projection mode, defaults to 0</span>
+<span class="sd">        :type CDmin: float, optional</span>
+<span class="sd">        :param CDmax: top of the renormalization for the experimental column density</span>
+<span class="sd">            projection mode, defaults to 1</span>
+<span class="sd">        :type CDmax: float, optional</span>
+<span class="sd">        :param CDlognorm: flag for whether renormalization should be done in log (``CDlognorm=1``)</span>
+<span class="sd">            or linear (``CDlognorm=0``) space, defaults to 0</span>
+<span class="sd">        :type CDmax: bool, optional</span>
+<span class="sd">        :param columnDensity: flag for whether the experimental column density projection mode</span>
+<span class="sd">            should be enabled at startup. Toggle this mode by pressing &#39;p&#39; on the keyboard, defaults to 0</span>
+<span class="sd">        :type CDcolumnDensity: bool, optional</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">__startup_settings</span> <span class="o">=</span> <span class="p">{</span>
@@ -468,7 +485,11 @@
             <span class="s1">&#39;stereo&#39;</span><span class="p">:</span><span class="n">stereo</span><span class="p">,</span>
             <span class="s1">&#39;stereoSep&#39;</span><span class="p">:</span><span class="n">stereoSep</span><span class="p">,</span>
             <span class="s1">&#39;decimate&#39;</span><span class="p">:</span><span class="n">decimate</span><span class="p">,</span>
-            <span class="s1">&#39;start_tween&#39;</span><span class="p">:</span><span class="n">start_tween</span>
+            <span class="s1">&#39;start_tween&#39;</span><span class="p">:</span><span class="n">start_tween</span><span class="p">,</span>
+            <span class="s1">&#39;CDmin&#39;</span><span class="p">:</span><span class="n">CDmin</span><span class="p">,</span>
+            <span class="s1">&#39;CDmax&#39;</span><span class="p">:</span><span class="n">CDmax</span><span class="p">,</span>
+            <span class="s1">&#39;CDlognorm&#39;</span><span class="p">:</span><span class="n">CDlognorm</span><span class="p">,</span>
+            <span class="s1">&#39;columnDensity&#39;</span><span class="p">:</span><span class="n">columnDensity</span>
         <span class="p">}</span></div>
     
 <div class="viewcode-block" id="Settings.particle_startup_settings"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Settings.html#firefly.data_reader.Settings.particle_startup_settings">[docs]</a>    <span class="k">def</span> <span class="nf">particle_startup_settings</span><span class="p">(</span>
