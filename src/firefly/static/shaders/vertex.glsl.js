@@ -27,7 +27,7 @@ uniform vec3 cameraY;
 uniform float minPointScale;
 uniform float maxToRender;
 
-const float maxPointScale = 20.;//1000.;
+const float maxPointScale = 1000.;
 const float PI = 3.1415926535897932384626433832795;
 const float sizeFac = 70.5; //trying to make physical sizes, I have NO idea why this number is needed.  This came from trial and error
 const float vectorFac = 5.; //so that vectors aren't smaller

@@ -102,6 +102,9 @@ function updateOctree(){
 							//console.log('drawing node', p, node.id, node.NparticlesToRender, node.Nparticles, node.particles.Coordinates.length, node.screenSize, node.inView)
 							viewerParams.octree.toDraw.push([p, node.id, false]);
 							viewerParams.octree.toDrawIDs.push(p+node.id);
+							// viewerParams.updateFilter[p] = true;
+							// viewerParams.updateOnOff[p] = true;
+							// viewerParams.updateColormap[p] = true;
 						}
 						
 						//existing node that needs more particles
@@ -109,6 +112,9 @@ function updateOctree(){
 							//console.log('updating node', p, node.id, node.NparticlesToRender, node.Nparticles, node.particles.Coordinates.length, node.screenSize, node.inView)
 							viewerParams.octree.toDraw.push([p, node.id, true]); //will be updated later
 							viewerParams.octree.toDrawIDs.push(p+node.id);
+							// viewerParams.updateFilter[p] = true;
+							// viewerParams.updateOnOff[p] = true;
+							// viewerParams.updateColormap[p] = true;
 						} 
 					}
 
@@ -124,7 +130,7 @@ function updateOctree(){
 
 		}
 	}
-	
+
 	//increment relevant variables
 	viewerParams.octree.drawPass += 1;
 	viewerParams.octree.pIndex = (viewerParams.octree.pIndex + 1) % viewerParams.partsKeys.length;

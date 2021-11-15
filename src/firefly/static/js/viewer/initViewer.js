@@ -236,7 +236,6 @@ function WebGLStart(){
 	Promise.all([
 		createPartsMesh(),
 	]).then(function(){
-		//searchOctree();
 		
 		//begin the animation
 		// keep track of runtime for crashing the app rather than the computer
@@ -444,9 +443,6 @@ function initScene() {
 
 	//apply presets from the options file
 	if (viewerParams.parts.hasOwnProperty('options')) applyOptions();
-
-	//octree
-	//viewerParams.octree = new THREE.Octree();//{scene:viewerParams.scene}); //add the scene if it should be visualized
 
 	// controls
 	initControls();
@@ -1079,6 +1075,7 @@ function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
 		});
 	});
 
+
 	viewerParams.partsKeys.forEach( function(p, i) {
 		viewerParams.parts[p] = {};
 
@@ -1088,7 +1085,6 @@ function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
 			viewerParams.parts[p].Coordinates = [];
 
 			var fname = prefix+'data/'+viewerParams.filenames[p][0][0]
-			var check = viewerParams.partsKeys.filter(function(d) { return d != 'options'});
 			d3.json(fname, function(d){
 				//initialize the boxSize using the first particle group
 				if (viewerParams.octree.boxSize == 0) {
@@ -1100,6 +1096,7 @@ function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
 						return true;
 					});
 				}
+				//initialize the octree node
 				viewerParams.octree.nodes[p] = pruneOctree(d, p, fname);
 			})
 
@@ -1123,7 +1120,6 @@ function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
 					} else if (j == 0){
 						readf = "data/"+f
 					}
-					//console.log(readf)
 					if (readf != null){
 						d3.json(prefix+readf,  function(foo) {
 							compileData(foo, p, callback, initialLoadFrac);
@@ -1178,11 +1174,47 @@ function compileData(data, p, callback, initialLoadFrac=0){
 				viewerParams.parts.options0 = JSON.parse(JSON.stringify(viewerParams.parts.options));
 			}
 
+			if (viewerParams.haveAnyOctree) addKeysForOctree();
+
 			callback(); 
 		}
 	}
 }
 
+function addKeysForOctree(){
+	//if we are using the octree, initialize a few of the parts keys so that we can generate a GUI
+	//users should specify values in the options/settings files explicitly for octree
+	if (viewerParams.parts.options.hasOwnProperty('filterVals')){
+		viewerParams.partsKeys.forEach(function(p){
+			if (viewerParams.haveOctree[p]){
+				viewerParams.parts[p].filterKeys = [];
+				Object.keys(viewerParams.parts.options.filterVals[p]).forEach(function(key){
+					var useKey = key;
+					if (key == 'Velocities'){
+						useKey = 'magVelocities';
+					}
+					viewerParams.parts[p].filterKeys.push(useKey)
+					viewerParams.parts[p][useKey] = viewerParams.parts.options.filterLims[p][key];
+				})
+			}
+		})
+	}
+	if (viewerParams.parts.options.hasOwnProperty('colormapVals')){
+		viewerParams.partsKeys.forEach(function(p){
+			if (viewerParams.haveOctree[p]){
+				viewerParams.parts[p].colormapKeys = [];
+				Object.keys(viewerParams.parts.options.colormapVals[p]).forEach(function(key){
+					var useKey = key;
+					if (key == 'Velocities'){
+						useKey = 'magVelocities';
+					}
+					viewerParams.parts[p].colormapKeys.push(useKey)
+					viewerParams.parts[p][useKey] = viewerParams.parts.options.colormapLims[p][key];
+				})
+			}
+		})
+	}
+}
 // compileData ->
 function countParts(){
 	var num = 0.;
@@ -1380,4 +1412,8 @@ function updateViewerCamera(){
 		viewerParams.camera.up.set(viewerParams.cameraUp.x, viewerParams.cameraUp.y, viewerParams.cameraUp.z);
 	}
 	//console.log(viewerParams.camera.position, viewerParams.camera.rotation, viewerParams.camera.up);
+}
+
+function blankCallback(){
+	console.log('blank callback')
 }

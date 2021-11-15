@@ -1,5 +1,5 @@
 
-function createOctreeParticleGeometry(p, parts,start, end){
+function createOctreeParticleGeometry(p, parts, start, end){
 	//geometry
 	var geo = new THREE.BufferGeometry();
 	//if all == true, then we draw all the particles except the first, which will always be there to define the node locations
@@ -51,7 +51,6 @@ function createOctreeParticleGeometry(p, parts,start, end){
 	var aindex = 0;
 
 	for (var j=0; j<len; j++){
-			
 		position[pindex++] = parseFloat(parts.Coordinates[j][0]);
 		position[pindex++] = parseFloat(parts.Coordinates[j][1]);
 		position[pindex++] = parseFloat(parts.Coordinates[j][2]);
@@ -89,14 +88,21 @@ function createOctreeParticleGeometry(p, parts,start, end){
 			}
 		}
 
+		var rad = 1.;
+		var alph = 1.;
+		if (!octreeParticleInFilter(p, parts, j)){	
+			rad = 0.;
+			alph = 0.;
+		}
+
 		if (parts.hasOwnProperty("SmoothingLength")){
-			radiusScale[rindex++] = parts.SmoothingLength[j];
+			radiusScale[rindex++] = parts.SmoothingLength[j]*rad;
 		}
 		else{
-			radiusScale[rindex++] = 1.;
+			radiusScale[rindex++] = rad;
 		}
 		
-		alpha[aindex++] = 1.;
+		alpha[aindex++] = alph;
 		
 		//need to do this somewhere else?
 		// ndraw += 1;
@@ -221,4 +227,31 @@ function drawOctreeNode(node, updateGeo=false){
 	}
 
 }
+
+function octreeParticleInFilter(p, parts, j){
+	for (k=0; k<viewerParams.fkeys[p].length; k++){
+		fk = viewerParams.fkeys[p][k];
+		var val = (viewerParams.filterVals[p][fk][0] + viewerParams.filterVals[p][fk][1])/2.;
+
+		// if the field value for this particle exists:
+		if (viewerParams.parts[p][fk] != null) {
+			if (parts.hasOwnProperty(fk)) val = parts[fk][j];
+	
+			// we want to hide this particle
+			if ( (!viewerParams.invertFilter[p][fk] &&  
+				(val < viewerParams.filterVals[p][fk][0] || 
+				val > viewerParams.filterVals[p][fk][1])) || 
+				( (viewerParams.invertFilter[p][fk] && 
+				(val > viewerParams.filterVals[p][fk][0] && 
+				val < viewerParams.filterVals[p][fk][1])))   ){
+
+				// set the radius to 0 and the alpha to 0
+				return false
+			} 
+		}
+	}
+	return true
+}
+
+
 

@@ -124,6 +124,9 @@ function update_particle_groups(time){
 				disable_particle_group_mesh(p,m,time);	
 			}
 		});// viewerParams.partsMesh[p].forEach( function( m, j )
+		viewerParams.updateFilter[p] = false;
+		viewerParams.updateOnOff[p] = false;
+		viewerParams.updateColormap[p] = false;
 	});// viewerParams.partsKeys.forEach(function(p,i)
 }// function update(time)
 
@@ -246,6 +249,22 @@ function update_particle_mesh_filter(p,m,time){
 		var alpha = m.geometry.attributes.alpha.array;
 		var fk;
 		// loop through this particle group's particles
+
+		var node = null;
+		if (viewerParams.haveOctree[p]){
+			//find the node
+			var iden = m.name.replace(p,'');
+			if (viewerParams.octree.nodes.hasOwnProperty(p)){
+				viewerParams.octree.nodes[p].every(function(n){
+					if (n.id == iden){
+						node = n;
+						return false
+					} 
+					return true
+				})
+			}
+		}
+
 		for( var ii = 0; ii < radiusScale.length; ii ++ ) {
 			// fill radiusScale array (alias for geometry buffer's radius scale)
 			// with default values
@@ -259,13 +278,21 @@ function update_particle_mesh_filter(p,m,time){
 
 			// if the UI has told us the filter needs to be updated
 			if (viewerParams.updateFilter[p]){
+
 				// apply each filter additively, loop over each filter key
 				for (k=0; k<viewerParams.fkeys[p].length; k++){
 					fk = viewerParams.fkeys[p][k];
 
 					// if the field value for this particle exists:
 					if (viewerParams.parts[p][fk] != null) {
-						val = viewerParams.parts[p][fk][ii];
+						var val = (viewerParams.filterVals[p][fk][0] + viewerParams.filterVals[p][fk][1])/2.;
+						if (viewerParams.haveOctree[p]){
+							if (node){
+								if (node.particles.hasOwnProperty(fk)) val = node.particles[fk][ii];
+							}
+						} else {
+							if (viewerParams.parts[p].hasOwnProperty(fk)) val = viewerParams.parts[p][fk][ii];
+						}
 						// we want to hide this particle
 						if ( (!viewerParams.invertFilter[p][fk] &&  
 							(val < viewerParams.filterVals[p][fk][0] || 
@@ -285,9 +312,7 @@ function update_particle_mesh_filter(p,m,time){
 
 		m.geometry.attributes.radiusScale.needsUpdate = true;
 		m.geometry.attributes.alpha.needsUpdate = true;					
-		viewerParams.updateFilter[p] = false;
-		viewerParams.updateOnOff[p] = false;
-		viewerParams.updateColormap[p] = false;
+
 	}// if (viewerParams.updateFilter[p] || viewerParams.updateOnOff[p] || viewerParams.updateColormap[p])
 }
 
