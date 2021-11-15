@@ -78,7 +78,7 @@ function updateOctree(){
 					if (node.screenSize >= viewerParams.octree.minNodeScreenSize && node.inView){
 						//particles to adjust (I could make this an if statement t only change if needed, but would that even speed things up?)
 						obj.material.uniforms.maxToRender.value = node.NparticlesToRender;
-						obj.material.uniforms.pointScale.value = node.particleSizeScale;
+						obj.material.uniforms.octreePointScale.value = node.particleSizeScale;
 						obj.material.needsUpdate = true;
 						if (node.particles.Coordinates.length >= node.NparticlesToRender) reduceOctreeParticles(node)
 					} else {
@@ -183,7 +183,7 @@ function removeUnwantedNodes(){
 			//swap geometry for the minimum number of particles to show
 			node.NparticlesToRender = Math.floor(node.Nparticles*viewerParams.octree.minFracParticlesToDraw[p]);
 			reduceOctreeParticles(node);
-			var geo = createOctreeParticleGeometry(node.particles, 0, node.NparticlesToRender);
+			var geo = createOctreeParticleGeometry(p, node.particles, 0, node.NparticlesToRender);
 			obj.geometry = geo;
 			obj.geometry.needsUpdate = true;
 		}
@@ -282,7 +282,7 @@ function setNodeDrawParams(node){
 	node.NparticlesToRender = Math.min(node.Nparticles, node.NparticlesToRender);
 
 	//scale particles size by the fraction rendered?
-	node.particleSizeScale = viewerParams.octree.boxSize*node.Nparticles/node.NparticlesToRender*viewerParams.octree.particleDefaultSizeScale[p];
+	//node.particleSizeScale = viewerParams.octree.boxSize*node.Nparticles/node.NparticlesToRender*viewerParams.octree.particleDefaultSizeScale[p];
 
 	node.color = viewerParams.Pcolors[p].slice();
 	if (node.NparticlesToRender > 0) node.color[3] = viewerParams.Pcolors[p][3]*Math.min(1., node.Nparticles/node.NparticlesToRender);

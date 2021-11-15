@@ -109,6 +109,7 @@ function createPartsMesh(pdraw = viewerParams.partsKeys)
 		geo.setDrawRange( 0, viewerParams.plotNmax[p] );
 
 		var mesh = new THREE.Points(geo, material);
+		mesh.name = p;
 		viewerParams.scene.add(mesh);
 
 

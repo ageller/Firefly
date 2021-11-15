@@ -6,6 +6,7 @@ function defineViewerParams(){
 		this.container = null;
 		this.scene = null;
 		this.camera = null;
+		this.frustum = null;
 		this.renderer = null;
 		this.controls = null
 		this.effect = null;
@@ -175,5 +176,57 @@ function defineViewerParams(){
 		// for debugging
 		this.showfps = false;
 		this.fps_list = [];
+
+		//for octree
+		this.haveOctree = {}; //will be initialized to false for each of the parts keys in loadData
+		this.haveAnyOctree = false; //must be a better way to do this!
+		this.FPS = 30; //will be upated in the octree render loop
+		this.octree = new function() {
+
+			//these should be set from the Options file (and same with some below)
+			this.minFracParticlesToDraw = {'Gas':0.01, 'Stars':0.01, 'LRDM':0.01, 'HRDM':0.001}; //minimum fraction per node to draw (unless there are less particles than this total in the node) >0;  
+			this.particleDefaultSizeScale = {'Gas':0.1, 'Stars':0.1, 'LRDM':0.1, 'HRDM':0.01};
+
+			this.nodes = {};
+
+			//minimum pixel width for a node to require rendering points
+			this.minNodeScreenSize = 1;
+
+			//default minimum particles size
+			//this.defaultMinParticleSize = 6.;
+			this.defaultMinParticleSize = 1.;
+
+			//will contain a list of nodes that are drawn
+			this.alreadyDrawn = [];
+			this.toRemove = [];
+			this.toRemoveIDs = [];
+			this.removeCount = 0;
+			this.removeIndex = -1;
+			this.toDraw = [];
+			this.toDrawIDs = [];
+			this.drawCount = 0;
+			this.drawIndex = -1;
+			this.drawPass = 1;
+			this.drawStartTime = 0;
+			this.maxDrawInterval = 10; //seconds
+			this.maxFilesToRead = 50;
+			this.maxToRemove = 50;
+
+			this.FPS = 30; //will be changed each render call
+			this.targetFPS = 30; //will be used to controls the NParticleFPSModifier
+			this.NParticleFPSModifier = 1.; //will be increased or decreased based on the current fps
+			//this.FPSmod = 100;// reset the FPS average every FPSmod draw counts
+			this.FPSmod = 1e10;// reset the FPS average every FPSmod draw counts (not sure this is needed anymore, but not ready to remove from code)
+			this.boxSize = 0; //will be set based on the root node
+			this.pIndex = 0; //will be used to increment through the particles in the render loop
+
+			//normalization for the camera distance in deciding how many particles to draw
+			//could be included in GUI
+			this.normCameraDistance = {'Gas':1000,
+							   		   'Stars':1000,
+							   		   'LRDM':1000,
+								       'HRDM':1000};
+		}
+
 	};
 }

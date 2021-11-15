@@ -1,5 +1,5 @@
 
-function createOctreeParticleGeometry(parts, start, end){
+function createOctreeParticleGeometry(p, parts,start, end){
 	//geometry
 	var geo = new THREE.BufferGeometry();
 	//if all == true, then we draw all the particles except the first, which will always be there to define the node locations
@@ -20,23 +20,96 @@ function createOctreeParticleGeometry(parts, start, end){
 	var pointIndex = new Float32Array( len );
 	geo.addAttribute( 'pointIndex', new THREE.BufferAttribute( pointIndex, 1 ) );
 
+	//radiusScaling (e.g., for filtering and on/off)
+	var radiusScale = new Float32Array( len ); 
+	geo.addAttribute( 'radiusScale', new THREE.BufferAttribute( radiusScale, 1 ) );
+
+	//alphas (e.g., for filtering and on/off)
+	var alpha = new Float32Array( len ); 
+	geo.addAttribute( 'alpha', new THREE.BufferAttribute( alpha, 1 ) );
+
+	//angles for velocities
+	var velVals = new Float32Array( len * 4); // unit vector (vx, vy, vz, norm), scaled magnitude
+	geo.addAttribute( 'velVals', new THREE.BufferAttribute( velVals, 4 ) );
+
+	//if user supplies individual per-particle colors (otherwise this is not used, but still need in shader)
+	if (viewerParams.parts[p].hasOwnProperty("colorArray")) console.log("have color Array")
+	var colorArray = new Float32Array( len * 4); // RGBA
+	geo.addAttribute( 'colorArray', new THREE.BufferAttribute( colorArray, 4 ) );
+	
+	// create array to hold colormap variable values
+	var colormapArray = new Float32Array( len); 
+	geo.addAttribute('colormapArray', new THREE.BufferAttribute( colormapArray, 1));
+
 	geo.setDrawRange( 0, len );
 
 	var pindex = 0;
+	var cindex = 0;
+	var colorIndex = 0;
+	var vindex = 0;
+	var rindex = 0;
+	var aindex = 0;
+
 	for (var j=0; j<len; j++){
 			
-			position[pindex++] = parseFloat(parts.Coordinates[j][0]);
-			position[pindex++] = parseFloat(parts.Coordinates[j][1]);
-			position[pindex++] = parseFloat(parts.Coordinates[j][2]);
+		position[pindex++] = parseFloat(parts.Coordinates[j][0]);
+		position[pindex++] = parseFloat(parts.Coordinates[j][1]);
+		position[pindex++] = parseFloat(parts.Coordinates[j][2]);
 
-			pointIndex[j] = parseFloat(j);
+		pointIndex[j] = parseFloat(j);
+
+		if (parts.hasOwnProperty("VelVals")){
+			velVals[vindex++] = parts.VelVals[j][0]/parts.magVelocities[j];
+			velVals[vindex++] = parts.VelVals[j][1]/parts.magVelocities[j];
+			velVals[vindex++] = parts.VelVals[j][2]/parts.magVelocities[j];
+			velVals[vindex++] = parts.NormVel[j];
+		}
+
+		// fill flattened color array from pre-computed colormap values
+		// stored in viewerParams.parts[p]["colorArray"]
+		//probably a better way to deal with this
+		if (parts.hasOwnProperty("colorArray")){
+			colorArray[colorIndex++] = parts.colorArray[j][0]
+			colorArray[colorIndex++] = parts.colorArray[j][1]
+			colorArray[colorIndex++] = parts.colorArray[j][2]
+			colorArray[colorIndex++] = parts.colorArray[j][3];
+		 } else {
+			colorArray[colorIndex++] = 0.;
+			colorArray[colorIndex++] = 0.;
+			colorArray[colorIndex++] = 0.;
+			colorArray[colorIndex++] = -1.;
+
+		}
+
+		// NEED TO UPDATE THIS
+		// fill colormap array with appropriate variable values
+		if (viewerParams.colormap[p] > 0.){
+			if (parts[viewerParams.ckeys[p][viewerParams.colormapVariable[p]]] != null){
+				colormapArray[cindex++] = parts[viewerParams.ckeys[p][viewerParams.colormapVariable[p]]][j];
+			}
+		}
+
+		if (parts.hasOwnProperty("SmoothingLength")){
+			radiusScale[rindex++] = parts.SmoothingLength[j];
+		}
+		else{
+			radiusScale[rindex++] = 1.;
+		}
+		
+		alpha[aindex++] = 1.;
+		
+		//need to do this somewhere else?
+		// ndraw += 1;
+		// if (ndraw % ndiv < 1 || ndraw == viewerParams.parts.totalSize){
+		// 	viewerParams.drawfrac = (1 + ndraw/viewerParams.parts.totalSize)*0.5;
+		// }
 
 	}
 
 	return geo;
 }
 
-function addOctreeParticlesToScene(parts, color, name, start, end, minPointSize=viewerParams.octree.defaultMinParticleSize, pointScale=1., updateGeo=false){
+function addOctreeParticlesToScene(p, parts, name, start, end, minPointSize=viewerParams.octree.defaultMinParticleSize, pointScale=1., updateGeo=false){
 	//I can use the start and end values to define how many particles to add to the mesh,
 	//  but first I want to try limitting this in the shader with maxToRender.  That may be quicker than add/removing meshes.
 
@@ -44,7 +117,7 @@ function addOctreeParticlesToScene(parts, color, name, start, end, minPointSize=
 	if (end - start > 0){
 
 		//geometry
-		var geo = createOctreeParticleGeometry(parts, start, end);
+		var geo = createOctreeParticleGeometry(p, parts, start, end);
 
 		var maxN = end - start;
 
@@ -65,23 +138,37 @@ function addOctreeParticlesToScene(parts, color, name, start, end, minPointSize=
 
 			var material = new THREE.ShaderMaterial( {
 
+
 				uniforms: { //add uniform variable here
-					color: {value: new THREE.Vector4( color[0]/255., color[1]/255., color[2]/255., color[3])},
+					color: {value: new THREE.Vector4( viewerParams.Pcolors[p][0], viewerParams.Pcolors[p][1], viewerParams.Pcolors[p][2], viewerParams.Pcolors[p][3])},
+					oID: {value: 0},
+					SPHrad: {value: viewerParams.parts[p].doSPHrad},
+					uVertexScale: {value: viewerParams.PsizeMult[p]},
+					maxDistance: {value: viewerParams.boxSize},
+					cameraY: {value: [0.,1.,0.]},
+					cameraX: {value: [1.,0.,0.]},
+					velType: {value: 0.},
+					colormapTexture: {value: viewerParams.colormapTexture},
+					colormap: {value: viewerParams.colormap[p]},
+					showColormap: {value: viewerParams.showColormap[p]},
+					colormapMin: {value: viewerParams.colormapVals[p][viewerParams.ckeys[p][viewerParams.colormapVariable[p]]][0]},
+					colormapMax: {value: viewerParams.colormapVals[p][viewerParams.ckeys[p][viewerParams.colormapVariable[p]]][1]},
+					columnDensity: {value: viewerParams.columnDensity},
+					scaleCD: {value: viewerParams.scaleCD},
 					minPointSize: {value: minPointSize},
-					pointScale: {value: pointScale},
-					maxToRender: {value: maxN} //this will be modified in the render loop
+					maxToRender: {value: parts.Coordinates.length},
+					octreePointScale: {value: pointScale},
+
 				},
 
-				//eventually I will probably want to use the same shader as the normal renderer
-				vertexShader: myOctreeVertexShader,
-				fragmentShader: myOctreeFragmentShader,
+				vertexShader: myVertexShader,
+				fragmentShader: myFragmentShader,
 				depthWrite:dWrite,
 				depthTest: dTest,
 				transparent:transp,
 				alphaTest: false,
 				blending:blend,
 			} );
-
 
 
 			var mesh = new THREE.Points(geo, material);
@@ -113,13 +200,12 @@ function drawOctreeNode(node, updateGeo=false){
 	var end = node.NparticlesToRender;
 	var minSize = viewerParams.octree.defaultMinParticleSize;
 	var sizeScale = node.particleSizeScale;
-	var color = node.color;
 	var name = node.particleType + node.id;
 
 	if (node.hasOwnProperty('particles')){
 		if (node.particles.Coordinates.length >= node.NparticlesToRender){
 			drawn = true;
-			addOctreeParticlesToScene(node.particles, color, name, start, end, minSize, sizeScale, updateGeo);
+			addOctreeParticlesToScene(node.particleType, node.particles, name, start, end, minSize, sizeScale, updateGeo);
 		}
 	}
 
@@ -129,7 +215,7 @@ function drawOctreeNode(node, updateGeo=false){
 				// console.log('parts',id, d)
 				//reformat this to the usual Firefly structure with Coordinates as a list of lists
 				node.particles = formatOctreeCSVdata(d.slice(0,node.NparticlesToRender));
-				addOctreeParticlesToScene(node.particles, color, name, start, end, minSize, sizeScale, updateGeo);
+				addOctreeParticlesToScene(node.particleType, node.particles, name, start, end, minSize, sizeScale, updateGeo);
 			})
 	}
 

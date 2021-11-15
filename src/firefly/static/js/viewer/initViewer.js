@@ -382,6 +382,7 @@ function initScene() {
 	if (viewerParams.reset){
 		viewerParams.scene = null;
 		viewerParams.camera = null;
+		viewerParams.frustum = null;
 	} else{
 
 		 //keyboard
@@ -426,6 +427,8 @@ function initScene() {
 	viewerParams.camera = new THREE.PerspectiveCamera( viewerParams.fov, aspect, viewerParams.zmin, viewerParams.zmax);
 	viewerParams.camera.up.set(0, -1, 0);
 	viewerParams.scene.add(viewerParams.camera);  
+
+	viewerParams.frustum = new THREE.Frustum();
 
 	// events
 	THREEx.WindowResize(viewerParams.renderer, viewerParams.camera);
@@ -1056,11 +1059,22 @@ function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
 	//console.log(files)
 	viewerParams.partsKeys = Object.keys(viewerParams.filenames);
 	viewerParams.partsKeys.forEach( function(p, i) {
+		viewerParams.haveOctree[p] = false;
 		viewerParams.filenames[p].forEach( function(f, j) {
+			var amt = 0;
 			if (f.constructor == Array){ 
-				viewerParams.parts.totalSize += parseFloat(f[1]);
+				amt = parseFloat(f[1]);
 			} else if (j == 1){
-				viewerParams.parts.totalSize += parseFloat(f);
+				amt = parseFloat(f);
+			}
+			if (amt > 0) {
+				viewerParams.parts.totalSize += amt;
+			} else {
+				//this is now I am identifying an octree file structure, for now (there must be a better way)
+				if (p != 'options') {
+					viewerParams.haveOctree[p] = true;
+					viewerParams.haveAnyOctree = true;
+				}
 			}
 		});
 	});
@@ -1068,41 +1082,64 @@ function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
 	viewerParams.partsKeys.forEach( function(p, i) {
 		viewerParams.parts[p] = {};
 
-		viewerParams.filenames[p].forEach( function(f, j) {
-			//console.log("f = ", f)
-			if (internalData){
-				console.log('==== compiling internal data', f)
-				Object.keys(internalData).forEach(function(key,k){
-					//if I was sent a prefix, this could be simplified
-					if (key.includes(f[0])) compileData(internalData[key], p, callback, initialLoadFrac=initialLoadFrac)
-				})
-			} else {
-				var readf = null;
-				if (f.constructor == Array){
-					readf = "data/"+f[0];
-				} else if (j == 0){
-					readf = "data/"+f
-				}
-				//console.log(readf)
-				if (readf != null){
-					d3.json(prefix+readf,  function(foo) {
-						compileData(foo, p, callback, initialLoadFrac=initialLoadFrac);
+		if (viewerParams.haveOctree[p]){
+			//initialize the coordinates so that I can initialize the options
+			//I will need to improve this so that I can get all the GUI options working!
+			viewerParams.parts[p].Coordinates = [];
+
+			var fname = prefix+'data/'+viewerParams.filenames[p][0][0]
+			var check = viewerParams.partsKeys.filter(function(d) { return d != 'options'});
+			d3.json(fname, function(d){
+				//initialize the boxSize using the first particle group
+				if (viewerParams.octree.boxSize == 0) {
+					d.every(function(dd){
+						if (dd.id == 0){
+							viewerParams.octree.boxSize = dd.width;
+							return false;
+						}
+						return true;
 					});
 				}
-			}
-		});
-		if (internalData && i == viewerParams.partsKeys.length - 1 && j == viewerParams.filenames[p].length - 1){
-			viewerParams.newInternalData = {};
+				viewerParams.octree.nodes[p] = pruneOctree(d, p, fname);
+			})
+
+
+		} else {
+
+			viewerParams.filenames[p].forEach( function(f, j) {
+				//console.log("f = ", f)
+				if (internalData){
+					console.log('==== compiling internal data', f)
+					Object.keys(internalData).forEach(function(key,k){
+						//if I was sent a prefix, this could be simplified
+						if (key.includes(f[0])) compileData(internalData[key], p, callback, initialLoadFrac)
+					})
+					if (internalData && i == viewerParams.partsKeys.length - 1 && j == viewerParams.filenames[p].length - 1) viewerParams.newInternalData = {};
+
+				} else {
+					var readf = null;
+					if (f.constructor == Array){
+						readf = "data/"+f[0];
+					} else if (j == 0){
+						readf = "data/"+f
+					}
+					//console.log(readf)
+					if (readf != null){
+						d3.json(prefix+readf,  function(foo) {
+							compileData(foo, p, callback, initialLoadFrac);
+						});
+					}
+				}
+			});
 		}
 	});
-
- 
-
 }
 
-// loadData ->
+
+
+// callCompileData ->
 function compileData(data, p, callback, initialLoadFrac=0){
-	//console.log('in compile data', p, data)
+	console.log('in compile data', p, data, viewerParams.counting, countParts())
 	Object.keys(data).forEach(function(k, jj) {
 		//console.log("k = ", k, jj)
 		if (viewerParams.parts[p].hasOwnProperty(k)){
@@ -1119,8 +1156,11 @@ function compileData(data, p, callback, initialLoadFrac=0){
 	var num = 0;
 	if (!viewerParams.counting){
 		var num = countParts()
-		var loadfrac = (num/viewerParams.parts.totalSize)*(1. - initialLoadFrac) + initialLoadFrac;
+		var frac = (num/viewerParams.parts.totalSize);
+		if (viewerParams.parts.totalSize == 0) frac = 1.;
+		var loadfrac = frac*(1. - initialLoadFrac) + initialLoadFrac;
 		//some if statment like this seems necessary.  Otherwise the loading bar doesn't update (I suppose from too many calls)
+		console.log('loadfrac', loadfrac)
 		if (loadfrac - viewerParams.loadfrac > 0.5 || loadfrac == 1){
 			viewerParams.loadfrac = loadfrac;
 			updateLoadingBar();

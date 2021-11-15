@@ -87,6 +87,9 @@ function update_particle_groups(time){
 	cameraY.applyQuaternion(viewerParams.camera.quaternion);
 
 
+	if (viewerParams.haveAnyOctree) updateOctree();
+
+
 	// TODO playback should be moved to full UI tweening in the future
 	// handle filter playblack 
 	viewerParams.partsKeys.forEach(function(p,i){
@@ -94,32 +97,36 @@ function update_particle_groups(time){
 		// move filter handle sliders if playback is enabled
 		update_particle_playback(p,time);
 		
-		//check on all the UI inputs for each particle type
-		viewerParams.partsMesh[p].forEach( function( m, j ) {
+		//for now use a separate renderer (but later I will want to allow filtering, etc.)
+		if (!viewerParams.haveOctree[p]){
 			
-			// send velocity vector type (line/arrow/cone) to material buffer
-			m.material.uniforms.velType.value = viewerParams.velopts[viewerParams.velType[p]];
-
-			// send column density flag to the material buffer
-			m.material.uniforms.columnDensity.value = viewerParams.columnDensity;
-
-			if (viewerParams.showParts[p]) {
-				// apply static color, colormap settings, 
-				// and particle group radius velocity vector scale factors
-				update_particle_mesh_UI_values(p,m,time);
-	
-				// handle velocity vectors
-				update_particle_mesh_velocity_vectors(p,m,cameraX,cameraY,time);
+			//check on all the UI inputs for each particle type
+			viewerParams.partsMesh[p].forEach( function( m, j ) {
 				
-				// apply particle radii and alpha values 
-				// according to current filter handle settings
-				update_particle_mesh_filter(p,m,time);
-			} 
-			else { 
-				// set radii and alpha values to 0 to hide this particle group
-				disable_particle_group_mesh(p,m,time);	
-			}
-		});// viewerParams.partsMesh[p].forEach( function( m, j )
+				// send velocity vector type (line/arrow/cone) to material buffer
+				m.material.uniforms.velType.value = viewerParams.velopts[viewerParams.velType[p]];
+
+				// send column density flag to the material buffer
+				m.material.uniforms.columnDensity.value = viewerParams.columnDensity;
+
+				if (viewerParams.showParts[p]) {
+					// apply static color, colormap settings, 
+					// and particle group radius velocity vector scale factors
+					update_particle_mesh_UI_values(p,m,time);
+		
+					// handle velocity vectors
+					update_particle_mesh_velocity_vectors(p,m,cameraX,cameraY,time);
+					
+					// apply particle radii and alpha values 
+					// according to current filter handle settings
+					update_particle_mesh_filter(p,m,time);
+				} 
+				else { 
+					// set radii and alpha values to 0 to hide this particle group
+					disable_particle_group_mesh(p,m,time);	
+				}
+			});// viewerParams.partsMesh[p].forEach( function( m, j )
+		}// if (viewerParams.haveOctree[p]){
 	});// viewerParams.partsKeys.forEach(function(p,i)
 }// function update(time)
 
@@ -352,13 +359,14 @@ function update_framerate(seconds,time){
 		showSleep();
 	}
 
+
+	// use previous frame rendering time to calculate FPS. 
+	// use average of previous 100 frames so FPS is a bit more stable.
+	viewerParams.fps_list.push(1/(seconds-viewerParams.currentTime));
+	viewerParams.fps_list = viewerParams.fps_list.slice(-100);
+
 	// fill FPS container div with calculated FPS
 	if (viewerParams.showfps){
-		// use previous frame rendering time to calculate FPS. 
-		// use average of previous 100 frames so FPS is a bit more stable.
-		viewerParams.fps_list.push(1/(seconds-viewerParams.currentTime));
-		viewerParams.fps_list = viewerParams.fps_list.slice(-100);
-
 		elm = document.getElementById("fps_container");
 		elm.innerHTML=Math.round(
 			viewerParams.fps_list.reduce((a, b) => a + b, 0)/viewerParams.fps_list.length);
