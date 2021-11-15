@@ -242,8 +242,31 @@ function updateColormapVariable(p){
 		//I think there should only be one mesh per particle set, but to be safe...
 		viewerParams.partsMesh[p].forEach( function( m, j ) {
 			var colormapArray = m.geometry.attributes.colormapArray.array;
-			for( var ii = 0; ii < m.geometry.attributes.colormapArray.array.length; ii ++ ) {
-				colormapArray[ii] = viewerParams.parts[p][viewerParams.ckeys[p][viewerParams.colormapVariable[p]]][ii];
+			if (viewerParams.haveOctree[p]){
+				//find the correct node
+				var iden = m.name.replace(p,'');
+				var node = null;
+				if (viewerParams.octree.nodes.hasOwnProperty(p)){
+					viewerParams.octree.nodes[p].every(function(n){
+						if (n.id == iden){
+							node = n;
+							return false
+						} 
+						return true
+					})
+				}
+				if (node){
+					var ckey = viewerParams.ckeys[p][viewerParams.colormapVariable[p]]
+					if (node.particles.hasOwnProperty(ckey)){
+						for( var ii = 0; ii < m.geometry.attributes.colormapArray.array.length; ii ++ ) {
+							colormapArray[ii] = node.particles[ckey][ii];
+						}
+					}
+				}
+			} else {
+				for( var ii = 0; ii < m.geometry.attributes.colormapArray.array.length; ii ++ ) {
+					colormapArray[ii] = viewerParams.parts[p][viewerParams.ckeys[p][viewerParams.colormapVariable[p]]][ii];
+				}
 			}
 			m.geometry.attributes.colormapArray.needsUpdate = true;
 
@@ -262,7 +285,6 @@ function updateColormapVariable(p){
 	}
 	viewerParams.partsKeys.forEach(function(pp,i){
 		viewerParams.partsMesh[pp].forEach( function( m, j ) {
-			console.log('checking', pp, dWrite, dTest, blend, m)
 			m.material.depthWrite = dWrite;
 			m.material.depthTest = dTest;
 			m.material.blending = blend;

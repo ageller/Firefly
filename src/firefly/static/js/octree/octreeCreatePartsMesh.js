@@ -141,6 +141,11 @@ function addOctreeParticlesToScene(p, parts, name, start, end, minPointSize=view
 			var dWrite = false;
 			var dTest = false;
 			var transp = true;
+			if (viewerParams.showColormap[p]){
+				blend = THREE.NormalBlending;
+				dWrite = true;
+				dTest = true;
+			}
 
 			var material = new THREE.ShaderMaterial( {
 

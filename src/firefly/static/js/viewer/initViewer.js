@@ -286,7 +286,7 @@ function initPVals(){
 		//velocities
 		viewerParams.showVel[p] = false;
 		if (viewerParams.parts[p].Velocities != null){
-			if (!viewerParams.reset){
+			if (!viewerParams.reset && !viewerParams.haveOctree[p]){
 				calcVelVals(p);
 				if(!viewerParams.parts[p].hasOwnProperty("filterKeys")){
 					viewerParams.parts[p].filterKeys = [];
@@ -551,7 +551,7 @@ function applyOptions(){
 			viewerParams.maxVrange = viewerParams.parts.options.maxVrange; //maximum dynamic range for length of velocity vectors
 			for (var i=0; i<viewerParams.partsKeys.length; i++){
 				var p = viewerParams.partsKeys[i];
-				if (viewerParams.parts[p].Velocities != null){
+				if (viewerParams.parts[p].Velocities != null && !viewerParams.haveOctree[p]){
 					calcVelVals(p);     
 				}
 			}
@@ -1080,9 +1080,7 @@ function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
 		viewerParams.parts[p] = {};
 
 		if (viewerParams.haveOctree[p]){
-			//initialize the coordinates so that I can initialize the options
-			//I will need to improve this so that I can get all the GUI options working!
-			viewerParams.parts[p].Coordinates = [];
+
 
 			var fname = prefix+'data/'+viewerParams.filenames[p][0][0]
 			d3.json(fname, function(d){
@@ -1187,11 +1185,13 @@ function addKeysForOctree(){
 	if (viewerParams.parts.options.hasOwnProperty('filterVals')){
 		viewerParams.partsKeys.forEach(function(p){
 			if (viewerParams.haveOctree[p]){
+				viewerParams.parts[p].Coordinates = [];
 				viewerParams.parts[p].filterKeys = [];
 				Object.keys(viewerParams.parts.options.filterVals[p]).forEach(function(key){
 					var useKey = key;
 					if (key == 'Velocities'){
 						useKey = 'magVelocities';
+						viewerParams.parts[p].Velocities = viewerParams.parts.options.filterLims[p][key];
 					}
 					viewerParams.parts[p].filterKeys.push(useKey)
 					viewerParams.parts[p][useKey] = viewerParams.parts.options.filterLims[p][key];
