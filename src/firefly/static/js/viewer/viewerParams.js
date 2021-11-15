@@ -194,7 +194,7 @@ function defineViewerParams(){
 
 			//default minimum particles size
 			//this.defaultMinParticleSize = 6.;
-			this.defaultMinParticleSize = 1.;
+			this.defaultMinParticleSize = 0.1;
 
 			//will contain a list of nodes that are drawn
 			this.alreadyDrawn = [];

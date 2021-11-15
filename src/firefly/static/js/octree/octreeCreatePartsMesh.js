@@ -174,6 +174,7 @@ function addOctreeParticlesToScene(p, parts, name, start, end, minPointSize=view
 			var mesh = new THREE.Points(geo, material);
 			mesh.name = name;
 			viewerParams.scene.add(mesh);
+			viewerParams.partsMesh[p].push(mesh);
 
 			mesh.position.set(0,0,0);
 		}
