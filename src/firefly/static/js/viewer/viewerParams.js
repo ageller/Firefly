@@ -184,13 +184,13 @@ function defineViewerParams(){
 		this.octree = new function() {
 
 			//these should be set from the Options file (and same with some below)
-			this.minFracParticlesToDraw = {'Gas':0.01, 'Stars':0.01, 'LRDM':0.01, 'HRDM':0.001}; //minimum fraction per node to draw (unless there are less particles than this total in the node) >0;  
+			this.minFracParticlesToDraw = {'Gas':0.001, 'Stars':0.001, 'LRDM':0.001, 'HRDM':0.001}; //minimum fraction per node to draw (unless there are less particles than this total in the node) >0;  
 			this.particleDefaultSizeScale = {'Gas':0.1, 'Stars':0.1, 'LRDM':0.1, 'HRDM':0.01};
 
 			this.nodes = {};
 
 			//minimum pixel width for a node to require rendering points
-			this.minNodeScreenSize = 1;
+			this.minNodeScreenSize = 5;
 
 			//default minimum particles size
 			//this.defaultMinParticleSize = 6.;
@@ -220,12 +220,13 @@ function defineViewerParams(){
 			this.boxSize = 0; //will be set based on the root node
 			this.pIndex = 0; //will be used to increment through the particles in the render loop
 
+			this.loadingCount = {}; //will contain an array for each particle type that has the total inView and the total drawn to adjust the loading bar
 			//normalization for the camera distance in deciding how many particles to draw
 			//could be included in GUI
-			this.normCameraDistance = {'Gas':1000,
-							   		   'Stars':1000,
-							   		   'LRDM':1000,
-								       'HRDM':1000};
+			this.normCameraDistance = {'Gas':100,
+							   		   'Stars':100,
+							   		   'LRDM':100,
+								       'HRDM':100};
 		}
 
 	};

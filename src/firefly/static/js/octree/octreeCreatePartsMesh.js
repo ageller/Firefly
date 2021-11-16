@@ -184,17 +184,18 @@ function addOctreeParticlesToScene(p, parts, name, start, end, minPointSize=view
 
 			var mesh = new THREE.Points(geo, material);
 			mesh.name = name;
+			mesh.position.set(0,0,0);
+
 			viewerParams.scene.add(mesh);
 			viewerParams.partsMesh[p].push(mesh);
 
-			mesh.position.set(0,0,0);
 		}
 	}
 
 	//remove from the toDraw list
 	const index = viewerParams.octree.toDrawIDs.indexOf(name);
 	viewerParams.octree.drawCount += 1;
-
+	updateOctreeLoadingBar();
 
 }
 
@@ -207,7 +208,7 @@ function reduceOctreeParticles(node, N=null){
 
 function drawOctreeNode(node, updateGeo=false){
 
-	var drawn = false;
+	node.drawn = false;
 	var start = 0;
 	var end = node.NparticlesToRender;
 	var minSize = viewerParams.octree.defaultMinParticleSize;
@@ -216,24 +217,27 @@ function drawOctreeNode(node, updateGeo=false){
 
 	if (node.hasOwnProperty('particles')){
 		if (node.particles.Coordinates.length >= node.NparticlesToRender){
-			drawn = true;
 			addOctreeParticlesToScene(node.particleType, node.particles, name, start, end, minSize, sizeScale, updateGeo);
+			node.drawn = true;
 		}
 	}
 
-	if (!drawn){
+	if (!node.drawn){
 		//read in the file, and then draw the particles
 		d3.csv(node.filename,function(d) {
-				// console.log('parts',id, d)
-				//reformat this to the usual Firefly structure with Coordinates as a list of lists
-				node.particles = formatOctreeCSVdata(d.slice(0,node.NparticlesToRender));
-				addOctreeParticlesToScene(node.particleType, node.particles, name, start, end, minSize, sizeScale, updateGeo);
-			})
+			// console.log('parts',id, d)
+			//reformat this to the usual Firefly structure with Coordinates as a list of lists
+			node.particles = formatOctreeCSVdata(d.slice(0,node.NparticlesToRender));
+			addOctreeParticlesToScene(node.particleType, node.particles, name, start, end, minSize, sizeScale, updateGeo);
+			node.drawn = true;
+		})
 	}
 
 }
 
 function octreeParticleInFilter(p, parts, j){
+	if (!viewerParams.showParts[p]) return false;
+
 	for (k=0; k<viewerParams.fkeys[p].length; k++){
 		fk = viewerParams.fkeys[p][k];
 		var val = (viewerParams.filterVals[p][fk][0] + viewerParams.filterVals[p][fk][1])/2.;

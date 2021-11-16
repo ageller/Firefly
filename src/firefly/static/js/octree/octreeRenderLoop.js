@@ -30,7 +30,10 @@ function updateOctree(){
 	if (viewerParams.octree.toRemove.length > 0 && viewerParams.octree.removeCount > viewerParams.octree.removeIndex) removeUnwantedNodes();
 
 	//draw the nodes that are flagged for drawing
-	if (viewerParams.octree.toDraw.length > 0 && viewerParams.octree.drawCount > viewerParams.octree.drawIndex) drawWantedNodes();
+	if (viewerParams.octree.toDraw.length > 0 && viewerParams.octree.drawCount > viewerParams.octree.drawIndex) {
+		drawWantedNodes();
+		updateOctreePindex();
+	}
 
 	//check if the object is in view (if not, we won't draw and can remove; though note that this will not pick up new nodes that shouldn't be drawn)
 	//https://github.com/mrdoob/three.js/issues/15339
@@ -46,12 +49,14 @@ function updateOctree(){
 	//rather than a for loop to go through the particles, I am going to manually iterate so that I can draw from one each draw pass
 	//this way the scene gets filled in more regularly, instead of filling in one particle group at a time
 	var p = viewerParams.partsKeys[viewerParams.octree.pIndex];
+	//console.log('=========CHECKING OCTREE PARTICLE', p, viewerParams.octree.toDraw.length);
 
 	if (viewerParams.showParts[p]){
 		//first get all the sizes and distances and sort
 		var toSort = []
 		var indices = []
 		if (viewerParams.octree.nodes.hasOwnProperty(p)){
+			viewerParams.octree.loadingCount[p] = [0,0]; //reset here and will will be updated in setNodeDrawParams
 			viewerParams.octree.nodes[p].forEach(function(node,i){
 				setNodeDrawParams(node);
 
@@ -67,7 +72,7 @@ function updateOctree(){
 			//sort from small to big
 			indices.sort(function (a, b) { return toSort[a] < toSort[b] ? -1 : toSort[a] > toSort[b] ? 1 : 0; });
 
-			indices.forEach(function(index){
+			indices.forEach(function(index, ii){
 
 				var node = viewerParams.octree.nodes[p][index];
 				var obj = viewerParams.scene.getObjectByName(p+node.id);
@@ -77,7 +82,7 @@ function updateOctree(){
 					if (obj){
 
 						if (node.screenSize >= viewerParams.octree.minNodeScreenSize && node.inView){
-							//particles to adjust (I could make this an if statement t only change if needed, but would that even speed things up?)
+							//particles to adjust (I could make this an if statement to only change if needed, but would that even speed things up?)
 							obj.material.uniforms.maxToRender.value = node.NparticlesToRender;
 							obj.material.uniforms.octreePointScale.value = node.particleSizeScale;
 							obj.material.needsUpdate = true;
@@ -118,24 +123,31 @@ function updateOctree(){
 						} 
 					}
 
-					if (viewerParams.octree.toDraw.length >= viewerParams.octree.maxFilesToRead) {
-						viewerParams.octree.drawCount = 0;
-						viewerParams.octree.drawIndex = -1;
-						console.log('reached draw limit', p, viewerParams.octree.toDraw.length);
-						return false;
-					}
-					return true;
+					if (viewerParams.octree.toDraw.length >= viewerParams.octree.maxFilesToRead) readyToDrawOctreeNodes();
 				}
+
+				if (ii == indices.length) readyToDrawOctreeNodes();
+
 			})
 
 		}
-	}
+	} 
+
+	if (!viewerParams.showParts[p] || viewerParams.octree.toDraw.length == 0) updateOctreePindex();
 
 	//increment relevant variables
 	viewerParams.octree.drawPass += 1;
-	viewerParams.octree.pIndex = (viewerParams.octree.pIndex + 1) % viewerParams.partsKeys.length;
 
 	
+}
+
+function updateOctreePindex(){
+	viewerParams.octree.pIndex = (viewerParams.octree.pIndex + 1) % viewerParams.partsKeys.length;
+}
+
+function readyToDrawOctreeNodes(){
+	viewerParams.octree.drawCount = 0;
+	viewerParams.octree.drawIndex = -1;
 }
 
 function clearDrawer(){
@@ -155,47 +167,81 @@ function clearRemover(){
 
 function removeDuplicatesFromScene(){
 	//For some reason duplicate nodes get drawn to the scene.  This will remove them
-	var keepNames = [];
+
+	//Somehow there is a mismatch between objects that are in the scene and those that are in viewerParams.partsMesh.  
+	//I have no idea why that should be(!), but it is making this removal very difficult to get right. 
+
+	//first I am going to gather all duplicates from either scene or partsMesh
+	var keepPartsNames = [];
+	var keepSceneNames = [];
 	var removeNames = [];
+	var removeIDs = [];
+	viewerParams.partsKeys.forEach(function(p){
+		viewerParams.partsMesh[p].forEach(function(obj, i){
+			if (keepPartsNames.includes(obj.name)) {
+				removeNames.push(obj.name);
+				removeIDs.push(obj.id);
+			} else {
+				keepPartsNames.push(obj.name);
+			}
+		});
+	})
 	viewerParams.scene.traverse(function(obj){
 		if (obj.isMesh || obj.isLine || obj.isPoints) {
-			if (keepNames.includes(obj.name)) {
+			if (keepSceneNames.includes(obj.name) && !removeNames.includes(obj.name)) {
 				removeNames.push(obj.name);
+				removeIDs.push(obj.id);
 			} else {
-				keepNames.push(obj.name);
+				keepSceneNames.push(obj.name);
 			}
 		}
 	})
+
+	//now I will remove them, but be sure that I am matching between the scene and partsMesh
 	if (removeNames.length > 0){
-		console.log('have duplicates in scene', removeNames.length, removeNames)
-		removeNames.forEach(function(name){
-			obj = viewerParams.scene.getObjectByName(name);
-			if (obj) viewerParams.scene.remove(obj);
+		console.log('have duplicates in scene', removeNames.length, removeNames, removeIDs);
+		removeNames.forEach(function(name, i){
+			var countScene = 0;
+			var countParts = 0;
+			var removedFromScene = [];
+			var keptInScene = null;
+			viewerParams.scene.traverse(function(obj){
+				if (obj.name == name){
+					if (countScene >= 1) removedFromScene.push(obj.id);
+					if (countScene == 0) keptInScene = obj.id
+					countScene += 1;
+				}
+			})
+			removedFromScene.forEach(function(iden){
+				obj = viewerParams.scene.getObjectById(iden);
+				if (obj) {
+					//console.log('removing object from scene', obj.name, obj)
+					obj.geometry.dispose();
+					viewerParams.scene.remove(obj);
+				} else {
+					console.log('=======WARNING : DID NOT FIND NODE', iden)
+				}
+			})
+			viewerParams.partsKeys.forEach(function(p){
+				var removeIndices = [];
+				viewerParams.partsMesh[p].forEach(function(obj, j){
+					if (obj.name == name){
+						if ((keptInScene != null && obj.id != keptInScene) || (keptInScene == null && countParts >= 1)) removeIndices.push(j)
+						countParts += 1;
+					}
+				})
+				removeIndices.forEach(function(j){
+					obj = viewerParams.partsMesh[p][j];
+					//console.log('removing object from parts', obj.name, obj)
+					obj.geometry.dispose();
+					viewerParams.scene.remove(obj);	
+					viewerParams.partsMesh[p].splice(j,1)
+				})
+			})
 		})
 	}
-
-	//also check viewerParams.partsMesh (there is probably a more efficient way to do both of these at once)
-	viewerParams.partsKeys.forEach(function(p){
-		var keepIndices = [];
-		var removeIndices = [];
-		viewerParams.partsMesh[p].forEach(function(obj, i){
-			if (obj.isMesh || obj.isLine || obj.isPoints) {
-				if (keepIndices.includes(i)) {
-					removeIndices.push(i);
-				} else {
-					keepIndices.push(i);
-				}
-			}
-		})
-		if (removeIndices.length > 0){
-			console.log('have duplicates in partsMesh', p, removeIndices.length, removeIndices)
-			removeIndices.forEach(function(i){
-				viewerParams.partsMesh[p].splice(i,1)
-			})
-		}
-	})
-
 }
+
 function removeUnwantedNodes(){
 	console.log('removing', viewerParams.octree.toRemove.length);
 	viewerParams.octree.removeCount = 0;
@@ -222,7 +268,7 @@ function removeUnwantedNodes(){
 }
 
 function drawWantedNodes(){
-	console.log('drawing', viewerParams.octree.toDraw.length);
+	console.log('drawing', viewerParams.octree.toDraw.length, viewerParams.octree.toDrawIDs);
 	viewerParams.octree.drawCount = 0;
 	viewerParams.octree.drawIndex = viewerParams.octree.toDraw.length;
 	viewerParams.octree.toDraw.forEach(function(arr){
@@ -304,17 +350,25 @@ function setNodeDrawParams(node){
 	var p = node.particleType;
 
 	//number of particles to render will depend on the camera distance and fps
-	node.NparticlesToRender = Math.max(Math.floor(node.Nparticles*viewerParams.octree.minFracParticlesToDraw[p]), Math.min(node.Nparticles, Math.floor(node.Nparticles*viewerParams.octree.normCameraDistance[p]/node.cameraDistance*viewerParams.octree.NParticleFPSModifier)));
+	node.NparticlesToRender = Math.min(node.Nparticles, Math.floor(node.Nparticles*viewerParams.octree.normCameraDistance[p]/node.cameraDistance*viewerParams.octree.NParticleFPSModifier));
 
-	if (node.screenSize < viewerParams.octree.minNodeScreenSize || !node.inView) node.NparticlesToRender = Math.floor(node.Nparticles*viewerParams.octree.minFracParticlesToDraw[p]);
+	//always keep the minimum number of particles, and also don't exceed the total number of particles in the node
+	node.NparticlesToRender = Math.max(Math.floor(node.Nparticles*viewerParams.octree.minFracParticlesToDraw[p]), Math.min(node.Nparticles, node.NparticlesToRender));
 
-	node.NparticlesToRender = Math.min(node.Nparticles, node.NparticlesToRender);
-
-	//scale particles size by the fraction rendered?
-	//node.particleSizeScale = viewerParams.octree.boxSize*node.Nparticles/node.NparticlesToRender*viewerParams.octree.particleDefaultSizeScale[p];
+	//scale particles size by the fraction rendered? (not sure what to use for max value)
+	//var maxS = node.width;
+	var maxS = viewerParams.octree.boxSize/100.;
+	node.particleSizeScale = THREE.Math.clamp(node.width*(1. - node.NparticlesToRender/node.Nparticles), 1., maxS);
 
 	node.color = viewerParams.Pcolors[p].slice();
 	if (node.NparticlesToRender > 0) node.color[3] = viewerParams.Pcolors[p][3]*Math.min(1., node.Nparticles/node.NparticlesToRender);
+
+	//for the loading bar
+	if (node.inView && node.screenSize > viewerParams.octree.minNodeScreenSize && node.NparticlesToRender > 0) {
+		viewerParams.octree.loadingCount[p][0] += 1;
+		if (node.drawn) viewerParams.octree.loadingCount[p][1] += 1;
+	}
+
 
 }
 
