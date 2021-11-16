@@ -267,7 +267,7 @@ function removeUnwantedNodes(){
 			//swap geometry for the minimum number of particles to show
 			node.NparticlesToRender = Math.floor(node.Nparticles*viewerParams.octree.minFracParticlesToDraw[p]);
 			reduceOctreeParticles(node);
-			var geo = createOctreeParticleGeometry(p, node.particles, 0, node.NparticlesToRender);
+			var geo = createParticleGeometry(p, node.particles, 0, node.NparticlesToRender);
 			obj.geometry = geo;
 			obj.geometry.needsUpdate = true;
 		}
