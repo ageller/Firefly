@@ -366,7 +366,7 @@ function setNodeDrawParams(node){
 	NparticlesToRender = THREE.Math.clamp(NparticlesToRender, minNDraw, node.Nparticles);
 
 	//test to see if this helps
-	if (node.cameraDistance > viewerParams.octree.normCameraDistance[p]) NparticlesToRender = minNDraw;
+	//if (node.cameraDistance > viewerParams.octree.normCameraDistance[p]) NparticlesToRender = minNDraw;
 
 	node.NparticlesToRender = NparticlesToRender;
 
