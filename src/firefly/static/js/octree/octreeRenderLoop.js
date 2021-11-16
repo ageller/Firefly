@@ -1,6 +1,9 @@
 function updateOctree(){
 
 	viewerParams.FPS = viewerParams.fps_list.reduce((a, b) => a + b, 0)/viewerParams.fps_list.length;
+	//tweak the number of particles based on the fps
+	//not sure what limits I should set here
+	//viewerParams.octree.NParticleFPSModifier = Math.round(Math.max(0.01, Math.min(1., viewerParams.FPS/viewerParams.octree.targetFPS))*10.)/10.;
 
 
 	//check and remove duplicates from scene (I don't know why this happens)
@@ -46,9 +49,6 @@ function updateOctree(){
 	viewerParams.frustum.setFromMatrix(new THREE.Matrix4().multiplyMatrices(viewerParams.camera.projectionMatrix, viewerParams.camera.matrixWorldInverse));  
 
 
-	//tweak the number of particles based on the fps
-	//not sure what limits I should set here
-	viewerParams.octree.NParticleFPSModifier = Math.max(0.01, Math.min(1., viewerParams.FPS/viewerParams.octree.targetFPS));
 
 	//rather than a for loop to go through the particles, I am going to manually iterate so that I can draw from one each draw pass
 	//this way the scene gets filled in more regularly, instead of filling in one particle group at a time
@@ -67,8 +67,9 @@ function updateOctree(){
 				//don't include any nodes that are marked for removal
 				if (!viewerParams.octree.toRemoveIDs.includes(p+node.id)){
 					//toSort.push(node.cameraDistance/node.screenSize);
-					var Ndiff = (viewerParams.octree.drawPass - node.drawPass);
-					toSort.push(node.cameraDistance/(Ndiff*Ndiff));
+					var NRenderDiff = viewerParams.octree.drawPass - node.drawPass;
+					var NPartsDiff = Math.max(node.NparticlesToRender - node.particles.Coordinates.length, 1.);
+					toSort.push(node.cameraDistance/(NRenderDiff*NRenderDiff)/NPartsDiff);
 					indices.push(i);
 				}
 			});
@@ -118,10 +119,11 @@ function updateOctree(){
 						}
 						
 						//existing node that needs more particles
-						if (obj && node.particles.Coordinates.length < node.NparticlesToRender && viewerParams.octree.toDraw.length < viewerParams.octree.maxFilesToRead && node.inView && drawFrac >= 0.9 && (node.NparticlesToRender - node.particles.Coordinates.length) > viewerParams.octree.minUpdateDiff){
-							//console.log('updating node', p, node.id, node.Nparticles, node.NparticlesToRender, node.particles.Coordinates.length, node.screenSize, node.inView, node.drawPass, viewerParams.octree.drawPass)
+						if (obj && node.particles.Coordinates.length < node.NparticlesToRender && viewerParams.octree.toDraw.length < viewerParams.octree.maxFilesToRead && node.inView && (node.NparticlesToRender - node.particles.Coordinates.length) > viewerParams.octree.minDiffForUpdate && viewerParams.octree.NUpdate < viewerParams.octree.maxUpdatesPerDraw){
+							console.log('updating node', p, node.id, node.Nparticles, node.NparticlesToRender, node.particles.Coordinates.length, node.screenSize, node.inView, node.drawPass, viewerParams.octree.drawPass)
 							viewerParams.octree.toDraw.push([p, node.id, true]); //will be updated later
 							viewerParams.octree.toDrawIDs.push(p+node.id);
+							viewerParams.octree.NUpdate += 1
 							// viewerParams.updateFilter[p] = true;
 							// viewerParams.updateOnOff[p] = true;
 							// viewerParams.updateColormap[p] = true;
@@ -131,7 +133,7 @@ function updateOctree(){
 					if (viewerParams.octree.toDraw.length >= viewerParams.octree.maxFilesToRead) readyToDrawOctreeNodes();
 				}
 
-				//if (ii == indices.length) readyToDrawOctreeNodes();
+				if (ii == indices.length && viewerParams.octree.drawCount > viewerParams.octree.drawIndex) readyToDrawOctreeNodes();
 
 			})
 
@@ -160,7 +162,7 @@ function clearDrawer(){
 	viewerParams.octree.drawIndex = -1;
 	viewerParams.octree.toDraw = [];
 	viewerParams.octree.toDrawIDs = [];
-
+	viewerParams.octree.NUpdate = 0;
 }
 
 function clearRemover(){
@@ -357,15 +359,24 @@ function setNodeDrawParams(node){
 	var p = node.particleType;
 
 	//number of particles to render will depend on the camera distance and fps
-	node.NparticlesToRender = Math.min(node.Nparticles, Math.floor(node.Nparticles*viewerParams.octree.normCameraDistance[p]/node.cameraDistance*viewerParams.octree.NParticleFPSModifier));
+	var minNDraw = Math.floor(node.Nparticles*viewerParams.octree.minFracParticlesToDraw[p])
+	NparticlesToRender = Math.min(node.Nparticles, Math.floor(minNDraw*viewerParams.octree.normCameraDistance[p]/node.cameraDistance*viewerParams.octree.NParticleFPSModifier));
 
 	//always keep the minimum number of particles, and also don't exceed the total number of particles in the node
-	node.NparticlesToRender = Math.max(Math.floor(node.Nparticles*viewerParams.octree.minFracParticlesToDraw[p]), Math.min(node.Nparticles, node.NparticlesToRender));
+	NparticlesToRender = THREE.Math.clamp(NparticlesToRender, minNDraw, node.Nparticles);
+
+	//test to see if this helps
+	if (node.cameraDistance > viewerParams.octree.normCameraDistance[p]) NparticlesToRender = minNDraw;
+
+	node.NparticlesToRender = NparticlesToRender;
+
+	//these will need to be updated so remove the drawn flag
+	if (node.particles.Coordinates.length < node.NparticlesToRender && node.inView && (node.NparticlesToRender - node.particles.Coordinates.length) > viewerParams.octree.minDiffForUpdate) node.drawn = false;
 
 	//scale particles size by the fraction rendered? (not sure what to use for max value)
 	//var maxS = node.width;
 	if (viewerParams.showVel[p]){
-		node.particleSizeScale = 1;
+		node.particleSizeScale = 10.; //this should allow the sizes to be about equal between velocity and point
 	} else {
 		var maxS = viewerParams.octree.boxSize/100.;
 		node.particleSizeScale = THREE.Math.clamp(node.width*(1. - node.NparticlesToRender/node.Nparticles), 1., maxS);
