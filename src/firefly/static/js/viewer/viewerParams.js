@@ -214,7 +214,7 @@ function defineViewerParams(){
 			this.minDiffForUpdate = 100; //minumum number of particles that need to be different between drawn and expected for the node to be updated
 			this.maxUpdatesPerDraw = this.maxFilesToRead/2; //maximum number of updates to make during a draw loop, to make sure new nodes are always drawn
 			this.NUpdate = 0; //will cound the number of nodes needing updates in a render pass
-			
+
 			this.targetFPS = 30; //will be used to controls the NParticleFPSModifier
 			this.NParticleFPSModifier = 1.; //will be increased or decreased based on the current fps
 			//this.FPSmod = 100;// reset the FPS average every FPSmod draw counts
@@ -225,10 +225,10 @@ function defineViewerParams(){
 			this.loadingCount = {}; //will contain an array for each particle type that has the total inView and the total drawn to adjust the loading bar
 			//normalization for the camera distance in deciding how many particles to draw
 			//could be included in GUI, will be reset in pruneOctree to be a fraction of boundingBox
-			this.normCameraDistance = {'Gas':500,
-							   		   'Stars':500,
-							   		   'LRDM':500,
-								       'HRDM':500};
+			this.normCameraDistance = {'Gas':1000,
+							   		   'Stars':1000,
+							   		   'LRDM':1000,
+								       'HRDM':1000};
 		}
 
 	};

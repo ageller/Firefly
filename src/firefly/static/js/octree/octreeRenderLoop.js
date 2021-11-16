@@ -358,20 +358,25 @@ function setNodeDrawParams(node){
 
 	var p = node.particleType;
 
+
 	//number of particles to render will depend on the camera distance and fps
 	var minNDraw = Math.floor(node.Nparticles*viewerParams.octree.minFracParticlesToDraw[p])
-	NparticlesToRender = Math.min(node.Nparticles, Math.floor(minNDraw*viewerParams.octree.normCameraDistance[p]/node.cameraDistance*viewerParams.octree.NParticleFPSModifier));
+	NparticlesToRender = Math.min(node.Nparticles, Math.floor(node.Nparticles*viewerParams.octree.normCameraDistance[p]/node.cameraDistance*viewerParams.octree.NParticleFPSModifier));
 
 	//always keep the minimum number of particles, and also don't exceed the total number of particles in the node
 	NparticlesToRender = THREE.Math.clamp(NparticlesToRender, minNDraw, node.Nparticles);
 
 	//test to see if this helps
 	//if (node.cameraDistance > viewerParams.octree.normCameraDistance[p]) NparticlesToRender = minNDraw;
+	//if (node.cameraDistance > viewerParams.octree.normCameraDistance[p]) node.inView = false;
 
 	node.NparticlesToRender = NparticlesToRender;
 
 	//these will need to be updated so remove the drawn flag
 	if (node.particles.Coordinates.length < node.NparticlesToRender && node.inView && (node.NparticlesToRender - node.particles.Coordinates.length) > viewerParams.octree.minDiffForUpdate) node.drawn = false;
+
+	//if (node.particles.Coordinates.length >= node.NparticlesToRender && node.inView) node.drawn = true;
+
 
 	//scale particles size by the fraction rendered? (not sure what to use for max value)
 	//var maxS = node.width;

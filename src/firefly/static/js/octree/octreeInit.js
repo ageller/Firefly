@@ -16,7 +16,7 @@ function pruneOctree(tree, p, fname){
 	})
 
 	//also set the normCameraDistance based on the boxSize?
-	viewerParams.octree.normCameraDistance[p] = viewerParams.octree.boxSize/10.;
+	viewerParams.octree.normCameraDistance[p] = viewerParams.octree.boxSize/100.;
 
 	return out
 }
