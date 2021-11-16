@@ -219,6 +219,7 @@ function drawOctreeNode(node, updateGeo=false){
 		if (node.particles.Coordinates.length >= node.NparticlesToRender){
 			addOctreeParticlesToScene(node.particleType, node.particles, name, start, end, minSize, sizeScale, updateGeo);
 			node.drawn = true;
+			node.drawPass = viewerParams.octree.drawPass;
 		}
 	}
 
@@ -230,6 +231,7 @@ function drawOctreeNode(node, updateGeo=false){
 			node.particles = formatOctreeCSVdata(d.slice(0,node.NparticlesToRender));
 			addOctreeParticlesToScene(node.particleType, node.particles, name, start, end, minSize, sizeScale, updateGeo);
 			node.drawn = true;
+			node.drawPass = viewerParams.octree.drawPass;
 		})
 	}
 

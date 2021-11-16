@@ -11,6 +11,7 @@ function pruneOctree(tree, p, fname){
 		d.filename = fileRoot + '/' + d.id + '.csv';
 		d.particles = {'Coordinates':[]};
 		d.drawn = false;
+		d.drawPass = 0;
 		if (d.Nparticles > 0) out.push(d);
 	})
 

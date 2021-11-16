@@ -211,8 +211,8 @@ function defineViewerParams(){
 			this.maxDrawInterval = 10; //seconds
 			this.maxFilesToRead = 50;
 			this.maxToRemove = 50;
-
-			this.FPS = 30; //will be changed each render call
+			this.minUpdateDiff = 100; //minumum number of particles that need to be different between drawn and expected for the node to be updated
+			
 			this.targetFPS = 30; //will be used to controls the NParticleFPSModifier
 			this.NParticleFPSModifier = 1.; //will be increased or decreased based on the current fps
 			//this.FPSmod = 100;// reset the FPS average every FPSmod draw counts

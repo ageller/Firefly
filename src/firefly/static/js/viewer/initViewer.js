@@ -1437,6 +1437,8 @@ function createOctreeLoadingBar(){
 	var nRects = 0;
 	viewerParams.partsKeys.forEach(function(p){
 		if (viewerParams.haveOctree[p]){
+			viewerParams.octree.loadingCount[p] = [0,0]; //will be updated during rendering
+
 			svg.append('rect')
 				.attr('id',p + 'octreeLoadingOutline')
 				.attr('x', '10px')
@@ -1459,9 +1461,8 @@ function createOctreeLoadingBar(){
 				.attr('y', (nRects*(height + offset) + margin + 0.75*height) + 'px')
 				.attr('fill','rgb(' + (255*viewerParams.Pcolors[p][0]) + ',' + (255*viewerParams.Pcolors[p][1]) + ',' + (255*viewerParams.Pcolors[p][2]) + ')')
 				.style('font-size', (0.75*height) + 'px')
-				.text(p)				
+				.text(p + ' (' + viewerParams.octree.loadingCount[p][1] + '/' + viewerParams.octree.loadingCount[p][0] + ')')				
 			nRects += 1;
-			viewerParams.octree.loadingCount[p] = [1,0]; //will be updated during rendering
 		}
 	})
 
@@ -1477,6 +1478,7 @@ function updateOctreeLoadingBar(){
 				//var frac = Math.max(viewerParams.octree.loadingCount[p][1]/viewerParams.octree.loadingCount[p][0], 0);
 				//console.log('loading',p, width,viewerParams.octree.loadingCount[p], frac)
 				d3.select('#' + p + 'octreeLoadingFill').transition().attr('width', (width*frac) + 'px');
+				d3.select('#' + p + 'octreeLoadingText').text(p + ' (' + viewerParams.octree.loadingCount[p][1] + '/' + viewerParams.octree.loadingCount[p][0] + ')');
 			}
 		}
 	})

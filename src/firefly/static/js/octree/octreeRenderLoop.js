@@ -2,8 +2,12 @@ function updateOctree(){
 
 	viewerParams.FPS = viewerParams.fps_list.reduce((a, b) => a + b, 0)/viewerParams.fps_list.length;
 
+
 	//check and remove duplicates from scene (I don't know why this happens)
-	if (viewerParams.octree.drawCount % 50 == 0) removeDuplicatesFromScene();
+	if (viewerParams.octree.drawCount % 50 == 0) {
+		removeDuplicatesFromScene();
+		updateOctreeLoadingBar(); //in case this doesn't get updated properly during the draw loop (can be 1 or 2 off after last draw in completed)
+	}
 
 	//check if we should reset the draw buffer
 	var dateCheck = new Date().getTime()/1000.
@@ -62,8 +66,9 @@ function updateOctree(){
 
 				//don't include any nodes that are marked for removal
 				if (!viewerParams.octree.toRemoveIDs.includes(p+node.id)){
-					toSort.push(node.cameraDistance);
-					//toSort.push(node.screenSize/node.cameraDistance);
+					//toSort.push(node.cameraDistance/node.screenSize);
+					var Ndiff = (viewerParams.octree.drawPass - node.drawPass);
+					toSort.push(node.cameraDistance/(Ndiff*Ndiff));
 					indices.push(i);
 				}
 			});
@@ -73,7 +78,7 @@ function updateOctree(){
 			indices.sort(function (a, b) { return toSort[a] < toSort[b] ? -1 : toSort[a] > toSort[b] ? 1 : 0; });
 
 			indices.forEach(function(index, ii){
-
+				var drawFrac = THREE.Math.clamp(viewerParams.octree.loadingCount[p][1]/viewerParams.octree.loadingCount[p][0], 0, 1);	
 				var node = viewerParams.octree.nodes[p][index];
 				var obj = viewerParams.scene.getObjectByName(p+node.id);
 
@@ -90,7 +95,7 @@ function updateOctree(){
 						} else {
 							//particles to remove
 							if (viewerParams.octree.toRemove.length < viewerParams.octree.maxToRemove && node.particles.Coordinates.length > Math.floor(node.Nparticles*viewerParams.octree.minFracParticlesToDraw[p]) && !viewerParams.octree.toRemoveIDs.includes(p+node.id)){
-								//console.log('removing node', p, node.id, node.NparticlesToRender, node.Nparticles, node.particles.Coordinates.length, node.screenSize, node.inView)
+								//console.log('removing node', p, node.id, node.Nparticles, node.NparticlesToRender, node.particles.Coordinates.length, node.screenSize, node.inView)
 								viewerParams.octree.toRemove.push([p, node.id]); //will be removed later
 								viewerParams.octree.toRemoveIDs.push(p+node.id);
 							}
@@ -100,7 +105,7 @@ function updateOctree(){
 				}
 
 				//add to the draw list, only when there are available slots in viewerParams.octree.toDraw
-				if (viewerParams.octree.toDraw.length < viewerParams.octree.maxFilesToRead) {
+				if (viewerParams.octree.toDraw.length < viewerParams.octree.maxFilesToRead && !viewerParams.octree.toRemoveIDs.includes(p+node.id)) {
 					if (!viewerParams.octree.toDrawIDs.includes(p+node.id) && node.NparticlesToRender > 0){
 						//new nodes
 						if (!obj && node.screenSize >= viewerParams.octree.minNodeScreenSize && node.inView ){
@@ -113,8 +118,8 @@ function updateOctree(){
 						}
 						
 						//existing node that needs more particles
-						if (obj && node.particles.Coordinates.length < node.NparticlesToRender && viewerParams.octree.toDraw.length < viewerParams.octree.maxFilesToRead && node.inView){
-							//console.log('updating node', p, node.id, node.NparticlesToRender, node.Nparticles, node.particles.Coordinates.length, node.screenSize, node.inView)
+						if (obj && node.particles.Coordinates.length < node.NparticlesToRender && viewerParams.octree.toDraw.length < viewerParams.octree.maxFilesToRead && node.inView && drawFrac >= 0.9 && (node.NparticlesToRender - node.particles.Coordinates.length) > viewerParams.octree.minUpdateDiff){
+							//console.log('updating node', p, node.id, node.Nparticles, node.NparticlesToRender, node.particles.Coordinates.length, node.screenSize, node.inView, node.drawPass, viewerParams.octree.drawPass)
 							viewerParams.octree.toDraw.push([p, node.id, true]); //will be updated later
 							viewerParams.octree.toDrawIDs.push(p+node.id);
 							// viewerParams.updateFilter[p] = true;
@@ -126,7 +131,7 @@ function updateOctree(){
 					if (viewerParams.octree.toDraw.length >= viewerParams.octree.maxFilesToRead) readyToDrawOctreeNodes();
 				}
 
-				if (ii == indices.length) readyToDrawOctreeNodes();
+				//if (ii == indices.length) readyToDrawOctreeNodes();
 
 			})
 
@@ -233,9 +238,11 @@ function removeDuplicatesFromScene(){
 				removeIndices.forEach(function(j){
 					obj = viewerParams.partsMesh[p][j];
 					//console.log('removing object from parts', obj.name, obj)
-					obj.geometry.dispose();
-					viewerParams.scene.remove(obj);	
-					viewerParams.partsMesh[p].splice(j,1)
+					if (obj){
+						obj.geometry.dispose();
+						viewerParams.scene.remove(obj);	
+						viewerParams.partsMesh[p].splice(j,1);
+					}
 				})
 			})
 		})
@@ -243,7 +250,7 @@ function removeDuplicatesFromScene(){
 }
 
 function removeUnwantedNodes(){
-	console.log('removing', viewerParams.octree.toRemove.length);
+	console.log('removing', viewerParams.octree.toRemove.length, viewerParams.octree.toRemoveIDs);
 	viewerParams.octree.removeCount = 0;
 	viewerParams.octree.removeIndex = viewerParams.octree.toRemove.length;
 	viewerParams.octree.toRemove.forEach(function(arr){
@@ -357,8 +364,12 @@ function setNodeDrawParams(node){
 
 	//scale particles size by the fraction rendered? (not sure what to use for max value)
 	//var maxS = node.width;
-	var maxS = viewerParams.octree.boxSize/100.;
-	node.particleSizeScale = THREE.Math.clamp(node.width*(1. - node.NparticlesToRender/node.Nparticles), 1., maxS);
+	if (viewerParams.showVel[p]){
+		node.particleSizeScale = 1;
+	} else {
+		var maxS = viewerParams.octree.boxSize/100.;
+		node.particleSizeScale = THREE.Math.clamp(node.width*(1. - node.NparticlesToRender/node.Nparticles), 1., maxS);
+	}
 
 	node.color = viewerParams.Pcolors[p].slice();
 	if (node.NparticlesToRender > 0) node.color[3] = viewerParams.Pcolors[p][3]*Math.min(1., node.Nparticles/node.NparticlesToRender);
@@ -375,10 +386,11 @@ function setNodeDrawParams(node){
 function inFrustum(node){
 
 	//use three.js check (only possible if already in scene)
-	var obj = viewerParams.scene.getObjectByName(node.particleType + node.id);
-	if (obj){
-		if (viewerParams.frustum.intersectsObject(obj)) return true;
-	}
+	//I think this is causing a redraw loop where Three.js thinks it is in the scene, but then it gets removed on the next pass
+	// var obj = viewerParams.scene.getObjectByName(node.particleType + node.id);
+	// if (obj){
+	// 	if (viewerParams.frustum.intersectsObject(obj)) return true;
+	// }
 
 	//in case the above fails, check manually
 	//check if any of the corners is within the frustum
