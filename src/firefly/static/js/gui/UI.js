@@ -682,7 +682,10 @@ function fillParticleDropdown(controls,p){
 	dNcontent.append('span')
 		.attr('class','pLabelDiv')
 		.attr('style','width:20px')
-		.text('N');
+		.text(function(){
+			if (GUIParams.haveOctree[p]) return '%';
+			return 'N';
+		});
 
 	dNcontent.append('div')
 		.attr('id',p+'_NSlider')

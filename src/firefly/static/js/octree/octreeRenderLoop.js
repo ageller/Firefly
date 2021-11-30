@@ -387,8 +387,10 @@ function setNodeDrawParams(node){
 		node.particleSizeScale = THREE.Math.clamp(node.width*(1. - node.NparticlesToRender/node.Nparticles), 1., maxS);
 	}
 
+	//update the opacity based on camera distance? (but I'm not using this right now...)
 	node.color = viewerParams.Pcolors[p].slice();
-	if (node.NparticlesToRender > 0) node.color[3] = viewerParams.Pcolors[p][3]*Math.min(1., node.Nparticles/node.NparticlesToRender);
+	//if (node.NparticlesToRender > 0) node.color[3] = viewerParams.Pcolors[p][3]*Math.min(1., node.Nparticles/node.NparticlesToRender);
+	if (node.NparticlesToRender > 0) node.color[3] = viewerParams.Pcolors[p][3]*THREE.Math.clamp(viewerParams.octree.normCameraDistance[p]/node.cameraDistance, 0.1, 1);
 
 	//for the loading bar
 	if (node.inView && node.screenSize > viewerParams.octree.minNodeScreenSize && node.NparticlesToRender > 0) {

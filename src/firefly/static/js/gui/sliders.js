@@ -221,7 +221,7 @@ function createDecimationSlider(){
 			text.value = values[handle];
 			varToSet[0] = values[handle];
 			sendToViewer([{'setViewerParamByKey':varToSet}])
-			GUIParams.decimate = values[handle];
+			GUIParams.decimate = parseFloat(values[handle]);
 		//}
 
 		GUIParams.partsKeys.forEach(function(p){
@@ -236,7 +236,8 @@ function createDecimationSlider(){
 						'max': [Math.round(max/parseFloat(values[handle]))]
 					}
 				});
-				sliderInput.parent.noUiSlider.set(Math.min(max, val*decf));
+				//Note: this is not perfect... if you increase decimation then decrease, it will not always place the N slider at the correct value
+				sliderInput.parent.noUiSlider.set(Math.round(Math.min(max, val*decf)));
 			}
 
 		});

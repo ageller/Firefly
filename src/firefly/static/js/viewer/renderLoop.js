@@ -196,8 +196,9 @@ function update_particle_playback(p,time){
 
 function update_particle_mesh_UI_values(p,m,time){
 	// apply global decimation
-	//DISABlED: need to find a way to re-allow this
-	//m.geometry.setDrawRange( 0, viewerParams.plotNmax[p]*(1./viewerParams.decimate) )
+	var Nfac = 1;
+	if (viewerParams.haveOctree[p]) Nfac = m.geometry.attributes.radiusScale.array.length/100.; // the 100 factor is to account for plotNmax being a percent
+	m.geometry.setDrawRange( 0, Nfac*viewerParams.plotNmax[p]*(1./viewerParams.decimate) )
 
 	// apply particle size scale factor 
 	m.material.uniforms.uVertexScale.value = viewerParams.PsizeMult[p];

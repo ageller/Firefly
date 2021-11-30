@@ -264,7 +264,7 @@ function initPVals(){
 		}
 
 		//misc
-		viewerParams.plotNmax[p] = viewerParams.parts[p].Coordinates.length;
+		if (!viewerParams.haveOctree[p]) viewerParams.plotNmax[p] = viewerParams.parts[p].Coordinates.length;
 		viewerParams.PsizeMult[p] = 1.;
 		viewerParams.showParts[p] = true;
 		viewerParams.updateOnOff[p] = false;
@@ -355,7 +355,7 @@ function initPVals(){
 						viewerParams.colormapVals[p][ckey] = [m.min, m.max];
 					}
 ////////////////////////////////////////////////////////////////////////                    
-////////////// I am not sure where to put this
+////////////// I am not sure where to put this <-- I don't think this is used anymore (?)
 ////////////////////////////////////////////////////////////////////////                    
 					if (i == viewerParams.partsKeys.length - 1 && k == viewerParams.ckeys[p].length -1) viewerParams.ready = true;
 ////////////////////////////////////////////////////////////////////////                    
@@ -1034,6 +1034,8 @@ function sendInitGUI(prepend=[], append=[]){
 	//if (viewerParams.usingSocket && !viewerParams.local) forGUI.push({'updateGUICamera':null});
 	if (viewerParams.usingSocket && !viewerParams.local) forGUI.push({'setGUIParamByKey':[true, "cameraNeedsUpdate"]});
 
+	forGUI.push({'setGUIParamByKey':[viewerParams.haveOctree,"haveOctree"]});
+
 	append.forEach(function(x,i){
 		forGUI.push(x);
 	})
@@ -1215,6 +1217,11 @@ function addKeysForOctree(){
 			}
 		})
 	}
+	viewerParams.partsKeys.forEach(function(p){
+		if (viewerParams.haveOctree[p]){
+			viewerParams.plotNmax[p] = 100; //this will be used as a percentage value in the GUI
+		}
+	});
 }
 // compileData ->
 function countParts(){

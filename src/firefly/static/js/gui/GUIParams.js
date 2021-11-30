@@ -129,6 +129,8 @@ function defineGUIParams(){
 
 		this.boxSize = 1.;
 
+		this.haveOctree = {}; //will be initialized to false for each of the parts keys in loadData
+
 		//only need to pass the controls target?
 		this.controlsTarget = new THREE.Vector3(0,0,0);
 
