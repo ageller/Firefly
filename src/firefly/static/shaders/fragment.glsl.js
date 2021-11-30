@@ -8,7 +8,6 @@ varying float vColormapMag;
 varying float vAlpha;
 varying float vPointSize;
 varying vec4 vColor;
-varying float vIndex;
 
 uniform bool showColormap;
 uniform float colormap;
@@ -18,7 +17,6 @@ uniform float velType; //0 = line, 1 = arrow, 2 = triangle
 uniform sampler2D colormapTexture;
 uniform bool columnDensity;
 uniform float scaleCD;
-uniform float maxToRender;
 
 //http://www.neilmendoza.com/glsl-rotation-about-an-arbitrary-axis/
 mat4 rotationMatrix(vec3 axis, float angle)
@@ -122,9 +120,5 @@ void main(void) {
 		gl_FragColor.a *= vColor[3];
 	}
 
-	if (vIndex > maxToRender) {
-		discard;
-		gl_FragColor = vec4(0,0,0,0);
-	}
 }
 `;

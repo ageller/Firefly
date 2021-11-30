@@ -89,10 +89,11 @@ function updateOctree(){
 
 						if (node.screenSize >= viewerParams.octree.minNodeScreenSize && node.inView){
 							//particles to adjust (I could make this an if statement to only change if needed, but would that even speed things up?)
-							obj.material.uniforms.maxToRender.value = node.NparticlesToRender;
+							obj.geometry.setDrawRange( 0, node.NparticlesToRender*viewerParams.plotNmax[p]/100.*(1./viewerParams.decimate));
 							obj.material.uniforms.octreePointScale.value = node.particleSizeScale;
 							obj.material.needsUpdate = true;
-							if (node.particles.Coordinates.length >= node.NparticlesToRender) reduceOctreeParticles(node)
+							//maybe I should leave the particles in memory so that the GUI could work smoothly (if/when I connect things to this)
+							//if (node.particles.Coordinates.length >= node.NparticlesToRender) reduceOctreeParticles(node)
 						} else {
 							//particles to remove
 							if (viewerParams.octree.toRemove.length < viewerParams.octree.maxToRemove && node.particles.Coordinates.length > Math.floor(node.Nparticles*viewerParams.octree.minFracParticlesToDraw[p]) && !viewerParams.octree.toRemoveIDs.includes(p+node.id)){

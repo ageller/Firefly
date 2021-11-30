@@ -21,7 +21,7 @@ function addOctreeParticlesToScene(p, parts, name, start, end, minPointSize=view
 		} else {
 	
 			//material
-			var material = createParticleMaterial(p, parts.Coordinates.length, minPointSize, octreePointScale);
+			var material = createParticleMaterial(p, minPointSize, octreePointScale);
 
 			var mesh = new THREE.Points(geo, material);
 			mesh.name = name;
@@ -43,7 +43,7 @@ function addOctreeParticlesToScene(p, parts, name, start, end, minPointSize=view
 function reduceOctreeParticles(node, N=null){
 	if (N == null) N = node.NparticlesToRender;
 	Object.keys(node.particles).forEach(function(k){
-		node.particles[k] = node.particles[k].slice(0, N);
+		if (N < node.particles[k].length) node.particles[k] = node.particles[k].slice(0, N);
 	})
 }
 

@@ -31,9 +31,9 @@ function createParticleGeometry(p, parts, start, end){
 	var position = new Float32Array( len*3 ); // 3 vertices per point
 	geo.addAttribute( 'position', new THREE.BufferAttribute( position, 3 ) );
 
-	//index
-	var pointIndex = new Float32Array( len );
-	geo.addAttribute( 'pointIndex', new THREE.BufferAttribute( pointIndex, 1 ) );
+	// //index
+	// var pointIndex = new Float32Array( len );
+	// geo.addAttribute( 'pointIndex', new THREE.BufferAttribute( pointIndex, 1 ) );
 
 	//radiusScaling (e.g., for filtering and on/off)
 	var radiusScale = new Float32Array( len ); 
@@ -70,7 +70,7 @@ function createParticleGeometry(p, parts, start, end){
 		position[pindex++] = parseFloat(parts.Coordinates[j][1]);
 		position[pindex++] = parseFloat(parts.Coordinates[j][2]);
 
-		pointIndex[j] = parseFloat(j);
+		//pointIndex[j] = parseFloat(j);
 
 		if (parts.hasOwnProperty("VelVals")){
 			velVals[vindex++] = parts.VelVals[j][0]/parts.magVelocities[j];
@@ -124,7 +124,7 @@ function createParticleGeometry(p, parts, start, end){
 	return geo;
 }
 
-function createParticleMaterial(p, maxToRender, minPointSize=1, octreePointScale=1.){
+function createParticleMaterial(p, minPointSize=1, octreePointScale=1.){
 	//change the blending mode when showing the colormap (so we don't get summing to white colors)
 	var blend = THREE.AdditiveBlending;
 	var dWrite = false;
@@ -156,7 +156,6 @@ function createParticleMaterial(p, maxToRender, minPointSize=1, octreePointScale
 			columnDensity: {value: viewerParams.columnDensity},
 			scaleCD: {value: viewerParams.scaleCD},
 			minPointSize: {value: minPointSize},
-			maxToRender: {value: maxToRender},
 			octreePointScale: {value: octreePointScale},
 
 		},
@@ -199,7 +198,7 @@ function createPartsMesh(pdraw = viewerParams.partsKeys, node=null){
 		var geo = createParticleGeometry(p, viewerParams.parts[p], 0, viewerParams.plotNmax[p]);
 
 		//material
-		var material = createParticleMaterial(p, viewerParams.plotNmax[p]);
+		var material = createParticleMaterial(p);
 
 		var mesh = new THREE.Points(geo, material);
 		mesh.name = p + 'Standard';

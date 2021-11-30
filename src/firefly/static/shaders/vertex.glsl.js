@@ -5,7 +5,6 @@ attribute float alpha;
 attribute vec4 velVals;
 attribute vec4 colorArray;
 attribute float colormapArray;
-attribute float pointIndex;
 
 varying float vID;
 varying float vTheta;
@@ -14,7 +13,6 @@ varying float vAlpha;
 varying vec2 vUv; //for the column density 
 varying float vPointSize;
 varying vec4 vColor;
-varying float vIndex;
 
 uniform float colormapMax;
 uniform float colormapMin;
@@ -25,7 +23,6 @@ uniform float maxDistance;
 uniform vec3 cameraX;
 uniform vec3 cameraY;
 uniform float minPointScale;
-uniform float maxToRender;
 
 const float maxPointScale = 1000.;
 const float PI = 3.1415926535897932384626433832795;
@@ -37,7 +34,6 @@ void main(void) {
 	vTheta = 0.;
 	vAlpha = alpha;
 	vUv = uv;
-	vIndex = pointIndex;
 
 	//vVertexScale = uVertexScale;
 
@@ -50,8 +46,6 @@ void main(void) {
 	
 	//gl_PointSize = uVertexScale * pointScale * radiusScale;
 	gl_PointSize = clamp(pointScale, minPointScale, maxPointScale);
-
-	if (pointIndex > maxToRender) gl_PointSize = 0.;
 
 	// send colormap array to fragment shader
 	vColormapMag = clamp(((colormapArray - colormapMin) / (colormapMax - colormapMin)), 0., 1.);
