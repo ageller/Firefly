@@ -1220,6 +1220,10 @@ function addKeysForOctree(){
 	viewerParams.partsKeys.forEach(function(p){
 		if (viewerParams.haveOctree[p]){
 			viewerParams.plotNmax[p] = 100; //this will be used as a percentage value in the GUI
+			viewerParams.octree.minFracParticlesToDraw[p] = viewerParams.octree.minFracParticlesToDraw.default;
+			viewerParams.octree.particleDefaultSizeScale[p] = viewerParams.octree.particleDefaultSizeScale.default;
+			viewerParams.octree.normCameraDistance[p] = viewerParams.octree.normCameraDistance.default;
+			
 		}
 	});
 }

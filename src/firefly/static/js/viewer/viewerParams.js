@@ -183,19 +183,13 @@ function defineViewerParams(){
 		this.FPS = 30; //will be upated in the octree render loop
 		this.octree = new function() {
 
-			//NEED TO GENERALIZE THIS SO THAT I DON'T INCLUDE THE KEYS (Gas, Stars, etc.) HERE!
-
 			//these should be set from the Options file (and same with some below)
-			this.minFracParticlesToDraw = {'Gas':0.001, 'Stars':0.001, 'LRDM':0.001, 'HRDM':0.001}; //minimum fraction per node to draw (unless there are less particles than this total in the node) >0;  
-			this.particleDefaultSizeScale = {'Gas':0.1, 'Stars':0.1, 'LRDM':0.1, 'HRDM':0.01};
+			this.minFracParticlesToDraw = {'default':0.001}; //minimum fraction per node to draw (unless there are less particles than this total in the node) >0;  
+			this.particleDefaultSizeScale = {'default':0.1};
 
 			//normalization for the camera distance in deciding how many particles to draw
 			//could be included in GUI, will be reset in pruneOctree to be a fraction of boundingBox
-			//NEED TO GENERALIZE THIS SO THAT I DON'T INCLUDE THE KEYS HERE!
-			this.normCameraDistance = {'Gas':1000,
-							   		   'Stars':1000,
-							   		   'LRDM':1000,
-								       'HRDM':1000};
+			this.normCameraDistance = {'default':1000};
 
 			this.nodes = {};
 
