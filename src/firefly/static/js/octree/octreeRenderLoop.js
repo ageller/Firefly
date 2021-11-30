@@ -398,8 +398,9 @@ function setNodeDrawParams(node){
 	if (viewerParams.showVel[p]){
 		node.particleSizeScale = 10.; //this should allow the sizes to be about equal between velocity and point
 	} else {
-		var maxS = viewerParams.octree.boxSize/100.;
-		node.particleSizeScale = THREE.Math.clamp(node.width*(1. - node.NparticlesToRender/node.Nparticles), 1., maxS);
+		// var maxS = viewerParams.octree.boxSize/100.;
+		// node.particleSizeScale = THREE.Math.clamp(node.width*(1. - node.NparticlesToRender/node.Nparticles), 1., maxS);
+		node.particleSizeScale = 1.;
 	}
 
 	//update the opacity based on camera distance? (but I'm not using this right now...)

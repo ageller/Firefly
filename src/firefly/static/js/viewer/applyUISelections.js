@@ -251,6 +251,11 @@ function checkColor(args){
 	var p = args[0];
 	var rgb = args[1];
 	viewerParams.Pcolors[p] = [rgb.r/255., rgb.g/255., rgb.b/255., rgb.a];
+	//update the octree loading bar if it exists
+	if (viewerParams.haveOctree[p]){
+		d3.select('#' + p + 'octreeLoadingFill').attr('fill','rgb(' + (255*viewerParams.Pcolors[p][0]) + ',' + (255*viewerParams.Pcolors[p][1]) + ',' + (255*viewerParams.Pcolors[p][2]) + ')')
+		d3.select('#' + p + 'octreeLoadingText').attr('fill','rgb(' + (255*viewerParams.Pcolors[p][0]) + ',' + (255*viewerParams.Pcolors[p][1]) + ',' + (255*viewerParams.Pcolors[p][2]) + ')')
+	}
 }
 
 //function to check which types to plot
