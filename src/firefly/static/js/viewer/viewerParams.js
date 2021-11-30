@@ -210,6 +210,8 @@ function defineViewerParams(){
 			this.alreadyDrawn = [];
 			this.toRemove = [];
 			this.toRemoveIDs = [];
+			this.waitingToRemove = false;
+			this.removeTimeout = 5; // time (seconds) to wait before removing nodes (in case viewer is moving camera around)
 			this.removeCount = 0;
 			this.removeIndex = -1;
 			this.toDraw = [];

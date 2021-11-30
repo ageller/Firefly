@@ -33,8 +33,7 @@ function addOctreeParticlesToScene(p, parts, name, start, end, minPointSize=view
 		}
 	}
 
-	//remove from the toDraw list
-	const index = viewerParams.octree.toDrawIDs.indexOf(name);
+
 	viewerParams.octree.drawCount += 1;
 	updateOctreeLoadingBar();
 

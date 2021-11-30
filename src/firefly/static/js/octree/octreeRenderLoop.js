@@ -34,7 +34,14 @@ function updateOctree(){
 		clearRemover();
 	}
 	//remove any nodes that are flagged for removal
-	if (viewerParams.octree.toRemove.length > 0 && viewerParams.octree.removeCount > viewerParams.octree.removeIndex) removeUnwantedNodes();
+	//but wait a few seconds in case nodes come back into view
+	if (viewerParams.octree.toRemove.length > 0 && viewerParams.octree.removeCount > viewerParams.octree.removeIndex && !viewerParams.octree.waitingToRemove) {
+		viewerParams.octree.waitingToRemove = true;
+		window.setTimeout(function(){
+			removeUnwantedNodes();
+			viewerParams.octree.waitingToRemove = false;
+		}, viewerParams.octree.removeTimeout*1000.);
+	}
 
 	//draw the nodes that are flagged for drawing
 	if (viewerParams.octree.toDraw.length > 0 && viewerParams.octree.drawCount > viewerParams.octree.drawIndex) {
@@ -65,13 +72,13 @@ function updateOctree(){
 				setNodeDrawParams(node);
 
 				//don't include any nodes that are marked for removal
-				if (!viewerParams.octree.toRemoveIDs.includes(p+node.id)){
+				//if (!viewerParams.octree.toRemoveIDs.includes(p+node.id)){
 					//toSort.push(node.cameraDistance/node.screenSize);
 					var NRenderDiff = viewerParams.octree.drawPass - node.drawPass;
 					var NPartsDiff = Math.max(node.NparticlesToRender - node.particles.Coordinates.length, 1.);
 					toSort.push(node.cameraDistance/(NRenderDiff*NRenderDiff)/NPartsDiff);
 					indices.push(i);
-				}
+				//}
 			});
 			//sort from big to small
 			//indices.sort(function (a, b) { return toSort[a] > toSort[b] ? -1 : toSort[a] < toSort[b] ? 1 : 0; });
@@ -92,11 +99,17 @@ function updateOctree(){
 							obj.geometry.setDrawRange( 0, node.NparticlesToRender*viewerParams.plotNmax[p]/100.*(1./viewerParams.decimate));
 							obj.material.uniforms.octreePointScale.value = node.particleSizeScale;
 							obj.material.needsUpdate = true;
+							if (viewerParams.octree.toRemoveIDs.includes(p+node.id)){
+								//remove from the toRemove list
+								const index = viewerParams.octree.toRemoveIDs.indexOf(p+node.id);
+								viewerParams.octree.toRemoveIDs.splice(index,1);
+								viewerParams.octree.toRemove.splice(index,1);
+							}
 							//maybe I should leave the particles in memory so that the GUI could work smoothly (if/when I connect things to this)
 							//if (node.particles.Coordinates.length >= node.NparticlesToRender) reduceOctreeParticles(node)
 						} else {
 							//particles to remove
-							if (viewerParams.octree.toRemove.length < viewerParams.octree.maxToRemove && node.particles.Coordinates.length > Math.floor(node.Nparticles*viewerParams.octree.minFracParticlesToDraw[p]) && !viewerParams.octree.toRemoveIDs.includes(p+node.id)){
+							if (viewerParams.octree.toRemove.length < viewerParams.octree.maxToRemove && node.particles.Coordinates.length > Math.floor(node.Nparticles*viewerParams.octree.minFracParticlesToDraw[p]) && !viewerParams.octree.toRemoveIDs.includes(p+node.id) && !viewerParams.octree.waitingToRemove){
 								//console.log('removing node', p, node.id, node.Nparticles, node.NparticlesToRender, node.particles.Coordinates.length, node.screenSize, node.inView)
 								viewerParams.octree.toRemove.push([p, node.id]); //will be removed later
 								viewerParams.octree.toRemoveIDs.push(p+node.id);
@@ -171,6 +184,7 @@ function clearRemover(){
 	viewerParams.octree.removeIndex = -1;
 	viewerParams.octree.toRemove = [];
 	viewerParams.octree.toRemoveIDs = [];
+	viewerParams.octree.waitingToRemove = false;
 }
 
 function removeDuplicatesFromScene(){
