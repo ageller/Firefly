@@ -21,10 +21,10 @@ function pruneOctree(tree, p, fname){
 	return out
 }
 
-function formatOctreeCSVdata(data){
+function formatOctreeCSVdata(data, p){
 	//these will be reset in the loop so that I can calculate a normalization
-	var maxV = -1.;
-	var minV = 1.e20;
+	// var maxV = -1.;
+	// var minV = 1.e20;
 	var vdif = 1.;
 
 	var out = {'Coordinates':[]};
@@ -49,12 +49,12 @@ function formatOctreeCSVdata(data){
 				var vy = parseFloat(d.vy);
 				var vz = parseFloat(d.vz);
 				var magV = Math.sqrt(vx*vx + vy*vy + vz*vz);
-				if (magV > maxV){
-					maxV = magV;
-				}
-				if (magV < minV){
-					minV = magV;
-				}
+				// if (magV > maxV){
+				// 	maxV = magV;
+				// }
+				// if (magV < minV){
+				// 	minV = magV;
+				// }
 				out.VelVals.push([vx, vy, vz]);
 				out.magVelocities.push(magV);
 			}
@@ -64,7 +64,13 @@ function formatOctreeCSVdata(data){
 		})
 	}
 
+
 	if (out.hasOwnProperty('VelVals')) {
+	//unlike for the normal particles, I will set the maxV and minV values based on the input filterLims
+	//otherwise, I would end up normalizing each node differently.
+		var minV = viewerParams.parts.options.filterLims[p].Velocities[0];
+		var maxV = viewerParams.parts.options.filterLims[p].Velocities[1];
+
 		vdif = Math.min(maxV - minV, viewerParams.maxVrange);
 		data.forEach(function(d, i){
 			out.NormVel.push( THREE.Math.clamp((out.magVelocities[i] - minV)/vdif, 0., 1.));

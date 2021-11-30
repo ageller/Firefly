@@ -69,7 +69,7 @@ function drawOctreeNode(node, updateGeo=false){
 		d3.csv(node.filename,function(d) {
 			// console.log('parts',id, d)
 			//reformat this to the usual Firefly structure with Coordinates as a list of lists
-			node.particles = formatOctreeCSVdata(d.slice(0,node.NparticlesToRender));
+			node.particles = formatOctreeCSVdata(d.slice(0,node.NparticlesToRender), node.particleType);
 			addOctreeParticlesToScene(node.particleType, node.particles, name, start, end, minSize, sizeScale, updateGeo);
 			node.drawn = true;
 			node.drawPass = viewerParams.octree.drawPass;
