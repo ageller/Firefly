@@ -237,7 +237,9 @@ class Settings(object):
         self,
         center=None,
         camera=None,
-        cameraRotation=None):
+        cameraRotation=None,
+        cameraUp=None,
+        quaternion=None):
         """Settings that affect the position and orientation of the camera
 
         :param center: do you want to explicilty define the initial camera focus/
@@ -250,12 +252,18 @@ class Settings(object):
         :param cameraRotation: can set camera rotation in units of radians 
             if you want, defaults to None
         :type cameraRotation: np.ndarray of shape (3), optional
+        :param cameraUp: set camera orientation (north vector) using a quaternion, defaults to None
+        :type cameraUp: np.ndarray of shape (3), optional
+        :param quaternion: can set camera rotation using a quaternion of form (w,x,y,z), defaults to None
+        :type quaternion: np.ndarray of shape (4), optional
         """
 
         self.__camera_settings = {
             'center':np.zeros(3) if center is None else center, 
             'camera':camera, 
             'cameraRotation':cameraRotation, 
+            'cameraUp':np.array([1,0,0]) if cameraUp is None else cameraUp,
+            'quaternion':np.array([0,1,0,0]) if quaternion is None else quaternion,
         }
 
     def startup_settings(
@@ -362,6 +370,7 @@ class Settings(object):
         self,
         filterLims=None,
         filterVals=None,
+        invertFilter=False,
         **extra):
         """Settings that will define the initial values of the filters in the particle UI panes
         and consequently what particles are filtered at startup.
@@ -378,11 +387,14 @@ class Settings(object):
             (e.g., {'Gas':{'log10Density':[.1,0.5],'magVelocities':[50, 60]}}),
             defaults to None and is set in the web app to [min, max] of that field
         :type filterVals: dict of UIname:dict of field:[min,max] range, optional
+        :param invertFilter: flag to invert the filter and *exclude* the [min,max] range
+        :type invertFilter: bool, optional
         """
 
         self.__particle_filter_settings = {
             'filterLims':dict() if filterLims is None else filterLims, 
             'filterVals':dict() if filterVals is None else filterVals, 
+            'invertFilter':invertFilter
         }
 
     def particle_colormap_settings(
