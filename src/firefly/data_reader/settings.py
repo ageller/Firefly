@@ -239,7 +239,8 @@ class Settings(object):
         camera=None,
         cameraRotation=None,
         cameraUp=None,
-        quaternion=None):
+        quaternion=None,
+        **extra):
         """Settings that affect the position and orientation of the camera
 
         :param center: do you want to explicilty define the initial camera focus/
@@ -275,6 +276,10 @@ class Settings(object):
         stereoSep=0.06,
         decimate=None,
         start_tween=False,
+        CDmin=0,
+        CDmax=1,
+        CDlognorm=0,
+        columnDensity=0,
         **extra):
         """General settings that affect the state app state
 
@@ -306,6 +311,18 @@ class Settings(object):
             requires a valid tweenParams.json file to be present in the JSONdir,
             defaults to False
         :type start_tween: bool, optional
+        :param CDmin: bottom of the renormalization for the experimental column density
+            projection mode, defaults to 0
+        :type CDmin: float, optional
+        :param CDmax: top of the renormalization for the experimental column density
+            projection mode, defaults to 1
+        :type CDmax: float, optional
+        :param CDlognorm: flag for whether renormalization should be done in log (``CDlognorm=1``)
+            or linear (``CDlognorm=0``) space, defaults to 0
+        :type CDmax: bool, optional
+        :param columnDensity: flag for whether the experimental column density projection mode
+            should be enabled at startup. Toggle this mode by pressing 'p' on the keyboard, defaults to 0
+        :type CDcolumnDensity: bool, optional
         """
 
         self.__startup_settings = {
@@ -315,7 +332,11 @@ class Settings(object):
             'stereo':stereo,
             'stereoSep':stereoSep,
             'decimate':decimate,
-            'start_tween':start_tween
+            'start_tween':start_tween,
+            'CDmin':CDmin,
+            'CDmax':CDmax,
+            'CDlognorm':CDlognorm,
+            'columnDensity':columnDensity
         }
     
     def particle_startup_settings(

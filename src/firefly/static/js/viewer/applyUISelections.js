@@ -450,6 +450,7 @@ function createPreset(){
 	preset.startFly = !viewerParams.useTrackball;
 	preset.cameraRotation = copyValue([viewerParams.camera.rotation.x, viewerParams.camera.rotation.y, viewerParams.camera.rotation.z]);
 	preset.cameraUp = copyValue([viewerParams.camera.up.x, viewerParams.camera.up.y, viewerParams.camera.up.z]);
+	preset.quaternion = copyValue([viewerParams.camera.quaternion.w,viewerParams.camera.quaternion.x, viewerParams.camera.quaternion.y, viewerParams.camera.quaternion.z]);
 
 	preset.friction = copyValue(viewerParams.friction);
 	preset.stereo = copyValue(viewerParams.useStereo);
