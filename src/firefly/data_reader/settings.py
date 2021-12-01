@@ -263,7 +263,7 @@ class Settings(object):
             'camera':camera, 
             'cameraRotation':cameraRotation, 
             'cameraUp':np.array([1,0,0]) if cameraUp is None else cameraUp,
-            'quaternion':np.array([0,1,0,0]) if quaternion is None else quaternion,
+            'quaternion':np.array([0,0,0,1]) if quaternion is None else quaternion,
         }
 
     def startup_settings(
