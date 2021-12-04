@@ -1,77 +1,38 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
   <title>Tutorial notebook: Managing Custom Settings &mdash; Firefly 2.0.0 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "document", "processHtmlClass": "math|output_area"}}</script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-
-    
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Managing multiple datasets" href="multiple_datasets.html" />
     <link rel="prev" title="Tutorial notebook: Using the Reader class" href="reader_tutorial.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../index.html">
-          
-
-          
-            
             <img src="../_static/logo_banner.png" class="logo" alt="Logo"/>
-          
           </a>
-
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -79,18 +40,7 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Quickstart</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../webapp/index.html">Using an existing instance of Firefly</a></li>
@@ -115,75 +65,32 @@
 <li class="toctree-l1"><a class="reference internal" href="../reference/api/api.html">API Reference</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">Firefly</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-        
           <li><a href="index.html">Creating your own instance of Firefly</a> &raquo;</li>
-        
           <li><a href="reader.html">Producing Firefly formatted <code class="code docutils literal notranslate"><span class="pre">.json</span></code> files using the <span class="xref std std-ref">Python API</span></a> &raquo;</li>
-        
       <li>Tutorial notebook: Managing Custom Settings</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="../_sources/data_reader/settings_tutorial.ipynb.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   
 <style>
 /* CSS for nbsphinx extension */
@@ -524,7 +431,7 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <section id="Tutorial-notebook:-Managing-Custom-Settings">
-<h1>Tutorial notebook: Managing Custom Settings<a class="headerlink" href="#Tutorial-notebook:-Managing-Custom-Settings" title="Permalink to this headline">¶</a></h1>
+<h1>Tutorial notebook: Managing Custom Settings<a class="headerlink" href="#Tutorial-notebook:-Managing-Custom-Settings" title="Permalink to this headline"></a></h1>
 <p>One of the core features of Firefly is the ability to customize the user interface (UI) and the startup behavior to make bespoke iterations of Firefly using ones own data. We have organized the different options that one can customize into different settings groups that fall into two categories: those that affect the app as a whole and those that are particular to an individual group of particles.</p>
 <table class="docutils align-default">
 <colgroup>
@@ -599,7 +506,7 @@ div.rendered_html tbody tr:hover {
 </pre></div></div>
 </div>
 <section id="Settings-can-be-changed-the-same-way-you-would-change-a-key-in-a-dictionary">
-<h2>Settings can be changed the same way you would change a key in a dictionary<a class="headerlink" href="#Settings-can-be-changed-the-same-way-you-would-change-a-key-in-a-dictionary" title="Permalink to this headline">¶</a></h2>
+<h2>Settings can be changed the same way you would change a key in a dictionary<a class="headerlink" href="#Settings-can-be-changed-the-same-way-you-would-change-a-key-in-a-dictionary" title="Permalink to this headline"></a></h2>
 <p>There is key validation (so you can’t attempt to set a setting that doesn’t exist) but there is no value validation, so be careful that you use appropriate values or your app might not work. See the settings documentation for details on what values each setting can take.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
@@ -639,7 +546,7 @@ annotation None
 </div>
 </section>
 <section id="Settings-are-most-useful-when-connected-to-a-Firefly.data_reader.Reader-object">
-<h2>Settings are most useful when connected to a <code class="docutils literal notranslate"><span class="pre">Firefly.data_reader.Reader</span></code> object<a class="headerlink" href="#Settings-are-most-useful-when-connected-to-a-Firefly.data_reader.Reader-object" title="Permalink to this headline">¶</a></h2>
+<h2>Settings are most useful when connected to a <code class="docutils literal notranslate"><span class="pre">Firefly.data_reader.Reader</span></code> object<a class="headerlink" href="#Settings-are-most-useful-when-connected-to-a-Firefly.data_reader.Reader-object" title="Permalink to this headline"></a></h2>
 <p>Doing so allows many of the necessary settings to be automatically generated as additional particle groups are added.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
@@ -816,7 +723,7 @@ You will need to add this settings filename to filenames.json if this was not ca
 </div>
 </section>
 <section id="Settings-can-also-be-imported-from-.json-files">
-<h2>Settings can also be imported from <code class="docutils literal notranslate"><span class="pre">.json</span></code> files<a class="headerlink" href="#Settings-can-also-be-imported-from-.json-files" title="Permalink to this headline">¶</a></h2>
+<h2>Settings can also be imported from <code class="docutils literal notranslate"><span class="pre">.json</span></code> files<a class="headerlink" href="#Settings-can-also-be-imported-from-.json-files" title="Permalink to this headline"></a></h2>
 <p>Only settings defined in the file will be overwritten, so you can also mix-and-match settings files.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
@@ -874,7 +781,7 @@ replacing showColormap
 </div>
 </section>
 <section id="Attaching-a-ParticleGroup-to-a-Settings">
-<h2>Attaching a ParticleGroup to a Settings<a class="headerlink" href="#Attaching-a-ParticleGroup-to-a-Settings" title="Permalink to this headline">¶</a></h2>
+<h2>Attaching a ParticleGroup to a Settings<a class="headerlink" href="#Attaching-a-ParticleGroup-to-a-Settings" title="Permalink to this headline"></a></h2>
 <p>One other thing you may want to do (perhaps in the course of building your own custom <code class="docutils literal notranslate"><span class="pre">Reader</span></code> sub-class) is link a <code class="docutils literal notranslate"><span class="pre">Firefly.data_reader.ParticleGroup</span></code> object to a <code class="docutils literal notranslate"><span class="pre">Settings</span></code> object so that the different particle settings can be imported. <code class="docutils literal notranslate"><span class="pre">ParticleGroup</span></code> settings can be changed in <code class="docutils literal notranslate"><span class="pre">settings_default</span></code> attribute (which is just a normal python dictionary).</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
@@ -941,50 +848,33 @@ showColormap {&#39;PGroup_0&#39;: False, &#39;PGroup_1&#39;: False, &#39;test&#3
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="multiple_datasets.html" class="btn btn-neutral float-right" title="Managing multiple datasets" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="reader_tutorial.html" class="btn btn-neutral float-left" title="Tutorial notebook: Using the Reader class" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="multiple_datasets.html" class="btn btn-neutral float-right" title="Managing multiple datasets" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2021, Alex Gurvich, Aaron Geller.
-
-    </p>
+    <p>&#169; Copyright 2021, Alex Gurvich, Aaron Geller.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

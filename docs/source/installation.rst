@@ -39,7 +39,7 @@ To install the latest stable release you can :code:`pip install` Firefly
 
 .. code-block:: bash
 
-    pip install firefly-vis
+    pip install firefly
 
 This is the preferred way to install Firefly as it will
 automatically install the necessary requirements and put Firefly
