@@ -174,13 +174,15 @@ function defineViewerParams(){
 		this.newInternalData = {};
 
 		// for debugging
-		this.showfps = false;
+		this.showfps = true;
 		this.fps_list = [];
 
 		//for octree
 		this.haveOctree = {}; //will be initialized to false for each of the parts keys in loadData
 		this.haveAnyOctree = false; //must be a better way to do this!
 		this.FPS = 30; //will be upated in the octree render loop
+		this.memoryUsage = 0; //if using Chrome, we can track the memory usage and try to avoid crashes
+
 		this.octree = new function() {
 
 			//these should be set from the Options file (and same with some below)
@@ -202,12 +204,22 @@ function defineViewerParams(){
 
 			//will contain a list of nodes that are drawn
 			this.alreadyDrawn = [];
+
 			this.toRemove = [];
 			this.toRemoveIDs = [];
 			this.waitingToRemove = false;
 			this.removeTimeout = 5; // time (seconds) to wait before removing nodes (in case viewer is moving camera around)
 			this.removeCount = 0;
 			this.removeIndex = -1;
+			this.maxToRemove = 50;
+
+			this.toReduce = [];
+			this.toReduceIDs = [];
+			this.reduceCount = 0;
+			this.reduceIndex = -1;
+			this.maxToReduce = 50;
+			this.reduceInterval;
+
 			this.toDraw = [];
 			this.toDrawIDs = [];
 			this.drawCount = 0;
@@ -216,7 +228,7 @@ function defineViewerParams(){
 			this.drawStartTime = 0;
 			this.maxDrawInterval = 10; //seconds
 			this.maxFilesToRead = 50;
-			this.maxToRemove = 50;
+
 			this.minDiffForUpdate = 100; //minumum number of particles that need to be different between drawn and expected for the node to be updated
 			this.maxUpdatesPerDraw = this.maxFilesToRead/2; //maximum number of updates to make during a draw loop, to make sure new nodes are always drawn
 			this.NUpdate = 0; //will cound the number of nodes needing updates in a render pass
@@ -228,6 +240,10 @@ function defineViewerParams(){
 			this.boxSize = 0; //will be set based on the root node
 			this.pIndex = 0; //will be used to increment through the particles in the render loop
 
+			this.memoryLimit = 2*1e9; //bytes, maximum memory allowed -- for now this is more like a target
+			this.NParticleMemoryModifier = 1.; //will be increased or decreased based on the current memory usage
+			this.NParticleMemoryModifierFac = 1.;
+			
 			this.loadingCount = {}; //will contain an array for each particle type that has the total inView and the total drawn to adjust the loading bar
 
 		}

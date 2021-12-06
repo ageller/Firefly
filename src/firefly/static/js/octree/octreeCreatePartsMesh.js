@@ -39,11 +39,22 @@ function addOctreeParticlesToScene(p, parts, name, start, end, minPointSize=view
 
 }
 
-function reduceOctreeParticles(node, N=null){
+function reduceOctreeParticles(node, N = null, recreateGeo = false){
 	if (N == null) N = node.NparticlesToRender;
 	Object.keys(node.particles).forEach(function(k){
-		if (N < node.particles[k].length) node.particles[k] = node.particles[k].slice(0, N);
+		if (N < node.particles[k].length) node.particles[k].splice(N);
 	})
+	if (recreateGeo){
+		var p = node.particleType;
+		var obj = viewerParams.scene.getObjectByName(p+node.id);
+		if (obj){
+			var geo = createParticleGeometry(p, node.particles, 0, node.NparticlesToRender);
+			obj.geometry.dispose()
+			obj.geometry = geo;
+			obj.geometry.setDrawRange( 0, node.NparticlesToRender*viewerParams.plotNmax[p]/100.*(1./viewerParams.decimate));
+			obj.geometry.needsUpdate = true;
+		}
+	}
 }
 
 function drawOctreeNode(node, updateGeo=false){

@@ -29,14 +29,14 @@ canvas{
 
 #fps_container{
         position:absolute;
-        width:auto;
+        width:150px;
         text-align:center;
         color:black;
         display:none;
         margin-top:0px;
         padding:3px;
-		transform: translate(-100%, 0%);
-		margin-left: 99.5%;
+	transform: translate(-100%, 0%);
+	margin-left: 99.5%;
 }
 
 #sleep{

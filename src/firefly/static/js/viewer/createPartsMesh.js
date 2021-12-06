@@ -66,17 +66,21 @@ function createParticleGeometry(p, parts, start, end){
 	var aindex = 0;
 
 	for (var j=0; j<len; j++){
-		position[pindex++] = parseFloat(parts.Coordinates[j][0]);
-		position[pindex++] = parseFloat(parts.Coordinates[j][1]);
-		position[pindex++] = parseFloat(parts.Coordinates[j][2]);
+		if (!isNaN(parts.Coordinates[j][0])){
+			position[pindex++] = parseFloat(parts.Coordinates[j][0]);
+			position[pindex++] = parseFloat(parts.Coordinates[j][1]);
+			position[pindex++] = parseFloat(parts.Coordinates[j][2]);
+		}
 
 		//pointIndex[j] = parseFloat(j);
 
 		if (parts.hasOwnProperty("VelVals")){
-			velVals[vindex++] = parts.VelVals[j][0]/parts.magVelocities[j];
-			velVals[vindex++] = parts.VelVals[j][1]/parts.magVelocities[j];
-			velVals[vindex++] = parts.VelVals[j][2]/parts.magVelocities[j];
-			velVals[vindex++] = parts.NormVel[j];
+			if (!isNaN(parts.VelVals[j][0])){
+				velVals[vindex++] = parts.VelVals[j][0]/parts.magVelocities[j];
+				velVals[vindex++] = parts.VelVals[j][1]/parts.magVelocities[j];
+				velVals[vindex++] = parts.VelVals[j][2]/parts.magVelocities[j];
+				velVals[vindex++] = parts.NormVel[j];
+			}
 		}
 
 		// fill flattened color array from pre-computed colormap values

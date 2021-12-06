@@ -389,11 +389,17 @@ function update_framerate(seconds,time){
 	viewerParams.fps_list.push(1/(seconds-viewerParams.currentTime));
 	viewerParams.fps_list = viewerParams.fps_list.slice(-100);
 
-	// fill FPS container div with calculated FPS
+	viewerParams.FPS = viewerParams.fps_list.reduce((a, b) => a + b, 0)/viewerParams.fps_list.length;
+
+	//also update the memory usage (could do this in a separate function to keep it clean)
+	if (window.performance.memory) viewerParams.memoryUsage = window.performance.memory.totalJSHeapSize;
+
+	// fill FPS container div with calculated FPS and memory usage
 	if (viewerParams.showfps){
+		var txt = Math.round(viewerParams.FPS) + ' fps'
+		if (viewerParams.memoryUsage > 0) txt += ', ' + (Math.round(viewerParams.memoryUsage/1e9*100.)/100.).toFixed(2) + ' Gb'
 		elm = document.getElementById("fps_container");
-		elm.innerHTML=Math.round(
-			viewerParams.fps_list.reduce((a, b) => a + b, 0)/viewerParams.fps_list.length);
+		elm.innerHTML = txt;
 		elm.style.display='block';
 	}
 
