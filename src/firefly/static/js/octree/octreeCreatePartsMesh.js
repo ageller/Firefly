@@ -37,9 +37,11 @@ function addOctreeParticlesToScene(p, parts, name, start, end, minPointSize=view
 	viewerParams.octree.drawCount += 1;
 	updateOctreeLoadingBar();
 
+	viewerParams.octree.waitingToDraw = false;
+
 }
 
-function reduceOctreeParticles(node, N = null, recreateGeo = false){
+function reduceOctreeParticles(node, N = null, recreateGeo = false, callback = null){
 	if (N == null) N = node.NparticlesToRender;
 	Object.keys(node.particles).forEach(function(k){
 		if (N < node.particles[k].length) node.particles[k].splice(N);
@@ -55,6 +57,9 @@ function reduceOctreeParticles(node, N = null, recreateGeo = false){
 			obj.geometry.needsUpdate = true;
 		}
 	}
+
+	if (callback) callback();
+
 }
 
 function drawOctreeNode(node, updateGeo=false){
@@ -153,6 +158,16 @@ function disposeOctreeNodes(p){
 		viewerParams.octree.toRemove.splice(i,1);
 	})
 
+	var indices = [];
+	viewerParams.octree.toRemoveTmpIDs.forEach(function(iden,i){
+		if (iden.includes(p)) indices.push(i);
+	})
+	indices.forEach(function(i){
+		viewerParams.octree.toRemoveTmpIDs.splice(i,1);
+		viewerParams.octree.toRemoveTmp.splice(i,1);
+	})
+
+
 	indices = [];
 	viewerParams.octree.toReduceIDs.forEach(function(iden,i){
 		if (iden.includes(p)) indices.push(i);
@@ -171,7 +186,7 @@ function disposeOctreeNodes(p){
 		viewerParams.octree.toDrawIDs.splice(i,1);
 		viewerParams.octree.toDraw.splice(i,1);
 	})
-	
+
 	//for loading bar
 	viewerParams.octree.loadingCount[p][1]  = 0;
 	updateOctreeLoadingBar();

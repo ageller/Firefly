@@ -207,27 +207,26 @@ function defineViewerParams(){
 
 			this.toRemove = [];
 			this.toRemoveIDs = [];
-			this.waitingToRemove = false;
-			this.removeTimeout = 5; // time (seconds) to wait before removing nodes (in case viewer is moving camera around)
-			this.removeCount = 0;
-			this.removeIndex = -1;
 			this.maxToRemove = 50;
+			this.waitingToRemove = false;
+
+			this.removeTimeout = 2; //(s) to wait to add to the remove list (in case the user just moves around a litte)
+			this.toRemoveTmp = [];
+			this.toRemoveTmpIDs = [];
+			this.waitingToAddToRemove = false;
 
 			this.toReduce = [];
 			this.toReduceIDs = [];
-			this.reduceCount = 0;
-			this.reduceIndex = -1;
 			this.maxToReduce = 50;
-			this.reduceInterval;
+			this.waitingToReduce = false;
 
 			this.toDraw = [];
 			this.toDrawIDs = [];
-			this.drawCount = 0;
-			this.drawIndex = -1;
-			this.drawPass = 1;
-			this.drawStartTime = 0;
-			this.maxDrawInterval = 10; //seconds
 			this.maxFilesToRead = 50;
+			this.waitingToDraw = false;
+			this.lastDrawnID = '';
+
+			this.drawPass = 1;
 
 			this.minDiffForUpdate = 100; //minumum number of particles that need to be different between drawn and expected for the node to be updated
 			this.maxUpdatesPerDraw = this.maxFilesToRead/2; //maximum number of updates to make during a draw loop, to make sure new nodes are always drawn
@@ -240,7 +239,7 @@ function defineViewerParams(){
 			this.boxSize = 0; //will be set based on the root node
 			this.pIndex = 0; //will be used to increment through the particles in the render loop
 
-			this.memoryLimit = 6*1e9; //bytes, maximum memory allowed -- for now this is more like a target
+			this.memoryLimit = 4*1e9; //bytes, maximum memory allowed -- for now this is more like a target
 			this.NParticleMemoryModifier = 1.; //will be increased or decreased based on the current memory usage
 			this.NParticleMemoryModifierFac = 1.;
 
