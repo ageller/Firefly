@@ -13,8 +13,8 @@ function updateOctree(){
 		d3.selectAll('.octreeLoadingFill').classed('octreeLoadingPaused', true);
 	}
 	//I need some way to bring the particle number back up without entering into a loop!
-	if (viewerParams.memoryUsage < 0.75*viewerParams.octree.memoryLimit) {
-		viewerParams.octree.NParticleMemoryModifier = THREE.Math.clamp(viewerParams.octree.NParticleMemoryModifierFac*2., 0., 1.);
+	if (viewerParams.memoryUsage < 1.8*viewerParams.octree.memoryLimit) {
+		viewerParams.octree.NParticleMemoryModifier = THREE.Math.clamp(viewerParams.octree.NParticleMemoryModifier*1.1, 0., 1.);
 	}
 
 	//tweak the number of particles based on the fps
