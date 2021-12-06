@@ -2,11 +2,15 @@ function updateOctree(){
 
 	//FPS and memoryUsage updated in main render loop of update_framerate
 	//if (viewerParams.FPS < viewerParams.octree.targetFPS) console.log('!!! WARNING, low fps', viewerParams.FPS)
+	d3.selectAll('.octreeLoadingText').classed('octreeLoadingPaused', false);
+	d3.selectAll('.octreeLoadingFill').classed('octreeLoadingPaused', false);
+	//allow a few draw passes because it seems that the browser doesn't always reset right away
+	if (viewerParams.octree.drawPass < 20) viewerParams.memoryUsage = 0;
 	if (viewerParams.memoryUsage > viewerParams.octree.memoryLimit) {
-		//allow a few draw passes because it seems that the browser doesn't always reset right away
-		if (viewerParams.octree.drawPass < 20) viewerParams.memoryUsage = 0;
 		//console.log('!!! WARNING, exceeded memory limit (Gb)', viewerParams.memoryUsage/1e9);
 		viewerParams.octree.NParticleMemoryModifier = THREE.Math.clamp(viewerParams.octree.NParticleMemoryModifierFac*viewerParams.octree.memoryLimit/viewerParams.memoryUsage, 0., 1.);
+		d3.selectAll('.octreeLoadingText').classed('octreeLoadingPaused', true);
+		d3.selectAll('.octreeLoadingFill').classed('octreeLoadingPaused', true);
 	}
 	//tweak the number of particles based on the fps
 	//not sure what limits I should set here
@@ -132,6 +136,7 @@ function updateOctree(){
 						//reduce in number
 						//should I remove the particles from memory? (or maybe I should leave them to allow for smoother interaction with GUI?)
 						if (!viewerParams.octree.toReduceIDs.includes(p+node.id) && !viewerParams.octree.toRemoveIDs.includes(p+node.id) && viewerParams.octree.toReduce.length < viewerParams.octree.maxToReduce && !viewerParams.octree.toRemoveIDs.includes(p+node.id) && (node.particles.Coordinates.length - node.NparticlesToRender) > viewerParams.octree.minDiffForUpdate) {
+							//console.log('reducing node', p, node.id, node.Nparticles, node.NparticlesToRender, node.particles.Coordinates.length, node.particles.Coordinates.length - node.NparticlesToRender)
 							viewerParams.octree.toReduce.push([p, node.id]); //will be reduced later
 							viewerParams.octree.toReduceIDs.push(p+node.id);
 						} 
@@ -286,6 +291,7 @@ function removeDuplicatesFromScene(){
 				if (obj) {
 					//console.log('removing object from scene', obj.name, obj)
 					obj.geometry.dispose();
+					obj.material.dispose();
 					viewerParams.scene.remove(obj);
 				} else {
 					console.log('=======WARNING : DID NOT FIND NODE', iden)
@@ -304,6 +310,7 @@ function removeDuplicatesFromScene(){
 					//console.log('removing object from parts', obj.name, obj)
 					if (obj){
 						obj.geometry.dispose();
+						obj.material.dispose();
 						viewerParams.scene.remove(obj);	
 						viewerParams.partsMesh[p].splice(j,1);
 					}
@@ -475,7 +482,8 @@ function setNodeDrawParams(node){
 	NparticlesToRender = Math.min(node.Nparticles, Math.floor(node.Nparticles*viewerParams.octree.normCameraDistance[p]/node.cameraDistance*viewerParams.octree.NParticleFPSModifier));
 
 	//modify number of distant particles based on FPS
-	if (node.cameraDistance > viewerParams.octree.normCameraDistance[p] && viewerParams.FPS < viewerParams.octree.targetFPS) NparticlesToRender *= viewerParams.FPS/viewerParams.octree.targetFPS;
+	//any modifications based on FPS causes looping where it reduces the particle number, FPS grows, then it redraws, then FPS goes down, and repeat
+	//if (node.cameraDistance > viewerParams.octree.normCameraDistance[p] && viewerParams.FPS < viewerParams.octree.targetFPS) NparticlesToRender *= viewerParams.FPS/viewerParams.octree.targetFPS;
 
 	//modify number of particles based on memory usase
 	NparticlesToRender *= viewerParams.octree.NParticleMemoryModifier

@@ -240,10 +240,10 @@ function defineViewerParams(){
 			this.boxSize = 0; //will be set based on the root node
 			this.pIndex = 0; //will be used to increment through the particles in the render loop
 
-			this.memoryLimit = 2*1e9; //bytes, maximum memory allowed -- for now this is more like a target
+			this.memoryLimit = 6*1e9; //bytes, maximum memory allowed -- for now this is more like a target
 			this.NParticleMemoryModifier = 1.; //will be increased or decreased based on the current memory usage
 			this.NParticleMemoryModifierFac = 1.;
-			
+
 			this.loadingCount = {}; //will contain an array for each particle type that has the total inView and the total drawn to adjust the loading bar
 
 		}

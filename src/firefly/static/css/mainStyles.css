@@ -232,3 +232,7 @@ a{
 a:visited {
 	color: var(--logo-color1);
 }
+
+.octreeLoadingPaused{
+	fill: gray;
+}

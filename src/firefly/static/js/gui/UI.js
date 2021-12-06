@@ -675,6 +675,28 @@ function fillParticleDropdown(controls,p){
 		.attr('id',p+'Dropdown')
 		.attr('class','dropdown-content');
 
+	var dheight = 0;
+
+	// for octree add a button to dispose of the nodes from memory
+	if (GUIParams.haveOctree[p]) {
+
+		var clearMem = dropdown.append('div')
+			.attr('id',p+'_disposer')
+		var b = clearMem.append('button')
+			.attr('class','button centerButton')
+			.style('margin','10px')
+			.style('width',(GUIParams.containerWidth - 40) + 'px')
+			.on('click',function(){disposeOctreeNodes(p)})
+		b.append('span').text('Clear from memory')
+
+		dropdown.append('hr')
+			.style('margin','0')
+			.style('border','1px solid #909090')
+			
+		dheight += 45;
+
+	}
+
 	// add max number of particles slider 
 	dNcontent = dropdown.append('div')
 		.attr('class','NdDiv');
@@ -697,7 +719,9 @@ function fillParticleDropdown(controls,p){
 		.attr('class', 'NMaxTClass')
 		.attr('type','text');
 
-	var dheight = 45; // height of the max particles section
+	dheight += 45; // height of the max particles section
+
+
 
 	// velocity vectors
 	if (GUIParams.haveVelocities[p]){

@@ -1461,6 +1461,7 @@ function createOctreeLoadingBar(){
 				.attr('stroke-width', '1')
 			svg.append('rect')
 				.attr('id',p + 'octreeLoadingFill')
+				.attr('class','octreeLoadingFill')
 				.attr('x', '10px')
 				.attr('y', (nRects*(height + offset) + margin) + 'px')
 				.attr('width','0px') //will be updated
@@ -1468,6 +1469,7 @@ function createOctreeLoadingBar(){
 				.attr('fill','rgb(' + (255*viewerParams.Pcolors[p][0]) + ',' + (255*viewerParams.Pcolors[p][1]) + ',' + (255*viewerParams.Pcolors[p][2]) + ')')
 			svg.append('text')
 				.attr('id',p + 'octreeLoadingText')
+				.attr('class','octreeLoadingText')
 				.attr('x', (width + margin + offset) + 'px')
 				.attr('y', (nRects*(height + offset) + margin + 0.75*height) + 'px')
 				.attr('fill','rgb(' + (255*viewerParams.Pcolors[p][0]) + ',' + (255*viewerParams.Pcolors[p][1]) + ',' + (255*viewerParams.Pcolors[p][2]) + ')')

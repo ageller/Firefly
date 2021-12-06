@@ -1,17 +1,20 @@
+function initNode(node, p){
+	//set default values
+	node.NparticlesToRender = Math.floor(node.Nparticles*viewerParams.octree.minFracParticlesToDraw[p]);;
+	node.particleSizeScale = 1.;
+	node.particleType = p;
+	node.inView = true;
+	node.particles = {'Coordinates':[]};
+	node.drawn = false;
+	node.drawPass = 0;
+}
 function pruneOctree(tree, p, fname){
 	var out = [];
 	var p1 =  fname.lastIndexOf('/');
 	var fileRoot = fname.substring(0,p1);
 	tree.forEach(function(d){
-		//also set these default values
-		d.NparticlesToRender = Math.floor(d.Nparticles*viewerParams.octree.minFracParticlesToDraw[p]);;
-		d.particleSizeScale = 1.;
-		d.particleType = p;
-		d.inView = true;
 		d.filename = fileRoot + '/' + d.id + '.csv';
-		d.particles = {'Coordinates':[]};
-		d.drawn = false;
-		d.drawPass = 0;
+		initNode(d, p);
 		if (d.Nparticles > 0) out.push(d);
 	})
 
@@ -68,13 +71,18 @@ function formatOctreeCSVdata(data, p){
 	if (out.hasOwnProperty('VelVals')) {
 	//unlike for the normal particles, I will set the maxV and minV values based on the input filterLims
 	//otherwise, I would end up normalizing each node differently.
-		var minV = viewerParams.parts.options.filterLims[p].Velocities[0];
-		var maxV = viewerParams.parts.options.filterLims[p].Velocities[1];
+		if (viewerParams.parts.options.filterLims[p].hasOwnProperty('Velocities')){
+			var minV = viewerParams.parts.options.filterLims[p].Velocities[0];
+			var maxV = viewerParams.parts.options.filterLims[p].Velocities[1];
 
-		vdif = Math.min(maxV - minV, viewerParams.maxVrange);
-		data.forEach(function(d, i){
-			out.NormVel.push( THREE.Math.clamp((out.magVelocities[i] - minV)/vdif, 0., 1.));
-		});
+			vdif = Math.min(maxV - minV, viewerParams.maxVrange);
+			data.forEach(function(d, i){
+				out.NormVel.push( THREE.Math.clamp((out.magVelocities[i] - minV)/vdif, 0., 1.));
+			});
+		} else {
+			out.NormVel.push(1.);
+			console.log('!!! WARNING, trying to set velocities without filterLims', p, viewerParams.parts.options.filterLims[p], out, data)
+		}
 	}
 
 	return out;

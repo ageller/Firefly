@@ -48,10 +48,10 @@ function reduceOctreeParticles(node, N = null, recreateGeo = false){
 		var p = node.particleType;
 		var obj = viewerParams.scene.getObjectByName(p+node.id);
 		if (obj){
-			var geo = createParticleGeometry(p, node.particles, 0, node.NparticlesToRender);
+			var geo = createParticleGeometry(p, node.particles, 0, N);
 			obj.geometry.dispose()
 			obj.geometry = geo;
-			obj.geometry.setDrawRange( 0, node.NparticlesToRender*viewerParams.plotNmax[p]/100.*(1./viewerParams.decimate));
+			obj.geometry.setDrawRange( 0, N*viewerParams.plotNmax[p]/100.*(1./viewerParams.decimate));
 			obj.geometry.needsUpdate = true;
 		}
 	}
@@ -77,7 +77,7 @@ function drawOctreeNode(node, updateGeo=false){
 	if (!node.drawn){
 		//read in the file, and then draw the particles
 		d3.csv(node.filename,function(d) {
-			// console.log('parts',id, d)
+			//console.log('checking parts',node.particleType, node.filename)
 			//reformat this to the usual Firefly structure with Coordinates as a list of lists
 			node.particles = formatOctreeCSVdata(d.slice(0,node.NparticlesToRender), node.particleType);
 			addOctreeParticlesToScene(node.particleType, node.particles, name, start, end, minSize, sizeScale, updateGeo);
@@ -117,3 +117,62 @@ function octreeParticleInFilter(p, parts, j){
 
 
 
+function disposeOctreeNodes(p){
+	console.log('disposing of all nodes ', p);
+	var sceneRemove = [];
+	viewerParams.scene.traverse(function(obj){
+		if (obj.name.includes(p)){
+			//remove from scene memory
+			obj.geometry.dispose();
+			obj.material.dispose();
+			sceneRemove.push(obj);
+
+			//remove from node memory
+			var iden = obj.name.replace(p,'');
+			var node = null;
+			viewerParams.octree.nodes[p].forEach(function(n){
+				if (n.id == iden) node = n;
+			})
+			if (node) initNode(node, p)
+
+		}
+	})
+
+	//remove any remnant from scene (can't do this in the traverse loop)
+	sceneRemove.forEach(function(obj){
+		viewerParams.scene.remove(obj);
+	})
+
+	//remove from any of the draw/remove/reduce arrays
+	var indices = [];
+	viewerParams.octree.toRemoveIDs.forEach(function(iden,i){
+		if (iden.includes(p)) indices.push(i);
+	})
+	indices.forEach(function(i){
+		viewerParams.octree.toRemoveIDs.splice(i,1);
+		viewerParams.octree.toRemove.splice(i,1);
+	})
+
+	indices = [];
+	viewerParams.octree.toReduceIDs.forEach(function(iden,i){
+		if (iden.includes(p)) indices.push(i);
+	})
+	indices.forEach(function(i){
+		viewerParams.octree.toReduceIDs.splice(i,1);
+		viewerParams.octree.toReduce.splice(i,1);
+	})
+
+
+	indices = [];
+	viewerParams.octree.toDrawIDs.forEach(function(iden,i){
+		if (iden.includes(p)) indices.push(i);
+	})
+	indices.forEach(function(i){
+		viewerParams.octree.toDrawIDs.splice(i,1);
+		viewerParams.octree.toDraw.splice(i,1);
+	})
+	
+	//for loading bar
+	viewerParams.octree.loadingCount[p][1]  = 0;
+	updateOctreeLoadingBar();
+}
