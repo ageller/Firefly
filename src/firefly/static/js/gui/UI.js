@@ -686,13 +686,15 @@ function fillParticleDropdown(controls,p){
 			.attr('class','button centerButton')
 			.style('margin','10px')
 			.style('width',(GUIParams.containerWidth - 40) + 'px')
-			.on('click',function(){disposeOctreeNodes(p)})
+			.on('click',function(){
+				sendToViewer([{'disposeOctreeNodes':[p]}]);
+			})
 		b.append('span').text('Clear from memory')
 
 		dropdown.append('hr')
 			.style('margin','0')
 			.style('border','1px solid #909090')
-			
+
 		dheight += 45;
 
 	}
