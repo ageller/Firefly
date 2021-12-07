@@ -115,3 +115,9 @@ function calcOctreeVelVals(p){
 		viewerParams.parts[p].NormVel.push( THREE.Math.clamp((viewerParams.parts[p].magVelocities[i] - min) / vdif, 0., 1.));
 	}
 }
+
+function updateOctreeDecimationSpan(){
+	var num = (1./viewerParams.octree.NParticleMemoryModifier).toFixed(2);
+	if (num > 10000) num = '> 10,000'
+	d3.select('#decimationOctreeSpan').text(num)
+}

@@ -794,7 +794,7 @@ function fillParticleDropdown(controls,p){
 	// velocity vectors
 	if (GUIParams.haveVelocities[p]){
 		fillVelocityVectorDropdown(dropdown,p);
-		dheight += 120;
+		dheight += 150;
 	}
 
 	// colormap
@@ -874,6 +874,22 @@ function fillVelocityVectorDropdown(dropdown,p){
 		.attr('id',p+'_VelWidthMaxT')
 		.attr('class', 'NMaxTClass')
 		.attr('type','text');
+
+	dVGcontent = dropdown.append('div')
+		.attr('class','NdDiv');
+
+	dVGcontent.append('input')
+		.attr('id',p+'velGradientCheckBox')
+		.attr('value','false')
+		.attr('type','checkbox')
+		.attr('autocomplete','off')
+		.on('change',function(){
+			sendToViewer([{'toggleVelocityGradient':[p, this.checked]}]);
+		})
+
+	dVGcontent.append('label')
+		.attr('for',p+'velGradientCheckBox')
+		.text('Apply Gradient to Vectors');
 
 	// add velocity animator checkbox
 	dAVcontent = dropdown.append('div')

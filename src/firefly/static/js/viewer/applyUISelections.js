@@ -220,6 +220,15 @@ function toggleVelocityAnimation(args){
 	}
 }
 
+//turn on/off velocity gradient
+function toggleVelocityGradient(args){
+	var p = args[0];
+	var checked = args[1];
+	viewerParams.velGradient[p] = 0;
+	if (checked){
+		viewerParams.velGradient[p] = 1;
+	}
+}
 //turn on/off the colormap
 function checkColormapBox(args){
 	var p = args[0];
@@ -345,11 +354,6 @@ function updateVelocityVectorWidth(args){
 	var value = args[0];
 	var p = args[1];
 	viewerParams.velVectorWidth[p] = parseFloat(value);
-
-	viewerParams.partsMesh[p].forEach( function( m, j ) {
-		m.material.uniforms.velVectorWidth.value = viewerParams.velVectorWidth[p];
-		m.material.needsUpdate = true;
-	});
 }
 
 //apply the options file to the UI
@@ -600,6 +604,7 @@ function updateMemoryLimit(value){
 	viewerParams.octree.memoryLimit = parseFloat(value*1e9);
 	viewerParams.octree.NParticleMemoryModifierFac = 1.;
 	viewerParams.octree.NParticleMemoryModifier = THREE.Math.clamp(viewerParams.octree.NParticleMemoryModifierFac*viewerParams.octree.memoryLimit/viewerParams.memoryUsage, 0., 1.);
+	updateOctreeDecimationSpan();
 }
 
 function updateNormCameraDistance(vals){

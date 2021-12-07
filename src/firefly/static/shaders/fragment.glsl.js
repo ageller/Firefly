@@ -19,6 +19,7 @@ uniform bool columnDensity;
 uniform float scaleCD;
 
 uniform float velVectorWidth;
+uniform float velGradient;
 
 //http://www.neilmendoza.com/glsl-rotation-about-an-arbitrary-axis/
 mat4 rotationMatrix(vec3 axis, float angle)
@@ -107,8 +108,11 @@ void main(void) {
 				discard;
 			} 
 		} 
-		//gl_FragColor.rgb +=  (1. - posRot.x/vSize); //white at tail
-		//gl_FragColor.rgb +=  0.4*posRot.x/vSize; //whiter at head
+		
+		if (velGradient > 0.5){
+			//gl_FragColor.rgb +=  (1. - posRot.x/vSize); //white at tail
+			gl_FragColor.rgb +=  0.4*posRot.x/vSize; //whiter at head
+		}
 		//gl_FragColor.a = posRot.x/vSize;
 	}
 	gl_FragColor.a *= vAlpha;

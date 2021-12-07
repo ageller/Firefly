@@ -168,6 +168,7 @@ function createParticleMaterial(p, minPointSize=1, octreePointScale=1.){
 			octreePointScale: {value: octreePointScale},
 			velTime: {value: viewerParams.animateVelTime},
 			velVectorWidth: {value: viewerParams.velVectorWidth[p]},
+			velGradient: {value: viewerParams.velGradient[p]},
 
 		},
 

@@ -242,6 +242,11 @@ function update_particle_mesh_velocity_vectors(p,m,cameraX,cameraY,time){
 		m.material.uniforms.cameraY.value = [cameraY.x,cameraY.y,cameraY.z];
 		// scale maximum velocity vector length
 		m.material.uniforms.uVertexScale.value *= viewerParams.vSizeMult;
+
+		//update the vector width
+		m.material.uniforms.velVectorWidth.value = viewerParams.velVectorWidth[p];
+		//update the gradient 
+		m.material.uniforms.velGradient.value = viewerParams.velGradient[p];
 	} 
 	else{
 		// disable velocity vectors
