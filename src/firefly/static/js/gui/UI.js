@@ -855,7 +855,7 @@ function fillParticleDropdown(controls,p){
 	// filters
 	if (GUIParams.haveFilter[p]){
 		fillFilterDropdown(dropdown,p);
-		dheight += 75;
+		dheight += 115;
 	} 
 	
 	dropdown.style('height',dheight+'px');
@@ -1114,27 +1114,13 @@ function fillFilterDropdown(dropdown,p){
 		.append('option')
 			.text(function (d) { return d; });
 
+	var invFilter = dropdown.append('div')
+		.attr('class','NdDiv');
 
 	var filtn = 0;
 	// create sliders for each of the filters
 	GUIParams.fkeys[p].forEach(function(fk){
 		if (GUIParams.haveFilterSlider[p][fk] != null){
-
-			invFilter = filterDiv.append('label')
-				.attr('for',p+'_FK_'+fk+'_'+'InvertFilterCheckBox')
-				.attr('id',p+'_FK_'+fk+'_END_InvertFilterCheckBoxLabel')
-				.style('display','inline-block')
-				.style('margin-left','160px')
-				.text('Invert');
-
-			invFilter.append('input')
-				.attr('id',p+'_FK_'+fk+'_END_InvertFilterCheckBox')
-				.attr('value','false')
-				.attr('type','checkbox')
-				.attr('autocomplete','off')
-				.on('change',function(){
-					sendToViewer([{'checkInvertFilterBox':[p, fk, this.checked]}]);
-				})
 
 			dfilters = filterDiv.append('div')
 				.attr('id',p+'_FK_'+fk+'_END_Filter')
@@ -1157,6 +1143,20 @@ function fillFilterDropdown(dropdown,p){
 				.attr('id',p+'_FK_'+fk+'_END_FilterMaxT')
 				.attr('class','FilterMaxTClass')
 				.attr('type','text');
+
+			invFilter.append('input')
+				.attr('id',p+'_FK_'+fk+'_END_InvertFilterCheckBox')
+				.attr('value','false')
+				.attr('type','checkbox')
+				.attr('autocomplete','off')
+				.on('change',function(){
+					sendToViewer([{'checkInvertFilterBox':[p, fk, this.checked]}]);
+				})
+			invFilter.append('label')
+				.attr('for',p+'_FK_'+fk+'_'+'InvertFilterCheckBox')
+				.attr('id',p+'_FK_'+fk+'_END_InvertFilterCheckBoxLabel')
+				.style('display','inline-block')
+				.text('Invert Filter');
 
 			filtn += 1;
 
