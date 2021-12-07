@@ -63,32 +63,42 @@ function reduceOctreeParticles(node, N = null, recreateGeo = false, callback = n
 }
 
 function drawOctreeNode(node, updateGeo=false){
-
-	node.drawn = false;
-	var start = 0;
-	var end = node.NparticlesToRender;
-	var minSize = viewerParams.octree.defaultMinParticleSize;
-	var sizeScale = node.particleSizeScale;
+	
 	var name = node.particleType + node.id;
 
-	if (node.hasOwnProperty('particles')){
-		if (node.particles.Coordinates.length >= node.NparticlesToRender){
-			addOctreeParticlesToScene(node.particleType, node.particles, name, start, end, minSize, sizeScale, updateGeo);
-			node.drawn = true;
-			node.drawPass = viewerParams.octree.drawPass;
-		}
-	}
+	var doDraw = true;
+	//one final check to see if the node is already in the scene
+	viewerParams.scene.traverse(function(obj){
+		if (obj.name == name) doDraw = false;
+	})
 
-	if (!node.drawn){
-		//read in the file, and then draw the particles
-		d3.csv(node.filename,function(d) {
-			//console.log('checking parts',node.particleType, node.filename)
-			//reformat this to the usual Firefly structure with Coordinates as a list of lists
-			node.particles = formatOctreeCSVdata(d.slice(0,node.NparticlesToRender), node.particleType);
-			addOctreeParticlesToScene(node.particleType, node.particles, name, start, end, minSize, sizeScale, updateGeo);
-			node.drawn = true;
-			node.drawPass = viewerParams.octree.drawPass;
-		})
+	if (doDraw || updateGeo){
+		node.drawn = false;
+		var start = 0;
+		var end = node.NparticlesToRender;
+		var minSize = viewerParams.octree.defaultMinParticleSize;
+		var sizeScale = node.particleSizeScale;
+		var name = node.particleType + node.id;
+
+		if (node.hasOwnProperty('particles')){
+			if (node.particles.Coordinates.length >= node.NparticlesToRender){
+				addOctreeParticlesToScene(node.particleType, node.particles, name, start, end, minSize, sizeScale, updateGeo);
+				node.drawn = true;
+				node.drawPass = viewerParams.octree.drawPass;
+			}
+		}
+
+		if (!node.drawn){
+			//read in the file, and then draw the particles
+			d3.csv(node.filename,function(d) {
+				//console.log('checking parts',node.particleType, node.filename)
+				//reformat this to the usual Firefly structure with Coordinates as a list of lists
+				node.particles = formatOctreeCSVdata(d.slice(0,node.NparticlesToRender), node.particleType);
+				addOctreeParticlesToScene(node.particleType, node.particles, name, start, end, minSize, sizeScale, updateGeo);
+				node.drawn = true;
+				node.drawPass = viewerParams.octree.drawPass;
+			})
+		}
 	}
 
 }
@@ -190,4 +200,9 @@ function disposeOctreeNodes(p){
 	//for loading bar
 	viewerParams.octree.loadingCount[p][1]  = 0;
 	updateOctreeLoadingBar();
+
+	//I think I should reset this just in case
+	viewerParams.octree.waitingToDraw = false;
+	viewerParams.octree.waitingToReduce = false;
+	viewerParams.octree.waitingToRemove = false;
 }
