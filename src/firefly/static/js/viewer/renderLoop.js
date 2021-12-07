@@ -20,6 +20,12 @@ function animate(time) {
 		// get the memory usage
 		update_memory_usage();
 
+		// velocity animation
+		//console.log('before', viewerParams.animateVelTime, viewerParams.animateVelDt, viewerParams.animateVelTmax)
+		viewerParams.animateVelTime = (viewerParams.animateVelTime + viewerParams.animateVelDt) % viewerParams.animateVelTmax;	
+		//console.log('after',viewerParams.animateVelTime, viewerParams.animateVelDt, viewerParams.animateVelTmax)
+		if (isNaN(viewerParams.animateVelTime)) viewerParams.animateVelTime = 0;
+
 		viewerParams.drawPass += 1;
 	}
 
@@ -123,6 +129,9 @@ function update_particle_groups(time){
 				// apply particle radii and alpha values 
 				// according to current filter handle settings
 				update_particle_mesh_filter(p,m,time);
+
+				// update the velocity time in the animation loop
+				update_velocity_animation(p,m);
 			} 
 			else { 
 				// set radii and alpha values to 0 to hide this particle group
@@ -440,6 +449,16 @@ function update_framerate(seconds,time){
 	viewerParams.currentTime=seconds;
 }
 
+function update_velocity_animation(p, m){		
+	
+	if (viewerParams.animateVel[p]){
+		m.material.uniforms.velTime.value = viewerParams.animateVelTime;
+	} else {
+		m.material.uniforms.velTime.value = 0.
+	}
+	m.material.needsUpdate = true;
+
+}
 // ABG: this could be moved to be in the UI I think
 function updatePlaybackFilter(p){
 	// read the current filter from the UI
@@ -486,3 +505,4 @@ function updatePlaybackFilter(p){
 		// 		m.geometry.attributes.colorArray.needsUpdate = true;					
 		// 	});
 		// });
+

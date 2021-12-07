@@ -98,6 +98,10 @@ function defineGUIParams(){
 		this.velopts = null; 
 		this.velType = null; 
 
+		this.animateVel = null;
+		this.animateVelDt = null;
+		this.animateVelTmax = null;
+		
 		this.ckeys = null;
 		this.colormapVals = null;
 		this.colormapLims = null;

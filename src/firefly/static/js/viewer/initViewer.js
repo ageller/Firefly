@@ -287,6 +287,9 @@ function initPVals(){
 
 		//velocities
 		viewerParams.showVel[p] = false;
+		viewerParams.animateVel[p] = false;
+		viewerParams.animateVelDt[p] = 0.;
+		viewerParams.animateVelTmax[p] = 0.;
 		if (viewerParams.parts[p].Velocities != null){
 			if (!viewerParams.reset && !viewerParams.haveOctree[p]){
 				calcVelVals(p);
@@ -660,6 +663,38 @@ function applyOptions(){
 			}
 		}
 
+		//start showing the velocity animation
+		if (viewerParams.parts.options.hasOwnProperty("animateVel")){
+			if (viewerParams.parts.options.animateVel != null){
+				if (viewerParams.parts.options.animateVel.hasOwnProperty(p)){
+					if (viewerParams.parts.options.animateVel[p] == true){
+						viewerParams.animateVel[p] = true;
+						if (viewerParams.haveUI){
+							var evalString = 'elm = document.getElementById("'+p+'velAnimateCheckBox"); elm.checked = true; elm.value = true;'
+							sendToGUI([{'evalCommand':[evalString]}]);
+						}
+					}
+				}
+			}
+		}
+
+		//animate velocity dt
+		if (viewerParams.parts.options.hasOwnProperty("animateVelDt")){
+			if (viewerParams.parts.options.animateVelDt != null){
+				if (viewerParams.parts.options.animateVelDt.hasOwnProperty(p)){
+					viewerParams.animateVelDt[p] = viewerParams.parts.options.animateVelDt[p];
+				}
+			}
+		}
+
+		//animate velocity tmax
+		if (viewerParams.parts.options.hasOwnProperty("animateVelTmax")){
+			if (viewerParams.parts.options.animateVelTmax != null){
+				if (viewerParams.parts.options.animateVelTmax.hasOwnProperty(p)){
+					viewerParams.animateVelTmax[p] = viewerParams.parts.options.animateVelTmax[p];
+				}
+			}
+		}
 
 		//filter values
 		if (viewerParams.parts.options.hasOwnProperty("filterVals")){
@@ -911,7 +946,7 @@ function initColumnDensity(){
 // continuously check if viewerParams attributes that
 // should be initialized here are null, if so, keep waiting
 function confirmViewerInit(){
-	var keys = ["partsKeys", "PsizeMult", "plotNmax", "decimate", "stereoSepMax", "friction", "Pcolors", "showParts", "showVel", "velopts", "velType", "ckeys", "colormapVals", "colormapLims", "colormapVariable", "colormap", "showColormap", "fkeys", "filterVals", "filterLims", "renderer", "scene", "controls","camera","parts"];
+	var keys = ["partsKeys", "PsizeMult", "plotNmax", "decimate", "stereoSepMax", "friction", "Pcolors", "showParts", "showVel", "animateVel", "velopts", "velType", "ckeys", "colormapVals", "colormapLims", "colormapVariable", "colormap", "showColormap", "fkeys", "filterVals", "filterLims", "renderer", "scene", "controls","camera","parts"];
 
 	var ready = true;
 	keys.forEach(function(k,i){
@@ -955,6 +990,9 @@ function sendInitGUI(prepend=[], append=[]){
 	forGUI.push({'setGUIParamByKey':[viewerParams.showVel, "showVel"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.velopts, "velopts"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.velType, "velType"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.animateVel, "animateVel"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.animateVelDt, "animateVelDt"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.animateVelTmax, "animateVelTmax"]});
 	var haveVelocities = {};
 	viewerParams.partsKeys.forEach(function(p){
 		haveVelocities[p] = false;

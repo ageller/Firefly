@@ -24,6 +24,8 @@ uniform vec3 cameraX;
 uniform vec3 cameraY;
 uniform float minPointScale;
 
+uniform float velTime;
+
 const float maxPointScale = 1000.;
 const float PI = 3.1415926535897932384626433832795;
 const float sizeFac = 70.5; //trying to make physical sizes, I have NO idea why this number is needed.  This came from trial and error
@@ -37,7 +39,8 @@ void main(void) {
 
 	//vVertexScale = uVertexScale;
 
-	vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+	//vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+	vec4 mvPosition = modelViewMatrix * vec4( position + velVals.xyz*velTime, 1.0 );
 
 	float cameraDist = length(mvPosition.xyz);
 	float pointScale = 1./cameraDist;//maxDistance/cameraDist;

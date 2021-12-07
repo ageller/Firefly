@@ -210,6 +210,16 @@ function checkVelBox(args){
 	}
 }
 
+//turn on/off velocity animation
+function toggleVelocityAnimation(args){
+	var p = args[0];
+	var checked = args[1];
+	viewerParams.animateVel[p] = false;
+	if (checked){
+		viewerParams.animateVel[p] = true;
+	}
+}
+
 //turn on/off the colormap
 function checkColormapBox(args){
 	var p = args[0];
@@ -288,6 +298,8 @@ function checkStereoLock(checked){
 function checkText(args){
 	var id = args[0];
 	var value = args[1];
+	var p = null;
+	if (args.length > 2) p = args[2];
 
 	var cameraPosition = new THREE.Vector3(viewerParams.camera.position.x, viewerParams.camera.position.y, viewerParams.camera.position.z);
 	var cameraRotation = new THREE.Vector3(viewerParams.camera.rotation.x, viewerParams.camera.rotation.y, viewerParams.camera.rotation.z);
@@ -303,12 +315,29 @@ function checkText(args){
 	if (id == "RotZText") cameraRotation.z = parseFloat(value)
 	if (id == "RenderXText") viewerParams.renderWidth = parseInt(value);
 	if (id == "RenderYText") viewerParams.renderHeight = parseInt(value);
+	if (id == "RenderYText") viewerParams.renderHeight = parseInt(value);
 
-	viewerParams.camera.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z);
-	console.log('===here camera', cameraRotation);
-	viewerParams.camera.rotation.set(cameraRotation.x, cameraRotation.y, cameraRotation.z);
-	viewerParams.controls.target = new THREE.Vector3(viewerParams.center.x, viewerParams.center.y, viewerParams.center.z);
+	if (p){
+		if (id == p+'velAnimateDt') {
+			viewerParams.animateVelDt = Math.max(0,parseFloat(value));
+			d3.selectAll('.velAnimateDt').each(function(){
+				this.value = viewerParams.animateVelDt;
+			})
+		}
+		if (id == p+'velAnimateTmax') {
+			viewerParams.animateVelTmax = Math.max(1,parseFloat(value));
+			d3.selectAll('.velAnimateTmax').each(function(){
+				this.value = viewerParams.animateVelTmax;
+			})
+		}
+	}
 
+	if (!p){
+		viewerParams.camera.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z);
+		console.log('===here camera', cameraRotation);
+		viewerParams.camera.rotation.set(cameraRotation.x, cameraRotation.y, cameraRotation.z);
+		viewerParams.controls.target = new THREE.Vector3(viewerParams.center.x, viewerParams.center.y, viewerParams.center.z);
+	}
 }
 
 

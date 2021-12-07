@@ -793,7 +793,7 @@ function fillParticleDropdown(controls,p){
 	// velocity vectors
 	if (GUIParams.haveVelocities[p]){
 		fillVelocityVectorDropdown(dropdown,p);
-		dheight += 30;
+		dheight += 90;
 	}
 
 	// colormap
@@ -809,7 +809,7 @@ function fillParticleDropdown(controls,p){
 	// filters
 	if (GUIParams.haveFilter[p]){
 		fillFilterDropdown(dropdown,p);
-		dheight += 80;
+		dheight += 75;
 	} 
 	
 	dropdown.style('height',dheight+'px');
@@ -824,10 +824,6 @@ function fillVelocityVectorDropdown(dropdown,p){
 		.attr('class','NdDiv');
 
 	// add velocity vector checkbox
-	dVcontent.append('label')
-		.attr('for',p+'velCheckBox')
-		.text('Plot Velocity Vectors');
-
 	dVcontent.append('input')
 		.attr('id',p+'velCheckBox')
 		.attr('value','false')
@@ -836,6 +832,11 @@ function fillVelocityVectorDropdown(dropdown,p){
 		.on('change',function(){
 			sendToViewer([{'checkVelBox':[p, this.checked]}]);
 		})
+
+	dVcontent.append('label')
+		.attr('for',p+'velCheckBox')
+		.text('Plot Velocity Vectors');
+
 	if (GUIParams.showVel[p]){
 		elm = document.getElementById(p+'velCheckBox');
 		elm.checked = true;
@@ -856,6 +857,65 @@ function fillVelocityVectorDropdown(dropdown,p){
 	elm = document.getElementById(p+'_SelectVelType');
 	elm.value = GUIParams.velType[p];
 
+	// add velocity animator checkbox
+	dAVcontent = dropdown.append('div')
+		.attr('class','NdDiv');
+
+	dAVcontent.append('input')
+		.attr('id',p+'velAnimateCheckBox')
+		.attr('value','false')
+		.attr('type','checkbox')
+		.attr('autocomplete','off')
+		.on('change',function(){
+			sendToViewer([{'toggleVelocityAnimation':[p, this.checked]}]);
+		})
+
+	dAVcontent.append('label')
+		.attr('for',p+'velAnimateCheckBox')
+		.text('Animate Velocities');
+
+	//add velocity animator input text boxes
+	dATVcontent = dropdown.append('div')
+		.attr('class','NdDiv');
+	dATVcontent.append('label')
+		.attr('for',p+'velAnimateDt')
+		.text('dt');
+	dATVcontent.append('input')
+		.attr('id',p+'velAnimateDt')
+		.attr('type', 'text')
+		.attr('value',GUIParams.animateVelDt)
+		.attr('autocomplete','off')
+		.attr('class','pTextInput velAnimateDt')
+		.style('width','50px')
+		.style('margin-left','8px')
+		.style('margin-right','20px')
+		.on('keypress',function(){
+			var key = event.keyCode || event.which;
+			if (key == 13) sendToViewer([{'checkText':[this.id, this.value, p]}]);
+		})
+	dATVcontent.append('label')
+		.attr('for',p+'velAnimateTmax')
+		.text('tMax');
+	dATVcontent.append('input')
+		.attr('id',p+'velAnimateTmax')
+		.attr('type', 'text')
+		.attr('value',GUIParams.animateVelTmax)
+		.attr('autocomplete','off')
+		.attr('class','pTextInput velAnimateTmax')
+		.style('width','50px')
+		.style('margin-left','8px')
+		.on('keypress',function(){
+			var key = event.keyCode || event.which;
+			if (key == 13) sendToViewer([{'checkText':[this.id, this.value, p]}]);
+		})
+
+	if (GUIParams.animateVel[p]){
+		elm = document.getElementById(p+'velAnimateCheckBox');
+		elm.checked = true;
+		elm.value = true;
+	} 
+
+
 }
 
 function fillColormapDropdown(dropdown,p){
@@ -867,10 +927,6 @@ function fillColormapDropdown(dropdown,p){
 		.attr('style','margin:0px;  padding:5px; height:50px')
 
 	// add checkbox to enable colormap
-	ColorDiv.append('label')
-		.attr('for',p+'colorCheckBox')
-		.text('Colormap');
-
 	ColorDiv.append('input')
 		.attr('id',p+'colorCheckBox')
 		.attr('value','false')
@@ -880,10 +936,15 @@ function fillColormapDropdown(dropdown,p){
 			sendToViewer([{'checkColormapBox':[p, this.checked]}]);
 		})
 
+	ColorDiv.append('label')
+		.attr('for',p+'colorCheckBox')
+		.text('Colormap');
+
 	// dropdown to select colormap
 	var selectCMap = ColorDiv.append('select')
 		.attr('class','selectCMap')
 		.attr('id',p+'_SelectCMap')
+		.style('margin-left','4px')
 		.on('change', selectColormap)
 
 	var options = selectCMap.selectAll('option')
@@ -1037,12 +1098,8 @@ function fillFilterDropdown(dropdown,p){
 	});
 
 	// add playback checkbox and label
-	playback = filterDiv.append('label')
-		.attr('for',p+'_'+'PlaybackLabel')
-		.attr('id',p+'_PlaybackLabel')
-		.style('display','inline-block')
-		.style('margin-top','30px')
-		.text('Playback:');
+	playback = dropdown.append('div')
+		.attr('class','NdDiv');
 	playback.append('input')
 		.attr('id',p+'_PlaybackCheckbox')
 		.attr('value','false')
@@ -1051,6 +1108,11 @@ function fillFilterDropdown(dropdown,p){
 		.style('display','inline-block')
 		.on('change',function(){
 			togglePlayback(p, this.checked)});
+	playback.append('label')
+		.attr('for',p+'_'+'PlaybackLabel')
+		.attr('id',p+'_PlaybackLabel')
+		.text('Playback');
+
 }
 
 //////////////////////// ////////////////////////

@@ -81,6 +81,11 @@ function createParticleGeometry(p, parts, start, end){
 				velVals[vindex++] = parts.VelVals[j][2]/parts.magVelocities[j];
 				velVals[vindex++] = parts.NormVel[j];
 			}
+		} else {
+			velVals[vindex++] = 0.;
+			velVals[vindex++] = 0.;
+			velVals[vindex++] = 0.;
+			velVals[vindex++] = 1.;
 		}
 
 		// fill flattened color array from pre-computed colormap values
@@ -161,6 +166,7 @@ function createParticleMaterial(p, minPointSize=1, octreePointScale=1.){
 			scaleCD: {value: viewerParams.scaleCD},
 			minPointSize: {value: minPointSize},
 			octreePointScale: {value: octreePointScale},
+			velTime: {value: viewerParams.animateVelTime},
 
 		},
 
