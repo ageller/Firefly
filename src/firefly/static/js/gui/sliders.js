@@ -245,6 +245,36 @@ function createDecimationSlider(){
 
 }
 
+function createMemorySlider(){
+
+	var initialValue = parseFloat(GUIParams.memoryLimit/1e9); 
+
+	var sliderArgs = {
+		start: [initialValue], 
+		connect: [true, false],
+		tooltips: false,
+		steps: [0.01],
+		range: { 
+			'min': [0],
+			'max': [initialValue]
+		},
+		format: wNumb({
+			decimals: 3
+		})
+	}
+
+	var slider = document.getElementById('MSlider');
+	var text = [document.getElementById('MMaxT')];
+	var varToSet = [initialValue];
+	var varArgs = {'f':'updateMemoryLimit','v':varToSet};
+
+	createSlider(slider, text, sliderArgs, varArgs, [null, 1]);
+
+	//reformat
+	w = parseInt(d3.select("#MSlider").style("width").slice(0,-2));
+	d3.select("#MSlider").select('.noUi-base').style('width',w-10+"px");
+
+}
 
 function createStereoSlider(){
 

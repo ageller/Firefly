@@ -555,3 +555,9 @@ function updateStereoSep(value){
 	viewerParams.stereoSep = value;
 	viewerParams.effect.setEyeSeparation(viewerParams.stereoSep);
 }
+
+function updateMemoryLimit(value){
+	viewerParams.octree.memoryLimit = parseFloat(value*1e9);
+	viewerParams.octree.NParticleMemoryModifierFac = 1.;
+	viewerParams.octree.NParticleMemoryModifier = THREE.Math.clamp(viewerParams.octree.NParticleMemoryModifierFac*viewerParams.octree.memoryLimit/viewerParams.memoryUsage, 0., 1.);
+}

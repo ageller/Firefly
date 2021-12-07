@@ -11,7 +11,9 @@ function updateOctree(){
 		viewerParams.octree.NParticleMemoryModifier = THREE.Math.clamp(viewerParams.octree.NParticleMemoryModifierFac*viewerParams.octree.memoryLimit/viewerParams.memoryUsage, 0., 1.);
 		d3.selectAll('.octreeLoadingText').classed('octreeLoadingPaused', true);
 		d3.selectAll('.octreeLoadingFill').classed('octreeLoadingPaused', true);
-		d3.select('#decimationOctreeSpan').text((1./viewerParams.octree.NParticleMemoryModifier).toFixed(2))
+		var num = (1./viewerParams.octree.NParticleMemoryModifier).toFixed(2);
+		if (num > 10000) num = '> 10,000'
+		d3.select('#decimationOctreeSpan').text(num)
 	}
 	//I need some way to bring the particle number back up without entering into a loop!
 	// if (viewerParams.memoryUsage < 1.8*viewerParams.octree.memoryLimit) {
@@ -126,20 +128,6 @@ function updateOctree(){
 					//identify existing nodes to modify 
 					if (node.screenSize >= viewerParams.octree.minNodeScreenSize && node.inView){
 
-						//reduce in number
-						//should I remove the particles from memory? (or maybe I should leave them to allow for smoother interaction with GUI?)
-						if (!viewerParams.octree.toReduceIDs.includes(p+node.id) && !viewerParams.octree.toRemoveIDs.includes(p+node.id) && !viewerParams.octree.toRemoveTmpIDs.includes(p+node.id) && toReduceIDs.length < viewerParams.octree.maxToReduce && (node.particles.Coordinates.length - node.NparticlesToRender) > viewerParams.octree.minDiffForUpdate) {
-							//console.log('reducing node', p, node.id, node.Nparticles, node.NparticlesToRender, node.particles.Coordinates.length, node.particles.Coordinates.length - node.NparticlesToRender)
-							toReduce.push([p, node.id]); //will be reduced later
-							toReduceIDs.push(p+node.id);
-						} 
-						var nparts = THREE.Math.clamp(node.NparticlesToRender*viewerParams.plotNmax[p]/100.*(1./viewerParams.decimate), 0, node.particles.Coordinates.length);
-						obj.geometry.setDrawRange( 0, nparts); //is this giving me an error sometimes?
-
-						//reset the point size
-						obj.material.uniforms.octreePointScale.value = node.particleSizeScale;
-						obj.material.needsUpdate = true;
-
 						//remove from the toRemove list(s)
 						if (viewerParams.octree.toRemoveIDs.includes(p+node.id)){
 							var index = viewerParams.octree.toRemoveIDs.indexOf(p+node.id);
@@ -151,6 +139,31 @@ function updateOctree(){
 							viewerParams.octree.toRemoveTmpIDs.splice(index,1);
 							viewerParams.octree.toRemoveTmp.splice(index,1);
 						}
+
+						//possibly remove from the toReduce list
+						if (viewerParams.octree.toReduceIDs.includes(p+node.id) && node.particles.NparticlesToRender >= (node.particles.Coordinates.length - viewerParams.octree.minDiffForUpdate)){
+							var index = viewerParams.octree.toReduceIDs.indexOf(p+node.id);
+							viewerParams.octree.toReduceIDs.splice(index,1);
+							viewerParams.octree.toReduce.splice(index,1);							
+						}
+
+						//reduce in number
+						//should I remove the particles from memory? (or maybe I should leave them to allow for smoother interaction with GUI?)
+						if (!viewerParams.octree.toReduceIDs.includes(p+node.id) && !viewerParams.octree.toRemoveIDs.includes(p+node.id) && !viewerParams.octree.toRemoveTmpIDs.includes(p+node.id) && toReduceIDs.length < viewerParams.octree.maxToReduce && (node.particles.Coordinates.length - node.NparticlesToRender) > viewerParams.octree.minDiffForUpdate) {
+							//console.log('reducing node', p, node.id, node.Nparticles, node.NparticlesToRender, node.particles.Coordinates.length, node.particles.Coordinates.length - node.NparticlesToRender)
+							toReduce.push([p, node.id]); //will be reduced later
+							toReduceIDs.push(p+node.id);
+						} 
+
+						//adjust the draw range based on GUI sliders
+						var nparts = THREE.Math.clamp(node.NparticlesToRender*viewerParams.plotNmax[p]/100.*(1./viewerParams.decimate), 0, node.particles.Coordinates.length);
+						obj.geometry.setDrawRange( 0, nparts); //is this giving me an error sometimes?
+
+						//reset the point size
+						obj.material.uniforms.octreePointScale.value = node.particleSizeScale;
+						obj.material.needsUpdate = true;
+
+
 					} 
 				}
 			}

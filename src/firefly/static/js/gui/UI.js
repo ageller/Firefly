@@ -120,6 +120,7 @@ function createUI(){
 	// create all the noUISliders
 	// data controls
 	createDecimationSlider();
+	if (GUIParams.haveAnyOctree) createMemorySlider();
 
 	// camera controls
 	createStereoSlider();
@@ -193,7 +194,8 @@ function createDataControlsBox(UI){
 		.style('left','255px')
 		.style('width','30px');
 	if (GUIParams.haveAnyOctree){
-		m2height += 25;
+		m2height += 50;
+		//text to show the memory-imposed decimation
 		m2.append('div')
 			.attr('id', 'decimationOctreeDiv')
 			.style('width','270px')
@@ -208,7 +210,31 @@ function createDataControlsBox(UI){
 				.text('Octree memory-imposed decimation = ')
 				.append('span')
 					.attr('id','decimationOctreeSpan')
-					.text('1.0')
+					.text('1.0');
+
+		//slider to controls the memory limit
+		var mem = m2.append('div')
+			.attr('id', 'memoryDiv')
+			.style('width','270px')
+			.style('margin-left','5px')
+			.style('margin-top','10px')
+			.style('display','inline-block')
+		mem.append('div')
+			.attr('class','pLabelDiv')
+			.style('width','135px')
+			.style('display','inline-block')
+			.text('Memory Limit (Gb)');
+		mem.append('div')
+			.attr('class','NSliderClass')
+			.attr('id','MSlider')
+			.style('margin-left','90px')
+			.style('width','108px');
+		mem.append('input')
+			.attr('class','NMaxTClass')
+			.attr('id','MMaxT')
+			.attr('type','text')
+			.style('left','255px')
+			.style('width','30px');
 	}
 
 	//fullscreen button

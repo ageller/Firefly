@@ -384,7 +384,7 @@ function update_memory_usage(){
 
 
 	//check the total number of particles rendered
-	if (viewerParams.drawPass % 50 == 0 && viewerParams.drawPass > viewerParams.partsKeys.length){
+	if (viewerParams.drawPass % 100 == 0 && viewerParams.drawPass > viewerParams.partsKeys.length){
 		viewerParams.totalParticlesInMemory = 0.;
 		viewerParams.partsKeys.forEach(function(p){
 			if (viewerParams.haveOctree[p]){
@@ -405,7 +405,7 @@ function update_memory_usage(){
 		viewerParams.memoryUsage = 2.03964119e+02*viewerParams.totalParticlesInMemory + 1.64869925e+08; 
 	}
 
-	//if (viewerParams.drawPass % 50 == 0) console.log('checking memory usage [', viewerParams.totalParticlesInMemory, ',', viewerParams.memoryUsage,'],')
+	//if (viewerParams.drawPass % 100 == 0) console.log('checking memory usage [', viewerParams.totalParticlesInMemory, ',', viewerParams.memoryUsage,'],')
 
 }
 
