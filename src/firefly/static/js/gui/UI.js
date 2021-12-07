@@ -128,6 +128,7 @@ function createUI(){
 	createFrictionSlider();
 
 	// particle group dropdowns
+	createVelWidthSliders();
 	createFilterSliders();
 	createColormapSliders();
 
@@ -793,7 +794,7 @@ function fillParticleDropdown(controls,p){
 	// velocity vectors
 	if (GUIParams.haveVelocities[p]){
 		fillVelocityVectorDropdown(dropdown,p);
-		dheight += 90;
+		dheight += 120;
 	}
 
 	// colormap
@@ -856,6 +857,23 @@ function fillVelocityVectorDropdown(dropdown,p){
 
 	elm = document.getElementById(p+'_SelectVelType');
 	elm.value = GUIParams.velType[p];
+
+	// add width input and gradient checkbox
+	dVWcontent = dropdown.append('div')
+		.attr('class','NdDiv');
+	dVWcontent.append('span')
+		.attr('class','pLabelDiv')
+		.attr('style','width:100px')
+		.text('Vector Width');
+	dVWcontent.append('div')
+		.attr('id',p+'_VelWidthSlider')
+		.attr('class','NSliderClass')
+		.style('margin-left','48px')
+		.style('width','132px');
+	dVWcontent.append('input')
+		.attr('id',p+'_VelWidthMaxT')
+		.attr('class', 'NMaxTClass')
+		.attr('type','text');
 
 	// add velocity animator checkbox
 	dAVcontent = dropdown.append('div')

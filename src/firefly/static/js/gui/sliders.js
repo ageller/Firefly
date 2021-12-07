@@ -216,6 +216,38 @@ function createCamNormSliders(){
 	});
 }
 
+function createVelWidthSliders(){
+	GUIParams.partsKeys.forEach(function(p,i){
+		if (GUIParams.haveVelocities[p]){
+			var initialValue = parseFloat(GUIParams.velVectorWidth[p]); 
+
+			var sliderArgs = {
+				start: [initialValue], 
+				connect: [true, false],
+				tooltips: false,
+				steps: [0.01],
+				range: { 
+					'min': [0],
+					'max': [initialValue]
+				},
+				format: wNumb({
+					decimals: 2
+				})
+			}
+
+			var slider = document.getElementById(p+'_VelWidthSlider');
+			var text = [document.getElementById(p+'_VelWidthMaxT')];
+			var varToSet = [initialValue, p];
+			var varArgs = {'f':'updateVelocityVectorWidth','v':varToSet};
+
+			createSlider(slider, text, sliderArgs, varArgs, [null, 1]);
+
+			//reformat
+			w = parseInt(d3.select('#'+p+'_VelWidthSlider').style('width').slice(0,-2));
+			d3.select('#'+p+'_VelWidthSlider').select('.noUi-base').style('width',w-10+"px");
+		}
+	});
+}
 //This one requires a bit of a special handling to talk to the N slider
 function createDecimationSlider(){
 

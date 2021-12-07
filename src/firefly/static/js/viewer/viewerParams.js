@@ -68,6 +68,7 @@ function defineViewerParams(){
 		this.velopts = {'line':0., 'arrow':1., 'triangle':2.};
 		this.velType = {};
 		this.maxVrange = 2000.; //maximum dynamic range for length of velocity vectors (can be reset in options file)
+		this.velVectorWidth = {};
 
 		//for deciding whether to animate the velocities
 		this.animateVel = {};

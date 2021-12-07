@@ -340,6 +340,17 @@ function checkText(args){
 	}
 }
 
+function updateVelocityVectorWidth(args){
+	//update the width of the velocity vector
+	var value = args[0];
+	var p = args[1];
+	viewerParams.velVectorWidth[p] = parseFloat(value);
+
+	viewerParams.partsMesh[p].forEach( function( m, j ) {
+		m.material.uniforms.velVectorWidth.value = viewerParams.velVectorWidth[p];
+		m.material.needsUpdate = true;
+	});
+}
 
 //apply the options file to the UI
 function applyUIoptions(){

@@ -287,6 +287,7 @@ function initPVals(){
 
 		//velocities
 		viewerParams.showVel[p] = false;
+		viewerParams.velVectorWidth[p] = 1.;
 		viewerParams.animateVel[p] = false;
 		viewerParams.animateVelDt[p] = 0.;
 		viewerParams.animateVelTmax[p] = 0.;
@@ -663,6 +664,15 @@ function applyOptions(){
 			}
 		}
 
+		//velocity vector width
+		if (viewerParams.parts.options.hasOwnProperty("velVectorWidth")){
+			if (viewerParams.parts.options.velVectorWidth != null){
+				if (viewerParams.parts.options.velVectorWidth.hasOwnProperty(p)){
+					viewerParams.velVectorWidth[p] = viewerParams.parts.options.velVectorWidth[p];
+				}
+			}
+		}
+		
 		//start showing the velocity animation
 		if (viewerParams.parts.options.hasOwnProperty("animateVel")){
 			if (viewerParams.parts.options.animateVel != null){
@@ -990,6 +1000,7 @@ function sendInitGUI(prepend=[], append=[]){
 	forGUI.push({'setGUIParamByKey':[viewerParams.showVel, "showVel"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.velopts, "velopts"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.velType, "velType"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.velVectorWidth, "velVectorWidth"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.animateVel, "animateVel"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.animateVelDt, "animateVelDt"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.animateVelTmax, "animateVelTmax"]});
