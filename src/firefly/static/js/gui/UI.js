@@ -208,7 +208,7 @@ function createDataControlsBox(UI){
 				.text('Octree memory-imposed decimation = ')
 				.append('span')
 					.attr('id','decimationOctreeSpan')
-					.text('1.00')
+					.text('1.0')
 	}
 
 	//fullscreen button

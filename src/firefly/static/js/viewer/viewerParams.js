@@ -182,6 +182,8 @@ function defineViewerParams(){
 		this.haveAnyOctree = false; //must be a better way to do this!
 		this.FPS = 30; //will be upated in the octree render loop
 		this.memoryUsage = 0; //if using Chrome, we can track the memory usage and try to avoid crashes
+		this.drawPass = 0;
+		this.totalParticlesInMemory = 0; //try to hold the total number of particles in memory
 
 		this.octree = new function() {
 
@@ -239,7 +241,7 @@ function defineViewerParams(){
 			this.boxSize = 0; //will be set based on the root node
 			this.pIndex = 0; //will be used to increment through the particles in the render loop
 
-			this.memoryLimit = 2*1e9; //bytes, maximum memory allowed -- for now this is more like a target
+			this.memoryLimit = 5*1e9; //bytes, maximum memory allowed -- for now this is more like a target
 			this.NParticleMemoryModifier = 1.; //will be increased or decreased based on the current memory usage
 			this.NParticleMemoryModifierFac = 1.;
 

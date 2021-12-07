@@ -39,6 +39,7 @@ function updateOctree(){
 
 
 	//check and remove duplicates from scene (I don't know why this happens)
+	//also perform a few other updates
 	if (viewerParams.octree.drawPass % 50 == 0) {
 		removeDuplicatesFromScene();
 		updateOctreeLoadingBar(); //in case this doesn't get updated properly during the draw loop (can be 1 or 2 off after last draw in completed)
@@ -188,7 +189,7 @@ function updateOctree(){
 		if (viewerParams.memoryUsage < viewerParams.octree.memoryLimit && viewerParams.octree.toDraw.length == 0) {
 			viewerParams.octree.NParticleMemoryModifierFac = THREE.Math.clamp(viewerParams.octree.NParticleMemoryModifierFac*2., 0, 1.);
 			viewerParams.octree.NParticleMemoryModifier = THREE.Math.clamp(viewerParams.octree.NParticleMemoryModifierFac*viewerParams.octree.memoryLimit/viewerParams.memoryUsage, 0., 1.);
-			d3.select('#decimationOctreeSpan').text((1./viewerParams.octree.NParticleMemoryModifier).toFixed(2))
+			d3.select('#decimationOctreeSpan').text((1./viewerParams.octree.NParticleMemoryModifier).toFixed(1))
 
 		}
 	}

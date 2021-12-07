@@ -16,6 +16,11 @@ function animate(time) {
 		// put the app to sleep if FPS < .66 by setting
 		// viewerParams.pauseAnimation = true
 		update_framerate(seconds,time);
+
+		// get the memory usage
+		update_memory_usage();
+
+		viewerParams.drawPass += 1;
 	}
 
 	// recursively loop this function
@@ -375,6 +380,35 @@ function render_stream(){
 	}
 }
 
+function update_memory_usage(){
+
+
+	//check the total number of particles rendered
+	if (viewerParams.drawPass % 50 == 0 && viewerParams.drawPass > viewerParams.partsKeys.length){
+		viewerParams.totalParticlesInMemory = 0.;
+		viewerParams.partsKeys.forEach(function(p){
+			if (viewerParams.haveOctree[p]){
+				viewerParams.octree.nodes[p].forEach(function(node){
+					viewerParams.totalParticlesInMemory += node.particles.Coordinates.length;
+				})
+			} else {
+				viewerParams.totalParticlesInMemory += viewerParams.parts.Coordinates.length;
+			}
+		})
+	}
+
+	//get the actual memory usage
+	if (window.performance.memory) { //works for Chrome
+		viewerParams.memoryUsage = window.performance.memory.totalJSHeapSize;
+	} else {
+		//calculated from a previous test using the octree mode
+		viewerParams.memoryUsage = 2.03964119e+02*viewerParams.totalParticlesInMemory + 1.64869925e+08; 
+	}
+
+	//if (viewerParams.drawPass % 50 == 0) console.log('checking memory usage [', viewerParams.totalParticlesInMemory, ',', viewerParams.memoryUsage,'],')
+
+}
+
 function update_framerate(seconds,time){
 	// if we spent more than 1.5 seconds drawing the last frame, send the app to sleep
 	if ( (seconds-viewerParams.currentTime) > 1.5){
@@ -391,8 +425,7 @@ function update_framerate(seconds,time){
 
 	viewerParams.FPS = viewerParams.fps_list.reduce((a, b) => a + b, 0)/viewerParams.fps_list.length;
 
-	//also update the memory usage (could do this in a separate function to keep it clean)
-	if (window.performance.memory) viewerParams.memoryUsage = window.performance.memory.totalJSHeapSize;
+
 
 	// fill FPS container div with calculated FPS and memory usage
 	if (viewerParams.showfps){
