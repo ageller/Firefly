@@ -135,15 +135,11 @@ function createParticleGeometry(p, parts, start, end){
 
 function createParticleMaterial(p, minPointSize=1, octreePointScale=1.){
 	//change the blending mode when showing the colormap (so we don't get summing to white colors)
-	var blend = THREE.AdditiveBlending;
-	var dWrite = false;
-	var dTest = false;
+	var blend = viewerParams.blendingOpts[viewerParams.blendingMode[p]];
+	var dWrite = viewerParams.depthWrite[p];
+	var dTest = viewerParams.depthTest[p];
 	var transp = true;
-	if (viewerParams.showColormap[p]){
-		blend = THREE.NormalBlending;
-		dWrite = true;
-		dTest = true;
-	}
+
 
 	var material = new THREE.ShaderMaterial( {
 
@@ -169,6 +165,7 @@ function createParticleMaterial(p, minPointSize=1, octreePointScale=1.){
 			velTime: {value: viewerParams.animateVelTime},
 			velVectorWidth: {value: viewerParams.velVectorWidth[p]},
 			velGradient: {value: viewerParams.velGradient[p]},
+			useDepth: {value: +viewerParams.depthTest[p]},
 
 		},
 
@@ -270,22 +267,31 @@ function updateColormapVariable(p){
 	}
 
 	//update the blending mode for all particles (otherwise non-colormapped particles will blend with colormapped particles)
+	viewerParams.blendingMode[p] = 'additive';
 	var blend = THREE.AdditiveBlending;
-	var dWrite = false;
-	var dTest = false;
+	viewerParams.depthWrite[p] = false;
+	viewerParams.depthTest[p] = false;
 
 	if (viewerParams.showColormap[p]){
+		viewerParams.blendingMode[p] = 'normal';
 		blend = THREE.NormalBlending;
-		dWrite = true;
-		dTest = true;
-	}
-	viewerParams.partsKeys.forEach(function(pp,i){
-		viewerParams.partsMesh[pp].forEach( function( m, j ) {
-			m.material.depthWrite = dWrite;
-			m.material.depthTest = dTest;
-			m.material.blending = blend;
-			m.material.needsUpdate = true;
-		});
-	});
+		viewerParams.depthWrite[p] = true;
+		viewerParams.depthTest[p] = true;
 
+		viewerParams.partsKeys.forEach(function(pp,i){
+			viewerParams.blendingMode[pp] = viewerParams.blendingMode[p];
+			viewerParams.depthTest[pp] = viewerParams.depthTest[p];
+			viewerParams.depthTest[pp] = viewerParams.depthWrite[p];
+
+			viewerParams.partsMesh[pp].forEach( function( m, j ) {
+				m.material.depthWrite =  viewerParams.depthWrite[p];
+				m.material.depthTest =  viewerParams.depthTest[p];
+				m.material.blending = blend;
+				m.material.needsUpdate = true;
+			});
+		});
+
+		//also update the dropdown menus and checkboxes in the GUI
+		sendToGUI({'updateUIBlending':[viewerParams.blendingMode[p], viewerParams.depthTest[p]]});
+	}
 }

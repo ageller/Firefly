@@ -746,6 +746,51 @@ function fillParticleDropdown(controls,p){
 
 	}
 
+	//dropdown to change blending mode
+	var dBcontent = dropdown.append('div')
+		.attr('class','NdDiv');
+
+	dBcontent.append('span')
+		.attr('class','pLabelDiv')
+		.attr('style','width:115px')
+		.text('Blending Mode');
+
+	// add blending mode selector
+	var selectBType = dBcontent.append('select')
+		.attr('class','selectBlendingMode')
+		.attr('id',p+'_selectBlendingMode')
+		.on('change',selectBlendingMode)
+
+	var optionsB = selectBType.selectAll('option')
+		.data(Object.keys(GUIParams.blendingOpts)).enter()
+		.append('option')
+			.text(function (d) { return d; });
+
+	elm = document.getElementById(p+'_selectBlendingMode');
+	elm.value = GUIParams.blendingMode[p];
+
+	depthCheck = dBcontent.append('label')
+		.attr('for',p+'_depthCheckBox')
+		.attr('id',p+'_depthCheckBoxLabel')
+		.style('display','inline-block')
+		.style('margin-left','8px')
+		.text('Depth');
+
+	depthCheck.append('input')
+		.attr('id',p+'_depthCheckBox')
+		.attr('value','false')
+		.attr('type','checkbox')
+		.attr('autocomplete','off')
+		.on('change',function(){
+			sendToViewer([{'setDepthMode':[p, this.checked]}]);
+		})
+
+	dropdown.append('hr')
+		.style('margin','0')
+		.style('border','1px solid #909090');
+
+	dheight += 35;
+
 	// add max number of particles slider 
 	dNcontent = dropdown.append('div')
 		.attr('class','NdDiv');
@@ -1027,6 +1072,7 @@ function fillColormapDropdown(dropdown,p){
 		}
 	});
 
+
 	// handle if colormap should be enabled at startup by pre-checking
 	//  the box
 	if (GUIParams.showColormap[p]){
@@ -1247,10 +1293,23 @@ function selectVelType() {
 		.filter(function (d, i) { 
 			return this.selected; 
 	});
-	selectValue = option.property('value');
+	var selectValue = option.property('value');
 
 	var p = this.id.slice(0,-14)
 	sendToViewer([{'setViewerParamByKey':[selectValue, "velType",p]}]);
+}
+
+function selectBlendingMode() {
+	//type of symbol to draw velocity vectors (from input box)
+	var option = d3.select(this)
+		.selectAll("option")
+		.filter(function (d, i) { 
+			return this.selected; 
+	});
+	var selectValue = option.property('value');
+
+	var p = this.id.slice(0,-19)
+	sendToViewer([{'setBlendingMode':[selectValue, p]}]);
 }
 
 function changeUISnapSizes(){
@@ -1484,6 +1543,22 @@ function updateUIValues(value, varArgs, i=0, type='single'){
 
 	}
 }
+
+function updateUIBlending(args){
+	var mode = args[0];
+	var dTest = args[1];
+
+	GUIParams.partsKeys.forEach(function(p){
+		var elm = document.getElementById(p+'_selectBlendingMode');
+		elm.value = mode;
+
+		//also update the checkboxes
+		elm = document.getElementById(p+'_depthCheckBox');
+		elm.checked = dTest;
+		elm.value = dTest
+	})
+}
+
 //////////////////////// ////////////////////////
 // helper functions ^^^^^^^
 //////////////////////// ////////////////////////

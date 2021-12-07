@@ -285,6 +285,11 @@ function initPVals(){
 		viewerParams.colormapVals[p] = {};
 		viewerParams.colormapLims[p] = {};
 
+		//blending
+		viewerParams.blendingMode[p] = 'additive';
+		viewerParams.depthWrite[p] = false;
+		viewerParams.depthTest[p] = false;
+
 		//velocities
 		viewerParams.showVel[p] = false;
 		viewerParams.velVectorWidth[p] = 1.;
@@ -1015,6 +1020,8 @@ function sendInitGUI(prepend=[], append=[]){
 	forGUI.push({'setGUIParamByKey':[viewerParams.animateVel, "animateVel"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.animateVelDt, "animateVelDt"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.animateVelTmax, "animateVelTmax"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.blendingOpts, "blendingOpts"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.blendingMode, "blendingMode"]});
 	var haveVelocities = {};
 	viewerParams.partsKeys.forEach(function(p){
 		haveVelocities[p] = false;

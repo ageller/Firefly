@@ -612,3 +612,41 @@ function updateNormCameraDistance(vals){
 	var p = vals[1];
 	viewerParams.octree.normCameraDistance[p] = parseFloat(value);
 }
+
+function setBlendingMode(args){
+	var mode = args[0];
+	var p = args[1];
+
+	viewerParams.blendingMode[p] = mode;
+	var blend = viewerParams.blendingOpts[mode];
+
+	viewerParams.partsMesh[p].forEach( function( m, j ) {
+		m.material.depthWrite = viewerParams.depthWrite[p];
+		m.material.depthTest = viewerParams.depthTest[p];
+		m.material.blending = blend;
+		m.material.uniforms.useDepth.value = +viewerParams.depthTest[p]
+		m.material.needsUpdate = true;
+	});
+}
+
+function setDepthMode(args){
+	var p = args[0];
+	var checked = args[1];
+
+	viewerParams.depthWrite[p] = false;
+	viewerParams.depthTest[p] = false;
+	if (checked){
+		viewerParams.depthWrite[p] = true;
+		viewerParams.depthTest[p] = true;		
+	}
+
+	var blend = viewerParams.blendingOpts[viewerParams.blendingMode[p]];
+
+	viewerParams.partsMesh[p].forEach( function( m, j ) {
+		m.material.depthWrite = viewerParams.depthWrite[p];
+		m.material.depthTest = viewerParams.depthTest[p];
+		m.material.blending = blend;
+		m.material.uniforms.useDepth.value = +viewerParams.depthTest[p];
+		m.material.needsUpdate = true;
+	});
+}

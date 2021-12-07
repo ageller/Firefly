@@ -20,6 +20,7 @@ uniform float scaleCD;
 
 uniform float velVectorWidth;
 uniform float velGradient;
+uniform float useDepth;
 
 //http://www.neilmendoza.com/glsl-rotation-about-an-arbitrary-axis/
 mat4 rotationMatrix(vec3 axis, float angle)
@@ -55,7 +56,7 @@ void main(void) {
 		float dist2 = dist*dist;
 		// fix for the minimum point size imposed by WebGL context gl.ALIASED_POINT_SIZE_RANGE = [1, ~8000]
 		float dMax = min(1., vPointSize);
-		if (showColormap){
+		if (useDepth > 0.5){
 			if (dist > dMax){
 				discard;
 			}
@@ -108,7 +109,7 @@ void main(void) {
 				discard;
 			} 
 		} 
-		
+
 		if (velGradient > 0.5){
 			//gl_FragColor.rgb +=  (1. - posRot.x/vSize); //white at tail
 			gl_FragColor.rgb +=  0.4*posRot.x/vSize; //whiter at head

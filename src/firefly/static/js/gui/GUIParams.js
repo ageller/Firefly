@@ -102,7 +102,10 @@ function defineGUIParams(){
 		this.animateVelDt = null;
 		this.animateVelTmax = null;
 		this.velVectorWidth = null;
-		
+
+		this.blendingOpts = null; 
+		this.blendingMode = null; 
+
 		this.ckeys = null;
 		this.colormapVals = null;
 		this.colormapLims = null;

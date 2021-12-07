@@ -71,6 +71,16 @@ function defineViewerParams(){
 		this.velVectorWidth = {};
 		this.velGradient = {}; //0 == false, 1 == true
 
+		//blending modes
+		this.blendingOpts = {'additive':THREE.AdditiveBlending, 
+							 'normal':THREE.NormalBlending, 
+							 'subtractive':THREE.SubtractiveBlending, 
+							 'multiply':THREE.MultiplyBlending, 
+							 'none':THREE.NoBlending};
+		this.blendingMode = {};
+		this.depthWrite = {};
+		this.depthTest = {};
+
 		//for deciding whether to animate the velocities
 		this.animateVel = {};
 		this.animateVelDt = 0;
