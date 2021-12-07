@@ -183,6 +183,39 @@ function createNpartsSliders(){
 }
 
 
+function createCamNormSliders(){
+	GUIParams.partsKeys.forEach(function(p,i){
+		if (GUIParams.haveOctree[p]){
+			var initialValue = parseFloat(GUIParams.octreeNormCameraDistance[p]); 
+
+			var sliderArgs = {
+				start: [initialValue], 
+				connect: [true, false],
+				tooltips: false,
+				steps: [1],
+				range: { 
+					'min': [0],
+					'max': [initialValue]
+				},
+				format: wNumb({
+					decimals: 0
+				})
+			}
+
+			var slider = document.getElementById(p+'_CamSlider');
+			var text = [document.getElementById(p+'_CamMaxT')];
+			var varToSet = [initialValue, p];
+			var varArgs = {'f':'updateNormCameraDistance','v':varToSet};
+
+			createSlider(slider, text, sliderArgs, varArgs, [null, 1]);
+
+			//reformat
+			w = parseInt(d3.select('#'+p+'_CamSlider').style('width').slice(0,-2));
+			d3.select('#'+p+'_CamSlider').select('.noUi-base').style('width',w-10+"px");
+		}
+	});
+}
+
 //This one requires a bit of a special handling to talk to the N slider
 function createDecimationSlider(){
 
@@ -247,7 +280,7 @@ function createDecimationSlider(){
 
 function createMemorySlider(){
 
-	var initialValue = parseFloat(GUIParams.memoryLimit/1e9); 
+	var initialValue = parseFloat(GUIParams.octreeMemoryLimit/1e9); 
 
 	var sliderArgs = {
 		start: [initialValue], 
@@ -259,7 +292,7 @@ function createMemorySlider(){
 			'max': [initialValue]
 		},
 		format: wNumb({
-			decimals: 3
+			decimals: 2
 		})
 	}
 

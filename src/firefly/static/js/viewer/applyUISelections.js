@@ -561,3 +561,9 @@ function updateMemoryLimit(value){
 	viewerParams.octree.NParticleMemoryModifierFac = 1.;
 	viewerParams.octree.NParticleMemoryModifier = THREE.Math.clamp(viewerParams.octree.NParticleMemoryModifierFac*viewerParams.octree.memoryLimit/viewerParams.memoryUsage, 0., 1.);
 }
+
+function updateNormCameraDistance(vals){
+	var value = vals[0];
+	var p = vals[1];
+	viewerParams.octree.normCameraDistance[p] = parseFloat(value);
+}

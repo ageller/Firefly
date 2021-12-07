@@ -116,6 +116,7 @@ function createUI(){
 	// particle groups
 	createPsizeSliders();
 	createNpartsSliders();
+	if (GUIParams.haveAnyOctree) createCamNormSliders();
 
 	// create all the noUISliders
 	// data controls
@@ -769,7 +770,26 @@ function fillParticleDropdown(controls,p){
 	dheight += 45; // height of the max particles section
 
 
+	//for octree, slider to change the camera limit
+	if (GUIParams.haveOctree[p]){
+		dCcontent = dropdown.append('div')
+			.attr('class','NdDiv');
+		dCcontent.append('span')
+			.attr('class','pLabelDiv')
+			.attr('style','width:140px')
+			.text('Octree Cam. Norm');
+		dCcontent.append('div')
+			.attr('id',p+'_CamSlider')
+			.attr('class','NSliderClass')
+			.style('margin-left','90px')
+			.style('width','90px');
+		dCcontent.append('input')
+			.attr('id',p+'_CamMaxT')
+			.attr('class', 'NMaxTClass')
+			.attr('type','text');
+		dheight += 45;
 
+	}
 	// velocity vectors
 	if (GUIParams.haveVelocities[p]){
 		fillVelocityVectorDropdown(dropdown,p);
