@@ -1035,6 +1035,7 @@ function sendInitGUI(prepend=[], append=[]){
 	if (viewerParams.usingSocket && !viewerParams.local) forGUI.push({'setGUIParamByKey':[true, "cameraNeedsUpdate"]});
 
 	forGUI.push({'setGUIParamByKey':[viewerParams.haveOctree,"haveOctree"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.haveAnyOctree,"haveAnyOctree"]});
 
 	append.forEach(function(x,i){
 		forGUI.push(x);

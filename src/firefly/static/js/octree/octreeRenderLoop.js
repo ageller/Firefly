@@ -11,11 +11,12 @@ function updateOctree(){
 		viewerParams.octree.NParticleMemoryModifier = THREE.Math.clamp(viewerParams.octree.NParticleMemoryModifierFac*viewerParams.octree.memoryLimit/viewerParams.memoryUsage, 0., 1.);
 		d3.selectAll('.octreeLoadingText').classed('octreeLoadingPaused', true);
 		d3.selectAll('.octreeLoadingFill').classed('octreeLoadingPaused', true);
+		d3.select('#decimationOctreeSpan').text((1./viewerParams.octree.NParticleMemoryModifier).toFixed(2))
 	}
 	//I need some way to bring the particle number back up without entering into a loop!
-	if (viewerParams.memoryUsage < 1.8*viewerParams.octree.memoryLimit) {
-		viewerParams.octree.NParticleMemoryModifier = THREE.Math.clamp(viewerParams.octree.NParticleMemoryModifier*1.1, 0., 1.);
-	}
+	// if (viewerParams.memoryUsage < 1.8*viewerParams.octree.memoryLimit) {
+	// 	viewerParams.octree.NParticleMemoryModifier = THREE.Math.clamp(viewerParams.octree.NParticleMemoryModifier*1.1, 0., 1.);
+	// }
 
 	//tweak the number of particles based on the fps
 	//not sure what limits I should set here
@@ -183,9 +184,13 @@ function updateOctree(){
 
 	//if we are done drawing, check if we should adjust the number of particles further see if I need to reduce the particles even further
 	if (viewerParams.octree.toRemove.length == 0 && viewerParams.octree.toReduce.length == 0){
-		if (viewerParams.memoryUsage > viewerParams.octree.memoryLimit) viewerParams.octree.NParticleMemoryModifierFac *= 0.5;
-		if (viewerParams.memoryUsage < viewerParams.octree.memoryLimit) viewerParams.octree.NParticleMemoryModifierFac /= 0.5;
-		viewerParams.octree.NParticleMemoryModifierFac = THREE.Math.clamp(viewerParams.octree.NParticleMemoryModifierFac, 0, 1.);
+		if (viewerParams.memoryUsage > viewerParams.octree.memoryLimit) viewerParams.octree.NParticleMemoryModifierFac = THREE.Math.clamp(viewerParams.octree.NParticleMemoryModifierFac/2., 0, 1.);
+		if (viewerParams.memoryUsage < viewerParams.octree.memoryLimit && viewerParams.octree.toDraw.length == 0) {
+			viewerParams.octree.NParticleMemoryModifierFac = THREE.Math.clamp(viewerParams.octree.NParticleMemoryModifierFac*2., 0, 1.);
+			viewerParams.octree.NParticleMemoryModifier = THREE.Math.clamp(viewerParams.octree.NParticleMemoryModifierFac*viewerParams.octree.memoryLimit/viewerParams.memoryUsage, 0., 1.);
+			d3.select('#decimationOctreeSpan').text((1./viewerParams.octree.NParticleMemoryModifier).toFixed(2))
+
+		}
 	}
 
 	//increment the draw pass
@@ -202,6 +207,7 @@ function updateOctree(){
 }
 
 function drawNextOctreeNode(){
+	//take the next in line to draw
 	viewerParams.octree.lastDrawnID = viewerParams.octree.toDrawIDs[0]; //trying to stop multiple draws!
 
 	viewerParams.octree.waitingToDraw = true;
@@ -224,8 +230,10 @@ function drawNextOctreeNode(){
 }
 
 function reduceNextOctreeNode(){
+	//work from the back of the array (since prioritized by the most important to view)
 	viewerParams.octree.waitingToReduce = true;
-	var arr = viewerParams.octree.toReduce[0];
+	var i = viewerParams.octree.toReduce.length - 1;
+	var arr = viewerParams.octree.toReduce[i];
 	var p = arr[0];
 	var iden = arr[1];
 	var obj = viewerParams.scene.getObjectByName(p+iden);
@@ -239,13 +247,15 @@ function reduceNextOctreeNode(){
 		reduceOctreeParticles(node, node.NparticlesToRender, true, resetWaitingToReduce);
 	}
 
-	viewerParams.octree.toReduce.shift();
-	viewerParams.octree.toReduceIDs.shift();
+	viewerParams.octree.toReduce.pop();
+	viewerParams.octree.toReduceIDs.pop();
 }
 
 function removeNextOctreeNode(){
+	//work from the back of the array (since prioritized by the most important to view)
 	viewerParams.octree.waitingToRemove = true;
-	var arr = viewerParams.octree.toRemove[0];
+	var i = viewerParams.octree.toRemove.length - 1;
+	var arr = viewerParams.octree.toRemove[i];
 	var p = arr[0];
 	var iden = arr[1];
 	var obj = viewerParams.scene.getObjectByName(p+iden);
@@ -261,8 +271,8 @@ function removeNextOctreeNode(){
 		reduceOctreeParticles(node, node.NparticlesToRender, true, resetWaitingToRemove);
 	}
 
-	viewerParams.octree.toRemove.shift();
-	viewerParams.octree.toRemoveIDs.shift();
+	viewerParams.octree.toRemove.pop();
+	viewerParams.octree.toRemoveIDs.pop();
 	viewerParams.octree.waitingToAddToRemove = false;
 }
 

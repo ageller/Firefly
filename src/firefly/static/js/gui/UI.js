@@ -167,7 +167,7 @@ function createDataControlsBox(UI){
 	var m2 = m1.append('div')
 		.attr('class','dropdown-content')
 		.attr('id','dataControlsDropdown')
-		.style('height','220px');
+	var m2height = 220;
 
 	//decimation
 	var dec = m2.append('div')
@@ -178,7 +178,7 @@ function createDataControlsBox(UI){
 		.style('display','inline-block')
 	dec.append('div')
 		.attr('class','pLabelDiv')
-		.style('width','85')
+		.style('width','85px')
 		.style('display','inline-block')
 		.text('Decimation');
 	dec.append('div')
@@ -192,6 +192,24 @@ function createDataControlsBox(UI){
 		.attr('type','text')
 		.style('left','255px')
 		.style('width','30px');
+	if (GUIParams.haveAnyOctree){
+		m2height += 25;
+		m2.append('div')
+			.attr('id', 'decimationOctreeDiv')
+			.style('width','270px')
+			.style('margin-left','5px')
+			.style('margin-top','10px')
+			.style('display','inline-block')
+			.append('div')
+				.attr('class','pLabelDiv')
+				.style('width','270px')
+				.style('display','inline-block')
+				.style('font-size','12px')
+				.text('Octree memory-imposed decimation = ')
+				.append('span')
+					.attr('id','decimationOctreeSpan')
+					.text('1.00')
+	}
 
 	//fullscreen button
 	m2.append('div').attr('id','fullScreenDiv')
@@ -295,6 +313,7 @@ function createDataControlsBox(UI){
 		.append('span')
 			.text('Load New Data');
 
+	m2.style('height', m2height + 'px');
 }
 
 function createCameraControlBox(UI){
