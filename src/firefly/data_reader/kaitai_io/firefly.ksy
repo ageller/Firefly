@@ -31,7 +31,7 @@ types:
       - id: components # dimensions, i.e. 3 for coords and vels otherwise 1
         type: u1
     seq:
-      - id: fields
+      - id: field_data
         type: field(components, field_type)
   field:
     params:
