@@ -1,9 +1,15 @@
+## TODO:
+## load test data alongside real data (from JSON) in firefly using Javascript loader
+## field filter flags
+## field filter lims/vals
+## field colorbar flags
+## field colorbar lims/vals
 meta:
   id: firefly_format1
   endian: le
   ks-opaque-types: true
   imports:
-    - array_buffer
+    - my_array_buffer
 seq:
   - id: firefly_header
     type: header
@@ -48,4 +54,4 @@ types:
         encoding: UTF-8
       - id: data
         size: _root.firefly_header.npart * components * 4
-        type: array_buffer(field_type)
+        type: my_array_buffer(field_type)
