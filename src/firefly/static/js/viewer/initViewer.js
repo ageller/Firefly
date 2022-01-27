@@ -2,6 +2,7 @@
 //// for sockets
 /////////////////////
 //https://blog.miguelgrinberg.com/post/easy-websockets-with-flask-and-gevent
+
 //https://github.com/miguelgrinberg/Flask-SocketIO
 function connectViewerSocket(){
 	//$(document).ready(function() {
@@ -139,6 +140,25 @@ function runLocal(useSockets=true, showGUI=true, allowVRControls=false, startSte
 	
 	//This will  load the data, and then start the WebGL rendering
 	getFilenames(prefix = "static/");
+
+	// TODO: remove
+	testKaitai();
+}
+
+function testKaitai(){
+
+
+	fetch('static/data/test.b')
+		.then(res => res.blob())
+		.then(blob =>{
+		binary_reader = new FileReader;
+		binary_reader.readAsArrayBuffer(blob)
+		binary_reader.onload = function () {
+			kaitai_input = binary_reader.result
+			stream = new KaitaiStream(kaitai_input);
+			viewerParams.kaitai_format = new FireflyFormat1(stream);
+		}
+	});
 }
 
 //wait for all the input before loading

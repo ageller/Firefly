@@ -1,5 +1,5 @@
 meta:
-  id: array_buffer
+  id: my_array_buffer
   endian: le
 params:
   - id: field_type
