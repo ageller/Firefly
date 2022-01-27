@@ -48,7 +48,7 @@ class FireflyFormat1(KaitaiStruct):
             self._read()
 
         def _read(self):
-            self.fields = FireflyFormat1.Field(self.components, self.field_type, self._io, self, self._root)
+            self.field_data = FireflyFormat1.Field(self.components, self.field_type, self._io, self, self._root)
 
 
     class Field(KaitaiStruct):
