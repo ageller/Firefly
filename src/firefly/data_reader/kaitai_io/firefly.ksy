@@ -11,12 +11,18 @@ seq:
     type: particle_fields('f4', 3)
   - id: velocities
     type: particle_fields('f4', 3)
+  - id: scalar_fields
+    type: particle_fields('f4',1)
+    repeat: expr
+    repeat-expr: _root.firefly_header.nfields
 types:
   header:
     seq:
       - id: recsize_0
         type: u4
       - id: npart
+        type: u4
+      - id: nfields ## should only be scalar fields in addition to coordinates and velocities
         type: u4
   particle_fields:
     params:
@@ -34,6 +40,12 @@ types:
       - id: field_type
         type: str
     seq:
-      - id: field
+      - id: str_len
+        type: u4
+      - id: field_name
+        type: str
+        size: str_len
+        encoding: UTF-8
+      - id: data
         size: _root.firefly_header.npart * components * 4
         type: array_buffer(field_type)

@@ -20,6 +20,10 @@ class FireflyFormat1(KaitaiStruct):
         self.firefly_header = FireflyFormat1.Header(self._io, self, self._root)
         self.coordinates = FireflyFormat1.ParticleFields(u"f4", 3, self._io, self, self._root)
         self.velocities = FireflyFormat1.ParticleFields(u"f4", 3, self._io, self, self._root)
+        self.scalar_fields = [None] * (self._root.firefly_header.nfields)
+        for i in range(self._root.firefly_header.nfields):
+            self.scalar_fields[i] = FireflyFormat1.ParticleFields(u"f4", 1, self._io, self, self._root)
+
 
     class Header(KaitaiStruct):
         def __init__(self, _io, _parent=None, _root=None):
@@ -31,6 +35,7 @@ class FireflyFormat1(KaitaiStruct):
         def _read(self):
             self.recsize_0 = self._io.read_u4le()
             self.npart = self._io.read_u4le()
+            self.nfields = self._io.read_u4le()
 
 
     class ParticleFields(KaitaiStruct):
@@ -56,17 +61,11 @@ class FireflyFormat1(KaitaiStruct):
             self._read()
 
         def _read(self):
-            self._raw_field = self._io.read_bytes(((self._root.firefly_header.npart * self.components) * 4))
-            _io__raw_field = KaitaiStream(BytesIO(self._raw_field))
-            self.field = array_buffer.ArrayBuffer(self.field_type, _io__raw_field)
-
-## added by ABG manually
-import numpy as np
-if __name__ == '__main__':
-    with open('test.b','rb') as handle:
-        format = FireflyFormat1(KaitaiStream(BytesIO(handle.read())))
-    
-    print(np.array(format.velocities.fields.field.values).reshape(-1,format.velocities.fields.components))
+            self.str_len = self._io.read_u4le()
+            self.field_name = (self._io.read_bytes(self.str_len)).decode(u"UTF-8")
+            self._raw_data = self._io.read_bytes(((self._root.firefly_header.npart * self.components) * 4))
+            _io__raw_data = KaitaiStream(BytesIO(self._raw_data))
+            self.data = array_buffer.ArrayBuffer(self.field_type, _io__raw_data)
 
 
 
