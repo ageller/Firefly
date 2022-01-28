@@ -198,7 +198,8 @@ class Reader(object):
         self,
         loud=False,
         write_jsons_to_disk=True,
-        symlink=True):
+        symlink=True,
+        use_format='ffly'):
         """Creates all the necessary JSON files to run firefly and ensures they are
         properly linked and cross-referenced correctly using the
         :func:`firefly.data_reader.Settings.outputToJSON` and
@@ -214,6 +215,8 @@ class Reader(object):
             saved directly to :code:`self.static_data_dir` directory (:code:`False`). 
             Note that :code:`symlink=False` will not _also_ save results in :code:`self.JSONdir`, defaults to True
         :type symlink: bool, optional
+        :param use_format: what output format should the particle data be saved in, JSON or binary 'ffly'
+        :type: str
         :return: :code:`self.JSON` or :code:`""` according to :code:`write_jsons_to_disk`
         :rtype: str
         """
@@ -273,15 +276,26 @@ class Reader(object):
             if loud:
                 print("Outputting:",particleGroup)
 
-            this_JSON_array,filenames_and_nparts = particleGroup.outputToJSON(
-                os.path.basename(JSONdir),
-                os.path.dirname(JSONdir),
-                self.JSON_prefix,
-                loud=loud,
-                nparts_per_file=self.max_npart_per_file,
-                clean_JSONdir=self.clean_JSONdir if particleGroup is self.particleGroups[0] else False,
-                write_jsons_to_disk=write_jsons_to_disk,
-                not_reader=False)
+            if use_format.lower() == 'json':
+                this_JSON_array,filenames_and_nparts = particleGroup.outputToJSON(
+                    os.path.basename(JSONdir),
+                    os.path.dirname(JSONdir),
+                    self.JSON_prefix,
+                    loud=loud,
+                    nparts_per_file=self.max_npart_per_file,
+                    clean_JSONdir=self.clean_JSONdir if particleGroup is self.particleGroups[0] else False,
+                    write_jsons_to_disk=write_jsons_to_disk,
+                    not_reader=False)
+            elif use_format.lower() == 'ffly':
+                this_JSON_array,filenames_and_nparts = particleGroup.outputToFFLY(
+                    os.path.basename(JSONdir),
+                    os.path.dirname(JSONdir),
+                    self.JSON_prefix,
+                    loud=loud,
+                    nparts_per_file=self.max_npart_per_file,
+                    clean_FFLYdir= self.clean_JSONdir if particleGroup is self.particleGroups[0] else False,
+                    not_reader=False)
+            else: raise KeyError("Requested format %s not understood. Choose json or ffly."%use_format)
 
             ## append the JSON arrays for this particle group
             JSON_array += this_JSON_array
