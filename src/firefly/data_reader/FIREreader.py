@@ -41,11 +41,11 @@ class FIREreader(Reader):
             defaults to :code:`[1 for i in ptypes]`
         :type decimation_factors: list of int, optional
         :param fields: names of fields to open from snapshot data
-            (e.g. Temperature, AgeGyr, Velocities, Density). Shared between 
+            (e.g. Temperature, AgeGyr, Density). Shared between 
             particle types but if a particle type does not have a field 
             (e.g. PartType4 does not have Temperature, PartType0 does not have AgeGyr)
             then that field is skipped for that particle type.
-            defaults to ['Velocities']
+            defaults to []
         :type fields: list of str, optional
         :param filterFlags: flags to signal whether field should be in filter dropdown,
             defaults to [True for i in fields]
@@ -73,7 +73,7 @@ class FIREreader(Reader):
         if decimation_factors is None: decimation_factors = [1 for i in ptypes]
 
         ## handle default input for fields
-        if fields is None: fields = ['Velocities']
+        if fields is None: fields = []
         if filterFlags is None: filterFlags = [True for i in fields]
         if colormapFlags is None: colormapFlags = [True for i in fields]
         if magFlags is None: magFlags = [False for i in fields]
@@ -266,6 +266,7 @@ class FIREreader(Reader):
                 [ParticleGroup(
                     UIname,
                     snapdict['Coordinates'],
+                    snapdict['Velocities'],
                     tracked_names=tracked_names,
                     tracked_arrays=tracked_arrays,
                     decimation_factor=dec_factor,
@@ -304,7 +305,7 @@ class SimpleFIREreader(FIREreader):
 
                 :code:`UInames = ['gas','stars']`
 
-                :code:`fields = ['Velocities','AgeGyr','Temperature','GCRadius']`
+                :code:`fields = ['AgeGyr','Temperature','GCRadius']`
 
             along  with some "standard" settings with:
                 :code:`settings['color']['gas'] = [1,0,0,1]`
@@ -356,7 +357,7 @@ class SimpleFIREreader(FIREreader):
             ptypes=[0,4], 
             UInames=['Gas','Stars'],
             decimation_factors=[decimation_factor,decimation_factor],
-            fields=['AgeGyr','Temperature','Velocities','GCRadius'],
+            fields=['AgeGyr','Temperature','GCRadius'],
             magFlags=[False,False,False,False], 
             logFlags=[False,True,False,False], 
             JSON_prefix='Data',
@@ -393,7 +394,7 @@ class STARFORGEreader(FIREreader):
 
                 :code:`UInames = ['gas','stars']`
 
-                :code:`fields = ['Velocities','AgeGyr','Temperature','GCRadius']`
+                :code:`fields = ['AgeGyr','Temperature','GCRadius']`
 
             along  with some "standard" settings with:
                 :code:`settings['color']['gas'] = [1,0,0,1]`
@@ -445,7 +446,7 @@ class STARFORGEreader(FIREreader):
             ptypes=[0,5], 
             UInames=['Gas','Stars'],
             decimation_factors=[decimation_factor,decimation_factor],
-            fields=['AgeGyr','Temperature','Velocities','GCRadius'],
+            fields=['AgeGyr','Temperature','GCRadius'],
             magFlags=[False,False,False,False], 
             logFlags=[False,True,False,False], 
             JSON_prefix='Data',
