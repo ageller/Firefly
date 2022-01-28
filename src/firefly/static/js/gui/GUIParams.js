@@ -75,7 +75,7 @@ function defineGUIParams(){
 			for (i=0; i <32; i++){
 				colormapList.push(name_file['names'][i])
 			}
-			console.log(colormapList)
+			//console.log(colormapList)
 		});
 
 		this.colormapList = colormapList
