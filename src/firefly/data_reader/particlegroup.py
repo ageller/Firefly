@@ -4,6 +4,7 @@ import numpy as np
 import os 
 
 from .json_utils import write_to_json
+from .binary_writer import BinaryWriter
 
 class ParticleGroup(object):
     """
@@ -72,6 +73,7 @@ class ParticleGroup(object):
         self,
         UIname,
         coordinates,
+        velocities=None,
         tracked_arrays=None,
         tracked_names=None,
         tracked_filter_flags=None,
@@ -90,6 +92,9 @@ class ParticleGroup(object):
         :type UIname: str 
         :param coordinates: The coordinates of the points in 3d space, should have a shape of `(nparts,3)`
         :type coordinates: np.ndarray
+        :param velocities: The velocities associated with each coordinate, should have a shape of `(nparts,3)`
+            allows vectors to be plotted at the coordinate location
+        :type velocities: np.ndarray
         :param tracked_arrays: The field data arrays to associate with each coordinate in space, each array
             should be one-dimensional and have `nparts` entries., defaults to None
         :type tracked_arrays: (nfields,nparts) np.ndarray, optional
@@ -147,10 +152,17 @@ class ParticleGroup(object):
         tracked_filter_flags = [] if tracked_filter_flags is None else tracked_filter_flags
         tracked_colormap_flags = [] if tracked_colormap_flags is None else tracked_colormap_flags
 
+        if 'Velocities' in tracked_names:
+            raise SyntaxError(
+                "Velocities should not be included in tracked array names,"+
+                " pass them directly to ParticleGroup using keyword argument `velocities=`."+
+                " This is new behavior as of 1/27/22.")
+
         ## bind input that will not be validated
         self.UIname = UIname
         self.decimation_factor = decimation_factor
         self.coordinates = np.array(coordinates)
+        self.velocities = np.array(velocities) if velocities is not None else None
         self.nparts = self.coordinates.shape[0]
 
         ## reduce the decimation factor if someone has asked to skip
@@ -406,6 +418,9 @@ class ParticleGroup(object):
         ##  aren't in the tracked array
         outDict['Coordinates'] = self.coordinates[dec_inds]
 
+        if self.velocities is not None:
+            outDict['Velocities'] = self.velocities[dec_inds]
+
         ## store the field arrays
         for tracked_name,tracked_arr in zip(
             self.tracked_names,
@@ -543,3 +558,88 @@ class ParticleGroup(object):
             cur_index += nparts_this_file
         
         return JSON_array,filenames_and_nparts
+
+    def outputToFFLY(
+        self,
+        short_data_path,
+        hard_data_path,
+        file_prefix='',
+        loud=True,
+        nparts_per_file=10**4,
+        clean_FFLYdir=False,
+        not_reader=True):
+
+        ## shuffle particles and decimate as necessary, save the output in dec_inds
+        self.getDecimationIndexArray()
+
+        ## where are we saving this json to?
+        full_path = os.path.join(hard_data_path, short_data_path)
+
+        if not os.path.isdir(full_path):
+            os.makedirs(full_path)
+        if loud and not_reader:
+            print("You will need to add the sub-filenames to"+
+                " filenames.json if this was not called by a Reader instance.")
+            print("Writing:",self,"FFLY files to %s"%full_path)
+
+        ## do we want to delete any existing files here?
+        if clean_FFLYdir:
+            print("Removing old ffly files from %s"%full_path)
+            for fname in os.listdir(full_path):
+                if "ffly" in fname:
+                    os.remove(os.path.join(full_path,fname))
+
+        filenames_and_nparts = self.filenames_and_nparts
+        ## if the user did not specify how we should partition the data between
+        ##  sub-JSON files then we'll just do it equally
+        if filenames_and_nparts is None:
+            ## determine if we were passed a boolean mask or a index array
+            if self.dec_inds.dtype == bool:
+                nparts = np.sum(self.dec_inds)
+                self.dec_inds = np.argwhere(self.dec_inds) ## convert to an index array
+            else: nparts = self.dec_inds.shape[0]
+
+            ## how many sub-files are we going to need?
+            nfiles = int(nparts/nparts_per_file + ((nparts%nparts_per_file)!=0))
+
+            ## how many particles will each file have and what are they named?
+            filenames = [os.path.join(short_data_path,"%s%s%03d.ffly"%(file_prefix,self.UIname,i_file)) for i_file in range(nfiles)]
+            nparts = [min(nparts_per_file,nparts-(i_file)*(nparts_per_file)) for i_file in range(nfiles)]
+
+            filenames_and_nparts = list(zip(filenames,nparts))
+        
+        file_array = []
+        ## loop through the sub-files
+        cur_index = 0
+
+        for i_file,(fname,nparts_this_file) in enumerate(filenames_and_nparts):
+            ## pick out the indices for this file
+            if self.decimation_factor > 1:
+                these_dec_inds = self.dec_inds[cur_index:cur_index+nparts_this_file]
+            else:
+                ## create a dummy index array that takes everything
+                these_dec_inds = np.arange(cur_index,cur_index+nparts_this_file)
+        
+            ## prepare writer class
+            fname = os.path.join(hard_data_path,fname)
+            binary_writer = BinaryWriter(
+                fname,
+                self.coordinates[these_dec_inds],
+                self.velocities[these_dec_inds] if self.velocities is not None else None)
+
+            ## fill necessary attributes
+            binary_writer.nfields = len(self.tracked_names)
+            binary_writer.field_names = self.tracked_names
+            binary_writer.fields = self.tracked_arrays[:,these_dec_inds]
+            binary_writer.filter_flags = self.tracked_filter_flags
+            binary_writer.colormap_flags = self.tracked_colormap_flags
+
+            ## TODO add interface for this
+            binary_writer.radius_flags = np.repeat(False,binary_writer.nfields)
+
+            file_array += [(fname,binary_writer.write())] 
+
+            ## move onto the next file
+            cur_index += nparts_this_file
+        
+        return file_array,filenames_and_nparts
