@@ -34,7 +34,7 @@ class BinaryWriter(object):
         self.fields = []
         self.field_names = []
         self.filter_flags = []
-        self.colorbar_flags = []
+        self.colormap_flags = []
         self.radius_flags = []
     
     def write(self):
@@ -52,7 +52,7 @@ class BinaryWriter(object):
         header_size += 8 ## velocity flag
         ## each char gets 32 bits for UTF-8 (ascii is just 1 byte tho)
         header_size += 32*np.sum([len(field_name) for field_name in self.field_names]) 
-        header_size += 3*8*self.nfields ## filter, colorbar, and radius flags
+        header_size += 3*8*self.nfields ## filter, colormap, and radius flags
         handle.write(np.array(header_size).astype(np.int32)) 
         ## boolean flag for whether there are velocities
         self.__write_flag(handle,self.velocities is not None)
@@ -65,8 +65,8 @@ class BinaryWriter(object):
             self.__write_field_name(handle,field_name)
         ## write the filter flag array
         handle.write(np.array(self.filter_flags).astype(bool))
-        ## write the colorbar flag array
-        handle.write(np.array(self.colorbar_flags).astype(bool))
+        ## write the colormap flag array
+        handle.write(np.array(self.colormap_flags).astype(bool))
         ## write the scale-by radius flag array
         handle.write(np.array(self.radius_flags).astype(bool))
 
@@ -95,7 +95,7 @@ class BinaryWriter(object):
         field,
         field_name,
         filter_flag=True,
-        colorbar_flag=True,
+        colormap_flag=True,
         radius_flag=False):
 
         if field.size != self.nparts: 
@@ -106,7 +106,7 @@ class BinaryWriter(object):
         self.nfields+=1
 
         self.filter_flags+=[filter_flag]
-        self.colorbar_flags+=[colorbar_flag]
+        self.colormap_flags+=[colormap_flag]
         self.radius_flags+=[radius_flag]
         
 if __name__ == '__main__':
