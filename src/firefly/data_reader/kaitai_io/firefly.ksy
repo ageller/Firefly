@@ -33,17 +33,17 @@ types:
       - id: field_names
         type: field_name
         repeat: expr
-        repeat-expr: _root.firefly_header.nfields
+        repeat-expr: nfields
       - id: filter_flags
-        size: _root.firefly_header.nfields ## 1 byte for each field
+        size: nfields ## 1 byte for each field
         type: my_array_buffer("u1")
         doc: array of filter flags, whether the field at this position should be filtered
       - id: colormap_flags
-        size: _root.firefly_header.nfields ## 1 byte for each field
+        size: nfields ## 1 byte for each field
         type: my_array_buffer("u1")
         doc: array of colormap flags, whether the field at this position should be colormapped
       - id: radius_flags
-        size: _root.firefly_header.nfields ## 1 byte for each field
+        size: nfields ## 1 byte for each field
         type: my_array_buffer("u1")
         doc: array of scale-by radius flags, whether the field at this position should be allowed to scale the particles
   field_name:
