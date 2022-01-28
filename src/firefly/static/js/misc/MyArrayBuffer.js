@@ -40,6 +40,9 @@ var MyArrayBuffer = (function() {
         case "f4":
           this._m_values.push(this._io.readF4le());
           break;
+        case "u1":
+          this._m_values.push(this._io.readU1());
+          break;
         case "f8":
           this._m_values.push(this._io.readF8le());
           break;
