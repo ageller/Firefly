@@ -95,17 +95,17 @@ var FireflyFormat1 = (function() {
       this.hasVelocities = this._io.readU1();
       this.npart = this._io.readU4le();
       this.nfields = this._io.readU4le();
-      this.fieldNames = new Array(this._root.fireflyHeader.nfields);
-      for (var i = 0; i < this._root.fireflyHeader.nfields; i++) {
+      this.fieldNames = new Array(this.nfields);
+      for (var i = 0; i < this.nfields; i++) {
         this.fieldNames[i] = new FieldName(this._io, this, this._root);
       }
-      this._raw_filterFlags = this._io.readBytes(this._root.fireflyHeader.nfields);
+      this._raw_filterFlags = this._io.readBytes(this.nfields);
       var _io__raw_filterFlags = new KaitaiStream(this._raw_filterFlags);
       this.filterFlags = new MyArrayBuffer(_io__raw_filterFlags, this, null, "u1");
-      this._raw_colormapFlags = this._io.readBytes(this._root.fireflyHeader.nfields);
+      this._raw_colormapFlags = this._io.readBytes(this.nfields);
       var _io__raw_colormapFlags = new KaitaiStream(this._raw_colormapFlags);
       this.colormapFlags = new MyArrayBuffer(_io__raw_colormapFlags, this, null, "u1");
-      this._raw_radiusFlags = this._io.readBytes(this._root.fireflyHeader.nfields);
+      this._raw_radiusFlags = this._io.readBytes(this.nfields);
       var _io__raw_radiusFlags = new KaitaiStream(this._raw_radiusFlags);
       this.radiusFlags = new MyArrayBuffer(_io__raw_radiusFlags, this, null, "u1");
     }
