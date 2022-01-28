@@ -15,6 +15,7 @@ instances:
     type:
       switch-on: field_type
       cases:
+        '"u1"': u1
         '"f4"': f4
         '"u4"': u4
         '"f8"': f8
