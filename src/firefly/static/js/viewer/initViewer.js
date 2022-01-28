@@ -141,24 +141,6 @@ function runLocal(useSockets=true, showGUI=true, allowVRControls=false, startSte
 	//This will  load the data, and then start the WebGL rendering
 	getFilenames(prefix = "static/");
 
-	// TODO: remove
-	testKaitai();
-}
-
-function testKaitai(){
-
-
-	fetch('static/data/test.b')
-		.then(res => res.blob())
-		.then(blob =>{
-		binary_reader = new FileReader;
-		binary_reader.readAsArrayBuffer(blob)
-		binary_reader.onload = function () {
-			kaitai_input = binary_reader.result
-			stream = new KaitaiStream(kaitai_input);
-			viewerParams.kaitai_format = new FireflyFormat1(stream);
-		}
-	});
 }
 
 //wait for all the input before loading
@@ -1216,7 +1198,7 @@ function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
 					console.log('==== compiling internal data', f)
 					Object.keys(internalData).forEach(function(key,k){
 						//if I was sent a prefix, this could be simplified
-						if (key.includes(f[0])) compileData(internalData[key], p, callback, initialLoadFrac)
+						if (key.includes(f[0])) compileJSONData(internalData[key], p, callback, initialLoadFrac)
 					})
 					if (internalData && i == viewerParams.partsKeys.length - 1 && j == viewerParams.filenames[p].length - 1) viewerParams.newInternalData = {};
 
@@ -1228,9 +1210,18 @@ function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
 						readf = "data/"+f
 					}
 					if (readf != null){
-						d3.json(prefix+readf,  function(foo) {
-							compileData(foo, p, callback, initialLoadFrac);
-						});
+						// read JSON files
+						if (readf.toLowerCase().includes('.json')){
+							d3.json(prefix+readf, function(foo) {
+								compileJSONData(foo, p, callback, initialLoadFrac);
+							});
+						}
+						// read binary .ffly files
+						else if (readf.toLowerCase().includes('.ffly' )){
+							loadFFLYKaitai(prefix+readf, function(foo){
+								compileFFLYData(foo, p, callback, initialLoadFrac)}
+							);
+						}
 					}
 				}
 			});
@@ -1239,10 +1230,8 @@ function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
 }
 
 
-
 // callCompileData ->
-function compileData(data, p, callback, initialLoadFrac=0){
-	console.log('in compile data', p, data, viewerParams.counting, countParts())
+function compileJSONData(data, p, callback, initialLoadFrac=0){
 	Object.keys(data).forEach(function(k, jj) {
 		//console.log("k = ", k, jj)
 		if (viewerParams.parts[p].hasOwnProperty(k)){
@@ -1263,11 +1252,11 @@ function compileData(data, p, callback, initialLoadFrac=0){
 		if (viewerParams.parts.totalSize == 0) frac = 1.;
 		var loadfrac = frac*(1. - initialLoadFrac) + initialLoadFrac;
 		//some if statment like this seems necessary.  Otherwise the loading bar doesn't update (I suppose from too many calls)
-		console.log('loadfrac', loadfrac)
 		if (loadfrac - viewerParams.loadfrac > 0.5 || loadfrac == 1){
 			viewerParams.loadfrac = loadfrac;
 			updateLoadingBar();
 		}
+		console.log('in compile JSON data', p, data, viewerParams.counting, countParts(),'loadfrac', loadfrac)
 	}
 	if ('options' in viewerParams.parts){
 		//console.log(d3.selectAll('#loadingRect').node().getBoundingClientRect().width)
@@ -1333,7 +1322,115 @@ function addKeysForOctree(){
 		}
 	});
 }
-// compileData ->
+function loadFFLYKaitai(fname,callback){
+	// initialize a FileReader object
+	var binary_reader = new FileReader;
+	// get local file
+	fetch(fname)
+		.then(res => res.blob()) // convert to blob
+		.then(blob =>{ 
+		// interpret blob as an "ArrayBuffer" (basic binary stream)
+		binary_reader.readAsArrayBuffer(blob)
+		// wait until loading finishes, then call function
+		binary_reader.onloadend = function () {
+			// convert ArrayBuffer to FireflyFormat
+			kaitai_format = new FireflyFormat1(
+				new KaitaiStream(binary_reader.result));
+			// call compileFFLYData as a callback
+			callback(kaitai_format);
+		}
+	});
+};
+
+function compileFFLYData(data, p, callback, initialLoadFrac=0,filetype='particle'){
+	var hasVelocities = data.fireflyHeader.hasVelocities;
+	var this_parts = viewerParams.parts[p];
+	if (!data.hasOwnProperty('coordinates')) console.log("Invalid particle group data",data);
+	else {
+		// need to initialize various arrays that would've just been copied from the JSON
+		if (!this_parts.hasOwnProperty('Coordinates')){
+			this_parts.Coordinates = []
+			if (hasVelocities) this_parts.Velocities = [];
+			this_parts.filterKeys = []
+			this_parts.colormapKeys = []
+			// TODO hook this up for choosing which variable to scale points by
+			this_parts.radiusFlags = []
+			this_parts.doSPHrad = Array(false)
+
+			// initialize scalar field arrays and corresponding flags
+			for (i=0; i < data.fireflyHeader.fieldNames.length; i++){
+				field_name = data.fireflyHeader.fieldNames[i].fieldName
+				this_parts[field_name] = [];
+				if (data.fireflyHeader.filterFlags.buffer[i]){
+					this_parts.filterKeys.push(field_name);
+				}
+				if (data.fireflyHeader.colormapFlags.buffer[i]){
+					this_parts.colormapKeys.push(field_name);
+				}
+				if (data.fireflyHeader.radiusFlags.buffer[i]){
+					this_parts.radiusKeys.push(field_name);
+				}
+			}
+		} // if (!this_parts.hasOwnProperty)('Coordinates'))
+		for (i=0; i < data.fireflyHeader.npart; i++){
+			this_parts['Coordinates'].push(Array(
+				data.coordinates.fieldData[0].data.values[i],
+				data.coordinates.fieldData[1].data.values[i],
+				data.coordinates.fieldData[2].data.values[i]
+			));
+			// only load velocities if we actually have them
+			if (hasVelocities){
+				this_parts.Velocities.push(Array(
+					data.velocities.fieldData[0].data.values[i],
+					data.velocities.fieldData[1].data.values[i],
+					data.velocities.fieldData[2].data.values[i]
+				));
+			}
+		}
+
+		// and now load the scalar field data
+		for (i=0; i < data.fireflyHeader.nfields; i++){
+			field_name = data.fireflyHeader.fieldNames[i].fieldName
+			this_parts[field_name] = this_parts[field_name].concat(
+				data.scalarFields[i].fieldData.data.values
+			);
+		}
+	}
+	var num = 0;
+	if (!viewerParams.counting){
+		var num = countParts()
+		var frac = (num/viewerParams.parts.totalSize);
+		if (viewerParams.parts.totalSize == 0) frac = 1.;
+		var loadfrac = frac*(1. - initialLoadFrac) + initialLoadFrac;
+		//some if statment like this seems necessary.  Otherwise the loading bar doesn't update (I suppose from too many calls)
+		if (loadfrac - viewerParams.loadfrac > 0.5 || loadfrac == 1){
+			viewerParams.loadfrac = loadfrac;
+			updateLoadingBar();
+		}
+		console.log('compile FFLY data', p, data, viewerParams.counting, countParts(),'loadfrac', loadfrac)
+	}
+
+	if ('options' in viewerParams.parts){
+		//console.log(d3.selectAll('#loadingRect').node().getBoundingClientRect().width)
+		//console.log("counting", countParts(), viewerParams.parts.totalSize, viewerParams.loadfrac)
+		if (countParts() ==  viewerParams.parts.totalSize && viewerParams.parts.options.loaded){
+			//console.log("here")
+
+			var index = viewerParams.partsKeys.indexOf('options');
+			if (index > -1) {
+				viewerParams.partsKeys.splice(index, 1);
+				viewerParams.parts.options0 = JSON.parse(JSON.stringify(viewerParams.parts.options));
+			}
+
+			//if (viewerParams.haveAnyOctree) addKeysForOctree();
+
+			callback(); 
+		}
+	}
+}
+
+
+// compileJSONData ->
 function countParts(){
 	var num = 0.;
 	viewerParams.counting = true;
@@ -1397,7 +1494,7 @@ function moveLoadingBar(){
 	d3.selectAll('#loadingRect').attr('x', (screenWidth - viewerParams.loadingSizeX)/2);
 }
 
-// compileData ->
+// compileJSONData ->
 function updateLoadingBar(){
 	//console.log(viewerParams.loadfrac, viewerParams.loadingSizeX*viewerParams.loadfrac)
 	d3.selectAll('#loadingRect').transition().attr("width", viewerParams.loadingSizeX*viewerParams.loadfrac);
