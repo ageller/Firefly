@@ -28,7 +28,7 @@ function createParticleGeometry(p, parts, start, end){
 
 	// attributes
 	//position
-	var position = new Float32Array( len*3 ); // 3 vertices per point
+	var position = Float32Array.from(parts.Coordinates_flat); // 3 vertices per point
 	// Doesn't seem to work, i guess we just have to copy it over :eyeroll:
 	// I just get a black screen when I try to initialize the buffer with the values--
 	// the addAttribute must zero out the buffer or something
@@ -71,9 +71,9 @@ function createParticleGeometry(p, parts, start, end){
 
 	for (var j=0; j<len; j++){
 
-		position[3*j+0] = parts.Coordinates_flat[3*j+0]
-		position[3*j+1] = parts.Coordinates_flat[3*j+1] 
-		position[3*j+2] = parts.Coordinates_flat[3*j+2]
+		//position[3*j+0] = parts.Coordinates_flat[3*j+0]
+		//position[3*j+1] = parts.Coordinates_flat[3*j+1] 
+		//position[3*j+2] = parts.Coordinates_flat[3*j+2]
 		//pointIndex[j] = parseFloat(j);
 
 		if (parts.hasOwnProperty("VelVals")){
