@@ -169,7 +169,7 @@ class FIREreader(Reader):
                 self.snapdir,
                 self.snapnum,
                 int(ptype), ## ptype should be 1,2,3,4,etc...
-                keys_to_extract = ['Coordinates']+self.fields+['Masses']*com_offset
+                keys_to_extract = ['Coordinates']+self.fields+['Masses']*com_offset+['Velocities']
             )
 
             if com_offset and com is None:
@@ -268,7 +268,7 @@ class FIREreader(Reader):
                     snapdict['Coordinates'],
                     snapdict['Velocities'],
                     tracked_names=tracked_names,
-                    tracked_arrays=tracked_arrays,
+                    tracked_arrays=np.array(tracked_arrays,ndmin=2),
                     decimation_factor=dec_factor,
                     tracked_filter_flags=tracked_filter_flags,
                     tracked_colormap_flags=tracked_colormap_flags,
@@ -339,13 +339,22 @@ class SimpleFIREreader(FIREreader):
         if path_to_snapshot[-1:] == os.sep:
             path_to_snapshot = path_to_snapshot[:-1]
 
-        snapdir = os.path.dirname(path_to_snapshot)
-        try:
-            snapnum = int(path_to_snapshot.split('_')[-1])
-        except:
-            raise ValueError(
-                "%s should be formatted as 'path/to/output/snapdir_xxx'"%path_to_snapshot+
-                " where xxx is an integer")
+        if '.hdf5' not in path_to_snapshot:
+            snapdir = os.path.dirname(path_to_snapshot)
+            try:
+                snapnum = int(path_to_snapshot.split('_')[-1])
+            except:
+                raise ValueError(
+                    "%s should be formatted as 'path/to/output/snapdir_xxx'"%path_to_snapshot+
+                    " where xxx is an integer")
+        else:
+            snapdir = os.path.dirname(path_to_snapshot)
+            try: snapnum = int(path_to_snapshot.split('_')[-1][:-len('.hdf5')])
+            except:
+                raise ValueError(
+                    "%s should be formatted as 'path/to/output/snapshot_xxx.hdf5'"%path_to_snapshot+
+                    " where xxx is an integer")
+
 
         ## relative path -> symbolic link
         if JSONdir is None: JSONdir="FIREData_%d"%snapnum
@@ -358,8 +367,8 @@ class SimpleFIREreader(FIREreader):
             UInames=['Gas','Stars'],
             decimation_factors=[decimation_factor,decimation_factor],
             fields=['AgeGyr','Temperature','GCRadius'],
-            magFlags=[False,False,False,False], 
-            logFlags=[False,True,False,False], 
+            magFlags=[False,False,False], 
+            logFlags=[False,True,False], 
             JSON_prefix='Data',
             JSONdir=JSONdir,
             **kwargs)
@@ -376,7 +385,7 @@ class SimpleFIREreader(FIREreader):
         self.settings['camera'] = [0,0,-15]
 
         ## dump the JSON files
-        self.dumpToJSON(loud=True,write_jsons_to_disk=write_jsons_to_disk)
+        self.dumpToJSON(loud=True,write_jsons_to_disk=write_jsons_to_disk,use_format='ffly')
 
 class STARFORGEreader(FIREreader):
     def __init__(
