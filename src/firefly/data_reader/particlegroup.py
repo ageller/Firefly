@@ -416,10 +416,10 @@ class ParticleGroup(object):
         
         ## save the coordinates as a special case since they 
         ##  aren't in the tracked array
-        outDict['Coordinates'] = self.coordinates[dec_inds]
+        outDict['Coordinates_flat'] = self.coordinates[dec_inds].flatten()
 
         if self.velocities is not None:
-            outDict['Velocities'] = self.velocities[dec_inds]
+            outDict['Velocities_flat'] = self.velocities[dec_inds].flatten()
 
         ## store the field arrays
         for tracked_name,tracked_arr in zip(
@@ -540,7 +540,7 @@ class ParticleGroup(object):
                 these_dec_inds = self.dec_inds[cur_index:cur_index+nparts_this_file]
             else:
                 ## create a dummy index array that takes everything
-                these_dec_inds = np.arange(cur_index,cur_index+nparts_this_file)
+                these_dec_inds = np.arange(cur_index,cur_index+nparts_this_file,dtype=int)
         
             ## format an output dictionary
             outDict = self.outputToDict(
@@ -618,7 +618,7 @@ class ParticleGroup(object):
                 these_dec_inds = self.dec_inds[cur_index:cur_index+nparts_this_file]
             else:
                 ## create a dummy index array that takes everything
-                these_dec_inds = np.arange(cur_index,cur_index+nparts_this_file)
+                these_dec_inds = np.arange(cur_index,cur_index+nparts_this_file,dtype=int)
         
             ## prepare writer class
             fname = os.path.join(hard_data_path,fname)
