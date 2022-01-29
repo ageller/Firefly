@@ -406,7 +406,7 @@ function update_memory_usage(){
 					viewerParams.totalParticlesInMemory += node.particles.Coordinates.length;
 				})
 			} else {
-				viewerParams.totalParticlesInMemory += viewerParams.parts[p].Coordinates.length;
+				viewerParams.totalParticlesInMemory += viewerParams.parts.count[p];
 			}
 		})
 	}

@@ -19,27 +19,28 @@ var FireflyFormat1 = (function() {
   }
   FireflyFormat1.prototype._read = function() {
     this.fireflyHeader = new Header(this._io, this, this._root);
-    this.coordinates = new VectorField(this._io, this, this._root, "f4");
+    this.coordinatesFlat = new VectorField(this._io, this, this._root, "f4");
     if (this._root.fireflyHeader.hasVelocities != 0) {
-      this.velocities = new VectorField(this._io, this, this._root, "f4");
+      this.velocitiesFlat = new VectorField(this._io, this, this._root, "f4");
     }
     this.scalarFields = new Array(this._root.fireflyHeader.nfields);
     for (var i = 0; i < this._root.fireflyHeader.nfields; i++) {
-      this.scalarFields[i] = new ParticleField(this._io, this, this._root, "f4");
+      this.scalarFields[i] = new ScalarField(this._io, this, this._root, "f4");
     }
   }
 
   var Field = FireflyFormat1.Field = (function() {
-    function Field(_io, _parent, _root, fieldType) {
+    function Field(_io, _parent, _root, fieldType, components) {
       this._io = _io;
       this._parent = _parent;
       this._root = _root || this;
       this.fieldType = fieldType;
+      this.components = components;
 
       this._read();
     }
     Field.prototype._read = function() {
-      this._raw_data = this._io.readBytes((this._root.fireflyHeader.npart * 4));
+      this._raw_data = this._io.readBytes(((this._root.fireflyHeader.npart * 4) * this.components));
       var _io__raw_data = new KaitaiStream(this._raw_data);
       this.data = new MyArrayBuffer(_io__raw_data, this, null, this.fieldType);
     }
@@ -47,8 +48,8 @@ var FireflyFormat1 = (function() {
     return Field;
   })();
 
-  var ParticleField = FireflyFormat1.ParticleField = (function() {
-    function ParticleField(_io, _parent, _root, fieldType) {
+  var ScalarField = FireflyFormat1.ScalarField = (function() {
+    function ScalarField(_io, _parent, _root, fieldType) {
       this._io = _io;
       this._parent = _parent;
       this._root = _root || this;
@@ -56,11 +57,11 @@ var FireflyFormat1 = (function() {
 
       this._read();
     }
-    ParticleField.prototype._read = function() {
-      this.fieldData = new Field(this._io, this, this._root, this.fieldType);
+    ScalarField.prototype._read = function() {
+      this.fieldData = new Field(this._io, this, this._root, this.fieldType, 1);
     }
 
-    return ParticleField;
+    return ScalarField;
   })();
 
   var VectorField = FireflyFormat1.VectorField = (function() {
@@ -73,10 +74,7 @@ var FireflyFormat1 = (function() {
       this._read();
     }
     VectorField.prototype._read = function() {
-      this.fieldData = new Array(3);
-      for (var i = 0; i < 3; i++) {
-        this.fieldData[i] = new Field(this._io, this, this._root, this.fieldType);
-      }
+      this.flatVectorData = new Field(this._io, this, this._root, this.fieldType, 3);
     }
 
     return VectorField;
