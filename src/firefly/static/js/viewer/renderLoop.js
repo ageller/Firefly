@@ -48,6 +48,37 @@ function update(time){
 	
 	// update particle mesh buffers with settings from UI
 	update_particle_groups(time);	
+
+	// A couple of klugy fixes to allow for certain initial presets
+	// Firefly seems to behave well when initialized in trackball controls and without stereo.   
+	//    Otherwise, there are bugs of unknown origin.
+	if (viewerParams.drawPass > 1){
+		// update initial stereo option
+		// trying this here to see if I can fix a bug (of unknown origin) for starting firefly in stereo
+		if (viewerParams.initialStereo){
+			viewerParams.initialStereo = false;
+			viewerParams.useStereo = true;
+			checkStereoLock(true);
+		}
+
+		// update initial controls option
+		// trying this here to see if I can fix a bug (of unknown origin) for starting firefly with different controls than Trackball
+		if (viewerParams.initialFlyControls){
+			viewerParams.initialFlyControls = false;
+			viewerParams.useTrackball = false;
+			viewerParams.controls.dispose();
+			viewerParams.switchControls = true;
+			initControls(false);
+		}
+			if (viewerParams.initialOrientationControls){
+			viewerParams.initialOrientationControls = false;
+			viewerParams.useOrientationControls = true;
+			viewerParams.useTrackball = false;
+			viewerParams.controls.dispose();
+			viewerParams.switchControls = true;
+			initControls(false);
+		}
+	}
 }
 
 function update_keypress(time){
@@ -70,13 +101,13 @@ function update_keypress(time){
 	}
 
 	// increase and decrease speed for fly controls
-	if (viewerParams.keyboard.down("+")){
+	if (viewerParams.keyboard.pressed("+")){
 		viewerParams.flyffac += 1;
 		sendToGUI([{'updateFlyMovementSpeed':viewerParams.flyffac}]);
 		if (viewerParams.controlsName == 'FlyControls') viewerParams.controls.movementSpeed = (1. - viewerParams.friction)*viewerParams.flyffac;
 		console.log('fly speed', viewerParams.flyffac)
 	}
-	if (viewerParams.keyboard.down("-")){
+	if (viewerParams.keyboard.pressed("-")){
 		viewerParams.flyffac = Math.max(1., viewerParams.flyffac - 1);
 		sendToGUI([{'updateFlyMovementSpeed':viewerParams.flyffac}]);
 		if (viewerParams.controlsName == 'FlyControls') viewerParams.controls.movementSpeed = (1. - viewerParams.friction)*viewerParams.flyffac;

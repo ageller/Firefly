@@ -493,8 +493,8 @@ function setNodeDrawParams(node){
 
 	//return a fraction of the screen size
 	var width = Math.max(xwidth, Math.max(ywidth, zwidth));
-
-	//if (width == 0) console.log('bad width', node.particleType, node.id, xwidth, ywidth, zwidth);
+	
+	if (width == 0) console.log('bad width', node.particleType, node.id, xwidth, ywidth, zwidth);
 
 	//this will be a width in pixels
 	node.screenSize = width

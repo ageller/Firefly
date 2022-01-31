@@ -54,9 +54,12 @@ function defineViewerParams(){
 
 		//camera controls
 		this.controlsName = null;
-		this.useOrientationControls = false;
 		this.useTrackball = true;
+		this.useOrientationControls = false;
+		this.initialOrientationControls = false;
+		this.initialFlyControls = false;
 		this.useStereo = false;
+		this.initialStereo = false;
 		this.stereoSep = 0.06;
 		this.stereoSepMax = 1.;
 

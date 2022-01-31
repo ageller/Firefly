@@ -292,6 +292,7 @@ function checkshowParts(args){
 
 //check for stereo separation
 function checkStereoLock(checked){
+	console.log('stereo', checked)
 	if (checked) {
 		viewerParams.normalRenderer = viewerParams.renderer;
 		viewerParams.renderer = viewerParams.effect;

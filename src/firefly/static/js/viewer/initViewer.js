@@ -120,10 +120,14 @@ function runLocal(useSockets=true, showGUI=true, useOrientationControls=false, s
 	forGUI.push({'setGUIParamByKey':[viewerParams.local, "local"]});
 	sendToGUI(forGUI);
 
-	viewerParams.useStereo = startStereo;
-	viewerParams.useOrientationControls = useOrientationControls;
-	viewerParams.useTrackball = !useOrientationControls;
-	
+	viewerParams.initialStereo = startStereo;
+	viewerParams.initialOrientationControls = useOrientationControls;
+
+	// it appears that in order for Firefly to start correctly, it must be initialized to non-stereo and trackbacl
+	// I will re-initialize them to the proper values after the first render pass
+	viewerParams.useTrackball = true;
+	viewerParams.useStereo = false;
+
 	//both of these start setIntervals to wait for the proper variables to be set
 	makeViewer(pSize);
 	if (showGUI) {
@@ -425,10 +429,14 @@ function initScene() {
 		viewerParams.effect.setAspect(1.);
 		viewerParams.effect.setEyeSeparation(viewerParams.stereoSep);
 
-		if (viewerParams.useStereo){
-			viewerParams.normalRenderer = viewerParams.renderer;
-			viewerParams.renderer = viewerParams.effect;
-		}
+		// Wtarting with stereo seems to break things (e.g., I can't change particle sizes)
+		//   but it works fine if I toggle stereo in the GUI.  I have no idea why this breaks.
+		// So, I will switch to stereo if needed after the first render pass (?)
+		// 
+		// if (viewerParams.useStereo){
+		// 	viewerParams.normalRenderer = viewerParams.renderer;
+		// 	viewerParams.renderer = viewerParams.effect;
+		// }
 	}
 
 	// scene
@@ -875,12 +883,15 @@ function applyOptions(){
 }
 
 // connect fly/trackball controls
-function initControls(){
+function initControls(updateGUI = true){
 
 	var forGUI = []
 	forGUI.push({'setGUIParamByKey':[viewerParams.useTrackball, "useTrackball"]})
 
-	if (viewerParams.useTrackball) {
+	// Firefly seems to behave best when it is initialized with trackball controls.  If the user chooses a different set of controls
+	// I will still initialize it with trackball, and then change after the first render pass
+	if (viewerParams.useTrackball || viewerParams.drawPass < 1) { 
+		console.log('initializing TrackballControls')
 		viewerParams.controlsName = 'TrackballControls'
 		var xx = new THREE.Vector3(0,0,0);
 		viewerParams.camera.getWorldDirection(xx);
@@ -910,14 +921,17 @@ function initControls(){
 		viewerParams.controls.dynamicDampingFactor = viewerParams.friction;
 		viewerParams.controls.addEventListener('change', sendCameraInfoToGUI);
 	} else if (viewerParams.useOrientationControls) {
+		console.log('initializing DeviceOrientationControls')
 		viewerParams.controlsName = 'DeviceOrientationControls'
 		viewerParams.controls = new THREE.FlyControls( viewerParams.camera , viewerParams.renderer.domElement);
 		viewerParams.controls.movementSpeed = (1. - viewerParams.friction)*viewerParams.flyffac;
+
 		//viewerParams.controls = new THREE.DeviceOrientationControls(viewerParams.camera);
 		//viewerParams.controls.updateAlphaOffsetAngle(THREE.Math.degToRad(-90));
 	} else {
+		console.log('initializing FlyControls')
 		viewerParams.controlsName = 'FlyControls';
-		viewerParams.controls = new THREE.FlyControls( viewerParams.camera , viewerParams.renderer.domElement);
+		viewerParams.controls = new THREE.FlyControls( viewerParams.camera , viewerParams.normalRenderer.domElement);
 		viewerParams.controls.movementSpeed = (1. - viewerParams.friction)*viewerParams.flyffac;
 	}
 
@@ -927,7 +941,7 @@ function initControls(){
 	}
 
 	viewerParams.switchControls = false;
-	sendToGUI(forGUI);
+	if (updateGUI) sendToGUI(forGUI);
 
 }
 
