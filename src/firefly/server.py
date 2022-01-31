@@ -260,7 +260,7 @@ def startFireflyServer(port=5000, frames_per_second=30, decimation_factor=1):
         dec = decimation_factor
 
         print("Launching Firefly at: http://localhost:%d"%port)
-        socketio.run(app, host='0.0.0.0', port=port, use_reloader=False)
+        socketio.run(app, host='0.0.0.0', port=port, use_reloader=True)
     except:
         raise
     finally:

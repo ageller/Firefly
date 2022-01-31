@@ -909,8 +909,10 @@ function initControls(){
 		viewerParams.controls.dynamicDampingFactor = viewerParams.friction;
 		viewerParams.controls.addEventListener('change', sendCameraInfoToGUI);
 	} else if (viewerParams.useOrientationControls) {
-		viewerParams.controls = new THREE.DeviceOrientationControls(viewerParams.camera);
-		viewerParams.controls.updateAlphaOffsetAngle(THREE.Math.degToRad(-90));
+		viewerParams.controls = new THREE.FlyControls( viewerParams.camera , viewerParams.renderer.domElement);
+		viewerParams.controls.movementSpeed = 1. - Math.pow(viewerParams.friction, viewerParams.flyffac);
+		//viewerParams.controls = new THREE.DeviceOrientationControls(viewerParams.camera);
+		//viewerParams.controls.updateAlphaOffsetAngle(THREE.Math.degToRad(-90));
 	} else {
 		viewerParams.controls = new THREE.FlyControls( viewerParams.camera , viewerParams.renderer.domElement);
 		viewerParams.controls.movementSpeed = 1. - Math.pow(viewerParams.friction, viewerParams.flyffac);

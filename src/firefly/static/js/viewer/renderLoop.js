@@ -446,8 +446,10 @@ function update_framerate(seconds,time){
 		var txt = Math.round(viewerParams.FPS) + ' fps'
 		if (viewerParams.memoryUsage > 0) txt += ', ' + (Math.round(viewerParams.memoryUsage/1e9*100.)/100.).toFixed(2) + ' Gb'
 		elm = document.getElementById("fps_container");
-		elm.innerHTML = txt;
-		elm.style.display='block';
+		if (elm){
+			elm.innerHTML = txt;
+			elm.style.display='block';
+		}
 	}
 
 	// update the stored current time from the last time we were here
