@@ -53,6 +53,7 @@ function defineViewerParams(){
 		this.fov = 45.
 
 		//camera controls
+		this.controlsName = null;
 		this.useOrientationControls = false;
 		this.useTrackball = true;
 		this.useStereo = false;
@@ -92,7 +93,7 @@ function defineViewerParams(){
 
 		//initial friction value
 		this.friction = 0.1;
-		this.flyffac = 0.2;
+		this.flyffac = 1.;
 		this.switchControls = false;
 
 		//check to see if the UI exists

@@ -590,7 +590,7 @@ function updateFriction(value){
 	if (viewerParams.useTrackball){
 		viewerParams.controls.dynamicDampingFactor = value;
 	} else {
-		viewerParams.controls.movementSpeed = 1. - Math.pow(value, viewerParams.flyffac);
+		viewerParams.controls.movementSpeed = (1. - value)*viewerParams.flyffac;
 	}
 	viewerParams.friction = value;
 }

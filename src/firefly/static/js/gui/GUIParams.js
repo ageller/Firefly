@@ -19,7 +19,7 @@ function defineGUIParams(){
 		this.zmax = 5.e10;
 		this.zmin = 1;
 		this.fov = 45.
-		this.flyffac = 0.2;
+		this.flyffac = 1.;
 		
 		//when ready the GUI will be created
 		this.waitForInit = null;
@@ -147,7 +147,7 @@ function defineGUIParams(){
 
 		// extra checking for fly controls
 		this.mouseDown = false;
-		
+
 		//check for mobile
 		//https://stackoverflow.com/questions/3514784/what-is-the-best-way-to-detect-a-mobile-device-in-jquery
 		// device detection

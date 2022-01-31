@@ -125,7 +125,7 @@ function initGUIControls(initial=false){
 	else {
 		GUIParams.controlsName = "FlyControls";
 		GUIParams.controls = new THREE.FlyControls( GUIParams.camera , GUIParams.renderer.domElement);
-		GUIParams.controls.movementSpeed = 1. - Math.pow(GUIParams.friction, GUIParams.flyffac);
+		GUIParams.controls.movementSpeed = (1. - GUIParams.friction)*GUIParams.flyffac;
 
 		d3.select('#WebGLContainer').node().addEventListener("keydown", sendCameraInfoToViewer,true);//for fly controls
 		d3.select('#WebGLContainer').node().addEventListener("keyup", sendCameraInfoToViewer,true);//for fly controls
@@ -201,6 +201,20 @@ function animateGUIupdate(){
 			//GUIParams.switchControls = true;
 			GUIParams.controls.dispose();
 			initGUIControls();
+		}
+
+		// increase and decrease speed for fly controls
+		if (GUIParams.keyboard.down("+")){
+			GUIParams.flyffac += 1;
+			sendToViewer([{'setViewerParamByKey':[GUIParams.flyffac, "flyffac"]}]);
+			updateFlyMovementSpeed(GUIParams.flyffac);
+			console.log('fly speed', GUIParams.flyffac)
+		}
+		if (GUIParams.keyboard.down("-")){
+			GUIParams.flyffac = Math.max(1., GUIParams.flyffac - 1);
+			sendToViewer([{'setViewerParamByKey':[GUIParams.flyffac, "flyffac"]}]);
+			updateFlyMovementSpeed(GUIParams.flyffac);
+			console.log('fly speed', GUIParams.flyffac)
 		}
 
 		// handle keyboard event to initialize tweening
@@ -284,7 +298,21 @@ function updateFriction(value){
 		console.log(GUIParams)
 		GUIParams.controls.dynamicDampingFactor = value;
 	} else {
-		GUIParams.controls.movementSpeed = 1. - Math.pow(value, GUIParams.flyffac);
+		GUIParams.controls.movementSpeed = (1. - value)*GUIParams.flyffac;
 	}
 	GUIParams.friction = value;
+}
+
+function updateFlyMovementSpeed(flyffac){
+	GUIParams.flyffac = flyffac;
+	
+	//update for the GUI cube
+	if (GUIParams.controls){
+		if (GUIParams.controlsName == 'FlyControls') GUIParams.controls.movementSpeed = (1. - GUIParams.friction)*GUIParams.flyffac;
+	}
+
+	//update for the viewer
+
+
+
 }

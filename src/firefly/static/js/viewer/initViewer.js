@@ -881,6 +881,7 @@ function initControls(){
 	forGUI.push({'setGUIParamByKey':[viewerParams.useTrackball, "useTrackball"]})
 
 	if (viewerParams.useTrackball) {
+		viewerParams.controlsName = 'TrackballControls'
 		var xx = new THREE.Vector3(0,0,0);
 		viewerParams.camera.getWorldDirection(xx);
 		viewerParams.controls = new THREE.TrackballControls( viewerParams.camera, viewerParams.renderer.domElement );
@@ -909,13 +910,15 @@ function initControls(){
 		viewerParams.controls.dynamicDampingFactor = viewerParams.friction;
 		viewerParams.controls.addEventListener('change', sendCameraInfoToGUI);
 	} else if (viewerParams.useOrientationControls) {
+		viewerParams.controlsName = 'DeviceOrientationControls'
 		viewerParams.controls = new THREE.FlyControls( viewerParams.camera , viewerParams.renderer.domElement);
-		viewerParams.controls.movementSpeed = 1. - Math.pow(viewerParams.friction, viewerParams.flyffac);
+		viewerParams.controls.movementSpeed = (1. - viewerParams.friction)*viewerParams.flyffac;
 		//viewerParams.controls = new THREE.DeviceOrientationControls(viewerParams.camera);
 		//viewerParams.controls.updateAlphaOffsetAngle(THREE.Math.degToRad(-90));
 	} else {
+		viewerParams.controlsName = 'FlyControls';
 		viewerParams.controls = new THREE.FlyControls( viewerParams.camera , viewerParams.renderer.domElement);
-		viewerParams.controls.movementSpeed = 1. - Math.pow(viewerParams.friction, viewerParams.flyffac);
+		viewerParams.controls.movementSpeed = (1. - viewerParams.friction)*viewerParams.flyffac;
 	}
 
 	if (viewerParams.haveUI){

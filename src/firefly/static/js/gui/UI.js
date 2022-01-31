@@ -612,6 +612,9 @@ function createCameraControlBox(UI){
 		.attr('type','text')
 		.style('margin-top','-4px');
 
+
+	// remove this after fixing the camera input boxes!
+	disableCameraInputBoxes();
 }
 
 function createParticleUIs(UI){
@@ -1557,6 +1560,38 @@ function updateUIBlending(args){
 		elm.checked = dTest;
 		elm.value = dTest
 	})
+}
+
+//////////////////////////////////////////
+// disable the camera text input boxes (they don't work properly)
+// this function is called right after creating the UI; remove it once the input boxes functionality is fixed!
+/////////////////////////////////////////
+function disableCameraInputBoxes(){
+	// this does the job but turns the boxes gray
+	// document.getElementById('CenterXText').disabled = true;
+	// document.getElementById('CenterYText').disabled = true;
+	// document.getElementById('CenterZText').disabled = true;
+
+	// document.getElementById('CameraXText').disabled = true;
+	// document.getElementById('CameraYText').disabled = true;
+	// document.getElementById('CameraZText').disabled = true;
+
+	// document.getElementById('RotXText').disabled = true;
+	// document.getElementById('RotYText').disabled = true;
+	// document.getElementById('RotZText').disabled = true;
+
+	// this does the job without graying out the boxes
+	document.getElementById('CenterXText').onkeydown = function(e){ e.preventDefault(); };
+	document.getElementById('CenterYText').onkeydown = function(e){ e.preventDefault(); };
+	document.getElementById('CenterZText').onkeydown = function(e){ e.preventDefault(); };
+
+	document.getElementById('CameraXText').onkeydown = function(e){ e.preventDefault(); };
+	document.getElementById('CameraYText').onkeydown = function(e){ e.preventDefault(); };
+	document.getElementById('CameraZText').onkeydown = function(e){ e.preventDefault(); };
+
+	document.getElementById('RotXText').onkeydown = function(e){ e.preventDefault(); };
+	document.getElementById('RotYText').onkeydown = function(e){ e.preventDefault(); };
+	document.getElementById('RotZText').onkeydown = function(e){ e.preventDefault(); };
 }
 
 //////////////////////// ////////////////////////

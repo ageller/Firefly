@@ -69,6 +69,20 @@ function update_keypress(time){
 		initControls();
 	}
 
+	// increase and decrease speed for fly controls
+	if (viewerParams.keyboard.down("+")){
+		viewerParams.flyffac += 1;
+		sendToGUI([{'updateFlyMovementSpeed':viewerParams.flyffac}]);
+		if (viewerParams.controlsName == 'FlyControls') viewerParams.controls.movementSpeed = (1. - viewerParams.friction)*viewerParams.flyffac;
+		console.log('fly speed', viewerParams.flyffac)
+	}
+	if (viewerParams.keyboard.down("-")){
+		viewerParams.flyffac = Math.max(1., viewerParams.flyffac - 1);
+		sendToGUI([{'updateFlyMovementSpeed':viewerParams.flyffac}]);
+		if (viewerParams.controlsName == 'FlyControls') viewerParams.controls.movementSpeed = (1. - viewerParams.friction)*viewerParams.flyffac;
+		console.log('fly speed', viewerParams.flyffac)
+	}
+
 	// toggle tween loop
 	if (viewerParams.keyboard.down("T")) {
 		if (viewerParams.inTween){
