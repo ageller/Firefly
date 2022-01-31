@@ -85,6 +85,13 @@ function initGUIControls(initial=false){
 	console.log("initializing controls", GUIParams.useTrackball)
 	var forViewer = [];
 
+	d3.select('#WebGLContainer').node().removeEventListener("keydown", sendCameraInfoToViewer,true);//for fly controls
+	d3.select('#WebGLContainer').node().removeEventListener("keyup", sendCameraInfoToViewer,true);//for fly controls
+	d3.select('#WebGLContainer').node().removeEventListener("mousedown", function(){GUIParams.mouseDown = true;},true);//for fly controls
+	d3.select('#WebGLContainer').node().removeEventListener("mouseup", function(){GUIParams.mouseDown = false;},true);//for fly controls
+	d3.select('#WebGLContainer').node().removeEventListener("mousemove", function(){if (GUIParams.mouseDown) sendCameraInfoToViewer()},true);//for fly controls
+
+
 	if (!initial) {
 		forViewer.push({'setViewerParamByKey':[GUIParams.useTrackball, "useTrackball"]});
 		forViewer.push({'initControls':null});
@@ -119,9 +126,8 @@ function initGUIControls(initial=false){
 		GUIParams.controlsName = "FlyControls";
 		GUIParams.controls = new THREE.FlyControls( GUIParams.camera , GUIParams.renderer.domElement);
 		GUIParams.controls.movementSpeed = 1. - Math.pow(GUIParams.friction, GUIParams.flyffac);
-		d3.select('#WebGLContainer').node().removeEventListener("keydown", sendCameraInfoToViewer,true);//for fly controls
+
 		d3.select('#WebGLContainer').node().addEventListener("keydown", sendCameraInfoToViewer,true);//for fly controls
-		d3.select('#WebGLContainer').node().removeEventListener("keyup", sendCameraInfoToViewer,true);//for fly controls
 		d3.select('#WebGLContainer').node().addEventListener("keyup", sendCameraInfoToViewer,true);//for fly controls
 		d3.select('#WebGLContainer').node().addEventListener("mousedown", function(){GUIParams.mouseDown = true;},true);//for fly controls
 		d3.select('#WebGLContainer').node().addEventListener("mouseup", function(){GUIParams.mouseDown = false;},true);//for fly controls
@@ -252,6 +258,9 @@ function sendCameraInfoToViewer(){
 
 	sendToViewer(forViewer);
 
+	// in case we are not in trackball controls, this needs to be set (but might as well set it here always)
+	GUIParams.cameraPosition = GUIParams.camera.position.clone();
+	updateUICameraText();
 }
 
 function updateGUICamera(){
