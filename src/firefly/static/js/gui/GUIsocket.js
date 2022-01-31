@@ -123,6 +123,9 @@ function initGUIControls(initial=false){
 		d3.select('#WebGLContainer').node().addEventListener("keydown", sendCameraInfoToViewer,true);//for fly controls
 		d3.select('#WebGLContainer').node().removeEventListener("keyup", sendCameraInfoToViewer,true);//for fly controls
 		d3.select('#WebGLContainer').node().addEventListener("keyup", sendCameraInfoToViewer,true);//for fly controls
+		d3.select('#WebGLContainer').node().addEventListener("mousedown", function(){GUIParams.mouseDown = true;},true);//for fly controls
+		d3.select('#WebGLContainer').node().addEventListener("mouseup", function(){GUIParams.mouseDown = false;},true);//for fly controls
+		d3.select('#WebGLContainer').node().addEventListener("mousemove", function(){if (GUIParams.mouseDown) sendCameraInfoToViewer()},true);//for fly controls
 	}
 
 	var elm = document.getElementById("CenterCheckBox")
@@ -248,6 +251,7 @@ function sendCameraInfoToViewer(){
 	//console.log(GUIParams.camera.position, GUIParams.camera.rotation, GUIParams.camera.up);
 
 	sendToViewer(forViewer);
+
 }
 
 function updateGUICamera(){

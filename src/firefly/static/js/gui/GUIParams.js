@@ -145,6 +145,9 @@ function defineGUIParams(){
 		//only need to pass the controls target?
 		this.controlsTarget = new THREE.Vector3(0,0,0);
 
+		// extra checking for fly controls
+		this.mouseDown = false;
+		
 		//check for mobile
 		//https://stackoverflow.com/questions/3514784/what-is-the-best-way-to-detect-a-mobile-device-in-jquery
 		// device detection
