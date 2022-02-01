@@ -178,9 +178,9 @@ def index():
 def combined(): 
     return render_template("combined.html")
 
-@app.route("/cardboard")
+@app.route("/VR")
 def cardboard(): 
-    return render_template("cardboard.html")
+    return render_template("VR.html")
 
 @app.route('/data_input', methods = ['POST'])
 def data_input():
