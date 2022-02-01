@@ -50,7 +50,7 @@ function updateOctree(){
 	//https://github.com/mrdoob/three.js/issues/15339
 	viewerParams.camera.updateMatrix();
 	viewerParams.camera.updateMatrixWorld();
-	viewerParams.frustum.setFromMatrix(new THREE.Matrix4().multiplyMatrices(viewerParams.camera.projectionMatrix, viewerParams.camera.matrixWorldInverse));  
+	viewerParams.frustum.setFromProjectionMatrix(new THREE.Matrix4().multiplyMatrices(viewerParams.camera.projectionMatrix, viewerParams.camera.matrixWorldInverse));  
 
 
 	//rather than a for loop to go through the particles, I am going to manually iterate so that I can draw from one each draw pass
@@ -494,7 +494,7 @@ function setNodeDrawParams(node){
 	//return a fraction of the screen size
 	var width = Math.max(xwidth, Math.max(ywidth, zwidth));
 	
-	if (width == 0) console.log('bad width', node.particleType, node.id, xwidth, ywidth, zwidth);
+	//if (width == 0) console.log('bad width', node.particleType, node.id, xwidth, ywidth, zwidth);
 
 	//this will be a width in pixels
 	node.screenSize = width

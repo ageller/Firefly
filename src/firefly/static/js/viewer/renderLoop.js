@@ -27,10 +27,17 @@ function animate(time) {
 		if (isNaN(viewerParams.animateVelTime)) viewerParams.animateVelTime = 0;
 
 		viewerParams.drawPass += 1;
+
+		//console.log(viewerParams.camera.position)
+
 	}
 
 	// recursively loop this function
-	requestAnimationFrame( animate );
+	if (viewerParams.allowVRControls){
+		viewerParams.renderer.setAnimationLoop( animate );
+	} else {
+		requestAnimationFrame( animate );
+	}
 }
 
 function update(time){
@@ -44,6 +51,7 @@ function update(time){
 	update_keypress(time);
 
 	// ABG: what does this do? TODO
+	// AMG: this applies any user interaction to the camera (enabling the controls)
 	viewerParams.controls.update();
 	
 	// update particle mesh buffers with settings from UI
@@ -70,14 +78,7 @@ function update(time){
 			viewerParams.switchControls = true;
 			initControls(false);
 		}
-			if (viewerParams.initialOrientationControls){
-			viewerParams.initialOrientationControls = false;
-			viewerParams.useOrientationControls = true;
-			viewerParams.useTrackball = false;
-			viewerParams.controls.dispose();
-			viewerParams.switchControls = true;
-			initControls(false);
-		}
+
 	}
 }
 

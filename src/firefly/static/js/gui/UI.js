@@ -1317,8 +1317,11 @@ function selectBlendingMode() {
 
 function changeUISnapSizes(){
 	//size of the snapshot (from text input)
-	document.getElementById("RenderXText").value = GUIParams.renderWidth;
-	document.getElementById("RenderYText").value = GUIParams.renderHeight;
+	var el = document.getElementById("RenderXText");
+	if (el) el.value = GUIParams.renderWidth;
+
+	el = document.getElementById("RenderYText");
+	if (el) el.value = GUIParams.renderHeight;
 }
 
 function togglePlayback(p,checked){

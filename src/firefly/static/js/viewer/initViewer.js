@@ -112,7 +112,8 @@ function initInputData(){
 }
 
 //so that it can run locally also without using Flask
-function runLocal(useSockets=true, showGUI=true, useOrientationControls=false, startStereo=false, pSize=null){
+// note that if allowVRControls == true, then you do not want to start in stereo (the VR button will do the work)
+function runLocal(useSockets=true, showGUI=true, allowVRControls=false, startStereo=false, pSize=null){
 	viewerParams.local = true;
 	viewerParams.usingSocket = useSockets;
 	forGUI = [];
@@ -121,7 +122,7 @@ function runLocal(useSockets=true, showGUI=true, useOrientationControls=false, s
 	sendToGUI(forGUI);
 
 	viewerParams.initialStereo = startStereo;
-	viewerParams.initialOrientationControls = useOrientationControls;
+	viewerParams.allowVRControls = allowVRControls;
 
 	// it appears that in order for Firefly to start correctly, it must be initialized to non-stereo and trackbacl
 	// I will re-initialize them to the proper values after the first render pass
@@ -460,14 +461,18 @@ function initScene() {
 	viewerParams.camera.position.set(viewerParams.center.x, viewerParams.center.y, viewerParams.center.z - viewerParams.boxSize/2.);
 	viewerParams.camera.lookAt(viewerParams.scene.position);  
 
-
 	//apply presets from the options file
 	if (viewerParams.parts.hasOwnProperty('options')) applyOptions();
 
 	// controls
 	initControls();
 
-
+	// add button to enable VR
+	if (viewerParams.allowVRControls) {
+		document.body.appendChild( VRButton.createButton( viewerParams.renderer ) );
+		viewerParams.renderer.xr.enabled = true;
+	}
+	
 	//investigating the minimum point size issue
 	// console.log("context", viewerParams.renderer.context)
 	// //maybe glDisable(GL_POINT_SMOOTH); would solve the point size issue?
@@ -517,15 +522,13 @@ function applyOptions(){
 	if (viewerParams.parts.options.hasOwnProperty('startFly')){
 		if (viewerParams.parts.options.startFly == true){
 			viewerParams.useTrackball = false;
-			viewerParams.useOrientation = false;
 		}
 	}
 
-	//check if we are starting in Orientation controls
-	if (viewerParams.parts.options.hasOwnProperty('startOrientation')){
-		if (viewerParams.parts.options.startOrientation == true){
-			viewerParams.useTrackball = false;
-			viewerParams.useOrientation = true;
+	//check if we are starting in VR controls
+	if (viewerParams.parts.options.hasOwnProperty('startVR')){
+		if (viewerParams.parts.options.startVR == true){
+			viewerParams.allowVRControls = true;
 		}
 	}
 
@@ -917,17 +920,9 @@ function initControls(updateGUI = true){
 			}
 
 		} 
-
+		viewerParams.controlsTarget = viewerParams.controls.target;
 		viewerParams.controls.dynamicDampingFactor = viewerParams.friction;
 		viewerParams.controls.addEventListener('change', sendCameraInfoToGUI);
-	} else if (viewerParams.useOrientationControls) {
-		console.log('initializing DeviceOrientationControls')
-		viewerParams.controlsName = 'DeviceOrientationControls'
-		viewerParams.controls = new THREE.FlyControls( viewerParams.camera , viewerParams.renderer.domElement);
-		viewerParams.controls.movementSpeed = (1. - viewerParams.friction)*viewerParams.flyffac;
-
-		//viewerParams.controls = new THREE.DeviceOrientationControls(viewerParams.camera);
-		//viewerParams.controls.updateAlphaOffsetAngle(THREE.Math.degToRad(-90));
 	} else {
 		console.log('initializing FlyControls')
 		viewerParams.controlsName = 'FlyControls';
@@ -1182,6 +1177,7 @@ function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
 					d.every(function(dd){
 						if (dd.id == 0){
 							viewerParams.octree.boxSize = dd.width;
+							viewerParams.boxSize = viewerParams.octree.boxSize;
 							return false;
 						}
 						return true;
@@ -1413,7 +1409,8 @@ function setCenter(coords){
 		sum[1] += coords[i][1];
 		sum[2] += coords[i][2];
 	}
-	viewerParams.center = new THREE.Vector3(sum[0]/coords.length, sum[1]/coords.length, sum[2]/coords.length);
+	viewerParams.center = new THREE.Vector3(sum[0], sum[1], sum[2]);
+	if (coords.length > 0) viewerParams.center.divideScalar(coords.length); 
 
 	setBoxSize(coords);
 

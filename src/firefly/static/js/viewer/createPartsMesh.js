@@ -29,32 +29,32 @@ function createParticleGeometry(p, parts, start, end){
 	// attributes
 	//position
 	var position = new Float32Array( len*3 ); // 3 vertices per point
-	geo.addAttribute( 'position', new THREE.BufferAttribute( position, 3 ) );
+	geo.setAttribute( 'position', new THREE.BufferAttribute( position, 3 ) );
 
 	// //index
 	// var pointIndex = new Float32Array( len );
-	// geo.addAttribute( 'pointIndex', new THREE.BufferAttribute( pointIndex, 1 ) );
+	// geo.setAttribute( 'pointIndex', new THREE.BufferAttribute( pointIndex, 1 ) );
 
 	//radiusScaling (e.g., for filtering and on/off)
 	var radiusScale = new Float32Array( len ); 
-	geo.addAttribute( 'radiusScale', new THREE.BufferAttribute( radiusScale, 1 ) );
+	geo.setAttribute( 'radiusScale', new THREE.BufferAttribute( radiusScale, 1 ) );
 
 	//alphas (e.g., for filtering and on/off)
 	var alpha = new Float32Array( len ); 
-	geo.addAttribute( 'alpha', new THREE.BufferAttribute( alpha, 1 ) );
+	geo.setAttribute( 'alpha', new THREE.BufferAttribute( alpha, 1 ) );
 
 	//angles for velocities
 	var velVals = new Float32Array( len * 4); // unit vector (vx, vy, vz, norm), scaled magnitude
-	geo.addAttribute( 'velVals', new THREE.BufferAttribute( velVals, 4 ) );
+	geo.setAttribute( 'velVals', new THREE.BufferAttribute( velVals, 4 ) );
 
 	//if user supplies individual per-particle colors (otherwise this is not used, but still need in shader)
 	if (viewerParams.parts[p].hasOwnProperty("colorArray")) console.log("have color Array")
 	var colorArray = new Float32Array( len * 4); // RGBA
-	geo.addAttribute( 'colorArray', new THREE.BufferAttribute( colorArray, 4 ) );
+	geo.setAttribute( 'colorArray', new THREE.BufferAttribute( colorArray, 4 ) );
 	
 	// create array to hold colormap variable values
 	var colormapArray = new Float32Array( len); 
-	geo.addAttribute('colormapArray', new THREE.BufferAttribute( colormapArray, 1));
+	geo.setAttribute('colormapArray', new THREE.BufferAttribute( colormapArray, 1));
 
 	geo.setDrawRange( 0, len );
 

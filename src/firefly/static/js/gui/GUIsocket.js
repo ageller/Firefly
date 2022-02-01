@@ -150,7 +150,7 @@ function initGUIControls(initial=false){
 function createCube(){
 	var size = GUIParams.boxSize/100.;
 	// CUBE
-	var geometry = new THREE.CubeGeometry(size, size, size);
+	var geometry = new THREE.BoxGeometry(size, size, size);
 	var cubeMaterials = [ 
 		new THREE.MeshBasicMaterial({color:"yellow", side: THREE.DoubleSide}),
 		new THREE.MeshBasicMaterial({color:"orange", side: THREE.DoubleSide}), 
