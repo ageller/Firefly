@@ -7,13 +7,13 @@ meta:
 seq:
   - id: firefly_header
     type: header
-  - id: coordinates
+  - id: coordinates_flat
     type: vector_field('f4')
-  - id: velocities
+  - id: velocities_flat
     type: vector_field('f4')
     if: _root.firefly_header.has_velocities != 0
   - id: scalar_fields
-    type: particle_field('f4')
+    type: scalar_field('f4')
     repeat: expr
     repeat-expr: _root.firefly_header.nfields
 types:
@@ -59,22 +59,22 @@ types:
       - id: field_type # format, like float or int or whatever. 'f4' or 'u4' usually
         type: str
     seq:
-      - id: field_data
-        type: field(field_type)
-        repeat: expr
-        repeat-expr: 3 ## x,y,z
-  particle_field:
+      - id: flat_vector_data
+        type: field(field_type,3)
+  scalar_field:
     params:
       - id: field_type # format, like float or int or whatever. 'f4' or 'u4' usually
         type: str 
     seq:
       - id: field_data
-        type: field(field_type) 
+        type: field(field_type,1) 
   field:
     params:
       - id: field_type
         type: str 
+      - id: components
+        type: u1
     seq:
       - id: data
-        size: _root.firefly_header.npart * 4
+        size: _root.firefly_header.npart * 4 * components
         type: my_array_buffer(field_type)

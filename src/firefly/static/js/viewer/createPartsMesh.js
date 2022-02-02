@@ -20,15 +20,19 @@ function createParticleGeometry(p, parts, start, end){
 	//if all == true, then we draw all the particles except the first, which will always be there to define the node locations
 	//otherwise, we only draw the first particle	
 	if (!start) start = 0;
-	if (!end) end = parts.Coordinates.length;
-	end = Math.min(parts.Coordinates.length, end);
+	if (!end) end = parts.Coordinates_flat.length/3;
+	end = Math.min(parts.Coordinates_flat.length/3, end);
 	var len = end - start;
 	var i0 = start;
 	var id = name;
 
 	// attributes
 	//position
-	var position = new Float32Array( len*3 ); // 3 vertices per point
+	var position = Float32Array.from(parts.Coordinates_flat); // 3 vertices per point
+	// Doesn't seem to work, i guess we just have to copy it over :eyeroll:
+	// I just get a black screen when I try to initialize the buffer with the values--
+	// the addAttribute must zero out the buffer or something
+	//var position = Float32Array.from(parts.Coordinates_flat.slice(3*start,3*end)[0]);
 	geo.addAttribute( 'position', new THREE.BufferAttribute( position, 3 ) );
 
 	// //index
@@ -66,12 +70,10 @@ function createParticleGeometry(p, parts, start, end){
 	var aindex = 0;
 
 	for (var j=0; j<len; j++){
-		if (!isNaN(parts.Coordinates[j][0])){
-			position[pindex++] = parseFloat(parts.Coordinates[j][0]);
-			position[pindex++] = parseFloat(parts.Coordinates[j][1]);
-			position[pindex++] = parseFloat(parts.Coordinates[j][2]);
-		}
 
+		//position[3*j+0] = parts.Coordinates_flat[3*j+0]
+		//position[3*j+1] = parts.Coordinates_flat[3*j+1] 
+		//position[3*j+2] = parts.Coordinates_flat[3*j+2]
 		//pointIndex[j] = parseFloat(j);
 
 		if (parts.hasOwnProperty("VelVals")){

@@ -79,15 +79,11 @@ class BinaryWriter(object):
         handle.write(np.int32(str_len))
         handle.write(field_name.encode('UTF-8'))
         
-    def __write_vector_field(self,handle,field):
-        ## write each component in turn
-        for i in range(field.shape[-1]):
-            self.__write_field(handle,field[:,i])
+    def __write_vector_field(self,handle,vfield):
+        ## flatten the vector field to write it, row-major order.
+        handle.write(np.array(vfield,dtype=np.float32).flatten())
 
-    def __write_field(
-        self,
-        handle,
-        field):
+    def __write_field(self,handle,field):
         handle.write(field.astype(np.float32))
      
     def add_field(
@@ -110,8 +106,8 @@ class BinaryWriter(object):
         self.radius_flags+=[radius_flag]
         
 if __name__ == '__main__':
+    #print(np.arange(300).reshape(-1,3))
     my_writer = BinaryWriter('test.b',np.arange(300).reshape(-1,3),np.arange(300).reshape(-1,3))
     my_writer.add_field(np.arange(100,200),'my_field')
     my_writer.add_field(np.arange(100,200),'my_other_field')
-    print(my_writer.filter_flags)
     my_writer.write()

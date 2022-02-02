@@ -266,7 +266,7 @@ function initPVals(){
 		}
 
 		//misc
-		if (!viewerParams.haveOctree[p]) viewerParams.plotNmax[p] = viewerParams.parts[p].Coordinates.length;
+		if (!viewerParams.haveOctree[p]) viewerParams.plotNmax[p] = viewerParams.parts.count[p];
 		viewerParams.PsizeMult[p] = 1.;
 		viewerParams.showParts[p] = true;
 		viewerParams.updateOnOff[p] = false;
@@ -299,7 +299,7 @@ function initPVals(){
 		viewerParams.animateVel[p] = false;
 		viewerParams.animateVelDt[p] = 0.;
 		viewerParams.animateVelTmax[p] = 0.;
-		if (viewerParams.parts[p].Velocities != null){
+		if (viewerParams.parts[p].Velocities_flat != null){
 			if (!viewerParams.reset && !viewerParams.haveOctree[p]){
 				calcVelVals(p);
 				if(!viewerParams.parts[p].hasOwnProperty("filterKeys")){
@@ -308,7 +308,6 @@ function initPVals(){
 			 
 			}
 			viewerParams.velType[p] = 'line';
-			//console.log(p, viewerParams.parts[p].VelVals, viewerParams.parts[p].Velocities)
 		}
 		
 		//filters
@@ -326,9 +325,13 @@ function initPVals(){
 			viewerParams.parts[p]['playbackTicks'] = 0;
 			viewerParams.parts[p]['playbackTickRate'] = 10;   
 			for (var k=0; k<viewerParams.fkeys[p].length; k++){
-				if (viewerParams.fkeys[p][k] == "Velocities"){
-					viewerParams.fkeys[p][k] = "magVelocities";
-				}
+				// TODO we should consider removing this "feature"
+				//  and just require users to pass in the mag velocity
+				//  as its own field-- or also radius and do radius/speed
+				//  flags or something
+				//if (viewerParams.fkeys[p][k] == "Velocities"){
+					//viewerParams.fkeys[p][k] = "magVelocities";
+				//}
 				var fkey = viewerParams.fkeys[p][k];
 				//calculate limits for the filters
 				if (viewerParams.parts[p][fkey] != null){
@@ -354,9 +357,13 @@ function initPVals(){
 			if (viewerParams.parts[p].colormapKeys.length > 0){
 				viewerParams.ckeys[p] = viewerParams.parts[p].colormapKeys;
 				for (var k=0; k<viewerParams.ckeys[p].length; k++){
-					if (viewerParams.ckeys[p][k] == "Velocities"){
-						viewerParams.ckeys[p][k] = "magVelocities";
-					}
+						// TODO we should consider removing this "feature"
+						//  and just require users to pass in the mag velocity
+						//  as its own field-- or also radius and do radius/speed
+						//  flags or something
+					//if (viewerParams.ckeys[p][k] == "Velocities"){
+						//viewerParams.ckeys[p][k] = "magVelocities";
+					//}
 					var ckey = viewerParams.ckeys[p][k];
 					viewerParams.colormapLims[p][ckey] = [0,1];
 					viewerParams.colormapVals[p][ckey] = [0,1];
@@ -450,7 +457,7 @@ function initScene() {
 	//viewerParams.useTrackball = true;
 
 	//console.log(viewerParams.parts.options);
-	setCenter(viewerParams.parts[viewerParams.partsKeys[0]].Coordinates);
+	setCenter(viewerParams.parts[viewerParams.partsKeys[0]].Coordinates_flat);
 	viewerParams.camera.position.set(viewerParams.center.x, viewerParams.center.y, viewerParams.center.z - viewerParams.boxSize/2.);
 	viewerParams.camera.lookAt(viewerParams.scene.position);  
 
@@ -478,7 +485,7 @@ function applyOptions(){
 	if (viewerParams.parts.options.hasOwnProperty('center')){
 		if (viewerParams.parts.options.center != null){
 			viewerParams.center = new THREE.Vector3(viewerParams.parts.options.center[0], viewerParams.parts.options.center[1], viewerParams.parts.options.center[2]);
-			setBoxSize(viewerParams.parts[viewerParams.partsKeys[0]].Coordinates);
+			setBoxSize(viewerParams.parts[viewerParams.partsKeys[0]].Coordinates_flat);
 		} else {
 			viewerParams.parts.options.center = [viewerParams.center.x, viewerParams.center.y, viewerParams.center.z];
 		}
@@ -565,7 +572,7 @@ function applyOptions(){
 			viewerParams.maxVrange = viewerParams.parts.options.maxVrange; //maximum dynamic range for length of velocity vectors
 			for (var i=0; i<viewerParams.partsKeys.length; i++){
 				var p = viewerParams.partsKeys[i];
-				if (viewerParams.parts[p].Velocities != null && !viewerParams.haveOctree[p]){
+				if (viewerParams.parts[p].Velocities_flat != null && !viewerParams.haveOctree[p]){
 					calcVelVals(p);     
 				}
 			}
@@ -983,7 +990,7 @@ function confirmViewerInit(){
 	if (viewerParams.parts == null){
 		ready = false;
 	} else {
-		var partsVals = ["Coordinates"]
+		var partsVals = ["Coordinates_flat"]
 		if (viewerParams.hasOwnProperty('partsKeys')){
 			viewerParams.partsKeys.forEach(function(p){
 				partsVals.forEach(function(k,i){
@@ -1027,7 +1034,7 @@ function sendInitGUI(prepend=[], append=[]){
 	var haveVelocities = {};
 	viewerParams.partsKeys.forEach(function(p){
 		haveVelocities[p] = false;
-		if (viewerParams.parts[p].Velocities != null){
+		if (viewerParams.parts[p].Velocities_flat != null){
 			haveVelocities[p] = true;
 		}
 	});
@@ -1127,11 +1134,12 @@ function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
 
 	viewerParams.parts = {};
 	viewerParams.parts.totalSize = 0.;
+	viewerParams.parts.count = {};
 
 
-	//console.log(files)
 	viewerParams.partsKeys = Object.keys(viewerParams.filenames);
 	viewerParams.partsKeys.forEach( function(p, i) {
+		viewerParams.parts.count[p] = 0;
 		viewerParams.haveOctree[p] = false;
 		viewerParams.filenames[p].forEach( function(f, j) {
 			var amt = 0;
@@ -1142,6 +1150,7 @@ function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
 			}
 			if (amt > 0) {
 				viewerParams.parts.totalSize += amt;
+				viewerParams.parts.count[p] += amt;
 			} else {
 				//this is how I am identifying an octree file structure, for now (there must be a better way)
 				if (p != 'options') {
@@ -1237,11 +1246,11 @@ function compileJSONData(data, p, callback, initialLoadFrac=0){
 		if (viewerParams.parts.totalSize == 0) frac = 1.;
 		var loadfrac = frac*(1. - initialLoadFrac) + initialLoadFrac;
 		//some if statment like this seems necessary.  Otherwise the loading bar doesn't update (I suppose from too many calls)
-		if (loadfrac - viewerParams.loadfrac > 0.5 || loadfrac == 1){
+		if (loadfrac - viewerParams.loadfrac > 0.1 || loadfrac == 1){
 			viewerParams.loadfrac = loadfrac;
 			updateLoadingBar();
 		}
-		console.log('in compile JSON data', p, data, viewerParams.counting, countParts(),'loadfrac', loadfrac)
+		//console.log('in compile JSON data', p, data, viewerParams.counting, countParts(),'loadfrac', loadfrac)
 	}
 	if ('options' in viewerParams.parts){
 		//console.log(d3.selectAll('#loadingRect').node().getBoundingClientRect().width)
@@ -1330,48 +1339,30 @@ function loadFFLYKaitai(fname,callback){
 function compileFFLYData(data, p, callback, initialLoadFrac=0,filetype='particle'){
 	var hasVelocities = data.fireflyHeader.hasVelocities;
 	var this_parts = viewerParams.parts[p];
-	if (!data.hasOwnProperty('coordinates')) console.log("Invalid particle group data",data);
+	if (!data.hasOwnProperty('coordinatesFlat')) console.log("Invalid particle group data",data);
 	else {
 		// need to initialize various arrays that would've just been copied from the JSON
-		if (!this_parts.hasOwnProperty('Coordinates')){
-			this_parts.Coordinates = []
-			if (hasVelocities) this_parts.Velocities = [];
-			this_parts.filterKeys = []
-			this_parts.colormapKeys = []
+		if (!this_parts.hasOwnProperty('Coordinates_flat')){
+			this_parts.Coordinates_flat = [];
+			if (hasVelocities) this_parts.Velocities_flat = [];
+			this_parts.filterKeys = [];
+			this_parts.colormapKeys = [];
 			// TODO hook this up for choosing which variable to scale points by
-			this_parts.radiusFlags = []
-			this_parts.doSPHrad = Array(false)
+			this_parts.radiusFlags = [];
+			this_parts.doSPHrad = Array(false);
 
 			// initialize scalar field arrays and corresponding flags
 			for (i=0; i < data.fireflyHeader.fieldNames.length; i++){
 				field_name = data.fireflyHeader.fieldNames[i].fieldName
 				this_parts[field_name] = [];
-				if (data.fireflyHeader.filterFlags.buffer[i]){
-					this_parts.filterKeys.push(field_name);
-				}
-				if (data.fireflyHeader.colormapFlags.buffer[i]){
-					this_parts.colormapKeys.push(field_name);
-				}
-				if (data.fireflyHeader.radiusFlags.buffer[i]){
-					this_parts.radiusKeys.push(field_name);
-				}
+				if (data.fireflyHeader.filterFlags.buffer[i]) this_parts.filterKeys.push(field_name);
+				if (data.fireflyHeader.colormapFlags.buffer[i]) this_parts.colormapKeys.push(field_name);
+				if (data.fireflyHeader.radiusFlags.buffer[i]) this_parts.radiusKeys.push(field_name);
 			}
-		} // if (!this_parts.hasOwnProperty)('Coordinates'))
-		for (i=0; i < data.fireflyHeader.npart; i++){
-			this_parts['Coordinates'].push(Array(
-				data.coordinates.fieldData[0].data.values[i],
-				data.coordinates.fieldData[1].data.values[i],
-				data.coordinates.fieldData[2].data.values[i]
-			));
-			// only load velocities if we actually have them
-			if (hasVelocities){
-				this_parts.Velocities.push(Array(
-					data.velocities.fieldData[0].data.values[i],
-					data.velocities.fieldData[1].data.values[i],
-					data.velocities.fieldData[2].data.values[i]
-				));
-			}
-		}
+		} // if (!this_parts.hasOwnProperty)('Coordinates_flat'))
+		this_parts.Coordinates_flat = this_parts.Coordinates_flat.concat(data.coordinatesFlat.flatVectorData.data.values);
+		// only load velocities if we actually have them
+		if (hasVelocities) this_parts.Velocities_flat = this_parts.Velocities_flat.concat(data.velocitiesFlat.flatVectorData.data.values);
 
 		// and now load the scalar field data
 		for (i=0; i < data.fireflyHeader.nfields; i++){
@@ -1388,11 +1379,11 @@ function compileFFLYData(data, p, callback, initialLoadFrac=0,filetype='particle
 		if (viewerParams.parts.totalSize == 0) frac = 1.;
 		var loadfrac = frac*(1. - initialLoadFrac) + initialLoadFrac;
 		//some if statment like this seems necessary.  Otherwise the loading bar doesn't update (I suppose from too many calls)
-		if (loadfrac - viewerParams.loadfrac > 0.5 || loadfrac == 1){
+		if (loadfrac - viewerParams.loadfrac > 0.1 || loadfrac == 1){
 			viewerParams.loadfrac = loadfrac;
 			updateLoadingBar();
 		}
-		console.log('compile FFLY data', p, data, viewerParams.counting, countParts(),'loadfrac', loadfrac)
+		//console.log('in compile FFLY data', p, data, viewerParams.counting, countParts(),'loadfrac', loadfrac)
 	}
 
 	if ('options' in viewerParams.parts){
@@ -1421,8 +1412,10 @@ function countParts(){
 	viewerParams.counting = true;
 	viewerParams.partsKeys.forEach( function(p, i) {
 		if (viewerParams.parts.hasOwnProperty(p)){
-			if (viewerParams.parts[p].hasOwnProperty('Coordinates')){
-				num += viewerParams.parts[p].Coordinates.length;
+			// count the particles that have already been loaded,
+			//  safe to assume they have coordinates.
+			if (viewerParams.parts[p].hasOwnProperty('Coordinates_flat')){
+				num += viewerParams.parts[p].Coordinates_flat.length/3;
 			}
 		}
 		if (i == viewerParams.partsKeys.length - 1) viewerParams.counting = false;
@@ -1504,25 +1497,27 @@ function calcMinMax(p,key, addFac = true){
 }
 
 // initScene -> 
-function setCenter(coords){
+function setCenter(coords_flat){
 	var sum = [0., 0., 0.];
-	for( var i = 0; i < coords.length; i++ ){
-		sum[0] += coords[i][0];
-		sum[1] += coords[i][1];
-		sum[2] += coords[i][2];
+	var nparts = coords_flat.length/3;
+	for( var i = 0; i < nparts; i++ ){
+		sum[0] += coords_flat[3*i];
+		sum[1] += coords_flat[3*i+1];
+		sum[2] += coords_flat[3*i+2];
 	}
-	viewerParams.center = new THREE.Vector3(sum[0]/coords.length, sum[1]/coords.length, sum[2]/coords.length);
+	viewerParams.center = new THREE.Vector3(sum[0]/nparts, sum[1]/nparts, sum[2]/nparts);
 
-	setBoxSize(coords);
+	setBoxSize(coords_flat);
 
 }
 
 // setCenter ->
-function setBoxSize(coords){
+function setBoxSize(coords_flat){
 	var fee, foo;
-	for( var i = 0; i < coords.length; i++ ){
-		foo = new THREE.Vector3(coords[i][0], coords[i][0], coords[i][0]);
-		fee = viewerParams.center.distanceTo(foo)
+	var nparts = coords_flat.length/3;
+	for( var i = 0; i < nparts; i++ ){
+		foo = new THREE.Vector3(coords_flat.slice(3*i,3*(i+1)))
+		fee = viewerParams.center.distanceTo(foo);
 		if (fee > viewerParams.boxSize){
 			viewerParams.boxSize = fee;
 		}
@@ -1538,8 +1533,8 @@ function calcVelVals(p){
 	var max = -1.;
 	var min = 1.e20;
 	var vdif = 1.;
-	for (var i=0; i<viewerParams.parts[p].Velocities.length; i++){
-		v = viewerParams.parts[p].Velocities[i];
+	for (var i=0; i<viewerParams.parts.count[p]; i++){
+		v = viewerParams.parts[p].Velocities_flat.slice(3*i,3*(i+1));
 		mag = Math.sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
 		angx = Math.atan2(v[1],v[0]);
 		angy = Math.acos(v[2]/mag);
@@ -1553,7 +1548,7 @@ function calcVelVals(p){
 		viewerParams.parts[p].magVelocities.push(mag);
 	}
 	vdif = Math.min(max - min, viewerParams.maxVrange);
-	for (var i=0; i<viewerParams.parts[p].Velocities.length; i++){
+	for (var i=0; i<viewerParams.parts.count[p]; i++){
 		viewerParams.parts[p].NormVel.push( THREE.Math.clamp((viewerParams.parts[p].magVelocities[i] - min) / vdif, 0., 1.));
 	}
 }
