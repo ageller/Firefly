@@ -6,6 +6,8 @@ import os
 from .json_utils import write_to_json
 from .binary_writer import BinaryWriter
 
+from .octree import Octree
+
 class ParticleGroup(object):
     """
     This is a class for organizing data that you want to interface with a 
@@ -145,6 +147,8 @@ class ParticleGroup(object):
         :raises KeyError: if passed an invalid option_kwarg
         """
         
+        ## this will be overwritten if we call the self.createOctree method
+        self.octree: Octree = None
 
         ## handle default values for iterables
         tracked_arrays = [] if tracked_arrays is None else tracked_arrays
@@ -180,7 +184,7 @@ class ParticleGroup(object):
         ## check if each field is named
         if len(tracked_names) != len(tracked_arrays):
             raise ValueError("Make sure each tracked_array (%d) has a tracked_name (%d)"%(
-                len(tracked_names),len(tracked_arrays)))
+                len(tracked_arrays),len(tracked_names)))
 
         ## check if each field is the right length
         for name,array in zip(tracked_names,tracked_arrays):
@@ -448,6 +452,19 @@ class ParticleGroup(object):
             outDict['doSPHrad'] = [self.doSPHrad]
         
         return outDict
+    
+    def createOctree(self,npart_min_node=2e2,npart_max_node=1e3):
+
+        ## initialize the octree
+        self.octree = Octree(self,npart_max_node)
+
+        ## build the octree (may take a while)
+        self.octree.buildOctree()
+
+        ## prune the tiny nodes (should be relatively fast)
+        self.octree.pruneOctree(npart_min_node)
+
+        return self.octree
 
     def outputToJSON(
         self,
@@ -491,6 +508,11 @@ class ParticleGroup(object):
         :rtype: str, list of str
         """
 
+        if hasattr(self,'octree'):
+            raise AssertionError(
+                "Octrees can only be output to binary format."+
+                " Use outputToFFLY instead to produce the necessary .fftree files.")
+
         ## shuffle particles and decimate as necessary, save the output in dec_inds
         self.getDecimationIndexArray()
 
@@ -502,7 +524,7 @@ class ParticleGroup(object):
         if loud and not_reader:
             print("You will need to add the sub-filenames to"+
                 " filenames.json if this was not called by a Reader instance.")
-            print("Writing:",self,"JSON to %s"%full_path)
+            print("Writing:",self,"to %s"%full_path)
 
         ## do we want to delete any existing jsons here?
         if clean_JSONdir:
@@ -569,9 +591,6 @@ class ParticleGroup(object):
         clean_FFLYdir=False,
         not_reader=True):
 
-        ## shuffle particles and decimate as necessary, save the output in dec_inds
-        self.getDecimationIndexArray()
-
         ## where are we saving this json to?
         full_path = os.path.join(hard_data_path, short_data_path)
 
@@ -580,14 +599,24 @@ class ParticleGroup(object):
         if loud and not_reader:
             print("You will need to add the sub-filenames to"+
                 " filenames.json if this was not called by a Reader instance.")
-            print("Writing:",self,"FFLY files to %s"%full_path)
+            print("Writing:",self,"files to %s"%full_path)
 
         ## do we want to delete any existing files here?
         if clean_FFLYdir:
             print("Removing old ffly files from %s"%full_path)
             for fname in os.listdir(full_path):
-                if "ffly" in fname:
+                if ("ffly" in fname or
+                    "json" in fname or 
+                    "fftree" in fname):
                     os.remove(os.path.join(full_path,fname))
+
+        if hasattr(self,'octree'):
+            tree_filename,node_filenames = self.octree.writeOctree(full_path,nparts_per_file)
+            ## mimic return signature: file_array, filenames_and_nparts
+            return [tree_filename],[(tree_filename,0)]
+
+        ## shuffle particles and decimate as necessary, save the output in dec_inds
+        self.getDecimationIndexArray()
 
         filenames_and_nparts = self.filenames_and_nparts
         ## if the user did not specify how we should partition the data between

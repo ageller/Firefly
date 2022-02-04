@@ -117,7 +117,7 @@ class Reader(object):
         self.clean_JSONdir = clean_JSONdir 
     
         ## array of particle groups
-        self.particleGroups = []
+        self.particleGroups: list[ParticleGroup] = []
 
         if settings is not None:
             if settings.__class__.__name__ != 'Settings':
@@ -134,7 +134,7 @@ class Reader(object):
             if tweenParams.__class__.__name__ != 'TweenParams':
                 raise TypeError("Make sure you use a TweenParams instance to specify fly-through paths.")
 
-        self.tweenParams = tweenParams
+        self.tweenParams: TweenParams = tweenParams
 
     def __splitAndValidateDatadir(self,loud=True):
         """[summary]
@@ -193,6 +193,9 @@ class Reader(object):
 
         ## add this particle group to the reader's settings file
         self.settings.attachSettings(particleGroup)
+    
+    def createOctrees(self,**kwargs):
+        for particleGroup in self.particleGroups: particleGroup.createOctree(**kwargs)
 
     def dumpToJSON(
         self,
@@ -423,7 +426,8 @@ class Reader(object):
         if not hasattr(self,'JSON') or self.JSON is None:
             self.dumpToJSON(
                 loud=False,
-                write_jsons_to_disk=False)
+                write_jsons_to_disk=False,
+                use_format='json')
 
         ## post the json to the listening url data_input
         ##  defined in server.py
