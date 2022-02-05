@@ -53,13 +53,13 @@ class OctNode(object):
         width,
         nfields,
         name:str='',
-        npart_max_node=1000):
+        max_npart_per_node=1000):
 
         self.center = center
         self.width = width
         self.name = name
         self.refinement = len(name)
-        self.npart_max_node = npart_max_node
+        self.max_npart_per_node = max_npart_per_node
         self.nfields = nfields
 
         self.children = []
@@ -68,7 +68,7 @@ class OctNode(object):
         self.npoints:int = 0
         self.fields = np.zeros(nfields)
 
-        ## buffers which will be flushed if npart_max_node is crossed
+        ## buffers which will be flushed if max_npart_per_node is crossed
         self.buffer_coordss:list = []
         #self.buffer_velss:list = []
         self.buffer_fieldss:list = []
@@ -87,7 +87,7 @@ class OctNode(object):
         nodes:dict):
 
         ## okay we're allowed to hold the raw data here
-        if self.npoints < self.npart_max_node: 
+        if self.npoints < self.max_npart_per_node: 
             ## store coordinate data in the buffer
             self.buffer_coordss += [point]
 
@@ -144,7 +144,7 @@ class OctNode(object):
                         width=self.width/2,
                         nfields=self.nfields,
                         name=child_name,
-                        npart_max_node=self.npart_max_node)
+                        max_npart_per_node=self.max_npart_per_node)
                     nodes[child_name] = child
                 else: child:OctNode = nodes[child_name]
 
@@ -179,7 +179,7 @@ class Octree(object):
     def __init__(
         self,
         particle_group,
-        npart_max_node=1000):
+        max_npart_per_node=1000):
         '''
             inputFile : path to the file. For now only text files.
             NMemoryMax : the maximum number of particles to save in the memory before writing to a file
@@ -246,7 +246,7 @@ class Octree(object):
             root_width,
             nfields=len(self.field_names),
             name='',
-            npart_max_node=npart_max_node)
+            max_npart_per_node=max_npart_per_node)
         }
 
     def buildOctree(self,start_octant=''):
@@ -276,13 +276,13 @@ class Octree(object):
         self.node_list = node_list
         return node_list
     
-    def pruneOctree(self,npart_min_node=100):
+    def pruneOctree(self,min_npart_per_node=100):
         ## put ourselves in the unenviable position of some parents having children 
         ##  *and* their own buffer data. this is useful if we have child(s) octant with a tiny
         ##  number of particles in it but its sibling(s) has many. Better to associate the tiny 
         ##  number with the parent IMO
         i = 0
-        while self.node_list[0].npoints < npart_min_node:
+        while self.node_list[0].npoints < min_npart_per_node:
             if not (i % 100): print(i,self.node_list[0].npoints,end='\t') 
             this_node = self.node_list.pop(0)
             this_node.merge_to_parent(self.nodes)
@@ -296,7 +296,7 @@ class Octree(object):
         for node in self.node_list[:-1]: self.nodes[node.name[:-1]].children += [node.name]
         
     
-    def writeOctree(self,path=None,npart_max_file=1e4):
+    def writeOctree(self,path=None,prefix='',max_npart_per_file=1e5):
 
         ## find nodes which have buffer data and write that buffer
         ##  data to disk. when we do that, we will add: 
@@ -306,25 +306,25 @@ class Octree(object):
         ##    npart_buffer_file - *total* number of particles in the buffer file (not just this node)
         ##  attributes to nodes which have buffer data.
         ##  files will be in binary .fftree format defined by kaitai_io/node.ksy
-        node_filenames,_ = self.write_particle_data_nodes_fftree(path,npart_max_file)
+        node_filenames,_ = self.write_particle_data_nodes_fftree(path,prefix,max_npart_per_file)
 
         ## for *each* node (whether it has buffer data or not) write out meta/aggregate
         ##  data to a JSON that will be read in full when Firefly starts up.
         ##  nodes which have particles on disk will have necessary information to 
         ##  load that data from disk when requested in Firefly.
-        tree_filename,_ = self.write_octree_json(path)
+        tree_filename,_ = self.write_octree_json(path,prefix)
         return tree_filename,node_filenames
  
-    def write_particle_data_nodes_fftree(self,path=None,npart_max_file=1e4):
+    def write_particle_data_nodes_fftree(self,path=None,prefix='',max_npart_per_file=1e5):
 
-        ## partition nodes into ~npart_max_file sized chunks
-        node_partitions,counts = self.split_chunks(npart_max_file)
+        ## partition nodes into ~max_npart_per_file sized chunks
+        node_partitions,counts = self.split_chunks(max_npart_per_file)
 
         filenames = []
 
         for i,chunk in enumerate(node_partitions):
             offset = 0
-            filename = 'octnode_%04d.fftree'%i
+            filename = '%soctnode_%04d.fftree'%(prefix,i)
             filenames += [filename]
             npart_this_file = counts[i]
             with open(os.path.join(path,filename),'wb') as handle:
@@ -359,11 +359,12 @@ class Octree(object):
                     offset+=byte_size        
         return filenames,counts
     
-    def split_chunks(self,npart_max_file=1e4) -> tuple[list[list[OctNode]],list[int]]:
+    def split_chunks(self,max_npart_per_file=1e5) -> tuple[list[list[OctNode]],list[int]]:
         split_indices = []
         counts = []
         count = 0
 
+        import pdb; pdb.set_trace()
         ## ok, want spatial localization on disk, so we want to store nodes
         ##  in similar regions of space next to one another
         ##  so we'll first sort by "name"
@@ -386,7 +387,7 @@ class Octree(object):
                 
             count+=node.buffer_size
             ## this node puts us over the limit, 
-            if count > npart_max_file:
+            if count > max_npart_per_file:
                 split_indices+=[i-popped+1] ## +1 b.c. we want this node to be included in the file
                 counts += [count]
                 count=0
@@ -401,13 +402,19 @@ class Octree(object):
         ## return the partitioning and how many files there are, for convenience.
         return node_partitions,counts
 
-    def write_octree_json(self,path=None,loud=True):
+    def write_octree_json(
+        self,
+        path=None,
+        prefix='',
+        loud=True):
+
+        if path is None: path = os.getcwd()
+        octree_fname = os.path.join(path, f'{prefix}octree.json')
 
         flag_dict = {}
         for flag_name in ['filter_flags','colormap_flags','radius_flags']:
             flag_dict[flag_name] = getattr(self,flag_name)
 
-        if path is None: path = os.getcwd()
         node_dict_list = [flag_dict]
 
         num_nodes = len(self.node_list)
@@ -456,8 +463,6 @@ class Octree(object):
             node_dict_list += [node_dict]
             node_index+=1
         print('done!',flush=True)
-
-        octree_fname = os.path.join(path, 'octree.json')
 
         with open(octree_fname, 'w') as f:
             json.dump(node_dict_list, f, cls=npEncoder)

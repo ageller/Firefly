@@ -285,7 +285,7 @@ class Reader(object):
                     os.path.dirname(JSONdir),
                     self.JSON_prefix,
                     loud=loud,
-                    nparts_per_file=self.max_npart_per_file,
+                    max_npart_per_file=self.max_npart_per_file,
                     clean_JSONdir=self.clean_JSONdir if particleGroup is self.particleGroups[0] else False,
                     write_jsons_to_disk=write_jsons_to_disk,
                     not_reader=False)
@@ -295,7 +295,7 @@ class Reader(object):
                     os.path.dirname(JSONdir),
                     self.JSON_prefix,
                     loud=loud,
-                    nparts_per_file=self.max_npart_per_file,
+                    max_npart_per_file=self.max_npart_per_file,
                     clean_FFLYdir= self.clean_JSONdir if particleGroup is self.particleGroups[0] else False,
                     not_reader=False)
             else: raise KeyError("Requested format %s not understood. Choose json or ffly."%use_format)

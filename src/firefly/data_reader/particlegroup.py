@@ -472,7 +472,7 @@ class ParticleGroup(object):
         hard_data_path,
         JSON_prefix='',
         loud=True,
-        nparts_per_file=10**4,
+        max_npart_per_file=10**4,
         clean_JSONdir=False,
         write_jsons_to_disk=True,
         not_reader=True):
@@ -508,7 +508,7 @@ class ParticleGroup(object):
         :rtype: str, list of str
         """
 
-        if hasattr(self,'octree'):
+        if self.octree is not None:
             raise AssertionError(
                 "Octrees can only be output to binary format."+
                 " Use outputToFFLY instead to produce the necessary .fftree files.")
@@ -545,11 +545,11 @@ class ParticleGroup(object):
                 nparts = self.dec_inds.shape[0]
 
             ## how many sub-files are we going to need?
-            nfiles = int(nparts/nparts_per_file + ((nparts%nparts_per_file)!=0))
+            nfiles = int(nparts/max_npart_per_file + ((nparts%max_npart_per_file)!=0))
 
             ## how many particles will each file have and what are they named?
             filenames = [os.path.join(short_data_path,"%s%s%03d.json"%(JSON_prefix,self.UIname,i_file)) for i_file in range(nfiles)]
-            nparts = [min(nparts_per_file,nparts-(i_file)*(nparts_per_file)) for i_file in range(nfiles)]
+            nparts = [min(max_npart_per_file,nparts-(i_file)*(max_npart_per_file)) for i_file in range(nfiles)]
 
             filenames_and_nparts = list(zip(filenames,nparts))
         
@@ -587,7 +587,7 @@ class ParticleGroup(object):
         hard_data_path,
         file_prefix='',
         loud=True,
-        nparts_per_file=10**4,
+        max_npart_per_file=10**5,
         clean_FFLYdir=False,
         not_reader=True):
 
@@ -610,8 +610,11 @@ class ParticleGroup(object):
                     "fftree" in fname):
                     os.remove(os.path.join(full_path,fname))
 
-        if hasattr(self,'octree'):
-            tree_filename,node_filenames = self.octree.writeOctree(full_path,nparts_per_file)
+        if self.octree is not None:
+            tree_filename,node_filenames = self.octree.writeOctree(
+                full_path,
+                self.UIname,
+                max_npart_per_file)
             ## mimic return signature: file_array, filenames_and_nparts
             return [tree_filename],[(tree_filename,0)]
 
@@ -629,11 +632,11 @@ class ParticleGroup(object):
             else: nparts = self.dec_inds.shape[0]
 
             ## how many sub-files are we going to need?
-            nfiles = int(nparts/nparts_per_file + ((nparts%nparts_per_file)!=0))
+            nfiles = int(nparts/max_npart_per_file + ((nparts%max_npart_per_file)!=0))
 
             ## how many particles will each file have and what are they named?
             filenames = [os.path.join(short_data_path,"%s%s%03d.ffly"%(file_prefix,self.UIname,i_file)) for i_file in range(nfiles)]
-            nparts = [min(nparts_per_file,nparts-(i_file)*(nparts_per_file)) for i_file in range(nfiles)]
+            nparts = [min(max_npart_per_file,nparts-(i_file)*(max_npart_per_file)) for i_file in range(nfiles)]
 
             filenames_and_nparts = list(zip(filenames,nparts))
         
