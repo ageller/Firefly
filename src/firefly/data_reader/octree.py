@@ -106,8 +106,6 @@ class OctNode(object):
             ## need to cascade, split this node
             if hasattr(self,'buffer_coordss'): 
 
-                #print(self)
-                #import pdb; pdb.set_trace()
                 buffer_coordss = self.buffer_coordss + [point]
                 #raw_vels = self.raw_vels + [vels)]
                 buffer_fieldss = self.buffer_fieldss + [fields]
@@ -134,7 +132,6 @@ class OctNode(object):
                 octant_index = 0
                 for axis in range(3): 
                     if point[axis] > self.center[axis]: octant_index+= (1 << axis)
-                #import pdb; pdb.set_trace()
                 child_name = self.name+'%d'%(octant_index)
 
                 if child_name not in nodes: 
@@ -364,7 +361,6 @@ class Octree(object):
         counts = []
         count = 0
 
-        import pdb; pdb.set_trace()
         ## ok, want spatial localization on disk, so we want to store nodes
         ##  in similar regions of space next to one another
         ##  so we'll first sort by "name"
@@ -415,7 +411,9 @@ class Octree(object):
         for flag_name in ['filter_flags','colormap_flags','radius_flags']:
             flag_dict[flag_name] = getattr(self,flag_name)
 
-        node_dict_list = [flag_dict]
+        flag_dict['field_names'] = self.field_names[:-3]
+
+        json_dict = {'flag_dict':flag_dict}
 
         num_nodes = len(self.node_list)
 
@@ -446,13 +444,13 @@ class Octree(object):
             node_dict['center_of_mass'] = com.tolist()
 
             ## set other accumulated field values, use the same weights
-            node_dict['field_names'] = self.field_names[:-3]
             for i,field_key in enumerate(self.field_names[:-3]):
                 node_dict[field_key] = node.fields[i]
                 if field_key != 'Masses': node_dict[field_key]/=weights
             
             if hasattr(node,'buffer_filename'):
                 node_dict['buffer_filename'] = node.buffer_filename
+                node_dict['buffer_size'] = node.buffer_size
                 node_dict['byte_offset'] = node.byte_offset
                 node_dict['byte_size'] = node.byte_size
                 ##  I don't know if we want this so I'll comment it out 
@@ -460,11 +458,11 @@ class Octree(object):
                 ##  it'll be easy to add.
                 #node_dict['npart_buffer_file'] = node.npart_buffer_file
 
-            node_dict_list += [node_dict]
+            json_dict[node.name] = node_dict
             node_index+=1
         print('done!',flush=True)
 
         with open(octree_fname, 'w') as f:
-            json.dump(node_dict_list, f, cls=npEncoder)
+            json.dump(json_dict, f, cls=npEncoder)
 
         return octree_fname,0

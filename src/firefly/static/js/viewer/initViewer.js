@@ -1230,6 +1230,10 @@ function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
 							loadFFLYKaitai(prefix+readf, function(foo){
 								compileFFLYData(foo, p, callback, initialLoadFrac)}
 							);
+
+							d3.json(prefix+'data/Data/PartType0octree.json', function(foo) {
+								viewerParams.abg_octree = foo;
+							});
 						}
 					}
 				}
