@@ -48,13 +48,17 @@ class BinaryWriter(object):
 
     def write_header(self,handle):
         byte_size = 0
+        header_size = 0
 
         ## size of the header, 2 32 bit ints and a 1 bit boolean
-        header_size = 32*2 ## nparts and nfields
-        header_size += 8 ## velocity flag
-        ## each char gets 32 bits for UTF-8 (ascii is just 1 byte tho)
-        header_size += 32*np.sum([len(field_name) for field_name in self.field_names]) 
-        header_size += 3*8*self.nfields ## filter, colormap, and radius flags
+        header_size += 4 ## size of header
+        header_size += 4 ## velocity flag
+        header_size += 4 ## nparts 
+        header_size += 4 ## nfields
+        ## length of string as an int followed by the string
+        ## each char gets 4 bytes for UTF-8 (ascii is just 1 byte tho)
+        header_size += 4*self.nfields + 4*np.sum([len(field_name) for field_name in self.field_names]) 
+        header_size += 3*4*self.nfields ## filter, colormap, and radius flags
 
         byte_size += self.write_int(handle,header_size) 
         ## boolean flag for whether there are velocities
@@ -72,8 +76,9 @@ class BinaryWriter(object):
         ## write the scale-by radius flag array
         byte_size += self.write_flag(handle,self.radius_flags)
 
-        if byte_size != header_size: 
-            raise IOError(f"We did not count our bytes correctly predicted:{header_size:d} counted:{byte_size:d}")
+        if header_size != byte_size: 
+            raise IOError(
+                f"We did not count our bytes correctly predicted:{header_size:d} counted:{byte_size:d}")
         return byte_size
 
     def write_flag(self,handle,flag):
