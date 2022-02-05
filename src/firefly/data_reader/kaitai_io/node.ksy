@@ -44,7 +44,7 @@ types:
         type: str 
     seq:
       - id: field_data
-        type: field(npart,field_type,1) 
+        type: field(field_type,1) 
   field:
     params:
       - id: field_type
@@ -53,5 +53,5 @@ types:
         type: u1
     seq:
       - id: data
-        size: _root.octnode_header.npart * 4 * components
+        size: _root.octnode_header.node_size * 4 * components
         type: my_array_buffer(field_type)
