@@ -611,12 +611,12 @@ class ParticleGroup(object):
                     os.remove(os.path.join(full_path,fname))
 
         if self.octree is not None:
-            tree_filename,node_filenames = self.octree.writeOctree(
+            tree_filename,num_nodes,node_filenames = self.octree.writeOctree(
                 full_path,
                 self.UIname,
                 max_npart_per_file)
             ## mimic return signature: file_array, filenames_and_nparts
-            return [tree_filename],[(tree_filename,0)]
+            return [tree_filename],[(tree_filename,num_nodes)]
 
         ## shuffle particles and decimate as necessary, save the output in dec_inds
         self.getDecimationIndexArray()

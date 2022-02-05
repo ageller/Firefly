@@ -309,8 +309,8 @@ class Octree(object):
         ##  data to a JSON that will be read in full when Firefly starts up.
         ##  nodes which have particles on disk will have necessary information to 
         ##  load that data from disk when requested in Firefly.
-        tree_filename,_ = self.write_octree_json(path,prefix)
-        return tree_filename,node_filenames
+        tree_filename,num_nodes = self.write_octree_json(path,prefix)
+        return tree_filename,num_nodes,node_filenames
  
     def write_particle_data_nodes_fftree(self,path=None,prefix='',max_npart_per_file=1e5):
 
@@ -407,15 +407,24 @@ class Octree(object):
         if path is None: path = os.getcwd()
         octree_fname = os.path.join(path, f'{prefix}octree.json')
 
-        flag_dict = {}
-        for flag_name in ['filter_flags','colormap_flags','radius_flags']:
-            flag_dict[flag_name] = getattr(self,flag_name)
-
-        flag_dict['field_names'] = self.field_names[:-3]
-
-        json_dict = {'flag_dict':flag_dict}
-
         num_nodes = len(self.node_list)
+
+        json_dict = {
+            #'header':flag_dict,
+            ##'node_arrays':node_arrays,
+            'octree':{},
+            'Coordinates_flat':np.zeros(3*num_nodes)
+            }
+        for field in self.field_names[:-3]: json_dict[field] = np.zeros(num_nodes)
+
+        for flag_name in ['filter_flags','colormap_flags','radius_flags']:
+            flags = getattr(self,flag_name)
+            js_name = flag_name.split('_')[0]+'Keys'
+            json_dict[js_name] = []
+            for field_name,flag in zip(self.field_names[:-3],flags):
+                if flag: json_dict[js_name] += [field_name]
+
+        json_dict['field_names'] = self.field_names[:-3]
 
         node_index = 0
         ## self.node_list should be sorted
@@ -447,6 +456,7 @@ class Octree(object):
             for i,field_key in enumerate(self.field_names[:-3]):
                 node_dict[field_key] = node.fields[i]
                 if field_key != 'Masses': node_dict[field_key]/=weights
+                json_dict[field_key][node_index] = node_dict[field_key]
             
             if hasattr(node,'buffer_filename'):
                 node_dict['buffer_filename'] = node.buffer_filename
@@ -458,11 +468,16 @@ class Octree(object):
                 ##  it'll be easy to add.
                 #node_dict['npart_buffer_file'] = node.npart_buffer_file
 
-            json_dict[node.name] = node_dict
+            json_dict['Coordinates_flat'][3*node_index:3*(node_index+1)] = com
+
+            node_dict['node_index'] = node_index
+            json_dict['octree'][node.name] = node_dict
             node_index+=1
+
         print('done!',flush=True)
 
         with open(octree_fname, 'w') as f:
             json.dump(json_dict, f, cls=npEncoder)
 
-        return octree_fname,0
+        octree_fname = octree_fname.split(os.path.join('static','data',''))[1]
+        return octree_fname,num_nodes

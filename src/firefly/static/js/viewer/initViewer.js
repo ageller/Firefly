@@ -1168,8 +1168,8 @@ function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
 			} else {
 				//this is how I am identifying an octree file structure, for now (there must be a better way)
 				if (p != 'options') {
-					viewerParams.haveOctree[p] = true;
-					viewerParams.haveAnyOctree = true;
+					viewerParams.haveOctree[p] = false;
+					viewerParams.haveAnyOctree = false;
 				}
 			}
 		});
@@ -1230,10 +1230,6 @@ function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
 							loadFFLYKaitai(prefix+readf, function(foo){
 								compileFFLYData(foo, p, callback, initialLoadFrac)}
 							);
-
-							d3.json(prefix+'data/Data/PartType0octree.json', function(foo) {
-								viewerParams.abg_octree = foo;
-							});
 						}
 					}
 				}
@@ -1355,7 +1351,7 @@ function loadFFLYKaitai(fname,callback){
 	});
 };
 
-function compileFFLYData(data, p, callback, initialLoadFrac=0,filetype='particle'){
+function compileFFLYData(data, p, callback, initialLoadFrac=0){
 	var hasVelocities = data.fireflyHeader.hasVelocities;
 	var this_parts = viewerParams.parts[p];
 	if (!data.hasOwnProperty('coordinatesFlat')) console.log("Invalid particle group data",data);
