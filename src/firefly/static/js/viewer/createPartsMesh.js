@@ -219,6 +219,11 @@ function createPartsMesh(pdraw = viewerParams.partsKeys, node=null){
 		viewerParams.partsMesh[p].push(mesh)
 	}
 
+	if (viewerParams.parts[p].hasOwnProperty('octree')){
+		octree = viewerParams.parts[p].octree;
+		evaluateFunctionOnOctreeNodes(createOctBox,octree[''],octree,3);
+	}
+
 	//this will not be printed if you change the N value in the slider, and therefore only redraw one particle type
 	//because ndraw will not be large enough, but I don't think this will cause a problem
 	//if (ndraw >= Math.floor(viewerParams.parts.totalSize/viewerParams.decimate)){
