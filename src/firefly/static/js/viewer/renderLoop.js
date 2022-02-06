@@ -144,12 +144,14 @@ function update_particle_groups(time){
 	cameraY.applyQuaternion(viewerParams.camera.quaternion);
 
 
-	if (viewerParams.haveAnyOctree) updateOctree();
 
 
 	// TODO playback should be moved to full UI tweening in the future
 	// handle filter playblack 
 	viewerParams.partsKeys.forEach(function(p,i){
+
+		//if (viewerParams.abg_haveAnyOctree) ;
+		abg_updateOctree(p);
 
 		// move filter handle sliders if playback is enabled
 		update_particle_playback(p,time);

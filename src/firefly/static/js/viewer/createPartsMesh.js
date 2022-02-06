@@ -221,7 +221,8 @@ function createPartsMesh(pdraw = viewerParams.partsKeys, node=null){
 
 	if (viewerParams.parts[p].hasOwnProperty('octree')){
 		octree = viewerParams.parts[p].octree;
-		evaluateFunctionOnOctreeNodes(createOctBox,octree[''],octree,3);
+		// initialize octree boxes
+		var octboxes = evaluateFunctionOnOctreeNodes(createOctBox,octree[''],octree);
 	}
 
 	//this will not be printed if you change the N value in the slider, and therefore only redraw one particle type

@@ -1,3 +1,61 @@
+function containsPoint(t){
+	t = new THREE.Vector3(t).project(viewerParams.camera)
+	const e=viewerParams.frustum.planes;
+	for(let n=0;n<6;n++) if (e[n].distanceToPoint(t)<0) return false; return true;
+}
+
+function abg_updateOctree(pkey){
+	//console.log(containsPoint((0,0,0)),containsPoint((-1,-1,-1)));
+	octree = viewerParams.parts[pkey].octree;
+	openCloseNodes(octree[''],octree);
+}
+
+function openCloseNodes(starting_node,octree){
+
+	var node_size_pix = getScreenSize(starting_node);
+	if ( (node_size_pix > viewerParams.renderWidth/4 || // too big
+			node_size_pix > viewerParams.renderHeight/4) ||
+		(node_size_pix < viewerParams.renderWidth/32 || // too small
+			node_size_pix < viewerParams.renderHeight/32)){ 
+		// open this node
+		starting_node.octbox.visible=false;
+		starting_node.children.forEach(function (child_name){
+			openCloseNodes(octree[child_name],octree);
+		});
+	}
+	else{
+		// close this node
+		starting_node.octbox.visible=true;
+		starting_node.children.forEach(function (child_name){
+			openCloseNodes(octree[child_name],octree);
+		});
+	}
+}
+
+function getScreenSize(node){
+	//estimate the screen size by taking the max of the x,y,z widths
+	//x width
+	dists = [0,0,0]
+	axes = ['x','y','z']
+	axes.forEach(function (axis,i){
+		var xp = new THREE.Vector3(node.center[0],node.center[1],node.center[2]);
+		var xm = new THREE.Vector3(node.center[0],node.center[1],node.center[2]);
+		xp[axis] += node.width/2;
+		xm[axis] -= node.width/2;
+
+		[xp,xm].forEach(function (xt){
+			xt.project(viewerParams.camera);
+			xt.x = (xt.x + 1)*window.innerWidth/2.;
+			xt.y = (xt.y - 1)*window.innerHeight/2.;
+		})
+		dists[i] = xp.distanceTo(xm);
+	});
+
+	// there's no built in array max function??? absurd
+	return Math.max(dists[0],Math.max(dists[1],dists[2]));
+}
+
+	
 function updateOctree(){
 
 	//FPS and memoryUsage updated in main render loop of update_framerate
