@@ -448,14 +448,15 @@ class Octree(object):
                 weights = node.fields[self.field_names.index('Masses')]
             else: weights = node.npoints
 
-            com/=weights
+            com=com/weights
 
             node_dict['center_of_mass'] = com.tolist()
 
             ## set other accumulated field values, use the same weights
             for i,field_key in enumerate(self.field_names[:-3]):
                 node_dict[field_key] = node.fields[i]
-                if field_key != 'Masses': node_dict[field_key]/=weights
+                if field_key != 'Masses': 
+                    node_dict[field_key]/=weights
                 json_dict[field_key][node_index] = node_dict[field_key]
             
             if hasattr(node,'buffer_filename'):
