@@ -7,29 +7,143 @@ function containsPoint(t){
 function abg_updateOctree(pkey){
 	//console.log(containsPoint((0,0,0)),containsPoint((-1,-1,-1)));
 	octree = viewerParams.parts[pkey].octree;
-	openCloseNodes(octree[''],octree);
+	openCloseNodes(pkey,octree[''],octree);
 }
 
-function openCloseNodes(starting_node,octree){
+function openCloseNodes(pkey,starting_node,octree){
 
+	// find the node size in pixels and then compare to the 
+	//  size of the window
 	var node_size_pix = getScreenSize(starting_node);
-	if ( (node_size_pix > viewerParams.renderWidth/4 || // too big
-			node_size_pix > viewerParams.renderHeight/4) ||
-		(node_size_pix < viewerParams.renderWidth/32 || // too small
-			node_size_pix < viewerParams.renderHeight/32)){ 
-		// open this node
-		starting_node.octbox.visible=false;
-		starting_node.children.forEach(function (child_name){
-			openCloseNodes(octree[child_name],octree);
-		});
+	var onscreen = checkOnScreen(starting_node);
+	var inside = checkInside(starting_node);
+
+	if (starting_node.refinement == 0){
+		console.log(onscreen,inside)
 	}
+
+	if (!onscreen ||  // whole box off the screen
+		node_size_pix < viewerParams.renderWidth/32 || // onscreen but too thin
+		node_size_pix < viewerParams.renderHeight/32){ // onscreen but too short
+			starting_node.octbox.visible=false;
+			// if we haven't already closed this node let's close it 
+			if (!starting_node.is_closed){
+				//closeNode(octree[child_name,octree]);
+				starting_node.is_closed = is_closed = true;
+			}
+			// we DON'T need to check if the children need to be open/closed
+			//  because when we close a node we'll loop over the children and make sure
+			//  they're also all closed
+			//else {starting_node.children.forEach(function (child_name){
+					//openCloseNodes(pkey,octree[child_name],octree)});
+			//}
+		}
+	// node is too large, and at least partially on screen? want to replace with the buffer particles and the children
+	else if ( (node_size_pix > viewerParams.renderWidth/4 ||
+			node_size_pix > viewerParams.renderHeight/4)){  
+		starting_node.octbox.visible=false;
+
+		// if we haven't already opened this node let's open it 
+		if (!starting_node.is_open){
+			//openNode(pkey,starting_node);
+			starting_node.is_open = true;
+		}
+		// we need to check if the children need to be open/closed
+		else {starting_node.children.forEach(function (child_name){
+				openCloseNodes(pkey,octree[child_name],octree)});
+		}
+	}  
+
 	else{
-		// close this node
 		starting_node.octbox.visible=true;
 		starting_node.children.forEach(function (child_name){
-			openCloseNodes(octree[child_name],octree);
+			openCloseNodes(pkey,octree[child_name],octree);
 		});
 	}
+}
+
+function checkOnScreen(starting_node){
+	var min_project = starting_node.bounding_box.min.clone().project(viewerParams.camera);
+	var max_project = starting_node.bounding_box.max.clone().project(viewerParams.camera);
+	var onscreen = true;
+
+	['x','y','z'].forEach(function (axis){
+		if (min_project[axis] > 1 || max_project.max > 1) onscreen = false;
+		else if (min_project[axis] < -1 || max_project.max < -1) onscreen = false;
+	})	
+	return onscreen;
+}
+
+function checkInside(starting_node){
+	var inside = true;
+	['x','y','z'].forEach(function (axis){
+		inside = inside && (
+			starting_node.bounding_box.min[axis] <
+			viewerParams.camera.position[axis]) && 
+			(viewerParams.camera.position[axis] <
+			starting_node.bounding_box.max[axis]);
+	})
+	return inside;
+}
+
+function openNode(p,node,octree){
+	//this_parts = viewerParams.parts[p];
+
+	// hide the CoM particle
+	// TODO need to search children for appropriate mesh
+	// should maybe link it to the octree when it's being generated?
+	var mesh = viewerParams.scene.children[1];
+	var radiusScale = mesh.geometry.attributes.radiusScale.array;
+	var alphas = mesh.geometry.attributes.alpha.array;
+	alphas[node.node_index] = 0;
+	radiusScale[node.node_index] = 0;
+	// TODO: add a new mesh for the buffer particles contained in this node if there are any
+
+	// show the children's CoM particles
+	node.children.forEach(function (child_name){
+		child_node = octree[child_name]
+		alphas[child_node.node_index] = 1;
+		// TODO should read this from radius scale array
+		radiusScale[child_node.node_index] = 1; 
+
+	});
+
+}
+
+function closeNode(p,node,octree){
+	//this_parts = viewerParams.parts[p];
+
+	// show the CoM particle for this node
+	// TODO need to search children for appropriate mesh
+	// should maybe link it to the octree when it's being generated?
+	var mesh = viewerParams.scene.children[1];
+	var radiusScale = mesh.geometry.attributes.radiusScale.array;
+	var alphas = mesh.geometry.attributes.alpha.array;
+	alphas[node.node_index] = 1;
+	radiusScale[node.node_index] = 1;
+
+	//TODO need to delete this node's buffer mesh if it has one
+
+	// separate function because we want to be able to recursively hide the CoM particles
+	closeChildren(node,octree,alphas,radiusScale);
+}
+
+function closeChildren(node,octree,alphas,radiusScale){
+
+	// show the children's CoM particles
+	node.children.forEach(function (child_name){
+		child_node = octree[child_name]
+		alphas[child_node.node_index] = 0;
+		// TODO should read this from radius scale array
+		radiusScale[child_node.node_index] = 0; 
+		//TODO need to delete this child node's buffer mesh if it has one
+
+		// mark that this node has been closed
+		child_node.is_closed = true;
+
+		closeChildren(child_node,octree,alphas,radiusScale);
+	});
+
 }
 
 function getScreenSize(node){
