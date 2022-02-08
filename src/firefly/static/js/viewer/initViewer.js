@@ -1253,6 +1253,8 @@ function compileJSONData(data, p, callback, initialLoadFrac=0){
 		}
 	});
 
+	if (data.hasOwnProperty('octree')) abg_initOctree(data);
+
 
 	var num = 0;
 	if (!viewerParams.counting){

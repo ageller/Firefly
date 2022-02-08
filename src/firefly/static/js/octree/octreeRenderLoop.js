@@ -18,48 +18,40 @@ function openCloseNodes(pkey,starting_node,octree){
 	var onscreen = checkOnScreen(starting_node);
 	var inside = checkInside(starting_node);
 
-	if (starting_node.refinement == 0){
-		console.log(onscreen,inside)
-	}
-
-	if (!onscreen ||  // whole box off the screen
+	if (!onscreen && !inside || // whole box off the screen
 		node_size_pix < viewerParams.renderWidth/32 || // onscreen but too thin
 		node_size_pix < viewerParams.renderHeight/32){ // onscreen but too short
-			starting_node.octbox.visible=false;
-			// if we haven't already closed this node let's close it 
-			if (!starting_node.is_closed){
-				//closeNode(octree[child_name,octree]);
-				starting_node.is_closed = is_closed = true;
-			}
-			// we DON'T need to check if the children need to be open/closed
-			//  because when we close a node we'll loop over the children and make sure
-			//  they're also all closed
-			//else {starting_node.children.forEach(function (child_name){
-					//openCloseNodes(pkey,octree[child_name],octree)});
-			//}
+		if (viewerParams.debug) starting_node.octbox.visible=false;
+		// if we haven't already closed this node let's close it 
+		if (!starting_node.is_closed){
+			closeNode(pkey,starting_node,octree);
+			starting_node.is_closed = true;
+			starting_node.is_open = false;
 		}
+		// we DON'T need to check if the children need to be open/closed
+		//  because when we close a node we'll loop over the children and make sure
+		//  they're also all closed
+		else {starting_node.children.forEach(function (child_name){
+				openCloseNodes(pkey,octree[child_name],octree)});
+		}
+	}
 	// node is too large, and at least partially on screen? want to replace with the buffer particles and the children
-	else if ( (node_size_pix > viewerParams.renderWidth/4 ||
-			node_size_pix > viewerParams.renderHeight/4)){  
-		starting_node.octbox.visible=false;
+	else if (inside || 
+		node_size_pix > viewerParams.renderWidth/8 ||
+		node_size_pix > viewerParams.renderHeight/8){  
+		if (viewerParams.debug) starting_node.octbox.visible=true;
 
 		// if we haven't already opened this node let's open it 
 		if (!starting_node.is_open){
-			//openNode(pkey,starting_node);
+			openNode(pkey,starting_node,octree);
 			starting_node.is_open = true;
+			starting_node.is_closed = false;
 		}
 		// we need to check if the children need to be open/closed
 		else {starting_node.children.forEach(function (child_name){
 				openCloseNodes(pkey,octree[child_name],octree)});
 		}
 	}  
-
-	else{
-		starting_node.octbox.visible=true;
-		starting_node.children.forEach(function (child_name){
-			openCloseNodes(pkey,octree[child_name],octree);
-		});
-	}
 }
 
 function checkOnScreen(starting_node){
@@ -67,9 +59,15 @@ function checkOnScreen(starting_node){
 	var max_project = starting_node.bounding_box.max.clone().project(viewerParams.camera);
 	var onscreen = true;
 
+	// thresh = 1 corresponds to point being *just* off-scren. 
+	//  adding a bit of buffer is necessary to bridge gap between 
+	//  node filling up the screen (but being outside it) and
+	//  being inside it
+	var thresh = 1.2;
+
 	['x','y','z'].forEach(function (axis){
-		if (min_project[axis] > 1 || max_project.max > 1) onscreen = false;
-		else if (min_project[axis] < -1 || max_project.max < -1) onscreen = false;
+		if (min_project[axis] > thresh || max_project.max > thresh) onscreen = false;
+		else if (min_project[axis] < -thresh || max_project.max < -thresh) onscreen = false;
 	})	
 	return onscreen;
 }
@@ -86,7 +84,17 @@ function checkInside(starting_node){
 	return inside;
 }
 
-function openNode(p,node,octree){
+function openNode(pkey,node,octree){
+	// to avoid nodes opening/closing
+	//  rapidly as the user moves the camera
+	//  we'll require that the conditions for
+	//  opening/closing be true for at least 30 frames
+	if (node.delay_open < 30){
+		node.delay_open++;
+		return;}
+	node.delay_open = 0;
+	node.delay_close = 0;
+
 	//this_parts = viewerParams.parts[p];
 
 	// hide the CoM particle
@@ -105,12 +113,20 @@ function openNode(p,node,octree){
 		alphas[child_node.node_index] = 1;
 		// TODO should read this from radius scale array
 		radiusScale[child_node.node_index] = 1; 
-
 	});
 
 }
 
-function closeNode(p,node,octree){
+function closeNode(pkey,node,octree){
+	// to avoid nodes opening/closing
+	//  rapidly as the user moves the camera
+	//  we'll require that the conditions for
+	//  opening/closing be true for at least 30 frames
+	if (node.delay_close < 30){
+		node.delay_close++;
+		return;}
+	node.delay_open = 0;
+	node.delay_close = 0;
 	//this_parts = viewerParams.parts[p];
 
 	// show the CoM particle for this node
@@ -133,6 +149,7 @@ function closeChildren(node,octree,alphas,radiusScale){
 	// show the children's CoM particles
 	node.children.forEach(function (child_name){
 		child_node = octree[child_name]
+		child_node.octbox.visible = false;
 		alphas[child_node.node_index] = 0;
 		// TODO should read this from radius scale array
 		radiusScale[child_node.node_index] = 0; 
@@ -140,6 +157,7 @@ function closeChildren(node,octree,alphas,radiusScale){
 
 		// mark that this node has been closed
 		child_node.is_closed = true;
+		child_node.is_open = false;
 
 		closeChildren(child_node,octree,alphas,radiusScale);
 	});

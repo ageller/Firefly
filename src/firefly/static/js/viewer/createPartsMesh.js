@@ -220,6 +220,7 @@ function createPartsMesh(pdraw = viewerParams.partsKeys, node=null){
 	}
 
 	if (viewerParams.parts[p].hasOwnProperty('octree')){
+		viewerParams.debug = true;
 		octree = viewerParams.parts[p].octree;
 		// initialize octree boxes
 		var octboxes = evaluateFunctionOnOctreeNodes(createOctBox,octree[''],octree);

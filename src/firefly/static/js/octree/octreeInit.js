@@ -1,3 +1,17 @@
+function abg_initOctree(data){
+	// setup the open/close flags for each node
+	evaluateFunctionOnOctreeNodes(
+		initializeNodeFlags,
+		data.octree[''], data.octree);
+}
+
+function initializeNodeFlags(node){
+	node.is_closed = false
+	node.is_open = false
+	node.delay_close = 0
+	node.delay_open = 0
+}
+
 function initNode(node, p){
 	//set default values
 	node.NparticlesToRender = Math.floor(node.Nparticles*viewerParams.octree.minFracParticlesToDraw[p]);;
@@ -120,4 +134,17 @@ function updateOctreeDecimationSpan(){
 	var num = (1./viewerParams.octree.NParticleMemoryModifier).toFixed(2);
 	if (num > 10000) num = '> 10,000'
 	d3.select('#decimationOctreeSpan').text(num)
+}
+
+function evaluateFunctionOnOctreeNodes(node_function,node,octree,max_refinement=null){
+	values = [node_function(node)];
+	node.children.forEach(
+		function (child_name){
+			child = octree[child_name]
+			if (!max_refinement || max_refinement >= child.refinement){
+			 values = values.concat(evaluateFunctionOnOctreeNodes(node_function,child,octree,max_refinement));
+			}
+		}
+	);
+	return values;
 }
