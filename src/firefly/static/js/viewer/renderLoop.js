@@ -50,7 +50,6 @@ function update(time){
 	// handle keypresses on the keyboard
 	update_keypress(time);
 
-	// ABG: what does this do? TODO
 	// AMG: this applies any user interaction to the camera (enabling the controls)
 	viewerParams.controls.update();
 	
@@ -147,11 +146,7 @@ function update_particle_groups(time){
 
 
 	// TODO playback should be moved to full UI tweening in the future
-	// handle filter playblack 
 	viewerParams.partsKeys.forEach(function(p,i){
-
-		//if (viewerParams.abg_haveAnyOctree) ;
-		abg_updateOctree(p);
 
 		// move filter handle sliders if playback is enabled
 		update_particle_playback(p,time);
@@ -180,6 +175,9 @@ function update_particle_groups(time){
 
 				// update the velocity time in the animation loop
 				update_velocity_animation(p,m);
+
+				//if (viewerParams.abg_haveAnyOctree) ;
+				abg_updateOctree(p);
 			} 
 			else { 
 				// set radii and alpha values to 0 to hide this particle group
