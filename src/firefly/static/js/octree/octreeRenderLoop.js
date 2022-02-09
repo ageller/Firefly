@@ -37,6 +37,16 @@ function openCloseNodes(pkey,node,octree){
 	//  every other scenario requires walking the rest of the tree :\
 	else node.children.forEach(
 		function (child_name){openCloseNodes(pkey,octree[child_name],octree)});
+
+	/* ---- finish up with this node's direct children ---- */
+	// show the children's CoM particles
+	/*node.children.forEach(function (dc_child_name){
+		dc_child_node = octree[dc_child_name]
+		alphas[dc_child_node.node_index] = dc_alpha;
+		// TODO should read this from radius scale array
+		radiusScale[dc_child_node.node_index] = dc_radius; 
+	});
+	*/
 }
 
 function checkOnScreen(node){
@@ -49,8 +59,7 @@ function checkOnScreen(node){
 	var cen_onscreen = true;
 
 	// thresh = 1 corresponds to point being *just* off-scren. 
-	//  adding a bit of buffer is necessary to bridge gap between 
-	var thresh = 0.75;
+	var thresh = 0.75; // a little more aggressive, culls stuff at the edge of the screen
 
 
 	['x','y'].forEach(function (axis){
@@ -99,27 +108,14 @@ function openNode(node){
 	node.delay_close = 0;
 	node.is_closed = false;
 	node.is_open = true;
-	if (viewerParams.debug) node.octbox.visible = true;
+	set_visible(node)
 
 	//this_parts = viewerParams.parts[p];
 
 	// hide the CoM particle
 	// TODO need to search children for appropriate mesh
 	// should maybe link it to the octree when it's being generated?
-	var mesh = viewerParams.scene.children[1];
-	var radiusScale = mesh.geometry.attributes.radiusScale.array;
-	var alphas = mesh.geometry.attributes.alpha.array;
-	alphas[node.node_index] = 0;
-	radiusScale[node.node_index] = 0;
 	// TODO: add a new mesh for the buffer particles contained in this node if there are any
-
-	// show the children's CoM particles
-	node.children.forEach(function (child_name){
-		child_node = octree[child_name]
-		alphas[child_node.node_index] = 1;
-		// TODO should read this from radius scale array
-		radiusScale[child_node.node_index] = 1; 
-	});
 
 }
 
@@ -135,20 +131,8 @@ function closeNode(node){
 	node.delay_close = 0;
 	node.is_closed = true;
 	node.is_open = false;
-	if (viewerParams.debug) node.octbox.visible = false;
+	set_transparent(node)
 	//this_parts = viewerParams.parts[p];
-
-	// show the CoM particle for this node
-	// TODO need to search children for appropriate mesh
-	// should maybe link it to the octree when it's being generated?
-	var mesh = viewerParams.scene.children[1];
-	var radiusScale = mesh.geometry.attributes.radiusScale.array;
-	var alphas = mesh.geometry.attributes.alpha.array;
-	alphas[node.node_index] = 1;
-	radiusScale[node.node_index] = 1;
-
-	//TODO need to delete this node's buffer mesh if it has one
-
 }
 
 function getScreenSize(node){

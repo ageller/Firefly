@@ -1,24 +1,51 @@
-function abg_initOctree(data){
-	// setup the open/close flags for each node
-	evaluateFunctionOnOctreeNodes(
-		initializeNodeFlags,
-		data.octree[''],
-		data.octree);
+function abg_initOctree(pkey,data){
 
 	viewerParams.debug = true;
-	// initialize octree boxes
+	viewerParams.parts[pkey].doSPH = true
+	viewerParams.boxSize = 10*data.octree[''].width
+
+	function initializeNode(node){
+		node.is_closed = false
+		node.is_open = false
+		node.delay_close = 0
+		node.delay_open = 0
+
+		node.pkey = pkey;
+
+		// initialize octree boxes
+		createOctBox(node);
+	}
+
+	// walk the tree and evaluate init function
 	evaluateFunctionOnOctreeNodes(
-		createOctBox,
+		initializeNode,
 		data.octree[''],
 		data.octree);
+
 }
 
-function initializeNodeFlags(node){
-	node.is_closed = false
-	node.is_open = false
-	node.delay_close = 0
-	node.delay_open = 0
-}
+	set_transparent = function (node){
+		mesh = viewerParams.partsMesh[node.pkey][0];
+		if (viewerParams.debug) node.octbox.visible = false;
+		mesh.geometry.attributes.radiusScale.array[node.node_index] = 0;
+		mesh.geometry.attributes.alpha.array[node.node_index] = 0;
+
+		mesh.geometry.attributes.radiusScale.needsUpdate = true;
+		mesh.geometry.attributes.alpha.needsUpdate = true;
+	}
+
+	set_visible = function (node){
+		mesh = viewerParams.partsMesh[node.pkey][0];
+		if (viewerParams.debug) node.octbox.visible = true;
+		mesh.geometry.attributes.radiusScale.array[node.node_index] = 1e4/(1+node.refinement);
+
+		mesh.geometry.attributes.alpha.array[node.node_index] = 1;
+		mesh.geometry.attributes.radiusScale.needsUpdate = true;
+		mesh.geometry.attributes.alpha.needsUpdate = true;
+
+	}
+
+
 
 function createOctBox(node){
 	if (viewerParams.debug) {
