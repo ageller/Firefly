@@ -7,10 +7,10 @@ function containsPoint(t){
 function abg_updateOctree(pkey){
 	//console.log(containsPoint((0,0,0)),containsPoint((-1,-1,-1)));
 	octree = viewerParams.parts[pkey].octree;
-	openCloseNodes(pkey,octree[''],octree);
+	openCloseNodes(octree['']);
 }
 
-function openCloseNodes(pkey,node,octree){
+function openCloseNodes(node){
 
 	// find the node size in pixels and then compare to the 
 	//  size of the window
@@ -30,13 +30,12 @@ function openCloseNodes(pkey,node,octree){
 		if (!node.is_open) openNode(node);
 	}  
 
+
+
 	/* ---- alright, now we have to decide what to do with the children ---- */
 
-	//  if this node is too small then all its children will be as well, so let's just close them
-	if (too_small) evaluateFunctionOnOctreeNodes(closeNode,node,octree)
-	//  every other scenario requires walking the rest of the tree :\
-	else node.children.forEach(
-		function (child_name){openCloseNodes(pkey,octree[child_name],octree)});
+	node.children.forEach(
+		function (child_name){openCloseNodes(node.octree[child_name])});
 
 	/* ---- finish up with this node's direct children ---- */
 	// show the children's CoM particles
@@ -59,7 +58,7 @@ function checkOnScreen(node){
 	var cen_onscreen = true;
 
 	// thresh = 1 corresponds to point being *just* off-scren. 
-	var thresh = 0.75; // a little more aggressive, culls stuff at the edge of the screen
+	var thresh = 1.2; // a little more aggressive, culls stuff at the edge of the screen
 
 
 	['x','y'].forEach(function (axis){
@@ -86,14 +85,14 @@ function checkInside(node){
 }
 
 function checkTooSmall(node_size_pix){
-	return (node_size_pix < viewerParams.renderWidth/32 || // too thin
-		node_size_pix < viewerParams.renderHeight/32);// too short
+	return (node_size_pix < viewerParams.renderWidth/16 || // too thin
+		node_size_pix < viewerParams.renderHeight/16);// too short
 
 }
 
 function checkTooBig(node_size_pix){
-	return (node_size_pix > viewerParams.renderWidth/8 ||// too wide
-		node_size_pix > viewerParams.renderHeight/8); // too tall
+	return (node_size_pix > viewerParams.renderWidth/16 ||// too wide
+		node_size_pix > viewerParams.renderHeight/16); // too tall
 }
 
 function openNode(node){
@@ -109,30 +108,23 @@ function openNode(node){
 	node.is_closed = false;
 	node.is_open = true;
 	set_visible(node)
-
-	//this_parts = viewerParams.parts[p];
-
-	// hide the CoM particle
-	// TODO need to search children for appropriate mesh
-	// should maybe link it to the octree when it's being generated?
-	// TODO: add a new mesh for the buffer particles contained in this node if there are any
-
 }
 
-function closeNode(node){
+function closeNode(node,force=false){
 	// to avoid nodes opening/closing
 	//  rapidly as the user moves the camera
 	//  we'll require that the conditions for
 	//  opening/closing be true for at least 30 frames
 	node.delay_close++;
-	if (node.delay_close < -1){
+	if (node.delay_close < -1 && !force){
 		return;}
 	node.delay_open = 0;
 	node.delay_close = 0;
 	node.is_closed = true;
 	node.is_open = false;
 	set_transparent(node)
-	//this_parts = viewerParams.parts[p];
+	parent = octree[node.name.slice(0,-2)]
+
 }
 
 function getScreenSize(node){

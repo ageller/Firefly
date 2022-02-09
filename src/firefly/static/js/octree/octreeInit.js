@@ -1,8 +1,8 @@
 function abg_initOctree(pkey,data){
 
-	viewerParams.debug = true;
+	viewerParams.debug = false;
 	viewerParams.parts[pkey].doSPH = true
-	viewerParams.boxSize = 10*data.octree[''].width
+	viewerParams.boxSize = 50*data.octree[''].width
 
 	function initializeNode(node){
 		node.is_closed = false
@@ -11,6 +11,7 @@ function abg_initOctree(pkey,data){
 		node.delay_open = 0
 
 		node.pkey = pkey;
+		node.octree = viewerParams.parts[pkey].octree
 
 		// initialize octree boxes
 		createOctBox(node);
@@ -37,7 +38,7 @@ function abg_initOctree(pkey,data){
 	set_visible = function (node){
 		mesh = viewerParams.partsMesh[node.pkey][0];
 		if (viewerParams.debug) node.octbox.visible = true;
-		mesh.geometry.attributes.radiusScale.array[node.node_index] = 1e4/(1+node.refinement);
+		mesh.geometry.attributes.radiusScale.array[node.node_index] = 10*node.width/(1+node.refinement/8);//1e4;
 
 		mesh.geometry.attributes.alpha.array[node.node_index] = 1;
 		mesh.geometry.attributes.radiusScale.needsUpdate = true;

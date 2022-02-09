@@ -224,7 +224,9 @@ function createPartsMesh(pdraw = viewerParams.partsKeys, node=null){
 		octree = viewerParams.parts[p].octree;
 		if (viewerParams.debug){
 			evaluateFunctionOnOctreeNodes(
-				function (node){viewerParams.scene.add(node.octbox)},
+				function (node){
+					viewerParams.scene.add(node.octbox)
+					set_transparent(node)},
 				octree[''],
 				octree)
 		}
