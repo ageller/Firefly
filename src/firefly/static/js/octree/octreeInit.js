@@ -3,6 +3,7 @@ function abg_initOctree(pkey,data){
 	viewerParams.debug = false;
 	viewerParams.parts[pkey].doSPH = true
 	viewerParams.boxSize = 50*data.octree[''].width
+	viewerParams.parts[pkey].SmoothingLength = Array(viewerParams.parts[pkey].Coordinates_flat.length/3)
 
 	function initializeNode(node){
 		node.is_closed = false
@@ -12,6 +13,10 @@ function abg_initOctree(pkey,data){
 
 		node.pkey = pkey;
 		node.octree = viewerParams.parts[pkey].octree
+		node.radius = 10*node.width/(1+node.refinement/8);
+		node.radius = 1e3*(1+node.refinement/8)*node.npoints/1e3;
+		viewerParams.parts[pkey].SmoothingLength[node.node_index] = node.radius;
+
 
 		// initialize octree boxes
 		createOctBox(node);
@@ -25,7 +30,7 @@ function abg_initOctree(pkey,data){
 
 }
 
-	set_transparent = function (node){
+function set_transparent(node){
 		mesh = viewerParams.partsMesh[node.pkey][0];
 		if (viewerParams.debug) node.octbox.visible = false;
 		mesh.geometry.attributes.radiusScale.array[node.node_index] = 0;
@@ -35,10 +40,10 @@ function abg_initOctree(pkey,data){
 		mesh.geometry.attributes.alpha.needsUpdate = true;
 	}
 
-	set_visible = function (node){
+function set_visible(node){
 		mesh = viewerParams.partsMesh[node.pkey][0];
 		if (viewerParams.debug) node.octbox.visible = true;
-		mesh.geometry.attributes.radiusScale.array[node.node_index] = 10*node.width/(1+node.refinement/8);//1e4;
+		mesh.geometry.attributes.radiusScale.array[node.node_index] = node.radius;//1e4;
 
 		mesh.geometry.attributes.alpha.array[node.node_index] = 1;
 		mesh.geometry.attributes.radiusScale.needsUpdate = true;
@@ -46,6 +51,50 @@ function abg_initOctree(pkey,data){
 
 	}
 
+function loadFFTREEKaitai(node,callback){
+
+	// initialize a FileReader object
+	var binary_reader = new FileReader;
+	// get local file
+	fetch('static/'+node.buffer_filename).then(res => {
+		res.blob().then(blob =>{ 
+			blob = blob.slice(
+				node.byte_offset,
+				node.byte_offset+node.byte_size)
+			binary_reader.readAsArrayBuffer(blob)
+			// wait until loading finishes, then call function
+			binary_reader.onloadend = function () {
+				// convert ArrayBuffer to FireflyFormat
+				kaitai_stream = new KaitaiStream(binary_reader.result)
+				console.log(kaitai_stream)
+				debugger
+				kaitai_format = new FireflyOctnodeSubstring(
+					kaitai_stream);
+				console.log(kaitai_format)
+				debugger
+				// call compileFFLYData as a callback
+				callback(kaitai_format,node);
+			}
+		});
+	})
+};
+
+function compileFFTREEData(kaitai_format,node){
+
+	node.buffer_parts = {}
+	hasVelocities = kaitai_format.octnodeHeader.hasVelocities
+	
+	node.buffer_parts.Coordinates_flat = kaitai_format.node.coordinatesFlat.flatVectorData.data.values;
+	// only load velocities if we actually have them
+	if (hasVelocities) node.buffer_parts.Velocities_flat = kaitai_format.node.velocitiesFlat.flatVectorData.data.values;
+
+	field_names = viewerParams.parts[node.pkey].field_names;
+	// and now load the scalar field data
+	for (i=0; i < kaitai_format.octnodeHeader.nfields; i++){
+		node.buffer_parts[field_names[i]] = kaitai_format.node.scalarFields[i].fieldData.data.values;
+	}
+
+}
 
 
 function createOctBox(node){
