@@ -8,6 +8,12 @@ function abg_updateOctree(pkey){
 	//console.log(containsPoint((0,0,0)),containsPoint((-1,-1,-1)));
 	octree = viewerParams.parts[pkey].octree;
 	openCloseNodes(octree['']);
+	evaluateFunctionOnOctreeNodes(
+		function (node){
+			if (node.children.length) set_transparent(node);
+			else set_visible(node);},
+		octree[''],
+		octree)
 }
 
 function openCloseNodes(node){
@@ -107,8 +113,26 @@ function openNode(node){
 	node.delay_close = 0;
 	node.is_closed = false;
 	node.is_open = true;
-	set_visible(node)
+	replace_com_with_buffer(node)
+
 }
+
+function replace_com_with_buffer(node){
+
+	set_transparent(node)
+
+	// open the particle buffer from disk
+	if (node.buffer_size){
+		loadFFTREEKaitai(
+			node,
+			function (kaitai_format,node){
+				compileFFTREEData(kaitai_format,node);
+				/* TODO  have it create a particle mesh */
+				//createPartsMesh()
+		});
+	}
+}
+
 
 function closeNode(node,force=false){
 	// to avoid nodes opening/closing
@@ -122,8 +146,14 @@ function closeNode(node,force=false){
 	node.delay_close = 0;
 	node.is_closed = true;
 	node.is_open = false;
-	set_transparent(node)
-	parent = octree[node.name.slice(0,-2)]
+	free_buffer_and_show_com(node)
+
+}
+
+
+function free_buffer_and_show_com(node){
+
+	set_visible(node)
 
 }
 
