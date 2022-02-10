@@ -52,13 +52,13 @@ class BinaryWriter(object):
 
         ## size of the header, 2 32 bit ints and a 1 bit boolean
         header_size += 4 ## size of header
-        header_size += 4 ## velocity flag
+        header_size += 1 ## velocity flag
         header_size += 4 ## nparts 
         header_size += 4 ## nfields
         ## length of string as an int followed by the string
         ## each char gets 4 bytes for UTF-8 (ascii is just 1 byte tho)
         header_size += 4*self.nfields + 4*np.sum([len(field_name) for field_name in self.field_names]) 
-        header_size += 3*4*self.nfields ## filter, colormap, and radius flags
+        header_size += 3*self.nfields ## filter, colormap, and radius flags
 
         byte_size += self.write_int(handle,header_size) 
         ## boolean flag for whether there are velocities
@@ -85,7 +85,7 @@ class BinaryWriter(object):
         ##allow overload-- can send in and integer and/or an array of integers
         flag = np.array(flag,dtype=bool)
         handle.write(flag)
-        return 4*flag.size ## wow, so inefficient
+        return flag.size
     
     def write_int(self,handle,integer):
         arr = np.array(integer,dtype=np.int32)
@@ -131,7 +131,7 @@ class OctBinaryWriter(BinaryWriter):
     ## assumes we have already opened a handle-- we're
     ##  actually appending to a binary file
     ##  TODO: this could really mess up the octree streamer :\
-    def write(self,handle):
+    def write(self,handle=None):
         """
 seq:
   - id: octree_header
@@ -140,9 +140,15 @@ seq:
     type: node_data 
 types: 
     """
-        byte_size = 0
-        byte_size += self.write_header(handle)
-        byte_size += self.write_node(handle)
+        if handle is None:
+            with open(self.fname,'wb') as handle:
+                byte_size = 0
+                byte_size += self.write_header(handle)
+                byte_size += self.write_node(handle)
+        else:
+            byte_size = 0
+            byte_size += self.write_header(handle)
+            byte_size += self.write_node(handle)
         return byte_size
         
     def write_header(self,handle):
