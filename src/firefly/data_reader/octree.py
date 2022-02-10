@@ -338,8 +338,8 @@ class Octree(object):
                         node.buffer_coordss,
                         node.buffer_velss if hasattr(node,'buffer_velss') else None)
                     binary_writer.nparts = node.buffer_size
-                    binary_writer.nfields = node.nfields
-                    binary_writer.fields = node.buffer_fieldss
+                    binary_writer.nfields = node.nfields-3
+                    binary_writer.fields = np.array(node.buffer_fieldss)[:,:-3]
 
                     ## write the data to the open binary file and in so doing
                     ##  count the length in bytes of this node
@@ -458,9 +458,12 @@ class Octree(object):
                 if field_key != 'Masses': 
                     node_dict[field_key]/=weights
                 json_dict[field_key][node_index] = node_dict[field_key]
-            
+
+            if 'static' in path: path = path.split('static')[1][1:]
             if hasattr(node,'buffer_filename'):
-                node_dict['buffer_filename'] = node.buffer_filename
+                node_dict['buffer_filename'] = os.path.join(
+                    path,
+                    node.buffer_filename)
                 node_dict['buffer_size'] = node.buffer_size
                 node_dict['byte_offset'] = node.byte_offset
                 node_dict['byte_size'] = node.byte_size
