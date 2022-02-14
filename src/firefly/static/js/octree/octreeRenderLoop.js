@@ -22,8 +22,7 @@ function openCloseNodes(node){
 
 	// don't need to draw nodes that aren't on screen
 	if (!onscreen && !inside){
-		hideCoM(node);
-		free_buffer(node);
+		free_buffer(node,hideCoM);
 	}
 	// this node is too large, we should hide its CoM and show its children
 	else if (inside || too_big){  
@@ -34,14 +33,13 @@ function openCloseNodes(node){
 	}  
 	// this node is too small. we should hide each of its children *and* its CoM
 	else if (too_small){
-		hideCoM(node);
-		free_buffer(node);
+		free_buffer(node,hideCoM);
 		node.children.forEach(
 			function (child_name){hideCoM(node.octree[child_name])});
 	}
 	// this node is just right. let's show its CoM
 	else if (onscreen && !inside){
-		showCoM(node);
+		free_buffer(node,showCoM);
 		node.children.forEach(
 			function (child_name){openCloseNodes(node.octree[child_name])});
 	}
@@ -113,24 +111,6 @@ function hideCoM(node){
 	set_transparent(node)
 }
 
-function load_buffer(node){
-
-
-	/*
-	// open the particle buffer from disk
-	if (node.buffer_size){
-		loadFFTREEKaitai(
-			node,
-			function (kaitai_format,node){
-				compileFFTREEData(kaitai_format,node);
-				// TODO  have it create a particle mesh //
-				//createPartsMesh()
-		});
-	}
-	*/
-}
-
-
 function showCoM(node,force=false){
 	// to avoid nodes opening/closing
 	//  rapidly as the user moves the camera
@@ -146,10 +126,27 @@ function showCoM(node,force=false){
 	set_visible(node)
 }
 
+function load_buffer(node,callback){
 
-function free_buffer(node){
+	// open the particle buffer from disk
+	if (node.buffer_size){
+		loadFFTREEKaitai(
+			node,
+			function (kaitai_format,node){
+				compileFFTREEData(kaitai_format,node);
+				// TODO  have it create a particle mesh //
+				//createPartsMesh()
+				// TODO pass callback to hide/show CoM so it's only done
+				//  after we've loaded its particles and added them to the scene
+		});
+	}
+}
 
-
+function free_buffer(node,callback){
+	// TODO pass callback to show CoM so it's only done
+	//  after we've actually removed the particle mesh 
+	//  from the scene
+	callback(node);
 }
 
 function getScreenSize(node){

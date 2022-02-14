@@ -66,12 +66,8 @@ function loadFFTREEKaitai(node,callback){
 			binary_reader.onloadend = function () {
 				// convert ArrayBuffer to FireflyFormat
 				kaitai_stream = new KaitaiStream(binary_reader.result)
-				console.log(kaitai_stream)
-				debugger
 				kaitai_format = new FireflyOctnodeSubstring(
 					kaitai_stream);
-				console.log(kaitai_format)
-				debugger
 				// call compileFFLYData as a callback
 				callback(kaitai_format,node);
 			}
