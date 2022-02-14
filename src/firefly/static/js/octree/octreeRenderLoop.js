@@ -20,23 +20,26 @@ function openCloseNodes(node){
 	var too_small = checkTooSmall(node_size_pix);
 	var too_big = checkTooBig(node_size_pix);
 
-	/* ---- first, handle this node ---- */
+	// don't need to draw nodes that aren't on screen
 	if (!onscreen && !inside){
 		hideCoM(node);
+		free_buffer(node);
 	}
-	// node is too large, and at least partially on screen? want to replace with the buffer particles and the children
+	// this node is too large, we should hide its CoM and show its children
 	else if (inside || too_big){  
-		// if we haven't already opened this node let's open it 
 		hideCoM(node);
+		load_buffer(node);
 		node.children.forEach(
 			function (child_name){openCloseNodes(node.octree[child_name])});
 	}  
+	// this node is too small. we should hide each of its children *and* its CoM
 	else if (too_small){
 		hideCoM(node);
-		//evaluateFunctionOnOctreeNodes(hideCoM,node,octree)
+		free_buffer(node);
 		node.children.forEach(
 			function (child_name){hideCoM(node.octree[child_name])});
 	}
+	// this node is just right. let's show its CoM
 	else if (onscreen && !inside){
 		showCoM(node);
 		node.children.forEach(
@@ -46,19 +49,6 @@ function openCloseNodes(node){
 		console.log(onscreen,inside,too_small,too_big)
 		debugger
 	}
-
-	/* ---- alright, now we have to decide what to do with the children ---- */
-
-
-	/* ---- finish up with this node's direct children ---- */
-	// show the children's CoM particles
-	/*node.children.forEach(function (dc_child_name){
-		dc_child_node = octree[dc_child_name]
-		alphas[dc_child_node.node_index] = dc_alpha;
-		// TODO should read this from radius scale array
-		radiusScale[dc_child_node.node_index] = dc_radius; 
-	});
-	*/
 }
 
 function checkOnScreen(node){
@@ -120,12 +110,11 @@ function hideCoM(node){
 	node.delay_close = 0;
 	node.is_closed = false;
 	node.is_open = true;
-	replace_com_with_buffer(node)
+	set_transparent(node)
 }
 
-function replace_com_with_buffer(node){
+function load_buffer(node){
 
-	set_transparent(node)
 
 	/*
 	// open the particle buffer from disk
@@ -154,13 +143,12 @@ function showCoM(node,force=false){
 	node.delay_close = 0;
 	node.is_closed = true;
 	node.is_open = false;
-	free_buffer_and_show_com(node)
+	set_visible(node)
 }
 
 
-function free_buffer_and_show_com(node){
+function free_buffer(node){
 
-	set_visible(node)
 
 }
 
