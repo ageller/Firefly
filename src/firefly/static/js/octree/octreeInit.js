@@ -13,7 +13,7 @@ function abg_initOctree(pkey,data){
 
 		node.pkey = pkey;
 		node.octree = viewerParams.parts[pkey].octree
-		node.radius = 10*node.width/(1+node.refinement/8);
+		//node.radius = 10*node.width;
 		//node.radius = 1e3*(1+node.refinement/8)*node.npoints/1e3;
 		viewerParams.parts[pkey].SmoothingLength[node.node_index] = node.radius;
 

@@ -409,6 +409,10 @@ class Octree(object):
 
         num_nodes = len(self.node_list)
 
+        npoints = np.array([node.npoints for node in self.node_list])
+        high_rscale = np.log10(np.percentile(npoints,95))
+        low_rscale = np.percentile(np.log10(npoints),10)
+
         json_dict = {
             #'header':flag_dict,
             ##'node_arrays':node_arrays,
@@ -474,6 +478,9 @@ class Octree(object):
 
             json_dict['Coordinates_flat'][3*node_index:3*(node_index+1)] = com
 
+            node_dict['radius'] = 5*node_dict['width'] * np.clip(
+                (np.log10(node_dict['npoints']) - low_rscale)/
+                (high_rscale-low_rscale), 0.1, 1)
             node_dict['node_index'] = node_index
             json_dict['octree'][node.name] = node_dict
             node_index+=1
