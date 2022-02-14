@@ -8,12 +8,6 @@ function abg_updateOctree(pkey){
 	//console.log(containsPoint((0,0,0)),containsPoint((-1,-1,-1)));
 	octree = viewerParams.parts[pkey].octree;
 	openCloseNodes(octree['']);
-	evaluateFunctionOnOctreeNodes(
-		function (node){
-			if (node.children.length) set_transparent(node);
-			else set_visible(node);},
-		octree[''],
-		octree)
 }
 
 function openCloseNodes(node){
@@ -27,21 +21,34 @@ function openCloseNodes(node){
 	var too_big = checkTooBig(node_size_pix);
 
 	/* ---- first, handle this node ---- */
-	if (!onscreen && !inside || too_small){
-		if (!node.is_closed) closeNode(node);
+	if (!onscreen && !inside){
+		hideCoM(node);
 	}
 	// node is too large, and at least partially on screen? want to replace with the buffer particles and the children
 	else if (inside || too_big){  
 		// if we haven't already opened this node let's open it 
-		if (!node.is_open) openNode(node);
+		hideCoM(node);
+		node.children.forEach(
+			function (child_name){openCloseNodes(node.octree[child_name])});
 	}  
-
-
+	else if (too_small){
+		hideCoM(node);
+		//evaluateFunctionOnOctreeNodes(hideCoM,node,octree)
+		node.children.forEach(
+			function (child_name){hideCoM(node.octree[child_name])});
+	}
+	else if (onscreen && !inside){
+		showCoM(node);
+		node.children.forEach(
+			function (child_name){openCloseNodes(node.octree[child_name])});
+	}
+	else {
+		console.log(onscreen,inside,too_small,too_big)
+		debugger
+	}
 
 	/* ---- alright, now we have to decide what to do with the children ---- */
 
-	node.children.forEach(
-		function (child_name){openCloseNodes(node.octree[child_name])});
 
 	/* ---- finish up with this node's direct children ---- */
 	// show the children's CoM particles
@@ -91,17 +98,17 @@ function checkInside(node){
 }
 
 function checkTooSmall(node_size_pix){
-	return (node_size_pix < viewerParams.renderWidth/16 || // too thin
-		node_size_pix < viewerParams.renderHeight/16);// too short
+	return (node_size_pix < viewerParams.renderWidth/32 || // too thin
+		node_size_pix < viewerParams.renderHeight/32);// too short
 
 }
 
 function checkTooBig(node_size_pix){
-	return (node_size_pix > viewerParams.renderWidth/16 ||// too wide
-		node_size_pix > viewerParams.renderHeight/16); // too tall
+	return (node_size_pix > viewerParams.renderWidth/8 ||// too wide
+		node_size_pix > viewerParams.renderHeight/8); // too tall
 }
 
-function openNode(node){
+function hideCoM(node){
 	// to avoid nodes opening/closing
 	//  rapidly as the user moves the camera
 	//  we'll require that the conditions for
@@ -114,27 +121,28 @@ function openNode(node){
 	node.is_closed = false;
 	node.is_open = true;
 	replace_com_with_buffer(node)
-
 }
 
 function replace_com_with_buffer(node){
 
 	set_transparent(node)
 
+	/*
 	// open the particle buffer from disk
 	if (node.buffer_size){
 		loadFFTREEKaitai(
 			node,
 			function (kaitai_format,node){
 				compileFFTREEData(kaitai_format,node);
-				/* TODO  have it create a particle mesh */
+				// TODO  have it create a particle mesh //
 				//createPartsMesh()
 		});
 	}
+	*/
 }
 
 
-function closeNode(node,force=false){
+function showCoM(node,force=false){
 	// to avoid nodes opening/closing
 	//  rapidly as the user moves the camera
 	//  we'll require that the conditions for
@@ -147,7 +155,6 @@ function closeNode(node,force=false){
 	node.is_closed = true;
 	node.is_open = false;
 	free_buffer_and_show_com(node)
-
 }
 
 
