@@ -4,13 +4,73 @@ function containsPoint(t){
 	for(let n=0;n<6;n++) if (e[n].distanceToPoint(t)<0) return false; return true;
 }
 
-function abg_updateOctree(pkey){
-	//console.log(containsPoint((0,0,0)),containsPoint((-1,-1,-1)));
+function updateOctree(){
+
+	//  check if we can draw a new node
+	if (!viewerParams.octree.waitingToDraw && viewerParams.octree.toDraw.length > 0 ) drawNextOctreeNode();
+
+	// check if we can remove  a node
+	if (!viewerParams.octree.waitingToRemove && viewerParams.octree.toRemove.length > 0) removeNextOctreeNode();
+
+	//check and remove duplicates from scene (I don't know why this happens)
+	//also perform a few other updates
+	//if (viewerParams.octree.drawPass % 50 == 0) {
+		//removeDuplicatesFromScene();
+		//updateOctreeLoadingBar(); //in case this doesn't get updated properly during the draw loop (can be 1 or 2 off after last draw in completed)
+	//}
+
+	
+	//rather than a for loop to go through the particles, I am going to manually iterate so that I can draw from one each draw pass
+	//this way the scene gets filled in more regularly, instead of filling in one particle group at a time
+	var pkey = viewerParams.partsKeys[viewerParams.octree.pIndex];
 	octree = viewerParams.parts[pkey].octree;
+
 	openCloseNodes(octree['']);
+
+	//if we are done drawing, check if we should adjust the number of particles further see if I need to reduce the particles even further
+	/*
+	if (viewerParams.octree.toRemove.length == 0 && 
+		viewerParams.octree.toReduce.length == 0){
+		if (viewerParams.memoryUsage > viewerParams.octree.memoryLimit) viewerParams.octree.NParticleMemoryModifierFac = THREE.Math.clamp(viewerParams.octree.NParticleMemoryModifierFac/2., 0, 1.);
+		// we have to draw fewer particles / node
+
+		if (viewerParams.memoryUsage < viewerParams.octree.memoryLimit && viewerParams.octree.toDraw.length == 0) {
+			viewerParams.octree.NParticleMemoryModifierFac = THREE.Math.clamp(viewerParams.octree.NParticleMemoryModifierFac*2., 0, 1.);
+			viewerParams.octree.NParticleMemoryModifier = THREE.Math.clamp(viewerParams.octree.NParticleMemoryModifierFac*viewerParams.octree.memoryLimit/viewerParams.memoryUsage, 0., 1.);
+			d3.select('#decimationOctreeSpan').text((1./viewerParams.octree.NParticleMemoryModifier).toFixed(1))
+
+		}// we can draw more particles / node
+	}
+	*/
+
+	//increment the draw pass
+	//viewerParams.octree.drawPass += 1;
+
+	//prioritization
+	//  use only one array, don't need toDraw and toDrawIDs if everything
+	//  uses one or the other
+	//prioritizeOctreeDrawList(toDraw, toDrawIDs);
+	//prioritizeOctreeReduceList(toReduce, toReduceIDs);
+	//prioritizeOctreeRemoveList();
+
+	// move to the next particle type
+	updateOctreePindex();
 }
 
 function openCloseNodes(node){
+	//adjust the draw range based on GUI sliders
+	/*
+	var nparts = THREE.Math.clamp(
+		node.NparticlesToRender*viewerParams.plotNmax[p]/100.*(1./viewerParams.decimate),
+		0,
+		node.particles.Coordinates.length);
+
+	obj.geometry.setDrawRange( 0, nparts); //is this giving me an error sometimes?
+
+	//reset the point size
+	obj.material.uniforms.octreePointScale.value = node.particleSizeScale;
+	obj.material.needsUpdate = true;
+	*/
 
 	// find the node size in pixels and then compare to the 
 	//  size of the window
@@ -20,29 +80,48 @@ function openCloseNodes(node){
 	var too_small = checkTooSmall(node_size_pix);
 	var too_big = checkTooBig(node_size_pix);
 
-	// don't need to draw nodes that aren't on screen
+	// don't need to draw nodes that aren't on screen 
 	if (!onscreen && !inside){
+		node.state = 'off screen';
+		node.current_state = 'remove';
 		free_buffer(node,hideCoM);
 	}
-	// this node is too large, we should hide its CoM and show its children
+	// this node is too large, we should hide its CoM and (maybe) show its children
 	else if (inside || too_big){  
-		hideCoM(node);
-		load_buffer(node);
-		node.children.forEach(
-			function (child_name){openCloseNodes(node.octree[child_name])});
+		node.state = 'inside or too big';
+		node.current_state = 'draw';
+		load_buffer(node,
+			function (this_node){
+				hideCoM(this_node);
+				this_node.children.forEach(
+					function (child_name){openCloseNodes(node.octree[child_name])});
+			});
 	}  
 	// this node is too small. we should hide each of its children *and* its CoM
 	else if (too_small){
-		free_buffer(node,hideCoM);
-		node.children.forEach(
-			function (child_name){hideCoM(node.octree[child_name])});
+		node.state = 'too small';
+		node.current_state = 'remove';
+		free_buffer(node,
+			function (this_node){
+				this_node.children.forEach(
+					function (child_name){free_buffer(node.octree[child_name],hideCoM)});
+				hideCoM(this_node)
+			});
 	}
-	// this node is just right. let's show its CoM
+	// this node is just right. let's check if we should do anything
+	//  to its children
 	else if (onscreen && !inside){
-		free_buffer(node,showCoM);
+		node.state = 'just right';
+		node.current_state = 'draw'
+		// if we aren't already, let's show the CoM
+		if (!node.com_shown) showCoM(node);
+
+		// check if any of the children also need to be opened/closed
 		node.children.forEach(
 			function (child_name){openCloseNodes(node.octree[child_name])});
 	}
+	// I don't think it is actually possible to get into here but if we do
+	//  I want to know about it
 	else {
 		console.log(onscreen,inside,too_small,too_big)
 		debugger
@@ -88,7 +167,6 @@ function checkInside(node){
 function checkTooSmall(node_size_pix){
 	return (node_size_pix < viewerParams.renderWidth/32 || // too thin
 		node_size_pix < viewerParams.renderHeight/32);// too short
-
 }
 
 function checkTooBig(node_size_pix){
@@ -97,56 +175,65 @@ function checkTooBig(node_size_pix){
 }
 
 function hideCoM(node){
-	// to avoid nodes opening/closing
-	//  rapidly as the user moves the camera
-	//  we'll require that the conditions for
-	//  opening/closing be true for at least 30 frames
-	node.delay_open++;
-	if (node.delay_open < -1){
-		return;}
-	node.delay_open = 0;
-	node.delay_close = 0;
-	node.is_closed = false;
-	node.is_open = true;
-	set_transparent(node)
+	mesh = viewerParams.partsMesh[node.pkey][0];
+	if (viewerParams.debug) node.octbox.visible = false;
+	mesh.geometry.attributes.radiusScale.array[node.node_index] = 0;
+	mesh.geometry.attributes.alpha.array[node.node_index] = 0;
+
+	mesh.geometry.attributes.radiusScale.needsUpdate = true;
+	mesh.geometry.attributes.alpha.needsUpdate = true;
+	node.com_shown = false;
 }
 
-function showCoM(node,force=false){
-	// to avoid nodes opening/closing
-	//  rapidly as the user moves the camera
-	//  we'll require that the conditions for
-	//  opening/closing be true for at least 30 frames
-	node.delay_close++;
-	if (node.delay_close < -1 && !force){
-		return;}
-	node.delay_open = 0;
-	node.delay_close = 0;
-	node.is_closed = true;
-	node.is_open = false;
-	set_visible(node)
+function showCoM(node){
+	mesh = viewerParams.partsMesh[node.pkey][0];
+	if (viewerParams.debug) node.octbox.visible = true;
+	mesh.geometry.attributes.radiusScale.array[node.node_index] = node.radius;//1e4;
+
+	mesh.geometry.attributes.alpha.array[node.node_index] = 1;
+	mesh.geometry.attributes.radiusScale.needsUpdate = true;
+	mesh.geometry.attributes.alpha.needsUpdate = true;
+	node.com_shown = true;
 }
 
-function load_buffer(node,callback){
+function load_buffer(node,callback,skip_queue=true){
+	if (skip_queue) return drawOctreeNode(node, callback);	
 
-	// open the particle buffer from disk
-	if (node.buffer_size){
-		loadFFTREEKaitai(
-			node,
-			function (kaitai_format,node){
-				compileFFTREEData(kaitai_format,node);
-				// TODO  have it create a particle mesh //
-				//createPartsMesh()
-				// TODO pass callback to hide/show CoM so it's only done
-				//  after we've loaded its particles and added them to the scene
-		});
-	}
+	// add to the draw list, only when there are available slots in toDraw and when memory usage is low enough
+	if (
+		node.buffer_size > 0 &&// node has particles to be drawn
+		viewerParams.memoryUsage < viewerParams.octree.memoryLimit && // we have enough memory
+		//toDrawIDs.length < viewerParams.octree.maxFilesToRead && 
+		!node.drawn && // not already in the scene
+		viewerParams.showParts[node.pkey] &&  // particle group is visible
+		!viewerParams.octree.toDraw.includes([node, callback]) // not already in the list
+		) { 
+
+		// double check the object isn't already in the scene, to really prevent
+		//  duplicates, also may consider drawing only a fraction of the particles
+		var obj = viewerParams.scene.getObjectByName(node.obj_name);
+
+		// need to create a new mesh for this node
+		if ( !obj ) viewerParams.octree.toDraw.push([ node, callback]);
+	} 
+	else callback(node);
 }
 
-function free_buffer(node,callback){
-	// TODO pass callback to show CoM so it's only done
-	//  after we've actually removed the particle mesh 
-	//  from the scene
-	callback(node);
+function free_buffer(node,callback,skip_queue=false){
+	if (skip_queue) return removeOctreeNode(node,callback);
+
+	var obj = viewerParams.scene.getObjectByName(node.obj_name);
+
+	if (
+		obj && 
+		//viewerParams.octree.toRemove.length < viewerParams.octree.maxToRemove && 
+		//node.particles.Coordinates.length > Math.floor(node.Nparticles*viewerParams.octree.minFracParticlesToDraw[p]) && 
+		!viewerParams.octree.toRemove.includes([node, callback]) && 
+		!viewerParams.octree.waitingToAddToRemove
+		) {
+			viewerParams.octree.toRemove.push([node,callback]); 
+		}
+	else callback(node);
 }
 
 function getScreenSize(node){
@@ -173,7 +260,7 @@ function getScreenSize(node){
 }
 
 	
-function updateOctree(){
+function amg_updateOctree(){
 
 	//FPS and memoryUsage updated in main render loop of update_framerate
 	//if (viewerParams.FPS < viewerParams.octree.targetFPS) console.log('!!! WARNING, low fps', viewerParams.FPS)
@@ -193,227 +280,48 @@ function updateOctree(){
 	// 	viewerParams.octree.NParticleMemoryModifier = THREE.Math.clamp(viewerParams.octree.NParticleMemoryModifier*1.1, 0., 1.);
 	// }
 
-	//tweak the number of particles based on the fps
-	//not sure what limits I should set here
-	//viewerParams.octree.NParticleFPSModifier = Math.round(Math.max(0.01, Math.min(1., viewerParams.FPS/viewerParams.octree.targetFPS))*10.)/10.;
-
-	//check if we can draw a new node
-	if (!viewerParams.octree.waitingToDraw && viewerParams.octree.toDraw.length > 0 && viewerParams.octree.toDrawIDs[0] != viewerParams.octree.lastDrawnID) {
-		drawNextOctreeNode();
-	}
-
-	//check if we can reduce the particles of a node
-	if (!viewerParams.octree.waitingToReduce && viewerParams.octree.toReduce.length > 0){
-		reduceNextOctreeNode();
-	}
-
-	//check if we can remove  a node
-	if (!viewerParams.octree.waitingToRemove && viewerParams.octree.toRemove.length > 0){
-		removeNextOctreeNode();
-	}
-
-
-	//check and remove duplicates from scene (I don't know why this happens)
-	//also perform a few other updates
-	if (viewerParams.octree.drawPass % 50 == 0) {
-		removeDuplicatesFromScene();
-		updateOctreeLoadingBar(); //in case this doesn't get updated properly during the draw loop (can be 1 or 2 off after last draw in completed)
-	}
-
-
-	//check if the object is in view (if not, we won't draw and can remove; though note that this will not pick up new nodes that shouldn't be drawn)
+	//update the camera to check if the object is in view (if not, we won't draw and can remove; though note that this will not pick up new nodes that shouldn't be drawn)
 	//https://github.com/mrdoob/three.js/issues/15339
 	viewerParams.camera.updateMatrix();
 	viewerParams.camera.updateMatrixWorld();
 	viewerParams.frustum.setFromProjectionMatrix(new THREE.Matrix4().multiplyMatrices(viewerParams.camera.projectionMatrix, viewerParams.camera.matrixWorldInverse));  
-
-
-	//rather than a for loop to go through the particles, I am going to manually iterate so that I can draw from one each draw pass
-	//this way the scene gets filled in more regularly, instead of filling in one particle group at a time
-	var p = viewerParams.partsKeys[viewerParams.octree.pIndex];
-
-	//save the draw list for this render pass so that I can place it at the correct priority in the main list
-	var toDraw = [];
-	var toDrawIDs = [];
-	viewerParams.octree.NUpdate = 0;
-
-	var toReduce = [];
-	var toReduceIDs = [];
-
-	if (!viewerParams.octree.waitingToAddToRemove){
-		viewerParams.octree.toRemoveTmp = [];
-		viewerParams.octree.toRemoveTmpIDs = [];
-	}
-
-	//first get all the sizes and distances and sort
-	var toSort = []
-	var indices = []
-	if (viewerParams.octree.nodes.hasOwnProperty(p)){
-		viewerParams.octree.loadingCount[p] = [0,0]; //reset here and will will be updated in setNodeDrawParams
-		viewerParams.octree.nodes[p].forEach(function(node,i){
-			setNodeDrawParams(node);
-
-			var NRenderDiff = viewerParams.octree.drawPass - node.drawPass;
-			var NPartsDiff = Math.max(node.NparticlesToRender - node.particles.Coordinates.length, 1.);
-			toSort.push(node.cameraDistance/(NRenderDiff*NRenderDiff)/NPartsDiff);
-			indices.push(i);
-		});
-		//sort from big to small
-		//indices.sort(function (a, b) { return toSort[a] > toSort[b] ? -1 : toSort[a] < toSort[b] ? 1 : 0; });
-		//sort from small to big
-		indices.sort(function (a, b) { return toSort[a] < toSort[b] ? -1 : toSort[a] > toSort[b] ? 1 : 0; });
-
-		indices.forEach(function(index, ii){
-			var drawFrac = THREE.Math.clamp(viewerParams.octree.loadingCount[p][1]/viewerParams.octree.loadingCount[p][0], 0, 1);	
-			var node = viewerParams.octree.nodes[p][index];
-			var obj = viewerParams.scene.getObjectByName(p+node.id);
-
-			if (viewerParams.octree.drawPass > viewerParams.partsKeys.length){
-
-				//remove any nodes that are out of the screen from the toDraw and toReduce lists
-				if (node.screenSize < viewerParams.octree.minNodeScreenSize || !node.inView){
-					var index = viewerParams.octree.toDrawIDs.indexOf(p+node.id);
-					if (index >= 0){
-						viewerParams.octree.toDrawIDs.splice(index,1);
-						viewerParams.octree.toDraw.splice(index,1);
-					}
-
-					var index = viewerParams.octree.toReduceIDs.indexOf(p+node.id);
-					if (index >= 0){
-						viewerParams.octree.toReduceIDs.splice(index,1);
-						viewerParams.octree.toReduce.splice(index,1);
-					}
-				}				
-
-				//adjust particles that are already drawn (I want this to work every time and on all nodes)
-				if (obj){
-
-					//identify existing nodes for removal
-					if (node.screenSize < viewerParams.octree.minNodeScreenSize || !node.inView){
-						if (viewerParams.octree.toRemoveTmp.length < viewerParams.octree.maxToRemove && node.particles.Coordinates.length > Math.floor(node.Nparticles*viewerParams.octree.minFracParticlesToDraw[p]) && !viewerParams.octree.toRemoveIDs.includes(p+node.id) && !viewerParams.octree.waitingToAddToRemove){
-							//console.log('removing node', p, node.id, node.Nparticles, node.NparticlesToRender, node.particles.Coordinates.length, node.screenSize, node.inView)
-							viewerParams.octree.toRemoveTmp.push([p, node.id]); //will be removed later
-							viewerParams.octree.toRemoveTmpIDs.push(p+node.id);
-						}
-					}
-
-
-					//identify existing nodes to modify 
-					if (node.screenSize >= viewerParams.octree.minNodeScreenSize && node.inView){
-
-						//remove from the toRemove list(s)
-						if (viewerParams.octree.toRemoveIDs.includes(p+node.id)){
-							var index = viewerParams.octree.toRemoveIDs.indexOf(p+node.id);
-							viewerParams.octree.toRemoveIDs.splice(index,1);
-							viewerParams.octree.toRemove.splice(index,1);
-						}
-						if (viewerParams.octree.toRemoveTmpIDs.includes(p+node.id)){
-							var index = viewerParams.octree.toRemoveTmpIDs.indexOf(p+node.id);
-							viewerParams.octree.toRemoveTmpIDs.splice(index,1);
-							viewerParams.octree.toRemoveTmp.splice(index,1);
-						}
-
-						//possibly remove from the toReduce list
-						if (viewerParams.octree.toReduceIDs.includes(p+node.id) && node.particles.NparticlesToRender >= (node.particles.Coordinates.length - viewerParams.octree.minDiffForUpdate)){
-							var index = viewerParams.octree.toReduceIDs.indexOf(p+node.id);
-							viewerParams.octree.toReduceIDs.splice(index,1);
-							viewerParams.octree.toReduce.splice(index,1);							
-						}
-
-						//reduce in number
-						//should I remove the particles from memory? (or maybe I should leave them to allow for smoother interaction with GUI?)
-						if (!viewerParams.octree.toReduceIDs.includes(p+node.id) && !viewerParams.octree.toRemoveIDs.includes(p+node.id) && !viewerParams.octree.toRemoveTmpIDs.includes(p+node.id) && toReduceIDs.length < viewerParams.octree.maxToReduce && (node.particles.Coordinates.length - node.NparticlesToRender) > viewerParams.octree.minDiffForUpdate) {
-							//console.log('reducing node', p, node.id, node.Nparticles, node.NparticlesToRender, node.particles.Coordinates.length, node.particles.Coordinates.length - node.NparticlesToRender)
-							toReduce.push([p, node.id]); //will be reduced later
-							toReduceIDs.push(p+node.id);
-						} 
-
-						//adjust the draw range based on GUI sliders
-						var nparts = THREE.Math.clamp(node.NparticlesToRender*viewerParams.plotNmax[p]/100.*(1./viewerParams.decimate), 0, node.particles.Coordinates.length);
-						obj.geometry.setDrawRange( 0, nparts); //is this giving me an error sometimes?
-
-						//reset the point size
-						obj.material.uniforms.octreePointScale.value = node.particleSizeScale;
-						obj.material.needsUpdate = true;
-
-
-					} 
-				}
-			}
-
-			//add to the draw list, only when there are available slots in toDraw and when memory usage is low enough
-			if (toDrawIDs.length < viewerParams.octree.maxFilesToRead && !viewerParams.octree.toRemoveIDs.includes(p+node.id) && !viewerParams.octree.toRemoveTmpIDs.includes(p+node.id) && !viewerParams.octree.toReduceIDs.includes(p+node.id) && !toReduceIDs.includes(p+node.id) && viewerParams.showParts[p] && viewerParams.memoryUsage < viewerParams.octree.memoryLimit && node.inView && node.NparticlesToRender > 0) {
-
-				//new nodes
-				if (!obj && node.screenSize >= viewerParams.octree.minNodeScreenSize){
-					//console.log('drawing node', p, node.id, node.NparticlesToRender, node.Nparticles, node.particles.Coordinates.length, node.screenSize, node.inView)
-					toDraw.push([p, node.id, false]);
-					toDrawIDs.push(p+node.id);
-
-				}
-				
-				//existing node that needs more particles
-				if (obj && toDrawIDs.length < viewerParams.octree.maxFilesToRead && (node.NparticlesToRender - node.particles.Coordinates.length) > viewerParams.octree.minDiffForUpdate && viewerParams.octree.NUpdate < viewerParams.octree.maxUpdatesPerDraw&& !toDrawIDs.includes(p+node.id)){
-					//console.log('updating node', p, node.id, node.Nparticles, node.NparticlesToRender, node.particles.Coordinates.length, node.screenSize, node.inView, node.drawPass, viewerParams.octree.drawPass)
-					toDraw.push([p, node.id, true]); //will be updated later
-					toDrawIDs.push(p+node.id);
-					viewerParams.octree.NUpdate += 1
-
-				} 
-
-			}
-
-
-		})
-
-	}
-
-
-	//if we are done drawing, check if we should adjust the number of particles further see if I need to reduce the particles even further
-	if (viewerParams.octree.toRemove.length == 0 && viewerParams.octree.toReduce.length == 0){
-		if (viewerParams.memoryUsage > viewerParams.octree.memoryLimit) viewerParams.octree.NParticleMemoryModifierFac = THREE.Math.clamp(viewerParams.octree.NParticleMemoryModifierFac/2., 0, 1.);
-		if (viewerParams.memoryUsage < viewerParams.octree.memoryLimit && viewerParams.octree.toDraw.length == 0) {
-			viewerParams.octree.NParticleMemoryModifierFac = THREE.Math.clamp(viewerParams.octree.NParticleMemoryModifierFac*2., 0, 1.);
-			viewerParams.octree.NParticleMemoryModifier = THREE.Math.clamp(viewerParams.octree.NParticleMemoryModifierFac*viewerParams.octree.memoryLimit/viewerParams.memoryUsage, 0., 1.);
-			d3.select('#decimationOctreeSpan').text((1./viewerParams.octree.NParticleMemoryModifier).toFixed(1))
-
-		}
-	}
-
-	//increment the draw pass
-	viewerParams.octree.drawPass += 1;
-
-	//prioritization
-	prioritizeOctreeDrawList(toDraw, toDrawIDs);
-	prioritizeOctreeReduceList(toReduce, toReduceIDs);
-	prioritizeOctreeRemoveList();
-
-	//move to the next particle type
-	updateOctreePindex();
-	
 }
 
+
 function drawNextOctreeNode(){
-	//take the next in line to draw
-	viewerParams.octree.lastDrawnID = viewerParams.octree.toDrawIDs[0]; //trying to stop multiple draws!
+
+	// take the next in line to draw
+	var tuple = viewerParams.octree.toDraw.shift(); // shift takes the first element, pop does the last
+
+	// unpack the tuple manually
+	var node = tuple[0];
+	var callback = tuple[1];
+	
+	// if the node is already drawn but was somehow added to the list 
+	//  we'll just skip it rather than move to the next element
+	//  better luck next time!
+	if (node.drawn || node.current_state != 'draw') return callback(node);
 
 	viewerParams.octree.waitingToDraw = true;
-	var arr = viewerParams.octree.toDraw[0];
-	var p = arr[0];
-	var iden = arr[1];
-	var updateGeo = arr[2];
-	var node = null;
-	if (p){
-		viewerParams.octree.nodes[p].forEach(function(n){
-			if (n.id == iden) node = n;
-		})
-	}
-	//console.log('drawing ',p, iden)
+	drawOctreeNode(node, callback);	
+}
 
-	viewerParams.octree.toDraw.shift();
-	viewerParams.octree.toDrawIDs.shift();
+function removeNextOctreeNode(){
+	//work from the back of the array (since prioritized by the most important to view)
+	//viewerParams.octree.waitingToRemove = true;
+	var tuple = viewerParams.octree.toRemove.pop();
+	var node = tuple[0];
+	var callback = tuple[1];
 
-	if (node) drawOctreeNode(node, updateGeo);	
+	var obj = viewerParams.scene.getObjectByName(node.obj_name);
+
+	// if the node was already removed  
+	//  or since it was added to the list it was added to the draw list
+	//  then skip it
+	//  better luck next time!
+	if (!obj || node.current_state != 'remove') return callback(node);
+
+	removeOctreeNode(node,callback)
 }
 
 function reduceNextOctreeNode(){
@@ -436,31 +344,6 @@ function reduceNextOctreeNode(){
 
 	viewerParams.octree.toReduce.pop();
 	viewerParams.octree.toReduceIDs.pop();
-}
-
-function removeNextOctreeNode(){
-	//work from the back of the array (since prioritized by the most important to view)
-	viewerParams.octree.waitingToRemove = true;
-	var i = viewerParams.octree.toRemove.length - 1;
-	var arr = viewerParams.octree.toRemove[i];
-	var p = arr[0];
-	var iden = arr[1];
-	var obj = viewerParams.scene.getObjectByName(p+iden);
-	var node = null;
-	viewerParams.octree.nodes[p].forEach(function(n){
-		if (n.id == iden) node = n;
-	})
-	//console.log('removing', p, iden);
-
-	if (node && obj){
-		//swap geometry for the minimum number of particles to show
-		node.NparticlesToRender = Math.floor(node.Nparticles*viewerParams.octree.minFracParticlesToDraw[p]);
-		reduceOctreeParticles(node, node.NparticlesToRender, true, resetWaitingToRemove);
-	}
-
-	viewerParams.octree.toRemove.pop();
-	viewerParams.octree.toRemoveIDs.pop();
-	viewerParams.octree.waitingToAddToRemove = false;
 }
 
 function prioritizeOctreeDrawList(toDraw, toDrawIDs){

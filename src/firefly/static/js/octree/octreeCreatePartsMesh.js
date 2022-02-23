@@ -1,43 +1,50 @@
-function addOctreeParticlesToScene(p, parts, name, start, end, minPointSize=viewerParams.octree.defaultMinParticleSize, octreePointScale=1., updateGeo=false){
+function addOctreeParticlesToScene(
+	node, 
+	start, end, 
+	minPointSize=viewerParams.octree.defaultMinParticleSize, 
+	octreePointScale=1.){
+
 	//I can use the start and end values to define how many particles to add to the mesh,
 	//  but first I want to try limitting this in the shader with maxToRender.  That may be quicker than add/removing meshes.
 
 	viewerParams.octree.drawStartTime = new Date().getTime()/1000;
 	if (end - start > 0){
 
-		//geometry
-		var geo = createParticleGeometry(p, parts, start, end);
+		// create a geometry very eager like. might attach to a mesh
+		//  that exists, might make a whole new mesh, who can say.
+		var geo = createParticleGeometry(node.pkey, node.particles, start, end);
 
-		var maxN = end - start;
+		var obj = viewerParams.scene.getObjectByName(node.obj_name);
 
-		if (updateGeo){
-			//update the geometry in the mesh
-			var obj = viewerParams.scene.getObjectByName(name);
-			if (obj){
-				obj.geometry = geo;
-				obj.geometry.needsUpdate = true;
-			}
-
-		} else {
+		// replace the geometry in the existing mesh, we'd want to do this if we've loaded additional
+		//  particles since last drawing this node (in the case where we are only drawing a subset of the 
+		//  particles. We'll assume that the new particles are appended to the back of the list and we'll 
+		//  replace the geometry in the mesh with this new expanded geometry.)
+		if (obj) {
+			obj.geometry = geo; 
+			obj.geometry.needsUpdate = true;}
+		// have to create a whole mesh for this geometry
+		else {
 	
-			//material
-			var material = createParticleMaterial(p, minPointSize, octreePointScale);
-
+			// var she blows, a brand new mesh
+			var material = createParticleMaterial(node.pkey, minPointSize, octreePointScale);
 			var mesh = new THREE.Points(geo, material);
-			mesh.name = name;
-			mesh.position.set(0,0,0);
 
+			// name this bad larry so we can find it later using scene.getObjectByName
+			mesh.name = node.obj_name;
+			mesh.position.set(0,0,0); //  <--- what is this? 
+
+			// add to the scene and keep track in the partsMesh array
 			viewerParams.scene.add(mesh);
-			viewerParams.partsMesh[p].push(mesh);
-
+			viewerParams.partsMesh[node.pkey].push(mesh);
 		}
 	}
 
-
+	// finish up, make a record of the draw, free up the queue to draw again
+	//  and increment the loading bar
 	viewerParams.octree.drawCount += 1;
-	updateOctreeLoadingBar();
-
 	viewerParams.octree.waitingToDraw = false;
+	updateOctreeLoadingBar();
 
 }
 
@@ -62,45 +69,48 @@ function reduceOctreeParticles(node, N = null, recreateGeo = false, callback = n
 
 }
 
-function drawOctreeNode(node, updateGeo=false){
+function drawOctreeNode(node, callback){
+
+	// prevent the node from being added to the toDraw list again
+	node.drawn = true;
+	var start = 0;
+	var end = node.buffer_size;
+	var minSize = 100;//viewerParams.octree.defaultMinParticleSize;
+	var sizeScale = 1000;//node.particleSizeScale;
+
+	//read in the file, and then draw the particles
+	loadFFTREEKaitai( node,
+	function (kaitai_format,node){
+		// fill node with formatted data
+		compileFFTREEData(kaitai_format,node);
+
+		if (node.state != 'inside or too big' && node.state != 'just right'){
+			debugger
+			console.log(node.obj_name,node.state,node.particles)}
+
+		// create the mesh and add it to the scene
+		addOctreeParticlesToScene(
+			node,
+			start, end,
+			minSize, sizeScale);
+		node.drawn = true;
+		node.drawPass = viewerParams.octree.drawPass;
+
+		// finish by executing the callback
+		callback(node);
+	});
+}
+
+function removeOctreeNode(node,callback){
+		obj.geometry.dispose();
+		obj.material.dispose();
+		viewerParams.scene.remove(obj);
+		console.log(viewerParams.partsMesh[node.pkey].length);
+		viewerParams.partsMesh[node.pkey].splice(obj.partsMeshIndex,1) // remove this partsmesh
+		console.log(viewerParams.partsMesh[node.pkey].length);
+		node.drawn=false;
 	
-	var name = node.particleType + node.id;
-
-	var doDraw = true;
-	//one final check to see if the node is already in the scene
-	viewerParams.scene.traverse(function(obj){
-		if (obj.name == name) doDraw = false;
-	})
-
-	if (doDraw || updateGeo){
-		node.drawn = false;
-		var start = 0;
-		var end = node.NparticlesToRender;
-		var minSize = viewerParams.octree.defaultMinParticleSize;
-		var sizeScale = node.particleSizeScale;
-		var name = node.particleType + node.id;
-
-		if (node.hasOwnProperty('particles')){
-			if (node.particles.Coordinates.length >= node.NparticlesToRender){
-				addOctreeParticlesToScene(node.particleType, node.particles, name, start, end, minSize, sizeScale, updateGeo);
-				node.drawn = true;
-				node.drawPass = viewerParams.octree.drawPass;
-			}
-		}
-
-		if (!node.drawn){
-			//read in the file, and then draw the particles
-			d3.csv(node.filename,function(d) {
-				//console.log('checking parts',node.particleType, node.filename)
-				//reformat this to the usual Firefly structure with Coordinates as a list of lists
-				node.particles = formatOctreeCSVdata(d.slice(0,node.NparticlesToRender), node.particleType);
-				addOctreeParticlesToScene(node.particleType, node.particles, name, start, end, minSize, sizeScale, updateGeo);
-				node.drawn = true;
-				node.drawPass = viewerParams.octree.drawPass;
-			})
-		}
-	}
-
+	callback(node);
 }
 
 function octreeParticleInFilter(p, parts, j){
