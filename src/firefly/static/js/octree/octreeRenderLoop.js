@@ -217,7 +217,7 @@ function load_buffer(node,callback,skip_queue=false){
 			
 			// don't execute the callback, it will be executed when
 			//  the element eventually is drawn
-			if (contained) return; 
+			if (contained) return callback(node); 
 
 			// need to create a new mesh for this node
 			viewerParams.octree.toDraw.push([ node, callback]);
@@ -241,7 +241,7 @@ function free_buffer(node,callback,skip_queue=false){
 
 			// NOTE it's possible that the CALLBACK doesn't match
 			//  and we would never execute the correct callback. this is bad.
-			if (contained) return; 
+			if (contained) return callback(node); 
 
 			viewerParams.octree.toRemove.push([node,callback]); 
 		}
@@ -332,7 +332,7 @@ function drawNextOctreeNode(){
 	// if the node is already drawn let's skip it
 	//  (should only happen if the list is now empty)
 	//  OR if it's also in the remove array (identified by "current_state")
-	if (node.mesh || node.current_state != 'draw') return;
+	if (node.mesh || node.current_state != 'draw') return callback(node);
 
 	viewerParams.octree.waitingToDraw = true;
 	return drawOctreeNode(node, callback);	

@@ -78,6 +78,9 @@ function drawOctreeNode(node, callback){
 	var minSize = 100;//viewerParams.octree.defaultMinParticleSize;
 	var sizeScale = 1000;//node.particleSizeScale;
 
+	// check if we should actually load the data
+	if (!(!node.mesh && node.current_state=='draw')) return callback(node);
+
 	//read in the file, and then draw the particles
 	loadFFTREEKaitai( node,
 	function (kaitai_format,node){
@@ -85,8 +88,10 @@ function drawOctreeNode(node, callback){
 		compileFFTREEData(kaitai_format,node);
 
 		if (node.state != 'inside or too big' && node.state != 'just right'){
-			debugger
-			console.log(node.obj_name,node.state,node.particles)}
+			console.log(node.obj_name,node.state,node.current_state,node.particles)}
+
+		// last check if we should actually SHOW the data we just loaded
+		if (!(!node.mesh && node.current_state=='draw')) return callback(node);
 
 		// create the mesh and add it to the scene
 		addOctreeParticlesToScene(
@@ -94,24 +99,25 @@ function drawOctreeNode(node, callback){
 			start, end,
 			minSize, sizeScale);
 
-		node.drawn = true;
 		node.drawPass = viewerParams.octree.drawPass;
 
+		viewerParams.octree.waitingToDraw = false;
+
 		// finish by executing the callback
-		callback(node);
+		return callback(node);
 	});
 }
 
 function removeOctreeNode(node,callback){
 	node.mesh.geometry.dispose();
 	node.mesh.material.dispose();
-	var before = viewerParams.scene.children.length;
 	viewerParams.scene.remove(node.mesh);
 	//viewerParams.partsMesh[node.pkey] // remove this partsmesh
 	node.mesh=null;
 	node.drawn=false;
 	
-	callback(node);
+	viewerParams.octree.waitingToRemove = false;
+	return callback(node);
 }
 
 function octreeParticleInFilter(p, parts, j){
