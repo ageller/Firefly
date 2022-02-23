@@ -108,7 +108,7 @@ function removeOctreeNode(node,callback){
 	var before = viewerParams.scene.children.length;
 	viewerParams.scene.remove(node.mesh);
 	//viewerParams.partsMesh[node.pkey] // remove this partsmesh
-	console.log(before-viewerParams.scene.children.length,before);
+	node.mesh=null;
 	node.drawn=false;
 	
 	callback(node);
