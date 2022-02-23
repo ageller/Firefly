@@ -212,6 +212,10 @@ class Octree(object):
         
         ## easier to convert this to a dictionary for the next couple of lines
         fields = dict(zip(particle_group.tracked_names,particle_group.tracked_arrays))
+        if particle_group.decimation_factor > 1:
+            self.coordinates = self.coordinates[::particle_group.decimation_factor]
+            for key in fields.keys():
+                fields[key] = fields[key][::particle_group.decimation_factor]
 
         ## prepare field accumulators
         ##  add com calculators to fields
