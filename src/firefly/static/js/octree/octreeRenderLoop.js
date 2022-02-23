@@ -210,14 +210,13 @@ function load_buffer(node,callback,skip_queue=false){
 		//viewerParams.memoryUsage < viewerParams.octree.memoryLimit && // we have enough memory
 		//toDrawIDs.length < viewerParams.octree.maxFilesToRead && 
 		!node.mesh && // not already in the scene
-		viewerParams.showParts[node.pkey] // particle group is visible
+		!checkInQueue(node) // not already in the draw queue
 		) { 
-			// defaults to draw queue
-			var contained = checkInQueue(node) || checkInQueue(node,'remove');
 			
-			// don't execute the callback, it will be executed when
-			//  the element eventually is drawn
-			if (contained) return callback(node); 
+			// check if node is also in the remove queue, 
+			//  if so, let's remove it from there and
+			//  add it to this queue instead. (true->extract)
+			checkInQueue(node,'remove',true)
 
 			// need to create a new mesh for this node
 			viewerParams.octree.toDraw.push([ node, callback]);
@@ -229,33 +228,40 @@ function free_buffer(node,callback,skip_queue=false){
 	if (skip_queue) return removeOctreeNode(node,callback);
 
 	if (
-		node.mesh && 
+		node.mesh
 		//viewerParams.octree.toRemove.length < viewerParams.octree.maxToRemove && 
 		//node.particles.Coordinates.length > Math.floor(node.Nparticles*viewerParams.octree.minFracParticlesToDraw[p]) && 
-		!viewerParams.octree.toRemove.includes([node, callback])
 		) {
 			// check if this node is already in the queue to be drawn
 			
-			// defaults to draw queue
-			var contained = checkInQueue(node) || checkInQueue(node,'remove');
+			// check draw queue and remove node if it's in there.
+			checkInQueue(node,'draw',true);
 
-			// NOTE it's possible that the CALLBACK doesn't match
-			//  and we would never execute the correct callback. this is bad.
-			if (contained) return callback(node); 
+			// let's remove it from the remove queue because the callback might not match
+			//  whatever we're asking it to do now. NOTE that this could constantly
+			//  juggle a node to the end of the queue over and over again which could be wasteful?
+			checkInQueue(node,'remove',true);
 
 			viewerParams.octree.toRemove.push([node,callback]); 
 		}
 	else return callback(node);
 }
 
-function checkInQueue(node,queue='draw'){
+function checkInQueue(node,queue='draw',extract=false){
 	// check if this node is already in the queue to be drawn
 	var contained = false;
 	var this_queue = queue == 'draw' ? viewerParams.octree.toDraw : viewerParams.octree.toRemove
-	this_queue.forEach(
-		function (ele){
-			if (ele[0].obj_name==node.obj_name) contained=true;
+	index = this_queue.forEach(
+		function (ele,index){
+			if (ele[0].obj_name==node.obj_name){ 
+				contained=true;
+				return index;}
 		});
+
+	// if we've been asked to extract this element from
+	//  the queue we're checking,let's do so.
+	if (extract && contained) this_queue.splice(index,1);
+
 	return contained;
 }
 
