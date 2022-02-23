@@ -79,10 +79,12 @@ function drawOctreeNode(node, callback){
 	var sizeScale = 1000;//node.particleSizeScale;
 
 	// check if we should actually load the data
-	if (!(!node.mesh && node.current_state=='draw')) return callback(node);
+	if (!(!node.mesh && node.current_state=='draw')){
+		viewerParams.octree.waitingToDraw = false;
+		return callback(node);}
 
 	//read in the file, and then draw the particles
-	loadFFTREEKaitai( node,
+	return loadFFTREEKaitai( node,
 	function (kaitai_format,node){
 		// fill node with formatted data
 		compileFFTREEData(kaitai_format,node);
@@ -91,7 +93,9 @@ function drawOctreeNode(node, callback){
 			console.log(node.obj_name,node.state,node.current_state,node.particles)}
 
 		// last check if we should actually SHOW the data we just loaded
-		if (!(!node.mesh && node.current_state=='draw')) return callback(node);
+		if (!(!node.mesh && node.current_state=='draw')) {
+			viewerParams.octree.waitingToDraw = false;
+			return callback(node); }
 
 		// create the mesh and add it to the scene
 		addOctreeParticlesToScene(

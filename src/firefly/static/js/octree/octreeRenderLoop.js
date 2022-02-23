@@ -222,7 +222,7 @@ function load_buffer(node,callback,skip_queue=false){
 			// need to create a new mesh for this node
 			viewerParams.octree.toDraw.push([ node, callback]);
 	} 
-	else callback(node);
+	else return callback(node);
 }
 
 function free_buffer(node,callback,skip_queue=false){
@@ -245,7 +245,7 @@ function free_buffer(node,callback,skip_queue=false){
 
 			viewerParams.octree.toRemove.push([node,callback]); 
 		}
-	else callback(node);
+	else return callback(node);
 }
 
 function checkInQueue(node,queue='draw'){
