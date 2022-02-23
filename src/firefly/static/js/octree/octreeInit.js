@@ -11,6 +11,7 @@ function abg_initOctree(pkey,data){
 		node.obj_name = pkey + '-' +(node.name.length != 0 ? node.name : 'root' )
 		node.current_state = 'draw'
 		node.com_shown=true;
+		node.mesh = null;
 
 		// let's store the pkey and octree in the node
 		//  for convenient reference in other routines where

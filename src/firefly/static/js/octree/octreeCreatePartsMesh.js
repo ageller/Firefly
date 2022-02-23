@@ -14,15 +14,13 @@ function addOctreeParticlesToScene(
 		//  that exists, might make a whole new mesh, who can say.
 		var geo = createParticleGeometry(node.pkey, node.particles, start, end);
 
-		var obj = viewerParams.scene.getObjectByName(node.obj_name);
-
 		// replace the geometry in the existing mesh, we'd want to do this if we've loaded additional
 		//  particles since last drawing this node (in the case where we are only drawing a subset of the 
 		//  particles. We'll assume that the new particles are appended to the back of the list and we'll 
 		//  replace the geometry in the mesh with this new expanded geometry.)
-		if (obj) {
-			obj.geometry = geo; 
-			obj.geometry.needsUpdate = true;}
+		if (node.mesh) {
+			node.mesh.geometry = geo; 
+			node.mesh.geometry.needsUpdate = true;}
 		// have to create a whole mesh for this geometry
 		else {
 	
@@ -35,8 +33,10 @@ function addOctreeParticlesToScene(
 			mesh.position.set(0,0,0); //  <--- what is this? 
 
 			// add to the scene and keep track in the partsMesh array
+			//  and in the node
 			viewerParams.scene.add(mesh);
 			viewerParams.partsMesh[node.pkey].push(mesh);
+			node.mesh = mesh;
 		}
 	}
 
@@ -93,6 +93,7 @@ function drawOctreeNode(node, callback){
 			node,
 			start, end,
 			minSize, sizeScale);
+
 		node.drawn = true;
 		node.drawPass = viewerParams.octree.drawPass;
 
@@ -102,13 +103,13 @@ function drawOctreeNode(node, callback){
 }
 
 function removeOctreeNode(node,callback){
-		obj.geometry.dispose();
-		obj.material.dispose();
-		viewerParams.scene.remove(obj);
-		console.log(viewerParams.partsMesh[node.pkey].length);
-		viewerParams.partsMesh[node.pkey].splice(obj.partsMeshIndex,1) // remove this partsmesh
-		console.log(viewerParams.partsMesh[node.pkey].length);
-		node.drawn=false;
+	node.mesh.geometry.dispose();
+	node.mesh.material.dispose();
+	var before = viewerParams.scene.children.length;
+	viewerParams.scene.remove(node.mesh);
+	//viewerParams.partsMesh[node.pkey] // remove this partsmesh
+	console.log(before-viewerParams.scene.children.length,before);
+	node.drawn=false;
 	
 	callback(node);
 }

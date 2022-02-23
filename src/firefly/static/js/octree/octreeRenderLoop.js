@@ -196,25 +196,30 @@ function showCoM(node){
 	node.com_shown = true;
 }
 
-function load_buffer(node,callback,skip_queue=true){
+function load_buffer(node,callback,skip_queue=false){
 	if (skip_queue) return drawOctreeNode(node, callback);	
 
 	// add to the draw list, only when there are available slots in toDraw and when memory usage is low enough
 	if (
 		node.buffer_size > 0 &&// node has particles to be drawn
-		viewerParams.memoryUsage < viewerParams.octree.memoryLimit && // we have enough memory
+		//viewerParams.memoryUsage < viewerParams.octree.memoryLimit && // we have enough memory
 		//toDrawIDs.length < viewerParams.octree.maxFilesToRead && 
-		!node.drawn && // not already in the scene
-		viewerParams.showParts[node.pkey] &&  // particle group is visible
-		!viewerParams.octree.toDraw.includes([node, callback]) // not already in the list
+		!node.mesh && // not already in the scene
+		viewerParams.showParts[node.pkey] // particle group is visible
 		) { 
+			// check if this node is already in the queue to be drawn
+			var contained = false;
+			viewerParams.octree.toDraw.forEach(
+				function (ele){
+					if (ele[0].obj_name==node.obj_name) contained=true;
+				});
+			
+			// don't execute the callback, it will be executed when
+			//  the element eventually is drawn
+			if (contained) return; 
 
-		// double check the object isn't already in the scene, to really prevent
-		//  duplicates, also may consider drawing only a fraction of the particles
-		var obj = viewerParams.scene.getObjectByName(node.obj_name);
-
-		// need to create a new mesh for this node
-		if ( !obj ) viewerParams.octree.toDraw.push([ node, callback]);
+			// need to create a new mesh for this node
+			viewerParams.octree.toDraw.push([ node, callback]);
 	} 
 	else callback(node);
 }
@@ -222,15 +227,22 @@ function load_buffer(node,callback,skip_queue=true){
 function free_buffer(node,callback,skip_queue=false){
 	if (skip_queue) return removeOctreeNode(node,callback);
 
-	var obj = viewerParams.scene.getObjectByName(node.obj_name);
-
 	if (
-		obj && 
+		node.mesh && 
 		//viewerParams.octree.toRemove.length < viewerParams.octree.maxToRemove && 
 		//node.particles.Coordinates.length > Math.floor(node.Nparticles*viewerParams.octree.minFracParticlesToDraw[p]) && 
-		!viewerParams.octree.toRemove.includes([node, callback]) && 
-		!viewerParams.octree.waitingToAddToRemove
+		!viewerParams.octree.toRemove.includes([node, callback])
 		) {
+			// check if this node is already in the queue to be drawn
+			var contained = false;
+			viewerParams.octree.toRemove.forEach(
+				function (ele){
+					if (ele[0].obj_name==node.obj_name) contained=true;
+				});
+			// NOTE it's possible that the CALLBACK doesn't match
+			//  and we would never execute the correct callback. this is bad.
+			if (contained) return; 
+
 			viewerParams.octree.toRemove.push([node,callback]); 
 		}
 	else callback(node);
@@ -293,14 +305,23 @@ function drawNextOctreeNode(){
 	// take the next in line to draw
 	var tuple = viewerParams.octree.toDraw.shift(); // shift takes the first element, pop does the last
 
-	// unpack the tuple manually
+	// unpack the tuple
 	var node = tuple[0];
 	var callback = tuple[1];
-	
+
 	// if the node is already drawn but was somehow added to the list 
 	//  we'll just skip it rather than move to the next element
-	//  better luck next time!
-	if (node.drawn || node.current_state != 'draw') return callback(node);
+	while (node.mesh && viewerParams.octree.toDraw.length){
+		// take the next in line to draw
+		tuple = viewerParams.octree.toDraw.shift(); // shift takes the first element, pop does the last
+		// unpack the tuple
+		node = tuple[0];
+		callback = tuple[1];}
+	
+	// if the node is already drawn let's skip it
+	//  (should only happen if the list is now empty)
+	//  OR if it's also in the remove array (identified by "current_state")
+	if (node.mesh || node.current_state != 'draw') return callback(node);
 
 	viewerParams.octree.waitingToDraw = true;
 	drawOctreeNode(node, callback);	
@@ -313,13 +334,17 @@ function removeNextOctreeNode(){
 	var node = tuple[0];
 	var callback = tuple[1];
 
-	var obj = viewerParams.scene.getObjectByName(node.obj_name);
+	// if the node was already removed move on to the next one
+	while (!node.mesh && viewerParams.octree.toRemove.length){
+		tuple = viewerParams.octree.toRemove.pop();
+		node = tuple[0];
+		callback = tuple[1];
+	}
 
-	// if the node was already removed  
-	//  or since it was added to the list it was added to the draw list
-	//  then skip it
-	//  better luck next time!
-	if (!obj || node.current_state != 'remove') return callback(node);
+	// if the node is already removed let's skip it
+	//  (should only happen if the list is now empty)
+	//  OR if it's also in the draw array (identified by "current_state")
+	if (!node.mesh || node.current_state != 'remove') return callback(node);
 
 	removeOctreeNode(node,callback)
 }
