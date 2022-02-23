@@ -116,10 +116,10 @@ function createParticleGeometry(p, parts, start, end){
 
 		var rad = 1.;
 		var alph = 1.;
-		if (!octreeParticleInFilter(p, parts, j)){	
+		/*if (!octreeParticleInFilter(p, parts, j)){	
 			rad = 0.;
 			alph = 0.;
-		}
+		}*/
 
 		if (parts.hasOwnProperty("SmoothingLength")){
 			radiusScale[rindex++] = parts.SmoothingLength[j]*rad;
