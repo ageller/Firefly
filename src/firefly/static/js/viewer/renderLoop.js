@@ -6,8 +6,6 @@ function animate(time) {
 		var currentTime = new Date();
 		var seconds = currentTime.getTime()/1000;
 
-		debugger
-
 		// check UI and update viewerParams or partsMesh
 		update(time);
 
@@ -187,17 +185,19 @@ function update_particle_groups(time){
 
 		if (!viewerParams.parts[p].hasOwnProperty('octree_init') || !viewerParams.parts[p].octree_init){
 			evaluateFunctionOnOctreeNodes(
-			set_transparent,
+			hideCoM,
 			viewerParams.parts[p].octree[''],
 			viewerParams.parts[p].octree);
 			viewerParams.parts[p].octree_init = true;
 		}
-		abg_updateOctree(p);
 
 		viewerParams.updateFilter[p] = false;
 		viewerParams.updateOnOff[p] = false;
 		viewerParams.updateColormap[p] = false;
 	});// viewerParams.partsKeys.forEach(function(p,i)
+
+	updateOctree(); // loops through particle keys internally
+
 }// function update(time)
 
 function update_particle_playback(p,time){
