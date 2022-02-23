@@ -82,17 +82,21 @@ function openCloseNodes(node){
 
 	// don't need to draw nodes that aren't on screen 
 	if (!onscreen && !inside){
+		// if we haven't already, let's hide the CoM
+		if (node.com_shown) hideCoM(node);
 		node.state = 'off screen';
 		node.current_state = 'remove';
-		free_buffer(node,hideCoM);
+		// callback does nothing
+		free_buffer(node, function (thise_node){return true;});
 	}
 	// this node is too large, we should hide its CoM and (maybe) show its children
 	else if (inside || too_big){  
 		node.state = 'inside or too big';
 		node.current_state = 'draw';
+		// if we haven't already, let's hide the CoM
+		if (node.com_shown) hideCoM(node);
 		load_buffer(node,
 			function (this_node){
-				hideCoM(this_node);
 				this_node.children.forEach(
 					function (child_name){openCloseNodes(node.octree[child_name])});
 			});
@@ -101,18 +105,19 @@ function openCloseNodes(node){
 	else if (too_small){
 		node.state = 'too small';
 		node.current_state = 'remove';
+		// if we haven't already, let's hide the CoM
+		if (node.com_shown) hideCoM(node);
+
 		free_buffer(node,
 			function (this_node){
 				this_node.children.forEach(
 					function (child_name){free_buffer(node.octree[child_name],hideCoM)});
-				hideCoM(this_node)
 			});
 	}
 	// this node is just right. let's check if we should do anything
 	//  to its children
 	else if (onscreen && !inside){
 		node.state = 'just right';
-		node.current_state = 'draw'
 		// if we aren't already, let's show the CoM
 		if (!node.com_shown) showCoM(node);
 
@@ -207,12 +212,8 @@ function load_buffer(node,callback,skip_queue=false){
 		!node.mesh && // not already in the scene
 		viewerParams.showParts[node.pkey] // particle group is visible
 		) { 
-			// check if this node is already in the queue to be drawn
-			var contained = false;
-			viewerParams.octree.toDraw.forEach(
-				function (ele){
-					if (ele[0].obj_name==node.obj_name) contained=true;
-				});
+			// defaults to draw queue
+			var contained = checkInQueue(node) || checkInQueue(node,'remove');
 			
 			// don't execute the callback, it will be executed when
 			//  the element eventually is drawn
@@ -234,11 +235,10 @@ function free_buffer(node,callback,skip_queue=false){
 		!viewerParams.octree.toRemove.includes([node, callback])
 		) {
 			// check if this node is already in the queue to be drawn
-			var contained = false;
-			viewerParams.octree.toRemove.forEach(
-				function (ele){
-					if (ele[0].obj_name==node.obj_name) contained=true;
-				});
+			
+			// defaults to draw queue
+			var contained = checkInQueue(node) || checkInQueue(node,'remove');
+
 			// NOTE it's possible that the CALLBACK doesn't match
 			//  and we would never execute the correct callback. this is bad.
 			if (contained) return; 
@@ -246,6 +246,17 @@ function free_buffer(node,callback,skip_queue=false){
 			viewerParams.octree.toRemove.push([node,callback]); 
 		}
 	else callback(node);
+}
+
+function checkInQueue(node,queue='draw'){
+	// check if this node is already in the queue to be drawn
+	var contained = false;
+	var this_queue = queue == 'draw' ? viewerParams.octree.toDraw : viewerParams.octree.toRemove
+	this_queue.forEach(
+		function (ele){
+			if (ele[0].obj_name==node.obj_name) contained=true;
+		});
+	return contained;
 }
 
 function getScreenSize(node){
@@ -321,10 +332,10 @@ function drawNextOctreeNode(){
 	// if the node is already drawn let's skip it
 	//  (should only happen if the list is now empty)
 	//  OR if it's also in the remove array (identified by "current_state")
-	if (node.mesh || node.current_state != 'draw') return callback(node);
+	if (node.mesh || node.current_state != 'draw') return;
 
 	viewerParams.octree.waitingToDraw = true;
-	drawOctreeNode(node, callback);	
+	return drawOctreeNode(node, callback);	
 }
 
 function removeNextOctreeNode(){
@@ -346,7 +357,8 @@ function removeNextOctreeNode(){
 	//  OR if it's also in the draw array (identified by "current_state")
 	if (!node.mesh || node.current_state != 'remove') return callback(node);
 
-	removeOctreeNode(node,callback)
+	viewerParams.octree.waitingtoRemove = true;
+	return removeOctreeNode(node,callback);
 }
 
 function reduceNextOctreeNode(){
