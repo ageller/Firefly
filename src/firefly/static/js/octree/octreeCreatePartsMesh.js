@@ -25,9 +25,8 @@ function addOctreeParticlesToScene(
 		else {
 	
 			// var she blows, a brand new mesh
-			var material = createParticleMaterial(node.pkey, minPointSize, octreePointScale);
+			var material = createParticleMaterial(node.pkey, minPointSize, octreePointScale,[1,0,0,1]);
 			var mesh = new THREE.Points(geo, material);
-
 			// name this bad larry so we can find it later using scene.getObjectByName
 			mesh.name = node.obj_name;
 			mesh.position.set(0,0,0); //  <--- what is this? 
@@ -104,7 +103,12 @@ function drawOctreeNode(node, callback){
 			minSize, sizeScale);
 
 		node.drawPass = viewerParams.octree.drawPass;
+		node.mesh.material.uniforms.color[0]=1
+		node.mesh.material.uniforms.color[1]=0
+		node.mesh.material.uniforms.color[2]=0
+		node.mesh.material.needsUpdate = true;
 
+		viewerParams.octree.loadingCount[node.pkey]+=1
 		viewerParams.octree.waitingToDraw = false;
 
 		// finish by executing the callback
@@ -120,7 +124,9 @@ function removeOctreeNode(node,callback){
 	node.mesh=null;
 	node.drawn=false;
 	
+	viewerParams.octree.loadingCount[node.pkey]-=1
 	viewerParams.octree.waitingToRemove = false;
+	updateOctreeLoadingBar();
 	return callback(node);
 }
 
@@ -219,7 +225,7 @@ function disposeOctreeNodes(p){
 	})
 
 	//for loading bar
-	viewerParams.octree.loadingCount[p][1]  = 0;
+	viewerParams.octree.loadingCount[p]  = 0;
 	updateOctreeLoadingBar();
 
 	//I think I should reset this just in case

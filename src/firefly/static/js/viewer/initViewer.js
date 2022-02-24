@@ -1577,7 +1577,7 @@ function createOctreeLoadingBar(){
 		.style('position','absolute')
 		.style('left','0px')
 		.style('bottom','0px')
-		.attr('width', (width + 2*margin + 100) + 'px')
+		.attr('width', (width + 2*margin + 120) + 'px')
 		.attr('height', height + 'px') //will be adjusted below
 		//.style('transform', 'translate(10px,' + (window.innerHeight - height - 10)+'px)')
 
@@ -1585,7 +1585,7 @@ function createOctreeLoadingBar(){
 	var nRects = 0;
 	viewerParams.partsKeys.forEach(function(p){
 		if (viewerParams.haveOctree[p]){
-			viewerParams.octree.loadingCount[p] = [0,0]; //will be updated during rendering
+			viewerParams.octree.loadingCount[p] = 0; //will be updated during rendering
 
 			svg.append('rect')
 				.attr('id',p + 'octreeLoadingOutline')
@@ -1611,7 +1611,7 @@ function createOctreeLoadingBar(){
 				.attr('y', (nRects*(height + offset) + margin + 0.75*height) + 'px')
 				.attr('fill','rgb(' + (255*viewerParams.Pcolors[p][0]) + ',' + (255*viewerParams.Pcolors[p][1]) + ',' + (255*viewerParams.Pcolors[p][2]) + ')')
 				.style('font-size', (0.75*height) + 'px')
-				.text(p + ' (' + viewerParams.octree.loadingCount[p][1] + '/' + viewerParams.octree.loadingCount[p][0] + ')')				
+				.text(p + ' (' + viewerParams.octree.loadingCount[p] + '/' + (viewerParams.octree.loadingCount[p]+ viewerParams.octree.toDraw[p].length) + ')')				
 			nRects += 1;
 		}
 	})
@@ -1623,12 +1623,14 @@ function updateOctreeLoadingBar(){
 	viewerParams.partsKeys.forEach(function(p){
 		if (viewerParams.haveOctree[p]){
 			var width = parseFloat(d3.select('#' + p + 'octreeLoadingOutline').attr('width'));
-			if (viewerParams.octree.loadingCount[p][0] > 0){
-				var frac = THREE.Math.clamp(viewerParams.octree.loadingCount[p][1]/viewerParams.octree.loadingCount[p][0], 0, 1);
+			var numerator = viewerParams.octree.loadingCount[p];
+			var denominator = numerator + viewerParams.octree.toDraw[p].length;
+			if (denominator > 0){
+				var frac = THREE.Math.clamp(numerator/denominator, 0, 1);
 				//var frac = Math.max(viewerParams.octree.loadingCount[p][1]/viewerParams.octree.loadingCount[p][0], 0);
 				//console.log('loading',p, width,viewerParams.octree.loadingCount[p], frac)
 				d3.select('#' + p + 'octreeLoadingFill').transition().attr('width', (width*frac) + 'px');
-				d3.select('#' + p + 'octreeLoadingText').text(p + ' (' + viewerParams.octree.loadingCount[p][1] + '/' + viewerParams.octree.loadingCount[p][0] + ')');
+				d3.select('#' + p + 'octreeLoadingText').text(p + ' (' + numerator + '/' + denominator + ')');
 			}
 		}
 	})

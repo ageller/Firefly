@@ -135,19 +135,23 @@ function createParticleGeometry(p, parts, start, end){
 	return geo;
 }
 
-function createParticleMaterial(p, minPointSize=1, octreePointScale=1.){
+function createParticleMaterial(p, minPointSize=1, octreePointScale=1.,color=null){
 	//change the blending mode when showing the colormap (so we don't get summing to white colors)
 	var blend = viewerParams.blendingOpts[viewerParams.blendingMode[p]];
 	var dWrite = viewerParams.depthWrite[p];
 	var dTest = viewerParams.depthTest[p];
 	var transp = true;
-
+	if (!color) color = [
+		viewerParams.Pcolors[p][0],
+		viewerParams.Pcolors[p][1],
+		viewerParams.Pcolors[p][2],
+		viewerParams.Pcolors[p][3]];
 
 	var material = new THREE.ShaderMaterial( {
 
 
 		uniforms: { //add uniform variable here
-			color: {value: new THREE.Vector4( viewerParams.Pcolors[p][0], viewerParams.Pcolors[p][1], viewerParams.Pcolors[p][2], viewerParams.Pcolors[p][3])},
+			color: {value: new THREE.Vector4(color[0],color[1],color[2],color[3])},
 			oID: {value: 0},
 			SPHrad: {value: viewerParams.parts[p].doSPHrad},
 			uVertexScale: {value: viewerParams.PsizeMult[p]},
