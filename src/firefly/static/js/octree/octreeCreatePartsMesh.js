@@ -117,87 +117,29 @@ function drawOctreeNode(node, callback){
 }
 
 function removeOctreeNode(node,callback){
-	node.mesh.geometry.dispose();
-	node.mesh.material.dispose();
-	viewerParams.scene.remove(node.mesh);
-	//viewerParams.partsMesh[node.pkey] // remove this partsmesh
-	node.mesh=null;
-	node.drawn=false;
-	
-	viewerParams.octree.loadingCount[node.pkey]-=1
-	viewerParams.octree.waitingToRemove = false;
-	updateOctreeLoadingBar();
+	if (node.mesh){
+		node.mesh.geometry.dispose();
+		node.mesh.material.dispose();
+		viewerParams.scene.remove(node.mesh);
+		//viewerParams.partsMesh[node.pkey] // remove this partsmesh
+		node.mesh=null;
+		node.drawn=false;
+		
+		viewerParams.octree.loadingCount[node.pkey]-=1
+		viewerParams.octree.waitingToRemove = false;
+		updateOctreeLoadingBar();
+	}
 	return callback(node);
 }
 
 function disposeOctreeNodes(p){
 	console.log('disposing of all nodes ', p);
-	var sceneRemove = [];
-	viewerParams.scene.traverse(function(obj){
-		if (obj.name.includes(p)){
-			//remove from scene memory
-			obj.geometry.dispose();
-			obj.material.dispose();
-			sceneRemove.push(obj);
 
-			//remove from node memory
-			var iden = obj.name.replace(p,'');
-			var node = null;
-			viewerParams.octree.nodes[p].forEach(function(n){
-				if (n.id == iden) node = n;
-			})
-			if (node) initNode(node, p)
-
-		}
-	})
-
-	//remove any remnant from scene (can't do this in the traverse loop)
-	sceneRemove.forEach(function(obj){
-		viewerParams.scene.remove(obj);
-	})
-
-	//remove from any of the draw/remove/reduce arrays
-	var indices = [];
-	viewerParams.octree.toRemoveIDs.forEach(function(iden,i){
-		if (iden.includes(p)) indices.push(i);
-	})
-	indices.forEach(function(i){
-		viewerParams.octree.toRemoveIDs.splice(i,1);
-		viewerParams.octree.toRemove.splice(i,1);
-	})
-
-	var indices = [];
-	viewerParams.octree.toRemoveTmpIDs.forEach(function(iden,i){
-		if (iden.includes(p)) indices.push(i);
-	})
-	indices.forEach(function(i){
-		viewerParams.octree.toRemoveTmpIDs.splice(i,1);
-		viewerParams.octree.toRemoveTmp.splice(i,1);
-	})
-
-
-	indices = [];
-	viewerParams.octree.toReduceIDs.forEach(function(iden,i){
-		if (iden.includes(p)) indices.push(i);
-	})
-	indices.forEach(function(i){
-		viewerParams.octree.toReduceIDs.splice(i,1);
-		viewerParams.octree.toReduce.splice(i,1);
-	})
-
-
-	indices = [];
-	viewerParams.octree.toDrawIDs.forEach(function(iden,i){
-		if (iden.includes(p)) indices.push(i);
-	})
-	indices.forEach(function(i){
-		viewerParams.octree.toDrawIDs.splice(i,1);
-		viewerParams.octree.toDraw.splice(i,1);
-	})
-
-	//for loading bar
-	viewerParams.octree.loadingCount[p]  = 0;
-	updateOctreeLoadingBar();
+	var this_octree = viewerParams.parts[p].octree;
+	evaluateFunctionOnOctreeNodes(
+		function (node){removeOctreeNode(node, function (node){true})},
+		this_octree[''],
+		this_octree);
 
 	//I think I should reset this just in case
 	viewerParams.octree.waitingToDraw = false;
