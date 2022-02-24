@@ -130,35 +130,6 @@ function removeOctreeNode(node,callback){
 	return callback(node);
 }
 
-function octreeParticleInFilter(p, parts, j){
-	if (!viewerParams.showParts[p]) return false;
-
-	for (k=0; k<viewerParams.fkeys[p].length; k++){
-		fk = viewerParams.fkeys[p][k];
-		var val = (viewerParams.filterVals[p][fk][0] + viewerParams.filterVals[p][fk][1])/2.;
-
-		// if the field value for this particle exists:
-		if (viewerParams.parts[p][fk] != null) {
-			if (parts.hasOwnProperty(fk)) val = parts[fk][j];
-	
-			// we want to hide this particle
-			if ( (!viewerParams.invertFilter[p][fk] &&  
-				(val < viewerParams.filterVals[p][fk][0] || 
-				val > viewerParams.filterVals[p][fk][1])) || 
-				( (viewerParams.invertFilter[p][fk] && 
-				(val > viewerParams.filterVals[p][fk][0] && 
-				val < viewerParams.filterVals[p][fk][1])))   ){
-
-				// set the radius to 0 and the alpha to 0
-				return false
-			} 
-		}
-	}
-	return true
-}
-
-
-
 function disposeOctreeNodes(p){
 	console.log('disposing of all nodes ', p);
 	var sceneRemove = [];

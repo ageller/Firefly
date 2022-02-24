@@ -280,11 +280,13 @@ function update_particle_mesh_UI_values(p,m,time){
 	m.material.uniforms.showColormap.value = viewerParams.showColormap[p];
 
 	// apply static color
-	m.material.uniforms.color.value = new THREE.Vector4(
-		viewerParams.Pcolors[p][0],
-		viewerParams.Pcolors[p][1],
-		viewerParams.Pcolors[p][2],
-		viewerParams.Pcolors[p][3]);
+	if (m.name.includes('Standard')){
+		m.material.uniforms.color.value = new THREE.Vector4(
+			viewerParams.Pcolors[p][0],
+			viewerParams.Pcolors[p][1],
+			viewerParams.Pcolors[p][2],
+			viewerParams.Pcolors[p][3]);
+	}
 }
 
 function update_particle_mesh_velocity_vectors(p,m,cameraX,cameraY,time){
