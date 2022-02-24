@@ -216,58 +216,38 @@ function defineViewerParams(){
 			//could be included in GUI, will be reset in pruneOctree to be a fraction of boundingBox
 			this.normCameraDistance = {'default':1000};
 
-			this.nodes = {};
-
-			//minimum pixel width for a node to require rendering points
-			this.minNodeScreenSize = 5;
-
 			//default minimum particles size
-			//this.defaultMinParticleSize = 6.;
 			this.defaultMinParticleSize = 0.1;
 
-			//will contain a list of nodes that are drawn
-			this.alreadyDrawn = [];
-
 			this.toRemove = [];
-			this.toRemoveIDs = [];
 			this.maxToRemove = 50;
-			this.waitingToRemove = false;
-
-			this.removeTimeout = 2; //(s) to wait to add to the remove list (in case the user just moves around a litte)
-			this.toRemoveTmp = [];
-			this.toRemoveTmpIDs = [];
-			this.waitingToAddToRemove = false;
-
-			this.toReduce = [];
-			this.toReduceIDs = [];
-			this.maxToReduce = 50;
-			this.waitingToReduce = false;
-
-			this.toDraw = [];
-			this.toDrawIDs = [];
-			this.maxFilesToRead = 50;
-			this.waitingToDraw = false;
-			this.lastDrawnID = '';
-
-			this.drawPass = 1;
-
-			this.minDiffForUpdate = 100; //minumum number of particles that need to be different between drawn and expected for the node to be updated
-			this.maxUpdatesPerDraw = this.maxFilesToRead/2; //maximum number of updates to make during a draw loop, to make sure new nodes are always drawn
-			this.NUpdate = 0; //will cound the number of nodes needing updates in a render pass
-
-			this.targetFPS = 30; //will be used to controls the NParticleFPSModifier
-			this.NParticleFPSModifier = 1.; //will be increased or decreased based on the current fps
-			//this.FPSmod = 100;// reset the FPS average every FPSmod draw counts
-			this.FPSmod = 1e10;// reset the FPS average every FPSmod draw counts (not sure this is needed anymore, but not ready to remove from code)
-			this.boxSize = 0; //will be set based on the root node
 			this.pIndex = 0; //will be used to increment through the particles in the render loop
 
-			this.memoryLimit = 5*1e9; //bytes, maximum memory allowed -- for now this is more like a target
-			this.NParticleMemoryModifier = 1.; //will be increased or decreased based on the current memory usage
-			this.NParticleMemoryModifierFac = 1.;
+			this.toDraw = [];
+			this.waitingToDraw = false;
+			this.boxSize = 0; //will be set based on the root node
 
 			this.loadingCount = {}; //will contain an array for each particle type that has the total inView and the total drawn to adjust the loading bar
 
+			this.memoryLimit = 5*1e9; //bytes, maximum memory allowed -- for now this is more like a target
+
+			/*
+			this.removeTimeout = 2; //(s) to wait to add to the remove list (in case the user just moves around a litte)
+			this.waitingToRemove = false;
+			this.toReduce = [];
+			this.maxToReduce = 50;
+			this.waitingToReduce = false;
+			this.maxFilesToRead = 50;
+			this.drawPass = 1;
+			this.minDiffForUpdate = 100; //minumum number of particles that need to be different between drawn and expected for the node to be updated
+			this.maxUpdatesPerDraw = this.maxFilesToRead/2; //maximum number of updates to make during a draw loop, to make sure new nodes are always drawn
+			this.NUpdate = 0; //will cound the number of nodes needing updates in a render pass
+			this.NParticleMemoryModifier = 1.; //will be increased or decreased based on the current memory usage
+			this.NParticleMemoryModifierFac = 1.;
+			*/
+
+			this.targetFPS = 30; //will be used to controls the NParticleFPSModifier
+			this.NParticleFPSModifier = 1.; //will be increased or decreased based on the current fps
 		}
 
 	};

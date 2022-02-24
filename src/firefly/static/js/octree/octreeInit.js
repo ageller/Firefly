@@ -1,8 +1,23 @@
 function abg_initOctree(pkey,data){
 
+	viewerParams.haveOctree[pkey] = true;
+	viewerParams.haveAnyOctree = true;
+
+	// flag to  draw the yellow octree boxes around the nodes
 	viewerParams.debug = false;
-	viewerParams.parts[pkey].doSPH = true
 	viewerParams.boxSize = 50*data.octree[''].width
+
+	// TODO not sure if these are still necessary post-octree-refactor
+	viewerParams.octree.boxSize = viewerParams.boxSize;
+	viewerParams.octree.normCameraDistance[pkey] = viewerParams.octree.normCameraDistance.default;
+	viewerParams.octree.minFracParticlesToDraw[pkey] = viewerParams.octree.minFracParticlesToDraw.default;
+	viewerParams.octree.particleDefaultSizeScale[pkey] = viewerParams.octree.particleDefaultSizeScale.default;
+
+	//this will be used as a percentage value in the GUI
+	viewerParams.plotNmax[pkey] = 100;
+
+	// enable radius rescaling to scale the center of mass particles
+	viewerParams.parts[pkey].doSPH = true
 	viewerParams.parts[pkey].SmoothingLength = Array(viewerParams.parts[pkey].Coordinates_flat.length/3)
 
 	function initializeNode(node){
@@ -18,6 +33,7 @@ function abg_initOctree(pkey,data){
 		//  we only have the node in scope
 		node.pkey = pkey;
 		node.octree = viewerParams.parts[pkey].octree
+		node.radius*=3;
 
 		// TODO: should rethink how we set radii using radius flag
 		// set the radius of the particle
@@ -27,12 +43,12 @@ function abg_initOctree(pkey,data){
 		createOctBox(node);
 	}
 
-	// walk the tree and evaluate init function
+	// walk the entire tree and evaluate the initializeNode function
+	//  on each node
 	evaluateFunctionOnOctreeNodes(
 		initializeNode,
 		data.octree[''],
 		data.octree);
-
 }
 
 function loadFFTREEKaitai(node,callback){
@@ -139,21 +155,6 @@ function initNode(node, p){
 	node.particles = {'Coordinates':[]};
 	node.drawn = false;
 	node.drawPass = 0;
-}
-function pruneOctree(tree, p, fname){
-	var out = [];
-	var p1 =  fname.lastIndexOf('/');
-	var fileRoot = fname.substring(0,p1);
-	tree.forEach(function(d){
-		d.filename = fileRoot + '/' + d.id + '.csv';
-		initNode(d, p);
-		if (d.Nparticles > 0) out.push(d);
-	})
-
-	//also set the normCameraDistance based on the boxSize?
-	viewerParams.octree.normCameraDistance[p] = viewerParams.octree.boxSize/100.;
-
-	return out
 }
 
 function formatOctreeCSVdata(data, p){

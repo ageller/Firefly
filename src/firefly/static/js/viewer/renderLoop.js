@@ -328,17 +328,7 @@ function update_particle_mesh_filter(p,m,time){
 
 		var node = null;
 		if (viewerParams.haveOctree[p]){
-			//find the node
-			var iden = m.name.replace(p,'');
-			if (viewerParams.octree.nodes.hasOwnProperty(p)){
-				viewerParams.octree.nodes[p].every(function(n){
-					if (n.id == iden){
-						node = n;
-						return false
-					} 
-					return true
-				})
-			}
+			console.log("NEED TO LOOP THROUGH PARTICLE NODES AND APPLY FILTER")
 		}
 
 		for( var ii = 0; ii < radiusScale.length; ii ++ ) {
@@ -458,9 +448,7 @@ function update_memory_usage(){
 		viewerParams.totalParticlesInMemory = 0.;
 		viewerParams.partsKeys.forEach(function(p){
 			if (viewerParams.haveOctree[p]){
-				viewerParams.octree.nodes[p].forEach(function(node){
-					viewerParams.totalParticlesInMemory += node.particles.Coordinates.length;
-				})
+				console.log("NEED TO COUNT THE TOTAL PARTICLES IN ALL DRAWN NODES")
 			} else {
 				viewerParams.totalParticlesInMemory += viewerParams.parts.count[p];
 			}

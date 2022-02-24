@@ -1157,87 +1157,66 @@ function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
 		viewerParams.haveOctree[p] = false;
 		viewerParams.filenames[p].forEach( function(f, j) {
 			var amt = 0;
-			if (f.constructor == Array){ 
-				amt = parseFloat(f[1]);
-			} else if (j == 1){
-				amt = parseFloat(f);
-			}
+			if (f.constructor == Array) amt = parseFloat(f[1]);
+			else if (j == 1) amt = parseFloat(f);
+
 			if (amt > 0) {
 				viewerParams.parts.totalSize += amt;
 				viewerParams.parts.count[p] += amt;
-			} else {
-				//this is how I am identifying an octree file structure, for now (there must be a better way)
-				if (p != 'options') {
-					viewerParams.haveOctree[p] = false;
-					viewerParams.haveAnyOctree = false;
-				}
-			}
+			} 
 		});
 	});
 
 	viewerParams.partsKeys.forEach( function(p, i) {
+		// initialize this particle dictionary
 		viewerParams.parts[p] = {};
 
-		if (viewerParams.haveOctree[p]){
+		// default that no particle groups have an octree
+		viewerParams.haveOctree[p] = false
 
+		// loop through each of the files to open
+		viewerParams.filenames[p].forEach( function(f, j) {
+			// passed data through flask, not an actual filename
+			if (internalData){
+				console.log('==== compiling internal data', f)
+				Object.keys(internalData).forEach(function(key,k){
+					//if I was sent a prefix, this could be simplified
+					// TODO should handle passing binary data
+					if (key.includes(f[0])) compileJSONData(internalData[key], p, callback, initialLoadFrac)
+				})
+				if (internalData && i == viewerParams.partsKeys.length - 1 && j == viewerParams.filenames[p].length - 1) viewerParams.newInternalData = {};
 
-			var fname = prefix+'data/'+viewerParams.filenames[p][0][0]
-			d3.json(fname, function(d){
-				//initialize the boxSize using the first particle group
-				if (viewerParams.octree.boxSize == 0) {
-					d.every(function(dd){
-						if (dd.id == 0){
-							viewerParams.octree.boxSize = dd.width;
-							viewerParams.boxSize = viewerParams.octree.boxSize;
-							return false;
-						}
-						return true;
-					});
-				}
-				//initialize the octree node
-				viewerParams.octree.nodes[p] = pruneOctree(d, p, fname);
-			})
+			} 
+			// passed an actual file, let's read it
+			else {
+				// determine what sort of "file" i was passed
+				//  i.e. where is the actual file name 
+				// 	ABG NOTE: (not sure why f.constructor might be an array?) 
+				var readf = null;
+				if (f.constructor == Array) readf = "data/"+f[0];
+				else if (j == 0) readf = "data/"+f;
 
-
-		} else {
-
-			viewerParams.filenames[p].forEach( function(f, j) {
-				//console.log("f = ", f)
-				if (internalData){
-					console.log('==== compiling internal data', f)
-					Object.keys(internalData).forEach(function(key,k){
-						//if I was sent a prefix, this could be simplified
-						if (key.includes(f[0])) compileJSONData(internalData[key], p, callback, initialLoadFrac)
-					})
-					if (internalData && i == viewerParams.partsKeys.length - 1 && j == viewerParams.filenames[p].length - 1) viewerParams.newInternalData = {};
-
-				} else {
-					var readf = null;
-					if (f.constructor == Array){
-						readf = "data/"+f[0];
-					} else if (j == 0){
-						readf = "data/"+f
+				// alright, let's go ahead and read the file
+				if (readf != null){
+					// read JSON files (including octree.json files
+					//  which reference .fftree files. Those are loaded
+					//  separately on demand.)
+					if (readf.toLowerCase().includes('.json')){
+						d3.json(prefix+readf, function(foo) {
+							compileJSONData(foo, p, callback, initialLoadFrac);
+						});
 					}
-					if (readf != null){
-						// read JSON files
-						if (readf.toLowerCase().includes('.json')){
-							d3.json(prefix+readf, function(foo) {
-								compileJSONData(foo, p, callback, initialLoadFrac);
-							});
-						}
-						// read binary .ffly files
-						else if (readf.toLowerCase().includes('.ffly' )){
-							loadFFLYKaitai(prefix+readf, function(foo){
-								compileFFLYData(foo, p, callback, initialLoadFrac)}
-							);
-						}
+					// read binary .ffly files
+					else if (readf.toLowerCase().includes('.ffly' )){
+						loadFFLYKaitai(prefix+readf, function(foo){
+							compileFFLYData(foo, p, callback, initialLoadFrac)}
+						);
 					}
 				}
-			});
-		}
+			}
+		});
 	});
 }
-
 
 // callCompileData ->
 function compileJSONData(data, p, callback, initialLoadFrac=0){
@@ -1253,6 +1232,7 @@ function compileJSONData(data, p, callback, initialLoadFrac=0){
 		}
 	});
 
+	// did we just load an octree.json file? let's initialize the octree then.
 	if (data.hasOwnProperty('octree')) abg_initOctree(p,data);
 
 
@@ -1270,10 +1250,8 @@ function compileJSONData(data, p, callback, initialLoadFrac=0){
 		//console.log('in compile JSON data', p, data, viewerParams.counting, countParts(),'loadfrac', loadfrac)
 	}
 	if ('options' in viewerParams.parts){
-		//console.log(d3.selectAll('#loadingRect').node().getBoundingClientRect().width)
-		//console.log("counting", countParts(), viewerParams.parts.totalSize, viewerParams.loadfrac)
+		// we're done loading!
 		if (countParts() ==  viewerParams.parts.totalSize && viewerParams.parts.options.loaded){
-			//console.log("here")
 
 			var index = viewerParams.partsKeys.indexOf('options');
 			if (index > -1) {
@@ -1281,58 +1259,13 @@ function compileJSONData(data, p, callback, initialLoadFrac=0){
 				viewerParams.parts.options0 = JSON.parse(JSON.stringify(viewerParams.parts.options));
 			}
 
-			if (viewerParams.haveAnyOctree) addKeysForOctree();
-
 			callback(); 
 		}
 	}
 }
 
-function addKeysForOctree(){
-	//if we are using the octree, initialize a few of the parts keys so that we can generate a GUI
-	//users should specify values in the options/settings files explicitly for octree
-	if (viewerParams.parts.options.hasOwnProperty('filterVals')){
-		viewerParams.partsKeys.forEach(function(p){
-			if (viewerParams.haveOctree[p]){
-				viewerParams.parts[p].Coordinates = [];
-				viewerParams.parts[p].filterKeys = [];
-				Object.keys(viewerParams.parts.options.filterVals[p]).forEach(function(key){
-					var useKey = key;
-					if (key == 'Velocities'){
-						useKey = 'magVelocities';
-						viewerParams.parts[p].Velocities = viewerParams.parts.options.filterLims[p][key];
-					}
-					viewerParams.parts[p].filterKeys.push(useKey)
-					viewerParams.parts[p][useKey] = viewerParams.parts.options.filterLims[p][key];
-				})
-			}
-		})
-	}
-	if (viewerParams.parts.options.hasOwnProperty('colormapVals')){
-		viewerParams.partsKeys.forEach(function(p){
-			if (viewerParams.haveOctree[p]){
-				viewerParams.parts[p].colormapKeys = [];
-				Object.keys(viewerParams.parts.options.colormapVals[p]).forEach(function(key){
-					var useKey = key;
-					if (key == 'Velocities'){
-						useKey = 'magVelocities';
-					}
-					viewerParams.parts[p].colormapKeys.push(useKey)
-					viewerParams.parts[p][useKey] = viewerParams.parts.options.colormapLims[p][key];
-				})
-			}
-		})
-	}
-	viewerParams.partsKeys.forEach(function(p){
-		if (viewerParams.haveOctree[p]){
-			viewerParams.plotNmax[p] = 100; //this will be used as a percentage value in the GUI
-			viewerParams.octree.minFracParticlesToDraw[p] = viewerParams.octree.minFracParticlesToDraw.default;
-			viewerParams.octree.particleDefaultSizeScale[p] = viewerParams.octree.particleDefaultSizeScale.default;
-			viewerParams.octree.normCameraDistance[p] = viewerParams.octree.normCameraDistance.default;
-			
-		}
-	});
-}
+// read a file, convert to a blob, and then pass the kaitai struct
+//  to be translated into the viewerParams!
 function loadFFLYKaitai(fname,callback){
 	// initialize a FileReader object
 	var binary_reader = new FileReader;
@@ -1353,6 +1286,7 @@ function loadFFLYKaitai(fname,callback){
 	});
 };
 
+// translate the katai format to viewerParams
 function compileFFLYData(data, p, callback, initialLoadFrac=0){
 	var hasVelocities = data.fireflyHeader.hasVelocities;
 	var this_parts = viewerParams.parts[p];
