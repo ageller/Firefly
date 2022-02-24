@@ -223,7 +223,7 @@ function defineViewerParams(){
 			this.maxToRemove = 50;
 			this.pIndex = 0; //will be used to increment through the particles in the render loop
 
-			this.toDraw = [];
+			this.toDraw = {};
 			this.waitingToDraw = false;
 			this.boxSize = 0; //will be set based on the root node
 

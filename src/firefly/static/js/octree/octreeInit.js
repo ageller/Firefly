@@ -1,6 +1,8 @@
 function abg_initOctree(pkey,data){
 
 	viewerParams.haveOctree[pkey] = true;
+
+	viewerParams.octree.toDraw[pkey] = [];
 	viewerParams.haveAnyOctree = true;
 
 	// flag to  draw the yellow octree boxes around the nodes

@@ -6,8 +6,10 @@ function containsPoint(t){
 
 function updateOctree(){
 
+	var pkey = viewerParams.partsKeys[viewerParams.octree.pIndex];
+
 	//  check if we can draw a new node
-	if (!viewerParams.octree.waitingToDraw && viewerParams.octree.toDraw.length > 0 ) drawNextOctreeNode();
+	if (!viewerParams.octree.waitingToDraw && viewerParams.octree.toDraw[pkey].length > 0 ) drawNextOctreeNode();
 
 	// check if we can remove  a node
 	if (!viewerParams.octree.waitingToRemove && viewerParams.octree.toRemove.length > 0) removeNextOctreeNode();
@@ -18,11 +20,9 @@ function updateOctree(){
 		//removeDuplicatesFromScene();
 		//updateOctreeLoadingBar(); //in case this doesn't get updated properly during the draw loop (can be 1 or 2 off after last draw in completed)
 	//}
-
 	
 	//rather than a for loop to go through the particles, I am going to manually iterate so that I can draw from one each draw pass
 	//this way the scene gets filled in more regularly, instead of filling in one particle group at a time
-	var pkey = viewerParams.partsKeys[viewerParams.octree.pIndex];
 	octree = viewerParams.parts[pkey].octree;
 
 	openCloseNodes(octree['']);
@@ -210,6 +210,7 @@ function load_buffer(node,callback,skip_queue=false){
 		//viewerParams.memoryUsage < viewerParams.octree.memoryLimit && // we have enough memory
 		//toDrawIDs.length < viewerParams.octree.maxFilesToRead && 
 		!node.mesh && // not already in the scene
+		!node.drawn && // not in the process of being drawn
 		!checkInQueue(node) // not already in the draw queue
 		) { 
 			
@@ -219,7 +220,7 @@ function load_buffer(node,callback,skip_queue=false){
 			checkInQueue(node,'remove',true)
 
 			// need to create a new mesh for this node
-			viewerParams.octree.toDraw.push([ node, callback]);
+			viewerParams.octree.toDraw[node.pkey].push([ node, callback]);
 	} 
 	else return callback(node);
 }
@@ -228,7 +229,8 @@ function free_buffer(node,callback,skip_queue=false){
 	if (skip_queue) return removeOctreeNode(node,callback);
 
 	if (
-		node.mesh
+		node.mesh &&
+		node.drawn // two checks to see if it has been drawn
 		//viewerParams.octree.toRemove.length < viewerParams.octree.maxToRemove && 
 		//node.particles.Coordinates.length > Math.floor(node.Nparticles*viewerParams.octree.minFracParticlesToDraw[p]) && 
 		) {
@@ -250,7 +252,7 @@ function free_buffer(node,callback,skip_queue=false){
 function checkInQueue(node,queue='draw',extract=false){
 	// check if this node is already in the queue to be drawn
 	var contained = false;
-	var this_queue = queue == 'draw' ? viewerParams.octree.toDraw : viewerParams.octree.toRemove
+	var this_queue = queue == 'draw' ? viewerParams.octree.toDraw[node.pkey] : viewerParams.octree.toRemove
 	index = this_queue.forEach(
 		function (ele,index){
 			if (ele[0].obj_name==node.obj_name){ 
@@ -320,7 +322,8 @@ function amg_updateOctree(){
 function drawNextOctreeNode(){
 
 	// take the next in line to draw
-	var tuple = viewerParams.octree.toDraw.shift(); // shift takes the first element, pop does the last
+	var pkey = viewerParams.partsKeys[viewerParams.octree.pIndex];
+	var tuple = viewerParams.octree.toDraw[pkey].shift(); // shift takes the first element, pop does the last
 
 	// unpack the tuple
 	var node = tuple[0];
@@ -330,7 +333,7 @@ function drawNextOctreeNode(){
 	//  we'll just skip it rather than move to the next element
 	while (node.mesh && viewerParams.octree.toDraw.length){
 		// take the next in line to draw
-		tuple = viewerParams.octree.toDraw.shift(); // shift takes the first element, pop does the last
+		tuple = viewerParams.octree.toDraw[pkey].shift(); // shift takes the first element, pop does the last
 		// unpack the tuple
 		node = tuple[0];
 		callback = tuple[1];}
