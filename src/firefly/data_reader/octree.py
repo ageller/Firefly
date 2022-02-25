@@ -343,7 +343,23 @@ class Octree(object):
                         node.buffer_velss if hasattr(node,'buffer_velss') else None)
                     binary_writer.nparts = node.buffer_size
                     binary_writer.nfields = node.nfields-3
+
+                    ## we /were/ accumulating a weighted quantity for the CoM particles
+                    ##  but /now/ we have to divide that weight back out
+                    if 'Masses' in self.field_names:
+                        weights = np.array(node.buffer_fieldss)[:,self.field_names.index('Masses')]
+                    else: weights = np.ones(node.buffer_size)
+
                     binary_writer.fields = np.array(node.buffer_fieldss)[:,:-3]
+
+                    ## renormalize every field except Masses
+                    for i,field in enumerate(self.field_names[:-3]):
+                        if field!= 'Masses': binary_writer.fields[:,i]/=weights
+
+                    ## take the transpose because binary_writer wants Nfields x Nparts
+                    ##  but make sure numpy doesn't do anything funny like give you a view 
+                    ##  of the transpose. change it in memory numpy!!
+                    binary_writer.fields = np.array(binary_writer.fields.T,order='C')
 
                     ## write the data to the open binary file and in so doing
                     ##  count the length in bytes of this node
