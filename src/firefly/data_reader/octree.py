@@ -222,11 +222,8 @@ class Octree(object):
         weights = (fields['Masses'] if 'Masses' in fields else 
             np.ones(self.coordinates.shape[0]))
 
-        for key in fields.keys():
-            if key != 'Masses': fields[key] = fields[key]*weights
-
         for i,axis in enumerate(['x','y','z']):
-            fields[f'com_{axis}'] = self.coordinates[:,i]*weights
+            fields[f'com_{axis}'] = self.coordinates[:,i]
         ##  we'll divide the accumulated [com_x,com_y,com_z] / accumulated weights
         ##  for each node when we output, this will give us a position in the octant for our node
         ##  if Masses is already in fields we'll be accumulating it anyway, if it's not then 
@@ -234,7 +231,18 @@ class Octree(object):
 
         self.field_names = list(fields.keys())
         ## group fields and transpose so we can index it to get a particle's field values
-        self.fieldss = np.array([fields[key] for key in self.field_names],ndmin=2).T
+        self.fieldss = np.array([
+            fields[key] if key == "Masses" else fields[key]*weights 
+            for key in self.field_names],ndmin=2).T
+        
+        settings = particle_group.attached_settings
+        ## find the minimum and maximum value of each field
+        ##  for initializing the filter if user values aren't passed.
+        for i,key in enumerate(self.field_names[:-3]):
+            if settings['filterLims'][particle_group.UIname][key] is None:
+                settings['filterLims'][particle_group.UIname][key]=[fields[key].min(), fields[key].max()]
+            if settings['filterVals'][particle_group.UIname][key] is None:
+                settings['filterVals'][particle_group.UIname][key]=[fields[key].min(), fields[key].max()]
 
         self.filter_flags = particle_group.tracked_filter_flags
         self.colormap_flags = particle_group.tracked_colormap_flags
