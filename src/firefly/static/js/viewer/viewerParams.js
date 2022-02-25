@@ -210,14 +210,14 @@ function defineViewerParams(){
 
 			//these should be set from the Options file (and same with some below)
 			this.minFracParticlesToDraw = {'default':0.001}; //minimum fraction per node to draw (unless there are less particles than this total in the node) >0;  
-			this.particleDefaultSizeScale = {'default':0.1};
+			this.particleDefaultSizeScale = {'default':1};
 
 			//normalization for the camera distance in deciding how many particles to draw
 			//could be included in GUI, will be reset in pruneOctree to be a fraction of boundingBox
 			this.normCameraDistance = {'default':1000};
 
 			//default minimum particles size
-			this.defaultMinParticleSize = 0.1;
+			this.defaultMinParticleSize = 1;
 
 			this.toRemove = [];
 			this.maxToRemove = 50;

@@ -22,12 +22,16 @@ function abg_initOctree(pkey,data){
 	viewerParams.parts[pkey].doSPH = true
 	viewerParams.parts[pkey].SmoothingLength = Array(viewerParams.parts[pkey].Coordinates_flat.length/3)
 
+	// array that prevents filtering from changing the size of nodes that aren't drawn (i.e. showing them
+	//  when the octree has "filtered" them out).
+	viewerParams.parts[pkey].IsDrawn = Array(viewerParams.parts[pkey].Coordinates_flat.length/3)
+
 	function initializeNode(node){
 		// name of this node's mesh, if it's not the the root we'll use
 		//  it's octant indices otherwise we'll use the string 'root'
 		node.obj_name = pkey + '-' +(node.name.length != 0 ? node.name : 'root' )
 		node.current_state = 'draw'
-		node.com_shown=true;
+		node.com_shown = true;
 		node.mesh = null;
 
 		// let's store the pkey and octree in the node

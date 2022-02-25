@@ -132,6 +132,9 @@ function createParticleGeometry(p, parts, start, end){
 
 	}
 
+	// store the particle data in the "userData" dictionary so we can
+	//  get it back later for filtering, etc... !
+	geo.userData = parts;
 	return geo;
 }
 

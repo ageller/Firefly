@@ -280,13 +280,13 @@ function update_particle_mesh_UI_values(p,m,time){
 	m.material.uniforms.showColormap.value = viewerParams.showColormap[p];
 
 	// apply static color
-	if (m.name.includes('Standard')){
-		m.material.uniforms.color.value = new THREE.Vector4(
-			viewerParams.Pcolors[p][0],
-			viewerParams.Pcolors[p][1],
-			viewerParams.Pcolors[p][2],
-			viewerParams.Pcolors[p][3]);
-	}
+	//if (m.name.includes('Standard')){
+	m.material.uniforms.color.value = new THREE.Vector4(
+		viewerParams.Pcolors[p][0],
+		viewerParams.Pcolors[p][1],
+		viewerParams.Pcolors[p][2],
+		viewerParams.Pcolors[p][3]);
+	//}
 }
 
 function update_particle_mesh_velocity_vectors(p,m,cameraX,cameraY,time){
@@ -314,74 +314,60 @@ function update_particle_mesh_velocity_vectors(p,m,cameraX,cameraY,time){
 
 function update_particle_mesh_filter(p,m,time){
 
-	//switching back to previous method of filtering,
-	//but now setting radii to zero, and also setting to sizes back to 1
-	//for all particles (in case turned off below)
+	// read particle data directly from the mesh
+	//   rather than from viewerParams
+	var this_parts = m.geometry.userData;
 
-	// if the filter has been updated for this particle type,
-	// or if the particle type has been switched off,
-	// or if the colormap has been changed. Flags are set in the UI
-	// ABG: TODO why do we enter this conditional for updateOnOff or updateColormap?
-	if (viewerParams.updateFilter[p] || viewerParams.updateOnOff[p] || viewerParams.updateColormap[p]){
+	// if the filter handles in  the UI have been updated for this particle type
+	//  then we need to reapply the filter
+	if (viewerParams.updateFilter[p] ){
 		var radiusScale = m.geometry.attributes.radiusScale.array;
 		var alpha = m.geometry.attributes.alpha.array;
-		var fk;
+		var fkey;
+
 		// loop through this particle group's particles
-
-		var node = null;
-		if (viewerParams.haveOctree[p]){
-			console.log("NEED TO LOOP THROUGH PARTICLE NODES AND APPLY FILTER")
-		}
-
 		for( var ii = 0; ii < radiusScale.length; ii ++ ) {
+			if ('IsDrawn' in this_parts && !this_parts['IsDrawn'][ii]) continue;
+
 			// fill radiusScale array (alias for geometry buffer's radius scale)
 			// with default values
-			if ('SmoothingLength' in viewerParams.parts[p]){
-				radiusScale[ii] = viewerParams.parts[p].SmoothingLength[ii];
+			if ('SmoothingLength' in this_parts){
+				radiusScale[ii] = this_parts['SmoothingLength'][ii];
 			}
 			else{radiusScale[ii] = 1.;}
 
 			// set default alpha to 1
 			alpha[ii] = 1.;
 
-			// if the UI has told us the filter needs to be updated
-			if (viewerParams.updateFilter[p]){
+			// apply each filter additively, loop over each filter key
+			for (k=0; k<viewerParams.fkeys[p].length; k++){
+				fkey = viewerParams.fkeys[p][k];
 
-				// apply each filter additively, loop over each filter key
-				for (k=0; k<viewerParams.fkeys[p].length; k++){
-					fk = viewerParams.fkeys[p][k];
+				// if the field value for this particle exists:
+				if (this_parts[fkey]) {
+					var val = this_parts[fkey][ii];
+					// we want to hide this particle
+					if (// handle default case, < min and > max -> you're out!
+						(!viewerParams.invertFilter[p][fkey] &&  
+						(val < viewerParams.filterVals[p][fkey][0] || 
+						val > viewerParams.filterVals[p][fkey][1])) || 
+						// handle inverse case, > min and < max -> you're out!
+						( (viewerParams.invertFilter[p][fkey] && 
+						(val > viewerParams.filterVals[p][fkey][0] && 
+						val < viewerParams.filterVals[p][fkey][1])))   ){
 
-					// if the field value for this particle exists:
-					if (viewerParams.parts[p][fk] != null) {
-						var val = (viewerParams.filterVals[p][fk][0] + viewerParams.filterVals[p][fk][1])/2.;
-						if (viewerParams.haveOctree[p]){
-							if (node){
-								if (node.particles.hasOwnProperty(fk)) val = node.particles[fk][ii];
-							}
-						} else {
-							if (viewerParams.parts[p].hasOwnProperty(fk)) val = viewerParams.parts[p][fk][ii];
-						}
-						// we want to hide this particle
-						if ( (!viewerParams.invertFilter[p][fk] &&  
-							(val < viewerParams.filterVals[p][fk][0] || 
-							val > viewerParams.filterVals[p][fk][1])) || 
-							( (viewerParams.invertFilter[p][fk] && 
-							(val > viewerParams.filterVals[p][fk][0] && 
-							val < viewerParams.filterVals[p][fk][1])))   ){
-
-							// set the radius to 0 and the alpha to 0
-							radiusScale[ii] = 0.;
-							alpha[ii] = 0.;
-						} 
-					}// if (viewerParams.parts[p][fk] != null) 
-				}// for (k=0; k<viewerParams.fkeys[p].length; k++)
-			}// if (viewerParams.updateFilter[p])
+						// set the radius to 0 and the alpha to 0
+						radiusScale[ii] = 0.;
+						alpha[ii] = 0.;
+					} 
+				}// if (this_parts[fkey]) 
+			}// for (k=0; k<viewerParams.fkeys[p].length; k++)
 		}// for( var ii = 0; ii < radiusScale.length; ii ++ ) 
 
 		m.geometry.attributes.radiusScale.needsUpdate = true;
 		m.geometry.attributes.alpha.needsUpdate = true;					
 
-	}// if (viewerParams.updateFilter[p] || viewerParams.updateOnOff[p] || viewerParams.updateColormap[p])
+	}// if viewerParams.updateFilter[p]
 }
 
 function disable_particle_group_mesh(p,m,time){

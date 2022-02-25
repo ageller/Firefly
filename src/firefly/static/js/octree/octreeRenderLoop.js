@@ -188,6 +188,7 @@ function hideCoM(node){
 	mesh.geometry.attributes.radiusScale.needsUpdate = true;
 	mesh.geometry.attributes.alpha.needsUpdate = true;
 	node.com_shown = false;
+	viewerParams.parts[node.pkey].IsDrawn[node.node_index] = 0;
 }
 
 function showCoM(node){
@@ -199,6 +200,7 @@ function showCoM(node){
 	mesh.geometry.attributes.radiusScale.needsUpdate = true;
 	mesh.geometry.attributes.alpha.needsUpdate = true;
 	node.com_shown = true;
+	viewerParams.parts[node.pkey].IsDrawn[node.node_index] = 1;
 }
 
 function load_buffer(node,callback,skip_queue=false){
