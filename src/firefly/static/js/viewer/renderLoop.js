@@ -346,16 +346,11 @@ function update_particle_mesh_filter(p,m,time){
 				// if the field value for this particle exists:
 				if (this_parts[fkey]) {
 					var val = this_parts[fkey][ii];
+					var inside_filter = ( 
+						val > viewerParams.filterVals[p][fkey][0] && 
+						val < viewerParams.filterVals[p][fkey][1]);
 					// we want to hide this particle
-					if (// handle default case, < min and > max -> you're out!
-						(!viewerParams.invertFilter[p][fkey] &&  
-						(val < viewerParams.filterVals[p][fkey][0] || 
-						val > viewerParams.filterVals[p][fkey][1])) || 
-						// handle inverse case, > min and < max -> you're out!
-						( (viewerParams.invertFilter[p][fkey] && 
-						(val > viewerParams.filterVals[p][fkey][0] && 
-						val < viewerParams.filterVals[p][fkey][1])))   ){
-
+					if (viewerParams.invertFilter[p][fkey] ? inside_filter : !inside_filter){
 						// set the radius to 0 and the alpha to 0
 						radiusScale[ii] = 0.;
 						alpha[ii] = 0.;
