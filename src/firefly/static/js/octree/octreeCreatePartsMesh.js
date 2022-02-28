@@ -103,10 +103,15 @@ function drawOctreeNode(node, callback){
 			minSize, sizeScale);
 
 		node.drawPass = viewerParams.octree.drawPass;
+		/*
 		node.mesh.material.uniforms.color[0]=1
 		node.mesh.material.uniforms.color[1]=0
 		node.mesh.material.uniforms.color[2]=0
 		node.mesh.material.needsUpdate = true;
+		*/
+
+		// spawn in new mesh with any filters, UI values, etc...
+		update_particle_mesh(node.pkey,node.mesh,true);
 
 		viewerParams.octree.loadingCount[node.pkey]+=1
 		viewerParams.octree.waitingToDraw = false;

@@ -135,53 +135,14 @@ function update_keypress(time){
 
 function update_particle_groups(time){
 
-	// find the camera's x and y axes for velocity vectors
-	// quaternion is orientation of the camera WRT data space
-	var cameraX =  new THREE.Vector3(1,0,0);
-	var cameraY =  new THREE.Vector3(0,1,0);
-	cameraX.applyQuaternion(viewerParams.camera.quaternion);
-	cameraY.applyQuaternion(viewerParams.camera.quaternion);
-
-
-
-
-	// TODO playback should be moved to full UI tweening in the future
 	viewerParams.partsKeys.forEach(function(p,i){
-
 		// move filter handle sliders if playback is enabled
+		// TODO playback should be moved to full UI tweening in the future
 		update_particle_playback(p,time);
 		
-			
 		//check on all the UI inputs for each particle type
-		viewerParams.partsMesh[p].forEach( function( m, j ) {
-			
-			// send velocity vector type (line/arrow/cone) to material buffer
-			m.material.uniforms.velType.value = viewerParams.velopts[viewerParams.velType[p]];
-
-			// send column density flag to the material buffer
-			m.material.uniforms.columnDensity.value = viewerParams.columnDensity;
-
-			if (viewerParams.showParts[p]) {
-				// apply static color, colormap settings, 
-				// and particle group radius velocity vector scale factors
-				update_particle_mesh_UI_values(p,m,time);
-	
-				// handle velocity vectors
-				update_particle_mesh_velocity_vectors(p,m,cameraX,cameraY,time);
-				
-				// apply particle radii and alpha values 
-				// according to current filter handle settings
-				update_particle_mesh_filter(p,m,time);
-
-				// update the velocity time in the animation loop
-				update_velocity_animation(p,m);
-	
-			} 
-			else { 
-				// set radii and alpha values to 0 to hide this particle group
-				disable_particle_group_mesh(p,m,time);	
-			}
-		});// viewerParams.partsMesh[p].forEach( function( m, j )
+		viewerParams.partsMesh[p].forEach( 
+			function( m, j ) {update_particle_mesh(p,m,viewerParams.updateFilter[p])});
 
 		if (!viewerParams.parts[p].hasOwnProperty('octree_init') || !viewerParams.parts[p].octree_init){
 			evaluateFunctionOnOctreeNodes(
@@ -264,7 +225,34 @@ function update_particle_playback(p,time){
 
 }
 
-function update_particle_mesh_UI_values(p,m,time){
+ function update_particle_mesh(p,m,update_filter=false){
+	// send velocity vector type (line/arrow/cone) to material buffer
+	m.material.uniforms.velType.value = viewerParams.velopts[viewerParams.velType[p]];
+
+	// send column density flag to the material buffer
+	m.material.uniforms.columnDensity.value = viewerParams.columnDensity;
+
+	if (viewerParams.showParts[p]) {
+		// apply static color, colormap settings, 
+		// and particle group radius velocity vector scale factors
+		update_particle_mesh_UI_values(p,m);
+
+		// handle velocity vectors
+		update_particle_mesh_velocity_vectors(p,m);
+		
+		// apply particle radii and alpha values 
+		// according to current filter handle settings
+		if (update_filter) update_particle_mesh_filter(p,m);
+
+		update_velocity_animation(p,m);
+
+	} 
+	// set radii and alpha values to 0 to hide this particle group
+	else disable_particle_group_mesh(p,m);	
+ }
+
+
+function update_particle_mesh_UI_values(p,m){
 	// apply global decimation
 	var Nfac = 1;
 	if (viewerParams.haveOctree[p]) Nfac = m.geometry.attributes.radiusScale.array.length/100.; // the 100 factor is to account for plotNmax being a percent
@@ -289,7 +277,14 @@ function update_particle_mesh_UI_values(p,m,time){
 	//}
 }
 
-function update_particle_mesh_velocity_vectors(p,m,cameraX,cameraY,time){
+function update_particle_mesh_velocity_vectors(p,m){
+
+	// find the camera's x and y axes for velocity vectors
+	// quaternion is orientation of the camera WRT data space
+	var cameraX =  new THREE.Vector3(1,0,0);
+	var cameraY =  new THREE.Vector3(0,1,0);
+	cameraX.applyQuaternion(viewerParams.camera.quaternion);
+	cameraY.applyQuaternion(viewerParams.camera.quaternion);
 
 	if (viewerParams.showVel[p]){
 		// enable velocity vectors
@@ -312,7 +307,7 @@ function update_particle_mesh_velocity_vectors(p,m,cameraX,cameraY,time){
 	}
 }
 
-function update_particle_mesh_filter(p,m,time){
+function update_particle_mesh_filter(p,m){
 
 	// read particle data directly from the mesh
 	//   rather than from viewerParams
@@ -320,52 +315,49 @@ function update_particle_mesh_filter(p,m,time){
 
 	// if the filter handles in  the UI have been updated for this particle type
 	//  then we need to reapply the filter
-	if (viewerParams.updateFilter[p] ){
-		var radiusScale = m.geometry.attributes.radiusScale.array;
-		var alpha = m.geometry.attributes.alpha.array;
-		var fkey;
+	var radiusScale = m.geometry.attributes.radiusScale.array;
+	var alpha = m.geometry.attributes.alpha.array;
+	var fkey;
 
-		// loop through this particle group's particles
-		for( var ii = 0; ii < radiusScale.length; ii ++ ) {
-			if ('IsDrawn' in this_parts && !this_parts['IsDrawn'][ii]) continue;
+	// loop through this particle group's particles
+	for( var ii = 0; ii < radiusScale.length; ii ++ ) {
+		if ('IsDrawn' in this_parts && !this_parts['IsDrawn'][ii]) continue;
 
-			// fill radiusScale array (alias for geometry buffer's radius scale)
-			// with default values
-			if ('SmoothingLength' in this_parts){
-				radiusScale[ii] = this_parts['SmoothingLength'][ii];
-			}
-			else{radiusScale[ii] = 1.;}
+		// fill radiusScale array (alias for geometry buffer's radius scale)
+		// with default values
+		if ('SmoothingLength' in this_parts){
+			radiusScale[ii] = this_parts['SmoothingLength'][ii];
+		}
+		else{radiusScale[ii] = 1.;}
 
-			// set default alpha to 1
-			alpha[ii] = 1.;
+		// set default alpha to 1
+		alpha[ii] = 1.;
 
-			// apply each filter additively, loop over each filter key
-			for (k=0; k<viewerParams.fkeys[p].length; k++){
-				fkey = viewerParams.fkeys[p][k];
+		// apply each filter additively, loop over each filter key
+		for (k=0; k<viewerParams.fkeys[p].length; k++){
+			fkey = viewerParams.fkeys[p][k];
 
-				// if the field value for this particle exists:
-				if (this_parts[fkey]) {
-					var val = this_parts[fkey][ii];
-					var inside_filter = ( 
-						val > viewerParams.filterVals[p][fkey][0] && 
-						val < viewerParams.filterVals[p][fkey][1]);
-					// we want to hide this particle
-					if (viewerParams.invertFilter[p][fkey] ? inside_filter : !inside_filter){
-						// set the radius to 0 and the alpha to 0
-						radiusScale[ii] = 0.;
-						alpha[ii] = 0.;
-					} 
-				}// if (this_parts[fkey]) 
-			}// for (k=0; k<viewerParams.fkeys[p].length; k++)
-		}// for( var ii = 0; ii < radiusScale.length; ii ++ ) 
+			// if the field value for this particle exists:
+			if (this_parts[fkey]) {
+				var val = this_parts[fkey][ii];
+				var inside_filter = ( 
+					val > viewerParams.filterVals[p][fkey][0] && 
+					val < viewerParams.filterVals[p][fkey][1]);
+				// we want to hide this particle
+				if (viewerParams.invertFilter[p][fkey] ? inside_filter : !inside_filter){
+					// set the radius to 0 and the alpha to 0
+					radiusScale[ii] = 0.;
+					alpha[ii] = 0.;
+				} 
+			}// if (this_parts[fkey]) 
+		}// for (k=0; k<viewerParams.fkeys[p].length; k++)
+	}// for( var ii = 0; ii < radiusScale.length; ii ++ ) 
 
-		m.geometry.attributes.radiusScale.needsUpdate = true;
-		m.geometry.attributes.alpha.needsUpdate = true;					
-
-	}// if viewerParams.updateFilter[p]
+	m.geometry.attributes.radiusScale.needsUpdate = true;
+	m.geometry.attributes.alpha.needsUpdate = true;					
 }
 
-function disable_particle_group_mesh(p,m,time){
+function disable_particle_group_mesh(p,m){
 	// disable the entire particle group, set color to 0,0,0,0 and radius to 0
 	m.material.uniforms.color.value = new THREE.Vector4(0);
 	m.material.uniforms.oID.value = -1;
