@@ -239,10 +239,9 @@ class Octree(object):
         ## find the minimum and maximum value of each field
         ##  for initializing the filter if user values aren't passed.
         for i,key in enumerate(self.field_names[:-3]):
-            if settings['filterLims'][particle_group.UIname][key] is None:
-                settings['filterLims'][particle_group.UIname][key]=[fields[key].min(), fields[key].max()]
-            if settings['filterVals'][particle_group.UIname][key] is None:
-                settings['filterVals'][particle_group.UIname][key]=[fields[key].min(), fields[key].max()]
+            for setting_key in ['filterLims','filterVals','colormapLims','colormapVals']:
+                if settings[setting_key][particle_group.UIname][key] is None:
+                    settings[setting_key][particle_group.UIname][key]=[fields[key].min(), fields[key].max()]
 
         self.filter_flags = particle_group.tracked_filter_flags
         self.colormap_flags = particle_group.tracked_colormap_flags
