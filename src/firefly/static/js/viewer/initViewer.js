@@ -270,6 +270,9 @@ function initPVals(){
 			viewerParams.partsMesh[p] = [];
 		}
 
+		// store the name inside the dictionary
+		viewerParams.parts[p].pkey = p;
+
 		//misc
 		if (!viewerParams.haveOctree[p]) viewerParams.plotNmax[p] = viewerParams.parts.count[p];
 		viewerParams.PsizeMult[p] = 1.;
@@ -305,8 +308,8 @@ function initPVals(){
 		viewerParams.animateVelDt[p] = 0.;
 		viewerParams.animateVelTmax[p] = 0.;
 		if (viewerParams.parts[p].Velocities_flat != null){
-			if (!viewerParams.reset && !viewerParams.haveOctree[p]){
-				calcVelVals(p);
+			if (!viewerParams.reset){
+				calcVelVals(viewerParams.parts[p]);
 				if(!viewerParams.parts[p].hasOwnProperty("filterKeys")){
 					viewerParams.parts[p].filterKeys = [];
 				}
@@ -583,8 +586,8 @@ function applyOptions(){
 			viewerParams.maxVrange = viewerParams.parts.options.maxVrange; //maximum dynamic range for length of velocity vectors
 			for (var i=0; i<viewerParams.partsKeys.length; i++){
 				var p = viewerParams.partsKeys[i];
-				if (viewerParams.parts[p].Velocities_flat != null && !viewerParams.haveOctree[p]){
-					calcVelVals(p);     
+				if (viewerParams.parts[p].Velocities_flat != null){
+					calcVelVals(viewerParams.parts[p]);     
 				}
 			}
 		}
@@ -1479,16 +1482,16 @@ function setBoxSize(coords_flat){
 }
 
 // applyOptions -> 
-function calcVelVals(p){
-	viewerParams.parts[p].VelVals = [];
-	viewerParams.parts[p].magVelocities = [];
-	viewerParams.parts[p].NormVel = [];
+function calcVelVals(this_parts){
+	this_parts.VelVals = [];
+	this_parts.magVelocities = [];
+	this_parts.NormVel = [];
 	var mag, angx, angy, v;
 	var max = -1.;
 	var min = 1.e20;
 	var vdif = 1.;
-	for (var i=0; i<viewerParams.parts.count[p]; i++){
-		v = viewerParams.parts[p].Velocities_flat.slice(3*i,3*(i+1));
+	for (var i=0; i<this_parts.Coordinates_flat.length/3; i++){
+		v = this_parts.Velocities_flat.slice(3*i,3*(i+1));
 		mag = Math.sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
 		angx = Math.atan2(v[1],v[0]);
 		angy = Math.acos(v[2]/mag);
@@ -1498,12 +1501,12 @@ function calcVelVals(p){
 		if (mag < min){
 			min = mag;
 		}
-		viewerParams.parts[p].VelVals.push([v[0],v[1],v[2]]);
-		viewerParams.parts[p].magVelocities.push(mag);
+		this_parts.VelVals.push([v[0],v[1],v[2]]);
+		this_parts.magVelocities.push(mag);
 	}
 	vdif = Math.min(max - min, viewerParams.maxVrange);
-	for (var i=0; i<viewerParams.parts.count[p]; i++){
-		viewerParams.parts[p].NormVel.push( THREE.Math.clamp((viewerParams.parts[p].magVelocities[i] - min) / vdif, 0., 1.));
+	for (var i=0; i<this_parts.Coordinates_flat.length/3; i++){
+		this_parts.NormVel.push( THREE.Math.clamp((this_parts.magVelocities[i] - min) / vdif, 0., 1.));
 	}
 }
 
