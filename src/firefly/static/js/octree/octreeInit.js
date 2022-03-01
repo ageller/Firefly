@@ -89,11 +89,16 @@ function loadFFTREEKaitai(node,callback){
 function compileFFTREEData(kaitai_format,node,callback){
 
 	node.particles = {}
+	node.particles.pkey = node.pkey
+
 	hasVelocities = kaitai_format.octnodeHeader.hasVelocities
 	
 	node.particles.Coordinates_flat = kaitai_format.node.coordinatesFlat.flatVectorData.data.values;
 	// only load velocities if we actually have them
-	if (hasVelocities) node.particles.Velocities_flat = kaitai_format.node.velocitiesFlat.flatVectorData.data.values;
+	if (hasVelocities){
+		node.particles.Velocities_flat = kaitai_format.node.velocitiesFlat.flatVectorData.data.values;
+		calcVelVals(node.particles);
+	}
 
 	field_names = viewerParams.parts[node.pkey].field_names;
 	// and now load the scalar field data
