@@ -168,8 +168,7 @@ header:
         byte_size = 0
   
         byte_size += self.write_int(handle,self.nparts)
-        #byte_size += self.write_flag(handle,self.velocities is not None)
-        byte_size += self.write_flag(handle,False)
+        byte_size += self.write_flag(handle,self.velocities is not None)
         byte_size += self.write_int(handle,self.nfields)
 
         return byte_size
