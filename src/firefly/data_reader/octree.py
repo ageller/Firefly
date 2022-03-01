@@ -66,11 +66,12 @@ class OctNode(object):
 
         ## accumulator attributes
         self.npoints:int = 0
+        self.velocity = np.zeros(3)
         self.fields = np.zeros(nfields)
 
         ## buffers which will be flushed if max_npart_per_node is crossed
         self.buffer_coordss:list = []
-        #self.buffer_velss:list = []
+        self.buffer_velss:list = []
         self.buffer_fieldss:list = []
         self.buffer_size:int = 0
     
@@ -84,7 +85,9 @@ class OctNode(object):
         self,
         point:np.ndarray,
         fields:np.ndarray,
-        nodes:dict):
+        nodes:dict,
+        velocity:np.ndarray=None,
+        ):
 
         ## okay we're allowed to hold the raw data here
         if self.npoints < self.max_npart_per_node: 
@@ -93,13 +96,14 @@ class OctNode(object):
 
             ## TODO implement velocities separately
             ##  as an optional buffer
-            #self.raw_vels = []
+            if velocity is not None: self.buffer_velss += [velocity]
 
             ## store field data in the buffer
             self.buffer_fieldss += [fields]
 
             ## accumulate the point
             self.npoints+=1
+            if velocity is not None: self.velocity += velocity
             self.fields+=fields
             self.buffer_size+=1
         else: 
@@ -107,22 +111,28 @@ class OctNode(object):
             if hasattr(self,'buffer_coordss'): 
 
                 buffer_coordss = self.buffer_coordss + [point]
-                #raw_vels = self.raw_vels + [vels)]
+                if velocity is not None: buffer_velss = self.buffer_velss + [velocity]
                 buffer_fieldss = self.buffer_fieldss + [fields]
 
                 ## clear the buffers for this node
-                del self.buffer_coordss,self.buffer_fieldss
-                #del self.raw_vels
+                del self.buffer_coordss,self.buffer_fieldss,self.buffer_velss
                 self.buffer_size = 0
 
                 ## loop back through each point and end up in the other branch of the conditional
                 ##  now that we have deleted the buffers
-                for point,fields in zip(buffer_coordss,buffer_fieldss): self.addPointToOctree(point,fields,nodes)
+                for i,(point,fields) in enumerate(
+                    zip(buffer_coordss,buffer_fieldss)): 
+                    self.addPointToOctree(
+                        point,
+                        fields,
+                        nodes,
+                        buffer_velss[i] if velocity is not None else None)
             else: 
 
                 ## accumulate the point
                 self.npoints+=1
                 self.fields+=fields
+                if velocity is not None: self.velocity += velocity
 
                 ## use 3 bit binary number to index
                 ##  the octants-- for each element of the array 
@@ -145,7 +155,7 @@ class OctNode(object):
                     nodes[child_name] = child
                 else: child:OctNode = nodes[child_name]
 
-                child.addPointToOctree(point,fields,nodes)
+                child.addPointToOctree(point,fields,nodes,velocity)
 
     def merge_to_parent(self,nodes):
         parent = nodes[self.name[:-1]]
@@ -153,18 +163,19 @@ class OctNode(object):
         ## another child has already been merged into this parent
         if hasattr(parent,'buffer_coordss'):
             parent.buffer_coordss += self.buffer_coordss
+            parent.buffer_velss += self.buffer_velss
             parent.buffer_fieldss += self.buffer_fieldss
             parent.buffer_size += self.buffer_size
         ## this is the first child to be merged to this parent
         else:
             parent.buffer_coordss = [] + self.buffer_coordss
             parent.buffer_fieldss = [] + self.buffer_fieldss
-            #parent.buffer_velss = []
+            parent.buffer_velss = [] + self.buffer_velss
             parent.buffer_size = self.buffer_size
 
             ## clear this buffer so as to avoid duplicating data
             ##  as much as possible
-            del self.buffer_coordss,self.buffer_fieldss
+            del self.buffer_coordss,self.buffer_fieldss,self.buffer_velss
 class Octree(object):
 
     def __repr__(self):
@@ -199,9 +210,10 @@ class Octree(object):
         self.count = 0
 
         ## want the true mean, not the com-- we'll calculate the com at the end
-        root_center = np.mean(particle_group.coordinates,axis=0)
+        root_center = np.zeros(3)#np.mean(particle_group.coordinates,axis=0)
 
         self.coordinates = particle_group.coordinates - root_center
+        self.velocities = particle_group.velocities
 
         ## find the maximum extent in any coordinate direction and set the 
         ##  octree root bounding box to that size
@@ -214,13 +226,18 @@ class Octree(object):
         fields = dict(zip(particle_group.tracked_names,particle_group.tracked_arrays))
         if particle_group.decimation_factor > 1:
             self.coordinates = self.coordinates[::particle_group.decimation_factor]
-            for key in fields.keys():
-                fields[key] = fields[key][::particle_group.decimation_factor]
+            if self.velocities is not None: self.velocities = self.velocities[::particle_group.decimation_factor]
+            for key in fields.keys(): fields[key] = fields[key][::particle_group.decimation_factor]
 
         ## prepare field accumulators
         ##  add com calculators to fields
         weights = (fields['Masses'] if 'Masses' in fields else 
             np.ones(self.coordinates.shape[0]))
+
+        ## copy velocities to octree and weight by mass if available
+        if self.velocities is not None:
+            ##  don't use *=, this will make a copy
+            self.velocities = self.velocities*weights[:,None]
 
         for i,axis in enumerate(['x','y','z']):
             fields[f'com_{axis}'] = self.coordinates[:,i]
@@ -239,9 +256,11 @@ class Octree(object):
         ## find the minimum and maximum value of each field
         ##  for initializing the filter if user values aren't passed.
         for i,key in enumerate(self.field_names[:-3]):
+            if key in ['Masses']: vals = [0,fields[key].sum()*1.1]
+            else: vals = [fields[key].min()*0.9, fields[key].max()*1.1]
             for setting_key in ['filterLims','filterVals','colormapLims','colormapVals']:
                 if settings[setting_key][particle_group.UIname][key] is None:
-                    settings[setting_key][particle_group.UIname][key]=[fields[key].min(), fields[key].max()]
+                    settings[setting_key][particle_group.UIname][key]=vals
 
         self.filter_flags = particle_group.tracked_filter_flags
         self.colormap_flags = particle_group.tracked_colormap_flags
@@ -250,7 +269,7 @@ class Octree(object):
 
         ## initialize the octree node dictionary
         self.nodes = {'': OctNode(
-            root_center,
+            np.zeros(3),
             root_width,
             nfields=len(self.field_names),
             name='',
@@ -261,14 +280,14 @@ class Octree(object):
 
         node = self.nodes[start_octant]
         end = self.coordinates.shape[0]
+        velocity = None
         print(f"Bulding octree of {end:d} points")
         for i,(point,fields) in enumerate(zip(self.coordinates,self.fieldss)):
-            ## ABG NOTE: i wonder if there's a way to better predict which node we should start at
-            ##  for each particle, like by sorting the particles by distance or something
-            ## node = self.nodes[start_octant]
             if not (i % 10000): print("%.2f"%(i/end*100)+"%",end='\t') 
 
-            node.addPointToOctree(point,fields,self.nodes)
+            if self.velocities is not None: velocity = self.velocities[i]
+
+            node.addPointToOctree(point,fields,self.nodes,velocity)
 
         ## we want the nodelist to be sorted s.t. the highest refinement levels are first
         ##  so that if we decide to prune the tree all children will get added to their parent before
@@ -341,21 +360,23 @@ class Octree(object):
                     self.nodes[node.name].byte_offset = offset
                     self.nodes[node.name].buffer_filename = filename
 
+                    ## we /were/ accumulating a weighted quantity for the CoM particles
+                    ##  but /now/ we have to divide that weight back out
+                    if 'Masses' in self.field_names:
+                        weights = np.array(node.buffer_fieldss)[:,self.field_names.index('Masses')]
+                    else: weights = np.ones(node.buffer_size)
+
                     ## initialize the writer object that will 
                     ##  convert the data to binary and write it in the
                     ##  correct .fftree order
                     binary_writer = OctBinaryWriter(
                         filename,
                         node.buffer_coordss,
-                        node.buffer_velss if hasattr(node,'buffer_velss') else None)
+                        None if self.velocities is None else
+                            np.array(node.buffer_velss)/weights[:,None])
+
                     binary_writer.nparts = node.buffer_size
                     binary_writer.nfields = node.nfields-3
-
-                    ## we /were/ accumulating a weighted quantity for the CoM particles
-                    ##  but /now/ we have to divide that weight back out
-                    if 'Masses' in self.field_names:
-                        weights = np.array(node.buffer_fieldss)[:,self.field_names.index('Masses')]
-                    else: weights = np.ones(node.buffer_size)
 
                     binary_writer.fields = np.array(node.buffer_fieldss)[:,:-3]
 
@@ -446,6 +467,9 @@ class Octree(object):
             'octree':{},
             'Coordinates_flat':np.zeros(3*num_nodes)
             }
+
+        if self.velocities is not None: json_dict['Velocities_flat'] = np.zeros(3*num_nodes)
+
         for field in self.field_names[:-3]: json_dict[field] = np.zeros(num_nodes)
 
         for flag_name in ['filter_flags','colormap_flags','radius_flags']:
@@ -461,7 +485,7 @@ class Octree(object):
         ## self.node_list should be sorted
         print("Writing aggregate/meta data to octree.json")
         for node in self.node_list[::-1]:
-            if loud and (not node_index%int(num_nodes/100)): print(
+            if loud and (not node_index%(int(num_nodes/100)+1)): print(
                 "%.2f"%(100*node_index/num_nodes)+'%',
                 '<'+node.name+'>',end='\t',flush=True)
             node_dict = {}
@@ -479,7 +503,7 @@ class Octree(object):
                 weights = node.fields[self.field_names.index('Masses')]
             else: weights = node.npoints
 
-            com=com/weights
+            com = com/weights
 
             node_dict['center_of_mass'] = com.tolist()
 
@@ -504,6 +528,10 @@ class Octree(object):
                 #node_dict['npart_buffer_file'] = node.npart_buffer_file
 
             json_dict['Coordinates_flat'][3*node_index:3*(node_index+1)] = com
+
+            if self.velocities is not None: 
+                vcom = node.velocity/weights
+                json_dict['Velocities_flat'][3*node_index:3*(node_index+1)] = vcom
 
             node_dict['radius'] = 5*node_dict['width'] * np.clip(
                 (np.log10(node_dict['npoints']) - low_rscale)/
