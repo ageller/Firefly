@@ -3,7 +3,7 @@ import os
 
 from .reader import Reader,ParticleGroup
 
-from abg_python.snapshot_utils import openSnapshot
+from abg_python.snapshot_utils import openSnapshot,iterativeCoM
 
 class FIREreader(Reader):
     """This is an example of a "custom" Reader that has been tuned to 
@@ -147,18 +147,19 @@ class FIREreader(Reader):
         ####### execute generic Reader __init__ below #######
         super().__init__(**kwargs)
 
-    def loadData(self,com_offset=False):
+    def loadData(
+        self,
+        com = None
+        ):
         """Loads FIRE snapshot data using Alex Gurvich's
         :func:`firefly.data_reader.snapshot_utils.openSnapshot`.
         (reproduced from https://github.com/agurvich/abg_python) and binds it to a 
         corresponding :class:`firefly.data_reader.ParticleGroup` instance.
 
-        :param com_offset: flag to offset all coordinates by the COM of the 
-            snapshot, defaults to False 
-        :type com_offset: bool, optional
+        :param com: position to offset all coordinates by if None, 
+            will calculate the CoM, defaults to None
+        :type com: np.ndarray, optional
         """
-
-        com = None
 
         for ptype,UIname,dec_factor in list(
             zip(self.ptypes,self.UInames,self.decimation_factors))[::-1]:
@@ -169,46 +170,18 @@ class FIREreader(Reader):
                 self.snapdir,
                 self.snapnum,
                 int(ptype), ## ptype should be 1,2,3,4,etc...
-                keys_to_extract = ['Coordinates']+self.fields+['Masses']*com_offset+['Velocities']
+                keys_to_extract = ['Coordinates']+self.fields+['Masses']*(com is None)+['Velocities']
             )
 
-            if com_offset and com is None:
-                com = np.zeros(3)
-                ## use concentric shells to find an estimate
-                ##  for the center of mass
-                for i in range(4):
-                    rs = np.sqrt(np.sum(snapdict['Coordinates']**2,axis=1))
-                    rmax = np.nanmax(rs)/10**i
+            if com is None:
+                com,vcom = iterativeCoM(
+                    snapdict['Coordinates'],
+                    snapdict['Masses'],
+                    snapdict['Velocities'])
+            else: vcom = 0
 
-
-                    rmask = rs <= rmax
-
-                    if np.sum(rmask) == 0:
-                        break
-
-                    print("Centering on particles within %.2f kpc"%rmax)
-
-                    ## compute the center of mass of the particles within this shell
-                    this_com = (np.sum(snapdict['Coordinates'][rmask] *
-                        snapdict['Masses'][rmask][:,None],axis=0) / 
-                        np.sum(snapdict['Masses'][rmask]))
-
-
-                    snapdict['Coordinates']-=this_com
-
-                    ## keep track of total com
-                    com += this_com
-
-                vcom = (np.sum(snapdict['Velocities'][rmask] *
-                    snapdict['Masses'][rmask][:,None],axis=0) /
-                    np.sum(snapdict['Masses'][rmask]))
-
-                snapdict['Velocities']-=vcom
-
-            elif com is not None: 
-                snapdict['Coordinates']-=com
-                snapdict['Velocities']-=vcom
-
+            snapdict['Coordinates']-=com
+            snapdict['Velocities'] -=vcom
 
             ## initialize output arrays for fields
             tracked_names = []
