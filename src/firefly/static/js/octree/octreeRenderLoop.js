@@ -25,7 +25,7 @@ function updateOctree(){
 	//this way the scene gets filled in more regularly, instead of filling in one particle group at a time
 	octree = viewerParams.parts[pkey].octree;
 
-	openCloseNodes(octree['']);
+	if (octree) openCloseNodes(octree['']);
 
 	//if we are done drawing, check if we should adjust the number of particles further see if I need to reduce the particles even further
 	/*
@@ -80,6 +80,8 @@ function openCloseNodes(node){
 	var too_small = checkTooSmall(node_size_pix);
 	var too_big = checkTooBig(node_size_pix);
 
+	// every function truncates forEach loop when return is false
+
 	// don't need to draw nodes that aren't on screen 
 	if (!onscreen && !inside){
 		// if we haven't already, let's hide the CoM
@@ -87,7 +89,7 @@ function openCloseNodes(node){
 		node.state = 'off screen';
 		node.current_state = 'remove';
 		// callback does nothing
-		free_buffer(node, function (thise_node){return true;});
+		free_buffer(node, function (this_node){return true;});
 	}
 	// this node is too large, we should hide its CoM and (maybe) show its children
 	else if (inside || too_big){  
@@ -262,6 +264,7 @@ function checkInQueue(node,queue='draw',extract=false){
 				return index;}
 		});
 
+	// TODO replcae the callback function if sent
 	// if we've been asked to extract this element from
 	//  the queue we're checking,let's do so.
 	if (extract && contained) this_queue.splice(index,1);
@@ -294,9 +297,9 @@ function getScreenSize(node){
 
 function drawNextOctreeNode(){
 
-	// take the next in line to draw
+	//work from the back of the array
 	var pkey = viewerParams.partsKeys[viewerParams.octree.pIndex];
-	var tuple = viewerParams.octree.toDraw[pkey].shift(); // shift takes the first element, pop does the last
+	var tuple = viewerParams.octree.toDraw[pkey].pop(); // shift takes the first element, pop does the last
 
 	// unpack the tuple
 	var node = tuple[0];
@@ -306,7 +309,7 @@ function drawNextOctreeNode(){
 	//  we'll just skip it rather than move to the next element
 	while (node.mesh && viewerParams.octree.toDraw.length){
 		// take the next in line to draw
-		tuple = viewerParams.octree.toDraw[pkey].shift(); // shift takes the first element, pop does the last
+		tuple = viewerParams.octree.toDraw[pkey].pop(); // shift takes the first element, pop does the last
 		// unpack the tuple
 		node = tuple[0];
 		callback = tuple[1];}
@@ -321,7 +324,7 @@ function drawNextOctreeNode(){
 }
 
 function removeNextOctreeNode(){
-	//work from the back of the array (since prioritized by the most important to view)
+	//work from the back of the array
 	//viewerParams.octree.waitingToRemove = true;
 	var tuple = viewerParams.octree.toRemove.pop();
 	var node = tuple[0];
