@@ -102,31 +102,30 @@ function openCloseNodes(node){
 		node.state = 'too small';
 		node.current_state = 'remove';
 		// if we haven't already, let's hide the CoM
-		if (node.com_shown) hideCoM(node);
 
 		free_buffer(node,
 			function (this_node){
-				this_node.children.forEach(
-					function (child_name){free_buffer(node.octree[child_name],hideCoM)});
+				if (this_node.com_shown) hideCoM(this_node);
+				this_node.children.forEach(function (child_name){free_buffer(node.octree[child_name],hideCoM)});
 			});
 	}
 	// don't need to draw nodes that aren't on screen 
 	else if (!onscreen && !inside){
 		// if we haven't already, let's hide the CoM
-		if (!node.com_shown) showCoM(node);
 		node.state = 'off screen';
 		node.current_state = 'remove';
-		// callback does nothing
-		free_buffer(node, function (this_node){return true;});
+		free_buffer(node, function (this_node){
+			if (!this_node.com_shown) showCoM(this_node);
+		});
 	}
 	// this node is too large, we should hide its CoM and (maybe) show its children
 	else if (inside || too_big){  
 		node.state = 'inside or too big';
 		node.current_state = 'draw';
 		// if we haven't already, let's hide the CoM
-		if (node.com_shown) hideCoM(node);
 		load_buffer(node,
 			function (this_node){
+				if (this_node.com_shown) hideCoM(this_node);
 				this_node.children.forEach(
 					function (child_name){openCloseNodes(node.octree[child_name])});
 			});
