@@ -468,30 +468,25 @@ function render_stream(){
 }
 
 function update_memory_usage(){
-
-
-	//check the total number of particles rendered
-	if (viewerParams.drawPass % 100 == 0 && viewerParams.drawPass > viewerParams.partsKeys.length){
-		viewerParams.totalParticlesInMemory = 0.;
-		viewerParams.partsKeys.forEach(function(p){
-			if (viewerParams.haveOctree[p]){
-				console.log("NEED TO COUNT THE TOTAL PARTICLES IN ALL DRAWN NODES")
-			} else {
-				viewerParams.totalParticlesInMemory += viewerParams.parts.count[p];
-			}
-		})
-	}
-
 	//get the actual memory usage
 	if (window.performance.memory) { //works for Chrome
 		viewerParams.memoryUsage = window.performance.memory.totalJSHeapSize;
 	} else {
+		//check the total number of particles rendered
+		if (viewerParams.drawPass % 100 == 0 && viewerParams.drawPass > viewerParams.partsKeys.length){
+			viewerParams.totalParticlesInMemory = 0.;
+			viewerParams.partsKeys.forEach(function(p){
+				if (viewerParams.haveOctree[p]){
+					viewerParams.partsMesh[p].forEach( function (m){
+						viewerParams.totalParticlesInMemory += m.geometry.userData['Coordinates_flat'].length/3
+					});
+				}
+				else viewerParams.totalParticlesInMemory += viewerParams.parts.count[p];
+			});
+		}
 		//calculated from a previous test using the octree mode
 		viewerParams.memoryUsage = 2.03964119e+02*viewerParams.totalParticlesInMemory + 1.64869925e+08; 
 	}
-
-	//if (viewerParams.drawPass % 100 == 0) console.log('checking memory usage [', viewerParams.totalParticlesInMemory, ',', viewerParams.memoryUsage,'],')
-
 }
 
 function update_framerate(seconds,time){
@@ -501,7 +496,6 @@ function update_framerate(seconds,time){
 		viewerParams.pauseAnimation=true;
 		showSleep();
 	}
-
 
 	// use previous frame rendering time to calculate FPS. 
 	// use average of previous 100 frames so FPS is a bit more stable.
