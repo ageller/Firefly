@@ -291,7 +291,7 @@ function initPVals(){
 		viewerParams.colormapVariable[p] = 0;
 		viewerParams.colormap[p] = 4/256;
 		viewerParams.showColormap[p] = false;
-		viewerParams.updateColormap[p] = false;
+		viewerParams.updateColormapVariable[p] = false;
 		viewerParams.colormapVals[p] = {};
 		viewerParams.colormapLims[p] = {};
 
@@ -818,8 +818,6 @@ function applyOptions(){
 			if (viewerParams.parts.options.colormapLims != null){
 				if (viewerParams.parts.options.colormapLims.hasOwnProperty(p)){
 					if (viewerParams.parts.options.colormapLims[p] != null){
-						viewerParams.updateColormap[p] = true
-
 						for (k=0; k<viewerParams.ckeys[p].length; k++){
 							var ckey = viewerParams.ckeys[p][k]
 							if (viewerParams.parts.options.colormapLims[p].hasOwnProperty(ckey)){
@@ -842,7 +840,6 @@ function applyOptions(){
 			if (viewerParams.parts.options.colormapVals != null){
 				if (viewerParams.parts.options.colormapVals.hasOwnProperty(p)){
 					if (viewerParams.parts.options.colormapVals[p] != null){
-						viewerParams.updateColormap[p] = true
 
 						for (k=0; k<viewerParams.ckeys[p].length; k++){
 							var ckey = viewerParams.ckeys[p][k]
@@ -865,7 +862,6 @@ function applyOptions(){
 			viewerParams.parts.options.showColormap != null &&
 			viewerParams.parts.options.showColormap.hasOwnProperty(p) &&
 			viewerParams.parts.options.showColormap[p] == true){
-			viewerParams.updateColormap[p] = true
 			viewerParams.showColormap[p] = true;
 			if (viewerParams.haveUI){
 				console.log(p+'colorCheckBox')

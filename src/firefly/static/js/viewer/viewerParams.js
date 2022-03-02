@@ -144,7 +144,7 @@ function defineViewerParams(){
 		this.colormapLims = {};
 
 		//check if we need to update the colormap when rendering
-		this.updateColormap = {};
+		this.updateColormapVariable = {};
 
 		//tweening
 		this.inTween = false;

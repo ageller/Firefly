@@ -204,7 +204,7 @@ function createPartsMesh(pdraw = viewerParams.partsKeys, node=null){
 	for (var i=0; i<pdraw.length; i++){
 		var p = pdraw[i];
 
-		viewerParams.updateColormap[p] = true;
+		viewerParams.updateColormapVariable[p] = true;
 		viewerParams.updateFilter[p] = true;
 		viewerParams.updateOnOff[p] = true;
 
@@ -244,72 +244,4 @@ function createPartsMesh(pdraw = viewerParams.partsKeys, node=null){
 
 	//}
 	return true;
-
-}
-
-function updateColormapVariable(p){
-	//replace the colormap variable
-	if (viewerParams.parts[p][viewerParams.ckeys[p][viewerParams.colormapVariable[p]]] != null){
-		//I think there should only be one mesh per particle set, but to be safe...
-		viewerParams.partsMesh[p].forEach( function( m, j ) {
-			var colormapArray = m.geometry.attributes.colormapArray.array;
-			if (viewerParams.haveOctree[p]){
-				//find the correct node
-				var iden = m.name.replace(p,'');
-				var node = null;
-				if (viewerParams.octree.nodes.hasOwnProperty(p)){
-					viewerParams.octree.nodes[p].every(function(n){
-						if (n.id == iden){
-							node = n;
-							return false
-						} 
-						return true
-					})
-				}
-				if (node){
-					var ckey = viewerParams.ckeys[p][viewerParams.colormapVariable[p]]
-					if (node.particles.hasOwnProperty(ckey)){
-						for( var ii = 0; ii < m.geometry.attributes.colormapArray.array.length; ii ++ ) {
-							colormapArray[ii] = node.particles[ckey][ii];
-						}
-					}
-				}
-			} else {
-				for( var ii = 0; ii < m.geometry.attributes.colormapArray.array.length; ii ++ ) {
-					colormapArray[ii] = viewerParams.parts[p][viewerParams.ckeys[p][viewerParams.colormapVariable[p]]][ii];
-				}
-			}
-			m.geometry.attributes.colormapArray.needsUpdate = true;
-
-		})
-	}
-
-	//update the blending mode for all particles (otherwise non-colormapped particles will blend with colormapped particles)
-	viewerParams.blendingMode[p] = 'additive';
-	var blend = THREE.AdditiveBlending;
-	viewerParams.depthWrite[p] = false;
-	viewerParams.depthTest[p] = false;
-
-	if (viewerParams.showColormap[p]){
-		viewerParams.blendingMode[p] = 'normal';
-		blend = THREE.NormalBlending;
-		viewerParams.depthWrite[p] = true;
-		viewerParams.depthTest[p] = true;
-
-		viewerParams.partsKeys.forEach(function(pp,i){
-			viewerParams.blendingMode[pp] = viewerParams.blendingMode[p];
-			viewerParams.depthTest[pp] = viewerParams.depthTest[p];
-			viewerParams.depthTest[pp] = viewerParams.depthWrite[p];
-
-			viewerParams.partsMesh[pp].forEach( function( m, j ) {
-				m.material.depthWrite =  viewerParams.depthWrite[p];
-				m.material.depthTest =  viewerParams.depthTest[p];
-				m.material.blending = blend;
-				m.material.needsUpdate = true;
-			});
-		});
-
-		//also update the dropdown menus and checkboxes in the GUI
-		sendToGUI({'updateUIBlending':[viewerParams.blendingMode[p], viewerParams.depthTest[p]]});
-	}
 }
