@@ -645,6 +645,7 @@ class ParticleGroup(object):
         cur_index = 0
 
         for i_file,(fname,nparts_this_file) in enumerate(filenames_and_nparts):
+            nparts_this_file=np.ceil(nparts_this_file).astype(int)
             ## pick out the indices for this file
             if self.decimation_factor > 1:
                 these_dec_inds = self.dec_inds[cur_index:cur_index+nparts_this_file]
