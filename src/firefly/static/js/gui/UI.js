@@ -1551,18 +1551,17 @@ function updateUIValues(value, varArgs, i=0, type='single'){
 }
 
 function updateUIBlending(args){
-	var mode = args[0];
-	var dTest = args[1];
+	var p = args[0];
+	var mode = args[1];
+	var dTest = args[2];
 
-	GUIParams.partsKeys.forEach(function(p){
-		var elm = document.getElementById(p+'_selectBlendingMode');
-		elm.value = mode;
+	// set the blending mode value in the dropdown
+	document.getElementById(p+'_selectBlendingMode').value = mode;
 
-		//also update the checkboxes
-		elm = document.getElementById(p+'_depthCheckBox');
-		elm.checked = dTest;
-		elm.value = dTest
-	})
+	//also update the checkbox for the depth test
+	elm = document.getElementById(p+'_depthCheckBox');
+	elm.checked = dTest;
+	elm.value = dTest
 }
 
 //////////////////////////////////////////
