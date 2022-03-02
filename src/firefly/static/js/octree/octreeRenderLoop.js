@@ -6,16 +6,15 @@ function containsPoint(t){
 
 function updateOctree(){
 
-	//check if the object is in view (if not, we won't draw and can remove; though note that this will not pick up new nodes that shouldn't be drawn)
-	//https://github.com/mrdoob/three.js/issues/15339
-	viewerParams.camera.updateMatrix();
-	viewerParams.camera.updateMatrixWorld();
-	viewerParams.frustum.setFromProjectionMatrix(
-		new THREE.Matrix4().multiplyMatrices(
-			viewerParams.camera.projectionMatrix,
-			viewerParams.camera.matrixWorldInverse));  
-
 	var pkey = viewerParams.partsKeys[viewerParams.octree.pIndex];
+
+	//rather than a for loop to go through the particles, I am going to manually iterate so that I can draw from one each draw pass
+	//this way the scene gets filled in more regularly, instead of filling in one particle group at a time
+	var octree = viewerParams.parts[pkey].octree;
+
+	// short circuit here if this particle type isn't shown
+	//  or if it doesn't have an octree in the first place.
+	if (!octree || !viewerParams.showParts[pkey]) return updateOctreePindex();
 
 	//  check if we can draw a new node
 	if (!viewerParams.octree.waitingToDraw && viewerParams.octree.toDraw[pkey].length > 0 ) drawNextOctreeNode();
@@ -28,15 +27,20 @@ function updateOctree(){
 	//if (viewerParams.octree.drawPass % 50 == 0) {
 		//removeDuplicatesFromScene();
 		//updateOctreeLoadingBar(); //in case this doesn't get updated properly during the draw loop (can be 1 or 2 off after last draw in completed)
-	//}
-	
-	//rather than a for loop to go through the particles, I am going to manually iterate so that I can draw from one each draw pass
-	//this way the scene gets filled in more regularly, instead of filling in one particle group at a time
-	octree = viewerParams.parts[pkey].octree;
+	//}	
+
+	// update the camera so that we can determine if stuff is off screen or not
+	//https://github.com/mrdoob/three.js/issues/15339
+	viewerParams.camera.updateMatrix();
+	viewerParams.camera.updateMatrixWorld();
+	viewerParams.frustum.setFromProjectionMatrix(
+		new THREE.Matrix4().multiplyMatrices(
+			viewerParams.camera.projectionMatrix,
+			viewerParams.camera.matrixWorldInverse));
 
 	// only update the octree if this pkey has an octree
 	//  and we're actually showing it on the screen
-	if (octree && viewerParams.showParts[pkey]) openCloseNodes(octree['']);
+	openCloseNodes(octree['']);
 
 	//if we are done drawing, check if we should adjust the number of particles further see if I need to reduce the particles even further
 	/*
@@ -65,7 +69,7 @@ function updateOctree(){
 	//prioritizeOctreeRemoveList();
 
 	// move to the next particle type
-	updateOctreePindex();
+	return updateOctreePindex();
 }
 
 function openCloseNodes(node){
@@ -313,6 +317,11 @@ function drawNextOctreeNode(){
 	var pkey = viewerParams.partsKeys[viewerParams.octree.pIndex];
 	var tuple = viewerParams.octree.toDraw[pkey].pop(); // shift takes the first element, pop does the last
 
+	// not sure why you might end up in here if the list is empty
+	//  but it happened while i was testing toggling
+	//  different particle types /shrug
+	if (!tuple) return;
+
 	// unpack the tuple
 	var node = tuple[0];
 	var callback = tuple[1];
@@ -382,6 +391,15 @@ function reduceNextOctreeNode(){
 
 function updateOctreePindex(){
 	viewerParams.octree.pIndex = (viewerParams.octree.pIndex + 1) % viewerParams.partsKeys.length;
+
+	// see if any particles are currently toggled on
+	var any_shown = viewerParams.partsKeys.some(function (pkey){return viewerParams.showParts[pkey]})
+
+	// if this particle type isn't being shown then we'll just continue to the next one until we find one
+	//  that way we don't waste draw passes short circuiting unecessarily
+	while (any_shown && !viewerParams.showParts[viewerParams.partsKeys[viewerParams.octree.pIndex]]){
+		viewerParams.octree.pIndex = (viewerParams.octree.pIndex + 1) % viewerParams.partsKeys.length;
+	}
 }
 
 function resetWaitingToRemove(){
