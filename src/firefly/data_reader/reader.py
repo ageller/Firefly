@@ -325,12 +325,7 @@ class Reader(object):
             filenamesDict[particleGroup.UIname]=list(filenames_and_nparts)
 
         ## output the settings.json file
-        JSON_array +=[self.settings.outputToJSON(
-            JSONdir,
-            JSON_prefix=self.JSON_prefix,
-            loud=loud,
-            write_jsons_to_disk=write_jsons_to_disk,
-            not_reader=False)]
+        JSON_array +=[self.dumpSettingsToJSON(symlink,write_jsons_to_disk,loud)]
 
         ## format and output the filenames.json file
         filenamesDict['options'] = [(os.path.join(
@@ -403,6 +398,28 @@ class Reader(object):
             self.JSON = ""
 
         return self.JSON
+
+    def dumpSettingsToJSON(
+        self,
+        symlink=True,
+        write_jsons_to_disk=True,
+        loud=False):
+
+        ## path where data needs to be visible to firefly
+        static_data_path = os.path.join(
+            self.static_data_dir,
+            os.path.basename(self.JSONdir))
+
+        ## where to put hard JSON files, if no symlink then we will
+        ##  need to save directly to static_data_path
+        JSONdir = self.JSONdir if symlink else static_data_path
+
+        return self.settings.outputToJSON(
+            JSONdir,
+            JSON_prefix=self.JSON_prefix,
+            loud=loud,
+            write_jsons_to_disk=write_jsons_to_disk,
+            not_reader=False)
 
     def outputToDict(self):
         """ Formats the data in the reader to a python dictionary using
