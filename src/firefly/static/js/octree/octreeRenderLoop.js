@@ -93,10 +93,23 @@ function openCloseNodes(node){
 
 	// every function truncates forEach loop when return is false
 
-	// don't need to draw nodes that aren't on screen 
-	if (!onscreen && !inside){
+	// this node is too small. we should hide each of its children *and* its CoM
+	if (too_small){
+		node.state = 'too small';
+		node.current_state = 'remove';
 		// if we haven't already, let's hide the CoM
 		if (node.com_shown) hideCoM(node);
+
+		free_buffer(node,
+			function (this_node){
+				this_node.children.forEach(
+					function (child_name){free_buffer(node.octree[child_name],hideCoM)});
+			});
+	}
+	// don't need to draw nodes that aren't on screen 
+	else if (!onscreen && !inside){
+		// if we haven't already, let's hide the CoM
+		if (!node.com_shown) showCoM(node);
 		node.state = 'off screen';
 		node.current_state = 'remove';
 		// callback does nothing
@@ -114,19 +127,6 @@ function openCloseNodes(node){
 					function (child_name){openCloseNodes(node.octree[child_name])});
 			});
 	}  
-	// this node is too small. we should hide each of its children *and* its CoM
-	else if (too_small){
-		node.state = 'too small';
-		node.current_state = 'remove';
-		// if we haven't already, let's hide the CoM
-		if (node.com_shown) hideCoM(node);
-
-		free_buffer(node,
-			function (this_node){
-				this_node.children.forEach(
-					function (child_name){free_buffer(node.octree[child_name],hideCoM)});
-			});
-	}
 	// this node is just right. let's check if we should do anything
 	//  to its children
 	else if (onscreen && !inside){
@@ -403,12 +403,25 @@ function inFrustum(node){
 
 	//in case the above fails, check manually
 	//check if any of the corners is within the frustum
-	var p;
+	return true;
+
+	var u;
+	var p = new THREE.Vector3(node.center_of_mass[0],node.center_of_mass[1],node.center_of_mass[2]);
+	var offsets = [0,1,-1];
+	var foo = false;
+	offsets.forEach(function (xoffset){
+		offsets.forEach(function (yoffset){
+			offsets.forEach(function (zoffset){
+				u = new THREE.Vector3(
+					p.x+xoffset*node.width/2,
+					p.y+yoffset*node.width/2,
+					p.z+zoffset*node.width/2);
+				if (viewerParams.frustum.containsPoint(u)) foo=true;;
+			})
+		})
+	})
 
 	
-	p = new THREE.Vector3(node.center_of_mass[0],node.center_of_mass[1],node.center_of_mass[2]);
-	if (viewerParams.frustum.containsPoint(p)) return true;
-
 	p = new THREE.Vector3(
 		node.center_of_mass[0] + node.width/2.,
 		node.center_of_mass[1] + node.width/2.,
