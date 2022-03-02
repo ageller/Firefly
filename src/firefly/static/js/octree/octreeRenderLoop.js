@@ -6,6 +6,15 @@ function containsPoint(t){
 
 function updateOctree(){
 
+	//check if the object is in view (if not, we won't draw and can remove; though note that this will not pick up new nodes that shouldn't be drawn)
+	//https://github.com/mrdoob/three.js/issues/15339
+	viewerParams.camera.updateMatrix();
+	viewerParams.camera.updateMatrixWorld();
+	viewerParams.frustum.setFromProjectionMatrix(
+		new THREE.Matrix4().multiplyMatrices(
+			viewerParams.camera.projectionMatrix,
+			viewerParams.camera.matrixWorldInverse));  
+
 	var pkey = viewerParams.partsKeys[viewerParams.octree.pIndex];
 
 	//  check if we can draw a new node
@@ -138,6 +147,7 @@ function openCloseNodes(node){
 }
 
 function checkOnScreen(node){
+	return inFrustum(node);
 	var min_project = node.bounding_box.min.clone().project(viewerParams.camera);
 	var max_project = node.bounding_box.max.clone().project(viewerParams.camera);
 	var cen_project = new THREE.Vector3(node.center[0],node.center[1],node.center[2])
@@ -147,7 +157,7 @@ function checkOnScreen(node){
 	var cen_onscreen = true;
 
 	// thresh = 1 corresponds to point being *just* off-scren. 
-	var thresh = 1.2; // a little more aggressive, culls stuff at the edge of the screen
+	var thresh = 5; // a little more aggressive, culls stuff at the edge of the screen
 
 
 	['x','y'].forEach(function (axis){
@@ -179,8 +189,8 @@ function checkTooSmall(node_size_pix){
 }
 
 function checkTooBig(node_size_pix){
-	return (node_size_pix > viewerParams.renderWidth/8 ||// too wide
-		node_size_pix > viewerParams.renderHeight/8); // too tall
+	return (node_size_pix > viewerParams.renderWidth/16 ||// too wide
+		node_size_pix > viewerParams.renderHeight/16); // too tall
 }
 
 function hideCoM(node){
@@ -395,31 +405,56 @@ function inFrustum(node){
 	//check if any of the corners is within the frustum
 	var p;
 
-	p = new THREE.Vector3( node.x, node.y, node.z);
+	
+	p = new THREE.Vector3(node.center_of_mass[0],node.center_of_mass[1],node.center_of_mass[2]);
 	if (viewerParams.frustum.containsPoint(p)) return true;
 
-	p = new THREE.Vector3( node.x + node.width/2., node.y + node.width/2., node.z + node.width/2.);
+	p = new THREE.Vector3(
+		node.center_of_mass[0] + node.width/2.,
+		node.center_of_mass[1] + node.width/2.,
+		node.center_of_mass[2] + node.width/2.);
 	if (viewerParams.frustum.containsPoint(p)) return true;
 
-	p = new THREE.Vector3( node.x - node.width/2., node.y + node.width/2., node.z + node.width/2.);
+	p = new THREE.Vector3(
+		node.center_of_mass[0] - node.width/2.,
+		node.center_of_mass[1] + node.width/2.,
+		node.center_of_mass[2] + node.width/2.);
 	if (viewerParams.frustum.containsPoint(p)) return true;
 
-	p = new THREE.Vector3( node.x + node.width/2., node.y - node.width/2., node.z + node.width/2.);
+	p = new THREE.Vector3(
+		node.center_of_mass[0] + node.width/2.,
+		node.center_of_mass[1] - node.width/2.,
+		node.center_of_mass[2] + node.width/2.);
 	if (viewerParams.frustum.containsPoint(p)) return true;
 
-	p = new THREE.Vector3( node.x - node.width/2., node.y - node.width/2., node.z + node.width/2.);
+	p = new THREE.Vector3(
+		node.center_of_mass[0] - node.width/2.,
+		node.center_of_mass[1] - node.width/2.,
+		node.center_of_mass[2] + node.width/2.);
 	if (viewerParams.frustum.containsPoint(p)) return true;
 
-	p = new THREE.Vector3( node.x + node.width/2., node.y + node.width/2., node.z - node.width/2.);
+	p = new THREE.Vector3(
+		node.center_of_mass[0] + node.width/2.,
+		node.center_of_mass[1] + node.width/2.,
+		node.center_of_mass[2] - node.width/2.);
 	if (viewerParams.frustum.containsPoint(p)) return true;
 
-	p = new THREE.Vector3( node.x - node.width/2., node.y + node.width/2., node.z - node.width/2.);
+	p = new THREE.Vector3(
+		node.center_of_mass[0] - node.width/2.,
+		node.center_of_mass[1] + node.width/2.,
+		node.center_of_mass[2] - node.width/2.);
 	if (viewerParams.frustum.containsPoint(p)) return true;
 
-	p = new THREE.Vector3( node.x + node.width/2., node.y - node.width/2., node.z - node.width/2.);
+	p = new THREE.Vector3(
+		node.center_of_mass[0] + node.width/2.,
+		node.center_of_mass[1] - node.width/2.,
+		node.center_of_mass[2] - node.width/2.);
 	if (viewerParams.frustum.containsPoint(p)) return true;
 
-	p = new THREE.Vector3( node.x - node.width/2., node.y - node.width/2., node.z - node.width/2.);
+	p = new THREE.Vector3(
+		node.center_of_mass[0] - node.width/2.,
+		node.center_of_mass[1] - node.width/2.,
+		node.center_of_mass[2] - node.width/2.);
 	if (viewerParams.frustum.containsPoint(p)) return true;
 
 	return false;
