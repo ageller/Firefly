@@ -27,7 +27,7 @@ function updateOctree(){
 
 	// only update the octree if this pkey has an octree
 	//  and we're actually showing it on the screen
-	if (octree && viewerParams.showParts[p]) openCloseNodes(octree['']);
+	if (octree && viewerParams.showParts[pkey]) openCloseNodes(octree['']);
 
 	//if we are done drawing, check if we should adjust the number of particles further see if I need to reduce the particles even further
 	/*

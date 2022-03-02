@@ -264,7 +264,7 @@ function update_particle_playback(p,time){
 		
 		// apply particle radii and alpha values 
 		// according to current filter handle settings
-		if (update_filter) update_particle_mesh_filter(p,m);
+		if (update_filter || update_onoff) update_particle_mesh_filter(p,m);
 
 		// only update the colormap variable if we're actually
 		//  colormapping. we'll get to it eventually
