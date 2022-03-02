@@ -187,7 +187,8 @@ function checkInside(node){
 	return inside;
 }
 
-function checkTooSmall(node_size_pix){
+function checkTooSmall(node_size_pix,threshold=5){
+	return node_size_pix < threshold 
 	return (node_size_pix < viewerParams.renderWidth/32 || // too thin
 		node_size_pix < viewerParams.renderHeight/32);// too short
 }
