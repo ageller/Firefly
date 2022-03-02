@@ -295,12 +295,16 @@ function update_particle_mesh_UI_values(p,m){
 	m.material.uniforms.colormap.value = viewerParams.colormap[p];
 	m.material.uniforms.showColormap.value = viewerParams.showColormap[p];
 
-	m.material.depthWrite =  viewerParams.depthWrite[p];
-	m.material.depthTest =  viewerParams.depthTest[p];
 
-	// update the blending mode only if it doesn't match
-	if (m.material.blending != viewerParams.blendingOpts[viewerParams.blendingMode[p]]){
+	// update the material only if it doesn't match
+	if (m.material.blending != viewerParams.blendingOpts[viewerParams.blendingMode[p]] ||
+		m.material.depthWrite !=  viewerParams.depthWrite[p] || 
+		m.material.depthTest !=  viewerParams.depthTest[p]){
+
 		m.material.blending = viewerParams.blendingOpts[viewerParams.blendingMode[p]];
+		m.material.depthWrite =  viewerParams.depthWrite[p];
+		m.material.depthTest =  viewerParams.depthTest[p];
+		m.material.uniforms.useDepth.value = +viewerParams.depthTest[p];
 		m.material.needsUpdate = true;
 	}
 

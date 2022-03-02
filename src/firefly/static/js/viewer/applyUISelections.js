@@ -647,20 +647,8 @@ function setDepthMode(args){
 	var p = args[0];
 	var checked = args[1];
 
-	viewerParams.depthWrite[p] = false;
-	viewerParams.depthTest[p] = false;
-	if (checked){
-		viewerParams.depthWrite[p] = true;
-		viewerParams.depthTest[p] = true;		
-	}
-
-	var blend = viewerParams.blendingOpts[viewerParams.blendingMode[p]];
-
-	viewerParams.partsMesh[p].forEach( function( m, j ) {
-		m.material.depthWrite = viewerParams.depthWrite[p];
-		m.material.depthTest = viewerParams.depthTest[p];
-		m.material.blending = blend;
-		m.material.uniforms.useDepth.value = +viewerParams.depthTest[p];
-		m.material.needsUpdate = true;
-	});
+	// update the viewer params and rely on the render loop
+	//  to apply them.
+	viewerParams.depthWrite[p] = checked;
+	viewerParams.depthTest[p] = checked;
 }
