@@ -164,7 +164,8 @@ function update_particle_groups(time){
 		viewerParams.updateOnOff[p] = false;
 
 		// hide all octree com nodes at the start
-		if (!viewerParams.parts[p].hasOwnProperty('octree_init') || !viewerParams.parts[p].octree_init){
+		if ( viewerParams.parts[p].hasOwnProperty('octree') &&
+			(!viewerParams.parts[p].hasOwnProperty('octree_init') || !viewerParams.parts[p].octree_init)){
 			evaluateFunctionOnOctreeNodes(
 			hideCoM,
 			viewerParams.parts[p].octree[''],
