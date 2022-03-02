@@ -194,8 +194,27 @@ class Reader(object):
         ## add this particle group to the reader's settings file
         self.settings.attachSettings(particleGroup)
     
-    def createOctrees(self,**kwargs):
-        for particleGroup in self.particleGroups: particleGroup.createOctree(**kwargs)
+    def createOctrees(self,mask=None,**kwargs):
+
+        ## validate mask length entry , each particle group
+        ##  should have a true or false entry
+        if mask is not None and len(mask) != len(self.particleGroups): raise ValueError(
+            f"mask must be of length: {len(self.particleGroups):d}"+
+            f" not length {len(mask):d}.")
+
+        for i,particleGroup in enumerate(self.particleGroups): 
+            if mask is None or mask[i]: particleGroup.createOctree(**kwargs)
+    
+    def pruneOctrees(self,min_npart_per_node,mask=None):
+        ## validate mask length entry , each particle group
+        ##  should have a true or false entry
+        if mask is not None and len(mask) != len(self.particleGroups): raise ValueError(
+            f"mask must be of length: {len(self.particleGroups):d}"+
+            f" not length {len(mask):d}.")
+
+        for i,particleGroup in enumerate(self.particleGroups): 
+            if (hasattr(particleGroup,'octree') and (mask is None or mask[i])): 
+                particleGroup.octree.pruneOctree(min_npart_per_node)
 
     def dumpToJSON(
         self,
