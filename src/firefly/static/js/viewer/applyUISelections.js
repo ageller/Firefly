@@ -234,22 +234,39 @@ function checkColormapBox(args){
 	var p = args[0];
 	var checked = args[1];
 	var forGUI = []; 
-	viewerParams.showColormap[p] = false;
-	if (checked){
-		viewerParams.showColormap[p] = true;
-		viewerParams.updateColormap[p] = true;
-		viewerParams.updateFilter[p] = true;
-		
-	}
+	viewerParams.showColormap[p] = checked;
 
+	changeBlendingForColormap(p,checked);
 
+	// tell the GUI what the change was-- send it back to maintain sync
 	forGUI.push({'setGUIParamByKey':[viewerParams.showColormap, "showColormap"]});
+	// tell the GUI to execute fillColorbarContainer,
+	// if showColormap = false then it will hide the div
 	forGUI.push({'fillColorbarContainer':p});
 	sendToGUI(forGUI);
-	console.log(p, " showColormap:", viewerParams.showColormap[p]);
+}
 
-	updateColormapVariable(p);
+function changeBlendingForColormap(pkey_to_colormap,checked){
 
+	// update the blending mode for all particles
+	//  (otherwise non-colormapped particles will blend with colormapped particles)
+	viewerParams.partsKeys.forEach(function (p,i){
+
+		if ( p == pkey_to_colormap && checked){
+			viewerParams.blendingMode[p] = 'normal';
+			viewerParams.depthWrite[p] = true;
+			viewerParams.depthTest[p] = true;
+		}
+		else {
+			// update the blending mode for the whole particle group (kind of wasteful)
+			viewerParams.blendingMode[p] = 'additive';
+			viewerParams.depthWrite[p] = false;
+			viewerParams.depthTest[p] = false;
+		}
+
+		//also update the dropdown menus and checkboxes in the GUI for each particle group
+		sendToGUI({'updateUIBlending':[p, viewerParams.blendingMode[p], viewerParams.depthTest[p]]});
+	})
 }
 
 //turn on/off the invert filter option
@@ -282,12 +299,8 @@ function checkshowParts(args){
 	var p = args[0];
 	var checked = args[1];
 	
+	viewerParams.showParts[p] = checked;
 	viewerParams.updateOnOff[p] = true;
-	viewerParams.updateFilter[p] = true;
-	viewerParams.showParts[p] = false;
-	if (checked){
-		viewerParams.showParts[p] = true;
-	}
 }
 
 //check for stereo separation

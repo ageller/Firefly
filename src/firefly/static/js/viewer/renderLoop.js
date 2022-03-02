@@ -142,8 +142,28 @@ function update_particle_groups(time){
 		
 		//check on all the UI inputs for each particle type
 		viewerParams.partsMesh[p].forEach( 
-			function( m, j ) {update_particle_mesh(p,m,viewerParams.updateFilter[p])});
+			function( m, j ) {
+				update_particle_mesh(p, m,
+				viewerParams.updateFilter[p],
+				viewerParams.updateColormapVariable[p],
+				viewerParams.updateOnOff[p]
+			)});
 
+		// update flags for looping through particles for this particle type.
+		// the update_particle_mesh call above will have done the work
+		// iff parts are shown
+		if (viewerParams.showParts[p]) {
+			viewerParams.updateFilter[p] = false;
+
+			// we'd have only updated the colormap variable if we're actually showing it
+			if (viewerParams.showColormap[p]) viewerParams.updateColormapVariable[p] = false;
+		}
+
+		// whether we are showing parts or not, we would've
+		//  updated the onoff state
+		viewerParams.updateOnOff[p] = false;
+
+		// hide all octree com nodes at the start
 		if (!viewerParams.parts[p].hasOwnProperty('octree_init') || !viewerParams.parts[p].octree_init){
 			evaluateFunctionOnOctreeNodes(
 			hideCoM,
@@ -152,11 +172,9 @@ function update_particle_groups(time){
 			viewerParams.parts[p].octree_init = true;
 		}
 
-		viewerParams.updateFilter[p] = false;
-		viewerParams.updateOnOff[p] = false;
-		viewerParams.updateColormap[p] = false;
 	});// viewerParams.partsKeys.forEach(function(p,i)
 
+	// determine what nodes need to be opened/closed
 	updateOctree(); // loops through particle keys internally
 
 }// function update(time)
@@ -225,7 +243,11 @@ function update_particle_playback(p,time){
 
 }
 
- function update_particle_mesh(p,m,update_filter=false){
+ function update_particle_mesh(
+	p,m,
+	update_filter=false,
+	update_colormap_variable=false,
+	update_onoff=false){
 	// send velocity vector type (line/arrow/cone) to material buffer
 	m.material.uniforms.velType.value = viewerParams.velopts[viewerParams.velType[p]];
 
@@ -244,11 +266,17 @@ function update_particle_playback(p,time){
 		// according to current filter handle settings
 		if (update_filter) update_particle_mesh_filter(p,m);
 
+		// only update the colormap variable if we're actually
+		//  colormapping. we'll get to it eventually
+		if (update_colormap_variable && viewerParams.showColormap[p]){
+			update_particle_mesh_colormap_variable(p,m);
+		} 
+
 		update_velocity_animation(p,m);
 
 	} 
 	// set radii and alpha values to 0 to hide this particle group
-	else disable_particle_group_mesh(p,m);	
+	else if (update_onoff) disable_particle_group_mesh(p,m);	
  }
 
 
@@ -266,6 +294,15 @@ function update_particle_mesh_UI_values(p,m){
 	m.material.uniforms.colormapMax.value = viewerParams.colormapVals[p][viewerParams.ckeys[p][viewerParams.colormapVariable[p]]][1];
 	m.material.uniforms.colormap.value = viewerParams.colormap[p];
 	m.material.uniforms.showColormap.value = viewerParams.showColormap[p];
+
+	m.material.depthWrite =  viewerParams.depthWrite[p];
+	m.material.depthTest =  viewerParams.depthTest[p];
+
+	// update the blending mode only if it doesn't match
+	if (m.material.blending != viewerParams.blendingOpts[viewerParams.blendingMode[p]]){
+		m.material.blending = viewerParams.blendingOpts[viewerParams.blendingMode[p]];
+		m.material.needsUpdate = true;
+	}
 
 	// apply static color
 	//if (m.name.includes('Standard')){
@@ -357,6 +394,22 @@ function update_particle_mesh_filter(p,m){
 	m.geometry.attributes.alpha.needsUpdate = true;					
 }
 
+function update_particle_mesh_colormap_variable(p,m){
+	// unpack the particle group associated with this mesh
+	var this_parts = m.geometry.userData;
+
+	// colormapVariable[p] holds the *index* of the colormap variable
+	var ckey = viewerParams.ckeys[p][viewerParams.colormapVariable[p]];
+	// replace the colormap variable
+	if (this_parts[ckey] != null){
+		var colormapArray = m.geometry.attributes.colormapArray.array;
+		// fill the colormapArray with the values from the ckey array
+		for( var ii = 0; ii < colormapArray.length; ii ++ ) colormapArray[ii] = this_parts[ckey][ii];
+		// flag that this array was updated
+		m.geometry.attributes.colormapArray.needsUpdate = true;
+	}	
+}
+
 function disable_particle_group_mesh(p,m){
 	// disable the entire particle group, set color to 0,0,0,0 and radius to 0
 	m.material.uniforms.color.value = new THREE.Vector4(0);
@@ -366,7 +419,6 @@ function disable_particle_group_mesh(p,m){
 		radiusScale[ii] = 0.;
 	}
 	m.geometry.attributes.radiusScale.needsUpdate = true;
-	viewerParams.updateOnOff[p] = false;
 }
 
 function render() {

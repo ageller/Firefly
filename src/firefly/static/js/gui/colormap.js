@@ -12,7 +12,7 @@ function selectColormap() {
 	GUIParams.colormap[p] = (selectValue + 0.5) * (8/256);
 	sendToViewer({'setViewerParamByKey':[GUIParams.colormap, "colormap"]});	
 
-	console.log(p, " selected colormap:", GUIParams.colormapList[selectValue], GUIParams.colormap[p])
+	//console.log(p, " selected colormap:", GUIParams.colormapList[selectValue], GUIParams.colormap[p])
 
 	// redraw particle type if colormap is on
 	if (GUIParams.showColormap[p]){
@@ -41,18 +41,12 @@ function selectColormapVariable() {
 
 	showHideColormapFilter(p, selectValue);
 
-	// update colormap variable
+	// update colormap variable here and for the viewer
 	GUIParams.colormapVariable[p] = selectValue;
-	sendToViewer({'setViewerParamByKey':[GUIParams.colormapVariable[p], "colormapVariable",p]});
-
-	console.log(p, "colored by:", GUIParams.ckeys[p][GUIParams.colormapVariable[p]])
-
-	// redraw particle type if colormap is on
-	if (GUIParams.showColormap[p]){
-		updateColormapVariable
-		sendToViewer({'updateColormapVariable':[[p]]})
-		fillColorbarContainer(p);
-	}
+	sendToViewer({'setViewerParamByKey':[selectValue, "colormapVariable", p]});
+	// tell the viewer the colormapVariable was changed, so it can 
+	//  update the colormap variable for p's meshes on the next render pass
+	sendToViewer({'setViewerParamByKey':[true, "updateColormapVariable", p]});
 }
 
 ///////////////////////////////
@@ -90,8 +84,6 @@ function createColormapSliders(){
 				var varArgs = {//'f':'setViewerParamByKey','v':[initialValueMin, "colormapVals",p, ck],
 							  'f1':'setViewerParamByKey','v1':[GUIParams.colormapVals[p][ck], "colormapVals",p, ck],
 							  'f2':'setViewerParamByKey','v2':[GUIParams.colormapLims[p][ck], "colormapLims",p, ck],
-  							  'f3':'setViewerParamByKey','v3':[true,'updateColormap',p],
-							  'f4':'setViewerParamByKey','v4':[true,'updateFilter',p],
 							  'evalString':evalString};
 
 				createSlider(slider, text, sliderArgs, varArgs, [2,2], 'double', GUIParams.colormapVals[p][ck], GUIParams.colormapLims[p][ck]);
