@@ -140,6 +140,7 @@ function openCloseNodes(node){
 }
 
 function checkOnScreen(node){
+	return true;
 	return inFrustum(node);
 	var min_project = node.bounding_box.min.clone().project(viewerParams.camera);
 	var max_project = node.bounding_box.max.clone().project(viewerParams.camera);
