@@ -102,44 +102,33 @@ function openCloseNodes(node){
 		node.state = 'too small';
 		node.current_state = 'remove';
 		// if we haven't already, let's hide the CoM
-
-		free_buffer(node,
-			function (this_node){
-				if (this_node.com_shown) hideCoM(this_node);
-				this_node.children.forEach(function (child_name){free_buffer(node.octree[child_name],hideCoM)});
-			});
+		free_buffer(node,hideCoM);
+		node.children.forEach(function (child_name){free_buffer(node.octree[child_name],hideCoM)});
 	}
 	// don't need to draw nodes that aren't on screen 
 	else if (!onscreen && !inside){
 		// if we haven't already, let's hide the CoM
 		node.state = 'off screen';
 		node.current_state = 'remove';
-		free_buffer(node, function (this_node){
-			if (!this_node.com_shown) showCoM(this_node);
-		});
+		free_buffer(node,showCoM);
 	}
 	// this node is too large, we should hide its CoM and (maybe) show its children
 	else if (inside || too_big){  
 		node.state = 'inside or too big';
 		node.current_state = 'draw';
 		// if we haven't already, let's hide the CoM
-		load_buffer(node,
-			function (this_node){
-				if (this_node.com_shown) hideCoM(this_node);
-				this_node.children.forEach(
-					function (child_name){openCloseNodes(node.octree[child_name])});
-			});
+		load_buffer(node,hideCoM);
+		node.children.forEach(function (child_name){openCloseNodes(node.octree[child_name])});
 	}  
 	// this node is just right. let's check if we should do anything
 	//  to its children
 	else if (onscreen && !inside){
 		node.state = 'just right';
-		// if we aren't already, let's show the CoM
-		if (!node.com_shown) showCoM(node);
-
+		// if we don't currently have this node's buffer particles
+		// loaded then we'll show the CoM.
+		if (!node.drawn) showCoM(node);
 		// check if any of the children also need to be opened/closed
-		node.children.forEach(
-			function (child_name){openCloseNodes(node.octree[child_name])});
+		node.children.forEach(function (child_name){openCloseNodes(node.octree[child_name])});
 	}
 	// I don't think it is actually possible to get into here but if we do
 	//  I want to know about it
@@ -198,6 +187,7 @@ function checkTooBig(node_size_pix){
 }
 
 function hideCoM(node){
+	if (!node.com_shown) return;
 	node.com_shown = false;
 	mesh = viewerParams.partsMesh[node.pkey][0];
 	if (node.octbox) node.octbox.visible = false;
@@ -210,6 +200,8 @@ function hideCoM(node){
 }
 
 function showCoM(node){
+	if (node.com_shown) return;
+	node.com_shown = true;
 	mesh = viewerParams.partsMesh[node.pkey][0];
 	if (node.octbox) node.octbox.visible = true;
 	mesh.geometry.attributes.radiusScale.array[node.node_index] = node.radius;//1e4;
@@ -217,7 +209,6 @@ function showCoM(node){
 	mesh.geometry.attributes.alpha.array[node.node_index] = 1;
 	mesh.geometry.attributes.radiusScale.needsUpdate = true;
 	mesh.geometry.attributes.alpha.needsUpdate = true;
-	node.com_shown = true;
 	viewerParams.parts[node.pkey].IsDrawn[node.node_index] = 1;
 }
 
@@ -242,7 +233,7 @@ function load_buffer(node,callback,skip_queue=false){
 			// need to create a new mesh for this node
 			viewerParams.octree.toDraw[node.pkey].push([ node, callback]);
 	} 
-	else return callback(node);
+	//else return callback(node);
 }
 
 function free_buffer(node,callback,skip_queue=false){
@@ -266,7 +257,7 @@ function free_buffer(node,callback,skip_queue=false){
 
 			viewerParams.octree.toRemove.push([node,callback]); 
 		}
-	else return callback(node);
+	//else return callback(node);
 }
 
 function checkInQueue(node,queue='draw',extract=false){
