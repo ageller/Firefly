@@ -16,7 +16,7 @@ function abg_initOctree(pkey,data){
 	viewerParams.octree.particleDefaultSizeScale[pkey] = viewerParams.octree.particleDefaultSizeScale.default;
 
 	//this will be used as a percentage value in the GUI
-	viewerParams.plotNmax[pkey] = viewerParams.parts[pkey].Coordinates_flat.length/3;
+	viewerParams.plotNmax[pkey] = 100;
 
 	// enable radius rescaling to scale the center of mass particles differentially
 	viewerParams.parts[pkey].doSPH = true
