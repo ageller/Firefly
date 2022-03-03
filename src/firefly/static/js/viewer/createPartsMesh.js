@@ -224,15 +224,17 @@ function createPartsMesh(pdraw = viewerParams.partsKeys, node=null){
 
 		viewerParams.scene.add(mesh);
 		viewerParams.partsMesh[p].push(mesh)
-	}
 
-	if (viewerParams.parts[p].hasOwnProperty('octree') && viewerParams.debug){
+		if (viewerParams.parts[p].hasOwnProperty('octree') && viewerParams.debug){
 
-		octree = viewerParams.parts[p].octree;
-		evaluateFunctionOnOctreeNodes(
-			function (node){viewerParams.scene.add(node.octbox);},
-			octree[''],
-			octree);
+			octree = viewerParams.parts[p].octree;
+			evaluateFunctionOnOctreeNodes(
+				function (node){ 
+				if (node.octbox){
+					viewerParams.scene.add(node.octbox)}},
+				octree[''],
+				octree);
+		}
 	}
 
 	//this will not be printed if you change the N value in the slider, and therefore only redraw one particle type
