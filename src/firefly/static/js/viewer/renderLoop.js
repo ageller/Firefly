@@ -283,12 +283,21 @@ function update_particle_playback(p,time){
 
 function update_particle_mesh_UI_values(p,m){
 	// apply global decimation
-	var Nfac = 1;
-	if (viewerParams.haveOctree[p]) Nfac = m.geometry.attributes.radiusScale.array.length/100.; // the 100 factor is to account for plotNmax being a percent
-	m.geometry.setDrawRange( 0, Nfac*viewerParams.plotNmax[p]*(1./viewerParams.decimate) )
+	var Nfac = 1/viewerParams.decimate;
 
-	// apply particle size scale factor 
-	m.material.uniforms.uVertexScale.value = viewerParams.PsizeMult[p];
+	// the 100 factor is to account for plotNmax being a percent
+	//  need to convert
+	if (viewerParams.haveOctree[p]){
+		Nfac *= m.geometry.attributes.radiusScale.array.length/100.;
+		// if this is a mesh for the octree coms we want it to always be the full array
+		if (m.geometry.userData.octree) Nfac *= 100/viewerParams.plotNmax[p]; 
+	}
+
+	m.geometry.setDrawRange( 0, viewerParams.plotNmax[p]*Nfac);
+
+	// apply particle size scale factor to meshes that aren't octree CoM meshes
+	if (!m.geometry.userData.octree) m.material.uniforms.uVertexScale.value = viewerParams.PsizeMult[p];
+	else m.material.uniforms.uVertexScale.value = 1;
 
 	// apply colormap limits and flag for colormapping at all
 	m.material.uniforms.colormapMin.value = viewerParams.colormapVals[p][viewerParams.ckeys[p][viewerParams.colormapVariable[p]]][0];
