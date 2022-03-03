@@ -111,6 +111,7 @@ function openCloseNodes(node){
 		node.state = 'off screen';
 		node.current_state = 'remove';
 		free_buffer(node,showCoM);
+		node.children.forEach(function (child_name){free_buffer(node.octree[child_name],hideCoM)});
 	}
 	// this node is too large, we should hide its CoM and (maybe) show its children
 	else if (inside || too_big){  
@@ -165,23 +166,23 @@ function checkOnScreen(node){
 
 function checkInside(node){
 	var inside = true;
-	['x','y','z'].forEach(function (axis){
-		inside = inside && (
-			node.bounding_box.min[axis] <
-			viewerParams.camera.position[axis]) && 
-			(viewerParams.camera.position[axis] <
-			node.bounding_box.max[axis]);
+	var dist;
+	var width2 = node.width*node.width/4;
+	['x','y','z'].forEach(function (axis,j){
+		dist = viewerParams.camera.position[axis]  - node.center[j]
+		inside = inside && (dist*dist < width2);
 	})
 	return inside;
 }
 
-function checkTooSmall(node_size_pix,threshold=5){
+function checkTooSmall(node_size_pix,threshold=10){
 	return node_size_pix < threshold 
 	return (node_size_pix < viewerParams.renderWidth/32 || // too thin
 		node_size_pix < viewerParams.renderHeight/32);// too short
 }
 
-function checkTooBig(node_size_pix){
+function checkTooBig(node_size_pix,threshold=20){
+	return node_size_pix > threshold;
 	return (node_size_pix > viewerParams.renderWidth/16 ||// too wide
 		node_size_pix > viewerParams.renderHeight/16); // too tall
 }
@@ -412,7 +413,6 @@ function inFrustum(node){
 
 	//in case the above fails, check manually
 	//check if any of the corners is within the frustum
-	return true;
 
 	var u;
 	var p = new THREE.Vector3(node.center_of_mass[0],node.center_of_mass[1],node.center_of_mass[2]);
