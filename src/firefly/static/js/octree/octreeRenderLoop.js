@@ -198,20 +198,20 @@ function checkTooBig(node_size_pix){
 }
 
 function hideCoM(node){
+	node.com_shown = false;
 	mesh = viewerParams.partsMesh[node.pkey][0];
-	if (viewerParams.debug) node.octbox.visible = false;
+	if (node.octbox) node.octbox.visible = false;
 	mesh.geometry.attributes.radiusScale.array[node.node_index] = 0;
 	mesh.geometry.attributes.alpha.array[node.node_index] = 0;
 
 	mesh.geometry.attributes.radiusScale.needsUpdate = true;
 	mesh.geometry.attributes.alpha.needsUpdate = true;
-	node.com_shown = false;
 	viewerParams.parts[node.pkey].IsDrawn[node.node_index] = 0;
 }
 
 function showCoM(node){
 	mesh = viewerParams.partsMesh[node.pkey][0];
-	if (viewerParams.debug) node.octbox.visible = true;
+	if (node.octbox) node.octbox.visible = true;
 	mesh.geometry.attributes.radiusScale.array[node.node_index] = node.radius;//1e4;
 
 	mesh.geometry.attributes.alpha.array[node.node_index] = 1;

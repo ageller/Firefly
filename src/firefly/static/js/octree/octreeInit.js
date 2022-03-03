@@ -7,7 +7,7 @@ function abg_initOctree(pkey,data){
 
 	// flag to  draw the yellow octree boxes around the nodes
 	viewerParams.debug = false;
-	viewerParams.boxSize = 50*data.octree[''].width
+	viewerParams.boxSize = 25*data.octree[''].width
 
 	// TODO not sure if these are still necessary post-octree-refactor
 	viewerParams.octree.boxSize = viewerParams.boxSize;
@@ -16,9 +16,9 @@ function abg_initOctree(pkey,data){
 	viewerParams.octree.particleDefaultSizeScale[pkey] = viewerParams.octree.particleDefaultSizeScale.default;
 
 	//this will be used as a percentage value in the GUI
-	viewerParams.plotNmax[pkey] = 100;
+	viewerParams.plotNmax[pkey] = viewerParams.parts[pkey].Coordinates_flat.length/3;
 
-	// enable radius rescaling to scale the center of mass particles
+	// enable radius rescaling to scale the center of mass particles differentially
 	viewerParams.parts[pkey].doSPH = true
 	viewerParams.parts[pkey].SmoothingLength = Array(viewerParams.parts[pkey].Coordinates_flat.length/3)
 
@@ -39,7 +39,8 @@ function abg_initOctree(pkey,data){
 		//  we only have the node in scope
 		node.pkey = pkey;
 		node.octree = viewerParams.parts[pkey].octree
-		node.radius*=3;
+		//node.radius*=3;
+		node.radius = 15*node.width;
 
 		// TODO: should rethink how we set radii using radius flag
 		// set the radius of the particle
@@ -109,7 +110,7 @@ function compileFFTREEData(kaitai_format,node,callback){
 
 
 function createOctBox(node){
-	if (viewerParams.debug) {
+	if (viewerParams.debug && node.pkey == 'PartType0') {
 		const geometry = new THREE.BufferGeometry();
 		// create a simple square shape. We duplicate the top left and bottom right
 		// vertices because each vertex needs to appear once per triangle.
