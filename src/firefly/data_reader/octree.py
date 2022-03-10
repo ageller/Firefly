@@ -221,6 +221,11 @@ class Octree(object):
         minPos = np.abs(self.coordinates.flatten().min())
         root_width = 2.*np.max([maxPos,minPos])
 
+        ## find the maximum extent in any coordinate direction and set the 
+        ##  octree root bounding box to that size
+        #coords = np.abs(self.coordinates.flatten())
+        #np.percentile(coords,[99.99])
+
         
         ## easier to convert this to a dictionary for the next couple of lines
         fields = dict(zip(particle_group.tracked_names,particle_group.tracked_arrays))
@@ -241,6 +246,8 @@ class Octree(object):
 
         for i,axis in enumerate(['x','y','z']):
             fields[f'com_{axis}'] = self.coordinates[:,i]
+        for i,axis in enumerate(['x','y','z']):
+            fields[f'com_sq_{axis}'] = self.coordinates[:,i]**2
         ##  we'll divide the accumulated [com_x,com_y,com_z] / accumulated weights
         ##  for each node when we output, this will give us a position in the octant for our node
         ##  if Masses is already in fields we'll be accumulating it anyway, if it's not then 
@@ -252,10 +259,13 @@ class Octree(object):
             fields[key] if key == "Masses" else fields[key]*weights 
             for key in self.field_names],ndmin=2).T
         
+        ## fill up the settings with appropriate limits
+        ##  so that filters and colormaps are appropriate accounting
+        ##  for unloaded particles
         settings = particle_group.attached_settings
         ## find the minimum and maximum value of each field
         ##  for initializing the filter if user values aren't passed.
-        for i,key in enumerate(self.field_names[:-3]):
+        for i,key in enumerate(self.field_names[:-6]):
             if key in ['Masses']: vals = [0,fields[key].sum()*1.1]
             else: vals = [fields[key].min()*0.9, fields[key].max()*1.1]
             for setting_key in ['filterLims','filterVals','colormapLims','colormapVals']:
@@ -355,6 +365,8 @@ class Octree(object):
             filenames += [filename]
             npart_this_file = counts[i]
             with open(os.path.join(path,filename),'wb') as handle:
+                ## all nodes in this chunk have buffer info, 
+                ##  any buffer_size=0 nodes were tossed in split_chunks
                 for node in chunk:
                     ## set attributes we know before writing
                     self.nodes[node.name].byte_offset = offset
@@ -376,12 +388,12 @@ class Octree(object):
                             np.array(node.buffer_velss)/weights[:,None])
 
                     binary_writer.nparts = node.buffer_size
-                    binary_writer.nfields = node.nfields-3
+                    binary_writer.nfields = node.nfields-6
 
-                    binary_writer.fields = np.array(node.buffer_fieldss)[:,:-3]
+                    binary_writer.fields = np.array(node.buffer_fieldss)[:,:binary_writer.nfields]
 
                     ## renormalize every field except Masses
-                    for i,field in enumerate(self.field_names[:-3]):
+                    for i,field in enumerate(self.field_names[:binary_writer.nfields]):
                         if field!= 'Masses': binary_writer.fields[:,i]/=weights
 
                     ## take the transpose because binary_writer wants Nfields x Nparts
@@ -476,10 +488,10 @@ class Octree(object):
             flags = getattr(self,flag_name)
             js_name = flag_name.split('_')[0]+'Keys'
             json_dict[js_name] = []
-            for field_name,flag in zip(self.field_names[:-3],flags):
+            for field_name,flag in zip(self.field_names[:-6],flags):
                 if flag: json_dict[js_name] += [field_name]
 
-        json_dict['field_names'] = self.field_names[:-3]
+        json_dict['field_names'] = self.field_names[:-6]
 
         node_index = 0
         ## self.node_list should be sorted
@@ -498,12 +510,17 @@ class Octree(object):
                 node_dict[key] = getattr(node,key)
 
             ## calculate center of mass
-            com = node.fields[-3:] ## last 3 fields will always be xcom, ycom, zcom
+            com = node.fields[-6:-3] ## last 3 fields will always be xcom, ycom, zcom
+            com_sq = node.fields[-3:] ## last 3 fields will always be xcom, ycom, zcom
             if 'Masses' in self.field_names:
                 weights = node.fields[self.field_names.index('Masses')]
             else: weights = node.npoints
 
             com = com/weights
+            com_sq = com_sq/weights
+            ## sigma_x = <x^2>_m - <x>_m^2, take average over 3 axes to get 1d
+            ##  sigma to represent 1-sigma extent of particles in node
+            node_dict['radius'] = np.sqrt(np.mean(com_sq-com**2))
 
             node_dict['center_of_mass'] = com.tolist()
 
@@ -527,15 +544,14 @@ class Octree(object):
                 ##  it'll be easy to add.
                 #node_dict['npart_buffer_file'] = node.npart_buffer_file
 
+            ## set center = 
             json_dict['Coordinates_flat'][3*node_index:3*(node_index+1)] = com
+            #json_dict['Coordinates_flat'][3*node_index:3*(node_index+1)] = node.center.tolist()
 
             if self.velocities is not None: 
                 vcom = node.velocity/weights
                 json_dict['Velocities_flat'][3*node_index:3*(node_index+1)] = vcom
 
-            node_dict['radius'] = 5*node_dict['width'] * np.clip(
-                (np.log10(node_dict['npoints']) - low_rscale)/
-                (high_rscale-low_rscale), 0.1, 1)
             node_dict['node_index'] = node_index
             json_dict['octree'][node.name] = node_dict
             node_index+=1
