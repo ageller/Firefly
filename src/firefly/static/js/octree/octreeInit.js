@@ -34,6 +34,9 @@ function abg_initOctree(pkey,data){
 		node.com_shown = true;
 		node.mesh = null;
 
+		// convert center to 3vector
+		node.center = new THREE.Vector3(node.center[0],node.center[1],node.center[2]);
+
 		// let's store the pkey and octree in the node
 		//  for convenient reference in other routines where
 		//  we only have the node in scope

@@ -89,13 +89,15 @@ function openCloseNodes(node){
 
 	// find the node size in pixels and then compare to the 
 	//  size of the window
-	var node_size_pix = getScreenSize(node);
+	var node_angle_deg = getScreenSize(node);
 	var onscreen = checkOnScreen(node);
 	var inside = checkInside(node);
-	var too_small = checkTooSmall(node_size_pix);
-	var too_big = checkTooBig(node_size_pix);
+	var too_big = checkTooBig(node_angle_deg);
 
-	// every function truncates forEach loop when return is false
+	// the only scenario where we actually want to load the data from disk
+	var should_draw = inside || (onscreen && too_big)
+
+	var too_small = checkTooSmall(node_angle_deg);
 
 	// this node is too small. we should hide each of its children *and* its CoM
 	if (too_small){
@@ -107,14 +109,24 @@ function openCloseNodes(node){
 	}
 	// don't need to draw nodes that aren't on screen 
 	else if (!onscreen && !inside){
-		// if we haven't already, let's hide the CoM
+		// if we haven't already, let's show the CoM so it's ready when we pan the camera
 		node.state = 'off screen';
 		node.current_state = 'remove';
-		free_buffer(node,showCoM);
+		if (!node.drawn){
+			// remove it from the draw queue
+			checkInQueue(node,'draw',true);
+			// show the CoM -- effectively "remove" it if we 
+			//  haven't already opened it but don't free up the memory unless 
+			//  we've zoomed far enough away or moved the camera. (i.e. too_small == true)
+ 			showCoM(node);
+		}
+		//free_buffer(node,showCoM);
 		node.children.forEach(function (child_name){free_buffer(node.octree[child_name],hideCoM)});
 	}
-	// this node is too large, we should hide its CoM and (maybe) show its children
-	else if (inside || too_big){  
+	// we should add this node's buffer particles to the scene and hide its CoM. 
+	//  then think about its children
+	// should_draw = inside || (onscreen && too_big)
+	else if (should_draw){  
 		node.state = 'inside or too big';
 		node.current_state = 'draw';
 		// if we haven't already, let's hide the CoM
@@ -139,53 +151,23 @@ function openCloseNodes(node){
 	}
 }
 
-function checkOnScreen(node){
-	return true;
-	return inFrustum(node);
-	var min_project = node.bounding_box.min.clone().project(viewerParams.camera);
-	var max_project = node.bounding_box.max.clone().project(viewerParams.camera);
-	var cen_project = new THREE.Vector3(node.center[0],node.center[1],node.center[2])
-	cen_project = cen_project.project(viewerParams.camera);
-	var min_onscreen = true;
-	var max_onscreen = true;
-	var cen_onscreen = true;
-
-	// thresh = 1 corresponds to point being *just* off-scren. 
-	var thresh = 5; // a little more aggressive, culls stuff at the edge of the screen
-
-
-	['x','y'].forEach(function (axis){
-		min_onscreen = (min_project[axis] > -thresh && min_project[axis] < thresh) && min_onscreen;
-		max_onscreen = (max_project[axis] > -thresh && max_project[axis] < thresh) && max_onscreen;
-		cen_onscreen = (cen_project[axis] > -thresh && cen_project[axis] < thresh) && cen_onscreen;
-	})	
-
-	//if (node.refinement==0){console.log(cen_onscreen,cen_project)}
-
-	return min_onscreen || max_onscreen || cen_onscreen;
-}
-
 function checkInside(node){
 	var inside = true;
 	var dist;
 	var width2 = node.width*node.width/4;
 	['x','y','z'].forEach(function (axis,j){
-		dist = viewerParams.camera.position[axis]  - node.center[j]
+		dist = viewerParams.camera.position[axis]  - node.center[axis]
 		inside = inside && (dist*dist < width2);
 	})
 	return inside;
 }
 
-function checkTooSmall(node_size_pix,threshold=10){
-	return node_size_pix < threshold 
-	return (node_size_pix < viewerParams.renderWidth/32 || // too thin
-		node_size_pix < viewerParams.renderHeight/32);// too short
+function checkTooSmall(node_angle_deg,threshold=1){
+	return node_angle_deg < threshold 
 }
 
-function checkTooBig(node_size_pix,threshold=20){
-	return node_size_pix > threshold;
-	return (node_size_pix > viewerParams.renderWidth/16 ||// too wide
-		node_size_pix > viewerParams.renderHeight/16); // too tall
+function checkTooBig(node_angle_deg,threshold=10){
+	return node_angle_deg > threshold;
 }
 
 function hideCoM(node){
@@ -247,45 +229,48 @@ function free_buffer(node,callback,skip_queue=false){
 		//viewerParams.octree.toRemove.length < viewerParams.octree.maxToRemove && 
 		//node.particles.Coordinates.length > Math.floor(node.Nparticles*viewerParams.octree.minFracParticlesToDraw[p]) && 
 		) {
-			// check if this node is already in the queue to be drawn
-			
-			// check draw queue and remove node if it's in there.
-			checkInQueue(node,'draw',true);
-
-			// let's remove it from the remove queue because the callback might not match
-			//  whatever we're asking it to do now. NOTE that this could constantly
-			//  juggle a node to the end of the queue over and over again which could be wasteful?
-			checkInQueue(node,'remove',true);
-
-			viewerParams.octree.toRemove.push([node,callback]); 
+			// if it's already in the remove queue, keep it in its position but replace the callback
+			//  otherwise, add it to the end of the remove queue
+			if (!checkInQueue(node,'remove',false,callback)){
+				viewerParams.octree.toRemove.push([node,callback]);
+			}
 		}
-	//else return callback(node);
+	// check draw queue and remove node if it's in there.
+	else checkInQueue(node,'draw',true);
 }
 
-function checkInQueue(node,queue='draw',extract=false){
+function checkInQueue(node,queue='draw',extract=false,replace_callback=null){
 	// check if this node is already in the queue to be drawn
-	var contained = false;
 	var this_queue = queue == 'draw' ? viewerParams.octree.toDraw[node.pkey] : viewerParams.octree.toRemove
-	index = this_queue.forEach(
+	var match_index=null;
+	// 'every' function truncates forEach loop when return is false
+	this_queue.every(
 		function (ele,index){
-			if (ele[0].obj_name==node.obj_name){ 
-				contained=true;
-				return index;}
+			if (ele[0].obj_name==node.obj_name){
+				match_index=index;
+				return false;} // tells the loop to stop
+			return true; 
 		});
 
 	// TODO replcae the callback function if sent
 	// if we've been asked to extract this element from
 	//  the queue we're checking,let's do so.
-	if (extract && contained) this_queue.splice(index,1);
+	if (extract && match_index!=null) this_queue.splice(match_index,1);
+	else if (replace_callback && match_index!=null) this_queue[match_index][1] = replace_callback;
 
-	return contained;
+	return match_index;
 }
 
 function getScreenSize(node){
+
+	var dist = node.center.distanceTo(viewerParams.camera.position)
+	var angle = Math.atan(node.radius/dist)/Math.PI*180
+	return angle
+
 	//estimate the screen size by taking the max of the x,y,z widths
 	//x width
 	dists = [0,0,0]
-	axes = ['x','y','z']
+	axes = ['x','y']//,'z']
 	axes.forEach(function (axis,i){
 		var xp = new THREE.Vector3(node.center[0],node.center[1],node.center[2]);
 		var xm = new THREE.Vector3(node.center[0],node.center[1],node.center[2]);
@@ -300,8 +285,9 @@ function getScreenSize(node){
 		dists[i] = xp.distanceTo(xm);
 	});
 
+	var node_size_pix = Math.max(dists[0],Math.max(dists[1],dists[2]));
 	// there's no built in array max function??? absurd
-	return Math.max(dists[0],Math.max(dists[1],dists[2]));
+	return node_size_pix;
 }
 
 function drawNextOctreeNode(){
@@ -340,13 +326,13 @@ function drawNextOctreeNode(){
 function removeNextOctreeNode(){
 	//work from the back of the array
 	//viewerParams.octree.waitingToRemove = true;
-	var tuple = viewerParams.octree.toRemove.pop();
+	var tuple = viewerParams.octree.toRemove.shift();
 	var node = tuple[0];
 	var callback = tuple[1];
 
 	// if the node was already removed move on to the next one
 	while (!node.mesh && viewerParams.octree.toRemove.length){
-		tuple = viewerParams.octree.toRemove.pop();
+		tuple = viewerParams.octree.toRemove.shift();
 		node = tuple[0];
 		callback = tuple[1];
 	}
@@ -403,7 +389,7 @@ function resetWaitingToReduce(){
 	viewerParams.octree.waitingToReduce = false;
 }
 
-function inFrustum(node){
+function checkOnScreen(node){
 
 	//use three.js check (only possible if already in scene)
 	//I think this is causing a redraw loop where Three.js thinks it is in the scene, but then it gets removed on the next pass

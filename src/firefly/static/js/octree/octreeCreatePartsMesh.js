@@ -70,6 +70,19 @@ function reduceOctreeParticles(node, N = null, recreateGeo = false, callback = n
 
 function drawOctreeNode(node, callback){
 
+	// final check that this node should *still* be drawn. 
+	// if not, skip before doing anything we might regret
+	var node_angle_deg = getScreenSize(node);
+	var inside = checkInside(node);
+	var too_big = checkTooBig(node_angle_deg);
+	var onscreen = checkOnScreen(node);
+	var should_draw = inside || (onscreen && too_big)
+	if (!should_draw){
+		// something changes about this node by the time we got to it to draw so 
+		//  we're going to move on to the next one.
+		viewerParams.octree.waitingToDraw = false;
+		return drawNextOctreeNode();}
+
 	// prevent the node from being added to the toDraw list again
 	node.drawn = true;
 	var start = 0;
@@ -80,7 +93,7 @@ function drawOctreeNode(node, callback){
 	// check if we should actually load the data
 	if (!(!node.mesh && node.current_state=='draw')){
 		viewerParams.octree.waitingToDraw = false;
-		return callback(node);}
+		return}
 
 	//read in the file, and then draw the particles
 	return loadFFTREEKaitai( node,
