@@ -213,7 +213,7 @@ function createPartsMesh(pdraw = viewerParams.partsKeys, node=null){
 		viewerParams.partsMesh[p] = [];
 	
 		//geometry
-		var geo = createParticleGeometry(p, viewerParams.parts[p], 0, viewerParams.plotNmax[p]);
+		var geo = createParticleGeometry(p, viewerParams.parts[p]);
 
 		//material
 		var material = createParticleMaterial(p);
