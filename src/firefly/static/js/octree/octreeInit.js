@@ -6,6 +6,7 @@ function abg_initOctree(pkey,data){
 	viewerParams.haveAnyOctree = true;
 
 	// flag to  draw the yellow octree boxes around the nodes
+	//viewerParams.debug = true;
 	viewerParams.debug = false;
 	viewerParams.boxSize = 25*data.octree[''].width
 
@@ -34,6 +35,7 @@ function abg_initOctree(pkey,data){
 		node.com_shown = true;
 		node.mesh = null;
 		node.queue = null;
+		//node.buffer_size = 0;
 
 		// convert center to 3vector
 		node.center = new THREE.Vector3(node.center[0],node.center[1],node.center[2]);
@@ -44,7 +46,7 @@ function abg_initOctree(pkey,data){
 		node.pkey = pkey;
 		node.octree = viewerParams.parts[pkey].octree
 		//node.radius*=3;
-		node.radius = 15*node.width;
+		node.radius = 15*node.radius;
 
 		// TODO: should rethink how we set radii using radius flag
 		// set the radius of the particle
@@ -114,7 +116,7 @@ function compileFFTREEData(kaitai_format,node,callback){
 
 
 function createOctBox(node){
-	if (viewerParams.debug && node.pkey == 'PartType0') {
+	if (viewerParams.debug && node.pkey == 'PartType4') {
 		const geometry = new THREE.BufferGeometry();
 		// create a simple square shape. We duplicate the top left and bottom right
 		// vertices because each vertex needs to appear once per triangle.
@@ -141,11 +143,10 @@ function createOctBox(node){
 		line.material.depthTest = false;
 		line.material.opacity = 0.25;
 		line.material.transparent = true;
-		line.position.x = node.center[0];
-		line.position.y = node.center[1];
-		line.position.z = node.center[2];
+		line.position.x = node.center.x;
+		line.position.y = node.center.y;
+		line.position.z = node.center.z;
 		line.scale.x = line.scale.y = line.scale.z = node.width/2;
-
 		var obj =  new THREE.BoxHelper( line );
 		obj.visible=true;
 		node.octbox = obj;
