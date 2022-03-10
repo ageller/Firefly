@@ -214,6 +214,7 @@ function load_buffer(node,callback,skip_queue=false){
 			//  add it to this queue instead. (true->extract)
 			checkInQueue(node,'remove',true)
 
+			node.queue = 'draw';
 			// need to create a new mesh for this node
 			viewerParams.octree.toDraw[node.pkey].push([ node, callback]);
 	} 
@@ -223,42 +224,50 @@ function load_buffer(node,callback,skip_queue=false){
 function free_buffer(node,callback,skip_queue=false){
 	if (skip_queue) return removeOctreeNode(node,callback);
 
-	if (
-		node.mesh &&
-		node.drawn // two checks to see if it has been drawn
-		//viewerParams.octree.toRemove.length < viewerParams.octree.maxToRemove && 
-		//node.particles.Coordinates.length > Math.floor(node.Nparticles*viewerParams.octree.minFracParticlesToDraw[p]) && 
-		) {
-			// if it's already in the remove queue, keep it in its position but replace the callback
-			//  otherwise, add it to the end of the remove queue
-			if (!checkInQueue(node,'remove',false,callback)){
-				viewerParams.octree.toRemove.push([node,callback]);
-			}
+	// two checks to see if it has been drawn (or is in the process of being drawn)
+	if (node.mesh && node.drawn){ 
+		// if it's already in the remove queue, keep it in its position but replace the callback
+		//  otherwise, add it to the end of the remove queue
+		if (!checkInQueue(node,'remove',false,callback)){
+			node.queue = 'remove';
+			viewerParams.octree.toRemove.push([node,callback]);
 		}
+	}
 	// check draw queue and remove node if it's in there.
 	else checkInQueue(node,'draw',true);
 }
 
 function checkInQueue(node,queue='draw',extract=false,replace_callback=null){
-	// check if this node is already in the queue to be drawn
-	var this_queue = queue == 'draw' ? viewerParams.octree.toDraw[node.pkey] : viewerParams.octree.toRemove
-	var match_index=null;
-	// 'every' function truncates forEach loop when return is false
-	this_queue.every(
-		function (ele,index){
-			if (ele[0].obj_name==node.obj_name){
-				match_index=index;
-				return false;} // tells the loop to stop
-			return true; 
-		});
 
-	// TODO replcae the callback function if sent
-	// if we've been asked to extract this element from
-	//  the queue we're checking,let's do so.
-	if (extract && match_index!=null) this_queue.splice(match_index,1);
-	else if (replace_callback && match_index!=null) this_queue[match_index][1] = replace_callback;
+	var in_this_queue = queue == node.queue;
 
-	return match_index;
+	// only loop through the queue if we need to
+	if (in_this_queue && (extract || replace_callback)){
+		// pick the actual queue object corresponding to the string
+		var this_queue = queue == 'draw' ? viewerParams.octree.toDraw[node.pkey] : viewerParams.octree.toRemove
+
+		// 'every' function truncates forEach loop when return is false
+		var match_index=null;
+		this_queue.every(
+			function (ele,index){
+				if (ele[0].obj_name==node.obj_name){
+					match_index=index; // store the index of the match
+					return false;} // tells the loop to stop
+				return true; 
+			});
+
+		// if we've been asked to extract this element from
+		//  the queue we're checking,let's do so.
+		if (extract && match_index!=null) {
+			this_queue.splice(match_index,1);
+			// tell the node it was removed from the queue
+			node.queue = null;
+		}
+		// if we've been asked to replace the callback function let's do so
+		else if (replace_callback && match_index!=null) this_queue[match_index][1] = replace_callback;
+		return match_index!=null;
+	}
+	else return in_this_queue;
 }
 
 function getScreenSize(node){
@@ -304,6 +313,8 @@ function drawNextOctreeNode(){
 	// unpack the tuple
 	var node = tuple[0];
 	var callback = tuple[1];
+	// tell the node it was removed from the queue
+	node.queue = null; 
 
 	// if the node is already drawn but was somehow added to the list 
 	//  we'll just skip it rather than move to the next element
@@ -313,6 +324,8 @@ function drawNextOctreeNode(){
 		// unpack the tuple
 		node = tuple[0];
 		callback = tuple[1];}
+		// tell the node it was removed from the queue
+		node.queue = null; 
 	
 	// if the node is already drawn let's skip it
 	//  (should only happen if the list is now empty)
@@ -327,14 +340,20 @@ function removeNextOctreeNode(){
 	//work from the back of the array
 	//viewerParams.octree.waitingToRemove = true;
 	var tuple = viewerParams.octree.toRemove.shift();
+	if (!tuple) return;
+
 	var node = tuple[0];
 	var callback = tuple[1];
+	// tell the node we removed it from the queue
+	node.queue = null;
 
 	// if the node was already removed move on to the next one
 	while (!node.mesh && viewerParams.octree.toRemove.length){
 		tuple = viewerParams.octree.toRemove.shift();
 		node = tuple[0];
 		callback = tuple[1];
+		// tell the node we removed it from the queue
+		node.queue = null;
 	}
 
 	// if the node is already removed let's skip it

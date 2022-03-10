@@ -33,6 +33,7 @@ function abg_initOctree(pkey,data){
 		node.current_state = 'draw'
 		node.com_shown = true;
 		node.mesh = null;
+		node.queue = null;
 
 		// convert center to 3vector
 		node.center = new THREE.Vector3(node.center[0],node.center[1],node.center[2]);
