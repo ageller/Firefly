@@ -85,7 +85,6 @@ class ParticleGroup(object):
         decimation_factor=1,
         filenames_and_nparts=None,
         attached_settings=None,
-        doSPHrad=False,
         loud=True,
         **settings_kwargs):
         """Accepts pass-through kwargs for :class:`firefly.data_reader.Settings` whether one is attached
@@ -140,11 +139,6 @@ class ParticleGroup(object):
             can be attached after-the-fact using the
             :func:`firefly.data-reader.Settings.attachSettings` method, defaults to None
         :type attached_settings: :class:`firefly.data_reader.Settings`, optional
-        :param doSPHrad: flag to vary the opacity across a particle by a cubic spline 
-            (as commonly done in SPH).
-            Must then also provide :code:`SmoothingLength` as a field_array., defaults to False
-            **EXPERIMENTAL FEATURE**
-        :type doSPHrad: bool, optional
         :param loud: flag to print status information to the console, defaults to False
         :type loud: bool, optional
         :raises ValueError: if len(field_names) != len(field arrays)
@@ -226,11 +220,23 @@ class ParticleGroup(object):
             )
             field_colormap_flags = new_field_colormap_flags
 
+            if len(field_names) != len(field_radius_flags):
+                if loud:
+                    print("Make sure each field_array (%d) has a field_radius_flag (%d), assuming False."%(
+                        len(field_names),len(field_radius_flags)))
+
+                new_field_radius_flags = np.append(
+                    field_radius_flags,
+                    [True]*(len(field_names)-len(field_radius_flags)),axis=0
+                )
+                field_radius_flags = new_field_radius_flags
+
         ## bind validated input
         self.field_names = field_names
         self.field_arrays = field_arrays
         self.field_filter_flags = np.array(field_filter_flags)
         self.field_colormap_flags = np.array(field_colormap_flags)
+        self.field_radius_flags = np.array(field_radius_flags)
 
         ## validate filenames and nparts if anyone was so foolhardy to
         ##  send it in themselves
@@ -304,7 +310,6 @@ class ParticleGroup(object):
                 raise KeyError("Invalid settings kwarg %s"%settings_kwarg)
 
         self.attached_settings = attached_settings
-        self.doSPHrad = doSPHrad
         
     def trackArray(
         self,
@@ -312,6 +317,7 @@ class ParticleGroup(object):
         arr,
         filter_flag=True,
         colormap_flag=True,
+        radius_flag=True,
         filterLims=None,
         filterVals=None,
         colormapLims=None,
@@ -326,6 +332,8 @@ class ParticleGroup(object):
         :type filter_flag: bool, optional
         :param colormap_flag: flag to make field colormappable in the GUI, defaults to True
         :type colormap_flag: bool, optional
+        :param radius_flag: flag to allow field to be used as a radius scale in the GUI, defaults to True
+        :type radius_flag: bool, optional
         :param filterLims: initial [min, max] limits to the filters. 
             defaults to None and is set in the web app to [min, max] of the field
         :type filterLims: list of float, optional
@@ -359,6 +367,9 @@ class ParticleGroup(object):
         self.field_colormap_flags = np.append(
             self.field_colormap_flags,
             [colormap_flag],axis=0)
+        self.field_radius_flags = np.append(
+            self.field_radius_flags,
+            [radius_flag],axis=0)
 
         ## update the default settings with this array's filterVals/Lims
         if filter_flag: 
@@ -413,7 +424,7 @@ class ParticleGroup(object):
                 use, defining a subset of the :class:`~firefly.data_reader.ParticleGroup` data to 
                 output, defaults to np.arange(self.nparts)
         :type dec_inds: np.ndarray, optional
-        :param store_extra_keys: flag to store filter and colormap flags, defaults to True
+        :param store_extra_keys: flag to store filter, colormap, and radius flags defaults to True
         :type store_extra_keys: bool, optional
         :param loud: flag to print status information to the console, defaults to False
         :type loud: bool, optional
@@ -451,7 +462,8 @@ class ParticleGroup(object):
             if loud: print(
                 self.field_names,
                 'filter:',self.field_filter_flags,
-                'colormap:',self.field_colormap_flags)
+                'colormap:',self.field_colormap_flags,
+                'radius:',self.field_radius_flags)
 
             outDict['filterKeys'] = np.array(self.field_names)[np.array(
                  self.field_filter_flags,dtype=bool)]
@@ -459,11 +471,9 @@ class ParticleGroup(object):
             outDict['colormapKeys'] = np.array(self.field_names)[np.array(
                 self.field_colormap_flags,dtype=bool)]
 
-            ## TODO this needs to be changed, this is a flag for having the
-            ##  opacity vary across a particle as the impact parameter projection
-            ##  of cubic spline kernel
-            outDict['doSPHrad'] = [self.doSPHrad]
-        
+            outDict['radiusKeys'] = np.array(self.field_names)[np.array(
+                self.field_radius_flags,dtype=bool)]
+
         return outDict
     
     def createOctree(self,npart_min_node=2e2,npart_max_node=1e3):
@@ -680,9 +690,7 @@ class ParticleGroup(object):
             binary_writer.fields = self.field_arrays[:,these_dec_inds]
             binary_writer.filter_flags = self.field_filter_flags
             binary_writer.colormap_flags = self.field_colormap_flags
-
-            ## TODO add interface for this
-            binary_writer.radius_flags = np.array(self.radius_flags,ndmin=1)
+            binary_writer.radius_flags = self.field_radius_flags
 
             file_array += [(fname,binary_writer.write())] 
 

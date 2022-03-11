@@ -281,8 +281,7 @@ class Octree(object):
 
         self.filter_flags = particle_group.field_filter_flags
         self.colormap_flags = particle_group.field_colormap_flags
-        ## TODO should add a hook for this
-        self.radius_flags= [False for field in self.field_names]
+        self.radius_flags= particle_group.field_radius_flags
 
         ## initialize the octree node dictionary
         ##  find the maximum extent in any coordinate direction and set the 
