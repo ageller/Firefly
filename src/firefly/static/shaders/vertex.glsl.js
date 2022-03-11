@@ -3,7 +3,7 @@ var myVertexShader = `
 attribute float radiusScale; //for filtering [0,1]
 attribute float alpha;
 attribute vec4 velVals;
-attribute vec4 colorArray;
+attribute vec4 rgbaColor;
 attribute float colormapField;
 
 varying float vID;
@@ -67,7 +67,7 @@ void main(void) {
 
 	vPointSize = gl_PointSize;
 
-	vColor = colorArray;
+	vColor = rgbaColor;
 
 	gl_Position = projectionMatrix * mvPosition;
 

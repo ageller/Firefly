@@ -97,12 +97,17 @@ function compileFFTREEData(kaitai_format,node,callback){
 	node.particles.pkey = node.pkey
 
 	hasVelocities = kaitai_format.octnodeHeader.hasVelocities
+	hasRgbaColors = kaitai_format.octnodeHeader.hasRgbaColors
 	
 	node.particles.Coordinates_flat = kaitai_format.node.coordinatesFlat.flatVectorData.data.values;
 	// only load velocities if we actually have them
 	if (hasVelocities){
 		node.particles.Velocities_flat = kaitai_format.node.velocitiesFlat.flatVectorData.data.values;
 		calcVelVals(node.particles);
+	}
+	// only load Rgba color tuples if we actually have them
+	if (hasRgbaColors){
+		node.particles.rgbaColors_flat = kaitai_format.node.rgbaColorsFlat.flatVector4Data.data.values;
 	}
 
 	field_names = viewerParams.parts[node.pkey].field_names;

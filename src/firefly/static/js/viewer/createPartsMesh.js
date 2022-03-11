@@ -55,9 +55,9 @@ function createParticleGeometry(p, parts, start, end){
 	geo.setAttribute('colormapField', new THREE.BufferAttribute( colormapField, 1));
 
 	//if user supplies individual per-particle colors (otherwise this is not used, but still need in shader)
-	if (viewerParams.parts[p].hasOwnProperty("colorArray")) var colorArray = Float32Array.from(parts.colorArray.slice(3*start,3*end));
-	else var colorArray = Float32Array.from( Array(len * 4).fill(-1)); // RGBA
-	geo.setAttribute( 'colorArray', new THREE.BufferAttribute( colorArray, 4 ) );
+	if (viewerParams.parts[p].hasOwnProperty("rgbaColors_flat")) var rgbaColors = Float32Array.from(parts.rgbaColors_flat.slice(4*start,4*end));
+	else var rgbaColors = Float32Array.from( Array(len * 4).fill(-1)); // RGBA
+	geo.setAttribute( 'rgbaColor', new THREE.BufferAttribute( rgbaColors, 4 ) );
 
 
 	// store the particle data in the "userData" dictionary so we can

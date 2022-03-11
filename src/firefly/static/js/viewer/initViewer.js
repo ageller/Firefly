@@ -1288,6 +1288,7 @@ function loadFFLYKaitai(fname,callback){
 // translate the katai format to viewerParams
 function compileFFLYData(data, p, callback, initialLoadFrac=0){
 	var hasVelocities = data.fireflyHeader.hasVelocities;
+	var hasRgbaColors = data.fireflyHeader.hasRgbaColors;
 	var this_parts = viewerParams.parts[p];
 	if (!data.hasOwnProperty('coordinatesFlat')) console.log("Invalid particle group data",data);
 	else {
@@ -1295,6 +1296,7 @@ function compileFFLYData(data, p, callback, initialLoadFrac=0){
 		if (!this_parts.hasOwnProperty('Coordinates_flat')){
 			this_parts.Coordinates_flat = [];
 			if (hasVelocities) this_parts.Velocities_flat = [];
+			if (hasRgbaColors) this_parts.rgbaColors_flat = [];
 			this_parts.filterKeys = [];
 			this_parts.colormapKeys = [];
 			// TODO hook this up for choosing which variable to scale points by
@@ -1313,6 +1315,7 @@ function compileFFLYData(data, p, callback, initialLoadFrac=0){
 		this_parts.Coordinates_flat = this_parts.Coordinates_flat.concat(data.coordinatesFlat.flatVectorData.data.values);
 		// only load velocities if we actually have them
 		if (hasVelocities) this_parts.Velocities_flat = this_parts.Velocities_flat.concat(data.velocitiesFlat.flatVectorData.data.values);
+		if (hasRgbaColors) this_parts.rgbaColors_flat = this_parts.rgbaColors_flat.concat(data.rgbaColorsFlat.flatVector4Data.data.values);
 
 		// and now load the scalar field data
 		for (i=0; i < data.fireflyHeader.nfields; i++){
