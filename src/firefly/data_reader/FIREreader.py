@@ -184,10 +184,10 @@ class FIREreader(Reader):
             snapdict['Velocities'] -=vcom
 
             ## initialize output arrays for fields
-            tracked_names = []
-            tracked_arrays = []
-            tracked_filter_flags = []
-            tracked_colormap_flags = []
+            field_names = []
+            field_arrays = []
+            field_filter_flags = []
+            field_colormap_flags = []
 
             for field,filterFlag,colormapFlag,magFlag,logFlag in list(zip(
                 self.fields,
@@ -218,19 +218,19 @@ class FIREreader(Reader):
                 
 
                 ## append this field into the arrays
-                tracked_names = np.append(
-                    tracked_names,
+                field_names = np.append(
+                    field_names,
                     [field],axis=0)
 
-                tracked_filter_flags = np.append(
-                    tracked_filter_flags,
+                field_filter_flags = np.append(
+                    field_filter_flags,
                     [filterFlag],axis=0)
 
-                tracked_colormap_flags = np.append(
-                    tracked_colormap_flags,
+                field_colormap_flags = np.append(
+                    field_colormap_flags,
                     [colormapFlag],axis=0)
 
-                tracked_arrays.append(arr)
+                field_arrays.append(arr)
                 
             ## initialize a particleGroup instance
             ##  for this particle type
@@ -240,12 +240,12 @@ class FIREreader(Reader):
                     UIname,
                     snapdict['Coordinates'],
                     snapdict['Velocities'],
-                    tracked_names=tracked_names,
-                    tracked_arrays=np.array(tracked_arrays,ndmin=2),
+                    field_names=field_names,
+                    field_arrays=np.array(field_arrays,ndmin=2),
                     decimation_factor=dec_factor,
-                    tracked_filter_flags=tracked_filter_flags,
-                    tracked_colormap_flags=tracked_colormap_flags,
-                    doSPHrad = 'SmoothingLength' in tracked_names)],
+                    field_filter_flags=field_filter_flags,
+                    field_colormap_flags=field_colormap_flags,
+                    doSPHrad = 'SmoothingLength' in field_names)],
                 axis=0)
 
 

@@ -231,7 +231,7 @@ class Octree(object):
 
         
         ## easier to convert this to a dictionary for the next couple of lines
-        fields = dict(zip(particle_group.tracked_names,particle_group.tracked_arrays))
+        fields = dict(zip(particle_group.field_names,particle_group.field_arrays))
         if particle_group.decimation_factor > 1:
             self.coordinates = self.coordinates[::particle_group.decimation_factor]
             if self.velocities is not None: self.velocities = self.velocities[::particle_group.decimation_factor]
@@ -279,8 +279,8 @@ class Octree(object):
                 if settings[setting_key][particle_group.UIname][key] is None:
                     settings[setting_key][particle_group.UIname][key]=vals
 
-        self.filter_flags = particle_group.tracked_filter_flags
-        self.colormap_flags = particle_group.tracked_colormap_flags
+        self.filter_flags = particle_group.field_filter_flags
+        self.colormap_flags = particle_group.field_colormap_flags
         ## TODO should add a hook for this
         self.radius_flags= [False for field in self.field_names]
 

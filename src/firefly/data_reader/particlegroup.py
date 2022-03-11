@@ -26,7 +26,7 @@ class ParticleGroup(object):
         
         mystr = "%s "%(self.UIname)
         mystr += "- %d/%d particles - %d tracked fields"%(
-            np.ceil(self.nparts/self.decimation_factor),self.nparts,len(self.tracked_names))
+            np.ceil(self.nparts/self.decimation_factor),self.nparts,len(self.field_names))
         return mystr
 
     def __getitem__(self,key):
@@ -42,10 +42,10 @@ class ParticleGroup(object):
         if key == 'Coordinates':
             return self.coordinates
 
-        elif key in self.tracked_names:
-            return self.tracked_arrays[self.tracked_names.index(key)]
+        elif key in self.field_names:
+            return self.field_arrays[self.field_names.index(key)]
         else:
-            raise KeyError("%s is not a tracked array"%key)
+            raise KeyError("%s is not a field array"%key)
     
     def __setitem__(self,key,value):
         """Implementation of builtin function __setitem__ to replace
@@ -63,9 +63,9 @@ class ParticleGroup(object):
         if key == 'Coordinates':
             ## replace the coordinates
             self.coordinates=value
-        elif key in self.tracked_names:
+        elif key in self.field_names:
             ## replace a field array
-            self.tracked_arrays[self.tracked_names.index(key)]=value
+            self.field_arrays[self.field_names.index(key)]=value
         else:
             ## track a key we haven't tracked yet,
             ##  filter and colormap flags will be set to True by default.
@@ -77,10 +77,11 @@ class ParticleGroup(object):
         coordinates,
         velocities=None,
         rgba_colors=None,
-        tracked_arrays=None,
-        tracked_names=None,
-        tracked_filter_flags=None,
-        tracked_colormap_flags=None,
+        field_arrays=None,
+        field_names=None,
+        field_filter_flags=None,
+        field_colormap_flags=None,
+        field_radius_flags=None,
         decimation_factor=1,
         filenames_and_nparts=None,
         attached_settings=None,
@@ -100,20 +101,24 @@ class ParticleGroup(object):
         :type velocities: np.ndarray
         :param rgba_colors: The RGBA tuples associated with each coordinate, should have a shape of `(nparts,4)`
         :type rgba_colors: np.ndarray
-        :param tracked_arrays: The field data arrays to associate with each coordinate in space, each array
+        :param field_arrays: The field data arrays to associate with each coordinate in space, each array
             should be one-dimensional and have `nparts` entries., defaults to None
-        :type tracked_arrays: (nfields,nparts) np.ndarray, optional
-        :param tracked_names: Should be the same length as `tracked_arrays`, and gives a
+        :type field_arrays: (nfields,nparts) np.ndarray, optional
+        :param field_names: Should be the same length as `field_arrays`, and gives a
             name to each of the arrays when they show up in the UI dropdowns., defaults to None
-        :type tracked_names: list of str with len = nfields, optional
-        :param tracked_filter_flags: Should be the same length as `tracked_arrays`,
+        :type field_names: list of str with len = nfields, optional
+        :param field_filter_flags: Should be the same length as `field_arrays`,
             and gives a flag for whether that array should be available as an
             interactive filter within the webapp, defaults to None
-        :type tracked_filter_flags: list of bool with len = nfields, optional
-        :param tracked_colormap_flags: Should be the same length as `tracked_arrays`,
+        :type field_filter_flags: list of bool with len = nfields, optional
+        :param field_colormap_flags: Should be the same length as `field_arrays`,
             and gives a flag for whether that field should be 
             "colormappable" within the webapp, defaults to None
-        :type tracked_colormap_flags: list of bool with len = nfields, optional
+        :type field_colormap_flags: list of bool with len = nfields, optional
+        :param field_radius_flags: Should be the same length as `field_arrays`,
+            and gives a flag for whether that field should be allowed to scale
+            particle radii within the webapp, defaults to None
+        :type field_radius_flags: list of bool with len = nfields, optional
         :param decimation_factor: factor by which to reduce the data randomly 
                 i.e. :code:`data=data[::decimation_factor]`, defaults to 1
         :type decimation_factor: int, optional
@@ -137,13 +142,13 @@ class ParticleGroup(object):
         :type attached_settings: :class:`firefly.data_reader.Settings`, optional
         :param doSPHrad: flag to vary the opacity across a particle by a cubic spline 
             (as commonly done in SPH).
-            Must then also provide :code:`SmoothingLength` as a tracked_array., defaults to False
+            Must then also provide :code:`SmoothingLength` as a field_array., defaults to False
             **EXPERIMENTAL FEATURE**
         :type doSPHrad: bool, optional
         :param loud: flag to print status information to the console, defaults to False
         :type loud: bool, optional
-        :raises ValueError: if len(tracked_names) != len(tracked arrays)
-        :raises ValueError: if a tracked_array has length other than len(coordinates)
+        :raises ValueError: if len(field_names) != len(field arrays)
+        :raises ValueError: if a field_array has length other than len(coordinates)
         :raises ValueError: if filenames_and_nparts is not a list of tuples and strs
         :raises ValueError: if :code:`color` is passed as an option kwarg but the value is 
             not an RGBA iterable
@@ -154,14 +159,15 @@ class ParticleGroup(object):
         self.octree: Octree = None
 
         ## handle default values for iterables
-        tracked_arrays = [] if tracked_arrays is None else tracked_arrays
-        tracked_names = [] if tracked_names is None else tracked_names
-        tracked_filter_flags = [] if tracked_filter_flags is None else tracked_filter_flags
-        tracked_colormap_flags = [] if tracked_colormap_flags is None else tracked_colormap_flags
+        field_arrays = [] if field_arrays is None else field_arrays
+        field_names = [] if field_names is None else field_names
+        field_filter_flags = [] if field_filter_flags is None else field_filter_flags
+        field_colormap_flags = [] if field_colormap_flags is None else field_colormap_flags
+        field_radius_flags = [] if field_radius_flags is None else field_colormap_flags
 
-        if 'Velocities' in tracked_names:
+        if 'Velocities' in field_names:
             raise SyntaxError(
-                "Velocities should not be included in tracked array names,"+
+                "Velocities should not be included in field array names,"+
                 " pass them directly to ParticleGroup using keyword argument `velocities=`."+
                 " This is new behavior as of 1/27/22.")
 
@@ -181,50 +187,50 @@ class ParticleGroup(object):
 
         ## allow users to pass in field data as a dictionary rather than a list
         ##  and use keys as field names
-        if type(tracked_arrays) == dict:
-            tracked_names = list(tracked_arrays.keys())
-            tracked_arrays = [tracked_arrays[key] for key in tracked_names]
+        if type(field_arrays) == dict:
+            field_names = list(field_arrays.keys())
+            field_arrays = [field_arrays[key] for key in field_names]
 
         ## check if each field is named
-        if len(tracked_names) != len(tracked_arrays):
-            raise ValueError("Make sure each tracked_array (%d) has a tracked_name (%d)"%(
-                len(tracked_arrays),len(tracked_names)))
+        if len(field_names) != len(field_arrays):
+            raise ValueError("Make sure each field_array (%d) has a field_name (%d)"%(
+                len(field_arrays),len(field_names)))
 
         ## check if each field is the right length
-        for name,array in zip(tracked_names,tracked_arrays):
+        for name,array in zip(field_names,field_arrays):
             if len(array) != self.nparts:
                 raise ValueError("You passed me %s with %d entries but only %d coordinates"%(
                     name,len(array),self.nparts))
     
         ## check if each field was specified to be filterable
-        if len(tracked_names) != len(tracked_filter_flags):
+        if len(field_names) != len(field_filter_flags):
             if loud:
-                print("Make sure each tracked_array (%d) has a tracked_filter_flag (%d), assuming True."%(
-                    len(tracked_names),len(tracked_colormap_flags)))
+                print("Make sure each field_array (%d) has a field_filter_flag (%d), assuming True."%(
+                    len(field_names),len(field_colormap_flags)))
 
-            new_tracked_filter_flags = np.append(
-                tracked_filter_flags,
-                [True]*(len(tracked_names)-len(tracked_filter_flags)),axis=0
+            new_field_filter_flags = np.append(
+                field_filter_flags,
+                [True]*(len(field_names)-len(field_filter_flags)),axis=0
             )
-            tracked_filter_flags = new_tracked_filter_flags
+            field_filter_flags = new_field_filter_flags
 
         ## check if each field was specified to be colormappable
-        if len(tracked_names) != len(tracked_colormap_flags):
+        if len(field_names) != len(field_colormap_flags):
             if loud:
-                print("Make sure each tracked_array (%d) has a tracked_colormap_flag (%d), assuming True."%(
-                    len(tracked_names),len(tracked_colormap_flags)))
+                print("Make sure each field_array (%d) has a field_colormap_flag (%d), assuming True."%(
+                    len(field_names),len(field_colormap_flags)))
 
-            new_tracked_colormap_flags = np.append(
-                tracked_colormap_flags,
-                [True]*(len(tracked_names)-len(tracked_colormap_flags)),axis=0
+            new_field_colormap_flags = np.append(
+                field_colormap_flags,
+                [True]*(len(field_names)-len(field_colormap_flags)),axis=0
             )
-            tracked_colormap_flags = new_tracked_colormap_flags
+            field_colormap_flags = new_field_colormap_flags
 
         ## bind validated input
-        self.tracked_names = tracked_names
-        self.tracked_arrays = tracked_arrays
-        self.tracked_filter_flags = np.array(tracked_filter_flags)
-        self.tracked_colormap_flags = np.array(tracked_colormap_flags)
+        self.field_names = field_names
+        self.field_arrays = field_arrays
+        self.field_filter_flags = np.array(field_filter_flags)
+        self.field_colormap_flags = np.array(field_colormap_flags)
 
         ## validate filenames and nparts if anyone was so foolhardy to
         ##  send it in themselves
@@ -267,17 +273,17 @@ class ParticleGroup(object):
         
         ## setup default values for the initial filter limits (vals/lims represent the interactive
         ##  "displayed" particles and the available boundaries for the limits)
-        for tracked_name,tracked_filter_flag in zip(self.tracked_names,self.tracked_filter_flags):
-            if tracked_filter_flag:
-                self.settings_default['filterVals'][tracked_name] = None
-                self.settings_default['filterLims'][tracked_name] = None
+        for field_name,field_filter_flag in zip(self.field_names,self.field_filter_flags):
+            if field_filter_flag:
+                self.settings_default['filterVals'][field_name] = None
+                self.settings_default['filterLims'][field_name] = None
 
         ## setup default values for the initial color limits (vals/lims represent the interactive
         ##  "displayed" particles and the available boundaries for the limits)
-        for tracked_name,tracked_colormap_flag in zip(self.tracked_names,self.tracked_colormap_flags):
-            if tracked_colormap_flag:
-                self.settings_default['colormapVals'][tracked_name] = None
-                self.settings_default['colormapLims'][tracked_name] = None
+        for field_name,field_colormap_flag in zip(self.field_names,self.field_colormap_flags):
+            if field_colormap_flag:
+                self.settings_default['colormapVals'][field_name] = None
+                self.settings_default['colormapLims'][field_name] = None
         
         ## now let the user overwrite the defaults if they'd like (e.g. the color, likely
         ##  the most popular thing users will like to do)
@@ -340,18 +346,18 @@ class ParticleGroup(object):
             raise ValueError("You passed me %s with %d entries but only %d coordinates"%(
                 field_name,len(arr),self.nparts))
 
-        ## go ahead and put it in the tracked arrays
-        self.tracked_names = np.append(
-            self.tracked_names,
+        ## go ahead and put it in the field arrays
+        self.field_names = np.append(
+            self.field_names,
             [field_name],axis=0)
-        self.tracked_arrays= np.append(
-            self.tracked_arrays,
+        self.field_arrays= np.append(
+            self.field_arrays,
             [arr],axis=0)
-        self.tracked_filter_flags = np.append(
-            self.tracked_filter_flags,
+        self.field_filter_flags = np.append(
+            self.field_filter_flags,
             [filter_flag],axis=0)
-        self.tracked_colormap_flags = np.append(
-            self.tracked_colormap_flags,
+        self.field_colormap_flags = np.append(
+            self.field_colormap_flags,
             [colormap_flag],axis=0)
 
         ## update the default settings with this array's filterVals/Lims
@@ -423,7 +429,7 @@ class ParticleGroup(object):
             dec_inds = np.arange(self.nparts)
         
         ## save the coordinates as a special case since they 
-        ##  aren't in the tracked array
+        ##  aren't in the field array
         outDict['Coordinates_flat'] = self.coordinates[dec_inds].flatten()
 
         if self.velocities is not None:
@@ -433,25 +439,25 @@ class ParticleGroup(object):
             outDict['rgbaColors_flat'] = self.rgba_colors[dec_inds].flatten()
 
         ## store the field arrays
-        for tracked_name,tracked_arr in zip(
-            self.tracked_names,
-            self.tracked_arrays):
+        for field_name,field_arr in zip(
+            self.field_names,
+            self.field_arrays):
 
-            outDict[tracked_name]=tracked_arr[dec_inds]
+            outDict[field_name]=field_arr[dec_inds]
 
         ## if this is the first file, let's also include the colormap
         ##  and filter keys
         if store_extra_keys:
             if loud: print(
-                self.tracked_names,
-                'filter:',self.tracked_filter_flags,
-                'colormap:',self.tracked_colormap_flags)
+                self.field_names,
+                'filter:',self.field_filter_flags,
+                'colormap:',self.field_colormap_flags)
 
-            outDict['filterKeys'] = np.array(self.tracked_names)[np.array(
-                 self.tracked_filter_flags,dtype=bool)]
+            outDict['filterKeys'] = np.array(self.field_names)[np.array(
+                 self.field_filter_flags,dtype=bool)]
 
-            outDict['colormapKeys'] = np.array(self.tracked_names)[np.array(
-                self.tracked_colormap_flags,dtype=bool)]
+            outDict['colormapKeys'] = np.array(self.field_names)[np.array(
+                self.field_colormap_flags,dtype=bool)]
 
             ## TODO this needs to be changed, this is a flag for having the
             ##  opacity vary across a particle as the impact parameter projection
@@ -669,14 +675,14 @@ class ParticleGroup(object):
                 self.rgba_colors[these_dec_inds] if self.rgba_colors is not None else None)
 
             ## fill necessary attributes
-            binary_writer.nfields = len(self.tracked_names)
-            binary_writer.field_names = self.tracked_names
-            binary_writer.fields = self.tracked_arrays[:,these_dec_inds]
-            binary_writer.filter_flags = self.tracked_filter_flags
-            binary_writer.colormap_flags = self.tracked_colormap_flags
+            binary_writer.nfields = len(self.field_names)
+            binary_writer.field_names = self.field_names
+            binary_writer.fields = self.field_arrays[:,these_dec_inds]
+            binary_writer.filter_flags = self.field_filter_flags
+            binary_writer.colormap_flags = self.field_colormap_flags
 
             ## TODO add interface for this
-            binary_writer.radius_flags = np.repeat(False,binary_writer.nfields)
+            binary_writer.radius_flags = np.array(self.radius_flags,ndmin=1)
 
             file_array += [(fname,binary_writer.write())] 
 

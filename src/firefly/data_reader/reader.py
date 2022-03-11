@@ -776,8 +776,8 @@ class ArrayReader(Reader):
                 UIname,
                 coords,
                 decimation_factor=decimation_factor,
-                tracked_arrays=None if fields is None else fields[i],
-                tracked_names=None if field_names is None else field_names[i])
+                field_arrays=None if fields is None else fields[i],
+                field_names=None if field_names is None else field_names[i])
 
             ## attach the instance to the reader
             self.addParticleGroup(firefly_particleGroup)
