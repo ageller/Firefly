@@ -23,6 +23,9 @@ var FireflyFormat1 = (function() {
     if (this._root.fireflyHeader.hasVelocities != 0) {
       this.velocitiesFlat = new VectorField(this._io, this, this._root, "f4");
     }
+    if (this._root.fireflyHeader.hasRgbaColors != 0) {
+      this.rgbaColorsFlat = new Vector4Field(this._io, this, this._root, "f4");
+    }
     this.scalarFields = new Array(this._root.fireflyHeader.nfields);
     for (var i = 0; i < this._root.fireflyHeader.nfields; i++) {
       this.scalarFields[i] = new ScalarField(this._io, this, this._root, "f4");
@@ -46,6 +49,22 @@ var FireflyFormat1 = (function() {
     }
 
     return Field;
+  })();
+
+  var Vector4Field = FireflyFormat1.Vector4Field = (function() {
+    function Vector4Field(_io, _parent, _root, fieldType) {
+      this._io = _io;
+      this._parent = _parent;
+      this._root = _root || this;
+      this.fieldType = fieldType;
+
+      this._read();
+    }
+    Vector4Field.prototype._read = function() {
+      this.flatVector4Data = new Field(this._io, this, this._root, this.fieldType, 4);
+    }
+
+    return Vector4Field;
   })();
 
   var ScalarField = FireflyFormat1.ScalarField = (function() {
@@ -91,6 +110,7 @@ var FireflyFormat1 = (function() {
     Header.prototype._read = function() {
       this.headerSize = this._io.readU4le();
       this.hasVelocities = this._io.readU1();
+      this.hasRgbaColors = this._io.readU1();
       this.npart = this._io.readU4le();
       this.nfields = this._io.readU4le();
       this.fieldNames = new Array(this.nfields);
@@ -110,6 +130,10 @@ var FireflyFormat1 = (function() {
 
     /**
      * A flag for whether this file contains vector velocities
+     */
+
+    /**
+     * A flag for whether this file contains rgba tuples for each particle
      */
 
     /**

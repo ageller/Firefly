@@ -41,6 +41,22 @@ var FireflyOctnodeSubstring = (function() {
     return Field;
   })();
 
+  var Vector4Field = FireflyOctnodeSubstring.Vector4Field = (function() {
+    function Vector4Field(_io, _parent, _root, fieldType) {
+      this._io = _io;
+      this._parent = _parent;
+      this._root = _root || this;
+      this.fieldType = fieldType;
+
+      this._read();
+    }
+    Vector4Field.prototype._read = function() {
+      this.flatVector4Data = new Field(this._io, this, this._root, this.fieldType, 4);
+    }
+
+    return Vector4Field;
+  })();
+
   var NodeData = FireflyOctnodeSubstring.NodeData = (function() {
     function NodeData(_io, _parent, _root) {
       this._io = _io;
@@ -53,6 +69,9 @@ var FireflyOctnodeSubstring = (function() {
       this.coordinatesFlat = new VectorField(this._io, this, this._root, "f4");
       if (this._root.octnodeHeader.hasVelocities != 0) {
         this.velocitiesFlat = new VectorField(this._io, this, this._root, "f4");
+      }
+      if (this._root.octnodeHeader.hasRgbaColors != 0) {
+        this.rgbaColorsFlat = new Vector4Field(this._io, this, this._root, "f4");
       }
       this.scalarFields = new Array(this._root.octnodeHeader.nfields);
       for (var i = 0; i < this._root.octnodeHeader.nfields; i++) {
@@ -106,11 +125,16 @@ var FireflyOctnodeSubstring = (function() {
     Header.prototype._read = function() {
       this.nodeSize = this._io.readU4le();
       this.hasVelocities = this._io.readU1();
+      this.hasRgbaColors = this._io.readU1();
       this.nfields = this._io.readU4le();
     }
 
     /**
      * A flag for whether this file contains vector velocities
+     */
+
+    /**
+     * A flag for whether this file contains rgba_colors
      */
 
     /**

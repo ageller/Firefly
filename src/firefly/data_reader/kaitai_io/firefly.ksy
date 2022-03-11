@@ -12,6 +12,9 @@ seq:
   - id: velocities_flat
     type: vector_field('f4')
     if: _root.firefly_header.has_velocities != 0
+  - id: rgba_colors_flat
+    type: vector4_field('f4')
+    if: _root.firefly_header.has_rgba_colors != 0
   - id: scalar_fields
     type: scalar_field('f4')
     repeat: expr
@@ -24,6 +27,9 @@ types:
       - id: has_velocities
         type: u1
         doc: A flag for whether this file contains vector velocities
+      - id: has_rgba_colors
+        type: u1
+        doc: A flag for whether this file contains rgba tuples for each particle
       - id: npart
         type: u4
         doc: number of particles in this dataset
@@ -61,6 +67,13 @@ types:
     seq:
       - id: flat_vector_data
         type: field(field_type,3)
+  vector4_field:
+    params:
+      - id: field_type # format, like float or int or whatever. 'f4' or 'u4' usually
+        type: str
+    seq:
+      - id: flat_vector4_data
+        type: field(field_type,4)
   scalar_field:
     params:
       - id: field_type # format, like float or int or whatever. 'f4' or 'u4' usually
