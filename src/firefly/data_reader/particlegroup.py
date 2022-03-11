@@ -76,6 +76,7 @@ class ParticleGroup(object):
         UIname,
         coordinates,
         velocities=None,
+        rgba_colors=None,
         tracked_arrays=None,
         tracked_names=None,
         tracked_filter_flags=None,
@@ -97,6 +98,8 @@ class ParticleGroup(object):
         :param velocities: The velocities associated with each coordinate, should have a shape of `(nparts,3)`
             allows vectors to be plotted at the coordinate location
         :type velocities: np.ndarray
+        :param rgba_colors: The RGBA tuples associated with each coordinate, should have a shape of `(nparts,4)`
+        :type rgba_colors: np.ndarray
         :param tracked_arrays: The field data arrays to associate with each coordinate in space, each array
             should be one-dimensional and have `nparts` entries., defaults to None
         :type tracked_arrays: (nfields,nparts) np.ndarray, optional
@@ -167,6 +170,7 @@ class ParticleGroup(object):
         self.decimation_factor = decimation_factor
         self.coordinates = np.array(coordinates)
         self.velocities = np.array(velocities) if velocities is not None else None
+        self.rgba_colors = np.array(rgba_colors) if rgba_colors is not None else None
         self.nparts = self.coordinates.shape[0]
 
         ## reduce the decimation factor if someone has asked to skip
@@ -425,6 +429,9 @@ class ParticleGroup(object):
         if self.velocities is not None:
             outDict['Velocities_flat'] = self.velocities[dec_inds].flatten()
 
+        if self.rgba_colors is not None:
+            outDict['rgbaColors_flat'] = self.rgba_colors[dec_inds].flatten()
+
         ## store the field arrays
         for tracked_name,tracked_arr in zip(
             self.tracked_names,
@@ -658,7 +665,8 @@ class ParticleGroup(object):
             binary_writer = BinaryWriter(
                 fname,
                 self.coordinates[these_dec_inds],
-                self.velocities[these_dec_inds] if self.velocities is not None else None)
+                self.velocities[these_dec_inds] if self.velocities is not None else None,
+                self.rgba_colors[these_dec_inds] if self.rgba_colors is not None else None)
 
             ## fill necessary attributes
             binary_writer.nfields = len(self.tracked_names)

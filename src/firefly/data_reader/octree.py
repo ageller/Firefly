@@ -67,11 +67,13 @@ class OctNode(object):
         ## accumulator attributes
         self.npoints:int = 0
         self.velocity = np.zeros(3)
+        self.rgba_color = np.zeros(4)
         self.fields = np.zeros(nfields)
 
         ## buffers which will be flushed if max_npart_per_node is crossed
         self.buffer_coordss:list = []
         self.buffer_velss:list = []
+        self.buffer_rgba_colors:list = []
         self.buffer_fieldss:list = []
         self.buffer_size:int = 0
     
@@ -87,6 +89,7 @@ class OctNode(object):
         fields:np.ndarray,
         nodes:dict,
         velocity:np.ndarray=None,
+        rgba_color:np.ndarray=None,
         ):
 
         ## okay we're allowed to hold the raw data here
@@ -94,9 +97,8 @@ class OctNode(object):
             ## store coordinate data in the buffer
             self.buffer_coordss += [point]
 
-            ## TODO implement velocities separately
-            ##  as an optional buffer
             if velocity is not None: self.buffer_velss += [velocity]
+            if rgba_color is not None: self.buffer_rgba_colors += [rgba_color]
 
             ## store field data in the buffer
             self.buffer_fieldss += [fields]
@@ -104,6 +106,7 @@ class OctNode(object):
             ## accumulate the point
             self.npoints+=1
             if velocity is not None: self.velocity += velocity
+            if rgba_color is not None: self.rgba_color += rgba_color
             self.fields+=fields
             self.buffer_size+=1
         else: 
@@ -112,10 +115,11 @@ class OctNode(object):
 
                 buffer_coordss = self.buffer_coordss + [point]
                 if velocity is not None: buffer_velss = self.buffer_velss + [velocity]
+                if rgba_color is not None: buffer_rgba_colors = self.buffer_rgba_colors+[rgba_color]
                 buffer_fieldss = self.buffer_fieldss + [fields]
 
                 ## clear the buffers for this node
-                del self.buffer_coordss,self.buffer_fieldss,self.buffer_velss
+                del self.buffer_coordss,self.buffer_fieldss,self.buffer_velss,self.buffer_rgba_colors
                 self.buffer_size = 0
 
                 ## loop back through each point and end up in the other branch of the conditional
@@ -126,13 +130,15 @@ class OctNode(object):
                         point,
                         fields,
                         nodes,
-                        buffer_velss[i] if velocity is not None else None)
+                        buffer_velss[i] if velocity is not None else None,
+                        buffer_rgba_colors[i] if rgba_color is not None else None)
             else: 
 
                 ## accumulate the point
                 self.npoints+=1
                 self.fields+=fields
                 if velocity is not None: self.velocity += velocity
+                if rgba_color is not None: self.rgba_color += rgba_color
 
                 ## use 3 bit binary number to index
                 ##  the octants-- for each element of the array 
@@ -155,15 +161,16 @@ class OctNode(object):
                     nodes[child_name] = child
                 else: child:OctNode = nodes[child_name]
 
-                child.addPointToOctree(point,fields,nodes,velocity)
+                child.addPointToOctree(point,fields,nodes,velocity,rgba_color)
 
     def merge_to_parent(self,nodes):
-        parent = nodes[self.name[:-1]]
+        parent:OctNode = nodes[self.name[:-1]]
 
         ## another child has already been merged into this parent
         if hasattr(parent,'buffer_coordss'):
             parent.buffer_coordss += self.buffer_coordss
             parent.buffer_velss += self.buffer_velss
+            parent.buffer_rgba_colors += self.buffer_rgba_colors
             parent.buffer_fieldss += self.buffer_fieldss
             parent.buffer_size += self.buffer_size
         ## this is the first child to be merged to this parent
@@ -171,11 +178,12 @@ class OctNode(object):
             parent.buffer_coordss = [] + self.buffer_coordss
             parent.buffer_fieldss = [] + self.buffer_fieldss
             parent.buffer_velss = [] + self.buffer_velss
+            parent.buffer_rgba_colors = [] + self.buffer_rgba_colors
             parent.buffer_size = self.buffer_size
 
             ## clear this buffer so as to avoid duplicating data
             ##  as much as possible
-            del self.buffer_coordss,self.buffer_fieldss,self.buffer_velss
+            del self.buffer_coordss,self.buffer_fieldss,self.buffer_velss,self.buffer_rgba_colors
 class Octree(object):
 
     def __repr__(self):
@@ -214,6 +222,7 @@ class Octree(object):
 
         self.coordinates = particle_group.coordinates - root_center
         self.velocities = particle_group.velocities
+        self.rgba_colors = particle_group.rgba_colors
  
         ## find the maximum extent in any coordinate direction and set the 
         ##  octree root bounding box to that size
@@ -226,6 +235,7 @@ class Octree(object):
         if particle_group.decimation_factor > 1:
             self.coordinates = self.coordinates[::particle_group.decimation_factor]
             if self.velocities is not None: self.velocities = self.velocities[::particle_group.decimation_factor]
+            if self.rgba_colors is not None: self.rgba_colors = self.rgba_colors[::particle_group.decimation_factor]
             for key in fields.keys(): fields[key] = fields[key][::particle_group.decimation_factor]
 
         ## prepare field accumulators
@@ -237,6 +247,9 @@ class Octree(object):
         if self.velocities is not None:
             ##  don't use *=, this will make a copy
             self.velocities = self.velocities*weights[:,None]
+        if self.rgba_colors is not None:
+            ##  don't use *=, this will make a copy
+            self.rgba_colors = self.rgba_colors*weights[:,None]
 
         for i,axis in enumerate(['x','y','z']):
             fields[f'com_{axis}'] = self.coordinates[:,i]
@@ -287,6 +300,7 @@ class Octree(object):
             ##  can stuff them into the root node when we're ready to
             self.__outlier_coordinates = self.coordinates[outlier_mask,:]
             if self.velocities is not None: self.__outlier_velocities = self.velocities[outlier_mask,:]
+            if self.rgba_colors is not None: self.__outlier_rgba_colors = self.rgba_colors[outlier_mask,:]
             self.__outlier_fieldss = self.fieldss[outlier_mask,:]
 
             ## exclude the outliers from the points that will 
@@ -308,13 +322,15 @@ class Octree(object):
         node = self.nodes[start_octant]
         end = self.coordinates.shape[0]
         velocity = None
+        rgba_color = None
         print(f"Bulding octree of {end:d} points")
         for i,(point,fields) in enumerate(zip(self.coordinates,self.fieldss)):
             if not (i % 10000): print("%.2f"%(i/end*100)+"%",end='\t') 
 
             if self.velocities is not None: velocity = self.velocities[i]
+            if self.rgba_colors is not None: rgba_color = self.rgba_colors[i]
 
-            node.addPointToOctree(point,fields,self.nodes,velocity)
+            node.addPointToOctree(point,fields,self.nodes,velocity,rgba_color)
 
         print("...done!")
         ## if there are any outliers, let's stuff them in the root node
@@ -342,6 +358,7 @@ class Octree(object):
             ## see if it has the private attribute __outlier_coordinates
             buffer_coordss = self.__outlier_coordinates.tolist()
             buffer_velss = [] if self.velocities is None else self.__outlier_velocities.tolist()
+            buffer_rgba_colors = [] if self.rgba_colors is None else self.__outlier_rgba_colors.tolist()
             buffer_fieldss = self.__outlier_fieldss.tolist()
             buffer_size = self.__outlier_coordinates.shape[0]
             print(f"adding {buffer_size} 'outliers' to root node's buffer.")
@@ -358,6 +375,7 @@ class Octree(object):
             if hasattr(parent,'buffer_coordss'):
                 parent.buffer_coordss += buffer_coordss
                 parent.buffer_velss += buffer_velss
+                parent.buffer_rgba_colors += buffer_rgba_colors
                 parent.buffer_fieldss += buffer_fieldss
                 parent.buffer_size += buffer_size
             ## this is the first child to be merged to this parent, must create buffer
@@ -365,6 +383,7 @@ class Octree(object):
                 parent.buffer_coordss = [] + buffer_coordss
                 parent.buffer_fieldss = [] + buffer_fieldss
                 parent.buffer_velss = [] + buffer_velss
+                parent.buffer_rgba_colors = [] + buffer_rgba_colors
                 parent.buffer_size = buffer_size
 
         except AttributeError: pass
@@ -441,7 +460,9 @@ class Octree(object):
                         filename,
                         node.buffer_coordss,
                         None if self.velocities is None else
-                            np.array(node.buffer_velss)/weights[:,None])
+                            np.array(node.buffer_velss)/weights[:,None],
+                        None if self.rgba_colors is None else
+                            np.array(node.buffer_rgba_colors)/weights[:,None])
 
                     binary_writer.nparts = node.buffer_size
                     binary_writer.nfields = node.nfields-6
@@ -537,6 +558,7 @@ class Octree(object):
             }
 
         if self.velocities is not None: json_dict['Velocities_flat'] = np.zeros(3*num_nodes)
+        if self.rgba_colors is not None: json_dict['rgbaColors_flat'] = np.zeros(4*num_nodes)
 
         for field in self.field_names[:-3]: json_dict[field] = np.zeros(num_nodes)
 
@@ -607,6 +629,10 @@ class Octree(object):
             if self.velocities is not None: 
                 vcom = node.velocity/weights
                 json_dict['Velocities_flat'][3*node_index:3*(node_index+1)] = vcom
+            
+            if self.rgba_colors is not None:
+                rgba_color = node.rgba_color/weights
+                json_dict['rgbaColors_flat'][4*node_index:4*(node_index+1)] = rgba_color
 
             node_dict['node_index'] = node_index
             json_dict['octree'][node.name] = node_dict

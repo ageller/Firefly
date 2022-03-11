@@ -6,7 +6,8 @@ class BinaryWriter(object):
         self,
         fname,
         coordinates,
-        velocities=None):
+        velocities=None,
+        rgba_colors=None):
         
         ## bind input
         self.fname = fname
@@ -23,11 +24,18 @@ class BinaryWriter(object):
                 velocities.shape[0] != coordinates.shape[0]):
                 raise ValueError("velocities must be an Nx3 array")
 
+        if rgba_colors is not None:
+            if( len(rgba_colors.shape) != 2 or
+                rgba_colors.shape[1] != 4 or
+                rgba_colors.shape[0] != coordinates.shape[0]):
+                raise ValueError("rgba_colors must be an Nx4 array")
+
         ## now that we've confirmed we were passed appropriately shaped arrays
         ##  let's bind them
         self.nparts = coordinates.shape[0]
         self.coordinates = coordinates
         self.velocities = velocities
+        self.rgba_colors = rgba_colors
         
         ## initialize scalar field variables
         self.nfields = 0
@@ -43,6 +51,7 @@ class BinaryWriter(object):
             byte_size += self.write_header(handle)
             byte_size += self.write_vector_field(handle,self.coordinates)
             if self.velocities is not None: byte_size += self.write_vector_field(handle,self.velocities)
+            if self.rgba_colors is not None: byte_size += self.write_vector_field(handle,self.rgba_colors)
             for field in self.fields: byte_size += self.write_field(handle,field)
             return byte_size
 
@@ -53,6 +62,7 @@ class BinaryWriter(object):
         ## size of the header, 2 32 bit ints and a 1 bit boolean
         header_size += 4 ## size of header
         header_size += 1 ## velocity flag
+        header_size += 1 ## rgba_color flag
         header_size += 4 ## nparts 
         header_size += 4 ## nfields
         ## length of string as an int followed by the string
@@ -63,6 +73,8 @@ class BinaryWriter(object):
         byte_size += self.write_int(handle,header_size) 
         ## boolean flag for whether there are velocities
         byte_size += self.write_flag(handle,self.velocities is not None)
+        ## boolean flag for whether there are rgba_colors
+        byte_size += self.write_flag(handle,self.rgba_colors is not None)
         ## number of particles
         byte_size += self.write_int(handle,self.nparts) 
         ## number of scalar fields
@@ -169,6 +181,7 @@ header:
   
         byte_size += self.write_int(handle,self.nparts)
         byte_size += self.write_flag(handle,self.velocities is not None)
+        byte_size += self.write_flag(handle,self.rgba_colors is not None)
         byte_size += self.write_int(handle,self.nfields)
 
         return byte_size
@@ -191,6 +204,7 @@ node_data:
 
         byte_size += self.write_vector_field(handle,self.coordinates)
         if self.velocities is not None: byte_size += self.write_vector_field(handle,self.velocities)
+        if self.rgba_colors is not None: byte_size += self.write_vector_field(handle,self.rgba_colors)
         for field in self.fields: byte_size+= self.write_field(handle,field)
 
         return byte_size
