@@ -26,111 +26,39 @@ function createParticleGeometry(p, parts, start, end){
 	var i0 = start;
 	var id = name;
 
-	// attributes
-	//position
-	var position = Float32Array.from(parts.Coordinates_flat); // 3 vertices per point
-	// Doesn't seem to work, i guess we just have to copy it over :eyeroll:
-	// I just get a black screen when I try to initialize the buffer with the values--
-	// the addAttribute must zero out the buffer or something
-	//var position = Float32Array.from(parts.Coordinates_flat.slice(3*start,3*end)[0]);
-	geo.setAttribute( 'position', new THREE.BufferAttribute( position, 3 ) );
-
-	// //index
-	// var pointIndex = new Float32Array( len );
-	// geo.setAttribute( 'pointIndex', new THREE.BufferAttribute( pointIndex, 1 ) );
-
-	//radiusScaling (e.g., for filtering and on/off)
-	var radiusScale = new Float32Array( len ); 
-	geo.setAttribute( 'radiusScale', new THREE.BufferAttribute( radiusScale, 1 ) );
-
-	//alphas (e.g., for filtering and on/off)
-	var alpha = new Float32Array( len ); 
-	geo.setAttribute( 'alpha', new THREE.BufferAttribute( alpha, 1 ) );
-
-	//angles for velocities
-	var velVals = new Float32Array( len * 4); // unit vector (vx, vy, vz, norm), scaled magnitude
-	geo.setAttribute( 'velVals', new THREE.BufferAttribute( velVals, 4 ) );
-
-	//if user supplies individual per-particle colors (otherwise this is not used, but still need in shader)
-	if (viewerParams.parts[p].hasOwnProperty("colorArray")) console.log("have color Array")
-	var colorArray = new Float32Array( len * 4); // RGBA
-	geo.setAttribute( 'colorArray', new THREE.BufferAttribute( colorArray, 4 ) );
-	
-	// create array to hold colormap variable values
-	var colormapArray = new Float32Array( len); 
-	geo.setAttribute('colormapArray', new THREE.BufferAttribute( colormapArray, 1));
-
 	geo.setDrawRange( 0, len );
 
-	var pindex = 0;
-	var cindex = 0;
-	var colorIndex = 0;
-	var vindex = 0;
-	var rindex = 0;
-	var aindex = 0;
+	// initialize and set all attribute buffers
+	// position
+	var position = Float32Array.from(parts.Coordinates_flat.slice(3*start,3*end)); // 3 vertices per point
+	geo.setAttribute( 'position', new THREE.BufferAttribute( position, 3 ) );
 
-	for (var j=0; j<len; j++){
+	// radiusScaling (e.g., for filtering and on/off and changing size of points)
+	if (parts.hasOwnProperty("SmoothingLength")) var radii = Float32Array.from(parts.SmoothingLength.slice(start,end));
+	else var radii = Float32Array.from(Array( len ).fill(1));
+	geo.setAttribute( 'radiusScale', new THREE.BufferAttribute( radii, 1 ) );
 
-		//position[3*j+0] = parts.Coordinates_flat[3*j+0]
-		//position[3*j+1] = parts.Coordinates_flat[3*j+1] 
-		//position[3*j+2] = parts.Coordinates_flat[3*j+2]
-		//pointIndex[j] = parseFloat(j);
+	// alphas (e.g., for filtering and on/off)
+	var alpha = Float32Array.from(Array( len ).fill(1)); 
+	geo.setAttribute( 'alpha', new THREE.BufferAttribute( alpha, 1 ) );
 
-		if (parts.hasOwnProperty("VelVals")){
-			if (!isNaN(parts.VelVals[j][0])){
-				velVals[vindex++] = parts.VelVals[j][0]/parts.magVelocities[j];
-				velVals[vindex++] = parts.VelVals[j][1]/parts.magVelocities[j];
-				velVals[vindex++] = parts.VelVals[j][2]/parts.magVelocities[j];
-				velVals[vindex++] = parts.NormVel[j];
-			}
-		} else {
-			velVals[vindex++] = 0.;
-			velVals[vindex++] = 0.;
-			velVals[vindex++] = 0.;
-			velVals[vindex++] = 1.;
-		}
+	// velocities, should be vx/|v|, vy/|v|, vz/|v| and [ |v| - min(|v|) ]/[ max(|v|) - min(|v|) ] 
+	if (parts.hasOwnProperty("VelVals")) var velVals = Float32Array.from(parts.VelVals.slice(4*start,4*end));
+	else var velVals = new Float32Array(Array(len * 4).fill(0)); // unit vector (vx, vy, vz, norm), scaled magnitude
+	geo.setAttribute( 'velVals', new THREE.BufferAttribute( velVals, 4 ) );
+	
+	// create array to hold colormap field values
+	// 	colormapVariable[p] is the index in the ckeys array, not the variable itself.
+	var ckey = viewerParams.ckeys[p][viewerParams.colormapVariable[p]]
+	if (parts.hasOwnProperty(ckey)) var colormapField = Float32Array.from(parts[ckey].slice(start,end));
+	else var colormapField = Float32Array.from(Array(len).fill(0));
+	geo.setAttribute('colormapField', new THREE.BufferAttribute( colormapField, 1));
 
-		// fill flattened color array from pre-computed colormap values
-		// stored in viewerParams.parts[p]["colorArray"]
-		//probably a better way to deal with this
-		if (parts.hasOwnProperty("colorArray")){
-			colorArray[colorIndex++] = parts.colorArray[j][0]
-			colorArray[colorIndex++] = parts.colorArray[j][1]
-			colorArray[colorIndex++] = parts.colorArray[j][2]
-			colorArray[colorIndex++] = parts.colorArray[j][3];
-		 } else {
-			colorArray[colorIndex++] = 0.;
-			colorArray[colorIndex++] = 0.;
-			colorArray[colorIndex++] = 0.;
-			colorArray[colorIndex++] = -1.;
+	//if user supplies individual per-particle colors (otherwise this is not used, but still need in shader)
+	if (viewerParams.parts[p].hasOwnProperty("colorArray")) var colorArray = Float32Array.from(parts.colorArray.slice(3*start,3*end));
+	else var colorArray = Float32Array.from( Array(len * 4).fill(-1)); // RGBA
+	geo.setAttribute( 'colorArray', new THREE.BufferAttribute( colorArray, 4 ) );
 
-		}
-
-		// NEED TO UPDATE THIS
-		// fill colormap array with appropriate variable values
-		if (viewerParams.colormap[p] > 0.){
-			if (parts[viewerParams.ckeys[p][viewerParams.colormapVariable[p]]] != null){
-				colormapArray[cindex++] = parts[viewerParams.ckeys[p][viewerParams.colormapVariable[p]]][j];
-			}
-		}
-
-		var rad = 1.;
-		var alph = 1.;
-		/*if (!octreeParticleInFilter(p, parts, j)){	
-			rad = 0.;
-			alph = 0.;
-		}*/
-
-		if (parts.hasOwnProperty("SmoothingLength")){
-			radiusScale[rindex++] = parts.SmoothingLength[j]*rad;
-		}
-		else{
-			radiusScale[rindex++] = rad;
-		}
-		
-		alpha[aindex++] = alph;
-
-	}
 
 	// store the particle data in the "userData" dictionary so we can
 	//  get it back later for filtering, etc... !

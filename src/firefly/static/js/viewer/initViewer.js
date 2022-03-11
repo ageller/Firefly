@@ -1480,29 +1480,27 @@ function setBoxSize(coords_flat){
 // applyOptions -> 
 function calcVelVals(this_parts){
 	this_parts.VelVals = [];
-	this_parts.magVelocities = [];
-	this_parts.NormVel = [];
-	var mag, angx, angy, v;
+	magVelocities = [];
+	var mag, v;
 	var max = -1.;
 	var min = 1.e20;
 	var vdif = 1.;
 	for (var i=0; i<this_parts.Coordinates_flat.length/3; i++){
 		v = this_parts.Velocities_flat.slice(3*i,3*(i+1));
 		mag = Math.sqrt(v[0]*v[0] + v[1]*v[1] + v[2]*v[2]);
-		angx = Math.atan2(v[1],v[0]);
-		angy = Math.acos(v[2]/mag);
-		if (mag > max){
-			max = mag;
-		}
-		if (mag < min){
-			min = mag;
-		}
-		this_parts.VelVals.push([v[0],v[1],v[2]]);
-		this_parts.magVelocities.push(mag);
+		// update min/max
+		if (mag > max) max = mag;
+		if (mag < min) min = mag;
+		this_parts.VelVals[4*i]   = v[0]/mag
+		this_parts.VelVals[4*i+1] = v[1]/mag
+		this_parts.VelVals[4*i+2] = v[2]/mag
+		// keep track of the magnitude so that we can use it to normalize below
+		magVelocities.push(mag)
 	}
 	vdif = Math.min(max - min, viewerParams.maxVrange);
+	// normalize velocity between 0 and 1 depending on the velocity dynamic range
 	for (var i=0; i<this_parts.Coordinates_flat.length/3; i++){
-		this_parts.NormVel.push( THREE.Math.clamp((this_parts.magVelocities[i] - min) / vdif, 0., 1.));
+		this_parts.VelVals[4*i+3] = THREE.Math.clamp((magVelocities[i] - min) / vdif, 0., 1.)
 	}
 }
 

@@ -412,15 +412,15 @@ function update_particle_mesh_colormap_variable(p,m){
 	// unpack the particle group associated with this mesh
 	var this_parts = m.geometry.userData;
 
-	// colormapVariable[p] holds the *index* of the colormap variable
+	// .colormapVariable[p] holds the *index* of the colormap variable
 	var ckey = viewerParams.ckeys[p][viewerParams.colormapVariable[p]];
-	// replace the colormap variable
+	// replace the colormap field 
 	if (this_parts[ckey] != null){
-		var colormapArray = m.geometry.attributes.colormapArray.array;
-		// fill the colormapArray with the values from the ckey array
-		for( var ii = 0; ii < colormapArray.length; ii ++ ) colormapArray[ii] = this_parts[ckey][ii];
+		var colormapField = m.geometry.attributes.colormapField.array;
+		// fill the colormapField array with the values from the ckey array
+		for( var ii = 0; ii < colormapField.length; ii ++ ) colormapField[ii] = this_parts[ckey][ii];
 		// flag that this array was updated
-		m.geometry.attributes.colormapArray.needsUpdate = true;
+		m.geometry.attributes.colormapField.needsUpdate = true;
 	}	
 }
 

@@ -4,7 +4,7 @@ attribute float radiusScale; //for filtering [0,1]
 attribute float alpha;
 attribute vec4 velVals;
 attribute vec4 colorArray;
-attribute float colormapArray;
+attribute float colormapField;
 
 varying float vID;
 varying float vTheta;
@@ -51,7 +51,7 @@ void main(void) {
 	gl_PointSize = clamp(pointScale, minPointScale, maxPointScale);
 
 	// send colormap array to fragment shader
-	vColormapMag = clamp(((colormapArray - colormapMin) / (colormapMax - colormapMin)), 0., 1.);
+	vColormapMag = clamp(((colormapField - colormapMin) / (colormapMax - colormapMin)), 0., 1.);
 
 	if (vID > 0.5){ //velocities (==1, but safer this way)
 		float vyc= -dot(velVals.xyz,cameraY);
