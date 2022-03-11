@@ -214,13 +214,7 @@ class Octree(object):
 
         self.coordinates = particle_group.coordinates - root_center
         self.velocities = particle_group.velocities
-
-        ## find the maximum extent in any coordinate direction and set the 
-        ##  octree root bounding box to that size
-        maxPos = np.abs(self.coordinates.flatten().max())
-        minPos = np.abs(self.coordinates.flatten().min())
-        root_width = 2.*np.max([maxPos,minPos])
-
+ 
         ## find the maximum extent in any coordinate direction and set the 
         ##  octree root bounding box to that size
         #coords = np.abs(self.coordinates.flatten())
@@ -278,6 +272,29 @@ class Octree(object):
         self.radius_flags= [False for field in self.field_names]
 
         ## initialize the octree node dictionary
+        ##  find the maximum extent in any coordinate direction and set the 
+        ##  octree root bounding box to that size
+        coords = np.abs(self.coordinates.flatten())
+        #root_width = 2.*np.max([maxPos,minPos])
+        ## find the extent which contains 99.99% of the particles 
+        ##  (to avoid weird outliers stretching your octree)
+        root_width = 2*np.percentile(coords,[99.99]) ## 2* for +/-
+
+        ## select those particles that are outside the root node's bounding box.
+        outlier_mask = np.max(np.abs(self.coordinates),axis=1) > root_width/2
+        if np.sum(outlier_mask) > 0:
+            ## store the outliers in their own arrays so that we
+            ##  can stuff them into the root node when we're ready to
+            self.__outlier_coordinates = self.coordinates[outlier_mask,:]
+            if self.velocities is not None: self.__outlier_velocities = self.velocities[outlier_mask,:]
+            self.__outlier_fieldss = self.fieldss[outlier_mask,:]
+
+            ## exclude the outliers from the points that will 
+            ##  be added to the octree normally
+            self.coordinates = self.coordinates[~outlier_mask,:]
+            if self.velocities is not None: self.velocities = self.velocities[~outlier_mask,:]
+            self.fieldss = self.fieldss[~outlier_mask,:]
+
         self.nodes = {'': OctNode(
             np.zeros(3),
             root_width,
@@ -299,6 +316,10 @@ class Octree(object):
 
             node.addPointToOctree(point,fields,self.nodes,velocity)
 
+        print("...done!")
+        ## if there are any outliers, let's stuff them in the root node
+        self.__store_outliers_in_root()
+
         ## we want the nodelist to be sorted s.t. the highest refinement levels are first
         ##  so that if we decide to prune the tree all children will get added to their parent before
         ##  the parent is itself pruned. we'll do that with a "complex sort" (google it)
@@ -312,6 +333,41 @@ class Octree(object):
         node_list = sorted(node_list,key=attrgetter('npoints'),reverse=False)
         self.node_list = node_list
         return node_list
+
+    def __store_outliers_in_root(self):
+        """ mimic node.merge_to_parent but forcibly dump all the outlier
+            particles (those outside the 99.99 %'ile root_width) into the root
+            node's buffer. """
+        try:
+            ## see if it has the private attribute __outlier_coordinates
+            buffer_coordss = self.__outlier_coordinates.tolist()
+            buffer_velss = [] if self.velocities is None else self.__outlier_velocities.tolist()
+            buffer_fieldss = self.__outlier_fieldss.tolist()
+            buffer_size = self.__outlier_coordinates.shape[0]
+            print(f"adding {buffer_size} 'outliers' to root node's buffer.")
+
+            ## select the root node
+            parent = self.nodes['']
+
+            ## accumulate the points and field values
+            parent.npoints += buffer_size
+            parent.fields += np.sum(self.__outlier_fieldss,axis=0)
+
+            ## store the raw data in the root node's buffer
+            ##  another child has already been merged into this parent, buffer exists
+            if hasattr(parent,'buffer_coordss'):
+                parent.buffer_coordss += buffer_coordss
+                parent.buffer_velss += buffer_velss
+                parent.buffer_fieldss += buffer_fieldss
+                parent.buffer_size += buffer_size
+            ## this is the first child to be merged to this parent, must create buffer
+            else:
+                parent.buffer_coordss = [] + buffer_coordss
+                parent.buffer_fieldss = [] + buffer_fieldss
+                parent.buffer_velss = [] + buffer_velss
+                parent.buffer_size = buffer_size
+
+        except AttributeError: pass
     
     def pruneOctree(self,min_npart_per_node=100):
         ## put ourselves in the unenviable position of some parents having children 
