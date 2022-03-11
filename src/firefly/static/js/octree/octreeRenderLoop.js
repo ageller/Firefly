@@ -40,7 +40,7 @@ function updateOctree(){
 
 	// only update the octree if this pkey has an octree
 	//  and we're actually showing it on the screen
-	openCloseNodes(octree['']);
+	openCloseNodes(octree[''],octree);
 
 	//if we are done drawing, check if we should adjust the number of particles further see if I need to reduce the particles even further
 	/*
@@ -72,7 +72,7 @@ function updateOctree(){
 	return updateOctreePindex();
 }
 
-function openCloseNodes(node){
+function openCloseNodes(node,octree){
 	//adjust the draw range based on GUI sliders
 	/*
 	var nparts = THREE.Math.clamp(
@@ -105,7 +105,7 @@ function openCloseNodes(node){
 		node.current_state = 'remove';
 		// if we haven't already, let's hide the CoM
 		free_buffer(node,hideCoM);
-		node.children.forEach(function (child_name){free_buffer(node.octree[child_name],hideCoM)});
+		node.children.forEach(function (child_name){free_buffer(octree[child_name],hideCoM)});
 	}
 	// don't need to draw nodes that aren't on screen 
 	else if (!onscreen && !inside){
@@ -121,7 +121,7 @@ function openCloseNodes(node){
  			showCoM(node);
 		}
 		//free_buffer(node,showCoM);
-		node.children.forEach(function (child_name){free_buffer(node.octree[child_name],hideCoM)});
+		node.children.forEach(function (child_name){free_buffer(octree[child_name],hideCoM)});
 	}
 	// we should add this node's buffer particles to the scene and hide its CoM. 
 	//  then think about its children
@@ -131,7 +131,7 @@ function openCloseNodes(node){
 		node.current_state = 'draw';
 		// if we haven't already, let's hide the CoM
 		load_buffer(node,hideCoM);
-		node.children.forEach(function (child_name){openCloseNodes(node.octree[child_name])});
+		node.children.forEach(function (child_name){openCloseNodes(octree[child_name],octree)});
 	}  
 	// this node is just right. let's check if we should do anything
 	//  to its children
@@ -141,7 +141,7 @@ function openCloseNodes(node){
 		// loaded then we'll show the CoM.
 		if (!node.drawn) showCoM(node);
 		// check if any of the children also need to be opened/closed
-		node.children.forEach(function (child_name){openCloseNodes(node.octree[child_name])});
+		node.children.forEach(function (child_name){openCloseNodes(octree[child_name],octree)});
 	}
 	// I don't think it is actually possible to get into here but if we do
 	//  I want to know about it

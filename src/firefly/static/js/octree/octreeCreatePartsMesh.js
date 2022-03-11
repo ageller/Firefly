@@ -139,9 +139,26 @@ function removeOctreeNode(node,callback){
 		node.mesh.geometry.dispose();
 		node.mesh.material.dispose();
 		viewerParams.scene.remove(node.mesh);
-		//viewerParams.partsMesh[node.pkey] // remove this partsmesh
+
+		// search partsMesh list for a matching mesh to remove it from the list
+		var match_index=null;
+		viewerParams.partsMesh[node.pkey].every(
+			function (m,index){
+				if (m.name == node.obj_name){
+					match_index = index;
+					return false;
+				}
+				else return true;
+			}
+		)
+
+		// remove from partsMesh
+		if (match_index)viewerParams.partsMesh[node.pkey].splice(match_index,1);
 		node.mesh=null;
 		node.drawn=false;
+
+		// unreference buffer data by deleting the .particles attribute
+		delete node.particles;
 		
 		viewerParams.octree.loadingCount[node.pkey]-=1
 		viewerParams.octree.waitingToRemove = false;

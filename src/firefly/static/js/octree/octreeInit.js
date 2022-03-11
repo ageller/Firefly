@@ -40,11 +40,10 @@ function abg_initOctree(pkey,data){
 		// convert center to 3vector
 		node.center = new THREE.Vector3(node.center[0],node.center[1],node.center[2]);
 
-		// let's store the pkey and octree in the node
+		// let's store the pkey in the node
 		//  for convenient reference in other routines where
 		//  we only have the node in scope
 		node.pkey = pkey;
-		node.octree = viewerParams.parts[pkey].octree
 		//node.radius*=3;
 		node.radius = 15*node.radius;
 
@@ -83,11 +82,10 @@ function loadFFTREEKaitai(node,callback){
 			// wait until loading finishes, then call function
 			binary_reader.onloadend = function () {
 				// convert ArrayBuffer to FireflyFormat
-				kaitai_stream = new KaitaiStream(binary_reader.result)
-				kaitai_format = new FireflyOctnodeSubstring(
-					kaitai_stream);
 				// call compileFFLYData as a callback
-				callback(kaitai_format,node);
+				callback(
+					new FireflyOctnodeSubstring(new KaitaiStream(binary_reader.result)),
+					node);
 			}
 		});
 	})
