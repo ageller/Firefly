@@ -26,7 +26,7 @@ class ParticleGroup(object):
         
         mystr = "%s "%(self.UIname)
         mystr += "- %d/%d particles - %d tracked fields"%(
-            self.nparts//self.decimation_factor,self.nparts,len(self.tracked_names))
+            np.ceil(self.nparts/self.decimation_factor),self.nparts,len(self.tracked_names))
         return mystr
 
     def __getitem__(self,key):
