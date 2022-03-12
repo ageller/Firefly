@@ -146,6 +146,7 @@ function update_particle_groups(time){
 				update_particle_mesh(p, m,
 				viewerParams.updateFilter[p],
 				viewerParams.updateColormapVariable[p],
+				viewerParams.updateRadiusVariable[p],
 				viewerParams.updateOnOff[p]
 			)});
 
@@ -154,9 +155,9 @@ function update_particle_groups(time){
 		// iff parts are shown
 		if (viewerParams.showParts[p]) {
 			viewerParams.updateFilter[p] = false;
-
 			// we'd have only updated the colormap variable if we're actually showing it
 			if (viewerParams.showColormap[p]) viewerParams.updateColormapVariable[p] = false;
+			viewerParams.updateRadiusVariable[p] = false;
 		}
 
 		// whether we are showing parts or not, we would've
@@ -248,6 +249,7 @@ function update_particle_playback(p,time){
 	p,m,
 	update_filter=false,
 	update_colormap_variable=false,
+	update_radius_variable=false,
 	update_onoff=false){
 	// send velocity vector type (line/arrow/cone) to material buffer
 	m.material.uniforms.velType.value = viewerParams.velopts[viewerParams.velType[p]];
@@ -272,6 +274,8 @@ function update_particle_playback(p,time){
 		if (update_colormap_variable && viewerParams.showColormap[p]){
 			update_particle_mesh_colormap_variable(p,m);
 		} 
+
+		if (update_radius_variable) update_particle_mesh_radius_variable(p,m); 
 
 		update_velocity_animation(p,m);
 
@@ -376,8 +380,9 @@ function update_particle_mesh_filter(p,m){
 
 		// fill radiusScale array (alias for geometry buffer's radius scale)
 		// with default values
-		if ('SmoothingLength' in this_parts){
-			radiusScale[ii] = this_parts['SmoothingLength'][ii];
+		if (viewerParams.radiusVariable[p] > 0){
+			var rkey = viewerParams.ckeys[p][viewerParams.radiusVariable[p]]
+			radiusScale[ii] = this_parts[rkey][ii];
 		}
 		else{radiusScale[ii] = 1.;}
 
@@ -422,6 +427,23 @@ function update_particle_mesh_colormap_variable(p,m){
 		// flag that this array was updated
 		m.geometry.attributes.colormapField.needsUpdate = true;
 	}	
+}
+
+function update_particle_mesh_radius_variable(p,m){
+	// unpack the particle group associated with this mesh
+	var this_parts = m.geometry.userData;
+
+	var radiusScale = m.geometry.attributes.radiusScale.array;
+
+	// .radiusVariable[p] holds the *index* of the radius variable
+	if (viewerParams.radiusVariable[p] > 0){
+		var rkey = viewerParams.ckeys[p][viewerParams.radiusVariable[p]]
+		var radii = this_parts[rkey];
+	} 
+	else var radii = Array(radiusScale.length).fill(1)
+
+	for( var ii = 0; ii < radiusScale.length; ii ++ ) radiusScale[ii] = radii[ii];
+	m.geometry.attributes.radiusScale.needsUpdate = true;
 }
 
 function disable_particle_group_mesh(p,m){

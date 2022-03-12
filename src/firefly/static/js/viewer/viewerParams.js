@@ -146,6 +146,15 @@ function defineViewerParams(){
 		//check if we need to update the colormap when rendering
 		this.updateColormapVariable = {};
 
+		// list of possible radius variables for each particle type
+		this.rkeys = {};
+
+		// determines which radius variable, if any, is activated for each particle type
+		this.radiusVariable = {};
+
+		//check if we need to update the colormap when rendering
+		this.updateRadiusVariable = {};
+
 		//tweening
 		this.inTween = false;
 		this.updateTween = false;

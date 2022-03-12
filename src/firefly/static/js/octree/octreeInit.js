@@ -20,8 +20,8 @@ function abg_initOctree(pkey,data){
 	viewerParams.plotNmax[pkey] = 100;
 
 	// enable radius rescaling to scale the center of mass particles differentially
-	viewerParams.parts[pkey].doSPH = true
-	viewerParams.parts[pkey].SmoothingLength = Array(viewerParams.parts[pkey].Coordinates_flat.length/3)
+	//viewerParams.parts[pkey].doSPH = true
+	viewerParams.parts[pkey].OctreeRadii = Array(viewerParams.parts[pkey].Coordinates_flat.length/3)
 
 	// array that prevents filtering from changing the size of nodes that aren't drawn (i.e. showing them
 	//  when the octree has "filtered" them out).
@@ -47,9 +47,7 @@ function abg_initOctree(pkey,data){
 		//node.radius*=3;
 		node.radius = 15*node.radius;
 
-		// TODO: should rethink how we set radii using radius flag
-		// set the radius of the particle
-		viewerParams.parts[pkey].SmoothingLength[node.node_index] = node.radius;
+		viewerParams.parts[pkey].OctreeRadii[node.node_index] = node.radius;
 
 		// TODO not sure if these are still necessary post-octree-refactor
 		node.NparticlesToRender = Math.floor(

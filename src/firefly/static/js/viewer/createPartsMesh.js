@@ -34,8 +34,7 @@ function createParticleGeometry(p, parts, start, end){
 	geo.setAttribute( 'position', new THREE.BufferAttribute( position, 3 ) );
 
 	// radiusScaling (e.g., for filtering and on/off and changing size of points)
-	if (parts.hasOwnProperty("SmoothingLength")) var radii = Float32Array.from(parts.SmoothingLength.slice(start,end));
-	else var radii = Float32Array.from(Array( len ).fill(1));
+	var radii = Float32Array.from(Array( len ).fill(1));
 	geo.setAttribute( 'radiusScale', new THREE.BufferAttribute( radii, 1 ) );
 
 	// alphas (e.g., for filtering and on/off)

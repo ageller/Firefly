@@ -295,6 +295,11 @@ function initPVals(){
 		viewerParams.colormapVals[p] = {};
 		viewerParams.colormapLims[p] = {};
 
+		// radius scaling
+		viewerParams.radiusVariable[p] = 0; // corresponds to "None"
+		viewerParams.updateRadiusVariable[p] = false;
+		viewerParams.rkeys[p] = [];
+
 		//blending
 		viewerParams.blendingMode[p] = 'additive';
 		viewerParams.depthWrite[p] = false;
@@ -390,12 +395,22 @@ function initPVals(){
 				}
 			}
 		}
+		// radius scaling
+		// None for no radius scaling radius possibilities
+		viewerParams.rkeys[p] = ["None"];
+		if (viewerParams.parts[p].hasOwnProperty("radiusKeys") &&
+			viewerParams.parts[p].radiusKeys.length > 0){
+				viewerParams.rkeys[p] = viewerParams.rkeys[p].concat(viewerParams.parts[p].radiusKeys);
+		}
 
-
+		if (viewerParams.haveOctree[p]){
+			// tell app we can scale by OctreeRadii
+			viewerParams.rkeys[p].push('OctreeRadii')
+			// we just pushed OctreeRadii to the end so we'll set it to the final value
+			viewerParams.radiusVariable[p] = viewerParams.rkeys[p].length-1
+			viewerParams.updateRadiusVariable[p] = true;
+		}
 	}
-
-
-
 }
 
 // size the window and optionally initialize stereo view
@@ -653,8 +668,6 @@ function applyOptions(){
 				}
 			}
 		}
-
-
 
 		//maximum number of particles to plot
 		if (viewerParams.parts.options.hasOwnProperty("plotNmax")){
@@ -1300,8 +1313,8 @@ function compileFFLYData(data, p, callback, initialLoadFrac=0){
 			this_parts.filterKeys = [];
 			this_parts.colormapKeys = [];
 			// TODO hook this up for choosing which variable to scale points by
-			this_parts.radiusFlags = [];
-			this_parts.doSPHrad = Array(false);
+			this_parts.radiusKeys = [];
+			//this_parts.doSPHrad = Array(false);
 
 			// initialize scalar field arrays and corresponding flags
 			for (i=0; i < data.fireflyHeader.fieldNames.length; i++){
