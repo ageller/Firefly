@@ -220,16 +220,17 @@ class ParticleGroup(object):
             )
             field_colormap_flags = new_field_colormap_flags
 
-            if len(field_names) != len(field_radius_flags):
-                if loud:
-                    print("Make sure each field_array (%d) has a field_radius_flag (%d), assuming False."%(
-                        len(field_names),len(field_radius_flags)))
+        ## check if each field was specified whether to be allowed to scale radius
+        if len(field_names) != len(field_radius_flags):
+            if loud:
+                print("Make sure each field_array (%d) has a field_radius_flag (%d), assuming False."%(
+                    len(field_names),len(field_radius_flags)))
 
-                new_field_radius_flags = np.append(
-                    field_radius_flags,
-                    [True]*(len(field_names)-len(field_radius_flags)),axis=0
-                )
-                field_radius_flags = new_field_radius_flags
+            new_field_radius_flags = np.append(
+                field_radius_flags,
+                [False]*(len(field_names)-len(field_radius_flags)),axis=0
+            )
+            field_radius_flags = new_field_radius_flags
 
         ## bind validated input
         self.field_names = field_names
