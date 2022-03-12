@@ -244,8 +244,7 @@ class FIREreader(Reader):
                     field_arrays=np.array(field_arrays,ndmin=2),
                     decimation_factor=dec_factor,
                     field_filter_flags=field_filter_flags,
-                    field_colormap_flags=field_colormap_flags,
-                    doSPHrad = 'SmoothingLength' in field_names)],
+                    field_colormap_flags=field_colormap_flags)],
                 axis=0)
 
 
