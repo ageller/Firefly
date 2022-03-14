@@ -316,3 +316,10 @@ function updateFlyMovementSpeed(flyffac){
 
 
 }
+
+function updateFPSContainer(){
+	var txt = Math.round(GUIParams.FPS) + ' fps'
+	if (GUIParams.memoryUsage > 0) txt += ', ' + (Math.round(GUIParams.memoryUsage/1e9*100.)/100.).toFixed(2) + ' Gb'
+	elm = document.getElementById("fps_container");
+	if (elm) elm.innerHTML = txt;
+}

@@ -26,12 +26,15 @@ function createUI(){
 //change the hamburger to the X to start
 	window.addEventListener('mouseup',function(){GUIParams.movingUI = false;});
 
-	var UIcontainer = d3.select('.UIcontainer');
+	var UIcontainer = d3.select('#UIcontainer');
 	UIcontainer.classed('hidden', true); //hide to start
 	UIcontainer.html(""); //start fresh
 	d3.select('#colorbar_container').classed('hidden', true);
 
-	UIcontainer.attr('style','position:absolute; top:10px; left:10px; width:'+GUIParams.containerWidth+'px');
+	UIcontainer.attr('style','position:absolute; top:30px; left:10px; width:'+GUIParams.containerWidth+'px');
+
+	// create the FPS container
+	createFPSContainer(UIcontainer);
 
 	var UIt = UIcontainer.append('div')
 		.attr('class','UItopbar')
@@ -69,6 +72,8 @@ function createUI(){
 	})
 
 	var UI = d3.select('#particleUI')
+
+
 
 	// create first controls pane containing:
 	//  fulscreen button
@@ -137,6 +142,9 @@ function createUI(){
 	updateUICameraText();
 	updateUIRotText();
 
+
+
+
 	// tell the viewer the UI has been initialized
 	sendToViewer([{'applyUIoptions':null}]);
 	sendToViewer([{'setViewerParamByKey':[true, "haveUI"]}]);
@@ -146,8 +154,29 @@ function createUI(){
 	hideUI(hamburger);
 	hamburger.classList.toggle("change");	
 
+
+
 	// and now reveal the result
 	UIcontainer.classed('hidden', false);
+
+}
+
+function createFPSContainer(container){
+
+	getComputedStyle(document.body).getPropertyValue('--UI-background-color');
+
+	var d = container.insert('div')
+		.attr('id','fps_container')
+		//.attr('class', 'dropdown-content')
+		.style('display','block')
+		.style('border-radius','10px 10px 0px 0px')
+		.style('width', GUIParams.containerWidth + 'px')
+		.style('margin','-22px 0px 4px 0px')
+		.style('background-color',getComputedStyle(document.body).getPropertyValue('--UI-dropdown-background-color'))
+		.style('color',getComputedStyle(document.body).getPropertyValue('--UI-text-color'))
+		.style('text-align','center')
+
+		//--UI-background-color
 }
 
 function createDataControlsBox(UI){
@@ -1359,7 +1388,7 @@ function togglePlayback(p,checked){
 // from https://www.w3schools.com/howto/howto_js_draggable.asp
 //////////////////////
 function dragElement(elm, e) {
-	var elmnt = document.getElementsByClassName("UIcontainer")[0];
+	var elmnt = document.getElementById("UIcontainer");
 	var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
 	dragMouseDown(e);
 
@@ -1402,14 +1431,16 @@ function dragElement(elm, e) {
 
 /////////////
 // for show/hide of elements of the UI
+// would be slicker if this had a clipPath that changed
 //////////////
 function hideUI(x){
 	if (!GUIParams.movingUI){
 
 		x.classList.toggle("change");
 		var UI = document.getElementById("UIhider");
-		var UIc = document.getElementsByClassName("UIcontainer")[0];
+		var UIc = document.getElementById("UIcontainer");
 		var UIt = document.getElementById("ControlsText");
+		var UIf = document.getElementById("fps_container");
 		//var UIp = document.getElementsByClassName("particleDiv");
 		var UIp = d3.selectAll('.particleDiv');
 		if (GUIParams.UIhidden){
@@ -1421,6 +1452,7 @@ function hideUI(x){
 			UIc.style.width = GUIParams.containerWidth + 'px';
 			//UIp.style('width', '280px');
 			UIt.style.opacity = 1;
+			UIf.style.display = 'block';
 		} else {
 			UI.style.display = 'none';
 			//UI.style.visibility = 'hidden';
@@ -1430,6 +1462,8 @@ function hideUI(x){
 			UIc.style.width = '35px';
 			//UIp.style('width', '35px');
 			UIt.style.opacity = 0;
+			UIf.style.display = 'none';
+
 		}
 		var UIt = document.getElementById("UItopbar");
 		//UIt.style.display = 'inline';
@@ -1460,7 +1494,7 @@ function expandDropdown(handle) {
 		}
 	} else {
 		//handle the last one differently
-		c = document.getElementsByClassName("UIcontainer")[0];
+		c = document.getElementById("UIcontainer");
 		if (GUIParams.gtoggle[pID]){
 			c.style.paddingBottom = (pb+ht-5)+'px';
 		} else {

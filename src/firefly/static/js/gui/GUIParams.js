@@ -148,6 +148,9 @@ function defineGUIParams(){
 		// extra checking for fly controls
 		this.mouseDown = false;
 
+		this.FPS = 0;
+		this.memoryUsage = 0;
+		
 		//check for mobile
 		//https://stackoverflow.com/questions/3514784/what-is-the-best-way-to-detect-a-mobile-device-in-jquery
 		// device detection

@@ -1,7 +1,15 @@
-.UIcontainer{
+:root {
+	--UI-text-color: black;
+	--UI-background-color: #d3d3d3;
+	--UI-border-color: #505050;
+	--UI-dropdown-text-color: black;
+	--UI-dropdown-background-color: #808080; 
+}
+
+#UIcontainer{
 	z-index:2; 
 	display:inline-block; 
-	border-color:#505050;
+	border-color:var(--UI-border-color);
 	border-style:solid;
 	border-width: 2px 2px 2px 2px;
 	font-family: Sans-Serif;
@@ -9,7 +17,8 @@
 	transition: width 0.4s;
 }
 .UItopbar{
-	background-color:#d3d3d3;
+	color:var(--UI-text-color);
+	background-color:var(--UI-background-color);
 	height: 30px;
 	padding: 2px;
 	opacity: 0.7;
@@ -121,7 +130,8 @@
 /* particle UI */
 .particleDiv {
 	z-index:2;
-	background-color: #d3d3d3;
+	background-color:var(--UI-background-color);
+	color: var(--UI-text-color);
 	width:280px;
 	padding:5px;
 	margin:5px;
@@ -188,7 +198,7 @@
 	width: 12px;
 	left: 4px;
 	bottom: 4px;
-	background-color: #d3d3d3;
+	background-color: var(--UI-background-color);
 	transition: transform .2s;
 }
 
@@ -225,7 +235,7 @@ input:checked + .slideroo:before {
 	margin-top:-5px;
 	height:20px;
 	width:27px;
-	background:#d3d3d3;
+	background:var(--UI-background-color);
 }
 .sp-replacer:hover, .sp-replacer.sp-active  {
 	border:0;
@@ -241,7 +251,8 @@ input:checked + .slideroo:before {
 	left: 260px;
 	top: -23px;
 	/*height: 30px; */
-	background-color: #d3d3d3;
+	background-color: var(--UI-background-color);
+	color: var(--UI-text-color);
 	padding: 2px;
 	padding-left:5px;
 	font-size: 16px;
@@ -250,7 +261,7 @@ input:checked + .slideroo:before {
 	color:white;
 }
 .dropbtn:hover{
-	color:black;
+	color: var(--UI-text-color);
 }
 .dropdown {
 	display: inline-block;
@@ -258,8 +269,8 @@ input:checked + .slideroo:before {
 .dropdown-content {
 	display: none;
 	position: relative;
-	background-color:#808080;
-	/*background-color: #a3a3a3;*/
+	background-color:var(--UI-dropdown-background-color);
+	color:var(--UI-dropdown-text-color);
 	width: 290px;
 	padding:0;
 	margin:-5px;
@@ -295,7 +306,7 @@ input:checked + .slideroo:before {
 	width:40px;
 	height:22px;
 	padding:2px;
-	color:black;
+	color: var(--UI-text-color);
 }
 .FilterMaxTClass{
 	position:absolute;
@@ -304,6 +315,7 @@ input:checked + .slideroo:before {
 	width:40px;
 	height:22px;
 	padding:2px;
+	color: var(--UI-text-color);
 }
 
 .CMapClass{
@@ -350,6 +362,7 @@ input:checked + .slideroo:before {
 	width:40px;
 	height:22px;
 	padding:2px;
+	color: var(--UI-text-color);
 }
 
 .PSliderClass{
@@ -366,6 +379,7 @@ input:checked + .slideroo:before {
 	width:30px;
 	height:25px;
 	padding:2px;
+	color: var(--UI-text-color);
 }
 
 .noUi-base{
@@ -448,7 +462,7 @@ select{
 }
 
 .colorbar{
-    background-color:#d3d3d3;
+    background-color:var(--UI-background-color);
     opacity:0.8;
     transition: opacity: 0.15s;
 }
