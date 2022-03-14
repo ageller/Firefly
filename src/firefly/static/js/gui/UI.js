@@ -170,9 +170,9 @@ function createFPSContainer(container){
 		//.attr('class', 'dropdown-content')
 		.style('display','block')
 		.style('border-radius','10px 10px 0px 0px')
-		.style('width', GUIParams.containerWidth + 'px')
-		.style('margin','-22px 0px 4px 0px')
-		.style('background-color',getComputedStyle(document.body).getPropertyValue('--UI-dropdown-background-color'))
+		.style('width', GUIParams.containerWidth + 4 + 'px') //+4 for the border
+		.style('margin','-21px 0px 3px -2px')
+		.style('background-color',getComputedStyle(document.body).getPropertyValue('--UI-border-color'))
 		.style('color',getComputedStyle(document.body).getPropertyValue('--UI-text-color'))
 		.style('text-align','center')
 
