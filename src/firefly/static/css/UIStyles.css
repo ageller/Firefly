@@ -4,6 +4,7 @@
 	--UI-border-color: #505050;
 	--UI-dropdown-text-color: black;
 	--UI-dropdown-background-color: #808080; 
+	--UI-extension-background-color: rgba(0,0,0,0.5); 
 }
 
 #UIcontainer{
@@ -251,7 +252,7 @@ input:checked + .slideroo:before {
 	left: 260px;
 	top: -23px;
 	/*height: 30px; */
-	background-color: var(--UI-background-color);
+	background-color: transparent;
 	color: var(--UI-text-color);
 	padding: 2px;
 	padding-left:5px;
@@ -259,9 +260,14 @@ input:checked + .slideroo:before {
 	cursor: pointer;
 	border:0;
 	color:white;
+    transition: transform 0.15s;
+
 }
 .dropbtn:hover{
 	color: var(--UI-text-color);
+}
+.dropbtn-open{
+	transform: translate(3px,-1px)rotate(180deg);
 }
 .dropdown {
 	display: inline-block;
@@ -468,4 +474,8 @@ select{
 }
 .colorbar:hover {
     opacity: 1;
+}
+
+.extension{
+	background-color: var(--UI-extension-background-color);
 }

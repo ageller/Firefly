@@ -143,6 +143,8 @@ function createUI(){
 	updateUIRotText();
 
 
+	//create the octree loading bar
+	if (GUIParams.haveAnyOctree) createOctreeLoadingBar(UIcontainer)
 
 
 	// tell the viewer the UI has been initialized
@@ -155,7 +157,6 @@ function createUI(){
 	hamburger.classList.toggle("change");	
 
 
-
 	// and now reveal the result
 	UIcontainer.classed('hidden', false);
 
@@ -163,22 +164,154 @@ function createUI(){
 
 function createFPSContainer(container){
 
-	getComputedStyle(document.body).getPropertyValue('--UI-background-color');
-
 	var d = container.insert('div')
 		.attr('id','fps_container')
-		//.attr('class', 'dropdown-content')
 		.style('display','block')
 		.style('border-radius','10px 10px 0px 0px')
 		.style('width', GUIParams.containerWidth + 4 + 'px') //+4 for the border
 		.style('margin','-21px 0px 3px -2px')
+		.style('height','20px')
 		.style('background-color',getComputedStyle(document.body).getPropertyValue('--UI-border-color'))
 		.style('color',getComputedStyle(document.body).getPropertyValue('--UI-text-color'))
 		.style('text-align','center')
 
-		//--UI-background-color
 }
 
+function createOctreeLoadingBar(container){
+
+
+
+	var d = container.append('div')
+		.attr('id','octree_loading_container')
+		.style('display','block')
+		.style('border-radius','0px 0px 10px 10px')
+		.style('width', GUIParams.containerWidth + 4 + 'px') //+4 for the border
+		.style('margin','3px 0 -21px -2px')
+		.style('border-top','2px solid ' + getComputedStyle(document.body).getPropertyValue('--UI-border-color'))
+
+
+	var elem = d.append('div')
+		.attr('id','octree_loading')
+		.attr('class','extension')
+		.style('width', GUIParams.containerWidth + 'px') 
+		.style('margin','0px 0px 2px 1px')
+
+	var tab = d.append('div')
+		.attr('id','octree_loading_tab')
+		.style('display','block')
+		.style('border-radius','0px 0px 10px 10px')
+		.style('width', GUIParams.containerWidth + 4 + 'px') //+4 for the border
+		.style('background-color',getComputedStyle(document.body).getPropertyValue('--UI-border-color'))
+		.style('color',getComputedStyle(document.body).getPropertyValue('--UI-text-color'))
+		.style('text-align','center')
+		.style('height', '20px')
+		.text('Octree Loading Progress')
+	var btn = tab.append('button')
+		.attr('class','dropbtn')
+		.attr('id','octreeLoadingDropbtn')
+		.attr('onclick','expandLoadingTab()')
+		.style('left',(GUIParams.containerWidth - 26) + 'px')
+		.style('margin-top','2px')
+		.html('&#x25BC');
+
+	//start with the tabl open
+	btn.classed('dropbtn-open',true)
+	d.classed('show', true);
+
+
+
+	var height = 16;
+	var width = GUIParams.containerWidth - GUIParams.longestPartLabelLen - 50;
+	var offset = 5;
+	var margin = 10;
+
+	var svg = elem.append('svg')
+		.attr('id','octreeLoadingBars')
+		// .style('position','absolute')
+		// .style('left','0px')
+		// .style('bottom','0px')
+		.attr('width', (width + 2*margin + 120) + 'px')
+		.attr('height', height + 'px') //will be adjusted below
+		//.style('transform', 'translate(2px,2px)')
+
+	//count to get the full size of the SVG
+	var nRects = 0;
+	GUIParams.partsKeys.forEach(function(p){
+		if (GUIParams.haveOctree[p]){
+
+			svg.append('rect')
+				.attr('id',p + 'octreeLoadingOutline')
+				.attr('x', '10px')
+				.attr('y', (nRects*(height + offset) + margin) + 'px')
+				.attr('width',width + 'px')
+				.attr('height',height + 'px')
+				.attr('fill','rgba(0,0,0,0)')
+				.attr('stroke',getComputedStyle(document.body).getPropertyValue('--UI-border-color'))
+				.attr('stroke-width', '1')
+			svg.append('rect')
+				.attr('id',p + 'octreeLoadingFill')
+				.attr('class','octreeLoadingFill')
+				.attr('x', '10px')
+				.attr('y', (nRects*(height + offset) + margin) + 'px')
+				.attr('width','0px') //will be updated
+				.attr('height',height + 'px')
+				.attr('fill','rgb(' + (255*GUIParams.Pcolors[p][0]) + ',' + (255*GUIParams.Pcolors[p][1]) + ',' + (255*GUIParams.Pcolors[p][2]) + ')')
+			svg.append('text')
+				.attr('id',p + 'octreeLoadingText')
+				.attr('class','octreeLoadingText')
+				.attr('x', (width + margin + offset) + 'px')
+				.attr('y', (nRects*(height + offset) + margin + 0.75*height) + 'px')
+				.attr('fill','rgb(' + (255*GUIParams.Pcolors[p][0]) + ',' + (255*GUIParams.Pcolors[p][1]) + ',' + (255*GUIParams.Pcolors[p][2]) + ')')
+				.style('font-size', (0.75*height) + 'px')
+				.text(p + ' (0/0)')				
+			nRects += 1;
+		}
+	})
+
+	var h = (nRects*(height + offset) + 2.*margin);
+	svg.attr('height', h + 'px') 
+
+	//add the clip path
+	svg.append('clipPath')
+		.attr('id','loadingClipPath')
+		.append('rect')
+			.attr('id','loadingClipRect')
+			.attr('x','0px')
+			.attr('y','0px')
+			.attr('width',GUIParams.containerWidth + 'px')
+			.attr('height', h + 'px')
+			.attr('stroke','white') //for now
+
+	svg.attr('clip-path', 'url(#loadingClipPath)')
+
+	//elem.attr('clip','rect(0px, 0px, ' + h + 'px, ' + GUIParams.containerWidth + 'px)' )
+}
+
+//would be much slicker with a clip path
+function expandLoadingTab(){
+	var container = d3.select('#octree_loading_container');
+	container.node().classList.toggle('show')
+
+	//rotate the arrow
+	d3.select('#octreeLoadingDropbtn').node().classList.toggle('dropbtn-open');
+
+	var elem = d3.select('#octree_loading');
+	var svg = elem.select('svg');
+	//show/hide the tab
+	if (container.classed('show')){
+		elem.style('margin','0px 0px 2px 1px');
+		elem.transition().style('height', svg.attr('height'));
+		svg.select('clipPath').select('rect').transition().attr('height', svg.attr('height'));
+	} else {
+		elem.transition()
+			.style('height','0px').on('end', function(){
+				d3.select(this).style('margin', '0px');
+			})
+			
+		svg.select('clipPath').select('rect').transition().attr('height', '0px');
+	}
+
+}
 function createDataControlsBox(UI){
 	////////////////////////
 	//generic dropdown for "data" controls"
@@ -1441,6 +1574,7 @@ function hideUI(x){
 		var UIc = document.getElementById("UIcontainer");
 		var UIt = document.getElementById("ControlsText");
 		var UIf = document.getElementById("fps_container");
+		var UIl = document.getElementById("octree_loading_container");
 		//var UIp = document.getElementsByClassName("particleDiv");
 		var UIp = d3.selectAll('.particleDiv');
 		if (GUIParams.UIhidden){
@@ -1452,7 +1586,8 @@ function hideUI(x){
 			UIc.style.width = GUIParams.containerWidth + 'px';
 			//UIp.style('width', '280px');
 			UIt.style.opacity = 1;
-			UIf.style.display = 'block';
+			if (UIf) UIf.style.display = 'block';
+			if (UIl) UIl.style.display = 'block';
 		} else {
 			UI.style.display = 'none';
 			//UI.style.visibility = 'hidden';
@@ -1462,8 +1597,8 @@ function hideUI(x){
 			UIc.style.width = '35px';
 			//UIp.style('width', '35px');
 			UIt.style.opacity = 0;
-			UIf.style.display = 'none';
-
+			if (UIf) UIf.style.display = 'none';
+			if (UIl) UIl.style.display = 'none';
 		}
 		var UIt = document.getElementById("UItopbar");
 		//UIt.style.display = 'inline';
@@ -1479,30 +1614,23 @@ function expandDropdown(handle) {
 	i = getPi(pID);
 	document.getElementById(pID+"Dropdown").classList.toggle("show");
 
+	handle.classList.toggle('dropbtn-open');
+
 	var pdiv;
 	var ddiv = document.getElementById(pID+'Dropdown');
 	var ht = parseFloat(ddiv.style.height.slice(0,-2)) + offset; //to take off "px"
 	var pb = 0.;
 
 	keys = Object.keys(GUIParams.gtoggle)
-	pdiv = document.getElementById(keys[i+1]+'Div');
-	if (i < keys.length-1){
-		if (GUIParams.gtoggle[pID]){
-			pdiv.style.marginTop = ht + "px";
-		} else {
-			pdiv.style.marginTop = "0px";
-		}
+	pdiv = document.getElementById(keys[i]+'Div');
+	if (GUIParams.gtoggle[pID]){
+		pdiv.style.marginBottom = ht + "px";
 	} else {
-		//handle the last one differently
-		c = document.getElementById("UIcontainer");
-		if (GUIParams.gtoggle[pID]){
-			c.style.paddingBottom = (pb+ht-5)+'px';
-		} else {
-			c.style.paddingBottom = pb+'px';	
-		}
+		pdiv.style.marginBottom = "0px";
 	}
 
 	GUIParams.gtoggle[pID] =! GUIParams.gtoggle[pID];	
+
 
 }
 
