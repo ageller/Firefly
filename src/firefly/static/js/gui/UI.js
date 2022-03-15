@@ -280,14 +280,11 @@ function createOctreeLoadingBar(container){
 			.attr('y','0px')
 			.attr('width',GUIParams.containerWidth + 'px')
 			.attr('height', h + 'px')
-			.attr('stroke','white') //for now
 
 	svg.attr('clip-path', 'url(#loadingClipPath)')
 
-	//elem.attr('clip','rect(0px, 0px, ' + h + 'px, ' + GUIParams.containerWidth + 'px)' )
 }
 
-//would be much slicker with a clip path
 function expandLoadingTab(){
 	var container = d3.select('#octree_loading_container');
 	container.node().classList.toggle('show')
@@ -503,7 +500,11 @@ function createDataControlsBox(UI){
 		.append('span')
 			.text('Load New Data');
 
-	m2.style('height', m2height + 'px');
+	m2.style('height', m2height + 'px')
+		.style('display','block')
+		.style('clip-path', 'inset(0px 0px ' + m2height + 'px 0px')
+
+
 }
 
 function createCameraControlBox(UI){
@@ -523,10 +524,12 @@ function createCameraControlBox(UI){
 		.attr('onclick','expandDropdown(this);')
 		.style('left',(GUIParams.containerWidth - 40) + 'px')
 		.html('&#x25BC');
+
+	var c2height = 190;
 	var c2 = c1.append('div')
 		.attr('class','dropdown-content')
 		.attr('id','cameraControlsDropdown')
-		.style('height','190px');
+
 	//center text boxes
 	var c3 = c2.append('div')
 		.attr('class','pLabelDiv')
@@ -774,6 +777,9 @@ function createCameraControlBox(UI){
 		.attr('type','text')
 		.style('margin-top','-4px');
 
+	c2.style('height', c2height + 'px')
+		.style('display','block')
+		.style('clip-path', 'inset(0px 0px ' + c2height + 'px 0px')
 
 	// remove this after fixing the camera input boxes!
 	disableCameraInputBoxes();
@@ -1023,7 +1029,11 @@ function fillParticleDropdown(controls,p){
 		dheight += 115;
 	} 
 	
-	dropdown.style('height',dheight+'px');
+	// add the clip path
+	dropdown
+		.style('height',dheight+'px')
+		.style('display','block')
+		.style('clip-path', 'inset(0px 0px ' + dheight + 'px 0px')
 }
 
 function fillVelocityVectorDropdown(dropdown,p){
@@ -1564,7 +1574,6 @@ function dragElement(elm, e) {
 
 /////////////
 // for show/hide of elements of the UI
-// would be slicker if this had a clipPath that changed
 //////////////
 function hideUI(x){
 	if (!GUIParams.movingUI){
@@ -1618,21 +1627,28 @@ function expandDropdown(handle) {
 
 	var pdiv;
 	var ddiv = document.getElementById(pID+'Dropdown');
-	var ht = parseFloat(ddiv.style.height.slice(0,-2)) + offset; //to take off "px"
+	var ht = parseFloat(ddiv.style.height) + offset; 
 	var pb = 0.;
 
 	keys = Object.keys(GUIParams.gtoggle)
 	pdiv = document.getElementById(keys[i]+'Div');
 	if (GUIParams.gtoggle[pID]){
-		pdiv.style.marginBottom = ht + "px";
+		//transitions handled in css
+		d3.select(pdiv).style('margin-bottom', ht + 'px')
+		d3.select(ddiv).style('clip-path', 'inset(0px 0px 0px 0px')
+		// d3.select(pdiv).transition().style('margin-bottom', ht + 'px')
+		// d3.select(ddiv).transition().style('clip-path', 'inset(0px 0px 0px 0px')
 	} else {
-		pdiv.style.marginBottom = "0px";
+		d3.select(pdiv).style('margin-bottom', '0px')
+		d3.select(ddiv).style('clip-path', 'inset(0px 0px ' + ht + 'px 0px')
+		// d3.select(pdiv).transition().style('margin-bottom', '0px')
+		// d3.select(ddiv).transition().style('clip-path', 'inset(0px 0px ' + ht + 'px 0px')
+
 	}
 
 	GUIParams.gtoggle[pID] =! GUIParams.gtoggle[pID];	
-
-
 }
+
 
 function getPi(pID){
 	var i=0;

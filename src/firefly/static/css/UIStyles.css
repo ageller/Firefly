@@ -138,8 +138,8 @@
 	margin:5px;
 	height:20px;
 	opacity: 0.8;
-	-webkit-transition: width 0.4s, opacity 0.15s;
-	transition: width 0.4s, opacity .15s;
+	-webkit-transition: width 0.4s, opacity 0.15s, margin 0.25s;
+	transition: width 0.4s, opacity .15s, margin 0.25s;
 }
 .particleDiv:hover {
 	opacity: 1;
@@ -260,7 +260,7 @@ input:checked + .slideroo:before {
 	cursor: pointer;
 	border:0;
 	color:white;
-    transition: transform 0.15s;
+    transition: transform 0.25s;
 
 }
 .dropbtn:hover{
@@ -285,13 +285,14 @@ input:checked + .slideroo:before {
 	z-index: 2;
 	left:0;
 	border-radius: 0px 0px 6px 6px;
+	transition: clip-path 0.25s;
 }
 .dropdown-content div {
 	color: black;
 	text-decoration: none;
 	display: block;
 }
-.show {display:block;}
+/*.show {display:block;}*/
 
 .FilterClass{
 	position:absolute;
@@ -470,7 +471,7 @@ select{
 .colorbar{
     background-color:var(--UI-background-color);
     opacity:0.8;
-    transition: opacity: 0.15s;
+    transition: opacity 0.15s;
 }
 .colorbar:hover {
     opacity: 1;
