@@ -14,8 +14,8 @@
 	border-style:solid;
 	border-width: 2px 2px 2px 2px;
 	font-family: Sans-Serif;
-	-webkit-transition: width 0.4s;
-	transition: width 0.4s;
+	-webkit-transition: width 0.4s, clip-path 0.25s;
+	transition: width 0.4s, clip-path 0.25s;
 }
 .UItopbar{
 	color:var(--UI-text-color);

@@ -32,6 +32,7 @@ function createUI(){
 	d3.select('#colorbar_container').classed('hidden', true);
 
 	UIcontainer.attr('style','position:absolute; top:30px; left:10px; width:'+GUIParams.containerWidth+'px');
+	UIcontainer.style('clip-path','inset(-20px -20px -20px 0px)');
 
 	// create the FPS container
 	createFPSContainer(UIcontainer);
@@ -1578,40 +1579,19 @@ function dragElement(elm, e) {
 function hideUI(x){
 	if (!GUIParams.movingUI){
 
+		// change the x to 3 bars
 		x.classList.toggle("change");
-		var UI = document.getElementById("UIhider");
-		var UIc = document.getElementById("UIcontainer");
-		var UIt = document.getElementById("ControlsText");
-		var UIf = document.getElementById("fps_container");
-		var UIl = document.getElementById("octree_loading_container");
-		//var UIp = document.getElementsByClassName("particleDiv");
-		var UIp = d3.selectAll('.particleDiv');
+
+		var elem = d3.select('#UIcontainer');
+		var bbox = elem.node().getBoundingClientRect();
 		if (GUIParams.UIhidden){
-			UI.style.display = 'inline';
-			//UI.style.visibility = 'visible';
-			UIc.style.borderStyle = 'solid';
-			UIc.style.marginLeft = '0';
-			UIc.style.marginTop = '0';
-			UIc.style.width = GUIParams.containerWidth + 'px';
-			//UIp.style('width', '280px');
-			UIt.style.opacity = 1;
-			if (UIf) UIf.style.display = 'block';
-			if (UIl) UIl.style.display = 'block';
-		} else {
-			UI.style.display = 'none';
-			//UI.style.visibility = 'hidden';
-			UIc.style.borderStyle = 'none';
-			UIc.style.marginLeft = '2px';
-			UIc.style.marginTop = '2px';
-			UIc.style.width = '35px';
-			//UIp.style('width', '35px');
-			UIt.style.opacity = 0;
-			if (UIf) UIf.style.display = 'none';
-			if (UIl) UIl.style.display = 'none';
+			//transition taken care of in css
+			elem.style('clip-path','inset(-20px -20px -20px 0px)');
+		}else{
+			elem.style('clip-path','inset(3px ' + (bbox.width - 35) + 'px ' + (bbox.height - 34) + 'px 3px')
 		}
-		var UIt = document.getElementById("UItopbar");
-		//UIt.style.display = 'inline';
 		GUIParams.UIhidden = !GUIParams.UIhidden
+
 	}
 }
 
