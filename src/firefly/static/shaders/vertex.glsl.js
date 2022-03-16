@@ -1,6 +1,6 @@
 var myVertexShader = `
 
-attribute float radiusScale; //for filtering [0,1]
+attribute float radiusScale; // scales the radius *after* clamping, also used to filter to save memory
 attribute float alpha;
 attribute vec4 rgbaColor;
 attribute float colormapField;
@@ -39,11 +39,10 @@ void main(void) {
 	vec4 mvPosition = modelViewMatrix * vec4( position + velVals.xyz*velTime, 1.0 );
 
 	float cameraDist = length(mvPosition.xyz);
-	float pointScale = 1./cameraDist * uVertexScale * radiusScale;
+	float pointScale = 1./cameraDist * 2000.*uVertexScale;
 
 	
-	//gl_PointSize = uVertexScale * pointScale * radiusScale;
-	gl_PointSize = clamp(pointScale, minPointScale, maxPointScale);
+	gl_PointSize = clamp(pointScale, minPointScale, maxPointScale)*radiusScale;
 
 	// send colormap array to fragment shader
 	vColormapMag = clamp(((colormapField - colormapMin) / (colormapMax - colormapMin)), 0., 1.);
@@ -55,15 +54,13 @@ void main(void) {
 		float vSize = sqrt(vyc*vyc+vxc*vxc)/sqrt(dot(velVals.xyz,velVals.xyz))*velVals[3] * 0.5;
 		vTheta = atan(vyc,vxc);
 		if (vTheta<0.0) vTheta=vTheta+2.0*PI;
-
 		// velVectorSizeFac = 100 empiracally tested seems to match particle size
 		//  when it's a fuzzy sphere.  the clamping ensures particles don't disappear when
 		//  you enable velocity vectors
 		gl_PointSize = clamp(
 			gl_PointSize*vSize*velVectorSizeFac,
 			minPointScale*velVectorSizeFac,
-			maxPointScale*velVectorSizeFac);
-
+			maxPointScale*velVectorSizeFac)*radiusScale;
 	}
 
 	vPointSize = gl_PointSize;

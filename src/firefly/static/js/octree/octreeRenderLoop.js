@@ -159,11 +159,11 @@ function checkInside(node){
 	return inside;
 }
 
-function checkTooSmall(node_angle_deg,threshold=1){
+function checkTooSmall(node_angle_deg,threshold=.1){
 	return node_angle_deg < threshold 
 }
 
-function checkTooBig(node_angle_deg,threshold=10){
+function checkTooBig(node_angle_deg,threshold=1){
 	return node_angle_deg > threshold;
 }
 

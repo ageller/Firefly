@@ -42,8 +42,7 @@ function abg_initOctree(pkey,data){
 		//  for convenient reference in other routines where
 		//  we only have the node in scope
 		node.pkey = pkey;
-		//node.radius*=3;
-		node.radius = 15*node.radius;
+		node.radius = node.radius;
 
 		viewerParams.parts[pkey].OctreeRadii[node.node_index] = node.radius;
 
