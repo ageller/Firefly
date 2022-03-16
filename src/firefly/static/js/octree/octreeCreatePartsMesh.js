@@ -1,8 +1,6 @@
 function addOctreeParticlesToScene(
 	node, 
-	start, end, 
-	minPointSize=viewerParams.octree.defaultMinParticleSize, 
-	octreePointScale=1.){
+	start, end){
 
 	//I can use the start and end values to define how many particles to add to the mesh,
 	//  but first I want to try limitting this in the shader with maxToRender.  That may be quicker than add/removing meshes.
@@ -25,7 +23,7 @@ function addOctreeParticlesToScene(
 		else {
 	
 			// var she blows, a brand new mesh
-			var material = createParticleMaterial(node.pkey, minPointSize, octreePointScale,[1,0,0,1]);
+			var material = createParticleMaterial(node.pkey);
 			var mesh = new THREE.Points(geo, material);
 			// name this bad larry so we can find it later using scene.getObjectByName
 			mesh.name = node.obj_name;
@@ -87,8 +85,6 @@ function drawOctreeNode(node, callback){
 	node.drawn = true;
 	var start = 0;
 	var end = node.buffer_size;
-	var minSize = 100;//viewerParams.octree.defaultMinParticleSize;
-	var sizeScale = 1000;//node.particleSizeScale;
 
 	// check if we should actually load the data
 	if (!(!node.mesh && node.current_state=='draw')){
@@ -112,8 +108,7 @@ function drawOctreeNode(node, callback){
 		// create the mesh and add it to the scene
 		addOctreeParticlesToScene(
 			node,
-			start, end,
-			minSize, sizeScale);
+			start, end)
 
 		node.drawPass = viewerParams.octree.drawPass;
 		/*
@@ -124,7 +119,7 @@ function drawOctreeNode(node, callback){
 		*/
 
 		// spawn in new mesh with any filters, UI values, etc...
-		update_particle_mesh(node.pkey,node.mesh,true,true,true);
+		update_particle_mesh(node.pkey,node.mesh,true,true,true,true);
 
 		viewerParams.octree.loadingCount[node.pkey]+=1
 		viewerParams.octree.waitingToDraw = false;

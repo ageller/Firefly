@@ -2,7 +2,7 @@ var myFragmentShader = `
 
 //precision mediump float;
 
-varying float vID;
+uniform float vID;
 varying float vTheta;
 varying float vColormapMag;
 varying float vAlpha;

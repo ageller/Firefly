@@ -2,49 +2,44 @@ var myVertexShader = `
 
 attribute float radiusScale; //for filtering [0,1]
 attribute float alpha;
-attribute vec4 velVals;
 attribute vec4 rgbaColor;
 attribute float colormapField;
 
-varying float vID;
+uniform float vID;
+attribute vec4 velVals;
 varying float vTheta;
 varying float vColormapMag;
 varying float vAlpha;
-varying vec2 vUv; //for the column density 
 varying float vPointSize;
 varying vec4 vColor;
 
+varying vec2 vUv; //for the column density 
+
 uniform float colormapMax;
 uniform float colormapMin;
-uniform float oID;
-uniform float uVertexScale; //from the GUI
-uniform float octreePointScale;
-uniform float maxDistance;
 uniform vec3 cameraX;
 uniform vec3 cameraY;
 uniform float minPointScale;
+uniform float maxPointScale;
+uniform float uVertexScale; //from the GUI
 
 uniform float velTime;
 
-const float maxPointScale = 1000.;
 const float PI = 3.1415926535897932384626433832795;
-const float sizeFac = 70.5; //trying to make physical sizes, I have NO idea why this number is needed.  This came from trial and error
-const float vectorFac = 5.; //so that vectors aren't smaller
+// vectors are substantially smaller (b.c. they're built by discarding) so we need to scale them 
+// to compensate, otherwise they are /tiny/
+const float velVectorSizeFac = 50.; 
 
 void main(void) {
-	vID = oID;
 	vTheta = 0.;
 	vAlpha = alpha;
 	vUv = uv;
-
-	//vVertexScale = uVertexScale;
 
 	//vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
 	vec4 mvPosition = modelViewMatrix * vec4( position + velVals.xyz*velTime, 1.0 );
 
 	float cameraDist = length(mvPosition.xyz);
-	float pointScale = 1./cameraDist;//maxDistance/cameraDist;
-	pointScale = pointScale * octreePointScale * uVertexScale * radiusScale * sizeFac;
+	float pointScale = 1./cameraDist * uVertexScale * radiusScale;
 
 	
 	//gl_PointSize = uVertexScale * pointScale * radiusScale;
@@ -61,7 +56,7 @@ void main(void) {
 		if (vTheta<0.0){
 			vTheta=vTheta+2.0*PI;
 		}
-		gl_PointSize = gl_PointSize*vSize*vectorFac;
+		gl_PointSize = gl_PointSize*vSize*velVectorSizeFac;
 
 	}
 

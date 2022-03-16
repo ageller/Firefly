@@ -30,7 +30,6 @@ function defineViewerParams(){
 
 		//particle size multiplicative factor
 		this.PsizeMult = {};
-		this.vSizeMult = 10.; //factor to multiply velocities vectors by, so we don't always have to increase particle size
 
 		//particle default colors;
 		this.Pcolors = {};
@@ -215,18 +214,15 @@ function defineViewerParams(){
 		this.drawPass = 0;
 		this.totalParticlesInMemory = 0; //try to hold the total number of particles in memory
 
-		this.octree = new function() {
+		//default min/max particles sizes
+		this.defaultMinPointScale = .01;
+		this.defaultMaxPointScale = 10;
 
-			//these should be set from the Options file (and same with some below)
-			this.minFracParticlesToDraw = {'default':0.001}; //minimum fraction per node to draw (unless there are less particles than this total in the node) >0;  
-			this.particleDefaultSizeScale = {'default':1};
+		this.octree = new function() {
 
 			//normalization for the camera distance in deciding how many particles to draw
 			//could be included in GUI, will be reset in pruneOctree to be a fraction of boundingBox
 			this.normCameraDistance = {'default':1000};
-
-			//default minimum particles size
-			this.defaultMinParticleSize = 1;
 
 			this.toRemove = [];
 			this.maxToRemove = 50;

@@ -343,13 +343,11 @@ function update_particle_mesh_velocity_vectors(p,m){
 
 	if (viewerParams.showVel[p]){
 		// enable velocity vectors
-		m.material.uniforms.oID.value = 1.;
+		m.material.uniforms.vID.value = 1.;
 		// pass camera orientation to the shader so we can project each particle's
 		// velocity vector in the vertex shader
 		m.material.uniforms.cameraX.value = [cameraX.x,cameraX.y,cameraX.z];
 		m.material.uniforms.cameraY.value = [cameraY.x,cameraY.y,cameraY.z];
-		// scale maximum velocity vector length
-		m.material.uniforms.uVertexScale.value *= viewerParams.vSizeMult;
 
 		//update the vector width
 		m.material.uniforms.velVectorWidth.value = viewerParams.velVectorWidth[p];
@@ -358,7 +356,7 @@ function update_particle_mesh_velocity_vectors(p,m){
 	} 
 	else{
 		// disable velocity vectors
-		m.material.uniforms.oID.value = 0.;
+		m.material.uniforms.vID.value = 0.;
 	}
 }
 
@@ -451,7 +449,7 @@ function update_particle_mesh_radius_variable(p,m){
 function disable_particle_group_mesh(p,m){
 	// disable the entire particle group, set color to 0,0,0,0 and radius to 0
 	m.material.uniforms.color.value = new THREE.Vector4(0);
-	m.material.uniforms.oID.value = -1;
+	m.material.uniforms.vID.value = -1;
 	var radiusScale = m.geometry.attributes.radiusScale.array;
 	for( var ii = 0; ii < radiusScale.length; ii ++ ) {
 		radiusScale[ii] = 0.;

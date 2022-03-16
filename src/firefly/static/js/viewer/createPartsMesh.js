@@ -65,7 +65,7 @@ function createParticleGeometry(p, parts, start, end){
 	return geo;
 }
 
-function createParticleMaterial(p, minPointSize=1, octreePointScale=1.,color=null){
+function createParticleMaterial(p, color=null,minPointScale=null,maxPointScale=null){
 	//change the blending mode when showing the colormap (so we don't get summing to white colors)
 	var blend = viewerParams.blendingOpts[viewerParams.blendingMode[p]];
 	var dWrite = viewerParams.depthWrite[p];
@@ -77,15 +77,17 @@ function createParticleMaterial(p, minPointSize=1, octreePointScale=1.,color=nul
 		viewerParams.Pcolors[p][2],
 		viewerParams.Pcolors[p][3]];
 
+	if (minPointScale == null) 	minPointScale = viewerParams.defaultMinPointScale;
+	if (maxPointScale == null) 	maxPointScale = viewerParams.defaultMaxPointScale;
+
 	var material = new THREE.ShaderMaterial( {
 
 
 		uniforms: { //add uniform variable here
 			color: {value: new THREE.Vector4(color[0],color[1],color[2],color[3])},
-			oID: {value: 0},
+			vID: {value: 0},
 			SPHrad: {value: viewerParams.parts[p].doSPHrad},
 			uVertexScale: {value: viewerParams.PsizeMult[p]},
-			maxDistance: {value: viewerParams.boxSize},
 			cameraY: {value: [0.,1.,0.]},
 			cameraX: {value: [1.,0.,0.]},
 			velType: {value: 0.},
@@ -96,8 +98,8 @@ function createParticleMaterial(p, minPointSize=1, octreePointScale=1.,color=nul
 			colormapMax: {value: viewerParams.colormapVals[p][viewerParams.ckeys[p][viewerParams.colormapVariable[p]]][1]},
 			columnDensity: {value: viewerParams.columnDensity},
 			scaleCD: {value: viewerParams.scaleCD},
-			minPointSize: {value: minPointSize},
-			octreePointScale: {value: octreePointScale},
+			minPointScale: {value: minPointScale},
+			maxPointScale: {value: maxPointScale},
 			velTime: {value: viewerParams.animateVelTime},
 			velVectorWidth: {value: viewerParams.velVectorWidth[p]},
 			velGradient: {value: viewerParams.velGradient[p]},

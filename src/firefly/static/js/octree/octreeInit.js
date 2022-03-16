@@ -13,8 +13,6 @@ function abg_initOctree(pkey,data){
 	// TODO not sure if these are still necessary post-octree-refactor
 	viewerParams.octree.boxSize = viewerParams.boxSize;
 	viewerParams.octree.normCameraDistance[pkey] = viewerParams.octree.normCameraDistance.default;
-	viewerParams.octree.minFracParticlesToDraw[pkey] = viewerParams.octree.minFracParticlesToDraw.default;
-	viewerParams.octree.particleDefaultSizeScale[pkey] = viewerParams.octree.particleDefaultSizeScale.default;
 
 	//this will be used as a percentage value in the GUI
 	viewerParams.plotNmax[pkey] = 100;
@@ -50,8 +48,7 @@ function abg_initOctree(pkey,data){
 		viewerParams.parts[pkey].OctreeRadii[node.node_index] = node.radius;
 
 		// TODO not sure if these are still necessary post-octree-refactor
-		node.NparticlesToRender = Math.floor(
-			node.buffer_size*viewerParams.octree.minFracParticlesToDraw[pkey]);;
+		node.NparticlesToRender = node.buffer_size;
 		node.particleSizeScale = 1.;
 
 		// initialize octree boxes

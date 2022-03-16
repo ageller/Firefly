@@ -82,9 +82,6 @@ function openCloseNodes(node,octree){
 
 	obj.geometry.setDrawRange( 0, nparts); //is this giving me an error sometimes?
 
-	//reset the point size
-	obj.material.uniforms.octreePointScale.value = node.particleSizeScale;
-	obj.material.needsUpdate = true;
 	*/
 
 	// find the node size in pixels and then compare to the 
