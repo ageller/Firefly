@@ -40,8 +40,6 @@ void main(void) {
 
 	float cameraDist = length(mvPosition.xyz);
 	float pointScale = 1./cameraDist * 2000.*uVertexScale;
-
-	
 	gl_PointSize = clamp(pointScale, minPointScale, maxPointScale)*radiusScale;
 
 	// send colormap array to fragment shader

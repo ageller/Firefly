@@ -213,32 +213,38 @@ function defineViewerParams(){
 		this.memoryUsage = 0; //if using Chrome, we can track the memory usage and try to avoid crashes
 		this.drawPass = 0;
 		this.totalParticlesInMemory = 0; //try to hold the total number of particles in memory
+		this.memoryLimit = 2*1e9; //bytes, maximum memory allowed -- for now this is more like a target
 
 		//default min/max particles sizes
 		this.defaultMinPointScale = .01;
 		this.defaultMaxPointScale = 10;
 
 		this.octree = new function() {
-
-			//normalization for the camera distance in deciding how many particles to draw
-			//could be included in GUI, will be reset in pruneOctree to be a fraction of boundingBox
+			// TODO remove this from the UI
 			this.normCameraDistance = {'default':1000};
 
-			this.toRemove = [];
-			this.maxToRemove = 50;
-			this.pIndex = 0; //will be used to increment through the particles in the render loop
+			this.pIndex = 0; //will be used to increment through the particle types in the render loop
 
+			// containers for nodes that should be loaded or discarded
+			//  separate draw queues for each particle type but single remove queue (because it's faster)
 			this.toDraw = {};
+			this.toRemove = [];
+
+			// flags used to gate drawing/removing multiple nodes at the same time
 			this.waitingToDraw = false;
+			this.waitingToRemove = false;
+
 			this.boxSize = 0; //will be set based on the root node
 
 			this.loadingCount = {}; //will contain an array for each particle type that has the total inView and the total drawn to adjust the loading bar
 
-			this.memoryLimit = 5*1e9; //bytes, maximum memory allowed -- for now this is more like a target
 
 			/*
+			this.maxToRemove = 50;
+			//normalization for the camera distance in deciding how many particles to draw
+			//could be included in GUI, will be reset in pruneOctree to be a fraction of boundingBox
+			this.normCameraDistance = {'default':1000};
 			this.removeTimeout = 2; //(s) to wait to add to the remove list (in case the user just moves around a litte)
-			this.waitingToRemove = false;
 			this.toReduce = [];
 			this.maxToReduce = 50;
 			this.waitingToReduce = false;
@@ -249,10 +255,10 @@ function defineViewerParams(){
 			this.NUpdate = 0; //will cound the number of nodes needing updates in a render pass
 			this.NParticleMemoryModifier = 1.; //will be increased or decreased based on the current memory usage
 			this.NParticleMemoryModifierFac = 1.;
-			*/
-
 			this.targetFPS = 30; //will be used to controls the NParticleFPSModifier
 			this.NParticleFPSModifier = 1.; //will be increased or decreased based on the current fps
+			*/
+
 		}
 
 	};

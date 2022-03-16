@@ -16,6 +16,30 @@ function updateOctree(){
 	//  or if it doesn't have an octree in the first place.
 	if (!octree || !viewerParams.showParts[pkey]) return updateOctreePindex();
 
+	// check if we're over the memory limit. if so, move the oldest mesh to the remove queue
+	if (viewerParams.memoryUsage > viewerParams.memoryLimit){
+		var i = 0;
+		var prefix_length = (pkey + '-').length
+
+		var node_name,node,node_dist;
+		var max_node_dist = -1;
+		var max_node = null;
+
+		viewerParams.partsMesh[pkey].forEach(function (mesh){
+			node_name = mesh.name;
+			if (!(node_name.includes('root') || node_name.includes('Standard'))){
+				node = octree[node_name.slice(prefix_length)];
+				node_dist = viewerParams.camera.position.distanceTo(node.center);
+				if ((node_dist > max_node_dist ) && !checkOnScreen(node)){
+					max_node_dist = node_dist;
+					max_node = node;
+				}
+			};
+		})
+		// make sure we didn't end up at the root b.c. it was at the end or something weird
+		if (max_node) free_buffer(max_node,showCoM,skip_queue=true);
+	}
+
 	//  check if we can draw a new node
 	if (!viewerParams.octree.waitingToDraw && viewerParams.octree.toDraw[pkey].length > 0 ) drawNextOctreeNode();
 
