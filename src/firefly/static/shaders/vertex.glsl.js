@@ -28,7 +28,7 @@ uniform float velTime;
 const float PI = 3.1415926535897932384626433832795;
 // vectors are substantially smaller (b.c. they're built by discarding) so we need to scale them 
 // to compensate, otherwise they are /tiny/
-const float velVectorSizeFac = 50.; 
+const float velVectorSizeFac = 100.; 
 
 void main(void) {
 	vTheta = 0.;
@@ -49,14 +49,20 @@ void main(void) {
 	vColormapMag = clamp(((colormapField - colormapMin) / (colormapMax - colormapMin)), 0., 1.);
 
 	if (vID > 0.5){ //velocities (==1, but safer this way)
+		// find projection onto camera
 		float vyc= -dot(velVals.xyz,cameraY);
 		float vxc = dot(velVals.xyz,cameraX); 
 		float vSize = sqrt(vyc*vyc+vxc*vxc)/sqrt(dot(velVals.xyz,velVals.xyz))*velVals[3] * 0.5;
 		vTheta = atan(vyc,vxc);
-		if (vTheta<0.0){
-			vTheta=vTheta+2.0*PI;
-		}
-		gl_PointSize = gl_PointSize*vSize*velVectorSizeFac;
+		if (vTheta<0.0) vTheta=vTheta+2.0*PI;
+
+		// velVectorSizeFac = 100 empiracally tested seems to match particle size
+		//  when it's a fuzzy sphere.  the clamping ensures particles don't disappear when
+		//  you enable velocity vectors
+		gl_PointSize = clamp(
+			gl_PointSize*vSize*velVectorSizeFac,
+			minPointScale*velVectorSizeFac,
+			maxPointScale*velVectorSizeFac);
 
 	}
 
