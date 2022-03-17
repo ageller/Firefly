@@ -77,8 +77,8 @@ function createParticleMaterial(p, color=null,minPointScale=null,maxPointScale=n
 		viewerParams.Pcolors[p][2],
 		viewerParams.Pcolors[p][3]];
 
-	if (minPointScale == null) 	minPointScale = viewerParams.defaultMinPointScale;
-	if (maxPointScale == null) 	maxPointScale = viewerParams.defaultMaxPointScale;
+	if (minPointScale == null) 	minPointScale = viewerParams.minPointScale;
+	if (maxPointScale == null) 	maxPointScale = viewerParams.maxPointScale;
 
 	var material = new THREE.ShaderMaterial( {
 

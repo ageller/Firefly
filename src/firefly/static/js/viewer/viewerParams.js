@@ -216,8 +216,8 @@ function defineViewerParams(){
 		this.memoryLimit = 2*1e9; //bytes, maximum memory allowed -- for now this is more like a target
 
 		//default min/max particles sizes
-		this.defaultMinPointScale = .01;
-		this.defaultMaxPointScale = 10;
+		this.minPointScale = .01;
+		this.maxPointScale = 10;
 
 		this.octree = new function() {
 			// TODO remove this from the UI
