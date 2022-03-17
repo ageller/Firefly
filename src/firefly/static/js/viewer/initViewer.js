@@ -512,124 +512,89 @@ function initScene() {
 // apply any settings from options file
 function applyOptions(){
 
+	var options = viewerParams.parts.options;
 	//initialize center
-	if (viewerParams.parts.options.hasOwnProperty('center')){
-		if (viewerParams.parts.options.center != null){
-			viewerParams.center = new THREE.Vector3(viewerParams.parts.options.center[0], viewerParams.parts.options.center[1], viewerParams.parts.options.center[2]);
-			setBoxSize(viewerParams.parts[viewerParams.partsKeys[0]].Coordinates_flat);
-		} else {
-			viewerParams.parts.options.center = [viewerParams.center.x, viewerParams.center.y, viewerParams.center.z];
-		}
-	} else {
-		viewerParams.parts.options.center = [viewerParams.center.x, viewerParams.center.y, viewerParams.center.z];
-	}
+	if (options.hasOwnProperty('center')){
+		if (options.center != null){
+			viewerParams.center = new THREE.Vector3(options.center[0], options.center[1], options.center[2]);
+			setBoxSize(viewerParams.parts[viewerParams.partsKeys[0]].Coordinates_flat); } 
+		else options.center = [viewerParams.center.x, viewerParams.center.y, viewerParams.center.z]; } 
+	else options.center = [viewerParams.center.x, viewerParams.center.y, viewerParams.center.z];
 
 	//change location of camera
-	if (viewerParams.parts.options.hasOwnProperty('camera')){
-		if (viewerParams.parts.options.camera != null){
-			viewerParams.camera.position.set(viewerParams.parts.options.camera[0], viewerParams.parts.options.camera[1], viewerParams.parts.options.camera[2]);
-		}
-	} 
+	if (options.hasOwnProperty('camera') &&
+		options.camera != null) viewerParams.camera.position.set(
+			options.camera[0],
+			options.camera[1],
+			options.camera[2]);
 
 	//change the rotation of the camera 
-	if (viewerParams.parts.options.hasOwnProperty('cameraRotation')){
-		if (viewerParams.parts.options.cameraRotation != null){
-			viewerParams.camera.rotation.set(viewerParams.parts.options.cameraRotation[0], viewerParams.parts.options.cameraRotation[1], viewerParams.parts.options.cameraRotation[2]);
-		}
-	}
+	if (options.hasOwnProperty('cameraRotation') &&
+		options.cameraRotation != null) viewerParams.camera.rotation.set(
+			options.cameraRotation[0],
+			options.cameraRotation[1],
+			options.cameraRotation[2]);
 
 	//change the up vector of the camera (required to get the rotation correct)
-	if (viewerParams.parts.options.hasOwnProperty('cameraUp')){
-		if (viewerParams.parts.options.cameraUp != null){
-			viewerParams.camera.up.set(viewerParams.parts.options.cameraUp[0], viewerParams.parts.options.cameraUp[1], viewerParams.parts.options.cameraUp[2]);
-		}
-	}
+	if (options.hasOwnProperty('cameraUp') &&
+		options.cameraUp != null) viewerParams.camera.up.set(
+			options.cameraUp[0],
+			options.cameraUp[1],
+			options.cameraUp[2]);
 
 	//check if we are starting in Fly controls
-	if (viewerParams.parts.options.hasOwnProperty('startFly')){
-		if (viewerParams.parts.options.startFly == true){
-			viewerParams.useTrackball = false;
-		}
-	}
+	if (options.hasOwnProperty('startFly') && options.startFly) viewerParams.useTrackball = false;
 
 	//check if we are starting in VR controls
-	if (viewerParams.parts.options.hasOwnProperty('startVR')){
-		if (viewerParams.parts.options.startVR == true){
-			viewerParams.allowVRControls = true;
-		}
-	}
+	if (options.hasOwnProperty('startVR') && options.startVR) viewerParams.allowVRControls = true;
 
 	//modify the initial friction
-	if (viewerParams.parts.options.hasOwnProperty('friction')){
-		if (viewerParams.parts.options.friction != null){
-			viewerParams.friction = viewerParams.parts.options.friction;
-		}
-	}
+	if (options.hasOwnProperty('friction') && options.friction != null) viewerParams.friction = options.friction;
 
 	//check if we are starting in Stereo
-	if (viewerParams.parts.options.hasOwnProperty('stereo')){
-		if (viewerParams.parts.options.stereo == true){
-			viewerParams.normalRenderer = viewerParams.renderer;
-			viewerParams.renderer = viewerParams.effect;
-			viewerParams.useStereo = true;
-			if (viewerParams.haveUI){
-				var evalString = 'elm = document.getElementById("StereoCheckBox"); elm.checked = true; elm.value = true;'
-				sendToGUI([{'evalCommand':[evalString]}]);
-			}
-		}
-	}
+	if (options.hasOwnProperty('stereo') && options.stereo){
+		viewerParams.normalRenderer = viewerParams.renderer;
+		viewerParams.renderer = viewerParams.effect;
+		viewerParams.useStereo = true;
+		if (viewerParams.haveUI){
+			var evalString = 'elm = document.getElementById("StereoCheckBox"); elm.checked = true; elm.value = true;'
+			sendToGUI([{'evalCommand':[evalString]}]);
+	} 	}
 
 	//modify the initial stereo separation
-	if (viewerParams.parts.options.hasOwnProperty('stereoSep')){
-		if (viewerParams.parts.options.stereoSep != null){
-			viewerParams.stereoSep = viewerParams.parts.options.stereoSep;
+	if (options.hasOwnProperty('stereoSep') && options.stereoSep != null){
+			viewerParams.stereoSep = options.stereoSep;
 			viewerParams.effect.setEyeSeparation(viewerParams.stereoSep);
-
-		}
 	}
 
 	//modify the initial decimation
-	if (viewerParams.parts.options.hasOwnProperty('decimate')){
-		if (viewerParams.parts.options.decimate != null){
-			viewerParams.decimate = viewerParams.parts.options.decimate;
-		}
-	}
+	if (options.hasOwnProperty('decimate') && options.decimate != null) viewerParams.decimate = options.decimate;
+	
 
 	//maximum range in calculating the length the velocity vectors
-	if (viewerParams.parts.options.hasOwnProperty("maxVrange")){
-		if (viewerParams.parts.options.maxVrange != null){
-			viewerParams.maxVrange = viewerParams.parts.options.maxVrange; //maximum dynamic range for length of velocity vectors
-			for (var i=0; i<viewerParams.partsKeys.length; i++){
-				var p = viewerParams.partsKeys[i];
-				if (viewerParams.parts[p].Velocities_flat != null){
-					calcVelVals(viewerParams.parts[p]);     
-				}
-			}
-		}
-	}
+	if (options.hasOwnProperty("maxVrange") && options.maxVrange != null){
+		viewerParams.maxVrange = options.maxVrange; //maximum dynamic range for length of velocity vectors
+		for (var i=0; i<viewerParams.partsKeys.length; i++){
+			var p = viewerParams.partsKeys[i];
+			if (viewerParams.parts[p].Velocities_flat != null){
+				calcVelVals(viewerParams.parts[p]);     
+	} 	} 	}
 
     // add an annotation to the top if necessary
-	if (viewerParams.parts.options.hasOwnProperty('annotation')){
-		if (viewerParams.parts.options.annotation != null){
-			elm = document.getElementById('annotate_container');
-			elm.innerHTML=viewerParams.parts.options.annotation;
-			elm.style.display='block';
-		}
+	if (options.hasOwnProperty('annotation') && options.annotation != null){
+		elm = document.getElementById('annotate_container');
+		elm.innerHTML=options.annotation;
+		elm.style.display='block';
     }
 
 	// flag to show fps in top right corner
-	if (viewerParams.parts.options.hasOwnProperty('showfps')){
-		if (viewerParams.parts.options.showfps != null){
-			viewerParams.showfps = viewerParams.parts.options.showfps;
-		}
-    }
+	// ABG_loop
+	if (options.hasOwnProperty('showfps') && options.showfps != null) viewerParams.showfps = options.showfps;
 
 	// flag to show fps in top right corner
-	if (viewerParams.parts.options.hasOwnProperty('start_tween')){
-		if (viewerParams.parts.options.start_tween){
-			viewerParams.updateTween = true	
-			setTweenviewerParams();
-		}
+	if (options.hasOwnProperty('start_tween') && options.start_tween){
+		viewerParams.updateTween = true	
+		setTweenviewerParams();
 	}
 
 	//particle specific options
@@ -637,273 +602,180 @@ function applyOptions(){
 		var p = viewerParams.partsKeys[i];
 
 		//on/off
-		if (viewerParams.parts.options.hasOwnProperty("showParts")){
-			if (viewerParams.parts.options.showParts != null){
-				if (viewerParams.parts.options.showParts.hasOwnProperty(p)){
-					if (viewerParams.parts.options.showParts[p] != null){
-						viewerParams.showParts[p] = viewerParams.parts.options.showParts[p];
-					}
-				}
-			}
-		}
+		if (options.hasOwnProperty("showParts") && 
+			options.showParts != null && 
+			options.showParts.hasOwnProperty(p) && 
+			options.showParts[p] != null) viewerParams.showParts[p] = options.showParts[p];
 
 		//size
-		if (viewerParams.parts.options.hasOwnProperty("sizeMult")){
-			if (viewerParams.parts.options.sizeMult != null){
-				if (viewerParams.parts.options.sizeMult.hasOwnProperty(p)){
-					if (viewerParams.parts.options.sizeMult[p] != null){
-						viewerParams.PsizeMult[p] = viewerParams.parts.options.sizeMult[p];
-					}
-				}
-			}
-		}
+		if (options.hasOwnProperty("sizeMult") && 
+			options.sizeMult != null && 
+			options.sizeMult.hasOwnProperty(p) && 
+			options.sizeMult[p] != null) viewerParams.PsizeMult[p] = options.sizeMult[p];
 
 		//color
-		if (viewerParams.parts.options.hasOwnProperty("color")){
-			if (viewerParams.parts.options.color != null){
-				if (viewerParams.parts.options.color.hasOwnProperty(p)){
-					if (viewerParams.parts.options.color[p] != null){
-						viewerParams.Pcolors[p] = viewerParams.parts.options.color[p];
-					}
-				}
-			}
-		}
+		if (options.hasOwnProperty("color") &&
+			options.color != null &&
+			options.color.hasOwnProperty(p) && 
+			options.color[p] != null) viewerParams.Pcolors[p] = options.color[p];
 
 		//maximum number of particles to plot
-		if (viewerParams.parts.options.hasOwnProperty("plotNmax")){
-			if (viewerParams.parts.options.plotNmax != null){
-				if (viewerParams.parts.options.plotNmax.hasOwnProperty(p)){
-					if (viewerParams.parts.options.plotNmax[p] != null){
-						viewerParams.plotNmax[p] = viewerParams.parts.options.plotNmax[p];
-					}
-				}
-			}
-		}
+		if (options.hasOwnProperty("plotNmax") &&
+			options.plotNmax != null &&
+			options.plotNmax.hasOwnProperty(p) &&
+			options.plotNmax[p] != null) viewerParams.plotNmax[p] = options.plotNmax[p];
 
 		//start plotting the velocity vectors
-		if (viewerParams.parts.options.hasOwnProperty("showVel")){
-			if (viewerParams.parts.options.showVel != null){
-				if (viewerParams.parts.options.showVel.hasOwnProperty(p)){
-					if (viewerParams.parts.options.showVel[p] == true){
-						viewerParams.showVel[p] = true;
-						if (viewerParams.haveUI){
-							var evalString = 'elm = document.getElementById("'+p+'velCheckBox"); elm.checked = true; elm.value = true;'
-							sendToGUI([{'evalCommand':[evalString]}]);
-						}
-					}
-				}
-			}
-		}
+		if (options.hasOwnProperty("showVel") && 
+			options.showVel != null &&
+			options.showVel.hasOwnProperty(p) &&
+			options.showVel[p]){
+
+			viewerParams.showVel[p] = true;
+			if (viewerParams.haveUI){
+				var evalString = 'elm = document.getElementById("'+p+'velCheckBox"); elm.checked = true; elm.value = true;'
+				sendToGUI([{'evalCommand':[evalString]}]);
+		} 	}
 
 		//type of velocity vectors
-		if (viewerParams.parts.options.hasOwnProperty("velType")){
-			if (viewerParams.parts.options.velType != null){
-				if (viewerParams.parts.options.velType.hasOwnProperty(p)){
-					if (viewerParams.parts.options.velType[p] == 'line' || viewerParams.parts.options.velType[p] == 'arrow' || viewerParams.parts.options.velType[p] == 'triangle'){
-						viewerParams.velType[p] = viewerParams.parts.options.velType[p];
-					}
-				}
-			}
-		}
+		if (options.hasOwnProperty("velType") &&
+			options.velType != null &&
+			options.velType.hasOwnProperty(p)){
+			// type guard the velocity lines, only allow valid values
+			if (options.velType[p] == 'line' || options.velType[p] == 'arrow' || options.velType[p] == 'triangle'){
+				viewerParams.velType[p] = options.velType[p];
+		} 	}
 
 		//velocity vector width
-		if (viewerParams.parts.options.hasOwnProperty("velVectorWidth")){
-			if (viewerParams.parts.options.velVectorWidth != null){
-				if (viewerParams.parts.options.velVectorWidth.hasOwnProperty(p)){
-					viewerParams.velVectorWidth[p] = viewerParams.parts.options.velVectorWidth[p]; 
-				}
-			}
-		}
+		if (options.hasOwnProperty("velVectorWidth") &&
+			options.velVectorWidth != null &&
+			options.velVectorWidth.hasOwnProperty(p)) viewerParams.velVectorWidth[p] = options.velVectorWidth[p]; 
 
 		//velocity vector gradient
-		if (viewerParams.parts.options.hasOwnProperty("velGradient")){
-			if (viewerParams.parts.options.velGradient != null){
-				if (viewerParams.parts.options.velGradient.hasOwnProperty(p)){
-					viewerParams.velGradient[p] = +viewerParams.parts.options.velGradient[p]; //convert from bool to int
-				}
-			}
-		}
+		if (options.hasOwnProperty("velGradient") && 
+			options.velGradient != null && 
+			options.velGradient.hasOwnProperty(p)) viewerParams.velGradient[p] = +options.velGradient[p]; //convert from bool to int
 
 		//start showing the velocity animation
-		if (viewerParams.parts.options.hasOwnProperty("animateVel")){
-			if (viewerParams.parts.options.animateVel != null){
-				if (viewerParams.parts.options.animateVel.hasOwnProperty(p)){
-					if (viewerParams.parts.options.animateVel[p] == true){
-						viewerParams.animateVel[p] = true;
-						if (viewerParams.haveUI){
-							var evalString = 'elm = document.getElementById("'+p+'velAnimateCheckBox"); elm.checked = true; elm.value = true;'
-							sendToGUI([{'evalCommand':[evalString]}]);
-						}
-					}
-				}
-			}
-		}
+		if (options.hasOwnProperty("animateVel") && 
+			options.animateVel != null &&
+			options.animateVel.hasOwnProperty(p) &&
+			options.animateVel[p]){
+
+			viewerParams.animateVel[p] = true;
+			if (viewerParams.haveUI){
+				var evalString = 'elm = document.getElementById("'+p+'velAnimateCheckBox"); elm.checked = true; elm.value = true;'
+				sendToGUI([{'evalCommand':[evalString]}]);
+		} 	}
 
 		//animate velocity dt
-		if (viewerParams.parts.options.hasOwnProperty("animateVelDt")){
-			if (viewerParams.parts.options.animateVelDt != null){
-				if (viewerParams.parts.options.animateVelDt.hasOwnProperty(p)){
-					viewerParams.animateVelDt[p] = viewerParams.parts.options.animateVelDt[p];
-				}
-			}
-		}
+		if (options.hasOwnProperty("animateVelDt") &&
+			options.animateVelDt != null &&
+			options.animateVelDt.hasOwnProperty(p)) viewerParams.animateVelDt[p] = options.animateVelDt[p];
 
 		//animate velocity tmax
-		if (viewerParams.parts.options.hasOwnProperty("animateVelTmax")){
-			if (viewerParams.parts.options.animateVelTmax != null){
-				if (viewerParams.parts.options.animateVelTmax.hasOwnProperty(p)){
-					viewerParams.animateVelTmax[p] = viewerParams.parts.options.animateVelTmax[p];
-				}
-			}
-		}
+		if (options.hasOwnProperty("animateVelTmax") &&
+			options.animateVelTmax != null &&
+			options.animateVelTmax.hasOwnProperty(p)) viewerParams.animateVelTmax[p] = options.animateVelTmax[p];
 
 		//filter values
-		if (viewerParams.parts.options.hasOwnProperty("filterVals")){
-			if (viewerParams.parts.options.filterVals != null){
-				if (viewerParams.parts.options.filterVals.hasOwnProperty(p)){
-					if (viewerParams.parts.options.filterVals[p] != null){
-						viewerParams.updateFilter[p] = true
+		if (options.hasOwnProperty("filterVals") &&
+			options.filterVals != null &&
+			options.filterVals.hasOwnProperty(p) &&
+			options.filterVals[p] != null){
+			viewerParams.updateFilter[p] = true
 
-						for (k=0; k<viewerParams.fkeys[p].length; k++){
-							var fkey = viewerParams.fkeys[p][k]
-							if (viewerParams.parts.options.filterVals[p].hasOwnProperty(fkey)){
-								if (viewerParams.parts.options.filterVals[p][fkey] != null){
-									viewerParams.filterVals[p][fkey] = []
-									viewerParams.filterVals[p][fkey].push(viewerParams.parts.options.filterVals[p][fkey][0]);
-									viewerParams.filterVals[p][fkey].push(viewerParams.parts.options.filterVals[p][fkey][1]);
-
-								}
-							}
-						}
-
-					}
-				}
-			}
-		}
+			for (k=0; k<viewerParams.fkeys[p].length; k++){
+				var fkey = viewerParams.fkeys[p][k]
+				if (options.filterVals[p].hasOwnProperty(fkey)){
+					if (options.filterVals[p][fkey] != null){
+						viewerParams.filterVals[p][fkey] = []
+						viewerParams.filterVals[p][fkey].push(options.filterVals[p][fkey][0]);
+						viewerParams.filterVals[p][fkey].push(options.filterVals[p][fkey][1]);
+		} 	} 	} 	}
 
 		//filter limits
-		if (viewerParams.parts.options.hasOwnProperty("filterLims")){
-			if (viewerParams.parts.options.filterLims != null){
-				if (viewerParams.parts.options.filterLims.hasOwnProperty(p)){
-					if (viewerParams.parts.options.filterLims[p] != null){
-						viewerParams.updateFilter[p] = true
+		if (options.hasOwnProperty("filterLims") &&
+			options.filterLims != null &&
+			options.filterLims.hasOwnProperty(p) &&
+			options.filterLims[p] != null){
+			viewerParams.updateFilter[p] = true
 
-						for (k=0; k<viewerParams.fkeys[p].length; k++){
-							var fkey = viewerParams.fkeys[p][k]
-							if (viewerParams.parts.options.filterLims[p].hasOwnProperty(fkey)){
-								if (viewerParams.parts.options.filterLims[p][fkey] != null){
-									viewerParams.filterLims[p][fkey] = []
-									viewerParams.filterLims[p][fkey].push(viewerParams.parts.options.filterLims[p][fkey][0]);
-									viewerParams.filterLims[p][fkey].push(viewerParams.parts.options.filterLims[p][fkey][1]);
-
-								}
-							}
-						}
-
-					}
-				}
-			}
-		}
+			for (k=0; k<viewerParams.fkeys[p].length; k++){
+				var fkey = viewerParams.fkeys[p][k]
+				if (options.filterLims[p].hasOwnProperty(fkey)){
+					if (options.filterLims[p][fkey] != null){
+						viewerParams.filterLims[p][fkey] = []
+						viewerParams.filterLims[p][fkey].push(options.filterLims[p][fkey][0]);
+						viewerParams.filterLims[p][fkey].push(options.filterLims[p][fkey][1]);
+		} 	} 	} 	}
 
 		//filter invert
-		if (viewerParams.parts.options.hasOwnProperty("invertFilter")){
-			if (viewerParams.parts.options.invertFilter != null){
-				if (viewerParams.parts.options.invertFilter.hasOwnProperty(p)){
-					if (viewerParams.parts.options.invertFilter[p] != null){
-
-						for (k=0; k<viewerParams.fkeys[p].length; k++){
-							var fkey = viewerParams.fkeys[p][k]
-							if (viewerParams.parts.options.invertFilter[p].hasOwnProperty(fkey)){
-								if (viewerParams.parts.options.invertFilter[p][fkey] != null){
-									viewerParams.invertFilter[p][fkey] = viewerParams.parts.options.invertFilter[p][fkey];
-
-								}
-							}
-						}
-
-					}
-				}
-			}
-		}
+		if (options.hasOwnProperty("invertFilter") &&
+			options.invertFilter != null &&
+			options.invertFilter.hasOwnProperty(p) &&
+			options.invertFilter[p] != null){
+			for (k=0; k<viewerParams.fkeys[p].length; k++){
+				var fkey = viewerParams.fkeys[p][k]
+				if (options.invertFilter[p].hasOwnProperty(fkey)){
+					if (options.invertFilter[p][fkey] != null){
+						viewerParams.invertFilter[p][fkey] = options.invertFilter[p][fkey];
+		} 	}	 } 	}
 
 		//colormap limits
-		if (viewerParams.parts.options.hasOwnProperty("colormapLims")){
-			if (viewerParams.parts.options.colormapLims != null){
-				if (viewerParams.parts.options.colormapLims.hasOwnProperty(p)){
-					if (viewerParams.parts.options.colormapLims[p] != null){
-						for (k=0; k<viewerParams.ckeys[p].length; k++){
-							var ckey = viewerParams.ckeys[p][k]
-							if (viewerParams.parts.options.colormapLims[p].hasOwnProperty(ckey)){
-								if (viewerParams.parts.options.colormapLims[p][ckey] != null){
-									viewerParams.colormapLims[p][ckey] = []
-									viewerParams.colormapLims[p][ckey].push(viewerParams.parts.options.colormapLims[p][ckey][0]);
-									viewerParams.colormapLims[p][ckey].push(viewerParams.parts.options.colormapLims[p][ckey][1]);
-
-								}
-							}
-						}
-
-					}
-				}
-			}
-		}//colormap limits
+		if (options.hasOwnProperty("colormapLims") &&
+			options.colormapLims != null && 
+			options.colormapLims.hasOwnProperty(p) && 
+			options.colormapLims[p] != null){
+			for (k=0; k<viewerParams.ckeys[p].length; k++){
+				var ckey = viewerParams.ckeys[p][k]
+				if (options.colormapLims[p].hasOwnProperty(ckey)){
+					if (options.colormapLims[p][ckey] != null){
+						viewerParams.colormapLims[p][ckey] = []
+						viewerParams.colormapLims[p][ckey].push(options.colormapLims[p][ckey][0]);
+						viewerParams.colormapLims[p][ckey].push(options.colormapLims[p][ckey][1]);
+		} 	} 	} 	}
 
 		//colormap values
-		if (viewerParams.parts.options.hasOwnProperty("colormapVals")){
-			if (viewerParams.parts.options.colormapVals != null){
-				if (viewerParams.parts.options.colormapVals.hasOwnProperty(p)){
-					if (viewerParams.parts.options.colormapVals[p] != null){
+		if (options.hasOwnProperty("colormapVals") &&
+			options.colormapVals != null &&
+			options.colormapVals.hasOwnProperty(p) &&
+			options.colormapVals[p] != null){
 
-						for (k=0; k<viewerParams.ckeys[p].length; k++){
-							var ckey = viewerParams.ckeys[p][k]
-							if (viewerParams.parts.options.colormapVals[p].hasOwnProperty(ckey)){
-								if (viewerParams.parts.options.colormapVals[p][ckey] != null){
-									viewerParams.colormapVals[p][ckey] = []
-									viewerParams.colormapVals[p][ckey].push(viewerParams.parts.options.colormapVals[p][ckey][0]);
-									viewerParams.colormapVals[p][ckey].push(viewerParams.parts.options.colormapVals[p][ckey][1]);
-								}
-
-							}
-						}
-					}
-				}
-			}
-		}// colormap vals
+			for (k=0; k<viewerParams.ckeys[p].length; k++){
+				var ckey = viewerParams.ckeys[p][k]
+				if (options.colormapVals[p].hasOwnProperty(ckey)){
+					if (options.colormapVals[p][ckey] != null){
+						viewerParams.colormapVals[p][ckey] = []
+						viewerParams.colormapVals[p][ckey].push(options.colormapVals[p][ckey][0]);
+						viewerParams.colormapVals[p][ckey].push(options.colormapVals[p][ckey][1]);
+		} 	} 	} 	}
 
 		//start plotting with a colormap
-		if (viewerParams.parts.options.hasOwnProperty("showColormap") &&
-			viewerParams.parts.options.showColormap != null &&
-			viewerParams.parts.options.showColormap.hasOwnProperty(p) &&
-			viewerParams.parts.options.showColormap[p] == true){
+		if (options.hasOwnProperty("showColormap") &&
+			options.showColormap != null &&
+			options.showColormap.hasOwnProperty(p) &&
+			options.showColormap[p] == true){
 			viewerParams.showColormap[p] = true;
 			if (viewerParams.haveUI){
 				console.log(p+'colorCheckBox')
 				var evalString = 'elm = document.getElementById("'+p+'colorCheckBox"); elm.checked = true; elm.value = true;'
 				sendToGUI([{'evalCommand':[evalString]}]);
-			}
-		}
+		} 	}
 
 		//choose which colormap to use
-		if (viewerParams.parts.options.hasOwnProperty("colormap") && 
-			viewerParams.parts.options.colormap != null &&
-			viewerParams.parts.options.colormap.hasOwnProperty(p) && 
-			viewerParams.parts.options.colormap[p] != null){
+		if (options.hasOwnProperty("colormap") && 
+			options.colormap != null &&
+			options.colormap.hasOwnProperty(p) && 
+			options.colormap[p] != null) viewerParams.colormap[p] = copyValue(options.colormap[p]);
 
-			viewerParams.colormap[p] = copyValue(viewerParams.parts.options.colormap[p]);
-
-		}
 		//select the colormap variable to color by
-		if (viewerParams.parts.options.hasOwnProperty("colormapVariable") && 
-			viewerParams.parts.options.colormapVariable != null &&
-			viewerParams.parts.options.colormapVariable.hasOwnProperty(p) && 
-			viewerParams.parts.options.colormapVariable[p] != null){
+		if (options.hasOwnProperty("colormapVariable") && 
+			options.colormapVariable != null &&
+			options.colormapVariable.hasOwnProperty(p) && 
+			options.colormapVariable[p] != null) viewerParams.colormapVariable[p] = copyValue(options.colormapVariable[p]);
 
-			viewerParams.colormapVariable[p] = copyValue(viewerParams.parts.options.colormapVariable[p]);
-
-
-		}
 	}// particle specific options
-
 }
 
 // connect fly/trackball controls
