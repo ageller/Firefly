@@ -509,16 +509,36 @@ function createPreset(){
 		viewerParams.camera.getWorldDirection(xx);
 		preset.center = copyValue([xx.x + viewerParams.camera.position.x, xx.y + viewerParams.camera.position.y, xx.z + viewerParams.camera.position.z]);
 	}
+
+	preset.zmin = copyValue(viewerParams.zmin);
+	preset.zmax = copyValue(viewerParams.zmax);
+
 	preset.camera = copyValue([viewerParams.camera.position.x, viewerParams.camera.position.y, viewerParams.camera.position.z]);
-	preset.startFly = !viewerParams.useTrackball;
 	preset.cameraRotation = copyValue([viewerParams.camera.rotation.x, viewerParams.camera.rotation.y, viewerParams.camera.rotation.z]);
 	preset.cameraUp = copyValue([viewerParams.camera.up.x, viewerParams.camera.up.y, viewerParams.camera.up.z]);
+
+	preset.startFly = copyValue(!viewerParams.useTrackball);
+	preset.startVR = copyValue(viewerParams.allowVRControls);
+	preset.startColumnDensity = copyValue(viewerParams.columnDensity);
+	preset.startTween = copyValue(viewerParams.updateTween);
 
 	preset.friction = copyValue(viewerParams.friction);
 	preset.stereo = copyValue(viewerParams.useStereo);
 	preset.stereoSep = copyValue(viewerParams.stereoSep);
+
 	preset.decimate = copyValue(viewerParams.decimate);
 	preset.maxVrange = copyValue(viewerParams.maxVrange);
+	preset.minPointScale = copyValue(viewerParams.minPointScale);
+	preset.maxPointScale = copyValue(viewerParams.maxPointScale);
+
+	elm = document.getElementById('annotate_container');
+	if (elm.style.display == 'block') preset.annotation = elm.innerHTML;
+
+	// flag to show fps in top right corner
+	preset.showfps = copyValue(viewerParams.showfps);
+
+	// change the memory limit for octrees, in bytes
+	preset.memoryLimit = copyValue(viewerParams.memoryLimit);
 
 	//for the UI
 	preset.UI = copyValue(viewerParams.parts.options.UI);
@@ -532,56 +552,78 @@ function createPreset(){
 
 
 	//particle specific options
+	preset.UIparticle = {};
+	preset.UIdropdown = {};
+	preset.UIcolorPicker = {};
+
 	preset.showParts = {};
 	preset.sizeMult = {};
 	preset.color = {};
 	preset.plotNmax = {};
+
 	preset.showVel = {};
 	preset.velType = {};
+	preset.velVectorWidth = {};
+	preset.velGradient = {};
+	preset.animateVel = {};
+	preset.animateVelDt = {};
+	preset.animateVelTmax = {};
+
 	preset.filterLims = {};
 	preset.filterVals = {};
 	preset.invertFilter = {};
+
 	preset.colormapLims = {};
 	preset.colormapVals = {};
-	preset.UIparticle = {};
-	preset.UIdropdown = {};
-	preset.UIcolorPicker = {};
 	preset.showColormap = {};
 	preset.colormap = {};
 	preset.colormapVariable = {};
+
+	preset.radiusVariable = {};
+
 	for (var i=0; i<viewerParams.partsKeys.length; i++){
 		var p = copyValue(viewerParams.partsKeys[i]);
+
+		preset.UIparticle[p] = copyValue(viewerParams.parts.options.UIparticle[p]);
+		preset.UIdropdown[p] = copyValue(viewerParams.parts.options.UIdropdown[p]);
+		preset.UIcolorPicker[p] = copyValue(viewerParams.parts.options.UIcolorPicker[p]);
 
 		preset.showParts[p] = copyValue(viewerParams.showParts[p]);
 		preset.sizeMult[p] = copyValue(viewerParams.PsizeMult[p]);
 		preset.color[p] = copyValue(viewerParams.Pcolors[p]);
 		preset.plotNmax[p] = copyValue(viewerParams.plotNmax[p]);
+
 		preset.showVel[p] = copyValue(viewerParams.showVel[p]);
 		preset.velType[p] = copyValue(viewerParams.velType[p]);
-		preset.showColormap[p] = copyValue(viewerParams.showColormap[p]);
-		preset.colormap[p] = copyValue(viewerParams.colormap[p]);
-		preset.colormapVariable[p] = copyValue(viewerParams.colormapVariable[p]);	
+		preset.velVectorWidth[p] = copyValue(viewerParams.velVectorWidth[p]);
+		preset.velGradient[p] = copyValue(viewerParams.velGradient[p]);
+		preset.animateVel[p] = copyValue(viewerParams.animateVel[p]);
+		preset.animateVelDt[p] = copyValue(viewerParams.animateVelDt[p]);
+		preset.animateVelTmax[p] = copyValue(viewerParams.animateVelTmax[p]);
 
-		preset.UIparticle[p] = copyValue(viewerParams.parts.options.UIparticle[p]);
-		preset.UIdropdown[p] = copyValue(viewerParams.parts.options.UIdropdown[p]);
-		preset.UIcolorPicker[p] = copyValue(viewerParams.parts.options.UIcolorPicker[p]);
 		preset.filterLims[p] = {};
 		preset.filterVals[p] = {};
 		preset.invertFilter[p] = {};
-		preset.colormapLims[p] = {};
-		preset.colormapVals[p] = {};
 		for (k=0; k<viewerParams.fkeys[p].length; k++){
 			var fkey = copyValue(viewerParams.fkeys[p][k]);
 			preset.filterLims[p][fkey] = copyValue(viewerParams.filterLims[p][fkey]);
 			preset.filterVals[p][fkey] = copyValue(viewerParams.filterVals[p][fkey]);
 			preset.invertFilter[p][fkey] = copyValue(viewerParams.invertFilter[p][fkey]);
 		}
+
+		preset.colormapLims[p] = {};
+		preset.colormapVals[p] = {};
 		for (k=0; k<viewerParams.ckeys[p].length; k++){
 			var ckey = copyValue(viewerParams.ckeys[p][k]);
 			preset.colormapLims[p][ckey] = copyValue(viewerParams.colormapLims[p][ckey]);
 			preset.colormapVals[p][ckey] = copyValue(viewerParams.colormapVals[p][ckey]);
 		}
-	}
+		preset.showColormap[p] = copyValue(viewerParams.showColormap[p]);
+		preset.colormap[p] = copyValue(viewerParams.colormap[p]);
+		preset.colormapVariable[p] = copyValue(viewerParams.colormapVariable[p]);	
+
+		preset.radiusVariable[p] = viewerParams.radiusVariable[p];
+	}// per particle options
 
 	preset.loaded = true;
 	return preset;

@@ -512,6 +512,12 @@ function initScene() {
 // apply any settings from options file
 function applyOptions(){
 
+	//modify the minimum z to show particles at (avoid having particles up in your face)
+	if (options.hasOwnProperty('zmin') && options.zmin != null) viewerParams.zmin = options.zmin;
+
+	//modify the maximum z to show particles at (avoid having particles up way in the background)
+	if (options.hasOwnProperty('zmax') && options.zmax != null) viewerParams.zmax = options.zmax;
+
 	var options = viewerParams.parts.options;
 	//initialize center
 	if (options.hasOwnProperty('center')){
@@ -548,6 +554,15 @@ function applyOptions(){
 	//check if we are starting in VR controls
 	if (options.hasOwnProperty('startVR') && options.startVR) viewerParams.allowVRControls = true;
 
+	//check if we are starting in column density mode
+	if (options.hasOwnProperty('startColumnDensity') && options.startColumnDensity) viewerParams.columnDensity = true;
+
+	// flag to start in a tween loop
+	if (options.hasOwnProperty('startTween') && options.startTween){
+		viewerParams.updateTween = true	
+		setTweenviewerParams();
+	}
+
 	//modify the initial friction
 	if (options.hasOwnProperty('friction') && options.friction != null) viewerParams.friction = options.friction;
 
@@ -570,7 +585,6 @@ function applyOptions(){
 	//modify the initial decimation
 	if (options.hasOwnProperty('decimate') && options.decimate != null) viewerParams.decimate = options.decimate;
 	
-
 	//maximum range in calculating the length the velocity vectors
 	if (options.hasOwnProperty("maxVrange") && options.maxVrange != null){
 		viewerParams.maxVrange = options.maxVrange; //maximum dynamic range for length of velocity vectors
@@ -580,6 +594,12 @@ function applyOptions(){
 				calcVelVals(viewerParams.parts[p]);     
 	} 	} 	}
 
+	//modify the minimum point scale factor
+	if (options.hasOwnProperty('minPointScale') && options.minPointScale != null) viewerParams.minPointScale = options.minPointScale;
+
+	//modify the maximum point scale factor
+	if (options.hasOwnProperty('maxPointScale') && options.maxPointScale != null) viewerParams.maxPointScale = options.maxPointScale;
+
     // add an annotation to the top if necessary
 	if (options.hasOwnProperty('annotation') && options.annotation != null){
 		elm = document.getElementById('annotate_container');
@@ -588,14 +608,10 @@ function applyOptions(){
     }
 
 	// flag to show fps in top right corner
-	// ABG_loop
 	if (options.hasOwnProperty('showfps') && options.showfps != null) viewerParams.showfps = options.showfps;
 
-	// flag to show fps in top right corner
-	if (options.hasOwnProperty('start_tween') && options.start_tween){
-		viewerParams.updateTween = true	
-		setTweenviewerParams();
-	}
+	// change the memory limit for octrees, in bytes
+	if (options.hasOwnProperty('memoryLimit') && options.memoryLimit != null) viewerParams.memoryLimit = options.memoryLimit;
 
 	//particle specific options
 	for (var i=0; i<viewerParams.partsKeys.length; i++){
@@ -678,22 +694,6 @@ function applyOptions(){
 			options.animateVelTmax != null &&
 			options.animateVelTmax.hasOwnProperty(p)) viewerParams.animateVelTmax[p] = options.animateVelTmax[p];
 
-		//filter values
-		if (options.hasOwnProperty("filterVals") &&
-			options.filterVals != null &&
-			options.filterVals.hasOwnProperty(p) &&
-			options.filterVals[p] != null){
-			viewerParams.updateFilter[p] = true
-
-			for (k=0; k<viewerParams.fkeys[p].length; k++){
-				var fkey = viewerParams.fkeys[p][k]
-				if (options.filterVals[p].hasOwnProperty(fkey)){
-					if (options.filterVals[p][fkey] != null){
-						viewerParams.filterVals[p][fkey] = []
-						viewerParams.filterVals[p][fkey].push(options.filterVals[p][fkey][0]);
-						viewerParams.filterVals[p][fkey].push(options.filterVals[p][fkey][1]);
-		} 	} 	} 	}
-
 		//filter limits
 		if (options.hasOwnProperty("filterLims") &&
 			options.filterLims != null &&
@@ -708,6 +708,22 @@ function applyOptions(){
 						viewerParams.filterLims[p][fkey] = []
 						viewerParams.filterLims[p][fkey].push(options.filterLims[p][fkey][0]);
 						viewerParams.filterLims[p][fkey].push(options.filterLims[p][fkey][1]);
+		} 	} 	} 	}
+
+		//filter values
+		if (options.hasOwnProperty("filterVals") &&
+			options.filterVals != null &&
+			options.filterVals.hasOwnProperty(p) &&
+			options.filterVals[p] != null){
+			viewerParams.updateFilter[p] = true
+
+			for (k=0; k<viewerParams.fkeys[p].length; k++){
+				var fkey = viewerParams.fkeys[p][k]
+				if (options.filterVals[p].hasOwnProperty(fkey)){
+					if (options.filterVals[p][fkey] != null){
+						viewerParams.filterVals[p][fkey] = []
+						viewerParams.filterVals[p][fkey].push(options.filterVals[p][fkey][0]);
+						viewerParams.filterVals[p][fkey].push(options.filterVals[p][fkey][1]);
 		} 	} 	} 	}
 
 		//filter invert
@@ -774,6 +790,12 @@ function applyOptions(){
 			options.colormapVariable != null &&
 			options.colormapVariable.hasOwnProperty(p) && 
 			options.colormapVariable[p] != null) viewerParams.colormapVariable[p] = copyValue(options.colormapVariable[p]);
+
+		//select the radius variable to scale by
+		if (options.hasOwnProperty("radiusVariable") && 
+			options.radiusVariable != null &&
+			options.radiusVariable.hasOwnProperty(p) && 
+			options.radiusVariable[p] != null) viewerParams.radiusVariable[p] = copyValue(options.radiusVariable[p]);
 
 	}// particle specific options
 }
