@@ -268,14 +268,21 @@ class ParticleGroup(object):
             'showParts':True,
             'filterVals':dict(),
             'filterLims':dict(),
+            'invertFilter':dict(),
             'colormapVals':dict(),
             'colormapLims':dict(),
             'colormap':1./64,
-            'colormapVariable':0,
-            'showColormap':False,
-            'showVel':False,
-            'plotNmax':None,
-            'velType':None
+            'colormapVariable':None, ## use default set in javascript
+            'showColormap':None, ## use default set in javascript
+            'showVel':None, ## use default set in javascript
+            'velVectorWidth':None, ## use default set in javascript
+            'velGradient':None, ## use default set in javascript
+            'plotNmax':None, ## use default set in javascript
+            'velType':None, ## use default set in javascript
+            'animateVel':None, ## use default set in javascript
+            'animateVelDt':None, ## use default set in javascript
+            'animateVelTmax':None, ## use default set in javascript
+            'radiusVariable':0, 
         }
         
         ## setup default values for the initial filter limits (vals/lims represent the interactive
