@@ -229,24 +229,11 @@ function toggleVelocityGradient(args){
 		viewerParams.velGradient[p] = 1;
 	}
 }
-//turn on/off the colormap
-function checkColormapBox(args){
-	var p = args[0];
+
+
+function changeBlendingForColormap(args){
+	var pkey_to_colormap = args[0];
 	var checked = args[1];
-	var forGUI = []; 
-	viewerParams.showColormap[p] = checked;
-
-	changeBlendingForColormap(p,checked);
-
-	// tell the GUI what the change was-- send it back to maintain sync
-	forGUI.push({'setGUIParamByKey':[viewerParams.showColormap, "showColormap"]});
-	// tell the GUI to execute fillColorbarContainer,
-	// if showColormap = false then it will hide the div
-	forGUI.push({'fillColorbarContainer':p});
-	sendToGUI(forGUI);
-}
-
-function changeBlendingForColormap(pkey_to_colormap,checked){
 
 	// update the blending mode for all particles
 	//  (otherwise non-colormapped particles will blend with colormapped particles)

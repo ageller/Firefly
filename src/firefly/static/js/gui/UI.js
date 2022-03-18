@@ -29,7 +29,6 @@ function createUI(){
 	var UIcontainer = d3.select('#UIcontainer');
 	UIcontainer.classed('hidden', true); //hide to start
 	UIcontainer.html(""); //start fresh
-	d3.select('#colorbar_container').classed('hidden', true);
 
 	UIcontainer.attr('style','position:absolute; top:30px; left:10px; width:'+GUIParams.containerWidth+'px');
 	UIcontainer.style('clip-path','inset(-20px -20px -20px 0px)');
@@ -37,29 +36,35 @@ function createUI(){
 	// create the FPS container
 	createFPSContainer(UIcontainer);
 
+	//create the colormap tab
+	createColormapContainer(UIcontainer)
+
 	var UIt = UIcontainer.append('div')
-		.attr('class','UItopbar')
 		.attr('id','UItopbar')
 		.attr('onmouseup','hideUI(this);')
-		.attr('onmousedown','dragElement(this, event);');
+		.attr('onmousedown','dragElement(this, event);')
+		.style('width', (GUIParams.containerWidth - 4)+ 'px')
 
 	//UIt.append('table');
-	var UIr1 = UIt.append('tr');
-	var UIc1 = UIr1.append('td')
-		.style('padding-left','5px')
+	var UIr1 = UIt.append('div')
 		.attr('id','Hamburger')
-	UIc1.append('div').attr('class','bar1');
-	UIc1.append('div').attr('class','bar2');
-	UIc1.append('div').attr('class','bar3');
-	var UIc2 = UIr1.append('td').append('div')
+		.style('padding','2px 0px 0px 4px')
+		.style('float','left')
+	UIr1.append('div').attr('class','bar1');
+	UIr1.append('div').attr('class','bar2');
+	UIr1.append('div').attr('class','bar3');
+
+	var UIr2 = UIt.append('div')
+		.style('float','left')
 		.attr('id','ControlsText')
 		.style('font-size','16pt')
-		.style('padding-left','5px')
-		.style('top','6px')
-		.style('position','absolute')
+		.style('line-height','16pt')
+		.style('padding','4px 0px 0px 8px')
 		.append('b').text('Controls');
 
-	var hider = UIcontainer.append('div').attr('id','UIhider');
+	var hider = UIcontainer.append('div')
+		.attr('id','UIhider')
+		.style('margin-top','18px')
 	hider.append('div').attr('id','particleUI');
 
 
@@ -93,10 +98,6 @@ function createUI(){
 	//  friction and stereo separation sliders
 	//  stereo checkbox
 	createCameraControlBox(UI);
-
-	// initially hide the colorbar, this is overwritten if showCmap is true
-	//  for any particle group
-	d3.select('#colorbar_container').classed('hidden', true);
 
 	// create each of the particle group UI panels containing:
 	//  on-off toggle
@@ -144,8 +145,16 @@ function createUI(){
 	updateUIRotText();
 
 
+	//get the final height and reset the "height" (actually the width since it rotated) of the colobar tab
+	//(It would be better if I can just know the height ahead of time; for the new GUI I should know that)
+	var h = UIcontainer.node().getBoundingClientRect().height;
+	d3.select('#colorbar_outer_container').style('width',(h - 4) + 'px') //+4 for the border
+	d3.select('#colorbar_outer_container').selectAll('div').style('width',(h - 4) + 'px') 
+	d3.select('#colorbarDropbtn').style('left',(h - 36) + 'px') 
+
 	//create the octree loading bar
-	if (GUIParams.haveAnyOctree) createOctreeLoadingBar(UIcontainer)
+	if (GUIParams.haveAnyOctree) createOctreeLoadingBar(UIcontainer);
+
 
 
 	// tell the viewer the UI has been initialized
@@ -175,15 +184,80 @@ function createFPSContainer(container){
 		.style('background-color',getComputedStyle(document.body).getPropertyValue('--UI-border-color'))
 		.style('color',getComputedStyle(document.body).getPropertyValue('--UI-text-color'))
 		.style('text-align','center')
+}
+
+
+function createColormapContainer(container){
+	var h = container.node().getBoundingClientRect().height;
+	var d = container.append('div')
+		.attr('id','colorbar_outer_container')
+		.style('display','block')
+		.style('border-radius','10px 10px 0px 0px')
+		.style('width',h + 4 + 'px') //+4 for the border
+		.style('margin',0)
+		.style('height','20px')
+		.style('background-color',getComputedStyle(document.body).getPropertyValue('--UI-border-color'))
+		.style('transform','translate(' + (GUIParams.containerWidth + 21) + 'px,' + (4 - h) + 'px)rotate(90deg)')
+		.style('transform-origin', 'top left')
+		.style('visibility', 'hidden')
+
+	var elem = d.append('div')
+		.attr('id','colorbar_container')
+		.attr('class','extension')
+		.style('width',h + 4 + 'px') 
+		.style('margin','0px 0px 2px 1px')
+
+	var tab = d.append('div')
+		.attr('id','colorbar_container_tab')
+		.style('display','block')
+		.style('border-radius','10px 10px 0px 0px')
+		.style('width',(h + 4) + 'px') //+4 for the border
+		.style('background-color',getComputedStyle(document.body).getPropertyValue('--UI-border-color'))
+		.style('color',getComputedStyle(document.body).getPropertyValue('--UI-text-color'))
+		.style('text-align','center')
+		.style('position','absolute')
+		.style('bottom','0px')
+		.style('height', '20px')
+		.text('Colorbar')
+	var btn = tab.append('button')
+		.attr('class','dropbtn')
+		.attr('id','colorbarDropbtn')
+		.attr('onclick','expandColorbarTab()')
+		.style('left',(h - 4) + 'px')
+		.style('margin-top','2px')
+		.html('&#x25B2');
+
 
 }
+function expandColorbarTab(){
+	var container = d3.select('#colorbar_outer_container');
+	container.node().classList.toggle('show')
+
+	//rotate the arrow
+	d3.select('#colorbarDropbtn').node().classList.toggle('dropbtn-open');
+
+	// var elem = d3.select('#colorbar_container');
+	// var svg = elem.select('svg');
+	// //show/hide the tab
+	// if (container.classed('show')){
+	// 	elem.style('margin','0px 0px 2px 1px');
+	// 	elem.transition().style('height', svg.attr('height'));
+	// 	svg.select('clipPath').select('rect').transition().attr('height', svg.attr('height'));
+	// } else {
+	// 	elem.transition()
+	// 		.style('height','0px').on('end', function(){
+	// 			d3.select(this).style('margin', '-1px 0px 0px 0px');
+	// 		})
+			
+	// 	svg.select('clipPath').select('rect').transition().attr('height', '0px');
+	// }
+}
+
 
 function createOctreeLoadingBar(container){
 
-
-
 	var d = container.append('div')
-		.attr('id','octree_loading_container')
+		.attr('id','octree_loading_outer_container')
 		.style('display','block')
 		.style('border-radius','0px 0px 10px 10px')
 		.style('width', GUIParams.containerWidth + 4 + 'px') //+4 for the border
@@ -192,7 +266,7 @@ function createOctreeLoadingBar(container){
 
 
 	var elem = d.append('div')
-		.attr('id','octree_loading')
+		.attr('id','octree_loading_container')
 		.attr('class','extension')
 		.style('width', GUIParams.containerWidth + 'px') 
 		.style('margin','0px 0px 2px 1px')
@@ -211,8 +285,8 @@ function createOctreeLoadingBar(container){
 		.attr('class','dropbtn')
 		.attr('id','octreeLoadingDropbtn')
 		.attr('onclick','expandLoadingTab()')
-		.style('left',(GUIParams.containerWidth - 26) + 'px')
-		.style('margin-top','2px')
+		.style('left',(GUIParams.containerWidth - 28) + 'px')
+		.style('margin-top','4px')
 		.html('&#x25BC');
 
 	//start with the tabl open
@@ -287,13 +361,13 @@ function createOctreeLoadingBar(container){
 }
 
 function expandLoadingTab(){
-	var container = d3.select('#octree_loading_container');
+	var container = d3.select('#octree_loading_outer_container');
 	container.node().classList.toggle('show')
 
 	//rotate the arrow
 	d3.select('#octreeLoadingDropbtn').node().classList.toggle('dropbtn-open');
 
-	var elem = d3.select('#octree_loading');
+	var elem = d3.select('#octree_loading_container');
 	var svg = elem.select('svg');
 	//show/hide the tab
 	if (container.classed('show')){
@@ -303,13 +377,13 @@ function expandLoadingTab(){
 	} else {
 		elem.transition()
 			.style('height','0px').on('end', function(){
-				d3.select(this).style('margin', '0px');
+				d3.select(this).style('margin', '-1px 0px 0px 0px');
 			})
 			
 		svg.select('clipPath').select('rect').transition().attr('height', '0px');
 	}
-
 }
+
 function createDataControlsBox(UI){
 	////////////////////////
 	//generic dropdown for "data" controls"
@@ -1016,10 +1090,6 @@ function fillParticleDropdown(controls,p){
 
 	// colormap
 	if (GUIParams.haveColormap[p]){
-		// create and fill the colorbar container
-		if (!GUIParams.definedColorbarContainer){
-			defineColorbarContainer(p)
-		}
 		fillColormapDropdown(dropdown,p);
 		dheight += 50;
 	}
@@ -1188,7 +1258,7 @@ function fillColormapDropdown(dropdown,p){
 		.attr('type','checkbox')
 		.attr('autocomplete','off')
 		.on('change',function(){
-			sendToViewer([{'checkColormapBox':[p, this.checked]}]);
+			checkColormapBox(p, this.checked);
 		})
 
 	ColorDiv.append('label')
@@ -1258,10 +1328,8 @@ function fillColormapDropdown(dropdown,p){
 		var idx = parseInt(Math.round(GUIParams.colormap[p]*256/8 - 0.5));
 		document.getElementById(p+'_SelectCMap').value = idx.toString();
 		document.getElementById(p+'_SelectCMapVar').value = GUIParams.colormapVariable[p].toString();
-		fillColorbarContainer(p);
+		createColormapSVG(p);
 
-		// show the colorbar container if showCmap is True
-		d3.select('#colorbar_container').classed('hidden', false);
 	} 
 	showHideColormapFilter(p, GUIParams.colormapVariable[p]);
 }
@@ -1588,7 +1656,7 @@ function hideUI(x){
 			//transition taken care of in css
 			elem.style('clip-path','inset(-20px -20px -20px 0px)');
 		}else{
-			elem.style('clip-path','inset(3px ' + (bbox.width - 35) + 'px ' + (bbox.height - 34) + 'px 3px')
+			elem.style('clip-path','inset(3px ' + (bbox.width - 34) + 'px ' + (bbox.height - 34) + 'px 3px')
 		}
 		GUIParams.UIhidden = !GUIParams.UIhidden
 
