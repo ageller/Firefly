@@ -1016,6 +1016,7 @@ function fillColormapDropdown(dropdown,p){
 		.attr('autocomplete','off')
 		.on('change',function(){
 			sendToViewer([{'checkColormapBox':[p, this.checked]}]);
+			updateUIBlending([p,this.checked]);
 		})
 
 	ColorDiv.append('label')
@@ -1552,8 +1553,8 @@ function updateUIValues(value, varArgs, i=0, type='single'){
 
 function updateUIBlending(args){
 	var p = args[0];
-	var mode = args[1];
-	var dTest = args[2];
+	var mode = args[1] ? 'normal':'additive';
+	var dTest = args[1]; // have dTest and mode share
 
 	// set the blending mode value in the dropdown
 	document.getElementById(p+'_selectBlendingMode').value = mode;
@@ -1561,7 +1562,7 @@ function updateUIBlending(args){
 	//also update the checkbox for the depth test
 	elm = document.getElementById(p+'_depthCheckBox');
 	elm.checked = dTest;
-	elm.value = dTest
+	elm.value = dTest;
 }
 
 //////////////////////////////////////////

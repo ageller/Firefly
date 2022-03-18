@@ -113,7 +113,7 @@ function resetCamera() {
 	viewerParams.camera.up.set(0, -1, 0);
 	viewerParams.scene.add(viewerParams.camera); 
 
-	setCenter(viewerParams.parts[viewerParams.partsKeys[0]].Coordinates);
+	setCenter(viewerParams.parts[viewerParams.partsKeys[0]].Coordinates_flat);
 	viewerParams.camera.position.set(viewerParams.center.x, viewerParams.center.y, viewerParams.center.z - viewerParams.boxSize/2.);
 	viewerParams.camera.lookAt(viewerParams.scene.position);  
 
@@ -263,9 +263,6 @@ function changeBlendingForColormap(pkey_to_colormap,checked){
 			viewerParams.depthWrite[p] = false;
 			viewerParams.depthTest[p] = false;
 		}
-
-		//also update the dropdown menus and checkboxes in the GUI for each particle group
-		sendToGUI({'updateUIBlending':[p, viewerParams.blendingMode[p], viewerParams.depthTest[p]]});
 	})
 }
 
