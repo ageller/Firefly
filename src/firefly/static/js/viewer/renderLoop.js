@@ -370,28 +370,29 @@ function update_particle_mesh_filter(p,m){
 	//  then we need to reapply the filter
 	var radiusScale = m.geometry.attributes.radiusScale.array;
 	var alpha = m.geometry.attributes.alpha.array;
-	var fkey;
+
+	// reset the buffer values
+	if (viewerParams.radiusVariable[p] > 0){
+		var rkey = viewerParams.rkeys[p][viewerParams.radiusVariable[p]]
+		if (this_parts.hasOwnProperty(rkey)) radiusScale.set(this_parts[rkey]);
+		else radiusScale.fill(1);
+	}
+	else radiusScale.fill(1);
+
+	alpha.fill(1);
 
 	// loop through this particle group's particles
 	for( var ii = 0; ii < radiusScale.length; ii ++ ) {
-		if ('IsDrawn' in this_parts && !this_parts['IsDrawn'][ii]) continue;
-
-		// fill radiusScale array (alias for geometry buffer's radius scale)
-		// with default values
-		if (viewerParams.radiusVariable[p] > 0){
-			var rkey = viewerParams.rkeys[p][viewerParams.radiusVariable[p]]
-			if (this_parts.hasOwnProperty(rkey)) radiusScale[ii] = this_parts[rkey][ii];
-			else radiusScale[ii] = 1;
+		// do not show octree CoM particles after they've been hidden from view
+		//  don't need to check filters
+		if ('IsDrawn' in this_parts && !this_parts['IsDrawn'][ii]){
+			radiusScale[ii] = 0.;
+			alpha[ii] = 0.;
+			continue;
 		}
-		else{radiusScale[ii] = 1.;}
-
-		// set default alpha to 1
-		alpha[ii] = 1.;
 
 		// apply each filter additively, loop over each filter key
-		for (k=0; k<viewerParams.fkeys[p].length; k++){
-			fkey = viewerParams.fkeys[p][k];
-
+		viewerParams.fkeys[p].every(function (fkey){
 			// if the field value for this particle exists:
 			if (this_parts[fkey]) {
 				var val = this_parts[fkey][ii];
@@ -403,9 +404,11 @@ function update_particle_mesh_filter(p,m){
 					// set the radius to 0 and the alpha to 0
 					radiusScale[ii] = 0.;
 					alpha[ii] = 0.;
+					return false; // break out of the every loop, we already set to 0
 				} 
 			}// if (this_parts[fkey]) 
-		}// for (k=0; k<viewerParams.fkeys[p].length; k++)
+			return true; // keep looping
+		}) // fkeys[p].every
 	}// for( var ii = 0; ii < radiusScale.length; ii ++ ) 
 
 	m.geometry.attributes.radiusScale.needsUpdate = true;
