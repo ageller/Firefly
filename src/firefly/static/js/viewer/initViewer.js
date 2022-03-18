@@ -512,13 +512,14 @@ function initScene() {
 // apply any settings from options file
 function applyOptions(){
 
+	var options = viewerParams.parts.options;
+
 	//modify the minimum z to show particles at (avoid having particles up in your face)
 	if (options.hasOwnProperty('zmin') && options.zmin != null) viewerParams.zmin = options.zmin;
 
 	//modify the maximum z to show particles at (avoid having particles up way in the background)
 	if (options.hasOwnProperty('zmax') && options.zmax != null) viewerParams.zmax = options.zmax;
 
-	var options = viewerParams.parts.options;
 	//initialize center
 	if (options.hasOwnProperty('center')){
 		if (options.center != null){
