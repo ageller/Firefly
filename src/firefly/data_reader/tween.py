@@ -12,7 +12,8 @@ class TweenParams(object):
         self,
         coords=None,
         duration=5,
-        loop=True):
+        loop=True,
+        filename=None):
         """Create a new tween parameter object, allowing the user to press :code:`t` from within
             the webapp to move between keyframe camera locations smoothly and automatically.
 
@@ -32,6 +33,9 @@ class TweenParams(object):
         :type duration: float/list of float
         :param loop: flag to loop after reaching the last keyframe, defaults to True
         :type loop: bool, optional
+        :param filename: name of tween file :code:`.json` file,
+            defaults to ``'TweenParams.json'``
+        :type filename: str, optional
         """
 
         ## initialize containers
@@ -46,6 +50,9 @@ class TweenParams(object):
         ## add keyframes if any were passed
         if coords is not None:
             self.addKeyframe(coords,duration)
+        
+        ## bind filename so js knows where to look
+        self.filename = 'TweenParams.json' if filename is None else filename
 
     def addKeyframe(
         self,
@@ -121,7 +128,6 @@ class TweenParams(object):
         self,
         JSONdir,
         JSON_prefix='',
-        filename=None,
         loud=1,
         write_jsons_to_disk=True,
         not_reader=True):
@@ -131,12 +137,7 @@ class TweenParams(object):
             to your :code:`$HOME directory`. , defaults to :code:`$HOME/<JSON_prefix>`
         :type JSONdir: str, optional
         :param JSON_prefix: Prefix for any :code:`.json` files created, :code:`.json` files will be of the format:
-            :code:`<JSON_prefix><filename>.json`, defaults to 'Data'
-        :type JSON_prefix: str, optional
-        :param filename: name of settings :code:`.json` file,
-            defaults to self.settings_filename
-        :type filename: str, optional
-        :param JSON_prefix: string that is prepended to filename, defaults to ''
+            :code:`<JSON_prefix><self.filename>.json`, defaults to ''
         :type JSON_prefix: str, optional
         :param loud: flag to print status information to the console, defaults to True
         :type loud: bool, optional
@@ -145,24 +146,15 @@ class TweenParams(object):
         :type write_jsons_to_disk: bool, optional
         :param not_reader: flag for whether to print the Reader :code:`filenames.json` warning, defaults to True
         :type write_jsons_to_disk: bool, optional
-        :raises NotImplementedError: if filename is anything but None 
-            TODO: need to check on this if the webapp actually requires it have 
-            a specific name.
         :return: filename, JSON(tween_params_dict) (either a filename if
             written to disk or a JSON strs)
         :rtype: str, str
         """
 
-        if filename is None:
-            filename = 'tweenParams.json'
-        else:
-            ##filename = self.settings_filename if filename is None else filename
-            raise NotImplementedError("Tween params must be named TweenParams.json")
-
         tween_params_dict = self.outputToDict()
 
         ## JSON_prefix+
-        filename = os.path.join(JSONdir,filename)
+        filename = os.path.join(JSONdir,self.filename)
 
         if loud and not_reader:
             print("You will need to add this tween params filename to"+

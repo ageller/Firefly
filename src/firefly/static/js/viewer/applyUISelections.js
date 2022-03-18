@@ -507,6 +507,8 @@ function createPreset(){
 		preset.center = copyValue([xx.x + viewerParams.camera.position.x, xx.y + viewerParams.camera.position.y, xx.z + viewerParams.camera.position.z]);
 	}
 
+	preset.tweenFileName = copyValue(viewerParams.tweenFileName);
+
 	preset.zmin = copyValue(viewerParams.zmin);
 	preset.zmax = copyValue(viewerParams.zmax);
 

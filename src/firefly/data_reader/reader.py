@@ -38,8 +38,8 @@ class Reader(object):
         clean_JSONdir=False,
         max_npart_per_file=10**4,
         write_startup='append',
-        settings=None,
-        tweenParams=None):
+        settings:Settings=None,
+        tweenParams:TweenParams=None):
         """Base initialization method for Reader instances. A Reader will read data and produce
             firefly compatible :code:`.json` files. 
 
@@ -124,17 +124,18 @@ class Reader(object):
                 ## fun fact, assert isinstance(settings,Settings) won't work with jupyter notebooks
                 ##  that use %load_ext autoreload
                 raise TypeError("Make sure you use a Settings instance to specify firefly settings.")
-        else:
-            ## we'll use the default ones then
-            settings = Settings()
+        ## we'll use the default ones then
+        else: settings = Settings()
 
         self.settings = settings
 
         if tweenParams is not None:
             if tweenParams.__class__.__name__ != 'TweenParams':
                 raise TypeError("Make sure you use a TweenParams instance to specify fly-through paths.")
+            ## set the filename in the settings file.
+            self.settings['tweenFileName'] = tweenParams.filename
 
-        self.tweenParams: TweenParams = tweenParams
+        self.tweenParams:TweenParams = tweenParams
 
     def __splitAndValidateDatadir(self,loud=True):
         """[summary]

@@ -514,6 +514,9 @@ function applyOptions(){
 
 	var options = viewerParams.parts.options;
 
+	// name of the tween file that should be read, defaults to TweenParams if not provided
+	if (options.hasOwnProperty('tweenFileName') && options.tweenFileName != null) viewerParams.tweenFileName = options.tweenFileName;
+
 	//modify the minimum z to show particles at (avoid having particles up in your face)
 	if (options.hasOwnProperty('zmin') && options.zmin != null) viewerParams.zmin = options.zmin;
 

@@ -260,6 +260,7 @@ class Settings(object):
         annotation=None,
         showfps=False,
         memoryLimit=2e9,
+        tweenFileName=None,
         **extra):
         """Settings that affect the browser window
 
@@ -278,6 +279,9 @@ class Settings(object):
             the memory usage directly, otherwise memory usage is only estimated, 
             defaults to 2e9 
         :type memoryLimit: float, optional
+        :param tweenFileName: the name of the file containing the tween params generated 
+            with :class:`firefly.data_reader.TweenParams`, defaults to ``"TweenParams.json"``
+        :type tweenFileName: str, optional
         """
 
         self.__window_settings = {
@@ -287,7 +291,8 @@ class Settings(object):
             'loaded':True, 
             'annotation':annotation ,
             'showfps':showfps,
-            'memoryLimit':memoryLimit
+            'memoryLimit':memoryLimit,
+            'tweenFileName':tweenFileName
         }
 
     def particle_UI_settings(
