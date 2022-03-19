@@ -545,15 +545,29 @@ function update_framerate(seconds,time){
 
 
 
+	elm = document.getElementById("fps_container");
 	// fill FPS container div with calculated FPS and memory usage
-	if (viewerParams.showfps){
+	if (viewerParams.showFPS){
 		var txt = Math.round(viewerParams.FPS) + ' fps'
-		if (viewerParams.memoryUsage > 0) txt += ', ' + (Math.round(viewerParams.memoryUsage/1e9*100.)/100.).toFixed(2) + ' Gb'
-		elm = document.getElementById("fps_container");
 		if (elm){
 			elm.innerHTML = txt;
 			elm.style.display='block';
 		}
+	}
+
+	if (viewerParams.showMemoryUsage && viewerParams.memoryUsage > 0){
+		if (viewerParams.showFPS) txt += ', ';
+		else var txt = '';
+
+		txt += (Math.round(viewerParams.memoryUsage/1e9*100.)/100.).toFixed(2) + ' Gb'
+		if (elm){
+			elm.innerHTML = txt;
+			elm.style.display='block';
+		}
+	}
+	 
+	if (!viewerParams.showFPS && !viewerParams.showMemoryUsage){
+		if (elm) elm.style.display='none';
 	}
 
 	// update the stored current time from the last time we were here
