@@ -314,7 +314,7 @@ function createDataControlsBox(UI){
 			sendToViewer([{'resetToOptions':null}]);
 		})
 		.append('span')
-			.text('Default Settings');
+			.text('Initial Settings');
 	//reset to preset button
 	d3.select('#resetDiv')
 		.append('button')
