@@ -156,7 +156,7 @@ function makeViewer(pSize=null, prepend=[], append=[]){
 			clearInterval(viewerParams.waitForInit);
 			viewerParams.ready = true;
 			viewerParams.pauseAnimation = false;
-			viewerParams.parts.options0 = createPreset(); //this might break things if the presets don't work...
+			viewerParams.parts.options_initial = createPreset(); //this might break things if the presets don't work...
 			console.log("initial options", viewerParams.parts.options)
 
 			//to test
@@ -612,7 +612,10 @@ function applyOptions(){
     }
 
 	// flag to show fps in top right corner
-	if (options.hasOwnProperty('showfps') && options.showfps != null) viewerParams.showfps = options.showfps;
+	if (options.hasOwnProperty('showFPS') && options.showFPS != null) viewerParams.showFPS = options.showFPS;
+
+	// flag to show memory usage in top right corner
+	if (options.hasOwnProperty('showMemoryUsage') && options.showMemoryUsage != null) viewerParams.showMemoryUsage = options.showMemoryUsage;
 
 	// change the memory limit for octrees, in bytes
 	if (options.hasOwnProperty('memoryLimit') && options.memoryLimit != null) viewerParams.memoryLimit = options.memoryLimit;
