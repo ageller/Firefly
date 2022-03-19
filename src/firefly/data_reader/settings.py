@@ -258,7 +258,8 @@ class Settings(object):
         self,
         title='Firefly',
         annotation=None,
-        showfps=False,
+        showFPS=False,
+        showMemoryUsage=False,
         memoryLimit=2e9,
         tweenFileName=None,
         **extra):
@@ -270,9 +271,12 @@ class Settings(object):
         :param annotation: text to include at the top of the
             Firefly window as an annotation, defaults to None
         :type annotation: str, optional
-        :param showfps: flag to display the FPS (frames per second) of the 
+        :param showFPS: flag to display the FPS (frames per second) of the 
             Firefly scene, defaults to False
-        :type showfps: bool, optional
+        :type showFPS: bool, optional
+        :param showMemoryUsage: flag to display the memory usage in GB of the 
+            loaded data-- useful for octrees when memory usage changes over time, defaults to False
+        :type showMemoryUsage: bool, optional
         :param memoryLimit: maximum memory in bytes to use when loading an octree dataset.
             If this limit is exceeded then previously loaded nodes will be discarded
             to bring the memory usage back below. Works best in Chrome which exposes
@@ -290,7 +294,8 @@ class Settings(object):
             ##  this should not be modified
             'loaded':True, 
             'annotation':annotation ,
-            'showfps':showfps,
+            'showFPS':showFPS,
+            'showMemoryUsage':showMemoryUsage,
             'memoryLimit':memoryLimit,
             'tweenFileName':tweenFileName
         }
