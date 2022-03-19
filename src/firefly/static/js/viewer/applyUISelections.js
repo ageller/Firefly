@@ -28,8 +28,8 @@ function resetViewer(){
 
 //reset to the initial Options file
 function resetToOptions(){
-	console.log("Resetting to Default", viewerParams.parts.options0);
-	viewerParams.parts.options = JSON.parse(JSON.stringify(viewerParams.parts.options0));
+	console.log("Resetting to initial", viewerParams.parts.options_initial);
+	viewerParams.parts.options = JSON.parse(JSON.stringify(viewerParams.parts.options_initial));
 	resetViewer();
 }
 
@@ -44,10 +44,20 @@ function loadNewData(){
 	forGUI.push({'defineGUIParams':null});
 	sendToGUI(forGUI);
 
+	viewerParams.partsKeys.forEach(
+		function (pkey){
+		if (viewerParams.parts[pkey].hasOwnProperty('octree')) disposeOctreeNodes(pkey);
+	});
+
+
 	viewerParams.parts = null;
 	viewerParams.camera = null;
 	viewerParams.boxSize = 0;
 	viewerParams.controls.dispose();
+
+	// reset to default options
+	defineViewerParams()
+	// rebuild the viewer with new options
 	makeViewer();
 	//if (viewerParams.local) makeUI(local=true);
 	forGUI = [{'makeUI':viewerParams.local}];
@@ -71,6 +81,8 @@ function loadNewData(){
 	viewerParams.loadfrac = 0.;
 	viewerParams.haveUI = false;
 	showSplash(true);
+	console.log(viewerParams.showMemoryUsage)
+	debugger
 
 	viewerParams.loaded = false;
 	viewerParams.pauseAnimation = true;
@@ -82,8 +94,8 @@ function loadNewData(){
 
 //reset to a preset file
 function resetToPreset(preset){
-	console.log(preset,viewerParams.parts.options0)
 	console.log("Resetting to Preset");
+	console.log('new',preset,'prev:',viewerParams.parts.options)
 	viewerParams.parts.options = preset;
 	resetViewer();
 }
