@@ -660,7 +660,8 @@ function applyOptions(){
 		//type of velocity vectors
 		if (options.hasOwnProperty("velType") &&
 			options.velType != null &&
-			options.velType.hasOwnProperty(p)){
+			options.velType.hasOwnProperty(p) && 
+			options.velType[p] != null){
 			// type guard the velocity lines, only allow valid values
 			if (options.velType[p] == 'line' || options.velType[p] == 'arrow' || options.velType[p] == 'triangle'){
 				viewerParams.velType[p] = options.velType[p];
@@ -669,18 +670,20 @@ function applyOptions(){
 		//velocity vector width
 		if (options.hasOwnProperty("velVectorWidth") &&
 			options.velVectorWidth != null &&
-			options.velVectorWidth.hasOwnProperty(p)) viewerParams.velVectorWidth[p] = options.velVectorWidth[p]; 
+			options.velVectorWidth.hasOwnProperty(p) &&
+			options.velVectorWidth[p] != null) viewerParams.velVectorWidth[p] = options.velVectorWidth[p]; 
 
 		//velocity vector gradient
 		if (options.hasOwnProperty("velGradient") && 
 			options.velGradient != null && 
-			options.velGradient.hasOwnProperty(p)) viewerParams.velGradient[p] = +options.velGradient[p]; //convert from bool to int
+			options.velGradient.hasOwnProperty(p) &&
+			options.velGradient[p] != null) viewerParams.velGradient[p] = +options.velGradient[p]; //convert from bool to int
 
 		//start showing the velocity animation
 		if (options.hasOwnProperty("animateVel") && 
 			options.animateVel != null &&
 			options.animateVel.hasOwnProperty(p) &&
-			options.animateVel[p]){
+			options.animateVel[p] != null){
 
 			viewerParams.animateVel[p] = true;
 			if (viewerParams.haveUI){
@@ -691,12 +694,14 @@ function applyOptions(){
 		//animate velocity dt
 		if (options.hasOwnProperty("animateVelDt") &&
 			options.animateVelDt != null &&
-			options.animateVelDt.hasOwnProperty(p)) viewerParams.animateVelDt[p] = options.animateVelDt[p];
+			options.animateVelDt.hasOwnProperty(p) &&
+			options.animateVelDt[p] != null) viewerParams.animateVelDt[p] = options.animateVelDt[p];
 
 		//animate velocity tmax
 		if (options.hasOwnProperty("animateVelTmax") &&
 			options.animateVelTmax != null &&
-			options.animateVelTmax.hasOwnProperty(p)) viewerParams.animateVelTmax[p] = options.animateVelTmax[p];
+			options.animateVelTmax.hasOwnProperty(p) &&
+			options.animateVelTmax[p] != null) viewerParams.animateVelTmax[p] = options.animateVelTmax[p];
 
 		//filter limits
 		if (options.hasOwnProperty("filterLims") &&
