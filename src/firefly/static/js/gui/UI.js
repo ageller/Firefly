@@ -148,9 +148,9 @@ function createUI(){
 	//get the final height and reset the "height" (actually the width since it rotated) of the colobar tab
 	//(It would be better if I can just know the height ahead of time; for the new GUI I should know that)
 	var h = UIcontainer.node().getBoundingClientRect().height;
-	d3.select('#colorbar_outer_container').style('width',(h - 4) + 'px') //+4 for the border
-	d3.select('#colorbar_outer_container').selectAll('div').style('width',(h - 4) + 'px') 
-	d3.select('#colorbarDropbtn').style('left',(h - 36) + 'px') 
+	d3.select('#colormap_outer_container').style('width',(h - 4) + 'px') //+4 for the border
+	d3.select('#colormap_outer_container').selectAll('div').style('width',(h - 4) + 'px') 
+	d3.select('#colormapDropbtn').style('left',(h - 36) + 'px') 
 
 	//create the octree loading bar
 	if (GUIParams.haveAnyOctree) createOctreeLoadingBar(UIcontainer);
@@ -163,7 +163,7 @@ function createUI(){
 
 	// collapse the UI initially
 	var hamburger = document.getElementById('UItopbar');
-	hideUI(hamburger);
+	hideUI(hamburger, 0);
 	hamburger.classList.toggle("change");	
 
 
@@ -190,7 +190,7 @@ function createFPSContainer(container){
 function createColormapContainer(container){
 	var h = container.node().getBoundingClientRect().height;
 	var d = container.append('div')
-		.attr('id','colorbar_outer_container')
+		.attr('id','colormap_outer_container')
 		.style('display','block')
 		.style('border-radius','10px 10px 0px 0px')
 		.style('width',h + 4 + 'px') //+4 for the border
@@ -202,13 +202,17 @@ function createColormapContainer(container){
 		.style('visibility', 'hidden')
 
 	var elem = d.append('div')
-		.attr('id','colorbar_container')
+		.attr('id','colormap_container')
 		.attr('class','extension')
 		.style('width',h + 4 + 'px') 
-		.style('margin','0px 0px 2px 1px')
+		.style('margin','0')
+		.style('transform','translate(0,20px)')
+		.style('border','2px solid ' + getComputedStyle(document.body).getPropertyValue('--UI-border-color'))
+		.style('border-radius','0px 10px 0px 0px')
+		.style('clip-path','inset(0px 0px 0px -1px)'); //using -1 so that it doesn't get set to (0px), which would not allow d3 transition!
 
 	var tab = d.append('div')
-		.attr('id','colorbar_container_tab')
+		.attr('id','colormap_container_tab')
 		.style('display','block')
 		.style('border-radius','10px 10px 0px 0px')
 		.style('width',(h + 4) + 'px') //+4 for the border
@@ -218,39 +222,48 @@ function createColormapContainer(container){
 		.style('position','absolute')
 		.style('bottom','0px')
 		.style('height', '20px')
-		.text('Colorbar')
+		.text('Colormap')
 	var btn = tab.append('button')
 		.attr('class','dropbtn')
-		.attr('id','colorbarDropbtn')
-		.attr('onclick','expandColorbarTab()')
+		.attr('id','colormapDropbtn')
+		.attr('onclick','expandColormapTab()')
 		.style('left',(h - 4) + 'px')
 		.style('margin-top','2px')
 		.html('&#x25B2');
 
 
+
+
 }
-function expandColorbarTab(){
-	var container = d3.select('#colorbar_outer_container');
+function expandColormapTab(duration=250){
+	var container = d3.select('#colormap_outer_container');
 	container.node().classList.toggle('show')
 
 	//rotate the arrow
-	d3.select('#colorbarDropbtn').node().classList.toggle('dropbtn-open');
+	d3.select('#colormapDropbtn').node().classList.toggle('dropbtn-open');
 
-	// var elem = d3.select('#colorbar_container');
-	// var svg = elem.select('svg');
-	// //show/hide the tab
-	// if (container.classed('show')){
-	// 	elem.style('margin','0px 0px 2px 1px');
-	// 	elem.transition().style('height', svg.attr('height'));
-	// 	svg.select('clipPath').select('rect').transition().attr('height', svg.attr('height'));
-	// } else {
-	// 	elem.transition()
-	// 		.style('height','0px').on('end', function(){
-	// 			d3.select(this).style('margin', '-1px 0px 0px 0px');
-	// 		})
-			
-	// 	svg.select('clipPath').select('rect').transition().attr('height', '0px');
-	// }
+
+	var size = parseFloat(d3.select('#colormap_container').style('height')) + 4; // +4 for border
+
+	//show/hide the tab
+	//animations for UIcontainer are taken care of in css
+	if (container.classed('show')){
+		d3.select('#UIcontainer').transition().duration(duration)
+			.style('clip-path', 'inset(-20px ' + (-20 - size) + 'px -20px 0px')
+		d3.select('#colormap_outer_container').transition().duration(duration)
+			.style('margin-left', size + 'px')
+		d3.select('#colormap_container').transition().duration(duration)
+			.style('clip-path','inset(0px 0px 0px -1px)'); //using -1 so that it doesn't get set to (0px), which would not allow d3 transition!
+
+
+	} else {
+		d3.select('#UIcontainer').transition().duration(duration)
+			.style('clip-path', 'inset(-20px -20px -20px 0px')
+		d3.select('#colormap_outer_container').transition().duration(duration)
+			.style('margin-left', '0px')
+		d3.select('#colormap_container').transition().duration(duration)
+			.style('clip-path','inset(0px 0px ' + size + 'px 0px)');
+	}
 }
 
 
@@ -360,7 +373,7 @@ function createOctreeLoadingBar(container){
 
 }
 
-function expandLoadingTab(){
+function expandLoadingTab(duration=250){
 	var container = d3.select('#octree_loading_outer_container');
 	container.node().classList.toggle('show')
 
@@ -372,15 +385,15 @@ function expandLoadingTab(){
 	//show/hide the tab
 	if (container.classed('show')){
 		elem.style('margin','0px 0px 2px 1px');
-		elem.transition().style('height', svg.attr('height'));
-		svg.select('clipPath').select('rect').transition().attr('height', svg.attr('height'));
+		elem.transition().duration(duration).style('height', svg.attr('height'));
+		svg.select('clipPath').select('rect').transition().duration(duration).attr('height', svg.attr('height'));
 	} else {
-		elem.transition()
+		elem.transition().duration(duration)
 			.style('height','0px').on('end', function(){
 				d3.select(this).style('margin', '-1px 0px 0px 0px');
 			})
 			
-		svg.select('clipPath').select('rect').transition().attr('height', '0px');
+		svg.select('clipPath').select('rect').transition().duration(duration).attr('height', '0px');
 	}
 }
 
@@ -1644,26 +1657,67 @@ function dragElement(elm, e) {
 /////////////
 // for show/hide of elements of the UI
 //////////////
-function hideUI(x){
+function hideUI(x, duration=250){
 	if (!GUIParams.movingUI){
 
 		// change the x to 3 bars
 		x.classList.toggle("change");
+		GUIParams.UIhidden = !GUIParams.UIhidden
 
 		var elem = d3.select('#UIcontainer');
 		var bbox = elem.node().getBoundingClientRect();
 		if (GUIParams.UIhidden){
-			//transition taken care of in css
-			elem.style('clip-path','inset(-20px -20px -20px 0px)');
+			elem.transition().duration(duration).style('clip-path','inset(3px ' + (bbox.width - 34) + 'px ' + (bbox.height - 34) + 'px 3px')
 		}else{
-			elem.style('clip-path','inset(3px ' + (bbox.width - 34) + 'px ' + (bbox.height - 34) + 'px 3px')
+			//check the colormap
+			var inset = getUIcontainerInset()
+			elem.transition().duration(duration).style('clip-path','inset(-20px ' + (-20 - inset.cbar[0]) + 'px ' + (-20 - inset.cbar[1]) + 'px 0px)');
+
+			// var cwidth = 0;
+			// var cheight = 0;
+			// if (d3.select('#colormap_outer_container').classed('show')){
+			// 	var cbar = d3.select('#colormap_container');
+			// 	if (cbar.node()){
+			// 		//it's rotated
+			// 		cwidth = parseFloat(cbar.style('height')) + 4; // +4 for border
+			// 		cheight = parseFloat(cbar.style('width')) + 4 - bbox.height; // +4 for border
+			// 	}
+			// }
+			// elem.transition().duration(duration).style('clip-path','inset(-20px ' + (-20 - cwidth) + 'px -20px 0px)');
+			// //elem.style('clip-path','inset(-20px -20px -20px 0px)');
+
 		}
-		GUIParams.UIhidden = !GUIParams.UIhidden
 
 	}
 }
 
-function expandDropdown(handle) {
+function getUIcontainerInset(pID = null){
+	//if the colormap is open be sure to update the overall clip-path
+	var bbox = d3.select('#UIcontainer').node().getBoundingClientRect();
+	var newHeight = 0;
+	if (pID){
+		//for dropdown
+		var dbbox = document.getElementById(pID+'Dropdown').getBoundingClientRect();
+		var newHeight = bbox.height - dbbox.height;
+	}
+	var cwidth = 0;
+	var cheight = 0;
+	var inset = parseInset(d3.select('#UIcontainer'));	
+	if (d3.select('#colormap_outer_container').classed('show')){
+		var cbar = d3.select('#colormap_container');
+		if (cbar.node()) {
+			//it's rotated
+			cwidth = parseFloat(cbar.style('height')) + 4;
+			inset[1] = -20 - cwidth; // 4 for border
+			cheight = parseFloat(cbar.style('width')) + 4; 
+			if (cheight > newHeight) inset[2] = -20 - (cheight - newHeight) - 4; // 4 for border
+		}
+	}
+
+	return {'inset':inset,'cbar':[cwidth, cheight]}
+}
+
+function expandDropdown(handle, duration=250) {
 	var offset = 5;
 
 	// find the position in the partsKeys list
@@ -1678,19 +1732,19 @@ function expandDropdown(handle) {
 	var ht = parseFloat(ddiv.style.height) + offset; 
 	var pb = 0.;
 
+	//if the colormap is open be sure to update the overall clip-path
+	var inset = getUIcontainerInset(pID)
+	d3.select('#UIcontainer').style('clip-path','inset(-20px ' + inset.inset[1] + 'px ' + inset.inset[2] + 'px 0px)');
+
 	keys = Object.keys(GUIParams.gtoggle)
 	pdiv = document.getElementById(keys[i]+'Div');
 	if (GUIParams.gtoggle[pID]){
-		//transitions handled in css
-		d3.select(pdiv).style('margin-bottom', ht + 'px')
-		d3.select(ddiv).style('clip-path', 'inset(0px 0px 0px 0px')
-		// d3.select(pdiv).transition().style('margin-bottom', ht + 'px')
-		// d3.select(ddiv).transition().style('clip-path', 'inset(0px 0px 0px 0px')
+		d3.select(pdiv).transition().duration(duration).style('margin-bottom', ht + 'px')
+		d3.select(ddiv).transition().duration(duration).style('clip-path', 'inset(0px 0px 0px -1px'); //-1 to enable d3 transitions
+
 	} else {
-		d3.select(pdiv).style('margin-bottom', '0px')
-		d3.select(ddiv).style('clip-path', 'inset(0px 0px ' + ht + 'px 0px')
-		// d3.select(pdiv).transition().style('margin-bottom', '0px')
-		// d3.select(ddiv).transition().style('clip-path', 'inset(0px 0px ' + ht + 'px 0px')
+		d3.select(pdiv).transition().duration(duration).style('margin-bottom', '0px')
+		d3.select(ddiv).transition().duration(duration).style('clip-path', 'inset(0px 0px ' + ht + 'px 0px')
 
 	}
 

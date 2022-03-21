@@ -77,9 +77,20 @@ function defineGUIParams(){
 			}
 			//console.log(colormapList)
 		});
-
 		this.colormapList = colormapList
 
+		this.colormapImage = 'static/textures/colormap.png';
+		// get the image size
+		var img = new Image();
+		img.onload = function(){
+			this.colormapImageX = img.width;
+			this.colormapImageY = img.height;
+			console.log("checking", this.colormapImageX, this.colormapImageY)
+			img = null;
+		}.bind(this)
+		img.src = this.colormapImage;
+		
+		this.colormapScale = 2; //size scale for the final colorbar
 
 		///////////////////
 		// these below are shared with viewerParams (passed from viewerParams to GUIParams)

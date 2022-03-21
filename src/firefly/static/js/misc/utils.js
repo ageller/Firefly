@@ -123,3 +123,17 @@ function setGUIParamByKey(args){
 	}
 	//console.log(args)
 }
+
+function parseInset(elem){
+	out = [0,0,0,0];
+	var inset = elem.style('clip-path');
+	if (inset) if (inset.includes('inset')){
+		inset = inset.substr(6,inset.indexOf(')')-6)
+		vals = inset.split(' ')
+		vals.forEach(function(v,i){
+			out[i] = parseFloat(v)
+		})
+
+	}
+	return out;
+}
