@@ -89,7 +89,7 @@ function defineGUIParams(){
 			img = null;
 		}.bind(this)
 		img.src = this.colormapImage;
-		
+
 		this.colormapScale = 2; //size scale for the final colorbar
 
 		///////////////////
@@ -162,6 +162,36 @@ function defineGUIParams(){
 		this.FPS = 0;
 		this.memoryUsage = 0;
 		
+
+		//object to hold the current visible window in the GUI
+		//current will hold the key that defines the currently visible window
+		//the rest of the keys will point to the IDs for the DOM elements that hold those windows
+		//the particles state will be populated in createUI
+		this.GUIState = {
+			'current':'main',
+			'main':{
+				'id':'GUIMain',
+				'name':'Main',
+				'general' : {
+					'id':'GUIGeneral',
+					'name':'General',
+					'data':{
+						'id':'GUIData',
+						'name':'Data'
+					},
+					'camera':{
+						'id':'GUICamera',
+						'name':'Camera'
+					},
+				},
+				'particles':{
+					'id':'GUIParticlesBase',
+					'name':'Particles'
+				}
+			},
+	
+		}
+
 		//check for mobile
 		//https://stackoverflow.com/questions/3514784/what-is-the-best-way-to-detect-a-mobile-device-in-jquery
 		// device detection

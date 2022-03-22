@@ -263,7 +263,7 @@ function populateColormapAxis(particle_group_UIname){
 	}
 
 	// set the range
-	var x = d3.scaleLinear().range([0, GUIParams.colormapImageY]).domain([xmax,xmin]).nice(); //because I'm rotating
+	var x = d3.scaleLinear().range([0, GUIParams.colormapImageY]).domain([xmax,xmin]);//.nice(); //because I'm rotating
 
 	//get the axis and create the ticks
 	var axis = d3.select('#' + particle_group_UIname + 'colormapAxis');

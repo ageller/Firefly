@@ -1,8 +1,15 @@
+window.addEventListener('mouseup',function(){GUIParams.movingUI = false;});
+
 ///////////////////////////////
 ////// create the UI
 //////////////////////////////
 function createUI(){
 	console.log("Creating UI", GUIParams.partsKeys, GUIParams.decimate);
+
+	//add particle data to the GUIState object
+	defineGUIParticleState();
+
+
 
 	//first get the maximum width of the particle type labels
 	var longestPartLabel = '';
@@ -23,24 +30,24 @@ function createUI(){
 		GUIParams.containerWidth += (GUIParams.longestPartLabelLen - 50);
 	}
 
-//change the hamburger to the X to start
-	window.addEventListener('mouseup',function(){GUIParams.movingUI = false;});
 
 	var UIcontainer = d3.select('#UIcontainer');
 	UIcontainer.classed('hidden', true); //hide to start
 	UIcontainer.html(""); //start fresh
 
-	UIcontainer.attr('style','position:absolute; top:30px; left:10px; width:'+GUIParams.containerWidth+'px');
+	UIcontainer.attr('style','position:relative; top:30px; left:10px; width:'+GUIParams.containerWidth+'px');
 	UIcontainer.style('clip-path','inset(-20px -20px -20px 0px)');
 
 	// create the FPS container
 	createFPSContainer(UIcontainer);
 
-	//create the colormap tab
+	//create the colormap tab (will be hidden until needed)
 	createColormapContainer(UIcontainer)
 
+	//define the top bar
 	var UIt = UIcontainer.append('div')
 		.attr('id','UItopbar')
+		.attr('class','UIdiv')
 		.attr('onmouseup','hideUI(this);')
 		.attr('onmousedown','dragElement(this, event);')
 		.style('width', (GUIParams.containerWidth - 4)+ 'px')
@@ -50,6 +57,7 @@ function createUI(){
 		.attr('id','Hamburger')
 		.style('padding','2px 0px 0px 4px')
 		.style('float','left')
+		.style('cursor','pointer')
 	UIr1.append('div').attr('class','bar1');
 	UIr1.append('div').attr('class','bar2');
 	UIr1.append('div').attr('class','bar3');
@@ -62,10 +70,53 @@ function createUI(){
 		.style('padding','4px 0px 0px 8px')
 		.append('b').text('Controls');
 
-	var hider = UIcontainer.append('div')
-		.attr('id','UIhider')
-		.style('margin-top','18px')
-	hider.append('div').attr('id','particleUI');
+	//add an address bar to show the current state of the GUI
+	var stateBar = UIcontainer.append('div')
+		.style('display','flex')
+		.style('position','absolute')
+		.style('padding','0px')
+		.style('top','35px')
+		.style('width', GUIParams.containerWidth + 'px')
+		.style('height', '16px')
+
+	stateBar.append('div')
+		.attr('id','UIBackButton')
+		.attr('class','particleDiv')
+		.style('float','left')
+		.style('width','40px')
+		.style('height','16px')
+		.style('cursor','pointer')
+		.style('margin','0px')
+		.style('padding','0px')
+		.on('click', transitionUIWindows)
+		.append('div')
+			.attr('class','pLabelDiv')
+			.style('font-size','30px')
+			.style('line-height','14px')
+			.style('color',getComputedStyle(document.body).getPropertyValue('--UI-character-background-color'))
+			.html('&#129044;')
+			//.text('Back')
+
+	stateBar.append('div')
+		.attr('id','UIStateText')
+		.attr('class','UIdiv')
+		.style('width', (GUIParams.containerWidth - 41) + 'px')
+		.style('margin-left','1px')
+		.style('height', '16px')
+		.style('font-size','12px')
+		.style('line-height','16px')
+		.style('float','left')
+		.style('padding','0px 0px 0px 10px')
+		.style('font-family', '"Lucida Console", "Courier New", monospace')
+		.text('main')
+
+
+	var UI = UIcontainer.append('div')
+		.attr('id','UIStateContainer')
+		.style('position','relative')
+		.style('height','72px')
+		.style('top','34px')
+		.style('clip-path','inset(0px)'); 
 
 
 	//set the gtoggle Object (in correct order)
@@ -77,75 +128,88 @@ function createUI(){
 
 	})
 
-	var UI = d3.select('#particleUI')
+
+
+	//start creating the rest of the elements
+	//work with the GUIState object
+
+
+	createMainWindow(UI);
+	createGeneralWindow(UI);
 
 
 
-	// create first controls pane containing:
-	//  fulscreen button
-	//  take snapshot button
-	//  save settings button
-	//  default settings button
-	//  load settings button
-	//  load new data button
-	createDataControlsBox(UI);
 
-	// create second controls pane containing:
-	//  camera center (camera focus) text boxes
-	//  camera location text boxes
-	//  camera rotation text boxes
-	//  save, reset, and recenter buttons
-	//  friction and stereo separation sliders
-	//  stereo checkbox
-	createCameraControlBox(UI);
 
-	// create each of the particle group UI panels containing:
-	//  on-off toggle
-	//  particle size slider
-	//  color picker
-	//  velocity vector checkbox/type selector
-	//  colormap selector, slider, checkbox
-	//  filter selecter, slider, checkbox
-	//  playback checkbox
-	createParticleUIs(UI);
+
+
+	// // create first controls pane containing:
+	// //  fulscreen button
+	// //  take snapshot button
+	// //  save settings button
+	// //  default settings button
+	// //  load settings button
+	// //  load new data button
+	// createDataControlsBox(UI);
+
+	// // create second controls pane containing:
+	// //  camera center (camera focus) text boxes
+	// //  camera location text boxes
+	// //  camera rotation text boxes
+	// //  save, reset, and recenter buttons
+	// //  friction and stereo separation sliders
+	// //  stereo checkbox
+	// createCameraControlBox(UI);
+
+
+
+	// // create each of the particle group UI panels containing:
+	// //  on-off toggle
+	// //  particle size slider
+	// //  color picker
+	// //  velocity vector checkbox/type selector
+	// //  colormap selector, slider, checkbox
+	// //  filter selecter, slider, checkbox
+	// //  playback checkbox
+	// createParticleUIs(UI);
 	
-	// resize a bit post-facto
-	d3.selectAll('.sp-replacer').style('left',(GUIParams.containerWidth - 60) + 'px');
+	// // resize a bit post-facto
+	// d3.selectAll('.sp-replacer').style('left',(GUIParams.containerWidth - 60) + 'px');
 	
-	if (GUIParams.containerWidth > 300) {
-		//could be nice to center these, but there are lots of built in positions for the sliders and input boxes.  Not worth it
-		var pd = 0.//(GUIParams.containerWidth - 300)/2.;
-		d3.selectAll('.dropdown-content')
-			.style('width',(GUIParams.containerWidth - 10 - pd) + 'px')
-			//.style('padding-left',pd + 'px')
-	}
+	// if (GUIParams.containerWidth > 300) {
+	// 	//could be nice to center these, but there are lots of built in positions for the sliders and input boxes.  Not worth it
+	// 	var pd = 0.//(GUIParams.containerWidth - 300)/2.;
+	// 	d3.selectAll('.dropdown-content')
+	// 		.style('width',(GUIParams.containerWidth - 10 - pd) + 'px')
+	// 		//.style('padding-left',pd + 'px')
+	// }
 
-	// particle groups
-	createPsizeSliders();
-	createNpartsSliders();
-	if (GUIParams.haveAnyOctree) createCamNormSliders();
+	// // particle groups
+	// createPsizeSliders();
+	// createNpartsSliders();
+	// if (GUIParams.haveAnyOctree) createCamNormSliders();
 
-	// create all the noUISliders
-	// data controls
-	createDecimationSlider();
-	if (GUIParams.haveAnyOctree) createMemorySlider();
+	// // create all the noUISliders
+	// // data controls
+	// createDecimationSlider();
+	// if (GUIParams.haveAnyOctree) createMemorySlider();
 
-	// camera controls
-	createStereoSlider();
-	createFrictionSlider();
+	// // camera controls
+	// createStereoSlider();
+	// createFrictionSlider();
 
-	// particle group dropdowns
-	createVelWidthSliders();
-	createFilterSliders();
-	createColormapSliders();
+	// // particle group dropdowns
+	// createVelWidthSliders();
+	// createFilterSliders();
+	// createColormapSliders();
 
-	// update the text boxes for camera
-	updateUICenterText();
-	updateUICameraText();
-	updateUIRotText();
+	// // update the text boxes for camera
+	// updateUICenterText();
+	// updateUICameraText();
+	// updateUIRotText();
 
 
-	//get the final height and reset the "height" (actually the width since it rotated) of the colobar tab
+	//get the final height and reset the colormap "height" (actually the width since it rotated) of the colobar tab
 	//(It would be better if I can just know the height ahead of time; for the new GUI I should know that)
 	var h = UIcontainer.node().getBoundingClientRect().height;
 	d3.select('#colormap_outer_container').style('width',(h - 4) + 'px') //+4 for the border
@@ -170,6 +234,184 @@ function createUI(){
 	// and now reveal the result
 	UIcontainer.classed('hidden', false);
 
+}
+function defineGUIParticleState(){
+	//I will add all the possible windows in here, though some may not be used (based on data and settings)
+	GUIParams.partsKeys.forEach(function(p){
+		GUIParams.GUIState.main.particles[p] = {
+			'general': {
+				'id' : 'GUI'+p+'General',
+				'name' : 'General'
+			},
+			'velocities': {
+				'id' : 'GUI'+p+'Velocities',
+				'name' : 'Velocities'
+			},
+			'colormap': {
+				'id' : 'GUI'+p+'Colormap',
+				'name' : 'Colormap'
+			},
+			'filters': {
+				'id' : 'GUI'+p+'Filters',
+				'name' : 'Filters'
+			},
+			'radii': {
+				'id' : 'GUI'+p+'Radii',
+				'name' : 'Radii'
+			},
+		}
+	})
+}
+
+function transitionUIWindows(state=null, duration=250){
+	//if state is null, this will transition to the previous level (unless the previous level is main)
+	//will transition from the current UI window (id1) to the desired UI windows (id2)
+	//animations taken care of by css
+
+	//don't try to go back from main
+	if (!state && GUIParams.GUIState.current == 'main') return false
+
+	//get the current state
+	var d = GUIParams.GUIState.current.split('/');
+	level = GUIParams.GUIState;
+	d.forEach(function(dd){
+		level = level[dd];
+	})
+	id1 = level.id;
+	var elem1 = d3.select('#'+id1);
+	var bbox1 = elem1.node().getBoundingClientRect(); 
+
+	if (state){
+		//going forward to a deeper level of the GUI
+		d = state.split('/');
+		level = GUIParams.GUIState;
+		d.forEach(function(dd){
+			level = level[dd];
+		})
+		var id2 = level.id;
+
+		//transition the clip paths
+		//old one off
+
+		elem1.style('transform','translateX(-' + GUIParams.containerWidth + 'px)')
+
+
+	} else {
+		//go back
+		//get the current state (in this case it is not included in the state string sent here)
+		d = GUIParams.GUIState.current.split('/');
+		d.pop();
+		level = GUIParams.GUIState;
+		state = ''
+		d.forEach(function(dd,i){
+			level = level[dd];
+			if (i > 0) state += '/';
+			state += dd;
+		})
+		id2 = level.id;
+
+		//old one off, but moving in the opposite direction (TO DO)
+		elem1.style('transform','translateX(' + GUIParams.containerWidth + 'px)')
+
+	}
+
+	//new one on
+	var elem2 = d3.select('#'+id2);
+	var bbox2 = elem2.node().getBoundingClientRect(); 
+	elem2.style('transform','translateX(0px)')
+
+	//update the UI state
+	var w = parseFloat(d3.select('#UIStateContainer').style('width'));
+	var stateText = state;
+	d3.select('#UIStateText').text(stateText);
+	//if the text is too long, shorten in
+	var count = (stateText.match(/\//g) || []).length;
+	var bbox = d3.select('#UIStateText').node().getBoundingClientRect();
+	if (bbox.width > w && count > 0){
+		while (count > 0){
+			var p1 = stateText.indexOf('/');
+			stateText = '...' + stateText.substr(p1)
+			d3.select('#UIStateText').text(stateText);
+			bbox = d3.select('#UIStateText').node().getBoundingClientRect();
+			count -= 1;
+			stateText = stateText.substr(4)
+		}
+	}
+	
+
+	//update the UI height?
+	d3.select('#UIStateContainer').transition().duration(duration).style('height',bbox2.height + 38 + 'px');
+
+	//set the state variable
+	GUIParams.GUIState.current = state;
+
+}
+
+function createMainWindow(container){
+	var keys = Object.keys(GUIParams.GUIState.main).filter(function(d){return (d != 'id' && d != 'name')});
+	var fullWidth = GUIParams.containerWidth;
+	var singleWidth = fullWidth/keys.length - 4;
+
+	var UI = container.append('div')
+		.attr('id',GUIParams.GUIState.main.id)
+		.attr('class','UImover')
+		.style('display','flex')
+		.style('position','absolute')
+		.style('top','0px')
+		.style('height','34px')
+		.style('width', fullWidth + 'px')
+		.style('transform','translateX(0px)')
+
+
+	keys.forEach(function(k){
+		UI.append('div')
+			.attr('id',GUIParams.GUIState.main[k].id + 'button')
+			.attr('class','particleDiv')
+			.style('width', singleWidth + 'px')
+			.style('float','left')
+			.style('margin','2px')
+			.style('cursor','pointer')
+			.on('click',function(){
+				transitionUIWindows('main/' + k)
+			})
+			.append('div')
+				.attr('class','pLabelDiv')
+				.text(GUIParams.GUIState.main[k].name)
+	})
+
+}
+
+function createGeneralWindow(container){
+	var keys = Object.keys(GUIParams.GUIState.main.general).filter(function(d){return (d != 'id' && d != 'name')});
+	var fullWidth = GUIParams.containerWidth;
+	var singleWidth = fullWidth/keys.length - 4;
+
+	var UI = container.append('div')
+		.attr('id',GUIParams.GUIState.main.general.id)
+		.attr('class','UImover')
+		.style('display','flex')
+		.style('position','absolute')
+		.style('top','0px')
+		.style('height','34px')
+		.style('width', fullWidth + 'px')
+		.style('transform','translateX(' + GUIParams.containerWidth + 'px)')
+
+
+	keys.forEach(function(k){
+		UI.append('div')
+			.attr('id',GUIParams.GUIState.main.general[k].id + 'button')
+			.attr('class','particleDiv')
+			.style('width', singleWidth + 'px')
+			.style('float','left')
+			.style('margin','2px')
+			.style('cursor','pointer')
+			.on('click',function(){
+				transitionUIWindows('main/general/' + k)
+			})
+			.append('div')
+				.attr('class','pLabelDiv')
+				.text(GUIParams.GUIState.main.general[k].name)
+	})
 }
 
 function createFPSContainer(container){

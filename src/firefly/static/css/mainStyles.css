@@ -215,3 +215,9 @@ a:visited {
 .octreeLoadingPaused{
 	fill: gray;
 }
+
+#WebGLContainer{
+	position: absolute;
+	top: 0px;
+	left:  0px;
+}

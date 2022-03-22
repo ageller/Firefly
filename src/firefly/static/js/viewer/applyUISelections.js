@@ -56,7 +56,8 @@ function loadNewData(){
 		forGUI.push({'showSplash':true});
 	}
 
-	d3.select('#particleUI').html("");
+	//AMG: should this be moved to the GUI (generally we won't have these in the viewer window...)
+	d3.select('#stateContainer').html("");
 	d3.select('.UIcontainer').html("");
 	d3.select("#splashdivLoader").selectAll('svg').remove();
 	d3.select("#splashdiv5").text("Loading...");
