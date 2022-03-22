@@ -134,8 +134,10 @@ function createColormapSVG(particle_group_UIname){
 
 
 	//destroy the svg if it exists
-	d3.select('#' + particle_group_UIname + 'colormap').remove();
+	//d3.select('#' + particle_group_UIname + 'colormap').remove();
 
+	//check if the colormap for this particle already exists, if not then a new one will be created, otherwise this contianer will be used
+	var cbar = d3.select('#' + particle_group_UIname + 'colormap');
 
 	var n = GUIParams.colormapList.length;
 	//could set actual cbar dimensions in params
@@ -144,60 +146,72 @@ function createColormapSVG(particle_group_UIname){
 
 	//check the offset (in case there are already other UIs)
 	nCB = d3.selectAll('.colormap').size()
+	if (!cbar.node()) nCB += 1; //if we're creating a new one, add this to the count 
 
 	//extend the colormap_container
 	var bbox = d3.select('#colormap_container').node().getBoundingClientRect()
 	d3.select('#colormap_container')
 		.style('width', actualCbarHeight*GUIParams.colormapScale + 'px') //since it's rotated, this is actually the height
-		.style('height', (nCB + 1)*actualCbarWidth*GUIParams.colormapScale + 70 + 'px') //to allow for the labels
+		.style('height', nCB*(actualCbarWidth*GUIParams.colormapScale + 70) + 'px') //to allow for the labels
 		.style('padding','0px 10px');
  
 	//create a container that can be scaled and translated
-	var cbar = d3.select('#colormap_container').append('div')
-		.attr('id',particle_group_UIname + 'colormap')
-		.attr('class','colormap')
-		.style('width', actualCbarHeight + 'px') //since it's rotated, this is actually the height
-		.style('height', actualCbarWidth + 50 + 'px') //to allow for the labels
-		.style('transform','scale(' + GUIParams.colormapScale + ',' + GUIParams.colormapScale + ')translate(' + 29*GUIParams.colormapScale + 'px,' + (nCB*actualCbarWidth*GUIParams.colormapScale + 20) + 'px)') //not sure why this needs to move down
+	if (!cbar.node()) {
+		cbar = d3.select('#colormap_container').append('div')
+			.attr('id',particle_group_UIname + 'colormap')
+			.attr('class','colormap')
+			.style('width', actualCbarHeight + 'px') //since it's rotated, this is actually the height
+			.style('height', actualCbarWidth + 50 + 'px') //to allow for the labels
+			.style('transform','scale(' + GUIParams.colormapScale + ',' + GUIParams.colormapScale + ')translate(' + 29*GUIParams.colormapScale + 'px,' + ((nCB-1)*actualCbarWidth*GUIParams.colormapScale + 20) + 'px)') //not sure why this needs to move down
+	}
 
 	//create the svg
+	//check if svg already exits
+	var svg = d3.select('#' + particle_group_UIname + 'colormapSVG');
+	if (!svg.node()) {
+		svg = cbar.append('svg')
+			.attr('id',particle_group_UIname + 'colormapSVG')
+			.attr('width', actualCbarHeight + 10 + 'px') //since it's rotated, this is actually the height, allow for a few extra pixels on each end for labels
+			.attr('height', actualCbarWidth + 50 + 'px') //+10 to allow for the labels
+			.append('g')
+				.attr('transform','translate(5,0)')
+	}
 
-	var svg = cbar.append('svg')
-		.attr('id',particle_group_UIname + 'colormapSVG')
-		.attr('width', actualCbarHeight + 10 + 'px') //since it's rotated, this is actually the height, allow for a few extra pixels on each end for labels
-		.attr('height', actualCbarWidth + 50 + 'px') //+10 to allow for the labels
-		.append('g')
-			.attr('transform','translate(5,0)')
-
-	var imgContainer = svg.append('g').attr('id',particle_group_UIname + 'colormapImgContainer')
+	var imgContainer = d3.select('#' + particle_group_UIname + 'colormapImgContainer');
+	if (!imgContainer.node()) imgContainer = svg.append('g').attr('id',particle_group_UIname + 'colormapImgContainer')
 
 	populateColormapImage(particle_group_UIname);
 
 
 	// Add the X Axis
 	var color = getComputedStyle(document.body).getPropertyValue('--UI-extension-text-color');
-	var axis = svg.append('g')
-		.attr('class', 'axis')
-		.attr('id',particle_group_UIname + 'colormapAxis')
-		.style('font-size', 12/GUIParams.colormapScale + 'px')
-
+	var axis = d3.select('#' + particle_group_UIname + 'colormapAxis');
+	if (!axis.node()){
+		axis = svg.append('g')
+			.attr('class', 'axis')
+			.attr('id',particle_group_UIname + 'colormapAxis')
+			.style('font-size', 12/GUIParams.colormapScale + 'px')
+	}
 
 	// add the axis label
-	var label = svg.append('text')
-		.attr('id',particle_group_UIname + 'colormapLabel')
-		.attr('text-anchor','middle')
-		.attr('x',GUIParams.colormapImageX/2.)
-		.attr('y',6)
-		.attr('dy', 1.7*GUIParams.colormapScale + 'em')
-		.attr('fill',color)
-		.style('font-size', 14/GUIParams.colormapScale + 'px')
+	var label = d3.select('#' + particle_group_UIname + 'colormapLabel');
+	if (!label.node()){
+		label = svg.append('text')
+			.attr('id',particle_group_UIname + 'colormapLabel')
+			.attr('text-anchor','middle')
+			.attr('x',GUIParams.colormapImageX/2.)
+			.attr('y',6)
+			.attr('dy', 1.7*GUIParams.colormapScale + 'em')
+			.attr('fill',color)
+			.style('font-size', 14/GUIParams.colormapScale + 'px')
+	}
 
 	// fill in the axis and label
 	populateColormapAxis(particle_group_UIname)
 
 
 	// show it
-	if (!d3.select('#colormap_outer_container').classed('show')) expandColormapTab();
+	expandColormapTab(250, true);
 }
 
 function populateColormapImage(particle_group_UIname){
@@ -249,20 +263,34 @@ function populateColormapAxis(particle_group_UIname){
 	}
 
 	// set the range
-	var x = d3.scaleLinear().range([0, GUIParams.colormapImageY]).domain([xmax,xmin]); //because I'm rotating
+	var x = d3.scaleLinear().range([0, GUIParams.colormapImageY]).domain([xmax,xmin]).nice(); //because I'm rotating
 
-	// update the axis ticks
+	//get the axis and create the ticks
 	var axis = d3.select('#' + particle_group_UIname + 'colormapAxis');
-	axis.call(d3.axisBottom(x).ticks(10))
-		.selectAll('text')  
+
+	//I need to do something to format the tick labels and ensure they are not too long
+	if ((Math.abs(xmax) < 0.01 && Math.abs(xmin) < 0.01) || (Math.abs(xmax) > 1000 && Math.abs(xmin) > 1000)) {
+		axis.call(d3.axisBottom(x).ticks(10).tickFormat(d3.format('.0e')))
+		axis.selectAll('text')  
+			.attr('text-anchor', 'end')
+			.attr('dx', '0em')
+			.attr('dy', '0em')
+			.attr('transform', 'rotate(-60)')
+			.attr('fill',color)
+	} else {
+		axis.call(d3.axisBottom(x).ticks(10))
+		axis.selectAll('text')  
 			.attr('text-anchor', 'end')
 			.attr('dx', '-0.8em')
 			.attr('dy', -0.55*GUIParams.colormapScale + 'em')
+
 			.attr('transform', 'rotate(-90)')
 			.attr('fill',color)
+	}
+
 
 	axis.attr('transform','translate(0,' + actualCbarWidth*0.9 + ')')
-	
+
 	axis.selectAll('line')
 		.attr('y2',8/GUIParams.colormapScale)
 		.style('stroke',color)

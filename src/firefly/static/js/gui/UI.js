@@ -235,13 +235,16 @@ function createColormapContainer(container){
 
 
 }
-function expandColormapTab(duration=250){
+function expandColormapTab(duration=250, show){
 	var container = d3.select('#colormap_outer_container');
-	container.node().classList.toggle('show')
+	if (show == null){
+		container.node().classList.toggle('show')
+		d3.select('#colormapDropbtn').node().classList.toggle('dropbtn-open');
 
-	//rotate the arrow
-	d3.select('#colormapDropbtn').node().classList.toggle('dropbtn-open');
-
+	} else {
+		container.classed('show', show)
+		d3.select('#colormapDropbtn').classed('dropbtn-open', show);
+	}
 
 	var size = parseFloat(d3.select('#colormap_container').style('height')) + 4; // +4 for border
 
