@@ -88,7 +88,7 @@ function createUI(){
 		.style('cursor','pointer')
 		.style('margin','0px')
 		.style('padding','0px')
-		.on('click', transitionUIWindows)
+		.on('click', function(){transitionUIWindows()})
 		.append('div')
 			.attr('class','pLabelDiv')
 			.style('font-size','30px')
@@ -132,10 +132,14 @@ function createUI(){
 
 	//start creating the rest of the elements
 	//work with the GUIState object
-
+	//  it might be nice to generalize this so that I can just define the GUIParams.GUIState Object to determine what parts to create...
 
 	createMainWindow(UI);
 	createGeneralWindow(UI);
+	createDataWindow(UI);
+	createCameraWindow(UI);
+
+	createParticlesWindow(UI);
 
 
 
@@ -143,23 +147,8 @@ function createUI(){
 
 
 
-	// // create first controls pane containing:
-	// //  fulscreen button
-	// //  take snapshot button
-	// //  save settings button
-	// //  default settings button
-	// //  load settings button
-	// //  load new data button
-	// createDataControlsBox(UI);
 
-	// // create second controls pane containing:
-	// //  camera center (camera focus) text boxes
-	// //  camera location text boxes
-	// //  camera rotation text boxes
-	// //  save, reset, and recenter buttons
-	// //  friction and stereo separation sliders
-	// //  stereo checkbox
-	// createCameraControlBox(UI);
+
 
 
 
@@ -189,24 +178,12 @@ function createUI(){
 	// createNpartsSliders();
 	// if (GUIParams.haveAnyOctree) createCamNormSliders();
 
-	// // create all the noUISliders
-	// // data controls
-	// createDecimationSlider();
-	// if (GUIParams.haveAnyOctree) createMemorySlider();
-
-	// // camera controls
-	// createStereoSlider();
-	// createFrictionSlider();
-
 	// // particle group dropdowns
 	// createVelWidthSliders();
 	// createFilterSliders();
 	// createColormapSliders();
 
-	// // update the text boxes for camera
-	// updateUICenterText();
-	// updateUICameraText();
-	// updateUIRotText();
+
 
 
 	//get the final height and reset the colormap "height" (actually the width since it rotated) of the colobar tab
@@ -259,6 +236,8 @@ function defineGUIParticleState(){
 				'id' : 'GUI'+p+'Radii',
 				'name' : 'Radii'
 			},
+			'id' : 'GUIParticles'+p,
+			'name': p
 		}
 	})
 }
@@ -339,7 +318,8 @@ function transitionUIWindows(state=null, duration=250){
 	}
 	
 
-	//update the UI height?
+	//update the UI height
+	console.log(duration)
 	d3.select('#UIStateContainer').transition().duration(duration).style('height',bbox2.height + 38 + 'px');
 
 	//set the state variable
@@ -348,6 +328,7 @@ function transitionUIWindows(state=null, duration=250){
 }
 
 function createMainWindow(container){
+	//these will be side by side
 	var keys = Object.keys(GUIParams.GUIState.main).filter(function(d){return (d != 'id' && d != 'name')});
 	var fullWidth = GUIParams.containerWidth;
 	var singleWidth = fullWidth/keys.length - 4;
@@ -382,6 +363,7 @@ function createMainWindow(container){
 }
 
 function createGeneralWindow(container){
+	//these will be side by side
 	var keys = Object.keys(GUIParams.GUIState.main.general).filter(function(d){return (d != 'id' && d != 'name')});
 	var fullWidth = GUIParams.containerWidth;
 	var singleWidth = fullWidth/keys.length - 4;
@@ -411,6 +393,91 @@ function createGeneralWindow(container){
 			.append('div')
 				.attr('class','pLabelDiv')
 				.text(GUIParams.GUIState.main.general[k].name)
+	})
+}
+
+function createDataWindow(container){
+	//these will be side by side
+	var keys = Object.keys(GUIParams.GUIState.main.general.data).filter(function(d){return (d != 'id' && d != 'name')});
+
+	var UI = container.append('div')
+		.attr('id',GUIParams.GUIState.main.general.data.id)
+		.attr('class','UImover')
+		.style('position','absolute')
+		.style('top','0px')
+		.style('height','34px')
+		.style('width', GUIParams.containerWidth + 'px')
+		.style('transform','translateX(' + GUIParams.containerWidth + 'px)')
+
+
+	// create data controls pane containing:
+	//  fullscreen button
+	//  take snapshot button
+	//  save settings button
+	//  default settings button
+	//  load settings button
+	//  load new data button
+	createDataControlsBox(UI);
+
+
+}
+
+function createCameraWindow(container){
+	//these will be side by side
+	var keys = Object.keys(GUIParams.GUIState.main.general.camera).filter(function(d){return (d != 'id' && d != 'name')});
+
+	var UI = container.append('div')
+		.attr('id',GUIParams.GUIState.main.general.camera.id)
+		.attr('class','UImover')
+		.style('position','absolute')
+		.style('top','0px')
+		.style('height','34px')
+		.style('width', GUIParams.containerWidth + 'px')
+		.style('transform','translateX(' + GUIParams.containerWidth + 'px)')
+
+
+	// create camera controls pane containing:
+	//  camera center (camera focus) text boxes
+	//  camera location text boxes
+	//  camera rotation text boxes
+	//  save, reset, and recenter buttons
+	//  friction and stereo separation sliders
+	//  stereo checkbox
+	createCameraControlBox(UI);
+}
+
+function createParticlesWindow(container){
+	//these will be full-width 
+	var keys = Object.keys(GUIParams.GUIState.main.particles).filter(function(d){return (d != 'id' && d != 'name')});
+
+
+	var UI = container.append('div')
+		.attr('id',GUIParams.GUIState.main.particles.id)
+		.attr('class','UImover')
+		// .style('display','flex')
+		.style('position','absolute')
+		.style('top','0px')
+		.style('height','34px')
+		.style('width', GUIParams.containerWidth + 'px')
+		.style('transform','translateX(' + GUIParams.containerWidth + 'px)')
+
+
+	keys.forEach(function(k){
+		//populate these with the particle containers
+		// will update this with the real div
+		UI.append('div')
+			.attr('id',GUIParams.GUIState.main.particles[k].id + 'button')
+			.attr('class','particleDiv')
+			.style('width', GUIParams.containerWidth + 'px')
+			.style('float','left')
+			.style('margin','2px')
+			.style('cursor','pointer')
+			.on('click',function(){
+				transitionUIWindows('main/particles/' + k)
+			})
+			.append('div')
+				.attr('class','pLabelDiv')
+				.text(GUIParams.GUIState.main.particles[k].name)
 	})
 }
 
@@ -473,10 +540,8 @@ function createColormapContainer(container){
 		.style('margin-top','2px')
 		.html('&#x25B2');
 
-
-
-
 }
+
 function expandColormapTab(duration=250, show){
 	var container = d3.select('#colormap_outer_container');
 	if (show == null){
@@ -644,30 +709,20 @@ function expandLoadingTab(duration=250){
 
 function createDataControlsBox(UI){
 	////////////////////////
-	//generic dropdown for "data" controls"
-	var m1 = UI.append('div')
-		.attr('id','dataControlsDiv')
-		.attr('class','particleDiv')
-		.style('width', (GUIParams.containerWidth - 20) + 'px')
-	m1.append('div')
-		.attr('class','pLabelDiv')
-		.style('width', '215px')
-		.text('Data Controls')
-	m1.append('button')
-		.attr('class','dropbtn')
-		.attr('id','dataControlsDropbtn')
-		.attr('onclick','expandDropdown(this);')
-		.style('left',(GUIParams.containerWidth - 40) + 'px')
-		.html('&#x25BC');
-	var m2 = m1.append('div')
+	//"data" controls"
+
+	var m2 = UI.append('div')
 		.attr('class','dropdown-content')
-		.attr('id','dataControlsDropdown')
-	var m2height = 220;
+		.attr('id','dataControls')
+		.style('margin','0px')
+		.style('width',GUIParams.containerWidth + 'px')
+		.style('border-radius',0)
+	var m2height = 224;
 
 	//decimation
 	var dec = m2.append('div')
 		.attr('id', 'decimationDiv')
-		.style('width','270px')
+		.style('width',(GUIParams.containerWidth - 10) + 'px')
 		.style('margin-left','5px')
 		.style('margin-top','10px')
 		.style('display','inline-block')
@@ -680,25 +735,27 @@ function createDataControlsBox(UI){
 		.attr('class','NSliderClass')
 		.attr('id','DSlider')
 		.style('margin-left','40px')
-		.style('width','158px');
+		.style('width',(GUIParams.containerWidth - 145) + 'px');
+		// .style('margin-left','90px')
+		// .style('width',(GUIParams.containerWidth - 200) + 'px');
 	dec.append('input')
 		.attr('class','NMaxTClass')
 		.attr('id','DMaxT')
 		.attr('type','text')
-		.style('left','255px')
-		.style('width','30px');
+		.style('left',(GUIParams.containerWidth - 45) + 'px')
+		.style('width','40px');
 	if (GUIParams.haveAnyOctree){
 		m2height += 50;
 		//text to show the memory-imposed decimation
 		m2.append('div')
 			.attr('id', 'decimationOctreeDiv')
-			.style('width','270px')
+			.style('width',(GUIParams.containerWidth - 10) + 'px')
 			.style('margin-left','5px')
 			.style('margin-top','10px')
 			.style('display','inline-block')
 			.append('div')
 				.attr('class','pLabelDiv')
-				.style('width','270px')
+				.style('width',(GUIParams.containerWidth - 10) + 'px')
 				.style('display','inline-block')
 				.style('font-size','12px')
 				.text('Octree memory-imposed decimation = ')
@@ -709,7 +766,7 @@ function createDataControlsBox(UI){
 		//slider to controls the memory limit
 		var mem = m2.append('div')
 			.attr('id', 'memoryDiv')
-			.style('width','270px')
+			.style('width',(GUIParams.containerWidth - 10) + 'px')
 			.style('margin-left','5px')
 			.style('margin-top','10px')
 			.style('display','inline-block')
@@ -722,13 +779,13 @@ function createDataControlsBox(UI){
 			.attr('class','NSliderClass')
 			.attr('id','MSlider')
 			.style('margin-left','90px')
-			.style('width','108px');
+			.style('width',(GUIParams.containerWidth - 195) + 'px');
 		mem.append('input')
 			.attr('class','NMaxTClass')
 			.attr('id','MMaxT')
 			.attr('type','text')
-			.style('left','255px')
-			.style('width','30px');
+			.style('left',(GUIParams.containerWidth - 45) + 'px')
+			.style('width','40px');
 	}
 
 	//fullscreen button
@@ -736,7 +793,7 @@ function createDataControlsBox(UI){
 		.append('button')
 		.attr('id','fullScreenButton')
 		.attr('class','button')
-		.style('width','280px')
+		.style('width',(GUIParams.containerWidth - 10) + 'px')
 		.attr('onclick','fullscreen();')
 		.append('span')
 			.text('Fullscreen');
@@ -745,7 +802,7 @@ function createDataControlsBox(UI){
 	var snap = m2.append('div')
 		.attr('id','snapshotDiv')
 		.attr('class', 'button-div')
-		.style('width','280px')
+		.style('width',(GUIParams.containerWidth - 10) + 'px')
 	snap.append('button')
 		.attr('class','button')
 		.style('width','140px')
@@ -789,7 +846,7 @@ function createDataControlsBox(UI){
 		.append('button')
 		.attr('id','savePresetButton')
 		.attr('class','button')
-		.style('width','280px')
+		.style('width',(GUIParams.containerWidth - 10) + 'px')
 		.on('click',function(){
 			sendToViewer([{'savePreset':null}]);
 		})
@@ -801,7 +858,7 @@ function createDataControlsBox(UI){
 		.append('button')
 		.attr('id','resetButton')
 		.attr('class','button')
-		.style('width','134px')
+		.style('width',(GUIParams.containerWidth - 10)/2. - 3 + 'px')
 		.on('click',function(){
 			sendToViewer([{'resetToOptions':null}]);
 		})
@@ -812,8 +869,8 @@ function createDataControlsBox(UI){
 		.append('button')
 		.attr('id','resetPButton')
 		.attr('class','button')
-		.style('width','140px')
-		.style('left','134px')
+		.style('width',(GUIParams.containerWidth - 10)/2. - 3 + 'px')
+		.style('left', (GUIParams.containerWidth - 10)/2. + 2 + 'px')
 		.style('margin-left','0px')
 		.on('click',function(){
 			loadPreset();
@@ -826,7 +883,7 @@ function createDataControlsBox(UI){
 		.append('button')
 		.attr('id','loadNewDataButton')
 		.attr('class','button')
-		.style('width','280px')
+		.style('width',(GUIParams.containerWidth - 10) + 'px')
 		.on('click',function(){
 			sendToViewer([{'loadNewData':null}]);
 		})
@@ -835,41 +892,35 @@ function createDataControlsBox(UI){
 
 	m2.style('height', m2height + 'px')
 		.style('display','block')
-		.style('clip-path', 'inset(0px 0px ' + m2height + 'px 0px')
 
+	UI.style('height', m2height + 'px')
 
+	// create all the noUISliders
+	createDecimationSlider();
+	if (GUIParams.haveAnyOctree) createMemorySlider();
 }
 
 function createCameraControlBox(UI){
 	/////////////////////////
-	//camera
-	var c1 = UI.append('div')
-		.attr('id','cameraControlsDiv')
-		.attr('class','particleDiv')
-		.style('width', (GUIParams.containerWidth - 20) + 'px')
-	c1.append('div')
-		.attr('class','pLabelDiv')
-		.style('width', '215px')
-		.text('Camera Controls')
-	c1.append('button')
-		.attr('class','dropbtn')
-		.attr('id','cameraControlsDropbtn')
-		.attr('onclick','expandDropdown(this);')
-		.style('left',(GUIParams.containerWidth - 40) + 'px')
-		.html('&#x25BC');
+	//camera controls
+
 
 	var c2height = 190;
-	var c2 = c1.append('div')
+	var c2 = UI.append('div')
 		.attr('class','dropdown-content')
-		.attr('id','cameraControlsDropdown')
+		.attr('id','cameraControls')
+		.style('margin','0px')
+		.style('padding','0px 0px 0px 5px')
+		.style('width',GUIParams.containerWidth + 'px')
+		.style('border-radius',0)
 
 	//center text boxes
 	var c3 = c2.append('div')
 		.attr('class','pLabelDiv')
-		.style('width','280px')
+		.style('width',(GUIParams.containerWidth - 10) + 'px')
 		.style('margin-top','5px') 
 	c3.append('div')
-		.style('width','60px')
+		.style('width','62px')
 		.style('display','inline-block')
 		.text('Center');
 	c3.append('input')
@@ -877,7 +928,7 @@ function createCameraControlBox(UI){
 		.attr('id','CenterXText')
 		.attr('value','1')
 		.attr('autocomplete','off')
-		.style('width','40px')
+		.style('width',(GUIParams.containerWidth - 150)/3. + 'px')
 		.style('margin-right','8px')
 		.on('keypress',function(){
 			var key = event.keyCode || event.which;
@@ -888,7 +939,7 @@ function createCameraControlBox(UI){
 		.attr('id','CenterYText')
 		.attr('value','1')
 		.attr('autocomplete','off')
-		.style('width','40px')
+		.style('width',(GUIParams.containerWidth - 150)/3. + 'px')
 		.style('margin-right','8px')
 		.on('keypress',function(){
 			var key = event.keyCode || event.which;
@@ -899,7 +950,7 @@ function createCameraControlBox(UI){
 		.attr('id','CenterZText')
 		.attr('value','1')
 		.attr('autocomplete','off')
-		.style('width','40px')
+		.style('width',(GUIParams.containerWidth - 150)/3. + 'px')
 		.on('keypress',function(){
 			var key = event.keyCode || event.which;
 			if (key == 13) sendToViewer([{'checkText':[this.id, this.value]}]);
@@ -938,7 +989,7 @@ function createCameraControlBox(UI){
 		.style('width','280px')
 		.style('margin-top','5px') 
 	c3.append('div')
-		.style('width','60px')
+		.style('width','62px')
 		.style('display','inline-block')
 		.text('Camera');
 	c3.append('input')
@@ -946,7 +997,7 @@ function createCameraControlBox(UI){
 		.attr('id','CameraXText')
 		.attr('value','1')
 		.attr('autocomplete','off')
-		.style('width','40px')
+		.style('width',(GUIParams.containerWidth - 150)/3. + 'px')
 		.style('margin-right','8px')
 		.on('keypress',function(){
 			var key = event.keyCode || event.which;
@@ -957,7 +1008,7 @@ function createCameraControlBox(UI){
 		.attr('id','CameraYText')
 		.attr('value','1')
 		.attr('autocomplete','off')
-		.style('width','40px')
+		.style('width','60px')
 		.style('margin-right','8px')
 		.on('keypress',function(){
 			var key = event.keyCode || event.which;
@@ -968,7 +1019,7 @@ function createCameraControlBox(UI){
 		.attr('id','CameraZText')
 		.attr('value','1')
 		.attr('autocomplete','off')
-		.style('width','40px')
+		.style('width',(GUIParams.containerWidth - 150)/3. + 'px')
 		.on('keypress',function(){
 			var key = event.keyCode || event.which;
 			if (key == 13) sendToViewer([{'checkText':[this.id, this.value]}]);
@@ -979,7 +1030,7 @@ function createCameraControlBox(UI){
 		.style('width','280px')
 		.style('margin-top','5px') 
 	c3.append('div')
-		.style('width','60px')
+		.style('width','62px')
 		.style('display','inline-block')
 		.text('Rotation');
 	c3.append('input')
@@ -987,7 +1038,7 @@ function createCameraControlBox(UI){
 		.attr('id','RotXText')
 		.attr('value','1')
 		.attr('autocomplete','off')
-		.style('width','40px')
+		.style('width',(GUIParams.containerWidth - 150)/3. + 'px')
 		.style('margin-right','8px')
 		.on('keypress',function(){
 			var key = event.keyCode || event.which;
@@ -998,7 +1049,7 @@ function createCameraControlBox(UI){
 		.attr('id','RotYText')
 		.attr('value','1')
 		.attr('autocomplete','off')
-		.style('width','40px')
+		.style('width',(GUIParams.containerWidth - 150)/3. + 'px')
 		.style('margin-right','8px')
 		.on('keypress',function(){
 			var key = event.keyCode || event.which;
@@ -1009,7 +1060,7 @@ function createCameraControlBox(UI){
 		.attr('id','RotZText')
 		.attr('value','1')
 		.attr('autocomplete','off')
-		.style('width','40px')
+		.style('width',(GUIParams.containerWidth - 150)/3. + 'px')
 		.on('keypress',function(){
 			var key = event.keyCode || event.which;
 			if (key == 13) sendToViewer([{'checkText':[this.id, this.value]}]);
@@ -1017,13 +1068,14 @@ function createCameraControlBox(UI){
 	//buttons
 	c3 = c2.append('div')
 		.attr('class','pLabelDiv')
-		.style('width','280px');
+		.style('width',(GUIParams.containerWidth - 10) + 'px');
 	c3.append('button')
 		.attr('id','CameraSave')
 		.attr('class','button centerButton')
 		.style('margin',0)
 		.style('margin-right','8px')
 		.style('padding','2px')
+		.style('width',(GUIParams.containerWidth - 30)/3. + 'px')
 		.on('click',function(){
 			var key = event.keyCode || event.which;
 			if (key == 13) sendToViewer([{'checkText':[this.id, this.value]}]);
@@ -1036,6 +1088,7 @@ function createCameraControlBox(UI){
 		.style('margin',0)
 		.style('margin-right','8px')
 		.style('padding','2px')
+		.style('width',(GUIParams.containerWidth - 30)/3. + 'px')
 		.on('click',function(){
 			sendToViewer([{'resetCamera':null}]);
 		})
@@ -1046,17 +1099,19 @@ function createCameraControlBox(UI){
 		.attr('class','button centerButton')
 		.style('margin',0)
 		.style('padding','2px')
+		.style('width',(GUIParams.containerWidth - 30)/3. + 'px')
 		.on('click',function(){
 			sendToViewer([{'recenterCamera':null}]);
 		})
 		.append('span')
 			.text('Recenter');
+
 	//camera friction
 	c3 = c2.append('div')
 		.attr('class','pLabelDiv')
 		.attr('id','FrictionDiv')
 		// .style('background-color','#808080')
-		.style('width','280px')
+		.style('width',(GUIParams.containerWidth - 10) + 'px')
 		.style('padding-top','10px');
 	c3.append('div')
 		.style('width','55px')
@@ -1066,18 +1121,21 @@ function createCameraControlBox(UI){
 		.attr('class','NSliderClass')
 		.attr('id','CFSlider')
 		.style('margin-left','10px')
-		.style('width','170px');
+		.style('width',(GUIParams.containerWidth - 115) + 'px');
 	c3.append('input')
 		.attr('class','NMaxTClass')
 		.attr('id','CFMaxT')
 		.attr('type','text')
-		.style('margin-top','-4px');
+		.style('left',(GUIParams.containerWidth - 45) + 'px')
+		.style('width','40px')
+		.style('margin-top','-2px');
+
 	//camera stereo separation
 	c3 = c2.append('div')
 		.attr('class','pLabelDiv')
 		.attr('id','StereoSepDiv')
 		// .style('background-color','#808080')
-		.style('width','280px')
+		.style('width',(GUIParams.containerWidth - 10) + 'px')
 		.style('padding-top','10px');
 	c3.append('div')
 		.style('width','55px')
@@ -1103,16 +1161,28 @@ function createCameraControlBox(UI){
 		.attr('class','NSliderClass')
 		.attr('id','SSSlider')
 		.style('margin-left','40px')
-		.style('width','140px');
+		.style('width',(GUIParams.containerWidth - 145));
 	c3.append('input')
 		.attr('class','NMaxTClass')
 		.attr('id','SSMaxT')
 		.attr('type','text')
-		.style('margin-top','-4px');
+		.style('left',(GUIParams.containerWidth - 45) + 'px')
+		.style('width','40px')
+		.style('margin-top','-2px');
 
 	c2.style('height', c2height + 'px')
 		.style('display','block')
-		.style('clip-path', 'inset(0px 0px ' + c2height + 'px 0px')
+
+	UI.style('height', c2height + 'px')
+
+	// camera sliders
+	createStereoSlider();
+	createFrictionSlider();
+
+	// update the text boxes for camera
+	updateUICenterText();
+	updateUICameraText();
+	updateUIRotText();
 
 	// remove this after fixing the camera input boxes!
 	disableCameraInputBoxes();
