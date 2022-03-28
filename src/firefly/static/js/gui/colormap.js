@@ -211,7 +211,7 @@ function createColormapSVG(particle_group_UIname){
 
 
 	// show it
-	expandColormapTab(250, true);
+	expandColormapTab(true);
 }
 
 function populateColormapImage(particle_group_UIname){

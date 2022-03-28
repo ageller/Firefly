@@ -143,27 +143,6 @@ function createUI(){
 
 
 
-
-
-
-
-
-
-
-
-
-	// // create each of the particle group UI panels containing:
-	// //  on-off toggle
-	// //  particle size slider
-	// //  color picker
-	// //  velocity vector checkbox/type selector
-	// //  colormap selector, slider, checkbox
-	// //  filter selecter, slider, checkbox
-	// //  playback checkbox
-	// createParticleUIs(UI);
-	
-	// // resize a bit post-facto
-	// d3.selectAll('.sp-replacer').style('left',(GUIParams.containerWidth - 60) + 'px');
 	
 	// if (GUIParams.containerWidth > 300) {
 	// 	//could be nice to center these, but there are lots of built in positions for the sliders and input boxes.  Not worth it
@@ -173,25 +152,12 @@ function createUI(){
 	// 		//.style('padding-left',pd + 'px')
 	// }
 
-	// // particle groups
-	// createPsizeSliders();
-	// createNpartsSliders();
-	// if (GUIParams.haveAnyOctree) createCamNormSliders();
-
-	// // particle group dropdowns
-	// createVelWidthSliders();
-	// createFilterSliders();
-	// createColormapSliders();
 
 
 
 
-	//get the final height and reset the colormap "height" (actually the width since it rotated) of the colobar tab
-	//(It would be better if I can just know the height ahead of time; for the new GUI I should know that)
-	var h = UIcontainer.node().getBoundingClientRect().height;
-	d3.select('#colormap_outer_container').style('width',(h - 4) + 'px') //+4 for the border
-	d3.select('#colormap_outer_container').selectAll('div').style('width',(h - 4) + 'px') 
-	d3.select('#colormapDropbtn').style('left',(h - 36) + 'px') 
+
+
 
 	//create the octree loading bar
 	if (GUIParams.haveAnyOctree) createOctreeLoadingBar(UIcontainer);
@@ -204,7 +170,7 @@ function createUI(){
 
 	// collapse the UI initially
 	var hamburger = document.getElementById('UItopbar');
-	hideUI(hamburger, 0);
+	hideUI(hamburger);
 	hamburger.classList.toggle("change");	
 
 
@@ -272,7 +238,8 @@ function transitionUIWindows(state=null, duration=250){
 		//transition the clip paths
 		//old one off
 
-		elem1.style('transform','translateX(-' + GUIParams.containerWidth + 'px)')
+		elem1
+			.style('transform','translateX(-' + GUIParams.containerWidth + 'px)')
 
 
 	} else {
@@ -289,17 +256,20 @@ function transitionUIWindows(state=null, duration=250){
 		})
 		id2 = level.id;
 
-		//old one off, but moving in the opposite direction (TO DO)
-		elem1.style('transform','translateX(' + GUIParams.containerWidth + 'px)')
+		//old one off, but moving in the opposite direction 
+		elem1
+			.style('transform','translateX(' + GUIParams.containerWidth + 'px)')
 
 	}
 
 	//new one on
 	var elem2 = d3.select('#'+id2);
 	var bbox2 = elem2.node().getBoundingClientRect(); 
-	elem2.style('transform','translateX(0px)')
+	elem2
+		.style('transform','translateX(0px)')
 
-	//update the UI state
+
+	//update the UI state,
 	var w = parseFloat(d3.select('#UIStateContainer').style('width'));
 	var stateText = state;
 	d3.select('#UIStateText').text(stateText);
@@ -319,7 +289,6 @@ function transitionUIWindows(state=null, duration=250){
 	
 
 	//update the UI height
-	console.log(duration)
 	d3.select('#UIStateContainer').transition().duration(duration).style('height',bbox2.height + 38 + 'px');
 
 	//set the state variable
@@ -462,23 +431,18 @@ function createParticlesWindow(container){
 		.style('transform','translateX(' + GUIParams.containerWidth + 'px)')
 
 
-	keys.forEach(function(k){
-		//populate these with the particle containers
-		// will update this with the real div
-		UI.append('div')
-			.attr('id',GUIParams.GUIState.main.particles[k].id + 'button')
-			.attr('class','particleDiv')
-			.style('width', GUIParams.containerWidth + 'px')
-			.style('float','left')
-			.style('margin','2px')
-			.style('cursor','pointer')
-			.on('click',function(){
-				transitionUIWindows('main/particles/' + k)
-			})
-			.append('div')
-				.attr('class','pLabelDiv')
-				.text(GUIParams.GUIState.main.particles[k].name)
-	})
+	// create each of the particle group UI panels containing:
+	//  on-off toggle
+	//  particle size slider
+	//  color picker
+	//  velocity vector checkbox/type selector
+	//  colormap selector, slider, checkbox
+	//  filter selecter, slider, checkbox
+	//  playback checkbox
+	createParticleUIs(UI);
+	
+
+
 }
 
 function createFPSContainer(container){
@@ -498,11 +462,12 @@ function createFPSContainer(container){
 
 function createColormapContainer(container){
 	var h = container.node().getBoundingClientRect().height;
+	var tabh = Math.max(h, 100);
 	var d = container.append('div')
 		.attr('id','colormap_outer_container')
 		.style('display','block')
 		.style('border-radius','10px 10px 0px 0px')
-		.style('width',h + 4 + 'px') //+4 for the border
+		.style('width',tabh + 4 + 'px') //+4 for the border
 		.style('margin',0)
 		.style('height','20px')
 		.style('background-color',getComputedStyle(document.body).getPropertyValue('--UI-border-color'))
@@ -524,25 +489,28 @@ function createColormapContainer(container){
 		.attr('id','colormap_container_tab')
 		.style('display','block')
 		.style('border-radius','10px 10px 0px 0px')
-		.style('width',(h + 4) + 'px') //+4 for the border
+		.style('width',(tabh + 4) + 'px') //+4 for the border
 		.style('background-color',getComputedStyle(document.body).getPropertyValue('--UI-border-color'))
 		.style('color',getComputedStyle(document.body).getPropertyValue('--UI-text-color'))
-		.style('text-align','center')
+		.style('text-align','left')
 		.style('position','absolute')
 		.style('bottom','0px')
 		.style('height', '20px')
-		.text('Colormap')
+		.append('span')
+			.style('padding-left','10px')
+			.text('Colormap')
 	var btn = tab.append('button')
 		.attr('class','dropbtn')
 		.attr('id','colormapDropbtn')
 		.attr('onclick','expandColormapTab()')
-		.style('left',(h - 4) + 'px')
+		.style('left',(tabh - 24) + 'px')
 		.style('margin-top','2px')
 		.html('&#x25B2');
 
 }
 
-function expandColormapTab(duration=250, show){
+function expandColormapTab(show){
+	//all animations are in CSS (because of the clip-pat)
 	var container = d3.select('#colormap_outer_container');
 	if (show == null){
 		container.node().classList.toggle('show')
@@ -553,26 +521,24 @@ function expandColormapTab(duration=250, show){
 		d3.select('#colormapDropbtn').classed('dropbtn-open', show);
 	}
 
-	var size = parseFloat(d3.select('#colormap_container').style('height')) + 4; // +4 for border
+	var h = parseFloat(d3.select('#colormap_container').style('height')) + 4; // +4 for border
+	var w = parseFloat(d3.select('#colormap_container').style('width')) + 4; // +4 for border
+	var hContainer = d3.select('#UIcontainer').node().getBoundingClientRect().height;
 
 	//show/hide the tab
 	//animations for UIcontainer are taken care of in css
 	if (container.classed('show')){
-		d3.select('#UIcontainer').transition().duration(duration)
-			.style('clip-path', 'inset(-20px ' + (-20 - size) + 'px -20px 0px')
-		d3.select('#colormap_outer_container').transition().duration(duration)
-			.style('margin-left', size + 'px')
-		d3.select('#colormap_container').transition().duration(duration)
-			.style('clip-path','inset(0px 0px 0px -1px)'); //using -1 so that it doesn't get set to (0px), which would not allow d3 transition!
+		var h2 = -20
+		if (w > hContainer) h2 -= w;
+		d3.select('#UIcontainer').style('clip-path', 'inset(-20px ' + (-20 - h) + 'px ' + h2 + 'px 0px')
+		d3.select('#colormap_outer_container').style('margin-left', h + 'px')
+		d3.select('#colormap_container').style('clip-path','inset(0px 0px 0px 0px)'); 
 
 
 	} else {
-		d3.select('#UIcontainer').transition().duration(duration)
-			.style('clip-path', 'inset(-20px -20px -20px 0px')
-		d3.select('#colormap_outer_container').transition().duration(duration)
-			.style('margin-left', '0px')
-		d3.select('#colormap_container').transition().duration(duration)
-			.style('clip-path','inset(0px 0px ' + size + 'px 0px)');
+		d3.select('#UIcontainer').style('clip-path', 'inset(-20px -20px -20px 0px')
+		d3.select('#colormap_outer_container').style('margin-left', '0px')
+		d3.select('#colormap_container').style('clip-path','inset(0px 0px ' + h + 'px 0px)');
 	}
 }
 
@@ -1190,8 +1156,28 @@ function createCameraControlBox(UI){
 
 function createParticleUIs(UI){
 	
+	//TO DO: 
+	//  rework this so that the sliders and filters go with each createParticleUI?  
+	//  I need to resize the UI based on the number of particles
+	//  reformat particle UIs so that there is an additional level of dropdowns/buttons (as in new design)
+	//  remove that "post-facto" resize
+
 	// loop through each of the particle groups and create their UI
 	GUIParams.partsKeys.forEach(function(p,i){createParticleUI(UI,p);});
+
+
+	// resize a bit post-facto
+	d3.selectAll('.sp-replacer').style('left',(GUIParams.containerWidth - 60) + 'px');
+
+	// particle sliders
+	createPsizeSliders();
+	createNpartsSliders();
+	if (GUIParams.haveAnyOctree) createCamNormSliders();
+
+	// particle group dropdowns
+	createVelWidthSliders();
+	createFilterSliders();
+	createColormapSliders();
 }
 
 function createParticleUI(UI,p){
@@ -1294,7 +1280,8 @@ function fillParticleDropdown(controls,p){
 
 	dropdown = controls.append('div')
 		.attr('id',p+'Dropdown')
-		.attr('class','dropdown-content');
+		.attr('class','dropdown-content')
+		.style('width',(GUIParams.containerWidth - 10) + 'px')
 
 	var dheight = 0;
 
@@ -1972,7 +1959,8 @@ function dragElement(elm, e) {
 /////////////
 // for show/hide of elements of the UI
 //////////////
-function hideUI(x, duration=250){
+function hideUI(x){
+	//clip-path has animation in css
 	if (!GUIParams.movingUI){
 
 		// change the x to 3 bars
@@ -1982,11 +1970,11 @@ function hideUI(x, duration=250){
 		var elem = d3.select('#UIcontainer');
 		var bbox = elem.node().getBoundingClientRect();
 		if (GUIParams.UIhidden){
-			elem.transition().duration(duration).style('clip-path','inset(3px ' + (bbox.width - 34) + 'px ' + (bbox.height - 34) + 'px 3px')
+			elem.style('clip-path','inset(3px ' + (bbox.width - 34) + 'px ' + (bbox.height - 34) + 'px 3px')
 		}else{
 			//check the colormap
 			var inset = getUIcontainerInset()
-			elem.transition().duration(duration).style('clip-path','inset(-20px ' + (-20 - inset.cbar[0]) + 'px ' + (-20 - inset.cbar[1]) + 'px 0px)');
+			elem.style('clip-path','inset(-20px ' + (-20 - inset.cbar[0]) + 'px ' + (-20 - inset.cbar[1]) + 'px 0px)');
 
 			// var cwidth = 0;
 			// var cheight = 0;
@@ -2033,7 +2021,6 @@ function getUIcontainerInset(pID = null){
 }
 
 function expandDropdown(handle, duration=250) {
-	var offset = 5;
 
 	// find the position in the partsKeys list
 	var pID = handle.id.slice(0,-7); // remove  "Dropbtn" from id
@@ -2044,12 +2031,20 @@ function expandDropdown(handle, duration=250) {
 
 	var pdiv;
 	var ddiv = document.getElementById(pID+'Dropdown');
-	var ht = parseFloat(ddiv.style.height) + offset; 
+	var ht = document.getElementById(pID+'Div').getBoundingClientRect().height;
+	console.log('check', ht, document.getElementById(pID+'Div').getBoundingClientRect(), pID)
+	if (d3.select('#'+pID+"Dropdown").classed('show')) ht += parseFloat(ddiv.style.height);
 	var pb = 0.;
 
+	//update the height
+	d3.select('#UIStateContainer').transition().duration(duration)
+		.style('height', (ht + 38) + 'px')
+
 	//if the colormap is open be sure to update the overall clip-path
-	var inset = getUIcontainerInset(pID)
-	d3.select('#UIcontainer').style('clip-path','inset(-20px ' + inset.inset[1] + 'px ' + inset.inset[2] + 'px 0px)');
+	var inset = getUIcontainerInset(pID);
+	d3.select('#UIContainer')
+		.style('clip-path','inset(-20px ' + inset.inset[1] + 'px ' + inset.inset[2] + 'px 0px)')
+
 
 	keys = Object.keys(GUIParams.gtoggle)
 	pdiv = document.getElementById(keys[i]+'Div');
@@ -2059,7 +2054,7 @@ function expandDropdown(handle, duration=250) {
 
 	} else {
 		d3.select(pdiv).transition().duration(duration).style('margin-bottom', '0px')
-		d3.select(ddiv).transition().duration(duration).style('clip-path', 'inset(0px 0px ' + ht + 'px 0px')
+		d3.select(ddiv).transition().duration(duration).style('clip-path', 'inset(0px 0px ' + parseFloat(ddiv.style.height) + 'px 0px')
 
 	}
 
