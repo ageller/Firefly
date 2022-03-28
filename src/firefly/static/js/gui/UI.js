@@ -172,25 +172,29 @@ function defineGUIParticleState(){
 	GUIParams.partsKeys.forEach(function(p){
 		GUIParams.GUIState.main.particles[p] = {
 			'current':'main',
-			'general': {
-				'id' : 'GUI'+p+'General',
-				'name' : 'General'
-			},
-			'velocities': {
-				'id' : 'GUI'+p+'Velocities',
-				'name' : 'Velocities'
-			},
-			'colormap': {
-				'id' : 'GUI'+p+'Colormap',
-				'name' : 'Colormap'
-			},
-			'filters': {
-				'id' : 'GUI'+p+'Filters',
-				'name' : 'Filters'
-			},
-			'radii': {
-				'id' : 'GUI'+p+'Radii',
-				'name' : 'Radii'
+			'main':{
+				'id' : 'GUI'+p+'Main',
+				'name': 'Main',
+				'general': {
+					'id' : 'GUI'+p+'General',
+					'name' : 'General'
+				},
+				'velocities': {
+					'id' : 'GUI'+p+'Velocities',
+					'name' : 'Velocities'
+				},
+				'colormap': {
+					'id' : 'GUI'+p+'Colormap',
+					'name' : 'Colormap'
+				},
+				'filters': {
+					'id' : 'GUI'+p+'Filters',
+					'name' : 'Filters'
+				},
+				'radii': {
+					'id' : 'GUI'+p+'Radii',
+					'name' : 'Radii'
+				},
 			},
 			'id' : 'GUIParticles'+p,
 			'name': p
@@ -212,6 +216,7 @@ function transitionUIWindows(state=null, pID=null){
 		GUIBase = GUIParams.GUIState.main.particles[pID];
 	}
 
+
 	//don't try to go back from main
 	if (!state && GUIBase.current == 'main') return false
 
@@ -221,7 +226,7 @@ function transitionUIWindows(state=null, pID=null){
 	d.forEach(function(dd){
 		level = level[dd];
 	})
-	id1 = level.id;
+	var id1 = level.id;
 	var elem1 = d3.select('#'+id1);
 	var bbox1 = elem1.node().getBoundingClientRect(); 
 
@@ -237,8 +242,7 @@ function transitionUIWindows(state=null, pID=null){
 		//transition the clip paths
 		//old one off
 
-		elem1
-			.style('transform','translateX(-' + GUIParams.containerWidth + 'px)')
+		elem1.style('transform','translateX(-' + GUIParams.containerWidth + 'px)')
 
 
 	} else {
@@ -256,31 +260,39 @@ function transitionUIWindows(state=null, pID=null){
 		id2 = level.id;
 
 		//old one off, but moving in the opposite direction 
-		elem1
-			.style('transform','translateX(' + GUIParams.containerWidth + 'px)')
+		elem1.style('transform','translateX(' + GUIParams.containerWidth + 'px)')
 
 	}
 
 	//new one on
 	var elem2 = d3.select('#'+id2);
 	var bbox2 = elem2.node().getBoundingClientRect(); 
-	elem2
-		.style('transform','translateX(0px)')
+	elem2.style('transform','translateX(0px)')
+
+
+	var stateTextID  = 'UIStateText';
+	var h = bbox2.height + 38;
+	if (inParticles){
+		stateTextID = pID + 'UIStateText';
+		d3.select('#' + pID + 'Dropdown').style('height',h + 'px');
+		h += 72;
+	}
+	console.log(inParticles, pID, state, id1, id2, stateTextID, bbox2, this)
 
 
 	//update the UI state,
 	var w = parseFloat(d3.select('#UIStateContainer').style('width'));
 	var stateText = state;
-	d3.select('#UIStateText').text(stateText);
+	d3.select('#' + stateTextID).text(stateText);
 	//if the text is too long, shorten in
 	var count = (stateText.match(/\//g) || []).length;
-	var bbox = d3.select('#UIStateText').node().getBoundingClientRect();
+	var bbox = d3.select('#' + stateTextID).node().getBoundingClientRect();
 	if (bbox.width > w && count > 0){
 		while (count > 0){
 			var p1 = stateText.indexOf('/');
 			stateText = '...' + stateText.substr(p1)
-			d3.select('#UIStateText').text(stateText);
-			bbox = d3.select('#UIStateText').node().getBoundingClientRect();
+			d3.select('#' + stateTextID).text(stateText);
+			bbox = d3.select('#' + stateTextID).node().getBoundingClientRect();
 			count -= 1;
 			stateText = stateText.substr(4)
 		}
@@ -288,7 +300,8 @@ function transitionUIWindows(state=null, pID=null){
 	
 
 	//update the UI height
-	d3.select('#UIStateContainer').style('height',bbox2.height + 38 + 'px');
+
+	d3.select('#UIStateContainer').style('height',h + 'px');
 
 	//set the state variable
 	GUIBase.current = state;
@@ -365,9 +378,6 @@ function createGeneralWindow(container){
 }
 
 function createDataWindow(container){
-	//these will be side by side
-	var keys = Object.keys(GUIParams.GUIState.main.general.data).filter(function(d){return (d != 'id' && d != 'name')});
-
 	var UI = container.append('div')
 		.attr('id',GUIParams.GUIState.main.general.data.id)
 		.attr('class','UImover')
@@ -391,8 +401,6 @@ function createDataWindow(container){
 }
 
 function createCameraWindow(container){
-	//these will be side by side
-	var keys = Object.keys(GUIParams.GUIState.main.general.camera).filter(function(d){return (d != 'id' && d != 'name')});
 
 	var UI = container.append('div')
 		.attr('id',GUIParams.GUIState.main.general.camera.id)
@@ -415,9 +423,6 @@ function createCameraWindow(container){
 }
 
 function createParticlesWindow(container){
-	//these will be full-width 
-	var keys = Object.keys(GUIParams.GUIState.main.particles).filter(function(d){return (d != 'id' && d != 'name')});
-
 
 	var UI = container.append('div')
 		.attr('id',GUIParams.GUIState.main.particles.id)
@@ -431,7 +436,10 @@ function createParticlesWindow(container){
 
 
 	// create each of the particle group UI base panels containing:
-	GUIParams.partsKeys.forEach(function(p,i){createParticleBase(UI,p);});
+	GUIParams.partsKeys.forEach(function(p,i){
+		var dropdown = createParticleBase(UI,p);
+		createParticleGeneralBox(dropdown, p);
+	});
 	
 
 
@@ -1101,7 +1109,12 @@ function createParticleUIs(UI){
 	//  remove that "post-facto" resize
 
 	// loop through each of the particle groups and create their UI
-	GUIParams.partsKeys.forEach(function(p,i){createParticleBase(UI,p);});
+	GUIParams.partsKeys.forEach(function(p,i){
+		var container = createParticleBase(UI,p);
+		console.log('here', p)
+		createParticleGeneralBox(container, p);
+
+	});
 
 
 	// // resize a bit post-facto
@@ -1184,7 +1197,7 @@ function createParticleBase(UI, p){
 		.style('left',(GUIParams.containerWidth - 40) + 'px')
 		.html('&#x25BC');
 
-	var keys = Object.keys(GUIParams.GUIState.main.particles[p]).filter(function(d){return (d != 'id' && d != 'name' && d != 'current')});
+	var keys = Object.keys(GUIParams.GUIState.main.particles[p].main).filter(function(d){return (d != 'id' && d != 'name' && d != 'current')});
 	//var h = 34*keys.length
 	var h = 34*Math.ceil(keys.length/2.) + 1;
 
@@ -1224,7 +1237,7 @@ function createParticleBase(UI, p){
 			//.text('Back')
 
 	stateBar.append('div')
-		.attr('id','UIStateText')
+		.attr('id',p + 'UIStateText')
 		.attr('class','UIdiv')
 		.style('width', (GUIParams.containerWidth - 51) + 'px')
 		.style('margin-left','1px')
@@ -1234,10 +1247,11 @@ function createParticleBase(UI, p){
 		.style('float','left')
 		.style('padding','0px 0px 0px 10px')
 		.style('font-family', '"Lucida Console", "Courier New", monospace')
-		.text('/')
+		.text('main')
 
+	// buttons to navigate to additional particle controls
 	var container = dropdown.append('div')
-		.attr('id',p+'DropdownMover')
+		.attr('id',GUIParams.GUIState.main.particles[p].main.id)
 		.attr('class','dropdown-content UImover')
 		.style('width',(GUIParams.containerWidth - 10) + 'px')
 		.style('display','flex-wrap')
@@ -1250,7 +1264,7 @@ function createParticleBase(UI, p){
 
 	keys.forEach(function(k){
 		container.append('div')
-			.attr('id',GUIParams.GUIState.main.particles[p][k].id + 'button')
+			.attr('id',GUIParams.GUIState.main.particles[p].main[k].id + 'button')
 			.attr('class','particleDiv')
 			//.style('width', (GUIParams.containerWidth - 25) + 'px')
 			.style('width',singleWidth + 'px')
@@ -1258,12 +1272,14 @@ function createParticleBase(UI, p){
 			.style('margin','2px')
 			.style('cursor','pointer')
 			.on('click',function(){
-				transitionUIWindows.call(this, k, p)
+				transitionUIWindows.call(this, 'main/' + k, p)
 			})
 			.append('div')
 				.attr('class','pLabelDiv')
-				.text(GUIParams.GUIState.main.particles[p][k].name)
+				.text(GUIParams.GUIState.main.particles[p].main[k].name)
 	})
+
+	return dropdown
 
 }
 
@@ -1296,27 +1312,25 @@ function createColorPicker(p){
 
 }
 
-function fillParticleDropdown(controls,p){
-
-	// add the dropdown button and a dropdown container div
-	controls.append('button')
-		.attr('id', p+'Dropbtn')
-		.attr('class', 'dropbtn')
-		.attr('onclick','expandDropdown(this)')
-		.style('left',(GUIParams.containerWidth - 40) + 'px')
-		.html('&#x25BC');
-
-	dropdown = controls.append('div')
-		.attr('id',p+'Dropdown')
-		.attr('class','dropdown-content')
-		.style('width',(GUIParams.containerWidth - 10) + 'px')
+function createParticleGeneralBox(container, p){
+	/////////////////////////
+	//general controls for a particle controls
 
 	var dheight = 0;
+	var UI = container.append('div')
+		.attr('id',GUIParams.GUIState.main.particles[p].main.general.id)
+		.attr('class','UImover')
+		.style('position','absolute')
+		.style('top','16px')
+		.style('height','34px')
+		.style('width', GUIParams.containerWidth + 'px')
+		.style('transform','translateX(' + GUIParams.containerWidth + 'px)')
+
 
 	// for octree add a button to dispose of the nodes from memory
 	if (GUIParams.haveOctree[p]) {
 
-		var clearMem = dropdown.append('div')
+		var clearMem = UI.append('div')
 			.attr('id',p+'_disposer')
 		var b = clearMem.append('button')
 			.attr('class','button centerButton')
@@ -1327,7 +1341,7 @@ function fillParticleDropdown(controls,p){
 			})
 		b.append('span').text('Clear from memory')
 
-		dropdown.append('hr')
+		UI.append('hr')
 			.style('margin','0')
 			.style('border','1px solid #909090')
 
@@ -1336,7 +1350,7 @@ function fillParticleDropdown(controls,p){
 	}
 
 	//dropdown to change blending mode
-	var dBcontent = dropdown.append('div')
+	var dBcontent = UI.append('div')
 		.attr('class','NdDiv');
 
 	dBcontent.append('span')
@@ -1374,14 +1388,14 @@ function fillParticleDropdown(controls,p){
 			sendToViewer([{'setDepthMode':[p, this.checked]}]);
 		})
 
-	dropdown.append('hr')
+	UI.append('hr')
 		.style('margin','0')
 		.style('border','1px solid #909090');
 
 	dheight += 35;
 
 	// add max number of particles slider 
-	dNcontent = dropdown.append('div')
+	dNcontent = UI.append('div')
 		.attr('class','NdDiv');
 
 	dNcontent.append('span')
@@ -1407,7 +1421,7 @@ function fillParticleDropdown(controls,p){
 
 	//for octree, slider to change the camera limit
 	if (GUIParams.haveOctree[p]){
-		dCcontent = dropdown.append('div')
+		dCcontent = UI.append('div')
 			.attr('class','NdDiv');
 		dCcontent.append('span')
 			.attr('class','pLabelDiv')
@@ -1425,6 +1439,15 @@ function fillParticleDropdown(controls,p){
 		dheight += 45;
 
 	}
+
+	UI.style('height',dheight + 'px');
+}
+
+function fillParticleDropdown(controls,p){
+
+
+
+
 	// velocity vectors
 	if (GUIParams.haveVelocities[p]){
 		fillVelocityVectorDropdown(dropdown,p);
