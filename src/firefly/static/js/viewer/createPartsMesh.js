@@ -86,7 +86,6 @@ function createParticleMaterial(p, color=null,minPointScale=null,maxPointScale=n
 		uniforms: { //add uniform variable here
 			color: {value: new THREE.Vector4(color[0],color[1],color[2],color[3])},
 			vID: {value: 0},
-			SPHrad: {value: viewerParams.parts[p].doSPHrad},
 			uVertexScale: {value: viewerParams.PsizeMult[p]},
 			cameraY: {value: [0.,1.,0.]},
 			cameraX: {value: [1.,0.,0.]},
