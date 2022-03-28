@@ -50,7 +50,7 @@ function update(time){
 	// handle keypresses on the keyboard
 	update_keypress(time);
 
-	// AMG: this applies any user interaction to the camera (enabling the controls)
+	// apply any user interaction to the camera (enabling the controls)
 	viewerParams.controls.update();
 	
 	// update particle mesh buffers with settings from UI
