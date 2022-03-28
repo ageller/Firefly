@@ -16,9 +16,14 @@
 	border-style:solid;
 	border-width: 2px 2px 2px 2px;
 	font-family: Sans-Serif;
-	-webkit-transition: width 0.4s, clip-path 0.25s;
-	transition: width 0.4s, clip-path 0.25s; 
+	-webkit-transition: width 0.25s, height 0.25s, clip-path 0.25s;
+	transition: width 0.25s, height 0.25s, clip-path 0.25s; 
 }
+#UIStateContainer{
+	-webkit-transition: width 0.25s, height 0.25s, clip-path 0.25s;
+	transition: width 0.25s, height 0.25s, clip-path 0.25s; 
+}
+
 #colormap_container{
 	-webkit-transition: clip-path 0.25s;
 	transition: clip-path 0.25s; 
@@ -156,8 +161,8 @@
 	margin:5px;
 	height:20px;
 	opacity: 0.8;
-	-webkit-transition: width 0.4s, opacity 0.15s;
-	transition: width 0.4s, opacity .15s;
+	-webkit-transition: width 0.25s, opacity 0.15s;
+	transition: width 0.25s, opacity .15s;
 }
 .particleDiv:hover {
 	opacity: 1;
@@ -291,7 +296,7 @@ input:checked + .slideroo:before {
 	display: inline-block;
 }
 .dropdown-content {
-	display: none;
+	/*display: none;*/
 	position: relative;
 	background-color:var(--UI-dropdown-background-color);
 	color:var(--UI-dropdown-text-color);
@@ -301,8 +306,11 @@ input:checked + .slideroo:before {
 	overflow: auto;
 	z-index: 2;
 	left:0;
-	border-radius: 0px 0px 6px 6px;
+	/*border-radius: 0px 0px 6px 6px;*/
+	-webkit-transition: margin 0.25s, clip-path 0.25s;
+	transition: margin 0.25s, clip-path 0.25s;
 }
+
 .dropdown-content div {
 	color: black;
 	text-decoration: none;
@@ -390,16 +398,16 @@ input:checked + .slideroo:before {
 
 .PSliderClass{
 	position:absolute;
-	margin-top:-23px;
+	margin-top:-24px;
 	left:100px;
-	width:110px;
+	width:95px;
 	height:20px;
 }
 .PMaxTClass{
 	position:absolute;
 	margin-top:-2px;
 	left:210px;
-	width:30px;
+	width:40px;
 	height:25px;
 	padding:2px;
 	color: var(--UI-text-color);

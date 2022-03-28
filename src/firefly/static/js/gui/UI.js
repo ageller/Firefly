@@ -88,7 +88,7 @@ function createUI(){
 		.style('cursor','pointer')
 		.style('margin','0px')
 		.style('padding','0px')
-		.on('click', function(){transitionUIWindows()})
+		.on('click', function(){transitionUIWindows.call(this, null)})
 		.append('div')
 			.attr('class','pLabelDiv')
 			.style('font-size','30px')
@@ -117,17 +117,6 @@ function createUI(){
 		.style('height','72px')
 		.style('top','34px')
 		.style('clip-path','inset(0px)'); 
-
-
-	//set the gtoggle Object (in correct order)
-	GUIParams.gtoggle = {};
-	GUIParams.gtoggle.dataControls = true;
-	GUIParams.gtoggle.cameraControls = true;
-	GUIParams.partsKeys.forEach(function(p){
-		GUIParams.gtoggle[p] = true;
-
-	})
-
 
 
 	//start creating the rest of the elements
@@ -182,6 +171,7 @@ function defineGUIParticleState(){
 	//I will add all the possible windows in here, though some may not be used (based on data and settings)
 	GUIParams.partsKeys.forEach(function(p){
 		GUIParams.GUIState.main.particles[p] = {
+			'current':'main',
 			'general': {
 				'id' : 'GUI'+p+'General',
 				'name' : 'General'
@@ -208,17 +198,26 @@ function defineGUIParticleState(){
 	})
 }
 
-function transitionUIWindows(state=null, duration=250){
+function transitionUIWindows(state=null, pID=null){
 	//if state is null, this will transition to the previous level (unless the previous level is main)
 	//will transition from the current UI window (id1) to the desired UI windows (id2)
 	//animations taken care of by css
 
+	//check which button was clicked
+	var inParticles = false;
+	var GUIBase = GUIParams.GUIState;
+	//if (this.id == "UIParticlesBackButton") {
+	if (pID) {
+		inParticles = true;
+		GUIBase = GUIParams.GUIState.main.particles[pID];
+	}
+
 	//don't try to go back from main
-	if (!state && GUIParams.GUIState.current == 'main') return false
+	if (!state && GUIBase.current == 'main') return false
 
 	//get the current state
-	var d = GUIParams.GUIState.current.split('/');
-	level = GUIParams.GUIState;
+	var d = GUIBase.current.split('/');
+	level = GUIBase;
 	d.forEach(function(dd){
 		level = level[dd];
 	})
@@ -229,7 +228,7 @@ function transitionUIWindows(state=null, duration=250){
 	if (state){
 		//going forward to a deeper level of the GUI
 		d = state.split('/');
-		level = GUIParams.GUIState;
+		level = GUIBase;
 		d.forEach(function(dd){
 			level = level[dd];
 		})
@@ -245,9 +244,9 @@ function transitionUIWindows(state=null, duration=250){
 	} else {
 		//go back
 		//get the current state (in this case it is not included in the state string sent here)
-		d = GUIParams.GUIState.current.split('/');
+		d = GUIBase.current.split('/');
 		d.pop();
-		level = GUIParams.GUIState;
+		level = GUIBase;
 		state = ''
 		d.forEach(function(dd,i){
 			level = level[dd];
@@ -289,10 +288,10 @@ function transitionUIWindows(state=null, duration=250){
 	
 
 	//update the UI height
-	d3.select('#UIStateContainer').transition().duration(duration).style('height',bbox2.height + 38 + 'px');
+	d3.select('#UIStateContainer').style('height',bbox2.height + 38 + 'px');
 
 	//set the state variable
-	GUIParams.GUIState.current = state;
+	GUIBase.current = state;
 
 }
 
@@ -322,7 +321,7 @@ function createMainWindow(container){
 			.style('margin','2px')
 			.style('cursor','pointer')
 			.on('click',function(){
-				transitionUIWindows('main/' + k)
+				transitionUIWindows.call(this, 'main/' + k)
 			})
 			.append('div')
 				.attr('class','pLabelDiv')
@@ -357,7 +356,7 @@ function createGeneralWindow(container){
 			.style('margin','2px')
 			.style('cursor','pointer')
 			.on('click',function(){
-				transitionUIWindows('main/general/' + k)
+				transitionUIWindows.call(this, 'main/general/' + k)
 			})
 			.append('div')
 				.attr('class','pLabelDiv')
@@ -431,15 +430,8 @@ function createParticlesWindow(container){
 		.style('transform','translateX(' + GUIParams.containerWidth + 'px)')
 
 
-	// create each of the particle group UI panels containing:
-	//  on-off toggle
-	//  particle size slider
-	//  color picker
-	//  velocity vector checkbox/type selector
-	//  colormap selector, slider, checkbox
-	//  filter selecter, slider, checkbox
-	//  playback checkbox
-	createParticleUIs(UI);
+	// create each of the particle group UI base panels containing:
+	GUIParams.partsKeys.forEach(function(p,i){createParticleBase(UI,p);});
 	
 
 
@@ -507,39 +499,6 @@ function createColormapContainer(container){
 		.style('margin-top','2px')
 		.html('&#x25B2');
 
-}
-
-function expandColormapTab(show){
-	//all animations are in CSS (because of the clip-pat)
-	var container = d3.select('#colormap_outer_container');
-	if (show == null){
-		container.node().classList.toggle('show')
-		d3.select('#colormapDropbtn').node().classList.toggle('dropbtn-open');
-
-	} else {
-		container.classed('show', show)
-		d3.select('#colormapDropbtn').classed('dropbtn-open', show);
-	}
-
-	var h = parseFloat(d3.select('#colormap_container').style('height')) + 4; // +4 for border
-	var w = parseFloat(d3.select('#colormap_container').style('width')) + 4; // +4 for border
-	var hContainer = d3.select('#UIcontainer').node().getBoundingClientRect().height;
-
-	//show/hide the tab
-	//animations for UIcontainer are taken care of in css
-	if (container.classed('show')){
-		var h2 = -20
-		if (w > hContainer) h2 -= w;
-		d3.select('#UIcontainer').style('clip-path', 'inset(-20px ' + (-20 - h) + 'px ' + h2 + 'px 0px')
-		d3.select('#colormap_outer_container').style('margin-left', h + 'px')
-		d3.select('#colormap_container').style('clip-path','inset(0px 0px 0px 0px)'); 
-
-
-	} else {
-		d3.select('#UIcontainer').style('clip-path', 'inset(-20px -20px -20px 0px')
-		d3.select('#colormap_outer_container').style('margin-left', '0px')
-		d3.select('#colormap_container').style('clip-path','inset(0px 0px ' + h + 'px 0px)');
-	}
 }
 
 
@@ -649,29 +608,7 @@ function createOctreeLoadingBar(container){
 
 }
 
-function expandLoadingTab(duration=250){
-	var container = d3.select('#octree_loading_outer_container');
-	container.node().classList.toggle('show')
 
-	//rotate the arrow
-	d3.select('#octreeLoadingDropbtn').node().classList.toggle('dropbtn-open');
-
-	var elem = d3.select('#octree_loading_container');
-	var svg = elem.select('svg');
-	//show/hide the tab
-	if (container.classed('show')){
-		elem.style('margin','0px 0px 2px 1px');
-		elem.transition().duration(duration).style('height', svg.attr('height'));
-		svg.select('clipPath').select('rect').transition().duration(duration).attr('height', svg.attr('height'));
-	} else {
-		elem.transition().duration(duration)
-			.style('height','0px').on('end', function(){
-				d3.select(this).style('margin', '-1px 0px 0px 0px');
-			})
-			
-		svg.select('clipPath').select('rect').transition().duration(duration).attr('height', '0px');
-	}
-}
 
 function createDataControlsBox(UI){
 	////////////////////////
@@ -1157,30 +1094,31 @@ function createCameraControlBox(UI){
 function createParticleUIs(UI){
 	
 	//TO DO: 
+	// remove this function
 	//  rework this so that the sliders and filters go with each createParticleUI?  
 	//  I need to resize the UI based on the number of particles
 	//  reformat particle UIs so that there is an additional level of dropdowns/buttons (as in new design)
 	//  remove that "post-facto" resize
 
 	// loop through each of the particle groups and create their UI
-	GUIParams.partsKeys.forEach(function(p,i){createParticleUI(UI,p);});
+	GUIParams.partsKeys.forEach(function(p,i){createParticleBase(UI,p);});
 
 
-	// resize a bit post-facto
-	d3.selectAll('.sp-replacer').style('left',(GUIParams.containerWidth - 60) + 'px');
+	// // resize a bit post-facto
+	// d3.selectAll('.sp-replacer').style('left',(GUIParams.containerWidth - 60) + 'px');
 
-	// particle sliders
-	createPsizeSliders();
-	createNpartsSliders();
-	if (GUIParams.haveAnyOctree) createCamNormSliders();
+	// // particle sliders
+	// createPsizeSliders();
+	// createNpartsSliders();
+	// if (GUIParams.haveAnyOctree) createCamNormSliders();
 
-	// particle group dropdowns
-	createVelWidthSliders();
-	createFilterSliders();
-	createColormapSliders();
+	// // particle group dropdowns
+	// createVelWidthSliders();
+	// createFilterSliders();
+	// createColormapSliders();
 }
 
-function createParticleUI(UI,p){
+function createParticleBase(UI, p){
 
 	//  create container divs for each of the particle groups
 	var controls = UI.append('div')
@@ -1227,16 +1165,106 @@ function createParticleUI(UI,p){
 		.attr('id',p+'_PMaxT')
 		.attr('class', 'PMaxTClass')
 		.attr('type','text')
-		.style('left',(GUIParams.containerWidth - 90) + 'px');
+		.style('left',(GUIParams.containerWidth - 100) + 'px');
 
 	// add the particle color picker
 	controls.append('input')
 		.attr('id',p+'ColorPicker');
 
 	createColorPicker(p);
+	controls.select('.sp-replacer').style('left',(GUIParams.containerWidth - 60) + 'px');
 
-	// fill the dropdown if that's enabled in the Settings.json file
-	if (GUIParams.useDropdown[p]){ fillParticleDropdown(controls,p); }
+	createPsizeSlider(p);
+
+	// add the dropdown button and a dropdown container div
+	controls.append('button')
+		.attr('id', p+'Dropbtn')
+		.attr('class', 'dropbtn')
+		.attr('onclick','expandParticleDropdown(this)')
+		.style('left',(GUIParams.containerWidth - 40) + 'px')
+		.html('&#x25BC');
+
+	var keys = Object.keys(GUIParams.GUIState.main.particles[p]).filter(function(d){return (d != 'id' && d != 'name' && d != 'current')});
+	//var h = 34*keys.length
+	var h = 34*Math.ceil(keys.length/2.) + 1;
+
+	dropdown = controls.append('div')
+		.attr('id',p+'Dropdown')
+		.attr('class','dropdown-content')
+		.style('width',(GUIParams.containerWidth - 10) + 'px')
+		.style('display','flex-wrap')
+		.style('height', h + 16 + 'px')
+		.style('clip-path', 'inset(0px 0px ' + (h + 16) + 'px 0px)');
+
+	//add an address bar (like in the main controls section) to show the current state of the particle UIs
+	var stateBar = dropdown.append('div')
+		.style('display','flex')
+		.style('position','absolute')
+		.style('padding','0px')
+		.style('top','0px')
+		.style('width', (GUIParams.containerWidth - 10) + 'px')
+		.style('height', '16px')
+
+	stateBar.append('div')
+		.attr('id','UIParticleBackButton')
+		.attr('class','particleDiv')
+		.style('float','left')
+		.style('width','40px')
+		.style('height','16px')
+		.style('cursor','pointer')
+		.style('margin','0px')
+		.style('padding','0px')
+		.on('click', function(){transitionUIWindows.call(this, null, p)})
+		.append('div')
+			.attr('class','pLabelDiv')
+			.style('font-size','30px')
+			.style('line-height','14px')
+			.style('color',getComputedStyle(document.body).getPropertyValue('--UI-character-background-color'))
+			.html('&#129044;')
+			//.text('Back')
+
+	stateBar.append('div')
+		.attr('id','UIStateText')
+		.attr('class','UIdiv')
+		.style('width', (GUIParams.containerWidth - 51) + 'px')
+		.style('margin-left','1px')
+		.style('height', '16px')
+		.style('font-size','12px')
+		.style('line-height','16px')
+		.style('float','left')
+		.style('padding','0px 0px 0px 10px')
+		.style('font-family', '"Lucida Console", "Courier New", monospace')
+		.text('/')
+
+	var container = dropdown.append('div')
+		.attr('id',p+'DropdownMover')
+		.attr('class','dropdown-content UImover')
+		.style('width',(GUIParams.containerWidth - 10) + 'px')
+		.style('display','flex-wrap')
+		.style('height', h+ 'px')
+		.style('margin-top','16px')
+		.style('padding-left','5px')
+		.style('clip-path', 'inset(0px 0px 0px 0px)');
+
+	var singleWidth = (GUIParams.containerWidth - 38)/2. - 1;
+
+	keys.forEach(function(k){
+		container.append('div')
+			.attr('id',GUIParams.GUIState.main.particles[p][k].id + 'button')
+			.attr('class','particleDiv')
+			//.style('width', (GUIParams.containerWidth - 25) + 'px')
+			.style('width',singleWidth + 'px')
+			.style('float','left')
+			.style('margin','2px')
+			.style('cursor','pointer')
+			.on('click',function(){
+				transitionUIWindows.call(this, k, p)
+			})
+			.append('div')
+				.attr('class','pLabelDiv')
+				.text(GUIParams.GUIState.main.particles[p][k].name)
+	})
+
 }
 
 function createColorPicker(p){
@@ -2020,58 +2048,101 @@ function getUIcontainerInset(pID = null){
 	return {'inset':inset,'cbar':[cwidth, cheight]}
 }
 
-function expandDropdown(handle, duration=250) {
+function expandParticleDropdown(handle) {
 
 	// find the position in the partsKeys list
 	var pID = handle.id.slice(0,-7); // remove  "Dropbtn" from id
-	i = getPi(pID);
 	document.getElementById(pID+"Dropdown").classList.toggle("show");
 
 	handle.classList.toggle('dropbtn-open');
 
-	var pdiv;
-	var ddiv = document.getElementById(pID+'Dropdown');
-	var ht = document.getElementById(pID+'Div').getBoundingClientRect().height;
-	console.log('check', ht, document.getElementById(pID+'Div').getBoundingClientRect(), pID)
-	if (d3.select('#'+pID+"Dropdown").classed('show')) ht += parseFloat(ddiv.style.height);
-	var pb = 0.;
-
-	//update the height
-	d3.select('#UIStateContainer').transition().duration(duration)
-		.style('height', (ht + 38) + 'px')
-
 	//if the colormap is open be sure to update the overall clip-path
 	var inset = getUIcontainerInset(pID);
-	d3.select('#UIContainer')
-		.style('clip-path','inset(-20px ' + inset.inset[1] + 'px ' + inset.inset[2] + 'px 0px)')
+	d3.select('#UIContainer').style('clip-path','inset(-20px ' + inset.inset[1] + 'px ' + inset.inset[2] + 'px 0px)')
 
+	var ddiv = document.getElementById(pID+'Dropdown');
 
-	keys = Object.keys(GUIParams.gtoggle)
-	pdiv = document.getElementById(keys[i]+'Div');
-	if (GUIParams.gtoggle[pID]){
-		d3.select(pdiv).transition().duration(duration).style('margin-bottom', ht + 'px')
-		d3.select(ddiv).transition().duration(duration).style('clip-path', 'inset(0px 0px 0px -1px'); //-1 to enable d3 transitions
+	var bh = parseFloat(d3.select('#GUIParticlesBase').style('height'));
+
+	if (d3.select('#'+pID+"Dropdown").classed('show')){
+		d3.select(ddiv)
+			.style('margin-bottom', parseFloat(ddiv.style.height) + 72 + 'px')
+			.style('clip-path', 'inset(0px 0px 0px 0px'); 
+		d3.select('#GUIParticlesBase').style('height',bh + parseFloat(ddiv.style.height) + 'px')
+		var ht = parseFloat(ddiv.style.height) + 72;
 
 	} else {
-		d3.select(pdiv).transition().duration(duration).style('margin-bottom', '0px')
-		d3.select(ddiv).transition().duration(duration).style('clip-path', 'inset(0px 0px ' + parseFloat(ddiv.style.height) + 'px 0px')
+		d3.select(ddiv)
+			.style('margin-bottom', '0px')
+			.style('clip-path', 'inset(0px 0px ' + parseFloat(ddiv.style.height) + 'px 0px')
+		d3.select('#GUIParticlesBase').style('height',bh - parseFloat(ddiv.style.height) + 'px')
+		var ht = 72
 
 	}
 
-	GUIParams.gtoggle[pID] =! GUIParams.gtoggle[pID];	
+	//update the height
+	d3.select('#UIStateContainer').style('height', ht + 'px')
 }
 
 
-function getPi(pID){
-	var i=0;
-	keys = Object.keys(GUIParams.gtoggle)
-	for (i=0; i<keys.length; i++){
-		if (pID == keys[i]){
-			break;
-		}
+function expandLoadingTab(duration=250){
+	var container = d3.select('#octree_loading_outer_container');
+	container.node().classList.toggle('show')
+
+	//rotate the arrow
+	d3.select('#octreeLoadingDropbtn').node().classList.toggle('dropbtn-open');
+
+	var elem = d3.select('#octree_loading_container');
+	var svg = elem.select('svg');
+	//show/hide the tab
+	if (container.classed('show')){
+		elem.style('margin','0px 0px 2px 1px');
+		elem.transition().duration(duration).style('height', svg.attr('height'));
+		svg.select('clipPath').select('rect').transition().duration(duration).attr('height', svg.attr('height'));
+	} else {
+		elem.transition().duration(duration)
+			.style('height','0px').on('end', function(){
+				d3.select(this).style('margin', '-1px 0px 0px 0px');
+			})
+			
+		svg.select('clipPath').select('rect').transition().duration(duration).attr('height', '0px');
 	}
-	return i
 }
+
+function expandColormapTab(show){
+	//all animations are in CSS (because of the clip-pat)
+	var container = d3.select('#colormap_outer_container');
+	if (show == null){
+		container.node().classList.toggle('show')
+		d3.select('#colormapDropbtn').node().classList.toggle('dropbtn-open');
+
+	} else {
+		container.classed('show', show)
+		d3.select('#colormapDropbtn').classed('dropbtn-open', show);
+	}
+
+	var h = parseFloat(d3.select('#colormap_container').style('height')) + 4; // +4 for border
+	var w = parseFloat(d3.select('#colormap_container').style('width')) + 4; // +4 for border
+	var hContainer = d3.select('#UIcontainer').node().getBoundingClientRect().height;
+
+	//show/hide the tab
+	//animations for UIcontainer are taken care of in css
+	if (container.classed('show')){
+		var h2 = -20
+		if (w > hContainer) h2 -= w;
+		d3.select('#UIcontainer').style('clip-path', 'inset(-20px ' + (-20 - h) + 'px ' + h2 + 'px 0px')
+		d3.select('#colormap_outer_container').style('margin-left', h + 'px')
+		d3.select('#colormap_container').style('clip-path','inset(0px 0px 0px 0px)'); 
+
+
+	} else {
+		d3.select('#UIcontainer').style('clip-path', 'inset(-20px -20px -20px 0px')
+		d3.select('#colormap_outer_container').style('margin-left', '0px')
+		d3.select('#colormap_container').style('clip-path','inset(0px 0px ' + h + 'px 0px)');
+	}
+}
+
+
 
 /////////////
 // read values from UI and send to viewer

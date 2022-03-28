@@ -118,36 +118,34 @@ function createSlider(slider, text, sliderArgs, varArgs, resetEnd=[null, 2], typ
 ///////////////////////////////
 
 // create the individual sliders
-function createPsizeSliders(){
+function createPsizeSlider(p){
 
-	GUIParams.partsKeys.forEach(function(p,i){
-		var initialValue = parseFloat(GUIParams.PsizeMult[p]); //I don't *think* I need to update this in GUI; it's just the initial value that matters, right?
+	var initialValue = parseFloat(GUIParams.PsizeMult[p]); //I don't *think* I need to update this in GUI; it's just the initial value that matters, right?
 
-		var sliderArgs = {
-			start: [initialValue], 
-			connect: [true, false],
-			tooltips: false,
-			steps: [0.0001],
-			range: { //reset below
-				'min': [0],
-				'max': [initialValue]
-			},
-			format: wNumb({
-				decimals: 4
-			})
-		}
+	var sliderArgs = {
+		start: [initialValue], 
+		connect: [true, false],
+		tooltips: false,
+		steps: [0.0001],
+		range: { //reset below
+			'min': [0],
+			'max': [initialValue]
+		},
+		format: wNumb({
+			decimals: 4
+		})
+	}
 
-		var slider = document.getElementById(p+'_PSlider');
-		var text = [document.getElementById(p+'_PMaxT')];
-		var varToSet = [initialValue, "PsizeMult",p];
-		var varArgs = {'f':'setViewerParamByKey','v':varToSet};
+	var slider = document.getElementById(p+'_PSlider');
+	var text = [document.getElementById(p+'_PMaxT')];
+	var varToSet = [initialValue, "PsizeMult",p];
+	var varArgs = {'f':'setViewerParamByKey','v':varToSet};
 
-		createSlider(slider, text, sliderArgs, varArgs);
+	createSlider(slider, text, sliderArgs, varArgs);
 
-		//reformat
-		w = parseInt(d3.select('#'+p+'_PSlider').style('width').slice(0,-2));
-		d3.select('#'+p+'_PSlider').select('.noUi-base').style('width',w-10+"px");
-	});
+	//reformat
+	w = parseInt(d3.select('#'+p+'_PSlider').style('width').slice(0,-2));
+	d3.select('#'+p+'_PSlider').select('.noUi-base').style('width',w-10+"px");
 
 }
 
