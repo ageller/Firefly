@@ -76,55 +76,6 @@ function checkColormapBox(p, checked){
 	sendToViewer(forViewer);
 }
 
-///////////////////////////////
-///// create the double sliders
-///////////////////////////////
-
-// create the individual sliders
-function createColormapSliders(){
-
-	GUIParams.partsKeys.forEach(function(p,i){
-		GUIParams.ckeys[p].forEach(function(ck, j){
-			if (ck != 'None'){
-				var sliderArgs = {
-					start: GUIParams.colormapVals[p][ck], 
-					connect: true,
-					tooltips: [false, false],
-					steps: [[0.001,0.001],[0.001,0.001]],
-					range: { 
-						'min': [GUIParams.colormapLims[p][ck][0]],
-						'max': [GUIParams.colormapLims[p][ck][1]]
-					},
-					format: wNumb({
-						decimals: 3
-					})
-				}
-
-				var slider = document.getElementById(p+'_CK_'+ck+'_END_CMapSlider');
-				var textMin = document.getElementById(p+'_CK_'+ck+'_END_CMapMinT');
-				var textMax = document.getElementById(p+'_CK_'+ck+'_END_CMapMaxT');
-
-
-				text = [textMin, textMax];
-				//not sure this is the best way to handle this.
-				var evalString = 'GUIParams.colormapVals.'+p+'.'+ck+'[i] = parseFloat(value); if (GUIParams.showColormap.'+p+') populateColormapAxis("'+p+'"); ';
-				var varArgs = {//'f':'setViewerParamByKey','v':[initialValueMin, 'colormapVals',p, ck],
-							  'f1':'setViewerParamByKey','v1':[GUIParams.colormapVals[p][ck], 'colormapVals',p, ck],
-							  'f2':'setViewerParamByKey','v2':[GUIParams.colormapLims[p][ck], 'colormapLims',p, ck],
-							  'evalString':evalString};
-
-				createSlider(slider, text, sliderArgs, varArgs, [2,2], 'double', GUIParams.colormapVals[p][ck], GUIParams.colormapLims[p][ck]);
-
-				//reformat
-				var w = parseInt(d3.select('.CMapClass').style('width').slice(0,-2));
-				d3.select('#'+p+'_CK_'+ck+'_END_CMapSlider').select('.noUi-base').style('width',w-10+'px');
-				d3.select('#'+p+'_CK_'+ck+'_END_CMapSlider').select('.noUi-connect').style('border-radius','6px 0px 0px 6px');
-				d3.select('#'+p+'_CK_'+ck+'_END_CMapSlider').select('.noUi-handle-lower').style('border-radius','6px 0px 0px 6px');
-			}
-		});
-	});
-
-}
 
 ///////////////////////////////
 ///// create a new SVG for the colormap

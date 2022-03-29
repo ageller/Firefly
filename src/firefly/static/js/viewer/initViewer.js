@@ -1109,6 +1109,11 @@ function sendInitGUI(prepend=[], append=[]){
 	forGUI.push({'setGUIParamByKey':[haveFilter,"haveFilter"]});
 	forGUI.push({'setGUIParamByKey':[haveFilterSlider,"haveFilterSlider"]});
 
+
+	//TO DO: need a check for radii values.  For now, I'm just setting it to false
+	forGUI.push({'setGUIParamByKey':[false,"haveRadii"]});
+
+
 	//for camera
 	forGUI.push({'setGUIParamByKey':[viewerParams.stereoSepMax, "stereoSepMax"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.friction, "friction"]});

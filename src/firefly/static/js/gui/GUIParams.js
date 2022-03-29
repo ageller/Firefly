@@ -52,6 +52,9 @@ function defineGUIParams(){
 		this.haveFilter = {};
 		this.haveFilterSlider = {};
 
+		//check for radii -- set in initViewer
+		this.haveRadii = {};
+
 		this.currentlyShownFilter = {};
 
 		//the startup file

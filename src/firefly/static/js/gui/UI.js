@@ -1,3 +1,5 @@
+// TO DO: create radii controls for particles
+
 window.addEventListener('mouseup',function(){GUIParams.movingUI = false;});
 
 ///////////////////////////////
@@ -167,40 +169,7 @@ function createUI(){
 	UIcontainer.classed('hidden', false);
 
 }
-function defineGUIParticleState(){
-	//I will add all the possible windows in here, though some may not be used (based on data and settings)
-	GUIParams.partsKeys.forEach(function(p){
-		GUIParams.GUIState.main.particles[p] = {
-			'current':'main',
-			'main':{
-				'id' : 'GUI'+p+'Main',
-				'name': 'Main',
-				'general': {
-					'id' : 'GUI'+p+'General',
-					'name' : 'General'
-				},
-				'velocities': {
-					'id' : 'GUI'+p+'Velocities',
-					'name' : 'Velocities'
-				},
-				'colormap': {
-					'id' : 'GUI'+p+'Colormap',
-					'name' : 'Colormap'
-				},
-				'filters': {
-					'id' : 'GUI'+p+'Filters',
-					'name' : 'Filters'
-				},
-				'radii': {
-					'id' : 'GUI'+p+'Radii',
-					'name' : 'Radii'
-				},
-			},
-			'id' : 'GUIParticles'+p,
-			'name': p
-		}
-	})
-}
+
 
 function transitionUIWindows(state=null, pID=null){
 	//if state is null, this will transition to the previous level (unless the previous level is main)
@@ -271,14 +240,20 @@ function transitionUIWindows(state=null, pID=null){
 
 
 	var stateTextID  = 'UIStateText';
-	var h = bbox2.height + 38;
+	var h = bbox2.height + 38; //for the state
 	if (inParticles){
 		stateTextID = pID + 'UIStateText';
-		d3.select('#' + pID + 'Dropdown').style('height',h + 'px');
-		h += 72;
+		d3.select('#' + pID + 'Dropdown').style('height',(h - 20) + 'px'); //-20 because the header is smaller
+		h += 52; //to account for the main controls header and top of particles
 	}
-	console.log(inParticles, pID, state, id1, id2, stateTextID, bbox2, this)
 
+	//if we're transitioning to the particle div, get the correct height (e.g. in case particle dropdowns are expanded)
+	if (!inParticles && id2 == 'GUIParticlesBase'){
+		h = 72;
+		GUIParams.partsKeys.forEach(function(k){
+			h += parseFloat(d3.select('#' + k + 'Dropdown').style('height'));
+		})
+	}
 
 	//update the UI state,
 	var w = parseFloat(d3.select('#UIStateContainer').style('width'));
@@ -422,28 +397,7 @@ function createCameraWindow(container){
 	createCameraControlBox(UI);
 }
 
-function createParticlesWindow(container){
 
-	var UI = container.append('div')
-		.attr('id',GUIParams.GUIState.main.particles.id)
-		.attr('class','UImover')
-		// .style('display','flex')
-		.style('position','absolute')
-		.style('top','0px')
-		.style('height','34px')
-		.style('width', GUIParams.containerWidth + 'px')
-		.style('transform','translateX(' + GUIParams.containerWidth + 'px)')
-
-
-	// create each of the particle group UI base panels containing:
-	GUIParams.partsKeys.forEach(function(p,i){
-		var dropdown = createParticleBase(UI,p);
-		createParticleGeneralBox(dropdown, p);
-	});
-	
-
-
-}
 
 function createFPSContainer(container){
 
@@ -1099,711 +1053,13 @@ function createCameraControlBox(UI){
 	disableCameraInputBoxes();
 }
 
-function createParticleUIs(UI){
-	
-	//TO DO: 
-	// remove this function
-	//  rework this so that the sliders and filters go with each createParticleUI?  
-	//  I need to resize the UI based on the number of particles
-	//  reformat particle UIs so that there is an additional level of dropdowns/buttons (as in new design)
-	//  remove that "post-facto" resize
 
-	// loop through each of the particle groups and create their UI
-	GUIParams.partsKeys.forEach(function(p,i){
-		var container = createParticleBase(UI,p);
-		console.log('here', p)
-		createParticleGeneralBox(container, p);
 
-	});
 
 
-	// // resize a bit post-facto
-	// d3.selectAll('.sp-replacer').style('left',(GUIParams.containerWidth - 60) + 'px');
 
-	// // particle sliders
-	// createPsizeSliders();
-	// createNpartsSliders();
-	// if (GUIParams.haveAnyOctree) createCamNormSliders();
 
-	// // particle group dropdowns
-	// createVelWidthSliders();
-	// createFilterSliders();
-	// createColormapSliders();
-}
 
-function createParticleBase(UI, p){
-
-	//  create container divs for each of the particle groups
-	var controls = UI.append('div')
-		.attr('class',"particleDiv "+p+"Div")
-		.attr('id',p+"Div" ) 
-		.style('width', (GUIParams.containerWidth - 20) + 'px');
-
-	// size the overall particle group div
-	controls.append('div')
-		.attr('class','pLabelDiv')
-		.style('width',GUIParams.longestPartLabelLen)
-		.text(p)
-		
-	// add the on-off switch
-	var onoff = controls.append('label')
-		.attr('class','switch');
-
-	onoff.append('input')
-		.attr('id',p+'Check')
-		.attr('type','checkbox')
-		.attr('autocomplete','off')
-		.attr('checked','true')
-		.on('change',function(){
-			sendToViewer([{'checkshowParts':[p,this.checked]}]);})
-
-	if (!GUIParams.showParts[p]){
-		elm = document.getElementById(p+'Check');
-		elm.checked = false;
-		elm.value = false;
-	} 
-
-	onoff.append('span')
-		.attr('class','slideroo');
-
-
-	// add the particle size slider
-	controls.append('div')
-		.attr('id',p+'_PSlider')
-		.attr('class','PSliderClass')
-		.style('left',(GUIParams.containerWidth - 200) + 'px');
-
-	// add the particle size text input
-	controls.append('input')
-		.attr('id',p+'_PMaxT')
-		.attr('class', 'PMaxTClass')
-		.attr('type','text')
-		.style('left',(GUIParams.containerWidth - 100) + 'px');
-
-	// add the particle color picker
-	controls.append('input')
-		.attr('id',p+'ColorPicker');
-
-	createColorPicker(p);
-	controls.select('.sp-replacer').style('left',(GUIParams.containerWidth - 60) + 'px');
-
-	createPsizeSlider(p);
-
-	// add the dropdown button and a dropdown container div
-	controls.append('button')
-		.attr('id', p+'Dropbtn')
-		.attr('class', 'dropbtn')
-		.attr('onclick','expandParticleDropdown(this)')
-		.style('left',(GUIParams.containerWidth - 40) + 'px')
-		.html('&#x25BC');
-
-	var keys = Object.keys(GUIParams.GUIState.main.particles[p].main).filter(function(d){return (d != 'id' && d != 'name' && d != 'current')});
-	//var h = 34*keys.length
-	var h = 34*Math.ceil(keys.length/2.) + 1;
-
-	dropdown = controls.append('div')
-		.attr('id',p+'Dropdown')
-		.attr('class','dropdown-content')
-		.style('width',(GUIParams.containerWidth - 10) + 'px')
-		.style('display','flex-wrap')
-		.style('height', h + 16 + 'px')
-		.style('clip-path', 'inset(0px 0px ' + (h + 16) + 'px 0px)');
-
-	//add an address bar (like in the main controls section) to show the current state of the particle UIs
-	var stateBar = dropdown.append('div')
-		.style('display','flex')
-		.style('position','absolute')
-		.style('padding','0px')
-		.style('top','0px')
-		.style('width', (GUIParams.containerWidth - 10) + 'px')
-		.style('height', '16px')
-
-	stateBar.append('div')
-		.attr('id','UIParticleBackButton')
-		.attr('class','particleDiv')
-		.style('float','left')
-		.style('width','40px')
-		.style('height','16px')
-		.style('cursor','pointer')
-		.style('margin','0px')
-		.style('padding','0px')
-		.on('click', function(){transitionUIWindows.call(this, null, p)})
-		.append('div')
-			.attr('class','pLabelDiv')
-			.style('font-size','30px')
-			.style('line-height','14px')
-			.style('color',getComputedStyle(document.body).getPropertyValue('--UI-character-background-color'))
-			.html('&#129044;')
-			//.text('Back')
-
-	stateBar.append('div')
-		.attr('id',p + 'UIStateText')
-		.attr('class','UIdiv')
-		.style('width', (GUIParams.containerWidth - 51) + 'px')
-		.style('margin-left','1px')
-		.style('height', '16px')
-		.style('font-size','12px')
-		.style('line-height','16px')
-		.style('float','left')
-		.style('padding','0px 0px 0px 10px')
-		.style('font-family', '"Lucida Console", "Courier New", monospace')
-		.text('main')
-
-	// buttons to navigate to additional particle controls
-	var container = dropdown.append('div')
-		.attr('id',GUIParams.GUIState.main.particles[p].main.id)
-		.attr('class','dropdown-content UImover')
-		.style('width',(GUIParams.containerWidth - 10) + 'px')
-		.style('display','flex-wrap')
-		.style('height', h+ 'px')
-		.style('margin-top','16px')
-		.style('padding-left','5px')
-		.style('clip-path', 'inset(0px 0px 0px 0px)');
-
-	var singleWidth = (GUIParams.containerWidth - 38)/2. - 1;
-
-	keys.forEach(function(k){
-		container.append('div')
-			.attr('id',GUIParams.GUIState.main.particles[p].main[k].id + 'button')
-			.attr('class','particleDiv')
-			//.style('width', (GUIParams.containerWidth - 25) + 'px')
-			.style('width',singleWidth + 'px')
-			.style('float','left')
-			.style('margin','2px')
-			.style('cursor','pointer')
-			.on('click',function(){
-				transitionUIWindows.call(this, 'main/' + k, p)
-			})
-			.append('div')
-				.attr('class','pLabelDiv')
-				.text(GUIParams.GUIState.main.particles[p].main[k].name)
-	})
-
-	return dropdown
-
-}
-
-function createColorPicker(p){
-	/* for color pickers*/
-	//can I write this in d3? I don't think so.  It needs a jquery object
-	$("#"+p+"ColorPicker").spectrum({
-		color: "rgba("+(GUIParams.Pcolors[p][0]*255)+","+(GUIParams.Pcolors[p][1]*255)+","+(GUIParams.Pcolors[p][2]*255)+","+GUIParams.Pcolors[p][3]+")",
-		flat: false,
-		showInput: true,
-		showInitial: false,
-		showAlpha: true,
-		showPalette: false,
-		showSelectionPalette: true,
-		clickoutFiresChange: false,
-		maxSelectionSize: 10,
-		preferredFormat: "rgb",
-		change: function(color) {
-			console.log(color)
-			sendToViewer([{'checkColor':[p, color.toRgb()]}]);
-		},
-	});
-
-	if (!GUIParams.useColorPicker[p]){
-		$("#"+d+"ColorPicker").spectrum({
-			color: "rgba("+(GUIParams.Pcolors[p][0]*255)+","+(GUIParams.Pcolors[p][1]*255)+","+(GUIParams.Pcolors[p][2]*255)+","+GUIParams.Pcolors[p][3]+")",
-			disabled: true,
-		});		
-	}
-
-}
-
-function createParticleGeneralBox(container, p){
-	/////////////////////////
-	//general controls for a particle controls
-
-	var dheight = 0;
-	var UI = container.append('div')
-		.attr('id',GUIParams.GUIState.main.particles[p].main.general.id)
-		.attr('class','UImover')
-		.style('position','absolute')
-		.style('top','16px')
-		.style('height','34px')
-		.style('width', GUIParams.containerWidth + 'px')
-		.style('transform','translateX(' + GUIParams.containerWidth + 'px)')
-
-
-	// for octree add a button to dispose of the nodes from memory
-	if (GUIParams.haveOctree[p]) {
-
-		var clearMem = UI.append('div')
-			.attr('id',p+'_disposer')
-		var b = clearMem.append('button')
-			.attr('class','button centerButton')
-			.style('margin','10px')
-			.style('width',(GUIParams.containerWidth - 40) + 'px')
-			.on('click',function(){
-				sendToViewer([{'disposeOctreeNodes':[p]}]);
-			})
-		b.append('span').text('Clear from memory')
-
-		UI.append('hr')
-			.style('margin','0')
-			.style('border','1px solid #909090')
-
-		dheight += 45;
-
-	}
-
-	//dropdown to change blending mode
-	var dBcontent = UI.append('div')
-		.attr('class','NdDiv');
-
-	dBcontent.append('span')
-		.attr('class','pLabelDiv')
-		.attr('style','width:115px')
-		.text('Blending Mode');
-
-	// add blending mode selector
-	var selectBType = dBcontent.append('select')
-		.attr('class','selectBlendingMode')
-		.attr('id',p+'_selectBlendingMode')
-		.on('change',selectBlendingMode)
-
-	var optionsB = selectBType.selectAll('option')
-		.data(Object.keys(GUIParams.blendingOpts)).enter()
-		.append('option')
-			.text(function (d) { return d; });
-
-	elm = document.getElementById(p+'_selectBlendingMode');
-	elm.value = GUIParams.blendingMode[p];
-
-	depthCheck = dBcontent.append('label')
-		.attr('for',p+'_depthCheckBox')
-		.attr('id',p+'_depthCheckBoxLabel')
-		.style('display','inline-block')
-		.style('margin-left','8px')
-		.text('Depth');
-
-	depthCheck.append('input')
-		.attr('id',p+'_depthCheckBox')
-		.attr('value','false')
-		.attr('type','checkbox')
-		.attr('autocomplete','off')
-		.on('change',function(){
-			sendToViewer([{'setDepthMode':[p, this.checked]}]);
-		})
-
-	UI.append('hr')
-		.style('margin','0')
-		.style('border','1px solid #909090');
-
-	dheight += 35;
-
-	// add max number of particles slider 
-	dNcontent = UI.append('div')
-		.attr('class','NdDiv');
-
-	dNcontent.append('span')
-		.attr('class','pLabelDiv')
-		.attr('style','width:20px')
-		.text(function(){
-			if (GUIParams.haveOctree[p]) return '%';
-			return 'N';
-		});
-
-	dNcontent.append('div')
-		.attr('id',p+'_NSlider')
-		.attr('class','NSliderClass');
-
-	// add max number of particles text input
-	dNcontent.append('input')
-		.attr('id',p+'_NMaxT')
-		.attr('class', 'NMaxTClass')
-		.attr('type','text');
-
-	dheight += 45; // height of the max particles section
-
-
-	//for octree, slider to change the camera limit
-	if (GUIParams.haveOctree[p]){
-		dCcontent = UI.append('div')
-			.attr('class','NdDiv');
-		dCcontent.append('span')
-			.attr('class','pLabelDiv')
-			.attr('style','width:140px')
-			.text('Octree Cam. Norm');
-		dCcontent.append('div')
-			.attr('id',p+'_CamSlider')
-			.attr('class','NSliderClass')
-			.style('margin-left','90px')
-			.style('width','90px');
-		dCcontent.append('input')
-			.attr('id',p+'_CamMaxT')
-			.attr('class', 'NMaxTClass')
-			.attr('type','text');
-		dheight += 45;
-
-	}
-
-	UI.style('height',dheight + 'px');
-}
-
-function fillParticleDropdown(controls,p){
-
-
-
-
-	// velocity vectors
-	if (GUIParams.haveVelocities[p]){
-		fillVelocityVectorDropdown(dropdown,p);
-		dheight += 150;
-	}
-
-	// colormap
-	if (GUIParams.haveColormap[p]){
-		fillColormapDropdown(dropdown,p);
-		dheight += 50;
-	}
-
-	// filters
-	if (GUIParams.haveFilter[p]){
-		fillFilterDropdown(dropdown,p);
-		dheight += 115;
-	} 
-	
-	// add the clip path
-	dropdown
-		.style('height',dheight+'px')
-		.style('display','block')
-		.style('clip-path', 'inset(0px 0px ' + dheight + 'px 0px')
-}
-
-function fillVelocityVectorDropdown(dropdown,p){
-	dropdown.append('hr')
-		.style('margin','0')
-		.style('border','1px solid #909090')
-
-	dVcontent = dropdown.append('div')
-		.attr('class','NdDiv');
-
-	// add velocity vector checkbox
-	dVcontent.append('input')
-		.attr('id',p+'velCheckBox')
-		.attr('value','false')
-		.attr('type','checkbox')
-		.attr('autocomplete','off')
-		.on('change',function(){
-			sendToViewer([{'checkVelBox':[p, this.checked]}]);
-		})
-
-	dVcontent.append('label')
-		.attr('for',p+'velCheckBox')
-		.text('Plot Velocity Vectors');
-
-	if (GUIParams.showVel[p]){
-		elm = document.getElementById(p+'velCheckBox');
-		elm.checked = true;
-		elm.value = true;
-	} 
-
-	// add velocity vector type selector
-	var selectVType = dVcontent.append('select')
-		.attr('class','selectVelType')
-		.attr('id',p+'_SelectVelType')
-		.on('change',selectVelType)
-
-	var options = selectVType.selectAll('option')
-		.data(Object.keys(GUIParams.velopts)).enter()
-		.append('option')
-			.text(function (d) { return d; });
-
-	elm = document.getElementById(p+'_SelectVelType');
-	elm.value = GUIParams.velType[p];
-
-	// add width input and gradient checkbox
-	dVWcontent = dropdown.append('div')
-		.attr('class','NdDiv');
-	dVWcontent.append('span')
-		.attr('class','pLabelDiv')
-		.attr('style','width:100px')
-		.text('Vector Width');
-	dVWcontent.append('div')
-		.attr('id',p+'_VelWidthSlider')
-		.attr('class','NSliderClass')
-		.style('margin-left','48px')
-		.style('width','132px');
-	dVWcontent.append('input')
-		.attr('id',p+'_VelWidthMaxT')
-		.attr('class', 'NMaxTClass')
-		.attr('type','text');
-
-	dVGcontent = dropdown.append('div')
-		.attr('class','NdDiv');
-
-	dVGcontent.append('input')
-		.attr('id',p+'velGradientCheckBox')
-		.attr('value','false')
-		.attr('type','checkbox')
-		.attr('autocomplete','off')
-		.on('change',function(){
-			sendToViewer([{'toggleVelocityGradient':[p, this.checked]}]);
-		})
-
-	dVGcontent.append('label')
-		.attr('for',p+'velGradientCheckBox')
-		.text('Apply Gradient to Vectors');
-
-	// add velocity animator checkbox
-	dAVcontent = dropdown.append('div')
-		.attr('class','NdDiv');
-
-	dAVcontent.append('input')
-		.attr('id',p+'velAnimateCheckBox')
-		.attr('value','false')
-		.attr('type','checkbox')
-		.attr('autocomplete','off')
-		.on('change',function(){
-			sendToViewer([{'toggleVelocityAnimation':[p, this.checked]}]);
-		})
-
-	dAVcontent.append('label')
-		.attr('for',p+'velAnimateCheckBox')
-		.text('Animate Velocities');
-
-	//add velocity animator input text boxes
-	dATVcontent = dropdown.append('div')
-		.attr('class','NdDiv');
-	dATVcontent.append('label')
-		.attr('for',p+'velAnimateDt')
-		.text('dt');
-	dATVcontent.append('input')
-		.attr('id',p+'velAnimateDt')
-		.attr('type', 'text')
-		.attr('value',GUIParams.animateVelDt)
-		.attr('autocomplete','off')
-		.attr('class','pTextInput velAnimateDt')
-		.style('width','50px')
-		.style('margin-left','8px')
-		.style('margin-right','20px')
-		.on('keypress',function(){
-			var key = event.keyCode || event.which;
-			if (key == 13) sendToViewer([{'checkText':[this.id, this.value, p]}]);
-		})
-	dATVcontent.append('label')
-		.attr('for',p+'velAnimateTmax')
-		.text('tMax');
-	dATVcontent.append('input')
-		.attr('id',p+'velAnimateTmax')
-		.attr('type', 'text')
-		.attr('value',GUIParams.animateVelTmax)
-		.attr('autocomplete','off')
-		.attr('class','pTextInput velAnimateTmax')
-		.style('width','50px')
-		.style('margin-left','8px')
-		.on('keypress',function(){
-			var key = event.keyCode || event.which;
-			if (key == 13) sendToViewer([{'checkText':[this.id, this.value, p]}]);
-		})
-
-	if (GUIParams.animateVel[p]){
-		elm = document.getElementById(p+'velAnimateCheckBox');
-		elm.checked = true;
-		elm.value = true;
-	} 
-
-
-}
-
-function fillColormapDropdown(dropdown,p){
-	dropdown.append('hr')
-		.style('margin','0')
-		.style('border','1px solid #909090')
-
-	var ColorDiv = dropdown.append('div')
-		.attr('style','margin:0px;  padding:5px; height:50px')
-
-	// add checkbox to enable colormap
-	ColorDiv.append('input')
-		.attr('id',p+'colorCheckBox')
-		.attr('value','false')
-		.attr('type','checkbox')
-		.attr('autocomplete','off')
-		.on('change',function(){
-			checkColormapBox(p, this.checked);
-		})
-
-	ColorDiv.append('label')
-		.attr('for',p+'colorCheckBox')
-		.text('Colormap');
-
-	// dropdown to select colormap
-	var selectCMap = ColorDiv.append('select')
-		.attr('class','selectCMap')
-		.attr('id',p+'_SelectCMap')
-		.style('margin-left','4px')
-		.on('change', selectColormap)
-
-	var options = selectCMap.selectAll('option')
-		.data(GUIParams.colormapList).enter()
-		.append('option')
-			.attr('value',function(d,i){ return i; })
-			.text(function (d) { return d; });
-
-	// dropdown to select colormap variable
-	var selectCMapVar = ColorDiv.append('select')
-		.attr('class','selectCMapVar')
-		.attr('id',p+'_SelectCMapVar')
-		.on('change',selectColormapVariable)
-
-	var options = selectCMapVar.selectAll('option')
-		.data(GUIParams.ckeys[p]).enter()
-		.append('option')
-			.attr('value',function(d,i){ return i; })
-			.text(function (d) { return d; });
-
-	// sliders for colormap limits
-	GUIParams.ckeys[p].forEach(function(ck){
-		if (GUIParams.haveColormapSlider){
-
-			colormapsliders = ColorDiv.append('div')
-				.attr('id',p+'_CK_'+ck+'_END_CMap')
-				.attr('class','CMapClass')
-
-			colormapsliders.append('div')
-				.attr('class','CMapClassLabel')
-
-			colormapsliders.append('div')
-				.attr('id',p+'_CK_'+ck+'_END_CMapSlider')
-				.style("margin-top","-1px")
-
-			colormapsliders.append('input')
-				.attr('id',p+'_CK_'+ck+'_END_CMapMinT')
-				.attr('class','CMapMinTClass')
-				.attr('type','text');
-
-			colormapsliders.append('input')
-				.attr('id',p+'_CK_'+ck+'_END_CMapMaxT')
-				.attr('class','CMapMaxTClass')
-				.attr('type','text');
-
-		}
-	});
-
-
-	// handle if colormap should be enabled at startup by pre-checking
-	//  the box
-	if (GUIParams.showColormap[p]){
-		elm = document.getElementById(p+'colorCheckBox');
-		elm.checked = true;
-		elm.value = true;
-		var idx = parseInt(Math.round(GUIParams.colormap[p]*256/8 - 0.5));
-		document.getElementById(p+'_SelectCMap').value = idx.toString();
-		document.getElementById(p+'_SelectCMapVar').value = GUIParams.colormapVariable[p].toString();
-		createColormapSVG(p);
-
-	} 
-	showHideColormapFilter(p, GUIParams.colormapVariable[p]);
-}
-
-function fillFilterDropdown(dropdown,p){
-	dropdown.append('hr')
-		.style('margin','0')
-		.style('border','1px solid #909090')
-
-	var filterDiv = dropdown.append('div')
-		.attr('style','margin:0px;  padding:5px; height:45px')
-
-	// add filter key selector
-	var selectF = filterDiv.append('div')
-		//.attr('style', 'height:20px')
-		.attr('style','height:20px; display:inline-block')
-		.html('Filters &nbsp')	
-		.append('select')
-		.attr('style','width:160px')
-		.attr('class','selectFilter')
-		.attr('id',p+'_SelectFilter')
-		.on('change',selectFilter)
-
-	var options = selectF.selectAll('option')
-		.data(GUIParams.fkeys[p]).enter()
-		.append('option')
-			.text(function (d) { return d; });
-
-	var invFilter = dropdown.append('div')
-		.attr('class','NdDiv');
-
-	var filtn = 0;
-	// create sliders for each of the filters
-	GUIParams.fkeys[p].forEach(function(fk){
-		if (GUIParams.haveFilterSlider[p][fk] != null){
-
-			dfilters = filterDiv.append('div')
-				.attr('id',p+'_FK_'+fk+'_END_Filter')
-				.attr('class','FilterClass')
-				.style('display','block');
-
-			dfilters.append('div')
-				.attr('class','FilterClassLabel')
-
-			dfilters.append('div')
-				.attr('id',p+'_FK_'+fk+'_END_FilterSlider')
-				.style("margin-top","-1px")
-
-			dfilters.append('input')
-				.attr('id',p+'_FK_'+fk+'_END_FilterMinT')
-				.attr('class','FilterMinTClass')
-				.attr('type','text');
-
-			dfilters.append('input')
-				.attr('id',p+'_FK_'+fk+'_END_FilterMaxT')
-				.attr('class','FilterMaxTClass')
-				.attr('type','text');
-
-			invFilter.append('input')
-				.attr('id',p+'_FK_'+fk+'_END_InvertFilterCheckBox')
-				.attr('value','false')
-				.attr('type','checkbox')
-				.attr('autocomplete','off')
-				.on('change',function(){
-					sendToViewer([{'checkInvertFilterBox':[p, fk, this.checked]}]);
-				})
-			invFilter.append('label')
-				.attr('for',p+'_FK_'+fk+'_'+'InvertFilterCheckBox')
-				.attr('id',p+'_FK_'+fk+'_END_InvertFilterCheckBoxLabel')
-				.style('display','inline-block')
-				.text('Invert Filter');
-
-			filtn += 1;
-
-		}
-		
-		// handle invert filter checkbox
-		elm = document.getElementById(p+'_FK_'+fk+'_END_InvertFilterCheckBox');
-		elm.checked = GUIParams.invertFilter[p][fk];
-		elm.value = GUIParams.invertFilter[p][fk];
-		
-		if (filtn > 1){
-			d3.selectAll('#'+p+'_FK_'+fk+'_END_Filter')
-				.style('display','none');
-			d3.selectAll('#'+p+'_FK_'+fk+'_END_InvertFilterCheckBox')
-				.style('display','none');
-			d3.selectAll('#'+p+'_FK_'+fk+'_END_InvertFilterCheckBoxLabel')
-				.style('display','none');
-		}
-	});
-
-	// add playback checkbox and label
-	playback = dropdown.append('div')
-		.attr('class','NdDiv');
-	playback.append('input')
-		.attr('id',p+'_PlaybackCheckbox')
-		.attr('value','false')
-		.attr('type','checkbox')
-		.attr('autocomplete','off')
-		.style('display','inline-block')
-		.on('change',function(){
-			togglePlayback(p, this.checked)});
-	playback.append('label')
-		.attr('for',p+'_'+'PlaybackLabel')
-		.attr('id',p+'_PlaybackLabel')
-		.text('Playback');
-
-}
 
 //////////////////////// ////////////////////////
 // helper functions vvvvvvv
@@ -1960,6 +1216,38 @@ function togglePlayback(p,checked){
 
 }
 
+function selectFilter() {
+	var option = d3.select(this)
+		.selectAll("option")
+		.filter(function (d, i) { 
+			return this.selected; 
+	});
+	selectValue = option.property('value');
+
+	var p = this.id.slice(0,-13)
+
+	// store the "currently shown" filter for later use
+	console.log("setting the current filter value to",selectValue)
+	GUIParams.currentlyShownFilter[p] = selectValue;
+	sendToViewer({'setViewerParamByKey':[selectValue, 'parts',p,'currentlyShownFilter']})
+
+	//console.log("in selectFilter", selectValue, this.id, p)
+	for (var i=0; i<GUIParams.fkeys[p].length; i+=1){
+		d3.selectAll('#'+p+'_FK_'+GUIParams.fkeys[p][i]+'_END_Filter')
+			.style('display','none');
+		d3.selectAll('#'+p+'_FK_'+GUIParams.fkeys[p][i]+'_END_InvertFilterCheckBox')
+			.style('display','none');
+		d3.selectAll('#'+p+'_FK_'+GUIParams.fkeys[p][i]+'_END_InvertFilterCheckBoxLabel')
+			.style('display','none');
+	}
+	d3.selectAll('#'+p+'_FK_'+selectValue+'_END_Filter')
+		.style('display','block');
+	d3.selectAll('#'+p+'_FK_'+selectValue+'_END_InvertFilterCheckBox')
+		.style('display','inline-block');
+	d3.selectAll('#'+p+'_FK_'+selectValue+'_END_InvertFilterCheckBoxLabel')
+		.style('display','inline-block');
+}
+
 
 //////////////////////
 // to move the GUI around on the screen
@@ -2071,41 +1359,7 @@ function getUIcontainerInset(pID = null){
 	return {'inset':inset,'cbar':[cwidth, cheight]}
 }
 
-function expandParticleDropdown(handle) {
 
-	// find the position in the partsKeys list
-	var pID = handle.id.slice(0,-7); // remove  "Dropbtn" from id
-	document.getElementById(pID+"Dropdown").classList.toggle("show");
-
-	handle.classList.toggle('dropbtn-open');
-
-	//if the colormap is open be sure to update the overall clip-path
-	var inset = getUIcontainerInset(pID);
-	d3.select('#UIContainer').style('clip-path','inset(-20px ' + inset.inset[1] + 'px ' + inset.inset[2] + 'px 0px)')
-
-	var ddiv = document.getElementById(pID+'Dropdown');
-
-	var bh = parseFloat(d3.select('#GUIParticlesBase').style('height'));
-
-	if (d3.select('#'+pID+"Dropdown").classed('show')){
-		d3.select(ddiv)
-			.style('margin-bottom', parseFloat(ddiv.style.height) + 72 + 'px')
-			.style('clip-path', 'inset(0px 0px 0px 0px'); 
-		d3.select('#GUIParticlesBase').style('height',bh + parseFloat(ddiv.style.height) + 'px')
-		var ht = parseFloat(ddiv.style.height) + 72;
-
-	} else {
-		d3.select(ddiv)
-			.style('margin-bottom', '0px')
-			.style('clip-path', 'inset(0px 0px ' + parseFloat(ddiv.style.height) + 'px 0px')
-		d3.select('#GUIParticlesBase').style('height',bh - parseFloat(ddiv.style.height) + 'px')
-		var ht = 72
-
-	}
-
-	//update the height
-	d3.select('#UIStateContainer').style('height', ht + 'px')
-}
 
 
 function expandLoadingTab(duration=250){
