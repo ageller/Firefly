@@ -261,7 +261,6 @@ class Settings(object):
         showFPS=False,
         showMemoryUsage=False,
         memoryLimit=2e9,
-        tweenFileName=None,
         **extra):
         """Settings that affect the browser window
 
@@ -283,9 +282,6 @@ class Settings(object):
             the memory usage directly, otherwise memory usage is only estimated, 
             defaults to 2e9 
         :type memoryLimit: float, optional
-        :param tweenFileName: the name of the file containing the tween params generated 
-            with :class:`firefly.data_reader.TweenParams`, defaults to ``"TweenParams.json"``
-        :type tweenFileName: str, optional
         """
 
         self.__window_settings = {
@@ -297,44 +293,15 @@ class Settings(object):
             'showFPS':showFPS,
             'showMemoryUsage':showMemoryUsage,
             'memoryLimit':memoryLimit,
-            'tweenFileName':tweenFileName
-        }
-
-    def particle_UI_settings(
-        self,
-        UIparticle=None,
-        UIdropdown=None,
-        UIcolorPicker=None,
-        **extra):
-        """Flags that control how the UI for each particle group looks like
-
-        :param UIparticle: do you want to show the particles 
-            in the user interface.
-            This is a dict with keys of the particle UInames mapped to bools,
-            defaults to dict([(UIname,True) for UIname in UInames])
-        :type UIparticle: dict of UIname:bool, optional
-        :param UIdropdown: do you want to enable the dropdown menus for 
-               particles in the user interface.
-               This is a dict with keys of the particle UInames mapped to bools,
-               defaults to dict([(UIname,True) for UIname in UInames])
-        :type UIdropdown: dict of UIname:bool, optional
-        :param UIcolorPicker: do you want to allow the user to change the color.
-               This is a dict with keys of the particle UInames mapped to bools,
-               defaults to dict([(UIname,True) for UIname in UInames])
-        :type UIcolorPicker: dict of UIname:bool, optional
-        """
-
-        self.__particle_UI_settings = {
-            'UIparticle':dict() if UIparticle is None else UIparticle,
-            'UIdropdown':dict() if UIdropdown is None else UIdropdown,
-            'UIcolorPicker':dict() if UIcolorPicker is None else UIcolorPicker,
         }
 
     def camera_settings(
         self,
         center=None,
         camera=None,
-        cameraRotation=None):
+        cameraRotation=None,
+        tweenFileName=None,
+        ):
         """Settings that affect the position and orientation of the camera
 
         :param center: do you want to explicilty define the initial camera focus/
@@ -347,12 +314,16 @@ class Settings(object):
         :param cameraRotation: can set camera rotation in units of radians 
             if you want, defaults to None
         :type cameraRotation: np.ndarray of shape (3), optional
+        :param tweenFileName: the name of the file containing the tween params generated 
+            with :class:`firefly.data_reader.TweenParams`, defaults to ``"TweenParams.json"``
+        :type tweenFileName: str, optional
         """
 
         self.__camera_settings = {
             'center':np.zeros(3) if center is None else center, 
             'camera':camera, 
-            'cameraRotation':cameraRotation, 
+            'cameraRotation':cameraRotation,
+            'tweenFileName':tweenFileName
         } 
     
     def particle_startup_settings(
@@ -407,6 +378,36 @@ class Settings(object):
             'showParts':dict() if showParts is None else showParts,
             'radiusVariable':dict() if radiusVariable is None else radiusVariable
         }
+
+    def particle_UI_settings(
+        self,
+        UIparticle=None,
+        UIdropdown=None,
+        UIcolorPicker=None,
+        **extra):
+        """Flags that control how the UI for each particle group looks like
+
+        :param UIparticle: do you want to show the particles 
+            in the user interface.
+            This is a dict with keys of the particle UInames mapped to bools,
+            defaults to dict([(UIname,True) for UIname in UInames])
+        :type UIparticle: dict of UIname:bool, optional
+        :param UIdropdown: do you want to enable the dropdown menus for 
+               particles in the user interface.
+               This is a dict with keys of the particle UInames mapped to bools,
+               defaults to dict([(UIname,True) for UIname in UInames])
+        :type UIdropdown: dict of UIname:bool, optional
+        :param UIcolorPicker: do you want to allow the user to change the color.
+               This is a dict with keys of the particle UInames mapped to bools,
+               defaults to dict([(UIname,True) for UIname in UInames])
+        :type UIcolorPicker: dict of UIname:bool, optional
+        """
+
+        self.__particle_UI_settings = {
+            'UIparticle':dict() if UIparticle is None else UIparticle,
+            'UIdropdown':dict() if UIdropdown is None else UIdropdown,
+            'UIcolorPicker':dict() if UIcolorPicker is None else UIcolorPicker,
+        }
     
     def particle_velocity_settings(
         self,
@@ -459,7 +460,6 @@ class Settings(object):
             'animateVelDt': dict() if animateVelDt is None else animateVelDt,
             'animateVelTmax': dict() if animateVelTmax is None else animateVelTmax
         }
-
     
     def particle_filter_settings(
         self,
