@@ -55,17 +55,42 @@ function selectColormapVariable() {
 
 //turn on/off the colormap
 function checkColormapBox(p, checked){
+	//check all colormaps to see if we need to turn it off
 	GUIParams.showColormap[p] = checked;
+	var hide = true
+	GUIParams.partsKeys.forEach(function(k){
+		if (GUIParams.showColormap[k]) hide = false;
+	})
+
 	if (GUIParams.showColormap[p]) {
 		//show the colormap div
 		d3.select('#colormap_outer_container').style('visibility','visible');
 		//create the colormap for this particle
 		createColormapSVG(p);
 	} else {
+		var w = 76; //I think this is the width of the colormap, but how do I get this from the DOM?
+		var w0 = parseFloat(d3.select('#colormap_container').style('height'));
+		d3.select('#' + p + 'colormap').remove();
+		d3.select('#colormap_container').style('height',(w0 - w) + 'px')
+		//var trans = parseTranslateStyle(d3.select('#colormap_outer_container'));
+		var m0 = parseFloat(d3.select('#colormap_outer_container').style('margin-left'));
+		d3.select('#colormap_outer_container').style('margin-left', (m0 - w) + 'px');
+		//also subtract 16 off the tranlateY styles for all the other colormaps (again I wish I could get 16 from the DOM)
+		GUIParams.partsKeys.forEach(function(k){
+			var elem = d3.select('#' + k + 'colormap');
+			if (elem.node()) {
+				var trans = parseTranslateStyle(elem);
+				console.log('checking', k, trans)
+				if (parseFloat(trans.y) > 20) elem.style('transform','scale('+trans.sx + ',' + trans.sy + ')translate(' + trans.x + ',' + (parseFloat(trans.y) - 16) + 'px)')
+			}
+		})
+
+	}
+
+	if (hide){
 		//hide the colomap div
 		if (d3.select('#colormap_outer_container').classed('show')) expandColormapTab();
 		d3.select('#colormap_outer_container').style('visibility','hidden');
-		d3.select('#' + p + 'colormap').remove();
 	}
 
 	forViewer = [];

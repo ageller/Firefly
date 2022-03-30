@@ -153,16 +153,17 @@
 
 /* particle UI */
 .particleDiv {
+	position: relative;
 	z-index:2;
 	background-color:var(--UI-background-color);
 	color: var(--UI-text-color);
 	width:280px;
 	padding:5px;
 	margin:2px 0px 0px 2px;
-	height:20px;
+	height:22px;
 	opacity: 0.8;
-	-webkit-transition: width 0.25s, opacity 0.15s;
-	transition: width 0.25s, opacity .15s;
+	-webkit-transition: width 0.25s, opacity 0.15s, margin 0.25s;
+	transition: width 0.25s, opacity .15s, margin 0.25s;
 }
 .particleDiv:hover {
 	opacity: 1;
@@ -196,8 +197,7 @@
 	position: relative;
 	display: inline-block;
 	width: 30px;
-	height: 20px;
-	top:-1px;
+	height: 25px;
 }
 
 .switch input {display:none;}
@@ -218,7 +218,7 @@
 .slideroo:before {
 	position: absolute;
 	content: "";
-	height: 12px;
+	height: 17px;
 	width: 12px;
 	left: 4px;
 	bottom: 4px;
@@ -255,9 +255,11 @@ input:checked + .slideroo:before {
 	z-index:2;
 	position:absolute;
 	left:240px;
+	top: 4px;
 	margin:0;
-	margin-top:-5px;
-	height:20px;
+	margin-left: 3px;
+	padding:0;
+	height:25px;
 	width:27px;
 	background:var(--UI-background-color);
 }
@@ -267,7 +269,11 @@ input:checked + .slideroo:before {
 .sp-picker-container{
 	border:0;
 }
-
+.sp-preview{
+	border: 0;
+	height: 25px;
+	width: 25px;
+}
 /* dropdown menu */
 .dropbtn {
 	display:block;
@@ -301,8 +307,6 @@ input:checked + .slideroo:before {
 	background-color:var(--UI-dropdown-background-color);
 	color:var(--UI-dropdown-text-color);
 	padding:0;
-	margin:-5px;
-	margin-top:-20px;
 	overflow: hidden;
 	z-index: 2;
 	left:0;
@@ -335,8 +339,9 @@ input:checked + .slideroo:before {
 	top:0px;
 	left:-52px;
 	width:40px;
-	height:22px;
+	height:25px;
 	padding:2px;
+	margin-top:-1px;
 	color: var(--UI-text-color);
 }
 .FilterMaxTClass{
@@ -344,8 +349,9 @@ input:checked + .slideroo:before {
 	top:0px;
 	left:182px;
 	width:40px;
-	height:22px;
+	height:25px;
 	padding:2px;
+	margin-top:-1px;
 	color: var(--UI-text-color);
 }
 
@@ -372,7 +378,7 @@ input:checked + .slideroo:before {
 }
 .CMapMaxTClass{
 	position:absolute;
-	top:0px;
+	top:2px;
 	left:182px;
 	width:40px;
 	height:22px;
@@ -381,32 +387,33 @@ input:checked + .slideroo:before {
 
 .NSliderClass{
 	position:absolute;
-	margin-top:-22px;
 	left:55px;
 	width:180px;
 	height:20px;
+	margin-top: -25px;
 }
 .NMaxTClass{
 	position:absolute;
 	margin-top:0px;
 	left:237px;
 	width:40px;
-	height:22px;
+	height:25px;
 	padding:2px;
+	margin-top:-2px;
 	color: var(--UI-text-color);
 }
 
 .PSliderClass{
 	position:absolute;
-	margin-top:-24px;
 	left:100px;
+	top: 4px;
 	width:95px;
-	height:20px;
+	height:25px;
 }
 .PMaxTClass{
 	position:absolute;
-	margin-top:-2px;
 	left:210px;
+	top: 4px;
 	width:40px;
 	height:25px;
 	padding:2px;
@@ -435,14 +442,14 @@ input:checked + .slideroo:before {
 
 
 .noUi-horizontal {
-	height:22px;
+	height:25px;
 	border:0px;
 	border-radius:6px;/*0px 6px 6px 0px;*/
 }
 .noUi-horizontal .noUi-handle {
 	width:10px;
 	left:0px;
-	height:22px;
+	height:25px;
 	top:0px;
 }
 .noUi-handle:before,

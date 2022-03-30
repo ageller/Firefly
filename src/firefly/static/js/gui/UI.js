@@ -100,17 +100,20 @@ function createUI(){
 			//.text('Back')
 
 	stateBar.append('div')
-		.attr('id','UIStateText')
+		.attr('id','UIStateTextContainer')
 		.attr('class','UIdiv')
 		.style('width', (GUIParams.containerWidth - 41) + 'px')
 		.style('margin-left','1px')
 		.style('height', '16px')
 		.style('font-size','12px')
 		.style('line-height','16px')
-		.style('float','left')
-		.style('padding','0px 0px 0px 10px')
-		.style('font-family', '"Lucida Console", "Courier New", monospace')
-		.text('main')
+		.style('padding','0px')
+		.append('div')
+			.attr('id','UIStateText')
+			.style('float','left')
+			.style('padding','0px 0px 0px 10px')
+			.style('font-family', '"Lucida Console", "Courier New", monospace')
+			.text('main')
 
 
 	var UI = UIcontainer.append('div')
@@ -187,7 +190,7 @@ function transitionUIWindows(state=null, pID=null){
 
 
 	//don't try to go back from main
-	if (!state && GUIBase.current == 'main') return false
+	if (!state && (GUIBase.current == 'main' || (inParticles && GUIBase.current == 'base'))) return false
 
 	//get the current state
 	var d = GUIBase.current.split('/');
@@ -239,27 +242,18 @@ function transitionUIWindows(state=null, pID=null){
 	elem2.style('transform','translateX(0px)')
 
 
-	var stateTextID  = 'UIStateText';
-	var h = bbox2.height + 38; //for the state
-	if (inParticles){
-		stateTextID = pID + 'UIStateText';
-		d3.select('#' + pID + 'Dropdown').style('height',(h - 20) + 'px'); //-20 because the header is smaller
-		h += 52; //to account for the main controls header and top of particles
-	}
-
-	//if we're transitioning to the particle div, get the correct height (e.g. in case particle dropdowns are expanded)
-	if (!inParticles && id2 == 'GUIParticlesBase'){
-		h = 72;
-		GUIParams.partsKeys.forEach(function(k){
-			h += parseFloat(d3.select('#' + k + 'Dropdown').style('height'));
-		})
-	}
-
-	//update the UI state,
-	var w = parseFloat(d3.select('#UIStateContainer').style('width'));
+	//update the state text
 	var stateText = state;
+	var stateTextID  = 'UIStateText';
+	var stateTextContainerID  = 'UIStateTextContainer';
+	if (inParticles) {
+		stateTextID = pID + 'UIStateText';
+		stateTextContainerID = pID + 'UIStateTextContainer';
+	}
 	d3.select('#' + stateTextID).text(stateText);
-	//if the text is too long, shorten in
+
+	//if the text is too long, shorten it (in my current version, this is never necessary)
+	var w = parseFloat(d3.select('#' + stateTextContainerID).style('width'));
 	var count = (stateText.match(/\//g) || []).length;
 	var bbox = d3.select('#' + stateTextID).node().getBoundingClientRect();
 	if (bbox.width > w && count > 0){
@@ -272,14 +266,76 @@ function transitionUIWindows(state=null, pID=null){
 			stateText = stateText.substr(4)
 		}
 	}
-	
 
-	//update the UI height
+	//get the new heights
+	var h = bbox2.height;
+	if (inParticles || id2 =='GUIParticlesBase'){
+		//count all the heights in the particles dropdowns
+		var hdrop = 0;
+		var pheight = 0;
+		GUIParams.partsKeys.forEach(function(k){
+			// the main particle div without the dropdown
+			var htmp = parseFloat(d3.select('#' + k + 'Div').style('height')) + 2; //2 for margins
+			if (d3.select('#' + k + 'Dropdown').classed('show')){
+				var current = GUIParams.GUIState.main.particles[k].current;
+				if (inParticles && pID == k) current = state;
+				var d = current.split('/');
+				var level = GUIParams.GUIState.main.particles[k];
+				d.forEach(function(dd){
+					level = level[dd];
+				})
+				var ph = parseFloat(d3.select('#' + level.id).style('height')) + 18; //18 for the state bar at the top
+				if (inParticles && pID == k) pheight = ph; //save this to resize the particle dropdown
+				htmp += ph
+				console.log('current', k, current, parseFloat(d3.select('#' + level.id).style('height')))
+			}
+			hdrop += htmp
 
-	d3.select('#UIStateContainer').style('height',h + 'px');
+			console.log('check', k, htmp)
+		});
+		h = hdrop
+
+		//resize the particle dropdown as needed
+		if (inParticles){
+			var ddiv = d3.select('#' + pID + 'Dropdown');
+			var pdiv = d3.select('#' + pID + 'Div');
+			ddiv
+				.style('clip-path', 'inset(0px 0px 0px 0px')
+				.style('height',pheight + 'px');
+			pdiv.style('margin-bottom', pheight + 4 + 'px')
+		}
+	}
+	console.log('height', id2, h)
+
+	//set the new height of the overall UI
+	d3.select('#UIStateContainer').style('height',(h + 38) + 'px');
 
 	//set the state variable
 	GUIBase.current = state;
+
+
+	// var h = bbox2.height + 38; //for the state
+	// if (inParticles){
+	// 	d3.select('#' + pID + 'Dropdown').style('height',(h - 20) + 'px'); //-20 because the header is smaller
+	// 	h += 52; //to account for the main controls header and top of particles
+	// 	d3.select('#' + pID + 'Div').style('margin-bottom', (bbox2.height + 22) + 'px')
+	// }
+
+	// //if we're transitioning to the particle div, get the correct height (e.g. in case particle dropdowns are expanded)
+	// if (!inParticles && id2 == 'GUIParticlesBase'){
+	// 	h = 42;
+	// 	GUIParams.partsKeys.forEach(function(k){
+	// 		h += Math.max(parseFloat(d3.select('#' + k + 'Dropdown').style('height')), 30);
+	// 	})
+	// 	console.log('HERE!!', h)
+	// }
+
+
+	
+
+
+
+
 
 }
 
@@ -986,6 +1042,7 @@ function createCameraControlBox(UI){
 		.attr('class','NSliderClass')
 		.attr('id','CFSlider')
 		.style('margin-left','10px')
+		.style('margin-top','-22px')
 		.style('width',(GUIParams.containerWidth - 115) + 'px');
 	c3.append('input')
 		.attr('class','NMaxTClass')
@@ -1026,6 +1083,7 @@ function createCameraControlBox(UI){
 		.attr('class','NSliderClass')
 		.attr('id','SSSlider')
 		.style('margin-left','40px')
+		.style('margin-top','-22px')
 		.style('width',(GUIParams.containerWidth - 145));
 	c3.append('input')
 		.attr('class','NMaxTClass')
@@ -1315,19 +1373,6 @@ function hideUI(x){
 			var inset = getUIcontainerInset()
 			elem.style('clip-path','inset(-20px ' + (-20 - inset.cbar[0]) + 'px ' + (-20 - inset.cbar[1]) + 'px 0px)');
 
-			// var cwidth = 0;
-			// var cheight = 0;
-			// if (d3.select('#colormap_outer_container').classed('show')){
-			// 	var cbar = d3.select('#colormap_container');
-			// 	if (cbar.node()){
-			// 		//it's rotated
-			// 		cwidth = parseFloat(cbar.style('height')) + 4; // +4 for border
-			// 		cheight = parseFloat(cbar.style('width')) + 4 - bbox.height; // +4 for border
-			// 	}
-			// }
-			// elem.transition().duration(duration).style('clip-path','inset(-20px ' + (-20 - cwidth) + 'px -20px 0px)');
-			// //elem.style('clip-path','inset(-20px -20px -20px 0px)');
-
 		}
 
 	}
@@ -1387,7 +1432,7 @@ function expandLoadingTab(duration=250){
 }
 
 function expandColormapTab(show){
-	//all animations are in CSS (because of the clip-pat)
+	//all animations are in CSS (because of the clip-path)
 	var container = d3.select('#colormap_outer_container');
 	if (show == null){
 		container.node().classList.toggle('show')

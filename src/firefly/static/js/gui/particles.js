@@ -1,51 +1,3 @@
-// function createParticleUIs(UI){
-	
-// 	//TO DO: 
-// 	// remove this function
-// 	//  rework this so that the sliders and filters go with each createParticleUI?  
-// 	//  I need to resize the UI based on the number of particles
-// 	//  reformat particle UIs so that there is an additional level of dropdowns/buttons (as in new design)
-// 	//  remove that "post-facto" resize
-
-
-
-
-// 	// // particle sliders
-// 	// createPsizeSliders();
-// 	// createNpartsSliders();
-// 	// if (GUIParams.haveAnyOctree) createCamNormSliders();
-
-// 	// // particle group dropdowns
-// 	// createVelWidthSliders();
-// 	// createFilterSliders();
-// 	// createColormapSliders();
-// }
-
-
-
-// function fillParticleDropdown(controls,p){
-
-
-
-// 	// colormap
-// 	if (GUIParams.haveColormap[p]){
-// 		fillColormapDropdown(dropdown,p);
-// 		dheight += 50;
-// 	}
-
-// 	// filters
-// 	if (GUIParams.haveFilter[p]){
-// 		fillFilterDropdown(dropdown,p);
-// 		dheight += 115;
-// 	} 
-	
-// 	// add the clip path
-// 	dropdown
-// 		.style('height',dheight+'px')
-// 		.style('display','block')
-// 		.style('clip-path', 'inset(0px 0px ' + dheight + 'px 0px')
-// }
-
 function defineGUIParticleState(){
 	//I will add all the possible windows in here, though some may not be used (based on data and settings)
 	GUIParams.partsKeys.forEach(function(p){
@@ -129,17 +81,22 @@ function createParticleBase(UI, p){
 	var controls = UI.append('div')
 		.attr('class',"particleDiv "+p+"Div")
 		.attr('id',p+"Div" ) 
-		.style('width', (GUIParams.containerWidth - 14) + 'px');
+		.style('width', (GUIParams.containerWidth - 4) + 'px')
+		.style('height','32px')
+		.style('margin-bottom','0px')
+		.style('padding','0px')
 
 	// size the overall particle group div
 	controls.append('div')
 		.attr('class','pLabelDiv')
+		.style('padding-top','7px')
 		.style('width',GUIParams.longestPartLabelLen)
 		.text(p)
 		
 	// add the on-off switch
 	var onoff = controls.append('label')
-		.attr('class','switch');
+		.attr('class','switch')
+		.style('top','4px');
 
 	onoff.append('input')
 		.attr('id',p+'Check')
@@ -163,21 +120,23 @@ function createParticleBase(UI, p){
 	controls.append('div')
 		.attr('id',p+'_PSlider')
 		.attr('class','PSliderClass')
-		.style('left',(GUIParams.containerWidth - 200) + 'px');
+		.style('left',(GUIParams.containerWidth - 210) + 'px')
+		.style('width',(GUIParams.containerWidth - 214) + 'px')
+		.style('height', '25px');
 
 	// add the particle size text input
 	controls.append('input')
 		.attr('id',p+'_PMaxT')
 		.attr('class', 'PMaxTClass')
 		.attr('type','text')
-		.style('left',(GUIParams.containerWidth - 100) + 'px');
+		.style('left',(GUIParams.containerWidth - 94) + 'px');
 
 	// add the particle color picker
 	controls.append('input')
 		.attr('id',p+'ColorPicker');
 
 	createColorPicker(p);
-	controls.select('.sp-replacer').style('left',(GUIParams.containerWidth - 60) + 'px');
+	controls.select('.sp-replacer').style('left',(GUIParams.containerWidth - 54) + 'px');
 
 	createPsizeSlider(p);
 
@@ -186,7 +145,8 @@ function createParticleBase(UI, p){
 		.attr('id', p+'Dropbtn')
 		.attr('class', 'dropbtn')
 		.attr('onclick','expandParticleDropdown(this)')
-		.style('left',(GUIParams.containerWidth - 34) + 'px')
+		.style('left',(GUIParams.containerWidth - 28) + 'px')
+		.style('top','-22px')
 		.html('&#x25BC');
 
 	var keys = Object.keys(GUIParams.GUIState.main.particles[p].base).filter(function(d){return (d != 'id' && d != 'name' && d != 'current')});
@@ -198,6 +158,7 @@ function createParticleBase(UI, p){
 		.attr('class','dropdown-content')
 		.style('width',(GUIParams.containerWidth - 4) + 'px')
 		.style('display','flex-wrap')
+		.style('top', '-18px') //why to I need this??
 		//.style('height', h + 16 + 'px')
 		//.style('clip-path', 'inset(0px 0px ' + (h + 16) + 'px 0px)');
 		.style('height','0px')
@@ -231,17 +192,20 @@ function createParticleBase(UI, p){
 			//.text('Back')
 
 	stateBar.append('div')
-		.attr('id',p + 'UIStateText')
+		.attr('id',p + 'UIStateTextContainer')
 		.attr('class','UIdiv')
-		.style('width', (GUIParams.containerWidth - 51) + 'px')
+		.style('width', (GUIParams.containerWidth - 47) + 'px')
 		.style('margin-left','1px')
 		.style('height', '16px')
 		.style('font-size','12px')
 		.style('line-height','16px')
-		.style('float','left')
-		.style('padding','0px 0px 0px 10px')
-		.style('font-family', '"Lucida Console", "Courier New", monospace')
-		.text('base')
+		.style('padding','0px')
+		.append('div')
+			.attr('id',p + 'UIStateText')
+			.style('float','left')
+			.style('padding','0px 0px 0px 10px')
+			.style('font-family', '"Lucida Console", "Courier New", monospace')
+			.text('base')
 
 	// buttons to navigate to additional particle controls
 	var container = dropdown.append('div')
@@ -810,47 +774,50 @@ function createParticleFilterWindow(container, p){
 
 function expandParticleDropdown(handle) {
 
-	// find the position in the partsKeys list
-	var pID = handle.id.slice(0,-7); // remove  "Dropbtn" from id
-	document.getElementById(pID+"Dropdown").classList.toggle("show");
+	//get the current height of the particle container
+	var h0 = parseFloat(d3.select('#UIStateContainer').style('height'));
 
+	// find particle ID for this dropdown and toggle the classes
+	var pID = handle.id.slice(0,-7); // remove  "Dropbtn" from id
+	var ddiv = d3.select('#' + pID + 'Dropdown');
+	var pdiv = d3.select('#' + pID + 'Div');
+	ddiv.node().classList.toggle('show');
 	handle.classList.toggle('dropbtn-open');
+
+	//get the height of the current dropdown window
+	var current = GUIParams.GUIState.main.particles[pID].current;
+	var d = current.split('/');
+	var level = GUIParams.GUIState.main.particles[pID];
+	d.forEach(function(dd){
+		level = level[dd];
+	})
+	var hdrop = parseFloat(d3.select('#' + level.id).style('height')) + 18; //18 for the state bar at the top
+
+
+	//transition the dropdown open or closed
+	if (ddiv.classed('show')){
+		ddiv
+			.style('clip-path', 'inset(0px 0px 0px 0px')
+			.style('height',hdrop + 'px');
+		pdiv.style('margin-bottom', hdrop + 4 + 'px')
+		h0 += hdrop
+	} else {
+		ddiv
+			.style('clip-path', 'inset(0px 0px ' + parseFloat(ddiv.style.height) + 'px 0px')
+			.style('height','0px');
+		pdiv.style('margin-bottom', '0px')
+
+		h0 -= hdrop
+	}
+
+
+	//reset the height of the containers
+	d3.select('#GUIParticlesBase').style('height',h0 + 'px')
+	d3.select('#UIStateContainer').style('height',h0 + 'px')
 
 	//if the colormap is open be sure to update the overall clip-path
 	var inset = getUIcontainerInset(pID);
 	d3.select('#UIContainer').style('clip-path','inset(-20px ' + inset.inset[1] + 'px ' + inset.inset[2] + 'px 0px)')
-
-	var ddiv = document.getElementById(pID+'Dropdown');
-
-	var bh = parseFloat(d3.select('#GUIParticlesBase').style('height'));
-
-	if (d3.select('#'+pID+"Dropdown").classed('show')){
-		var current = GUIParams.GUIState.main.particles[pID].current;
-		var d = current.split('/');
-		level = GUIParams.GUIState.main.particles[pID];
-		d.forEach(function(dd){
-			level = level[dd];
-		})
-		var h = parseFloat(d3.select('#' + level.id).style('height')) + 18; //18 for the state bar at the top
-		d3.select(ddiv)
-			.style('margin-bottom', parseFloat(ddiv.style.height) + 72 + 'px')
-			.style('clip-path', 'inset(0px 0px 0px 0px')
-			.style('height',h + 'px')
-		d3.select('#GUIParticlesBase').style('height',bh + h + 'px')
-		var ht = h + 72;
-
-	} else {
-		d3.select(ddiv)
-			.style('margin-bottom', '0px')
-			.style('clip-path', 'inset(0px 0px ' + parseFloat(ddiv.style.height) + 'px 0px')
-			.style('height','0px')
-		d3.select('#GUIParticlesBase').style('height',bh - parseFloat(ddiv.style.height) + 'px')
-		var ht = 72
-		d3.select('#' + pID + 'Dropdown').style('height','0px')
-	}
-
-	//update the height
-	d3.select('#UIStateContainer').style('height', ht + 'px')
 }
 
 

@@ -137,3 +137,41 @@ function parseInset(elem){
 	}
 	return out;
 }
+
+function parseTranslateStyle(elem){
+	var trans = elem.style('transform');
+
+	var out = {}
+	
+	//translate
+	var tpos = trans.indexOf('translate(');
+	if (tpos >= 0){
+		var x = trans.substr(tpos  + 10);
+		var tpos2 = x.indexOf(')');
+		var xx = x.substr(0, tpos2).split(',');
+		out.x = xx[0];
+		out.y = xx[1];
+	}
+	
+	//rotate
+	var rpos = trans.indexOf('rotate(')
+	if (rpos >= 0){
+		var x = trans.substr(rpos + 7);
+		var rpos2 = x.indexOf(')');
+		var xx = x.substr(0,rpos2);//.split(',');
+		out.rot = xx
+	}
+
+	//scale
+	var spos = trans.indexOf('scale(');
+	if (spos >= 0){
+		var x = trans.substr(spos  + 6);
+		var spos2 = x.indexOf(')');
+		var xx = x.substr(0, spos2).split(',');
+		out.sx = xx[0];
+		out.sy = xx[1];
+	}
+	
+	return out;
+
+}
