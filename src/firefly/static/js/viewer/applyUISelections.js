@@ -81,8 +81,6 @@ function loadNewData(){
 	viewerParams.loadfrac = 0.;
 	viewerParams.haveUI = false;
 	showSplash(true);
-	console.log(viewerParams.showMemoryUsage)
-	debugger
 
 	viewerParams.loaded = false;
 	viewerParams.pauseAnimation = true;
