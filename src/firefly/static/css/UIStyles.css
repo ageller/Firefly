@@ -7,6 +7,9 @@
 	--UI-extension-background-color: rgba(0,0,0,0.5); 
 	--UI-extension-text-color: white; 
 	--UI-character-background-color:  #333333;
+	--logo-color1: #ff4f75;
+	--logo-color2: #3d0066;
+	--logo-color3: #a3314a;
 }
 
 #UIcontainer{
@@ -19,9 +22,10 @@
 	-webkit-transition: width 0.25s, height 0.25s, clip-path 0.25s;
 	transition: width 0.25s, height 0.25s, clip-path 0.25s; 
 }
-#UIStateContainer{
+.UIStateContainer{
 	-webkit-transition: width 0.25s, height 0.25s, clip-path 0.25s;
 	transition: width 0.25s, height 0.25s, clip-path 0.25s; 
+	overflow: hidden;
 }
 
 #colormap_container{
@@ -501,4 +505,32 @@ select{
 
 .extension{
 	background-color: var(--UI-extension-background-color);
+}
+
+.noTransition{
+	-webkit-transition: all 0s;
+	transition: all 0s; 
+}
+
+/*for the scrollbar */
+/* width */
+::-webkit-scrollbar {
+	width: 3px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+	background: var(--UI-text-color); 
+}
+ 
+/* Handle */
+::-webkit-scrollbar-thumb {
+	background: var(--logo-color3); 
+	border-radius: 3px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+	background: var(--logo-color3); 
+	cursor:pointer;
 }

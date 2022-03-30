@@ -1,6 +1,27 @@
 // TO DO: create radii controls for particles
 
 window.addEventListener('mouseup',function(){GUIParams.movingUI = false;});
+window.addEventListener('resize',checkGUIsize);
+
+// while the window is resizing, I don't want transitions in the size of the GUI
+// execute a function after resize is finished
+// https://stackoverflow.com/questions/45905160/javascript-on-window-resize-end
+function debounce(func, time = 100){
+	var timer;
+	return function(event){
+		if(timer) clearTimeout(timer);
+		timer = setTimeout(func, time, event);
+	};
+}
+
+function removeTransition() {
+	d3.select('#UIStateContainer').classed('noTransition', true);
+}
+function resetTransition() {
+	d3.select('#UIStateContainer').classed('noTransition', false);
+}
+window.addEventListener('resize', removeTransition);
+window.addEventListener('resize', debounce(resetTransition));
 
 ///////////////////////////////
 ////// create the UI
@@ -118,8 +139,11 @@ function createUI(){
 
 	var UI = UIcontainer.append('div')
 		.attr('id','UIStateContainer')
+		.attr('class','UIStateContainer')
+		.attr('trueHeight','34px')
 		.style('position','relative')
-		.style('height','72px')
+		.style('height','34px')
+		.style('margin-bottom','38px')
 		.style('top','34px')
 		.style('clip-path','inset(0px)'); 
 
@@ -308,7 +332,9 @@ function transitionUIWindows(state=null, pID=null){
 	console.log('height', id2, h)
 
 	//set the new height of the overall UI
-	d3.select('#UIStateContainer').style('height',(h + 38) + 'px');
+	d3.select('#UIStateContainer')
+		.style('height',h + 'px')
+		.attr('trueHeight',h + 'px');
 
 	//set the state variable
 	GUIBase.current = state;
@@ -1324,7 +1350,7 @@ function dragElement(elm, e) {
 		pos4 = e.clientY;
 		document.addEventListener('mouseup', closeDragElement);
 		document.addEventListener('mousemove', elementDrag);
-
+		d3.select('#UIStateContainer').classed('noTransition', true);
 	}
 
 	function elementDrag(e) {
@@ -1341,6 +1367,8 @@ function dragElement(elm, e) {
 		var left = parseInt(elmnt.style.left);
 		elmnt.style.top = (top - pos2) + "px";
 		elmnt.style.left = (left - pos1) + "px";
+
+		checkGUIsize();
 	}
 
 	function closeDragElement(e) {
@@ -1349,7 +1377,7 @@ function dragElement(elm, e) {
 		e.stopPropagation();
 		document.removeEventListener('mouseup', closeDragElement);
 		document.removeEventListener('mousemove', elementDrag);
-
+		d3.select('#UIStateContainer').classed('noTransition', false);
 	}
 }
 
@@ -1582,3 +1610,46 @@ function disableCameraInputBoxes(){
 //////////////////////// ////////////////////////
 // helper functions ^^^^^^^
 //////////////////////// ////////////////////////
+
+function checkGUIsize(){
+	//if the bottom of the GUI extends off the page, force the GUI size to get smaller (is possible) and add a scroll bar
+	var bbox = document.getElementById('UIcontainer').getBoundingClientRect();
+	var bottom = bbox.bottom
+	if (GUIParams.haveAnyOctree) bottom += 20; //20 to account for the octree loading tab
+
+	var windowHeight = window.innerHeight;
+	var container = d3.select('#UIStateContainer');
+	var h = parseFloat(container.style('height'));
+	var h0 = parseFloat(container.attr('trueHeight'));
+	
+	
+
+	if (bottom > windowHeight){
+		if (h > 34){
+			//shrink
+			var newh = Math.max(h - (bottom - windowHeight), 34);
+			container.style('height', newh + 'px');
+		}
+	} else {
+		//grow
+		if (h < h0){
+			var newh = Math.min(h - (bottom - windowHeight), h0);
+			container.style('height', newh + 'px');
+
+		}
+	}
+
+
+	//add the scrollbar
+	h = parseFloat(container.style('height'));
+	if (h < h0){
+		container
+			.style('overflow-y', 'scroll')
+			.style('overflow-x', 'hidden')
+	} else {
+		container.style('overflow-y', 'hidden')
+	}
+
+	//FIX THE PARTICLE DROPDOWNS
+	//for some reason these are not sizing the UISTateContainer correctly.  The height is too large, and when the scrollbar is active is shows. I don't understand it
+}
