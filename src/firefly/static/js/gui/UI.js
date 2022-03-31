@@ -1,7 +1,9 @@
 // TO DO: create radii controls for particles
+// TO DO: on double click, reset location of GUI
 
 window.addEventListener('mouseup',function(){GUIParams.movingUI = false;});
 window.addEventListener('resize',checkGUIsize);
+document.body.addEventListener('dblclick',resetGUILocation);
 
 // while the window is resizing, I don't want transitions in the size of the GUI
 // execute a function after resize is finished
@@ -71,26 +73,41 @@ function createUI(){
 	var UIt = UIcontainer.append('div')
 		.attr('id','UItopbar')
 		.attr('class','UIdiv')
-		.attr('onmouseup','hideUI(this);')
-		.attr('onmousedown','dragElement(this, event);')
+		.on('mousedown',dragElement)
 		.style('width', (GUIParams.containerWidth - 4)+ 'px')
+		.style('opacity',1)
 
 	//UIt.append('table');
-	var UIr1 = UIt.append('div')
-		.attr('id','Hamburger')
-		.style('padding','2px 0px 0px 4px')
-		.style('float','left')
+	// var UIr1 = UIt.append('div')
+	// 	.attr('id','Hamburger')
+	// 	.style('padding','2px 0px 0px 4px')
+	// 	.style('float','left')
+	// 	.style('cursor','pointer')
+	// 	.on('mouseup',hideUI)
+	// UIr1.append('div').attr('class','bar1');
+	// UIr1.append('div').attr('class','bar2');
+	// UIr1.append('div').attr('class','bar3');
+
+	// append the Firefly logo (instead of the bars?)
+	UIt.append('div')
+		.attr('id','UIicon')
+		.on('mousedown',dragElement)
+		.on('mouseup',hideUI)
 		.style('cursor','pointer')
-	UIr1.append('div').attr('class','bar1');
-	UIr1.append('div').attr('class','bar2');
-	UIr1.append('div').attr('class','bar3');
+		.style('position','absolute')
+		.style('top','2px')
+		.style('left','2px')
+		.append('img')
+			.attr('src','static/docs/GUIicon.png')
+			.attr('draggable',false)
+			.style('height','30px')
 
 	var UIr2 = UIt.append('div')
 		.style('float','left')
 		.attr('id','ControlsText')
 		.style('font-size','16pt')
 		.style('line-height','16pt')
-		.style('padding','4px 0px 0px 8px')
+		.style('padding','4px 0px 0px 40px')
 		.append('b').text('Controls');
 
 	//add an address bar to show the current state of the GUI
@@ -188,7 +205,7 @@ function createUI(){
 
 	// collapse the UI initially
 	var hamburger = document.getElementById('UItopbar');
-	hideUI(hamburger);
+	hideUI.call(hamburger);
 	hamburger.classList.toggle("change");	
 
 
@@ -197,56 +214,50 @@ function createUI(){
 
 }
 
+function getCurrentLevel(obj, state = null){
+	var current = obj.current
+	if (state) current = state;
+	var d = current.split('/');
+	var level = obj;
+	d.forEach(function(dd){
+		level = level[dd];
+	})
+	return level
+}
 
 function transitionUIWindows(state=null, pID=null){
-	//if state is null, this will transition to the previous level (unless the previous level is main)
-	//will transition from the current UI window (id1) to the desired UI windows (id2)
-	//animations taken care of by css
+	// if state is null, this will transition to the previous level (unless the previous level is main)
+	// will transition from the current UI window (id1) to the desired UI windows (id2)
+	// animations taken care of by css
 
-	//check which button was clicked
+	// check which button was clicked
 	var inParticles = false;
+	var direction = 'forward'
 	var GUIBase = GUIParams.GUIState;
-	//if (this.id == "UIParticlesBackButton") {
 	if (pID) {
 		inParticles = true;
 		GUIBase = GUIParams.GUIState.main.particles[pID];
 	}
 
-
-	//don't try to go back from main
+	// don't try to go back from main
 	if (!state && (GUIBase.current == 'main' || (inParticles && GUIBase.current == 'base'))) return false
 
-	//get the current state
-	var d = GUIBase.current.split('/');
-	level = GUIBase;
-	d.forEach(function(dd){
-		level = level[dd];
-	})
+	// get the current and next element
+	var level = getCurrentLevel(GUIBase);
 	var id1 = level.id;
 	var elem1 = d3.select('#'+id1);
-	//set this to the correct height
-	elem1.style('height', elem1.attr('trueHeight'));
-	elem1.select('.dropdown-content').style('height', elem1.attr('trueHeight'));
-	var bbox1 = elem1.node().getBoundingClientRect(); 
 
+	var id2 = null;
+	var elem2 = null;
 	if (state){
-		//going forward to a deeper level of the GUI
-		d = state.split('/');
-		level = GUIBase;
-		d.forEach(function(dd){
-			level = level[dd];
-		})
-		var id2 = level.id;
-
-		//transition the clip paths
-		//old one off
-
-		elem1.style('transform','translateX(-' + GUIParams.containerWidth + 'px)')
-
-
+		// going forward to a deeper level of the GUI
+		level = getCurrentLevel(GUIBase, state)
+		id2 = level.id;
+		elem2 = d3.select('#'+id2);
+		direction = 'forward';
 	} else {
-		//go back
-		//get the current state (in this case it is not included in the state string sent here)
+		// go back
+		// get the current state (in this case it is not included in the state string sent here)
 		d = GUIBase.current.split('/');
 		d.pop();
 		level = GUIBase;
@@ -257,20 +268,12 @@ function transitionUIWindows(state=null, pID=null){
 			state += dd;
 		})
 		id2 = level.id;
-
-		//old one off, but moving in the opposite direction 
-		elem1.style('transform','translateX(' + GUIParams.containerWidth + 'px)')
-
+		elem2 = d3.select('#'+id2);
+		direction = 'backward';
 	}
 
-	//new one on
-	var elem2 = d3.select('#'+id2);
-	//set this to the correct height
-	elem2.style('height', elem2.attr('trueHeight'));
-	elem2.select('.dropdown-content').style('height', elem2.attr('trueHeight'));
-	var bbox2 = elem2.node().getBoundingClientRect(); 
-	elem2.style('transform','translateX(0px)')
-
+	//set the state variable
+	GUIBase.current = state;
 
 	//update the state text
 	var stateText = state;
@@ -297,57 +300,94 @@ function transitionUIWindows(state=null, pID=null){
 		}
 	}
 
-	//get the new heights
+	// deal with the particle show classes
+	GUIParams.partsKeys.forEach(function(k){
+		var ddiv = d3.select('#' + k + 'Dropdown');
+		ddiv.selectAll('.dropdown-content').classed('show', false);
+		if ((inParticles || id2 == 'GUIParticlesBase') && ddiv.classed('show')){
+			var level = getCurrentLevel(GUIParams.GUIState.main.particles[k]);
+			d3.select('#' + level.id).classed('show', true);
+		}
+	})
+
+
+	// transition the old and new elements into place
+	if (direction == 'forward'){
+		// old one off
+		elem1.style('transform','translateX(-' + GUIParams.containerWidth + 'px)');
+		// new one on
+		elem2.style('transform','translateX(0px)');
+	} else {
+		// old one off, but moving in the opposite direction 
+		elem1.style('transform','translateX(' + GUIParams.containerWidth + 'px)');
+		// new one on
+		elem2.style('transform','translateX(0px)');
+	}
+
+
+	// set the correct heights
+	// these go away (after the transition)
+	setTimeout(function(){
+		elem1.style('height', '0px');
+		elem1.selectAll('.dropdown-content').style('height', '0px');
+	}, 250);
+
+	// these go on, but with special handling below for particles
+	elem2.style('height', elem2.attr('trueHeight'));
+	elem2.select('.dropdown-content').style('height', elem2.attr('trueHeight'));
+	var bbox2 = elem2.node().getBoundingClientRect(); 
+
+
+	// set the heights for the particle dropdowns and count up the total height for the global GUI height
 	var h = bbox2.height;
+	var dh = 0;
 	var id3 = '';
 	if (inParticles || id2 =='GUIParticlesBase'){
-		//count all the heights in the particles dropdowns
 		var hdrop = 0;
 		var pheight = 0;
 		GUIParams.partsKeys.forEach(function(k){
+			var ddiv = d3.select('#' + k + 'Dropdown');
+			var pdiv = d3.select('#' + k + 'Div');
+
 			// the main particle div without the dropdown
-			var htmp = parseFloat(d3.select('#' + k + 'Div').style('height')) + 2; //2 for margins
-			if (d3.select('#' + k + 'Dropdown').classed('show')){
-				d3.select('#' + k + 'Dropdown').style('height', elem2.attr('trueHeight'))
-				var current = GUIParams.GUIState.main.particles[k].current;
-				if (inParticles && pID == k) current = state;
-				var d = current.split('/');
-				var level = GUIParams.GUIState.main.particles[k];
-				d.forEach(function(dd){
-					level = level[dd];
-				})
-				id3 = level.id;
+			var htmp = parseFloat(pdiv.style('height')) + 2; //2 for margins
+
+			if (ddiv.classed('show')){
+				// add on the height of the dropdown
+				var level = getCurrentLevel(GUIParams.GUIState.main.particles[k]);
+				if (inParticles && pID == k) id3 = level.id;
 				var elem = d3.select('#' + level.id);
+
+				var ph = parseFloat(elem.attr('trueHeight')) + 18; //18 for the state bar at the top
+
 				//reset the heights
 				elem.style('height', elem.attr('trueHeight'));
-				var ph = parseFloat(d3.select('#' + level.id).attr('trueHeight')) + 18; //18 for the state bar at the top
-				d3.select('#' + k + 'Dropdown').style('height', ph);
-				if (inParticles && pID == k) pheight = ph; //save this to resize the particle dropdown
+				ddiv.style('height', ph + 'px');
+				pdiv.style('margin-bottom', ph + 4 + 'px');
+
+				//save this to resize the particle dropdown
+				if (inParticles && pID == k) pheight = ph; 
+
 				htmp += ph
+
+				dh += 2; // I think I need a slight addition to the sizing per particle, but this needs further testing
+			} else 	{
+				ddiv.style('height','0px');
 			}
+
 			hdrop += htmp
 
 		});
 		h = hdrop
 
-		//resize the particle dropdown as needed (ddiv is a bit redundant, but OK to keep here)
-		if (inParticles){
-			var ddiv = d3.select('#' + pID + 'Dropdown');
-			var pdiv = d3.select('#' + pID + 'Div');
-			ddiv
-				.style('clip-path', 'inset(0px 0px 0px 0px')
-				.style('height',pheight + 'px');
-			pdiv.style('margin-bottom', pheight + 4 + 'px')
-		}
 	}
 
-	//set the new height of the overall UI
+
+	// set the new height of the overall UI
 	d3.select('#UIStateContainer')
-		.style('height',h + 'px')
+		.style('height',(h + dh) + 'px')
 		.attr('trueHeight',h + 'px');
 
-	//set the state variable
-	GUIBase.current = state;
 
 
 	// set all hidden components of the GUI to a height of 0
@@ -355,7 +395,7 @@ function transitionUIWindows(state=null, pID=null){
 		if (obj.hasOwnProperty('id')){
 			if (obj.id != id1 && obj.id != id2 && obj.id != id3){
 				var elem = d3.select('#' + obj.id);
-				elem.style('height','0px');
+				if (!elem.classed('show')) elem.style('height','0px');
 				elem.select('.dropdown-content').filter(function(){
 					if (d3.select(this).classed('show')) return false;
 					return true;
@@ -368,6 +408,8 @@ function transitionUIWindows(state=null, pID=null){
 	}
 	setToZero(GUIParams.GUIState);
 
+
+	// check if we need a scroll bar
 	setTimeout(checkGUIsize, 500);
 
 }
@@ -1354,69 +1396,66 @@ function selectFilter() {
 // from https://www.w3schools.com/howto/howto_js_draggable.asp
 //////////////////////
 function dragElement(elm, e) {
-	var elmnt = document.getElementById("UIcontainer");
 	var pos1 = 0, pos2 = 0, pos3 = 0, pos4 = 0;
 	dragMouseDown(e);
-
-
-	function dragMouseDown(e) {
-		e = e || window.event;
-		// get the mouse cursor position at startup:
-		pos3 = e.clientX;
-		pos4 = e.clientY;
-		document.addEventListener('mouseup', closeDragElement);
-		document.addEventListener('mousemove', elementDrag);
-		d3.select('#UIStateContainer').classed('noTransition', true);
-	}
-
-	function elementDrag(e) {
-		GUIParams.movingUI = true;
-		e = e || window.event;
-		// calculate the new cursor position:
-		pos1 = pos3 - e.clientX;
-		pos2 = pos4 - e.clientY;
-		pos3 = e.clientX;
-		pos4 = e.clientY;
-
-		// set the element's new position:
-		var top = parseInt(elmnt.style.top);
-		var left = parseInt(elmnt.style.left);
-		elmnt.style.top = (top - pos2) + "px";
-		elmnt.style.left = (left - pos1) + "px";
-
-		checkGUIsize();
-	}
-
-	function closeDragElement(e) {
-		/* stop moving when mouse button is released:*/
-		GUIParams.movingUI = false;
-		e.stopPropagation();
-		document.removeEventListener('mouseup', closeDragElement);
-		document.removeEventListener('mousemove', elementDrag);
-		d3.select('#UIStateContainer').classed('noTransition', false);
-	}
 }
 
+function dragMouseDown(e) {
+	e = e || window.event;
+	// get the mouse cursor position at startup:
+	pos3 = e.clientX;
+	pos4 = e.clientY;
+	document.addEventListener('mouseup', closeDragElement);
+	document.addEventListener('mousemove', elementDrag);
+	d3.select('#UIStateContainer').classed('noTransition', true);
+}
+
+function elementDrag(e) {
+	GUIParams.movingUI = true;
+	e = e || window.event;
+	// calculate the new cursor position:
+	pos1 = pos3 - e.clientX;
+	pos2 = pos4 - e.clientY;
+	pos3 = e.clientX;
+	pos4 = e.clientY;
+
+	// set the element's new position:
+	var elem = document.getElementById("UIcontainer");
+	var top = parseInt(elem.style.top);
+	var left = parseInt(elem.style.left);
+	elem.style.top = (top - pos2) + "px";
+	elem.style.left = (left - pos1) + "px";
+
+	checkGUIsize();
+}
+
+function closeDragElement(e) {
+	/* stop moving when mouse button is released:*/
+	GUIParams.movingUI = false;
+	e.stopPropagation();
+	document.removeEventListener('mouseup', closeDragElement);
+	document.removeEventListener('mousemove', elementDrag);
+	d3.select('#UIStateContainer').classed('noTransition', false);
+}
 /////////////
 // for show/hide of elements of the UI
 //////////////
-function hideUI(x){
+function hideUI(){
 	//clip-path has animation in css
 	if (!GUIParams.movingUI){
 
 		// change the x to 3 bars
-		x.classList.toggle("change");
+		this.classList.toggle("change");
 		GUIParams.UIhidden = !GUIParams.UIhidden
 
 		var elem = d3.select('#UIcontainer');
 		var bbox = elem.node().getBoundingClientRect();
 		if (GUIParams.UIhidden){
-			elem.style('clip-path','inset(3px ' + (bbox.width - 34) + 'px ' + (bbox.height - 34) + 'px 3px')
+			elem.style('clip-path','inset(3px ' + (bbox.width - 35) + 'px ' + (bbox.height - 35) + 'px 3px round 10px');
 		}else{
 			//check the colormap
 			var inset = getUIcontainerInset()
 			elem.style('clip-path','inset(-20px ' + (-20 - inset.cbar[0]) + 'px ' + (-20 - inset.cbar[1]) + 'px 0px)');
-
 		}
 
 	}
@@ -1637,8 +1676,6 @@ function checkGUIsize(){
 	var container = d3.select('#UIStateContainer');
 	var h = parseFloat(container.style('height'));
 	var h0 = parseFloat(container.attr('trueHeight'));
-	
-	
 
 	if (bottom > windowHeight){
 		if (h > 34){
@@ -1655,7 +1692,6 @@ function checkGUIsize(){
 		}
 	}
 
-
 	//add the scrollbar
 	h = parseFloat(container.style('height'));
 	if (h < h0){
@@ -1664,4 +1700,14 @@ function checkGUIsize(){
 		container.style('overflow', 'hidden')
 	}
 
+}
+
+function resetGUILocation(){
+	// move the GUI back to the starting location on double click
+	closeDragElement(event);
+	if (event.target.nodeName == 'CANVAS') {
+		var elem = document.getElementById("UIcontainer");
+		elem.style.top = '30px';
+		elem.style.left = '10px';
+	}
 }

@@ -13,8 +13,6 @@ function defineGUIParticleState(){
 				},
 
 			},
-			'id' : 'GUIParticles'+p,
-			'name': p
 		};
 
 
@@ -88,15 +86,20 @@ function createParticleBase(UI, p){
 		.style('margin-bottom','0px')
 		.style('padding','0px')
 
+	var container = controls.append('div')
+		.attr('id',p + 'BaseContainer')
+		.style('height','33px')
+		.attr('trueHeight','33px');
+
 	// size the overall particle group div
-	controls.append('div')
+	container.append('div')
 		.attr('class','pLabelDiv')
 		.style('padding-top','7px')
 		.style('width',GUIParams.longestPartLabelLen)
 		.text(p)
 		
 	// add the on-off switch
-	var onoff = controls.append('label')
+	var onoff = container.append('label')
 		.attr('class','switch')
 		.style('top','4px');
 
@@ -119,7 +122,7 @@ function createParticleBase(UI, p){
 
 
 	// add the particle size slider
-	controls.append('div')
+	container.append('div')
 		.attr('id',p+'_PSlider')
 		.attr('class','PSliderClass')
 		.style('left',(GUIParams.containerWidth - 210) + 'px')
@@ -127,23 +130,23 @@ function createParticleBase(UI, p){
 		.style('height', '25px');
 
 	// add the particle size text input
-	controls.append('input')
+	container.append('input')
 		.attr('id',p+'_PMaxT')
 		.attr('class', 'PMaxTClass')
 		.attr('type','text')
 		.style('left',(GUIParams.containerWidth - 94) + 'px');
 
 	// add the particle color picker
-	controls.append('input')
+	container.append('input')
 		.attr('id',p+'ColorPicker');
 
 	createColorPicker(p);
-	controls.select('.sp-replacer').style('left',(GUIParams.containerWidth - 54) + 'px');
+	container.select('.sp-replacer').style('left',(GUIParams.containerWidth - 54) + 'px');
 
 	createPsizeSlider(p);
 
 	// add the dropdown button and a dropdown container div
-	controls.append('button')
+	container.append('button')
 		.attr('id', p+'Dropbtn')
 		.attr('class', 'dropbtn')
 		.attr('onclick','expandParticleDropdown(this)')
@@ -160,7 +163,7 @@ function createParticleBase(UI, p){
 		.attr('class','dropdown-content')
 		.style('width',(GUIParams.containerWidth - 4) + 'px')
 		.style('display','flex-wrap')
-		.style('top', '-18px') //why to I need this??
+		.style('top', '0px') 
 		//.style('height', h + 16 + 'px')
 		//.style('clip-path', 'inset(0px 0px ' + (h + 16) + 'px 0px)');
 		.style('height','0px')
@@ -783,13 +786,14 @@ function createParticleFilterWindow(container, p){
 function expandParticleDropdown(handle) {
 
 	//get the current height of the particle container
-	var h0 = parseFloat(d3.select('#UIStateContainer').style('height'));
+	var h0 = parseFloat(d3.select('#UIStateContainer').attr('trueHeight'));
 
 	// find particle ID for this dropdown and toggle the classes
 	var pID = handle.id.slice(0,-7); // remove  "Dropbtn" from id
 	var ddiv = d3.select('#' + pID + 'Dropdown');
 	var pdiv = d3.select('#' + pID + 'Div');
 	ddiv.node().classList.toggle('show');
+
 	handle.classList.toggle('dropbtn-open');
 
 	//get the height of the current dropdown window
@@ -800,8 +804,7 @@ function expandParticleDropdown(handle) {
 		level = level[dd];
 	})
 	var elem = d3.select('#' + level.id);
-	//reset the height
-	elem.style('height', elem.attr('trueHeight'));
+	elem.node().classList.toggle('show');
 	var hdrop = parseFloat(elem.attr('trueHeight')) + 18; //18 for the state bar at the top
 
 
@@ -810,14 +813,15 @@ function expandParticleDropdown(handle) {
 		ddiv
 			.style('clip-path', 'inset(0px 0px 0px 0px')
 			.style('height',hdrop + 'px');
-		pdiv.style('margin-bottom', hdrop + 4 + 'px')
+		pdiv.style('margin-bottom', hdrop + 4 + 'px');
+		elem.style('height', elem.attr('trueHeight'));
 		h0 += hdrop
 	} else {
 		ddiv
 			.style('clip-path', 'inset(0px 0px ' + parseFloat(ddiv.style.height) + 'px 0px')
 			.style('height','0px');
-		pdiv.style('margin-bottom', '0px')
-
+		pdiv.style('margin-bottom', '0px');
+		elem.style('height', '0px');
 		h0 -= hdrop
 	}
 
@@ -825,7 +829,7 @@ function expandParticleDropdown(handle) {
 	//reset the height of the containers
 	d3.select('#GUIParticlesBase').style('height',h0 + 'px')
 	d3.select('#UIStateContainer')
-		.style('height',h0 + 'px')
+		.style('height',(h0 + 2*GUIParams.partsKeys.length) + 'px') //I think I need this offset, but required further testing
 		.attr('trueHeight',h0 + 'px')
 
 	//if the colormap is open be sure to update the overall clip-path

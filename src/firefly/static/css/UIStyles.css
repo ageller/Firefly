@@ -56,6 +56,9 @@
 #UItopbar:hover {
 	opacity: 1;
 }
+.fullOpacity{
+	opacity: 1;
+}
 .bar1, .bar2, .bar3 {
 	width: 20px;
 	height: 3px;
