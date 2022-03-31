@@ -1165,13 +1165,13 @@ function compileJSONData(data, p, callback, initialLoadFrac=0){
 	})
 
 	key = 'colorArray'
-	if (data.hasOwnProperty(key) && !data.hasOwnProperty('rgbaColor')){
+	if (data.hasOwnProperty(key) && !data.hasOwnProperty('rgbaColors_flat')){
 		data[key+'_flat'] = Array(3*data[key].length);
 		for (var i=0; i<data[key].length; i++){
-			data['rgbaColor'][4*i] = data[key][i][0];
-			data['rgbaColor'][4*i+1] = data[key][i][1];
-			data['rgbaColor'][4*i+2] = data[key][i][2];
-			data['rgbaColor'][4*i+3] = data[key][i][3];
+			data['rgbaColors_flat'][4*i] = data[key][i][0];
+			data['rgbaColors_flat'][4*i+1] = data[key][i][1];
+			data['rgbaColors_flat'][4*i+2] = data[key][i][2];
+			data['rgbaColors_flat'][4*i+3] = data[key][i][3];
 		}
 		data.removeProperty(key);
 	}
