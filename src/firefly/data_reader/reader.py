@@ -226,12 +226,12 @@ class Reader(object):
             if (hasattr(particleGroup,'octree') and (mask is None or mask[i])): 
                 particleGroup.octree.pruneOctree(min_npart_per_node)
 
-    def dumpToJSON(
+    def writeToDisk(
         self,
         loud=False,
-        write_jsons_to_disk=True,
+        write_to_disk=True,
         symlink=True,
-        use_format='ffly'):
+        extension='.ffly'):
         """Creates all the necessary JSON files to run firefly and ensures they are
         properly linked and cross-referenced correctly using the
         :func:`firefly.data_reader.Settings.outputToJSON` and
@@ -239,17 +239,17 @@ class Reader(object):
         (and :func:`firefly.data_reader.TweenParams.outputToJSON` if one is attached).
         :param loud: flag to print status information to the console, defaults to False
         :type loud: bool, optional
-        :param write_jsons_to_disk: flag that controls whether data is saved to disk (:code:`True`) 
+        :param write_to_disk: flag that controls whether data is saved to disk (:code:`True`) 
             or only converted to a string and stored in :code:`self.JSON` (:code:`False`), defaults to True
-        :type write_jsons_to_disk: bool, optional
+        :type write_to_disk: bool, optional
         :param symlink: flag for whether a soft link should be created between where the data is stored on 
             disk and the :code:`self.static_data_dir` directory (:code:`True`) or whether it should be 
             saved directly to :code:`self.static_data_dir` directory (:code:`False`). 
             Note that :code:`symlink=False` will not _also_ save results in :code:`self.JSONdir`, defaults to True
         :type symlink: bool, optional
-        :param use_format: what output format should the particle data be saved in, JSON or binary 'ffly'
+        :param extension: what output format should the particle data be saved in, JSON or binary 'ffly'
         :type: str
-        :return: :code:`self.JSON` or :code:`""` according to :code:`write_jsons_to_disk`
+        :return: :code:`self.JSON` or :code:`""` according to :code:`write_to_disk`
         :rtype: str
         """
         
@@ -274,7 +274,7 @@ class Reader(object):
 
         ## if we don't actually want to write to disk then we don't need
         ##  to do any filesystem tasks
-        if write_jsons_to_disk:
+        if write_to_disk:
             ## make the output directory
             if not os.path.isdir(JSONdir):
                 os.makedirs(JSONdir)
@@ -308,7 +308,7 @@ class Reader(object):
             if loud:
                 print("Outputting:",particleGroup)
 
-            if use_format.lower() == 'json':
+            if extension.lower() == '.json':
                 this_JSON_array,filenames_and_nparts = particleGroup.outputToJSON(
                     os.path.basename(JSONdir),
                     os.path.dirname(JSONdir),
@@ -316,9 +316,9 @@ class Reader(object):
                     loud=loud,
                     max_npart_per_file=self.max_npart_per_file,
                     clean_JSONdir=self.clean_JSONdir if particleGroup is self.particleGroups[0] else False,
-                    write_jsons_to_disk=write_jsons_to_disk,
+                    write_to_disk=write_to_disk,
                     not_reader=False)
-            elif use_format.lower() == 'ffly':
+            elif extension.lower() == '.ffly':
                 this_JSON_array,filenames_and_nparts = particleGroup.outputToFFLY(
                     os.path.basename(JSONdir),
                     os.path.dirname(JSONdir),
@@ -327,7 +327,7 @@ class Reader(object):
                     max_npart_per_file=self.max_npart_per_file,
                     clean_FFLYdir= self.clean_JSONdir if particleGroup is self.particleGroups[0] else False,
                     not_reader=False)
-            else: raise KeyError("Requested format %s not understood. Choose json or ffly."%use_format)
+            else: raise KeyError("Requested format %s not understood. Choose .json or .ffly."%extension)
 
             ## append the JSON arrays for this particle group
             JSON_array += this_JSON_array
@@ -365,8 +365,6 @@ class Reader(object):
                 'startup.json')
 
             ## relative path from .js interpreter (which runs in /firefly/static) 
-        ## relative path from .js interpreter (which runs in /firefly/static) 
-            ## relative path from .js interpreter (which runs in /firefly/static) 
             ##  to this dataset
             startup_path = os.path.join("data",os.path.basename(JSONdir))
 
@@ -374,26 +372,18 @@ class Reader(object):
                 startup_dict = load_from_json(startup_file)
 
                 maxx = 0 
-            maxx = 0 
-                maxx = 0 
                 for key in startup_dict.keys():
-                    if int(key) > maxx: 
-                if int(key) > maxx: 
                     if int(key) > maxx: 
                         maxx = int(key)
 
                     ## it's already in startup.json
                     if startup_dict[key] == startup_path:
                         startup_file = None 
-                    startup_file = None 
-                        startup_file = None 
                         maxx-=1 ## since we'll add 1 below
                 
                 startup_dict[str(maxx+1)]=startup_path
                 JSON_array+=[(
                     ## recreate in case we overwrote the startup_file variable in loop above
-                    os.path.join(self.static_data_dir,'startup.json'), 
-                os.path.join(self.static_data_dir,'startup.json'), 
                     os.path.join(self.static_data_dir,'startup.json'), 
                     write_to_json(
                         startup_dict,
@@ -406,7 +396,7 @@ class Reader(object):
                         {"0":startup_path},
                         startup_file if write_to_disk else None))] ## None -> returns JSON string
 
-        if not write_jsons_to_disk:
+        if not write_to_disk:
             ## create a single "big JSON" with all the data in it in case
             ##  we want to send dataViaFlask
             JSON_dict = dict(JSON_array)
@@ -423,7 +413,7 @@ class Reader(object):
     def dumpSettingsToJSON(
         self,
         symlink=True,
-        write_jsons_to_disk=True,
+        write_to_disk=True,
         loud=False):
 
         ## path where data needs to be visible to firefly
@@ -439,7 +429,7 @@ class Reader(object):
             JSONdir,
             JSON_prefix=self.JSON_prefix,
             loud=loud,
-            write_jsons_to_disk=write_jsons_to_disk,
+            write_to_disk=write_to_disk,
             not_reader=False)
 
     def outputToDict(self):
@@ -483,8 +473,8 @@ class Reader(object):
         if not hasattr(self,'JSON') or self.JSON is None:
             self.dumpToJSON(
                 loud=False,
-                write_jsons_to_disk=False,
-                use_format='json')
+                write_to_disk=False,
+                extension='json')
 
         ## post the json to the listening url data_input
         ##  defined in server.py
@@ -670,7 +660,7 @@ class ArrayReader(Reader):
         fields=None,
         field_names=None,
         decimation_factor=1,
-        write_jsons_to_disk=True,
+        write_to_disk=True,
         loud=True,
         **kwargs):
         """Takes a list of opened numpy arrays and creates a :class:`firefly.data_reader.Reader` instance
@@ -695,9 +685,9 @@ class ArrayReader(Reader):
         :param decimation_factor: factor by which to reduce the data randomly 
             i.e. :code:`data=data[::decimation_factor]`, defaults to 1
         :type decimation_factor: int, optional
-        :param write_jsons_to_disk: flag that controls whether data is saved to disk (:code:`True`)
+        :param write_to_disk: flag that controls whether data is saved to disk (:code:`True`)
             or only converted to a string and stored in :code:`self.JSON` (:code:`False`), defaults to True
-        :type write_jsons_to_disk: bool, optional
+        :type write_to_disk: bool, optional
         :param loud: flag to print status information to the console, defaults to False
         :type loud: bool, optional
         :raises np.AxisError: if the coordinate data cannot be interpreted
@@ -805,9 +795,10 @@ class ArrayReader(Reader):
 
         ## either write a bunch of mini JSONs to disk or store 
         ##  a single big JSON in self.JSON
-        self.dumpToJSON(
-            write_jsons_to_disk=write_jsons_to_disk,
-            loud=loud)
+        self.writeToDisk(
+            write_to_disk=write_to_disk,
+            loud=loud,
+            extension='.json' if not write_to_disk else '.ffly')
 
 class SimpleReader(ArrayReader):
     """ A wrapper to :class:`firefly.data_reader.ArrayReader` that attempts to 
@@ -818,7 +809,7 @@ class SimpleReader(ArrayReader):
         self,
         path_to_data,
         field_names=None,
-        write_jsons_to_disk=True,
+        write_to_disk=True,
         extension='.hdf5',
         loud=True,
         **kwargs):
@@ -907,10 +898,11 @@ class SimpleReader(ArrayReader):
             coordinates=coordss,
             UInames=particle_groups,
             fields=fieldsss,
-            write_jsons_to_disk=write_jsons_to_disk,
-            loud=loud)
+            write_to_disk=write_to_disk,
+            loud=loud,
+            **kwargs)
 
-    def __getCSVCoordinates(self,fname):
+    def __getCSVCoordinates(self,fname,sep=' '):
         """Simple parser for opening a CSV file and extracting
             its coordinates.
 
@@ -919,7 +911,7 @@ class SimpleReader(ArrayReader):
         :return: :code:`coordinates`
         :rtype: np.ndarray
         """
-        full_df = pd.read_csv(fname,sep=' ')
+        full_df = pd.read_csv(fname,sep=sep)
         coordinates = np.empty((full_df.shape[0],3))
 
         if 'x' in full_df and 'y' in full_df and 'z' in full_df:

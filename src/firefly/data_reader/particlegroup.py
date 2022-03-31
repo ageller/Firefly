@@ -505,7 +505,7 @@ class ParticleGroup(object):
         loud=True,
         max_npart_per_file=10**4,
         clean_JSONdir=False,
-        write_jsons_to_disk=True,
+        write_to_disk=True,
         not_reader=True):
         """Outputs this ParticleGroup instance's data to JSON format, splitting it up into 
             multiple sub-JSON files. Best used when coupled with a :class:`firefly.data_reader.Reader`'s
@@ -529,11 +529,11 @@ class ParticleGroup(object):
             the :code:`JSONdir`. Strictly not necessary (since :code:`filenames.json` 
             will be updated) but it is good to clean up after yourself., defaults to False
         :type clean_JSONdir: bool, optional
-        :param write_jsons_to_disk: flag that controls whether data is saved to disk (:code:`True`)
+        :param write_to_disk: flag that controls whether data is saved to disk (:code:`True`)
             or only converted to a string and returned (:code:`False`), defaults to True
-        :type write_jsons_to_disk: bool, optional
+        :type write_to_disk: bool, optional
         :param not_reader: flag for whether to print the Reader :code:`filenames.json` warning, defaults to True
-        :type write_jsons_to_disk: bool, optional
+        :type write_to_disk: bool, optional
         :return: filename, JSON_array (either a list full of filenames if
             written to disk or a list of JSON strs)
         :rtype: str, list of str
@@ -605,7 +605,7 @@ class ParticleGroup(object):
             JSON_array += [(
                 fname,
                 write_to_json(outDict,
-                    fname if write_jsons_to_disk else None))] ## path=None -> returns a string
+                    fname if write_to_disk else None))] ## path=None -> returns a string
 
             ## move onto the next file
             cur_index += nparts_this_file
@@ -695,7 +695,8 @@ class ParticleGroup(object):
             ## fill necessary attributes
             binary_writer.nfields = len(self.field_names)
             binary_writer.field_names = self.field_names
-            binary_writer.fields = self.field_arrays[:,these_dec_inds]
+            if len(self.field_names): binary_writer.fields = self.field_arrays[:,these_dec_inds]
+            else: binary_writer.fields = []
             binary_writer.filter_flags = self.field_filter_flags
             binary_writer.colormap_flags = self.field_colormap_flags
             binary_writer.radius_flags = self.field_radius_flags

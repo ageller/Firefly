@@ -597,7 +597,7 @@ class Settings(object):
         JSON_prefix='',
         filename=None,
         loud=True,
-        write_jsons_to_disk=True,
+        write_to_disk=True,
         not_reader=True):
         """ Saves the current settings to a JSON file.
 
@@ -614,11 +614,11 @@ class Settings(object):
         :type JSON_prefix: str, optional
         :param loud: flag to print status information to the console, defaults to True
         :type loud: bool, optional
-        :param write_jsons_to_disk: flag that controls whether data is saved to disk (:code:`True`)
+        :param write_to_disk: flag that controls whether data is saved to disk (:code:`True`)
             or only converted to a string and returned (:code:`False`), defaults to True
-        :type write_jsons_to_disk: bool, optional
+        :type write_to_disk: bool, optional
         :param not_reader: flag for whether to print the Reader :code:`filenames.json` warning, defaults to True
-        :type write_jsons_to_disk: bool, optional
+        :type write_to_disk: bool, optional
         :return: filename, JSON(all_settings_dict) (either a filename if
             written to disk or a JSON strs)
         :rtype: str, str
@@ -638,7 +638,7 @@ class Settings(object):
         ## convert dictionary to a JSON (either write to disk or get back a str)
         return filename,write_to_json(
             all_settings_dict,
-            filename if write_jsons_to_disk else None) ## None -> string
+            filename if write_to_disk else None) ## None -> string
 
     def loadFromJSON(
         self,

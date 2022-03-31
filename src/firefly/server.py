@@ -120,7 +120,7 @@ def separate_GUI():
 #     socketio.emit('update_streamer', blob, namespace=namespace)
 
 
-########reading in hdf5 or csv files
+########reading in a directory of hdf5 or csv files
 @socketio.on('input_otherType', namespace=namespace)
 def input_otherType(filedir):
     print('======= showing loader')
@@ -140,7 +140,7 @@ def input_otherType(filedir):
         pass
 
     print('======= have input '+ftype+' data file(s) in', fdir)
-    reader = SimpleReader(fdir, write_jsons_to_disk=False, extension=ftype, decimation_factor=dec)
+    reader = SimpleReader(fdir, write_to_disk=False, extension=ftype, decimation_factor=dec)
     data = json.loads(reader.JSON)
 
     print('======= have data from file(s), sending to viewer ...')
