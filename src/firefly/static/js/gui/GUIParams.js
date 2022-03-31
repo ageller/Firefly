@@ -137,6 +137,11 @@ function defineGUIParams(){
 
 		this.boxSize = 1.;
 
+		// prevent users from accidentally making particles big enough to 
+		//  freeze their computer by forcing them to interactively slide the sliders
+		//  up to the maximum value after they set it.
+		this.safePSizeSliders = true;
+
 		this.haveOctree = {}; //will be initialized to false for each of the parts keys in loadData
 		this.haveAnyOctree = false;
 		this.octreeMemoryLimit = 0;

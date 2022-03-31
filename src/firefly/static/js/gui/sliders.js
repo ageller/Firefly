@@ -43,11 +43,13 @@ function setSliderHandle(i, value, parent, varArgs, resetEnd, type, varVals=null
 		//reset the slider value
 		var r = parent.noUiSlider.get()
 		if (Array.isArray(r)) r[i] = value; else r = value; //this could also be type 'double' vs. 'single'
-		parent.noUiSlider.set(r);
 
-
-		//update the attached variables (already taken care of when we change the slider value)
-		updateUIValues(parseFloat(value), varArgs, i, type);
+		// don't automatically update the size, make people slide it so it's safer
+		if (!GUIParams.safePSizeSliders || (!parent.id.includes('PSlider') || value < max)){
+			parent.noUiSlider.set(r);
+			//update the attached variables (already taken care of when we change the slider value)
+			updateUIValues(parseFloat(value), varArgs, i, type);
+		}
 	}
 
 }
