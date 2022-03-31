@@ -56,8 +56,10 @@ void main(void) {
 		float dist2 = dist*dist;
 		// fix for the minimum point size imposed by WebGL context gl.ALIASED_POINT_SIZE_RANGE = [1, ~8000]
 		float dMax = min(1., vPointSize);
-		if (dist > dMax){
-			discard;
+		if (useDepth > 0.5){
+			if (dist > dMax){
+				discard;
+			}
 		} else {
 			if (SPHrad == 1){
 				// best fit quartic to SPH kernel (unormalized)
