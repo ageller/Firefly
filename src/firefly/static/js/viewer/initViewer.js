@@ -1130,6 +1130,16 @@ function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
 							compileFFLYData(foo, p, callback, initialLoadFrac)}
 						);
 					}
+
+					else if (viewerParams.usingSocket){
+						if (
+						readf.toLowerCase().includes('.csv') ||
+						readf.toLowerCase().includes('.hdf5')){
+						console.log('hdf5 or csv file in filenames.json', readf);
+						socketParams.socket.emit('input_CSVHDF5', prefix+readf);
+
+						}
+					}
 				}
 			}
 		});
@@ -1153,7 +1163,12 @@ function compileJSONData(data, p, callback, initialLoadFrac=0){
 	// did we just load an octree.json file? let's initialize the octree then.
 	if (data.hasOwnProperty('octree')) abg_initOctree(p,data);
 
+	countPartsForLoadingBar(initialLoadFrac);
 
+	checkDone(callback);	
+}
+
+function countPartsForLoadingBar(initialLoadFrac=0){
 	var num = 0;
 	if (!viewerParams.counting){
 		var num = countParts()
@@ -1165,18 +1180,22 @@ function compileJSONData(data, p, callback, initialLoadFrac=0){
 			viewerParams.loadfrac = loadfrac;
 			updateLoadingBar();
 		}
-		//console.log('in compile JSON data', p, data, viewerParams.counting, countParts(),'loadfrac', loadfrac)
 	}
-	if ('options' in viewerParams.parts){
+}
+
+function checkDone(callback){
+	if (
+		('options' in viewerParams.parts && viewerParams.parts.options.loaded) || 
+		!(viewerParams.filenames.hasOwnProperty('options')) // no options file provided
+		){
 		// we're done loading!
-		if (countParts() ==  viewerParams.parts.totalSize && viewerParams.parts.options.loaded){
+		if (countParts() ==  viewerParams.parts.totalSize){
 
 			var index = viewerParams.partsKeys.indexOf('options');
 			if (index > -1) {
 				viewerParams.partsKeys.splice(index, 1);
 				viewerParams.parts.options0 = JSON.parse(JSON.stringify(viewerParams.parts.options));
 			}
-
 			callback(); 
 		}
 	}
@@ -1244,37 +1263,10 @@ function compileFFLYData(data, p, callback, initialLoadFrac=0){
 			);
 		}
 	}
-	var num = 0;
-	if (!viewerParams.counting){
-		var num = countParts()
-		var frac = (num/viewerParams.parts.totalSize);
-		if (viewerParams.parts.totalSize == 0) frac = 1.;
-		var loadfrac = frac*(1. - initialLoadFrac) + initialLoadFrac;
-		//some if statment like this seems necessary.  Otherwise the loading bar doesn't update (I suppose from too many calls)
-		if (loadfrac - viewerParams.loadfrac > 0.1 || loadfrac == 1){
-			viewerParams.loadfrac = loadfrac;
-			updateLoadingBar();
-		}
-		//console.log('in compile FFLY data', p, data, viewerParams.counting, countParts(),'loadfrac', loadfrac)
-	}
+	
+	countPartsForLoadingBar(initialLoadFrac);
 
-	if ('options' in viewerParams.parts){
-		//console.log(d3.selectAll('#loadingRect').node().getBoundingClientRect().width)
-		//console.log("counting", countParts(), viewerParams.parts.totalSize, viewerParams.loadfrac)
-		if (countParts() ==  viewerParams.parts.totalSize && viewerParams.parts.options.loaded){
-			//console.log("here")
-
-			var index = viewerParams.partsKeys.indexOf('options');
-			if (index > -1) {
-				viewerParams.partsKeys.splice(index, 1);
-				viewerParams.parts.options0 = JSON.parse(JSON.stringify(viewerParams.parts.options));
-			}
-
-			//if (viewerParams.haveAnyOctree) addKeysForOctree();
-
-			callback(); 
-		}
-	}
+	checkDone(callback);	
 }
 
 
