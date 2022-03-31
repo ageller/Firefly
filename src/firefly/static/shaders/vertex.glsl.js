@@ -52,7 +52,7 @@ void main(void) {
 		float vSize = sqrt(vyc*vyc+vxc*vxc)/sqrt(dot(velVals.xyz,velVals.xyz))*velVals[3] * 0.5;
 		vTheta = atan(vyc,vxc);
 		if (vTheta<0.0) vTheta=vTheta+2.0*PI;
-		// velVectorSizeFac = 100 empiracally tested seems to match particle size
+		// velVectorSizeFac = 100 empirically tested seems to match particle size
 		//  when it's a fuzzy sphere.  the clamping ensures particles don't disappear when
 		//  you enable velocity vectors
 		gl_PointSize = clamp(
