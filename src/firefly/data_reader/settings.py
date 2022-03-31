@@ -300,7 +300,6 @@ class Settings(object):
         center=None,
         camera=None,
         cameraRotation=None,
-        tweenFileName=None,
         ):
         """Settings that affect the position and orientation of the camera
 
@@ -314,16 +313,12 @@ class Settings(object):
         :param cameraRotation: can set camera rotation in units of radians 
             if you want, defaults to None
         :type cameraRotation: np.ndarray of shape (3), optional
-        :param tweenFileName: the name of the file containing the tween params generated 
-            with :class:`firefly.data_reader.TweenParams`, defaults to ``"TweenParams.json"``
-        :type tweenFileName: str, optional
         """
 
         self.__camera_settings = {
             'center':np.zeros(3) if center is None else center, 
             'camera':camera, 
             'cameraRotation':cameraRotation,
-            'tweenFileName':tweenFileName
         } 
     
     def particle_startup_settings(

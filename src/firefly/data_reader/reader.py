@@ -141,8 +141,6 @@ class Reader(object):
         if tweenParams is not None:
             if tweenParams.__class__.__name__ != 'TweenParams':
                 raise TypeError("Make sure you use a TweenParams instance to specify fly-through paths.")
-            ## set the filename in the settings file.
-            self.settings['tweenFileName'] = tweenParams.filename
 
         self.tweenParams:TweenParams = tweenParams
 
@@ -343,21 +341,24 @@ class Reader(object):
                 os.path.basename(JSONdir),
                 self.JSON_prefix+self.settings.settings_filename),0)]
 
-            filename=os.path.join(JSONdir,'filenames.json')
-            JSON_array +=[(
-                filename,
-                write_to_json(
-                    filenamesDict,
-                    filename if write_to_disk else None))] ## None -> returns JSON string
-
             ## write a tweenParams file if a TweenParams instance is attached to reader
             if hasattr(self,'tweenParams') and self.tweenParams is not None:
+                filenamesDict['tweenParams'] = [(os.path.join(
+                    os.path.basename(JSONdir),
+                    self.tweenParams.filename),0)]
                 JSON_array+=[self.tweenParams.outputToJSON(
                     JSONdir,
                     JSON_prefix=self.JSON_prefix,
                     loud=loud,
                     write_to_disk=write_to_disk,
                     not_reader=False)] ## None -> returns JSON string
+
+            filename=os.path.join(JSONdir,'filenames.json')
+            JSON_array +=[(
+                filename,
+                write_to_json(
+                    filenamesDict,
+                    filename if write_to_disk else None))] ## None -> returns JSON string
 
             ## handle the startup.json file, may need to append or totally overwrite
             startup_file = os.path.join(

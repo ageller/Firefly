@@ -121,7 +121,6 @@ function update_keypress(time){
 			viewerParams.updateTween = false
 			viewerParams.inTween = false
 		} else {
-			console.log("tweening")
 			viewerParams.updateTween = true	
 			setTweenviewerParams();
 		}

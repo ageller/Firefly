@@ -1,16 +1,16 @@
 function setTweenviewerParams(prefix="static/"){
-	viewerParams.inTween = true;
-	viewerParams.tweenviewerParams = {};
 
-	viewerParams.tweenFile = prefix + viewerParams.dir[0]+"/"+viewerParams.tweenFileName
-	d3.json(viewerParams.tweenFile,  function(val) {
-		Object.keys(val).forEach(function(k, jj) {
-			viewerParams.tweenviewerParams[k] = val[k]
+	if (viewerParams.parts.hasOwnProperty('tweenParams')){
+		viewerParams.inTween = true;
+		viewerParams.tweenviewerParams = {};
+		// unpack the tween params
+		Object.keys(viewerParams.parts.tweenParams).forEach(function(k, jj) {
+			viewerParams.tweenviewerParams[k] = viewerParams.parts.tweenParams[k]
 			if (k == "loop"){ //this should always be the last key
-				createTweens()
+				createTweens();
 			}
 		});
-	});
+	}
 }
 
 //these are not necessary, but could be modified if we want a more complex tween

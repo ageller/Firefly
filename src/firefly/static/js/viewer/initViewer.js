@@ -514,9 +514,6 @@ function applyOptions(){
 
 	var options = viewerParams.parts.options;
 
-	// name of the tween file that should be read, defaults to TweenParams if not provided
-	if (options.hasOwnProperty('tweenFileName') && options.tweenFileName != null) viewerParams.tweenFileName = options.tweenFileName;
-
 	//modify the minimum z to show particles at (avoid having particles up in your face)
 	if (options.hasOwnProperty('zmin') && options.zmin != null) viewerParams.zmin = options.zmin;
 
@@ -1120,6 +1117,7 @@ function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
 					//  which reference .fftree files. Those are loaded
 					//  separately on demand.)
 					if (readf.toLowerCase().includes('.json')){
+						console.log(prefix+readf)
 						d3.json(prefix+readf, function(foo) {
 							compileJSONData(foo, p, callback, initialLoadFrac);
 						});
@@ -1138,18 +1136,6 @@ function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
 
 // callCompileData ->
 function compileJSONData(data, p, callback, initialLoadFrac=0){
-	Object.keys(data).forEach(function(k, jj) {
-		//console.log("k = ", k, jj)
-		if (viewerParams.parts[p].hasOwnProperty(k)){
-			viewerParams.parts[p][k] = viewerParams.parts[p][k].concat(data[k]);
-			//console.log('appending', k, p, viewerParams.parts[p])
-
-		} else {
-			viewerParams.parts[p][k] = data[k];
-			//console.log('creating', k, p, viewerParams.parts[p], data[k])
-		}
-	});
-
 	// handle backwards compatability, multi dimensional arrays were flattened in later
 	//  versions of firefly
 	['Coordinates','Velocities'].forEach(function (key){
@@ -1176,6 +1162,18 @@ function compileJSONData(data, p, callback, initialLoadFrac=0){
 		data.removeProperty(key);
 	}
 
+	Object.keys(data).forEach(function(k, jj) {
+		//console.log("k = ", k, jj)
+		if (viewerParams.parts[p].hasOwnProperty(k)){
+			viewerParams.parts[p][k] = viewerParams.parts[p][k].concat(data[k]);
+			//console.log('appending', k, p, viewerParams.parts[p])
+
+		} else {
+			viewerParams.parts[p][k] = data[k];
+			//console.log('creating', k, p, viewerParams.parts[p], data[k])
+		}
+	});	
+
 	// did we just load an octree.json file? let's initialize the octree then.
 	if (data.hasOwnProperty('octree')) initOctree(p,data);
 
@@ -1200,10 +1198,10 @@ function countPartsForLoadingBar(initialLoadFrac=0){
 }
 
 function checkDone(callback){
-	if (
-		('options' in viewerParams.parts && viewerParams.parts.options.loaded) || 
-		!(viewerParams.filenames.hasOwnProperty('options')) // no options file provided
-		){
+	if ((!viewerParams.filenames.hasOwnProperty('tweenParams') || // no tweenParams file provided
+		('tweenParams' in viewerParams.parts && viewerParams.parts.tweenParams.loaded)) &&
+		(!viewerParams.filenames.hasOwnProperty('options') || // no options file provided
+		('options' in viewerParams.parts && viewerParams.parts.options.loaded))){
 		// we're done loading!
 		if (countParts() ==  viewerParams.parts.totalSize){
 
@@ -1211,6 +1209,11 @@ function checkDone(callback){
 			if (index > -1) {
 				viewerParams.partsKeys.splice(index, 1);
 				viewerParams.parts.options0 = JSON.parse(JSON.stringify(viewerParams.parts.options));
+			}
+			var index = viewerParams.partsKeys.indexOf('tweenParams');
+			if (index > -1) {
+				viewerParams.partsKeys.splice(index, 1);
+				//viewerParams.tweenParams = JSON.parse(JSON.stringify(viewerParams.parts.tweenParams));
 			}
 			callback(); 
 		}

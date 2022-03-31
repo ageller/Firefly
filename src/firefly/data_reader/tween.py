@@ -119,7 +119,8 @@ class TweenParams(object):
             'position':keyframe_dicts,
             'rotation':rotation_dicts,
             'duration':self.durations,
-            'loop':self.loop
+            'loop':self.loop,
+            'loaded':True
         }
 
         return tween_params_dict
@@ -129,7 +130,7 @@ class TweenParams(object):
         JSONdir,
         JSON_prefix='',
         loud=1,
-        write_jsons_to_disk=True,
+        write_to_disk=True,
         not_reader=True):
         """ Saves the current tween parameters to a JSON file.
 
@@ -141,11 +142,11 @@ class TweenParams(object):
         :type JSON_prefix: str, optional
         :param loud: flag to print status information to the console, defaults to True
         :type loud: bool, optional
-        :param write_jsons_to_disk: flag that controls whether data is saved to disk (:code:`True`)
+        :param write_to_disk: flag that controls whether data is saved to disk (:code:`True`)
             or only converted to a string and returned (:code:`False`), defaults to True
-        :type write_jsons_to_disk: bool, optional
+        :type write_to_disk: bool, optional
         :param not_reader: flag for whether to print the Reader :code:`filenames.json` warning, defaults to True
-        :type write_jsons_to_disk: bool, optional
+        :type write_to_disk: bool, optional
         :return: filename, JSON(tween_params_dict) (either a filename if
             written to disk or a JSON strs)
         :rtype: str, str
@@ -162,4 +163,4 @@ class TweenParams(object):
 
         return filename,write_to_json(
             tween_params_dict,
-            filename if write_jsons_to_disk else None) ## None-> returns a string
+            filename if write_to_disk else None) ## None-> returns a string

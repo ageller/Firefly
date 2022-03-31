@@ -161,7 +161,6 @@ function defineViewerParams(){
 		this.tweenParams = {};
 		this.tweenPos = [];
 		this.tweenRot = [];
-		this.tweenFileName = "tweenParams.json"
 
 		//render texture to show column density
 		this.textureCD = null;
