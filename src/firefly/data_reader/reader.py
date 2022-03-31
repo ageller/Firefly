@@ -38,6 +38,7 @@ class Reader(object):
         clean_JSONdir=False,
         max_npart_per_file=10**4,
         write_startup='append',
+        write_only_data=False,
         settings:Settings=None,
         tweenParams:TweenParams=None):
         """Base initialization method for Reader instances. A Reader will read data and produce
@@ -64,6 +65,11 @@ class Reader(object):
             :code:`False`: does not alter :code:`startup.json`, 
             , defaults to 'append'
         :type write_startup: str/bool, optional
+        :param write_only_data: flag for whether writeToDisk should exclude Settings and tweenParams instances
+            as well as the filenames.json and startup.json files. If True, then the reader will only
+            export the raw data files (useful for not overwriting things or only loading single files at a time
+            to append onto an existing dataset), defaults to False
+        :type write_only_data: bool, optional
         :param settings: a :class:`firefly.data_reader.Settings` instance, defaults to 
             a new default :class:`firefly.data_reader.Settings` instance.
         :type settings: :class:`firefly.data_reader.Settings`, optional
@@ -106,6 +112,9 @@ class Reader(object):
 
         ## how are we managing multiple datasets?
         self.write_startup = write_startup
+
+        ## should we exclude settings, tween params, filenames.json, and startup.json when writing to disk?
+        self.write_only_data = write_only_data
 
         #set the maximum number of particles per data file
         self.max_npart_per_file = max_npart_per_file
@@ -326,65 +335,76 @@ class Reader(object):
             filenamesDict[particleGroup.UIname]=list(filenames_and_nparts)
 
         ## output the settings.json file
-        JSON_array +=[self.dumpSettingsToJSON(symlink,write_jsons_to_disk,loud)]
+        if not self.write_only_data: 
+            JSON_array +=[self.dumpSettingsToJSON(symlink,write_to_disk,loud)]
 
-        ## format and output the filenames.json file
-        filenamesDict['options'] = [(os.path.join(
-            os.path.basename(JSONdir),
-            self.JSON_prefix+self.settings.settings_filename),0)]
+            ## format and output the filenames.json file
+            filenamesDict['options'] = [(os.path.join(
+                os.path.basename(JSONdir),
+                self.JSON_prefix+self.settings.settings_filename),0)]
 
-        filename=os.path.join(JSONdir,'filenames.json')
-        JSON_array +=[(
-            filename,
-            write_to_json(
-                filenamesDict,
-                filename if write_jsons_to_disk else None))] ## None -> returns JSON string
+            filename=os.path.join(JSONdir,'filenames.json')
+            JSON_array +=[(
+                filename,
+                write_to_json(
+                    filenamesDict,
+                    filename if write_to_disk else None))] ## None -> returns JSON string
 
-        ## write a tweenParams file if a TweenParams instance is attached to reader
-        if hasattr(self,'tweenParams') and self.tweenParams is not None:
-            JSON_array+=[self.tweenParams.outputToJSON(
-                JSONdir,
-                JSON_prefix=self.JSON_prefix,
-                loud=loud,
-                write_jsons_to_disk=write_jsons_to_disk,
-                not_reader=False)] ## None -> returns JSON string
+            ## write a tweenParams file if a TweenParams instance is attached to reader
+            if hasattr(self,'tweenParams') and self.tweenParams is not None:
+                JSON_array+=[self.tweenParams.outputToJSON(
+                    JSONdir,
+                    JSON_prefix=self.JSON_prefix,
+                    loud=loud,
+                    write_to_disk=write_to_disk,
+                    not_reader=False)] ## None -> returns JSON string
 
-        ## handle the startup.json file, may need to append or totally overwrite
-        startup_file = os.path.join(
-            self.static_data_dir,
-            'startup.json')
+            ## handle the startup.json file, may need to append or totally overwrite
+            startup_file = os.path.join(
+                self.static_data_dir,
+                'startup.json')
 
+            ## relative path from .js interpreter (which runs in /firefly/static) 
         ## relative path from .js interpreter (which runs in /firefly/static) 
-        ##  to this dataset
-        startup_path = os.path.join("data",os.path.basename(JSONdir))
+            ## relative path from .js interpreter (which runs in /firefly/static) 
+            ##  to this dataset
+            startup_path = os.path.join("data",os.path.basename(JSONdir))
 
-        if self.write_startup == 'append' and os.path.isfile(startup_file):
-            startup_dict = load_from_json(startup_file)
+            if self.write_startup == 'append' and os.path.isfile(startup_file):
+                startup_dict = load_from_json(startup_file)
 
+                maxx = 0 
             maxx = 0 
-            for key in startup_dict.keys():
+                maxx = 0 
+                for key in startup_dict.keys():
+                    if int(key) > maxx: 
                 if int(key) > maxx: 
-                    maxx = int(key)
+                    if int(key) > maxx: 
+                        maxx = int(key)
 
-                ## it's already in startup.json
-                if startup_dict[key] == startup_path:
+                    ## it's already in startup.json
+                    if startup_dict[key] == startup_path:
+                        startup_file = None 
                     startup_file = None 
-                    maxx-=1 ## since we'll add 1 below
-            
-            startup_dict[str(maxx+1)]=startup_path
-            JSON_array+=[(
-                ## recreate in case we overwrote the startup_file variable in loop above
+                        startup_file = None 
+                        maxx-=1 ## since we'll add 1 below
+                
+                startup_dict[str(maxx+1)]=startup_path
+                JSON_array+=[(
+                    ## recreate in case we overwrote the startup_file variable in loop above
+                    os.path.join(self.static_data_dir,'startup.json'), 
                 os.path.join(self.static_data_dir,'startup.json'), 
-                write_to_json(
-                    startup_dict,
-                    startup_file if write_jsons_to_disk else None))] ## None -> returns JSON string
+                    os.path.join(self.static_data_dir,'startup.json'), 
+                    write_to_json(
+                        startup_dict,
+                        startup_file if write_to_disk else None))] ## None -> returns JSON string
 
-        elif self.write_startup:
-            JSON_array+=[(
-                startup_file,
-                write_to_json(
-                    {"0":startup_path},
-                    startup_file if write_jsons_to_disk else None))] ## None -> returns JSON string
+            elif self.write_startup:
+                JSON_array+=[(
+                    startup_file,
+                    write_to_json(
+                        {"0":startup_path},
+                        startup_file if write_to_disk else None))] ## None -> returns JSON string
 
         if not write_jsons_to_disk:
             ## create a single "big JSON" with all the data in it in case
