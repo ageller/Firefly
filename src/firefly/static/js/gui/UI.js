@@ -224,6 +224,9 @@ function transitionUIWindows(state=null, pID=null){
 	})
 	var id1 = level.id;
 	var elem1 = d3.select('#'+id1);
+	//set this to the correct height
+	elem1.style('height', elem1.attr('trueHeight'));
+	elem1.select('.dropdown-content').style('height', elem1.attr('trueHeight'));
 	var bbox1 = elem1.node().getBoundingClientRect(); 
 
 	if (state){
@@ -262,6 +265,9 @@ function transitionUIWindows(state=null, pID=null){
 
 	//new one on
 	var elem2 = d3.select('#'+id2);
+	//set this to the correct height
+	elem2.style('height', elem2.attr('trueHeight'));
+	elem2.select('.dropdown-content').style('height', elem2.attr('trueHeight'));
 	var bbox2 = elem2.node().getBoundingClientRect(); 
 	elem2.style('transform','translateX(0px)')
 
@@ -293,6 +299,7 @@ function transitionUIWindows(state=null, pID=null){
 
 	//get the new heights
 	var h = bbox2.height;
+	var id3 = '';
 	if (inParticles || id2 =='GUIParticlesBase'){
 		//count all the heights in the particles dropdowns
 		var hdrop = 0;
@@ -301,6 +308,7 @@ function transitionUIWindows(state=null, pID=null){
 			// the main particle div without the dropdown
 			var htmp = parseFloat(d3.select('#' + k + 'Div').style('height')) + 2; //2 for margins
 			if (d3.select('#' + k + 'Dropdown').classed('show')){
+				d3.select('#' + k + 'Dropdown').style('height', elem2.attr('trueHeight'))
 				var current = GUIParams.GUIState.main.particles[k].current;
 				if (inParticles && pID == k) current = state;
 				var d = current.split('/');
@@ -308,18 +316,21 @@ function transitionUIWindows(state=null, pID=null){
 				d.forEach(function(dd){
 					level = level[dd];
 				})
-				var ph = parseFloat(d3.select('#' + level.id).style('height')) + 18; //18 for the state bar at the top
+				id3 = level.id;
+				var elem = d3.select('#' + level.id);
+				//reset the heights
+				elem.style('height', elem.attr('trueHeight'));
+				var ph = parseFloat(d3.select('#' + level.id).attr('trueHeight')) + 18; //18 for the state bar at the top
+				d3.select('#' + k + 'Dropdown').style('height', ph);
 				if (inParticles && pID == k) pheight = ph; //save this to resize the particle dropdown
 				htmp += ph
-				console.log('current', k, current, parseFloat(d3.select('#' + level.id).style('height')))
 			}
 			hdrop += htmp
 
-			console.log('check', k, htmp)
 		});
 		h = hdrop
 
-		//resize the particle dropdown as needed
+		//resize the particle dropdown as needed (ddiv is a bit redundant, but OK to keep here)
 		if (inParticles){
 			var ddiv = d3.select('#' + pID + 'Dropdown');
 			var pdiv = d3.select('#' + pID + 'Div');
@@ -329,7 +340,6 @@ function transitionUIWindows(state=null, pID=null){
 			pdiv.style('margin-bottom', pheight + 4 + 'px')
 		}
 	}
-	console.log('height', id2, h)
 
 	//set the new height of the overall UI
 	d3.select('#UIStateContainer')
@@ -340,30 +350,28 @@ function transitionUIWindows(state=null, pID=null){
 	GUIBase.current = state;
 
 
-	// var h = bbox2.height + 38; //for the state
-	// if (inParticles){
-	// 	d3.select('#' + pID + 'Dropdown').style('height',(h - 20) + 'px'); //-20 because the header is smaller
-	// 	h += 52; //to account for the main controls header and top of particles
-	// 	d3.select('#' + pID + 'Div').style('margin-bottom', (bbox2.height + 22) + 'px')
-	// }
+	// set all hidden components of the GUI to a height of 0
+	function setToZero(obj){
+		if (obj.hasOwnProperty('id')){
+			if (obj.id != id1 && obj.id != id2 && obj.id != id3){
+				var elem = d3.select('#' + obj.id);
+				elem.style('height','0px');
+				elem.select('.dropdown-content').filter(function(){
+					if (d3.select(this).classed('show')) return false;
+					return true;
+				}).style('height','0px');
+			}
+		}
+		Object.keys(obj).forEach(function(k){
+			if (typeof obj[k] === 'object') setToZero(obj[k])
+		})
+	}
+	setToZero(GUIParams.GUIState);
 
-	// //if we're transitioning to the particle div, get the correct height (e.g. in case particle dropdowns are expanded)
-	// if (!inParticles && id2 == 'GUIParticlesBase'){
-	// 	h = 42;
-	// 	GUIParams.partsKeys.forEach(function(k){
-	// 		h += Math.max(parseFloat(d3.select('#' + k + 'Dropdown').style('height')), 30);
-	// 	})
-	// 	console.log('HERE!!', h)
-	// }
-
-
-	
-
-
-
-
+	setTimeout(checkGUIsize, 500);
 
 }
+
 
 function createMainWindow(container){
 	//these will be side by side
@@ -378,6 +386,7 @@ function createMainWindow(container){
 		.style('position','absolute')
 		.style('top','0px')
 		.style('height','34px')
+		.attr('trueHeight','34px')
 		.style('width', fullWidth + 'px')
 		.style('transform','translateX(0px)')
 
@@ -413,6 +422,7 @@ function createGeneralWindow(container){
 		.style('position','absolute')
 		.style('top','0px')
 		.style('height','34px')
+		.attr('trueHeight','34px')
 		.style('width', fullWidth + 'px')
 		.style('transform','translateX(' + GUIParams.containerWidth + 'px)')
 
@@ -441,6 +451,7 @@ function createDataWindow(container){
 		.style('position','absolute')
 		.style('top','0px')
 		.style('height','34px')
+		.attr('trueHeight','34px')
 		.style('width', GUIParams.containerWidth + 'px')
 		.style('transform','translateX(' + GUIParams.containerWidth + 'px)')
 
@@ -465,6 +476,7 @@ function createCameraWindow(container){
 		.style('position','absolute')
 		.style('top','0px')
 		.style('height','34px')
+		.attr('trueHeight','34px')
 		.style('width', GUIParams.containerWidth + 'px')
 		.style('transform','translateX(' + GUIParams.containerWidth + 'px)')
 
@@ -838,9 +850,11 @@ function createDataControlsBox(UI){
 			.text('Load New Data');
 
 	m2.style('height', m2height + 'px')
+		.attr('trueHeight', m2height + 'px')
 		.style('display','block')
 
 	UI.style('height', m2height + 'px')
+		.attr('trueHeight', m2height + 'px')
 
 	// create all the noUISliders
 	createDecimationSlider();
@@ -1120,9 +1134,11 @@ function createCameraControlBox(UI){
 		.style('margin-top','-2px');
 
 	c2.style('height', c2height + 'px')
+		.attr('trueHeight', c2height + 'px')
 		.style('display','block')
 
 	UI.style('height', c2height + 'px')
+		.attr('trueHeight', c2height + 'px')
 
 	// camera sliders
 	createStereoSlider();
@@ -1643,13 +1659,9 @@ function checkGUIsize(){
 	//add the scrollbar
 	h = parseFloat(container.style('height'));
 	if (h < h0){
-		container
-			.style('overflow-y', 'scroll')
-			.style('overflow-x', 'hidden')
+		container.style('overflow', 'hidden scroll')
 	} else {
-		container.style('overflow-y', 'hidden')
+		container.style('overflow', 'hidden')
 	}
 
-	//FIX THE PARTICLE DROPDOWNS
-	//for some reason these are not sizing the UISTateContainer correctly.  The height is too large, and when the scrollbar is active is shows. I don't understand it
 }

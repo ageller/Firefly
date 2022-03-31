@@ -63,6 +63,7 @@ function createParticlesWindow(container){
 		.style('position','absolute')
 		.style('top','0px')
 		.style('height','34px')
+		.attr('trueHeight','34px')
 		.style('width', GUIParams.containerWidth + 'px')
 		.style('transform','translateX(' + GUIParams.containerWidth + 'px)')
 
@@ -83,6 +84,7 @@ function createParticleBase(UI, p){
 		.attr('id',p+"Div" ) 
 		.style('width', (GUIParams.containerWidth - 4) + 'px')
 		.style('height','32px')
+		.attr('trueHeight','32px')
 		.style('margin-bottom','0px')
 		.style('padding','0px')
 
@@ -214,6 +216,7 @@ function createParticleBase(UI, p){
 		.style('width',(GUIParams.containerWidth - 7) + 'px')
 		.style('display','flex-wrap')
 		.style('height', h + 'px')
+		.attr('trueHeight', h + 'px')
 		.style('margin-top','16px')
 		.style('margin-left','1px')
 		.style('clip-path', 'inset(0px 0px 0px 0px)');
@@ -261,6 +264,7 @@ function createParticleGeneralWindow(container, p){
 		.style('position','absolute')
 		.style('top','16px')
 		.style('height','34px')
+		.attr('trueHeight','34px')
 		.style('width', GUIParams.containerWidth + 'px')
 		.style('transform','translateX(' + GUIParams.containerWidth + 'px)')
 
@@ -384,7 +388,8 @@ function createParticleGeneralWindow(container, p){
 		createCamNormSlider(p);
 	}
 
-	UI.style('height',dheight + 'px');
+	UI.style('height',dheight + 'px')
+		.attr('trueHeight',dheight + 'px');
 
 	createNpartsSlider(p);
 
@@ -400,6 +405,7 @@ function createParticleVelocityWindow(container, p){
 		.style('position','absolute')
 		.style('top','16px')
 		.style('height','154px')
+		.attr('trueHeight','154px')
 		.style('width', GUIParams.containerWidth + 'px')
 		.style('transform','translateX(' + GUIParams.containerWidth + 'px)')
 
@@ -556,6 +562,7 @@ function createParticleColormapWindow(container, p){
 		.style('position','absolute')
 		.style('top','16px')
 		.style('height','54px')
+		.attr('trueHeight','54px')
 		.style('width', GUIParams.containerWidth + 'px')
 		.style('transform','translateX(' + GUIParams.containerWidth + 'px)');
 
@@ -663,6 +670,7 @@ function createParticleFilterWindow(container, p){
 		.style('position','absolute')
 		.style('top','16px')
 		.style('height','116px')
+		.attr('trueHeight','116px')
 		.style('width', GUIParams.containerWidth + 'px')
 		.style('transform','translateX(' + GUIParams.containerWidth + 'px)');
 
@@ -791,7 +799,10 @@ function expandParticleDropdown(handle) {
 	d.forEach(function(dd){
 		level = level[dd];
 	})
-	var hdrop = parseFloat(d3.select('#' + level.id).style('height')) + 18; //18 for the state bar at the top
+	var elem = d3.select('#' + level.id);
+	//reset the height
+	elem.style('height', elem.attr('trueHeight'));
+	var hdrop = parseFloat(elem.attr('trueHeight')) + 18; //18 for the state bar at the top
 
 
 	//transition the dropdown open or closed
@@ -819,7 +830,9 @@ function expandParticleDropdown(handle) {
 
 	//if the colormap is open be sure to update the overall clip-path
 	var inset = getUIcontainerInset(pID);
-	d3.select('#UIContainer').style('clip-path','inset(-20px ' + inset.inset[1] + 'px ' + inset.inset[2] + 'px 0px)')
+	d3.select('#UIContainer').style('clip-path','inset(-20px ' + inset.inset[1] + 'px ' + inset.inset[2] + 'px 0px)');
+
+	setTimeout(checkGUIsize, 500);
 }
 
 
