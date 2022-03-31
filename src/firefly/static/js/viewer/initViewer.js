@@ -1130,16 +1130,6 @@ function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
 							compileFFLYData(foo, p, callback, initialLoadFrac)}
 						);
 					}
-
-					else if (viewerParams.usingSocket){
-						if (
-						readf.toLowerCase().includes('.csv') ||
-						readf.toLowerCase().includes('.hdf5')){
-						console.log('hdf5 or csv file in filenames.json', readf);
-						socketParams.socket.emit('input_CSVHDF5', prefix+readf);
-
-						}
-					}
 				}
 			}
 		});

@@ -51,6 +51,7 @@ function update(time){
 	update_keypress(time);
 
 	// apply any user interaction to the camera (enabling the controls)
+	// also re-points the camera at the center if you're in a tween loop
 	viewerParams.controls.update();
 	
 	// update particle mesh buffers with settings from UI
