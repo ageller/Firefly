@@ -1150,8 +1150,34 @@ function compileJSONData(data, p, callback, initialLoadFrac=0){
 		}
 	});
 
+	// handle backwards compatability, multi dimensional arrays were flattened in later
+	//  versions of firefly
+	['Coordinates','Velocities'].forEach(function (key){
+		if (data.hasOwnProperty(key) && !data.hasOwnProperty(key+'_flat')){
+			data[key+'_flat'] = Array(3*data[key].length);
+			for (var i=0; i<data[key].length; i++){
+				data[key+'_flat'][3*i] = data[key][i][0];
+				data[key+'_flat'][3*i+1] = data[key][i][1];
+				data[key+'_flat'][3*i+2] = data[key][i][2];
+			}
+			data.removeProperty(key);
+		}
+	})
+
+	key = 'colorArray'
+	if (data.hasOwnProperty(key) && !data.hasOwnProperty('rgbaColor')){
+		data[key+'_flat'] = Array(3*data[key].length);
+		for (var i=0; i<data[key].length; i++){
+			data['rgbaColor'][4*i] = data[key][i][0];
+			data['rgbaColor'][4*i+1] = data[key][i][1];
+			data['rgbaColor'][4*i+2] = data[key][i][2];
+			data['rgbaColor'][4*i+3] = data[key][i][3];
+		}
+		data.removeProperty(key);
+	}
+
 	// did we just load an octree.json file? let's initialize the octree then.
-	if (data.hasOwnProperty('octree')) abg_initOctree(p,data);
+	if (data.hasOwnProperty('octree')) initOctree(p,data);
 
 	countPartsForLoadingBar(initialLoadFrac);
 

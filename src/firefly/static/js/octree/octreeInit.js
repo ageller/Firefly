@@ -1,4 +1,4 @@
-function abg_initOctree(pkey,data){
+function initOctree(pkey,data){
 
 	viewerParams.haveOctree[pkey] = true;
 
