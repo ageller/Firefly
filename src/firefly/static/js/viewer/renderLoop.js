@@ -539,9 +539,12 @@ function update_framerate(seconds,time){
 	// use previous frame rendering time to calculate FPS. 
 	// use average of previous 100 frames so FPS is a bit more stable.
 	viewerParams.fps_list.push(1/(seconds-viewerParams.currentTime));
-	viewerParams.fps_list = viewerParams.fps_list.slice(-100);
+	viewerParams.fps_list = viewerParams.fps_list.slice(-30);
 
-	viewerParams.FPS = viewerParams.fps_list.reduce((a, b) => a + b, 0)/viewerParams.fps_list.length;
+	//viewerParams.FPS = viewerParams.fps_list.reduce((a, b) => a + b, 0)/viewerParams.fps_list.length;
+	// use median FPS rather than mean; when it's going real slow it will skip frames
+	//  and put in a weirdly high value (like >100 fps) that biases the mean high
+	viewerParams.FPS = viewerParams.fps_list.slice().sort()[15]
 
 
 
