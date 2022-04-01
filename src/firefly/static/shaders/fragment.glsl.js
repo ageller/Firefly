@@ -68,6 +68,7 @@ void main(void) {
 			} 
 			else {
 				if (vPointSize > 1.) gl_FragColor.a *= dMax - dist;
+				//if (dist > dMax){ discard; }
 			}
 		}
 	} else { //velocities, lines (Note: requiring vID == 1. breaks in windows for some reason)
