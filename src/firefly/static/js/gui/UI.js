@@ -1,5 +1,6 @@
 // TO DO: create radii controls for particles
-// TO DO: on double click, reset location of GUI
+// particle state bar needs to be a few pixels larger
+// fix multiple colormaps (alex may have already fixed this, wait until merged into kaitai_io)
 
 window.addEventListener('mouseup',function(){GUIParams.movingUI = false;});
 window.addEventListener('resize',checkGUIsize);
