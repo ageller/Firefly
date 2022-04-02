@@ -31,9 +31,6 @@ function defineGUIParams(){
 		this.movingUI = false;
 		this.UIhidden = false;
 
-		//for dropdowns
-		this.gtoggle = {};
-
 		//for sockets
 		this.usingSocket = true;
 		this.local = false; //for GUI and viewer in one but still using sockets?
@@ -54,6 +51,9 @@ function defineGUIParams(){
 		//check for filters -- set in initViewer
 		this.haveFilter = {};
 		this.haveFilterSlider = {};
+
+		//check for radii -- set in initViewer
+		this.haveRadii = {};
 
 		this.currentlyShownFilter = {};
 
@@ -77,9 +77,20 @@ function defineGUIParams(){
 			}
 			//console.log(colormapList)
 		});
-
 		this.colormapList = colormapList
 
+		this.colormapImage = 'static/textures/colormap.png';
+		// get the image size
+		var img = new Image();
+		img.onload = function(){
+			this.colormapImageX = img.width;
+			this.colormapImageY = img.height;
+			console.log("checking", this.colormapImageX, this.colormapImageY)
+			img = null;
+		}.bind(this)
+		img.src = this.colormapImage;
+
+		this.colormapScale = 2; //size scale for the final colorbar
 
 		///////////////////
 		// these below are shared with viewerParams (passed from viewerParams to GUIParams)
@@ -152,6 +163,39 @@ function defineGUIParams(){
 
 		// extra checking for fly controls
 		this.mouseDown = false;
+
+		this.FPS = 0;
+		this.memoryUsage = 0;
+		
+
+		//object to hold the current visible window in the GUI
+		//current will hold the key that defines the currently visible window
+		//the rest of the keys will point to the IDs for the DOM elements that hold those windows
+		//the particles state will be populated in createUI
+		this.GUIState = {
+			'current':'main',
+			'main':{
+				'id':'GUIMain',
+				'name':'Main',
+				'general' : {
+					'id':'GUIGeneral',
+					'name':'General',
+					'data':{
+						'id':'GUIData',
+						'name':'Data'
+					},
+					'camera':{
+						'id':'GUICamera',
+						'name':'Camera'
+					},
+				},
+				'particles':{
+					'id':'GUIParticlesBase',
+					'name':'Particles'
+				}
+			},
+	
+		}
 
 		//check for mobile
 		//https://stackoverflow.com/questions/3514784/what-is-the-best-way-to-detect-a-mobile-device-in-jquery

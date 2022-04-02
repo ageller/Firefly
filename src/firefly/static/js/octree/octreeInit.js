@@ -14,6 +14,9 @@ function initOctree(pkey,data){
 	viewerParams.octree.boxSize = viewerParams.boxSize;
 	viewerParams.octree.normCameraDistance[pkey] = viewerParams.octree.normCameraDistance.default;
 
+	//for loading bar
+	viewerParams.octree.loadingCount[pkey] = 0;
+
 	//this will be used as a percentage value in the GUI
 	viewerParams.plotNmax[pkey] = 100;
 
@@ -24,6 +27,7 @@ function initOctree(pkey,data){
 	// array that prevents filtering from changing the size of nodes that aren't drawn (i.e. showing them
 	//  when the octree has "filtered" them out).
 	viewerParams.parts[pkey].IsDrawn = Array(viewerParams.parts[pkey].Coordinates_flat.length/3)
+
 
 	function initializeNode(node){
 		// name of this node's mesh, if it's not the the root we'll use

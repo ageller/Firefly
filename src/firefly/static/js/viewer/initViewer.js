@@ -239,8 +239,6 @@ function WebGLStart(){
 	
 	initColumnDensity();
 
-	if (viewerParams.haveAnyOctree) createOctreeLoadingBar()
-
 	//draw everything
 	Promise.all([
 		createPartsMesh(),
@@ -1054,6 +1052,11 @@ function sendInitGUI(prepend=[], append=[]){
 	forGUI.push({'setGUIParamByKey':[haveFilter,"haveFilter"]});
 	forGUI.push({'setGUIParamByKey':[haveFilterSlider,"haveFilterSlider"]});
 
+
+	//TO DO: need a check for radii values.  For now, I'm just setting it to false
+	forGUI.push({'setGUIParamByKey':[false,"haveRadii"]});
+
+
 	//for camera
 	forGUI.push({'setGUIParamByKey':[viewerParams.stereoSepMax, "stereoSepMax"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.friction, "friction"]});
@@ -1537,73 +1540,16 @@ function blankCallback(){
 	console.log('blank callback')
 }
 
-function createOctreeLoadingBar(){
-	var height = 16;
-	var width = 215;
-	var offset = 5;
-	var margin = 10;
-
-	var svg = d3.select('body').append('svg')
-		.style('position','absolute')
-		.style('left','0px')
-		.style('bottom','0px')
-		.attr('width', (width + 2*margin + 120) + 'px')
-		.attr('height', height + 'px') //will be adjusted below
-		//.style('transform', 'translate(10px,' + (window.innerHeight - height - 10)+'px)')
-
-	//count to get the full size of the SVG
-	var nRects = 0;
-	viewerParams.partsKeys.forEach(function(p){
-		if (viewerParams.haveOctree[p]){
-			viewerParams.octree.loadingCount[p] = 0; //will be updated during rendering
-
-			svg.append('rect')
-				.attr('id',p + 'octreeLoadingOutline')
-				.attr('x', '10px')
-				.attr('y', (nRects*(height + offset) + margin) + 'px')
-				.attr('width',width + 'px')
-				.attr('height',height + 'px')
-				.attr('fill','rgba(0,0,0,0)')
-				.attr('stroke','#d3d3d3')
-				.attr('stroke-width', '1')
-			svg.append('rect')
-				.attr('id',p + 'octreeLoadingFill')
-				.attr('class','octreeLoadingFill')
-				.attr('x', '10px')
-				.attr('y', (nRects*(height + offset) + margin) + 'px')
-				.attr('width','0px') //will be updated
-				.attr('height',height + 'px')
-				.attr('fill','rgb(' + (255*viewerParams.Pcolors[p][0]) + ',' + (255*viewerParams.Pcolors[p][1]) + ',' + (255*viewerParams.Pcolors[p][2]) + ')')
-			svg.append('text')
-				.attr('id',p + 'octreeLoadingText')
-				.attr('class','octreeLoadingText')
-				.attr('x', (width + margin + offset) + 'px')
-				.attr('y', (nRects*(height + offset) + margin + 0.75*height) + 'px')
-				.attr('fill','rgb(' + (255*viewerParams.Pcolors[p][0]) + ',' + (255*viewerParams.Pcolors[p][1]) + ',' + (255*viewerParams.Pcolors[p][2]) + ')')
-				.style('font-size', (0.75*height) + 'px')
-				.text(p + ' (' + viewerParams.octree.loadingCount[p] + '/' + (viewerParams.octree.loadingCount[p]+ viewerParams.octree.toDraw[p].length) + ')')				
-			nRects += 1;
-		}
-	})
-
-	svg.attr('height', (nRects*(height + offset) + 2.*margin) + 'px') 
-
-}
 function updateOctreeLoadingBar(){
+	var forGUI = [];
 	viewerParams.partsKeys.forEach(function(p){
-		if (viewerParams.haveOctree[p]){
-			var width = parseFloat(d3.select('#' + p + 'octreeLoadingOutline').attr('width'));
+		if (viewerParams.haveOctree[p]) {
 			var numerator = viewerParams.octree.loadingCount[p];
 			var denominator = numerator + viewerParams.octree.toDraw[p].length;
-			if (denominator > 0){
-				var frac = THREE.Math.clamp(numerator/denominator, 0, 1);
-				//var frac = Math.max(viewerParams.octree.loadingCount[p][1]/viewerParams.octree.loadingCount[p][0], 0);
-				//console.log('loading',p, width,viewerParams.octree.loadingCount[p], frac)
-				d3.select('#' + p + 'octreeLoadingFill').transition().attr('width', (width*frac) + 'px');
-				d3.select('#' + p + 'octreeLoadingText').text(p + ' (' + numerator + '/' + denominator + ')');
-			}
+			var out = {'p':p, 'numerator':numerator,'denominator':denominator};
+			forGUI.push({'updateOctreeLoadingBarUI':out});
 		}
 	})
-
+	sendToGUI(forGUI);
 }
 

@@ -316,3 +316,21 @@ function updateFlyMovementSpeed(flyffac){
 
 
 }
+
+function updateFPSContainer(){
+	var txt = Math.round(GUIParams.FPS) + ' fps'
+	if (GUIParams.memoryUsage > 0) txt += ', ' + (Math.round(GUIParams.memoryUsage/1e9*100.)/100.).toFixed(2) + ' Gb'
+	elm = document.getElementById("fps_container");
+	if (elm) elm.innerHTML = txt;
+}
+
+function updateOctreeLoadingBarUI(input){
+	var width = parseFloat(d3.select('#' + input.p + 'octreeLoadingOutline').attr('width'));
+	if (input.denominator > 0){
+		var frac = THREE.Math.clamp(input.numerator/input.denominator, 0, 1);
+		//var frac = Math.max(viewerParams.octree.loadingCount[p][1]/viewerParams.octree.loadingCount[p][0], 0);
+		//console.log('loading',p, width,viewerParams.octree.loadingCount[p], frac)
+		d3.select('#' + input.p + 'octreeLoadingFill').transition().attr('width', (width*frac) + 'px');
+		d3.select('#' + input.p + 'octreeLoadingText').text(input.p + ' (' + input.numerator + '/' + input.denominator + ')');
+	}
+}

@@ -27,17 +27,6 @@ canvas{
         margin-left:50%;
 }
 
-#fps_container{
-        position:absolute;
-        width:150px;
-        text-align:center;
-        color:black;
-        display:none;
-        margin-top:0px;
-        padding:3px;
-	transform: translate(-100%, 0%);
-	margin-left: 99.5%;
-}
 
 #sleep{
 	position:absolute; 
@@ -58,16 +47,6 @@ canvas{
 	cursor: pointer;
 }
 
-#colorbar_container{
-    width:300;
-    height:30;
-    margin-top:10;
-    margin-bottom:10;
-    margin-left:15;
-    margin-right:15;
-    top:138;
-    left:188;
-}
 
 #UserMessage{
 	position:absolute; 
@@ -235,4 +214,10 @@ a:visited {
 
 .octreeLoadingPaused{
 	fill: gray;
+}
+
+#WebGLContainer{
+	position: absolute;
+	top: 0px;
+	left:  0px;
 }
