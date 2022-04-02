@@ -523,6 +523,7 @@ function createPreset(){
 	preset.camera = copyValue([viewerParams.camera.position.x, viewerParams.camera.position.y, viewerParams.camera.position.z]);
 	preset.cameraRotation = copyValue([viewerParams.camera.rotation.x, viewerParams.camera.rotation.y, viewerParams.camera.rotation.z]);
 	preset.cameraUp = copyValue([viewerParams.camera.up.x, viewerParams.camera.up.y, viewerParams.camera.up.z]);
+	preset.quaternion = copyValue([viewerParams.camera.quaternion.w,viewerParams.camera.quaternion.x, viewerParams.camera.quaternion.y, viewerParams.camera.quaternion.z]);
 
 	preset.startFly = copyValue(!viewerParams.useTrackball);
 	preset.startVR = copyValue(viewerParams.allowVRControls);

@@ -300,7 +300,9 @@ class Settings(object):
         center=None,
         camera=None,
         cameraRotation=None,
-        ):
+        cameraUp=None,
+        quaternion=None,
+        **extra):
         """Settings that affect the position and orientation of the camera
 
         :param center: do you want to explicilty define the initial camera focus/
@@ -313,13 +315,91 @@ class Settings(object):
         :param cameraRotation: can set camera rotation in units of radians 
             if you want, defaults to None
         :type cameraRotation: np.ndarray of shape (3), optional
+        :param cameraUp: set camera orientation (north vector) using a quaternion, defaults to None
+        :type cameraUp: np.ndarray of shape (3), optional
+        :param quaternion: can set camera rotation using a quaternion of form (w,x,y,z), defaults to None
+        :type quaternion: np.ndarray of shape (4), optional
         """
 
         self.__camera_settings = {
             'center':np.zeros(3) if center is None else center, 
             'camera':camera, 
-            'cameraRotation':cameraRotation,
-        } 
+            'cameraRotation':cameraRotation, 
+            'cameraUp':np.array([1,0,0]) if cameraUp is None else cameraUp,
+            'quaternion':np.array([0,0,0,1]) if quaternion is None else quaternion,
+        }
+
+    def startup_settings(
+        self,
+        maxVrange=2000.,
+        startFly=False,
+        friction=0.1,
+        stereo=False,
+        stereoSep=0.06,
+        decimate=None,
+        start_tween=False,
+        CDmin=0,
+        CDmax=1,
+        CDlognorm=0,
+        columnDensity=0,
+        **extra):
+        """General settings that affect the state app state
+
+        :param maxVrange: maximum range in velocities to use in deciding 
+            the length of the velocity vectors (making maxVrange 
+            larger will enhance the difference between small and large velocities),
+            defaults to 2000.
+        :type maxVrange: float, optional
+        :param startFly: flag to start in Fly controls
+            (if False, then start in the default Trackball controls),
+            defaults to False
+        :type startFly: bool, optional
+        :param friction: set the initial friction for the controls, defaults to 0.1
+        :type friction: float, optional
+        :param stereo: flag to start in stereo mode, defaults to False
+        :type stereo: bool, optional
+        :param stereoSep: camera (eye) separation in the stereo 
+            mode (should be < 1), defaults to 0.06
+        :type stereoSep: float, optional
+        :param decimate: set the initial global decimation 
+            (e.g, you could load in all the data by setting 
+            the :code:`decimation_factor` to 1 for any individual
+            :class:`firefly.data_reader.ParticleGroup`,
+            but only _display_ some fraction by setting
+            decimate > 1 here).  
+            This is a single value (not a dict), defaults to None
+        :type decimate: int, optional
+        :param start_tween: flag to initialize the Firefly scene in tween mode, 
+            requires a valid tweenParams.json file to be present in the JSONdir,
+            defaults to False
+        :type start_tween: bool, optional
+        :param CDmin: bottom of the renormalization for the experimental column density
+            projection mode, defaults to 0
+        :type CDmin: float, optional
+        :param CDmax: top of the renormalization for the experimental column density
+            projection mode, defaults to 1
+        :type CDmax: float, optional
+        :param CDlognorm: flag for whether renormalization should be done in log (``CDlognorm=1``)
+            or linear (``CDlognorm=0``) space, defaults to 0
+        :type CDmax: bool, optional
+        :param columnDensity: flag for whether the experimental column density projection mode
+            should be enabled at startup. Toggle this mode by pressing 'p' on the keyboard, defaults to 0
+        :type CDcolumnDensity: bool, optional
+        """
+
+        self.__startup_settings = {
+            'maxVrange':maxVrange,
+            'startFly':startFly,
+            'friction':friction,
+            'stereo':stereo,
+            'stereoSep':stereoSep,
+            'decimate':decimate,
+            'start_tween':start_tween,
+            'CDmin':CDmin,
+            'CDmax':CDmax,
+            'CDlognorm':CDlognorm,
+            'columnDensity':columnDensity
+        }
     
     def particle_startup_settings(
         self,

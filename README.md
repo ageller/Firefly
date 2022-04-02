@@ -2,6 +2,7 @@
 # Firefly
 
 [![PyPI](https://img.shields.io/pypi/v/Firefly-vis)](https://pypi.org/project/Firefly-vis)
+<a href="https://ascl.net/1810.021"><img src="https://img.shields.io/badge/ascl-1810.021-blue.svg?colorB=262255" alt="ascl:1810.021" /></a>
 
 ![logo banner](https://github.com/ageller/Firefly/blob/main/docs/source/_static/logo_banner_gradient.png?raw=true)
 

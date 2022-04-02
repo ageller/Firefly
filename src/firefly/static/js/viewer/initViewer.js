@@ -616,6 +616,43 @@ function applyOptions(){
 
 	// change the memory limit for octrees, in bytes
 	if (options.hasOwnProperty('memoryLimit') && options.memoryLimit != null) viewerParams.memoryLimit = options.memoryLimit;
+	// flag to launch the app in a tween loop
+	if (viewerParams.parts.options.hasOwnProperty('start_tween')){
+		if (viewerParams.parts.options.start_tween){
+			viewerParams.updateTween = true	
+			setTweenviewerParams();
+		}
+	}
+
+	//  --------- column density options ----------- 
+
+	// flag to launch the app with the column density projection mode enabled
+	if (viewerParams.parts.options.hasOwnProperty('columnDensity')){
+		if (viewerParams.parts.options.columnDensity != null){
+			viewerParams.columnDensity = viewerParams.parts.options.columnDensity;
+		}
+	}
+
+	// flag to renormalize column densities in logspace
+	if (viewerParams.parts.options.hasOwnProperty('CDlognorm')){
+		if (viewerParams.parts.options.CDlognorm != null){
+			viewerParams.CDlognorm = viewerParams.parts.options.CDlognorm;
+		}
+	}
+
+	// bottom of the column density renormalization
+	if (viewerParams.parts.options.hasOwnProperty('CDmin')){
+		if (viewerParams.parts.options.CDmin != null){
+			viewerParams.CDmin = viewerParams.parts.options.CDmin;
+		}
+	}
+
+	// top of the column density renormalization
+	if (viewerParams.parts.options.hasOwnProperty('CDmax')){
+		if (viewerParams.parts.options.CDmax != null){
+			viewerParams.CDmax = viewerParams.parts.options.CDmax;
+		}
+	}	
 
 	//particle specific options
 	for (var i=0; i<viewerParams.partsKeys.length; i++){
@@ -885,6 +922,9 @@ function initColumnDensity(){
 			tex: { value: viewerParams.textureCD.texture }, 
 			cmap: { type:'t', value: viewerParams.cmap },
 			colormap: {value: viewerParams.colormap[p]},
+			CDmin: {value: viewerParams.CDmin}, // bottom of CD renormalization
+			CDmax: {value: viewerParams.CDmax}, // top of CD renormalization
+			lognorm: {value: viewerParams.CDlognorm}, // flag to normalize column densities in log space
 		},
 		vertexShader: myVertexShader,
 		fragmentShader: myFragmentShader_pass2,

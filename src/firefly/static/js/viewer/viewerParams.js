@@ -169,6 +169,9 @@ function defineViewerParams(){
 		this.sceneCD = null;
 		this.cameraCD = null;
 		this.scaleCD = 0.1; //scaling factor for the shader so that it adds up to one at highest density
+		this.CDmin = 0;
+		this.CDmax = 1;
+		this.CDlognorm = 0;
 		this.cmap = this.colormapTexture;//new THREE.TextureLoader().load( "textures/cmap.png");
 		this.cmap.minFilter = THREE.LinearFilter;
 		this.cmap.magFilter = THREE.NearestFilter;
