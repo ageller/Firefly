@@ -208,6 +208,8 @@ function populateColormapImage(particle_group_UIname){
 		.attr('width', GUIParams.colormapImageY + 'px') 
 		.attr('height', GUIParams.colormapImageX + 'px') 
 		.attr('y',-(n_colormap*actualCbarWidth) + 'px') 
+		.attr('x',-(GUIParams.colormapImageX) + 'px') 
+		.style('transform','scaleX(-1)') // flip image so that colorbar is correct
 
 	//add the clip path to only use the correct portion of the image
 	imgContainer.append('clipPath')
