@@ -1,6 +1,6 @@
-﻿Firefly.server.killAllFireflyServers
+﻿firefly.server.killAllFireflyServers
 ====================================
 
-.. currentmodule:: Firefly.server
+.. currentmodule:: firefly.server
 
 .. autofunction:: killAllFireflyServers

@@ -1,5 +1,6 @@
-Using an existing instance of Firefly
-=====================================
+.. _viz-navigation:
+Interacting with a Firefly visualization
+========================================
 
 Flying with the mouse or keyboard
 ---------------------------------
