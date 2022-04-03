@@ -193,7 +193,7 @@ function createParticleBase(UI, p){
 			.style('font-size','30px')
 			.style('line-height','14px')
 			.style('color',getComputedStyle(document.body).getPropertyValue('--UI-character-background-color'))
-			.html('&#129044;')
+			.html(GLOBAL_arrow);
 			//.text('Back')
 
 	stateBar.append('div')

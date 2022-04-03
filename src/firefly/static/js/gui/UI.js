@@ -1,3 +1,6 @@
+GLOBAL_arrow = '&#129044;';
+GLOBAL_arrow = '&#11104;';
+
 // TO DO: create radii controls for particles
 // particle state bar needs to be a few pixels larger
 // fix multiple colormaps (alex may have already fixed this, wait until merged into kaitai_io)
@@ -135,7 +138,7 @@ function createUI(){
 			.style('font-size','30px')
 			.style('line-height','14px')
 			.style('color',getComputedStyle(document.body).getPropertyValue('--UI-character-background-color'))
-			.html('&#129044;')
+			.html(GLOBAL_arrow)
 			//.text('Back')
 
 	stateBar.append('div')
