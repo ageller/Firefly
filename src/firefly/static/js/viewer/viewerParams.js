@@ -206,7 +206,7 @@ function defineViewerParams(){
 
 		// for debugging
 		this.showfps = true;
-		this.fps_list = [];
+		this.fps_list = Array(30).fill(0);
 
 		//for octree
 		this.haveOctree = {}; //will be initialized to false for each of the parts keys in loadData
