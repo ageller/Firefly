@@ -37,8 +37,8 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Quickstart</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../webapp/index.html">Using an existing instance of Firefly</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../webapp/index.html">Interacting with a Firefly visualization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../data_reader/index.html">Creating your own instance of Firefly</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../server.html">Hosting a Firefly webserver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../experimental.html">Experimental features</a></li>
@@ -78,9 +78,9 @@
 
 <span class="kn">from</span> <span class="nn">.json_utils</span> <span class="kn">import</span> <span class="n">write_to_json</span>
 
-<div class="viewcode-block" id="TweenParams"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.TweenParams.html#Firefly.data_reader.TweenParams">[docs]</a><span class="k">class</span> <span class="nc">TweenParams</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="TweenParams"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.TweenParams.html#firefly.data_reader.TweenParams">[docs]</a><span class="k">class</span> <span class="nc">TweenParams</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;A class to store tween parameters and make an output file&quot;&quot;&quot;</span>
-<div class="viewcode-block" id="TweenParams.__init__"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.TweenParams.html#Firefly.data_reader.TweenParams.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+<div class="viewcode-block" id="TweenParams.__init__"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.TweenParams.html#firefly.data_reader.TweenParams.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">coords</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">duration</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
@@ -108,6 +108,8 @@
 
         <span class="c1">## initialize containers</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">coordss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span> <span class="nb">iter</span><span class="p">(</span><span class="n">duration</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span> <span class="n">duration</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">duration</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span><span class="o">//</span><span class="mi">3</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">durations</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([])</span>
 
         <span class="c1">## store loop flag</span>
@@ -117,7 +119,7 @@
         <span class="k">if</span> <span class="n">coords</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">addKeyframe</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span><span class="n">duration</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="TweenParams.addKeyframe"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.TweenParams.html#Firefly.data_reader.TweenParams.addKeyframe">[docs]</a>    <span class="k">def</span> <span class="nf">addKeyframe</span><span class="p">(</span>
+<div class="viewcode-block" id="TweenParams.addKeyframe"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.TweenParams.html#firefly.data_reader.TweenParams.addKeyframe">[docs]</a>    <span class="k">def</span> <span class="nf">addKeyframe</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">coords</span><span class="p">,</span>
         <span class="n">duration</span><span class="p">):</span>
@@ -163,7 +165,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">coordss</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">coordss</span><span class="p">,</span><span class="n">coords</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">durations</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">durations</span><span class="p">,</span><span class="n">duration</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="TweenParams.outputToDict"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.TweenParams.html#Firefly.data_reader.TweenParams.outputToDict">[docs]</a>    <span class="k">def</span> <span class="nf">outputToDict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="TweenParams.outputToDict"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.TweenParams.html#firefly.data_reader.TweenParams.outputToDict">[docs]</a>    <span class="k">def</span> <span class="nf">outputToDict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Converts stored data into a single python dictionary.</span>
 
 <span class="sd">        :return: tween_params_dict</span>
@@ -174,15 +176,20 @@
             <span class="p">{</span><span class="s1">&#39;x&#39;</span><span class="p">:</span><span class="n">xs</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="s1">&#39;y&#39;</span><span class="p">:</span><span class="n">ys</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="s1">&#39;z&#39;</span><span class="p">:</span><span class="n">zs</span><span class="p">[</span><span class="n">i</span><span class="p">]}</span> 
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">xs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
 
+        <span class="n">rotation_dicts</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">{</span><span class="s1">&#39;x&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;y&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;z&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">}</span> 
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">xs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
+
         <span class="n">tween_params_dict</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s1">&#39;loop&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">loop</span><span class="p">,</span>
+            <span class="s1">&#39;position&#39;</span><span class="p">:</span><span class="n">keyframe_dicts</span><span class="p">,</span>
+            <span class="s1">&#39;rotation&#39;</span><span class="p">:</span><span class="n">rotation_dicts</span><span class="p">,</span>
             <span class="s1">&#39;duration&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">durations</span><span class="p">,</span>
-            <span class="s1">&#39;position&#39;</span><span class="p">:</span><span class="n">keyframe_dicts</span>
+            <span class="s1">&#39;loop&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">loop</span>
         <span class="p">}</span>
 
         <span class="k">return</span> <span class="n">tween_params_dict</span></div>
 
-<div class="viewcode-block" id="TweenParams.outputToJSON"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.TweenParams.html#Firefly.data_reader.TweenParams.outputToJSON">[docs]</a>    <span class="k">def</span> <span class="nf">outputToJSON</span><span class="p">(</span>
+<div class="viewcode-block" id="TweenParams.outputToJSON"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.TweenParams.html#firefly.data_reader.TweenParams.outputToJSON">[docs]</a>    <span class="k">def</span> <span class="nf">outputToJSON</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">JSONdir</span><span class="p">,</span>
         <span class="n">JSON_prefix</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
@@ -226,7 +233,8 @@
 
         <span class="n">tween_params_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">outputToDict</span><span class="p">()</span>
 
-        <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">JSONdir</span><span class="p">,</span><span class="n">JSON_prefix</span><span class="o">+</span><span class="n">filename</span><span class="p">)</span>
+        <span class="c1">## JSON_prefix+</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">JSONdir</span><span class="p">,</span><span class="n">filename</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">loud</span> <span class="ow">and</span> <span class="n">not_reader</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;You will need to add this tween params filename to&quot;</span><span class="o">+</span>

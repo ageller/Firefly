@@ -21,7 +21,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Hosting a Firefly webserver" href="../server.html" />
+    <link rel="next" title="Using Firefly to view FIRE data" href="fire_quickstart.html" />
     <link rel="prev" title="Sending data to a Firefly server via Flask" href="flask.html" /> 
 </head>
 
@@ -42,21 +42,19 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../installation.html">Quickstart</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../webapp/index.html">Using an existing instance of Firefly</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../webapp/index.html">Interacting with a Firefly visualization</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Creating your own instance of Firefly</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="files.html">Understanding Firefly’s input requirements</a></li>
-<li class="toctree-l2"><a class="reference internal" href="reader.html">Producing Firefly formatted <code class="code docutils literal notranslate"><span class="pre">.json</span></code> files using the <span class="xref std std-ref">Python API</span></a></li>
-<li class="toctree-l2"><a class="reference internal" href="multiple_datasets.html">Managing multiple datasets</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="flask.html">Sending data to a Firefly server via Flask</a><ul class="current">
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Tutorial notebook: Sending data to a local Firefly server through Flask</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#Start-the-Firefly-server-as-a-background-process">Start the Firefly server as a background process</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#Show-Firefly-in-an-IFrame">Show Firefly in an IFrame</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#Create-some-example-data-and-put-it-into-a-Firefly.data_reader.Reader-object">Create some example data and put it into a <code class="docutils literal notranslate"><span class="pre">Firefly.data_reader.Reader</span></code> object</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#Send-this-data-to-the-Flask-app">Send this data to the Flask app</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#Killing-the-Firefly-server-process-when-you’re-done">Killing the Firefly server process when you’re done</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#quickstart">Quickstart</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html#next-steps">Next steps</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="files.html">Understanding Firefly’s input requirements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reader.html">Producing Firefly formatted <code class="code docutils literal notranslate"><span class="pre">.json</span></code> files using the <span class="xref std std-ref">Python API</span></a></li>
+<li class="toctree-l3"><a class="reference internal" href="multiple_datasets.html">Managing multiple datasets</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="flask.html">Sending data to a Firefly server via Flask</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">Tutorial notebook: Sending data to a local Firefly server through Flask</a></li>
 </ul>
 </li>
+<li class="toctree-l3"><a class="reference internal" href="fire_quickstart.html">Using Firefly to view FIRE data</a></li>
 </ul>
 </li>
 </ul>
@@ -362,7 +360,7 @@ div.rendered_html tbody tr:hover {
     text-align: unset;
 }
 </style>
-<p><code class="docutils literal notranslate"><span class="pre">Firefly/ntbks/flask_tutorial.ipynb</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">firefly/ntbks/flask_tutorial.ipynb</span></code></p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
@@ -410,9 +408,9 @@ div.rendered_html tbody tr:hover {
 
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;/Users/ageller/VISUALIZATIONS/Firefly&#39;</span><span class="p">)</span>
-<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;/Users/agurvich/research/repos/Firefly/src&#39;</span><span class="p">)</span>
-<span class="kn">from</span> <span class="nn">Firefly.data_reader</span> <span class="kn">import</span> <span class="n">ArrayReader</span>
-<span class="kn">from</span> <span class="nn">Firefly.server</span> <span class="kn">import</span> <span class="n">spawnFireflyServer</span><span class="p">,</span><span class="n">killAllFireflyServers</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;/Users/agurvich/research/repos/firefly/src&#39;</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">firefly.data_reader</span> <span class="kn">import</span> <span class="n">ArrayReader</span>
+<span class="kn">from</span> <span class="nn">firefly.server</span> <span class="kn">import</span> <span class="n">spawnFireflyServer</span><span class="p">,</span><span class="n">killAllFireflyServers</span>
 </pre></div>
 </div>
 </div>
@@ -505,7 +503,7 @@ Waiting up to 10 seconds for background Firefly server to start...done! Your ser
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-JSONdir is None, defaulting to /Users/agurvich/research/repos/Firefly/src/Firefly/static/data/Data
+JSONdir is None, defaulting to /Users/agurvich/research/repos/firefly/src/firefly/static/data/Data
 Make sure each tracked_array (1) has a tracked_filter_flag (0), assuming True.
 Make sure each tracked_array (1) has a tracked_colormap_flag (0), assuming True.
 Outputting: PGroup_0 - 8000/8000 particles - 1 tracked fields

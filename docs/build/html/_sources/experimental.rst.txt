@@ -27,7 +27,7 @@ For security reasons, this currently does not work if the host is not the curren
 we're working on getting around this limitation). 
 
 The FPS of the stream can be specified when starting the Flask server
-see the :ref:`documentation <server api>` for :func:`Firefly.server.startFireflyServer`
+see the :ref:`documentation <server api>` for :func:`firefly.server.startFireflyServer`
 for details.
 The stream quality will degrade to ensure the target FPS  is achieved.
 

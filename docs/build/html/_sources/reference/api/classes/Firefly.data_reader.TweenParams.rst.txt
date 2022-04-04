@@ -1,7 +1,7 @@
-﻿Firefly.data\_reader.TweenParams
+﻿firefly.data\_reader.TweenParams
 ================================
 
-.. currentmodule:: Firefly.data_reader
+.. currentmodule:: firefly.data_reader
 
 .. autoclass:: TweenParams
    :members:

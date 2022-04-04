@@ -37,3 +37,7 @@ __pycache__
 ###################
 *.swp
 
+dist/*.whl
+dist/*.tar.gz
+*.ffly
+*.fftree

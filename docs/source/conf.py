@@ -15,7 +15,7 @@ import sys
 sys.path.insert(0, os.path.abspath('../../src'))
 
 
-import Firefly
+import firefly
 
 
 # -- Project information -----------------------------------------------------
@@ -25,7 +25,7 @@ copyright = '2021, Alex Gurvich, Aaron Geller'
 author = 'Alex Gurvich, Aaron Geller'
 
 # The full version, including alpha/beta/rc tags
-release = '2.0.0'
+release = '2.0.5'
 
 
 # -- General configuration ---------------------------------------------------

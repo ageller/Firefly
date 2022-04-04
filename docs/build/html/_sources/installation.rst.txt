@@ -1,16 +1,19 @@
-Quickstart
-==========
+.. _install: 
+
+Installation
+============
+
+The below will help you quickly install Firefly so you can create your own Firefly visualization.
+
+.. note::
+    Viewing an existing Firefly instance requires no installation.
+    Simply navigate to the visualization web address with a modern web browser.
 
 Requirements
 ------------
 
-To use an existing copy of Firefly you will need:
-
-* An internet browser; we recommend Firefox or Google Chrome
-
-To visualize your own data with Firefly you will need:
-
-*  A working Python installation; we recommend installing `Anaconda <https://www.anaconda.com/download/>`_ Python version 3.x, with the following packages:
+You will need a working Python installation; we recommend installing `Anaconda <https://www.anaconda.com/download/>`_ Python version 3.x.
+You will also need to install the following packages:
 
     * numpy
 
@@ -20,22 +23,16 @@ To visualize your own data with Firefly you will need:
     
     * eventlet
     
-    * flask-socketio
-    
     * flask
+    
+    * flask-socketio
 
     * requests
 
-.. _install: 
+Installing the latest stable release
+------------------------------------
 
-Installation
-------------
-
-Download the latest stable release
-++++++++++++++++++++++++++++++++++
-
-To install the latest stable release you can :code:`pip install` Firefly 
-
+Install the latest stable release with
 
 .. code-block:: bash
 
@@ -46,41 +43,43 @@ automatically install the necessary requirements and put Firefly
 into your :code:`${PYTHONPATH}` environment variable so you can 
 import it.
 
-Build from source
-+++++++++++++++++
+Install from source
+-------------------
 
-Build the latest version directly from the most up-to-date version
+Alternatively, you can install the latest version directly from the most up-to-date version
 of the source-code by cloning/forking the GitHub repository 
 
 .. code-block:: bash
 
     git clone https://github.com/ageller/Firefly.git
 
-or manually download the zip file and unpack it 
-(though this is not recommended as the development version is
-inherently unstable and you would not be able to update without
-repeating this step).
 
 Once you have the source, you can build Firefly (and add it to your environment)
-by executing:
+by executing
 
 .. code-block:: bash
 
     python setup.py install
 
+or
+
+.. code-block:: bash
+
+    pip install -e .
+
 in the top level directory. The required Python packages will automatically be 
 installed as well.
 
-You can test your installation by looking for the Firefly 
+You can test your installation by looking for the firefly 
 executable built by the installation
 
 .. code-block:: bash
 
-    which Firefly
+    which firefly
 
-and by importing the Firefly Python frontend
+and by importing the Firefly Python frontend in Python
 
 .. code-block:: python
 
-    import Firefly
+    import firefly
 

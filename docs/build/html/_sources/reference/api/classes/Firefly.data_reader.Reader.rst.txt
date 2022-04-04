@@ -1,7 +1,7 @@
-﻿Firefly.data\_reader.Reader
+﻿firefly.data\_reader.Reader
 ===========================
 
-.. currentmodule:: Firefly.data_reader
+.. currentmodule:: firefly.data_reader
 
 .. autoclass:: Reader
    :members:

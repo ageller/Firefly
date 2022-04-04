@@ -20,7 +20,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Experimental features" href="experimental.html" />
-    <link rel="prev" title="Tutorial notebook: Sending data to a local Firefly server through Flask" href="data_reader/flask_tutorial.html" /> 
+    <link rel="prev" title="Using Firefly to view FIRE data" href="data_reader/fire_quickstart.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -40,8 +40,8 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="installation.html">Quickstart</a></li>
-<li class="toctree-l1"><a class="reference internal" href="webapp/index.html">Using an existing instance of Firefly</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="webapp/index.html">Interacting with a Firefly visualization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="data_reader/index.html">Creating your own instance of Firefly</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Hosting a Firefly webserver</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#hosting-firefly-locally">Hosting Firefly locally</a><ul>
@@ -131,7 +131,7 @@ must be hosted locally (vs. <a class="reference internal" href="#internet-host">
 <p><a class="reference internal" href="data_reader/flask.html#flask"><span class="std std-ref">Features that require Flask</span></a>
 will not work if Firefly is hosted this way.</p>
 </div>
-<p>From within the the <code class="code docutils literal notranslate"><span class="pre">Firefly/src/Firefly</span></code> directory (or from within
+<p>From within the the <code class="code docutils literal notranslate"><span class="pre">Firefly/src/firefly</span></code> directory (or from within
 the corresponding sub-directory in your site-packages directory) execute</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python -m http.server
 </pre></div>
@@ -155,9 +155,9 @@ the corresponding sub-directory in your site-packages directory) execute</p>
 <h3>Using the <code class="code docutils literal notranslate"><span class="pre">Firefly</span></code> executable to launch Flask<a class="headerlink" href="#using-the-firefly-executable-to-launch-flask" title="Permalink to this headline"></a></h3>
 <p>The Firefly bash executable is a wrapper to
 <code class="code docutils literal notranslate"><span class="pre">run_server.py</span></code> so that it can be initialized without having to
-be in <code class="code docutils literal notranslate"><span class="pre">Firefly/src/Firefly</span></code> directory.</p>
+be in <code class="code docutils literal notranslate"><span class="pre">Firefly/src/firefly</span></code> directory.</p>
 <p>It is distributed along with the Firefly source
-files and Python API and is located in <code class="code docutils literal notranslate"><span class="pre">Firefly/src/Firefly/bin</span></code>
+files and Python API and is located in <code class="code docutils literal notranslate"><span class="pre">Firefly/src/firefly/bin</span></code>
 (or the corresponding sub-directory in your site-packages directory).
 When Firefly is <a class="reference internal" href="installation.html#install"><span class="std std-ref">correctly installed</span></a> then this directory
 will be added to your <code class="code docutils literal notranslate"><span class="pre">${PATH}$</span></code> variable.</p>
@@ -190,7 +190,7 @@ by creating an iframe with the command:</p>
 <h3>Hosting a Firefly server within a notebook<a class="headerlink" href="#hosting-a-firefly-server-within-a-notebook" title="Permalink to this headline"></a></h3>
 <p>You can even host a Firefly Flask server without going back to the
 command line from within a Jupyter notebook as well.</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">Firefly.server</span> <span class="kn">import</span> <span class="n">spawnFireflyServer</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">firefly.server</span> <span class="kn">import</span> <span class="n">spawnFireflyServer</span>
 
 <span class="c1">## optionally accepts port as positional argument</span>
 <span class="n">spawnFireflyServer</span><span class="p">()</span>
@@ -199,13 +199,13 @@ command line from within a Jupyter notebook as well.</p>
 <p>Where <cite>xxxx</cite> is the 4 digit port number that you’d like to host the server on.</p>
 <p>When you would like to kill this server when you are done with it,
 use the command:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">Firefly.server</span> <span class="kn">import</span> <span class="n">killAllFireflyServers</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">firefly.server</span> <span class="kn">import</span> <span class="n">killAllFireflyServers</span>
 
 <span class="c1">## optionally accepts a single process id to kill</span>
 <span class="n">killAllFireflyServers</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>Note that the pid is accessible from the original <a class="reference internal" href="reference/api/server/Firefly.server.spawnFireflyServer.html#Firefly.server.spawnFireflyServer" title="Firefly.server.spawnFireflyServer"><code class="xref py py-func docutils literal notranslate"><span class="pre">spawnFireflyServer()</span></code></a>
+<p>Note that the pid is accessible from the original <a class="reference internal" href="reference/api/server/Firefly.server.spawnFireflyServer.html#firefly.server.spawnFireflyServer" title="firefly.server.spawnFireflyServer"><code class="xref py py-func docutils literal notranslate"><span class="pre">spawnFireflyServer()</span></code></a>
 call but that processes in general do not like to be killed and may sometimes
 survive the targeted attempt on their life. It’s more reliable to indiscriminately
 kill any process that has a Firefly server process name (the default).</p>
@@ -221,7 +221,7 @@ consult the <a class="reference internal" href="reference/api/api.html#server-ap
 </div>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p><a class="reference internal" href="reference/api/classes/Firefly.data_reader.Reader.html#Firefly.data_reader.Reader.copyFireflySourceToTarget" title="Firefly.data_reader.Reader.copyFireflySourceToTarget"><code class="xref py py-func docutils literal notranslate"><span class="pre">copyFireflySourceToTarget()</span></code></a> takes an optional boolean
+<p><a class="reference internal" href="reference/api/classes/firefly.data_reader.Reader.html#firefly.data_reader.Reader.copyFireflySourceToTarget" title="firefly.data_reader.Reader.copyFireflySourceToTarget"><code class="xref py py-func docutils literal notranslate"><span class="pre">copyFireflySourceToTarget()</span></code></a> takes an optional boolean
 keyword argument <code class="code docutils literal notranslate"><span class="pre">init_gh_pages</span></code> that will attempt to
 create a new repository and enable GitHub pages automatically.
 See <a class="reference internal" href="data_reader/multiple_datasets.html#multiple-datasets"><span class="std std-ref">Managing multiple datasets</span></a> for details.</p>

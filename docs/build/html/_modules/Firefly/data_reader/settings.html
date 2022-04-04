@@ -37,8 +37,8 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Quickstart</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../webapp/index.html">Using an existing instance of Firefly</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../webapp/index.html">Interacting with a Firefly visualization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../data_reader/index.html">Creating your own instance of Firefly</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../server.html">Hosting a Firefly webserver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../experimental.html">Experimental features</a></li>
@@ -78,15 +78,15 @@
 
 <span class="kn">from</span> <span class="nn">.json_utils</span> <span class="kn">import</span> <span class="n">write_to_json</span><span class="p">,</span><span class="n">load_from_json</span>
 
-<div class="viewcode-block" id="Settings"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.Settings.html#Firefly.data_reader.Settings">[docs]</a><span class="k">class</span> <span class="nc">Settings</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="Settings"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Settings.html#firefly.data_reader.Settings">[docs]</a><span class="k">class</span> <span class="nc">Settings</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;This is a class for organizing the various settings you can pass to </span>
 <span class="sd">        Firefly to customize how the app is initialized and what features </span>
 <span class="sd">        the user has access to. </span>
 
 <span class="sd">        It is easiest to use when instances of Settings are passed to a </span>
-<span class="sd">        :class:`Firefly.data_reader.Reader` instance when it is initialized.</span>
+<span class="sd">        :class:`firefly.data_reader.Reader` instance when it is initialized.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-<div class="viewcode-block" id="Settings.__getitem__"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.Settings.html#Firefly.data_reader.Settings.__getitem__">[docs]</a>    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">key</span><span class="p">):</span>
+<div class="viewcode-block" id="Settings.__getitem__"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Settings.html#firefly.data_reader.Settings.__getitem__">[docs]</a>    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">key</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Implementation of builtin function  __getitem__</span>
 
 <span class="sd">        :param key: key to read</span>
@@ -97,7 +97,7 @@
         <span class="n">attr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__findWhichSettingsDict</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">attr</span><span class="p">)[</span><span class="n">key</span><span class="p">]</span></div>
         
-<div class="viewcode-block" id="Settings.__setitem__"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.Settings.html#Firefly.data_reader.Settings.__setitem__">[docs]</a>    <span class="k">def</span> <span class="fm">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">key</span><span class="p">,</span><span class="n">value</span><span class="p">):</span>
+<div class="viewcode-block" id="Settings.__setitem__"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Settings.html#firefly.data_reader.Settings.__setitem__">[docs]</a>    <span class="k">def</span> <span class="fm">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">key</span><span class="p">,</span><span class="n">value</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Implementation of builtin function __setitem__ </span>
 
 <span class="sd">        :param key: key to set</span>
@@ -129,7 +129,7 @@
 
         <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;Invalid settings key </span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="n">key</span><span class="p">)</span>
         
-<div class="viewcode-block" id="Settings.printKeys"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.Settings.html#Firefly.data_reader.Settings.printKeys">[docs]</a>    <span class="k">def</span> <span class="nf">printKeys</span><span class="p">(</span>
+<div class="viewcode-block" id="Settings.printKeys"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Settings.html#firefly.data_reader.Settings.printKeys">[docs]</a>    <span class="k">def</span> <span class="nf">printKeys</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">pattern</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">values</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
@@ -154,7 +154,7 @@
                         <span class="nb">print</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">attr</span><span class="p">)</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
                     <span class="nb">print</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="Settings.keys"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.Settings.html#Firefly.data_reader.Settings.keys">[docs]</a>    <span class="k">def</span> <span class="nf">keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Settings.keys"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Settings.html#firefly.data_reader.Settings.keys">[docs]</a>    <span class="k">def</span> <span class="nf">keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Returns a list of keys for all the different settings sub-dictionaries &quot;&quot;&quot;</span>
         <span class="n">this_keys</span> <span class="o">=</span> <span class="p">[]</span> 
         <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
@@ -162,29 +162,29 @@
                 <span class="n">this_keys</span> <span class="o">+=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">attr</span><span class="p">)</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
         <span class="k">return</span> <span class="n">this_keys</span></div>
 
-<div class="viewcode-block" id="Settings.__init__"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.Settings.html#Firefly.data_reader.Settings.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+<div class="viewcode-block" id="Settings.__init__"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Settings.html#firefly.data_reader.Settings.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
         <span class="n">settings_filename</span><span class="o">=</span><span class="s1">&#39;Settings.json&#39;</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Base initialization method for Settings instances. A Settings will store</span>
-<span class="sd">            the app state and produce Firefly compatible :code:`.json` files.</span>
+<span class="sd">            the app state and produce firefly compatible :code:`.json` files.</span>
 
 <span class="sd">            accepts passthrough kwargs from:</span>
 
-<span class="sd">            :func:`Firefly.data_reader.Settings.window_settings`</span>
+<span class="sd">            :func:`firefly.data_reader.Settings.window_settings`</span>
 
-<span class="sd">            :func:`Firefly.data_reader.Settings.UI_settings`</span>
+<span class="sd">            :func:`firefly.data_reader.Settings.UI_settings`</span>
 
-<span class="sd">            :func:`Firefly.data_reader.Settings.particle_UI_settings`</span>
+<span class="sd">            :func:`firefly.data_reader.Settings.particle_UI_settings`</span>
 
-<span class="sd">            :func:`Firefly.data_reader.Settings.camera_settings`</span>
+<span class="sd">            :func:`firefly.data_reader.Settings.camera_settings`</span>
 
-<span class="sd">            :func:`Firefly.data_reader.Settings.startup_settings`</span>
+<span class="sd">            :func:`firefly.data_reader.Settings.startup_settings`</span>
 
-<span class="sd">            :func:`Firefly.data_reader.Settings.particle_startup_settings`</span>
+<span class="sd">            :func:`firefly.data_reader.Settings.particle_startup_settings`</span>
 
-<span class="sd">            :func:`Firefly.data_reader.Settings.particle_filter_settings`</span>
+<span class="sd">            :func:`firefly.data_reader.Settings.particle_filter_settings`</span>
 
-<span class="sd">            :func:`Firefly.data_reader.Settings.particle_colormap_settings`</span>
+<span class="sd">            :func:`firefly.data_reader.Settings.particle_colormap_settings`</span>
 <span class="sd">            </span>
 
 <span class="sd">        :param settings_filename: name of settings :code:`.json` file,</span>
@@ -205,10 +205,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">particle_filter_settings</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">particle_colormap_settings</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Settings.window_settings"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.Settings.html#Firefly.data_reader.Settings.window_settings">[docs]</a>    <span class="k">def</span> <span class="nf">window_settings</span><span class="p">(</span>
+<div class="viewcode-block" id="Settings.window_settings"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Settings.html#firefly.data_reader.Settings.window_settings">[docs]</a>    <span class="k">def</span> <span class="nf">window_settings</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Firefly&#39;</span><span class="p">,</span>
         <span class="n">annotation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">showfps</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="o">**</span><span class="n">extra</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Settings that affect the browser window</span>
 
@@ -218,6 +219,9 @@
 <span class="sd">        :param annotation: text to include at the top of the</span>
 <span class="sd">            Firefly window as an annotation, defaults to None</span>
 <span class="sd">        :type annotation: str, optional</span>
+<span class="sd">        :param showfps: flag to display the FPS (frames per second) of the </span>
+<span class="sd">            Firefly scene, defaults to False</span>
+<span class="sd">        :type showfps: bool, optional</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">__window_settings</span> <span class="o">=</span> <span class="p">{</span>
@@ -225,10 +229,11 @@
             <span class="c1">## used in the web app to check if the settings have been read in</span>
             <span class="c1">##  this should not be modified</span>
             <span class="s1">&#39;loaded&#39;</span><span class="p">:</span><span class="kc">True</span><span class="p">,</span> 
-            <span class="s1">&#39;annotation&#39;</span><span class="p">:</span><span class="n">annotation</span> 
+            <span class="s1">&#39;annotation&#39;</span><span class="p">:</span><span class="n">annotation</span> <span class="p">,</span>
+            <span class="s1">&#39;showfps&#39;</span><span class="p">:</span><span class="n">showfps</span>
         <span class="p">}</span></div>
 
-<div class="viewcode-block" id="Settings.UI_settings"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.Settings.html#Firefly.data_reader.Settings.UI_settings">[docs]</a>    <span class="k">def</span> <span class="nf">UI_settings</span><span class="p">(</span>
+<div class="viewcode-block" id="Settings.UI_settings"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Settings.html#firefly.data_reader.Settings.UI_settings">[docs]</a>    <span class="k">def</span> <span class="nf">UI_settings</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">UI</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">UIfullscreen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -270,7 +275,7 @@
             <span class="s1">&#39;UIdecimation&#39;</span><span class="p">:</span><span class="n">UIdecimation</span><span class="p">,</span> 
         <span class="p">}</span></div>
 
-<div class="viewcode-block" id="Settings.particle_UI_settings"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.Settings.html#Firefly.data_reader.Settings.particle_UI_settings">[docs]</a>    <span class="k">def</span> <span class="nf">particle_UI_settings</span><span class="p">(</span>
+<div class="viewcode-block" id="Settings.particle_UI_settings"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Settings.html#firefly.data_reader.Settings.particle_UI_settings">[docs]</a>    <span class="k">def</span> <span class="nf">particle_UI_settings</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">UIparticle</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">UIdropdown</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -300,11 +305,12 @@
             <span class="s1">&#39;UIcolorPicker&#39;</span><span class="p">:</span><span class="nb">dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">UIcolorPicker</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">UIcolorPicker</span><span class="p">,</span>
         <span class="p">}</span></div>
 
-<div class="viewcode-block" id="Settings.camera_settings"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.Settings.html#Firefly.data_reader.Settings.camera_settings">[docs]</a>    <span class="k">def</span> <span class="nf">camera_settings</span><span class="p">(</span>
+<div class="viewcode-block" id="Settings.camera_settings"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Settings.html#firefly.data_reader.Settings.camera_settings">[docs]</a>    <span class="k">def</span> <span class="nf">camera_settings</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">center</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">camera</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">cameraRotation</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">cameraRotation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">extra</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Settings that affect the position and orientation of the camera</span>
 
 <span class="sd">        :param center: do you want to explicilty define the initial camera focus/</span>
@@ -325,7 +331,7 @@
             <span class="s1">&#39;cameraRotation&#39;</span><span class="p">:</span><span class="n">cameraRotation</span><span class="p">,</span> 
         <span class="p">}</span></div>
 
-<div class="viewcode-block" id="Settings.startup_settings"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.Settings.html#Firefly.data_reader.Settings.startup_settings">[docs]</a>    <span class="k">def</span> <span class="nf">startup_settings</span><span class="p">(</span>
+<div class="viewcode-block" id="Settings.startup_settings"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Settings.html#firefly.data_reader.Settings.startup_settings">[docs]</a>    <span class="k">def</span> <span class="nf">startup_settings</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">maxVrange</span><span class="o">=</span><span class="mf">2000.</span><span class="p">,</span>
         <span class="n">startFly</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -333,6 +339,11 @@
         <span class="n">stereo</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">stereoSep</span><span class="o">=</span><span class="mf">0.06</span><span class="p">,</span>
         <span class="n">decimate</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">start_tween</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">CDmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">CDmax</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">CDlognorm</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">columnDensity</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
         <span class="o">**</span><span class="n">extra</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;General settings that affect the state app state</span>
 
@@ -355,11 +366,27 @@
 <span class="sd">        :param decimate: set the initial global decimation </span>
 <span class="sd">            (e.g, you could load in all the data by setting </span>
 <span class="sd">            the :code:`decimation_factor` to 1 for any individual</span>
-<span class="sd">            :class:`Firefly.data_reader.ParticleGroup`,</span>
+<span class="sd">            :class:`firefly.data_reader.ParticleGroup`,</span>
 <span class="sd">            but only _display_ some fraction by setting</span>
 <span class="sd">            decimate &gt; 1 here).  </span>
 <span class="sd">            This is a single value (not a dict), defaults to None</span>
 <span class="sd">        :type decimate: int, optional</span>
+<span class="sd">        :param start_tween: flag to initialize the Firefly scene in tween mode, </span>
+<span class="sd">            requires a valid tweenParams.json file to be present in the JSONdir,</span>
+<span class="sd">            defaults to False</span>
+<span class="sd">        :type start_tween: bool, optional</span>
+<span class="sd">        :param CDmin: bottom of the renormalization for the experimental column density</span>
+<span class="sd">            projection mode, defaults to 0</span>
+<span class="sd">        :type CDmin: float, optional</span>
+<span class="sd">        :param CDmax: top of the renormalization for the experimental column density</span>
+<span class="sd">            projection mode, defaults to 1</span>
+<span class="sd">        :type CDmax: float, optional</span>
+<span class="sd">        :param CDlognorm: flag for whether renormalization should be done in log (``CDlognorm=1``)</span>
+<span class="sd">            or linear (``CDlognorm=0``) space, defaults to 0</span>
+<span class="sd">        :type CDmax: bool, optional</span>
+<span class="sd">        :param columnDensity: flag for whether the experimental column density projection mode</span>
+<span class="sd">            should be enabled at startup. Toggle this mode by pressing &#39;p&#39; on the keyboard, defaults to 0</span>
+<span class="sd">        :type CDcolumnDensity: bool, optional</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">__startup_settings</span> <span class="o">=</span> <span class="p">{</span>
@@ -369,9 +396,14 @@
             <span class="s1">&#39;stereo&#39;</span><span class="p">:</span><span class="n">stereo</span><span class="p">,</span>
             <span class="s1">&#39;stereoSep&#39;</span><span class="p">:</span><span class="n">stereoSep</span><span class="p">,</span>
             <span class="s1">&#39;decimate&#39;</span><span class="p">:</span><span class="n">decimate</span><span class="p">,</span>
+            <span class="s1">&#39;start_tween&#39;</span><span class="p">:</span><span class="n">start_tween</span><span class="p">,</span>
+            <span class="s1">&#39;CDmin&#39;</span><span class="p">:</span><span class="n">CDmin</span><span class="p">,</span>
+            <span class="s1">&#39;CDmax&#39;</span><span class="p">:</span><span class="n">CDmax</span><span class="p">,</span>
+            <span class="s1">&#39;CDlognorm&#39;</span><span class="p">:</span><span class="n">CDlognorm</span><span class="p">,</span>
+            <span class="s1">&#39;columnDensity&#39;</span><span class="p">:</span><span class="n">columnDensity</span>
         <span class="p">}</span></div>
     
-<div class="viewcode-block" id="Settings.particle_startup_settings"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.Settings.html#Firefly.data_reader.Settings.particle_startup_settings">[docs]</a>    <span class="k">def</span> <span class="nf">particle_startup_settings</span><span class="p">(</span>
+<div class="viewcode-block" id="Settings.particle_startup_settings"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Settings.html#firefly.data_reader.Settings.particle_startup_settings">[docs]</a>    <span class="k">def</span> <span class="nf">particle_startup_settings</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">plotNmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">showVel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -419,7 +451,7 @@
             <span class="s1">&#39;showParts&#39;</span><span class="p">:</span><span class="nb">dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">showParts</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">showParts</span>
         <span class="p">}</span></div>
     
-<div class="viewcode-block" id="Settings.particle_filter_settings"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.Settings.html#Firefly.data_reader.Settings.particle_filter_settings">[docs]</a>    <span class="k">def</span> <span class="nf">particle_filter_settings</span><span class="p">(</span>
+<div class="viewcode-block" id="Settings.particle_filter_settings"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Settings.html#firefly.data_reader.Settings.particle_filter_settings">[docs]</a>    <span class="k">def</span> <span class="nf">particle_filter_settings</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">filterLims</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">filterVals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -446,7 +478,7 @@
             <span class="s1">&#39;filterVals&#39;</span><span class="p">:</span><span class="nb">dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">filterVals</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">filterVals</span><span class="p">,</span> 
         <span class="p">}</span></div>
 
-<div class="viewcode-block" id="Settings.particle_colormap_settings"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.Settings.html#Firefly.data_reader.Settings.particle_colormap_settings">[docs]</a>    <span class="k">def</span> <span class="nf">particle_colormap_settings</span><span class="p">(</span>
+<div class="viewcode-block" id="Settings.particle_colormap_settings"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Settings.html#firefly.data_reader.Settings.particle_colormap_settings">[docs]</a>    <span class="k">def</span> <span class="nf">particle_colormap_settings</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">colormapLims</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">colormapVals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -469,7 +501,7 @@
 <span class="sd">            defaults to None and is set in the web app to [min, max] of that field</span>
 <span class="sd">        :type colormapVals: dict of UIname:dict of field:[min,max] range, optional</span>
 <span class="sd">        :param colormap: index of the colormap to use for each gas particle,</span>
-<span class="sd">            defined by the grid of colors in Firefly/static/textures/colormap.png</span>
+<span class="sd">            defined by the grid of colors in firefly/static/textures/colormap.png</span>
 <span class="sd">            TODO: (index + 0.5) * (8/256)</span>
 <span class="sd">            This is a dict with keys of the particle UInames mapped to floats,</span>
 <span class="sd">            (e.g. {&#39;Gas&#39;:0.015625, &#39;Stars&#39;:0.015625}),</span>
@@ -497,15 +529,15 @@
         <span class="p">}</span></div>
 
 
-<div class="viewcode-block" id="Settings.attachSettings"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.Settings.html#Firefly.data_reader.Settings.attachSettings">[docs]</a>    <span class="k">def</span> <span class="nf">attachSettings</span><span class="p">(</span>
+<div class="viewcode-block" id="Settings.attachSettings"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Settings.html#firefly.data_reader.Settings.attachSettings">[docs]</a>    <span class="k">def</span> <span class="nf">attachSettings</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">particleGroup</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Adds a :class:`~Firefly.data_reader.ParticleGroup`&#39;s settings to the</span>
+        <span class="sd">&quot;&quot;&quot;Adds a :class:`~firefly.data_reader.ParticleGroup`&#39;s settings to the</span>
 <span class="sd">        relevant settings dictionaries.</span>
 
-<span class="sd">        :param particleGroup: the :class:`~Firefly.data_reader.ParticleGroup`</span>
-<span class="sd">            that you want to link to this :class:`~Firefly.data_reader.Settings`.</span>
-<span class="sd">        :type particleGroup: :class:`Firefly.data_reader.ParticleGroup`</span>
+<span class="sd">        :param particleGroup: the :class:`~firefly.data_reader.ParticleGroup`</span>
+<span class="sd">            that you want to link to this :class:`~firefly.data_reader.Settings`.</span>
+<span class="sd">        :type particleGroup: :class:`firefly.data_reader.ParticleGroup`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1">## transfer keys from particle group</span>
@@ -521,7 +553,7 @@
         <span class="c1">## and link the other way, this Settings instance to the particleGroup</span>
         <span class="n">particleGroup</span><span class="o">.</span><span class="n">attached_settings</span> <span class="o">=</span> <span class="bp">self</span></div>
 
-<div class="viewcode-block" id="Settings.outputToDict"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.Settings.html#Firefly.data_reader.Settings.outputToDict">[docs]</a>    <span class="k">def</span> <span class="nf">outputToDict</span><span class="p">(</span>
+<div class="viewcode-block" id="Settings.outputToDict"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Settings.html#firefly.data_reader.Settings.outputToDict">[docs]</a>    <span class="k">def</span> <span class="nf">outputToDict</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Concatenates all the settings dicts into a single dictionary.</span>
@@ -543,7 +575,7 @@
 
         <span class="k">return</span> <span class="n">all_settings_dict</span></div>
 
-<div class="viewcode-block" id="Settings.outputToJSON"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.Settings.html#Firefly.data_reader.Settings.outputToJSON">[docs]</a>    <span class="k">def</span> <span class="nf">outputToJSON</span><span class="p">(</span>
+<div class="viewcode-block" id="Settings.outputToJSON"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Settings.html#firefly.data_reader.Settings.outputToJSON">[docs]</a>    <span class="k">def</span> <span class="nf">outputToJSON</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">JSONdir</span><span class="p">,</span>
         <span class="n">JSON_prefix</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
@@ -592,7 +624,7 @@
             <span class="n">all_settings_dict</span><span class="p">,</span>
             <span class="n">filename</span> <span class="k">if</span> <span class="n">write_jsons_to_disk</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span> <span class="c1">## None -&gt; string</span></div>
 
-<div class="viewcode-block" id="Settings.loadFromJSON"><a class="viewcode-back" href="../../../reference/api/classes/Firefly.data_reader.Settings.html#Firefly.data_reader.Settings.loadFromJSON">[docs]</a>    <span class="k">def</span> <span class="nf">loadFromJSON</span><span class="p">(</span>
+<div class="viewcode-block" id="Settings.loadFromJSON"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Settings.html#firefly.data_reader.Settings.loadFromJSON">[docs]</a>    <span class="k">def</span> <span class="nf">loadFromJSON</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">filename</span><span class="p">,</span>
         <span class="n">loud</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>

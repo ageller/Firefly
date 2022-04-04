@@ -1,0 +1,91 @@
+<html>
+
+	<head>
+		<meta charset="utf-8">
+		<title>Firefly GUI</title>		
+		<link rel="icon" href="static/docs/icon.png">  
+
+	</head>
+
+	<body>
+
+		<!-- <div style="background-color:black; position:absolute; top:0; bottom:0; left:0; right:0;" id='loader'>Waiting for viewer...</div> -->
+
+		<div id="ContentContainer" > 
+			<div id="splash" style="z-index: 5;">
+				<div id="splashdiv1">Waiting for Viewer... </div>
+
+				<div id="splashdivLoader">
+					<button id='loadDataButton' class='button' style='display:none; font-size:24px; width:415px; height:50px'>
+						<span>Click here to select a data directory</span>
+					</button>
+					<button id='selectStartupButton' class='button' style='display:none; font-size:24px; width:600px; height:50px'>
+						<span>Click here to select a directory from your startup file</span>
+					</button>
+				</div>
+			</div>
+
+			<div id="UIcontainer" class="hidden" style="height:0; width:0"></div>
+			
+			<div id="WebGLContainer" ></div>
+
+		</div>
+
+<!-- three.js resources -->		
+		<script src="static/lib/three.min.r137.js"></script>
+		<script src="static/lib/Detector.js"></script>
+		<script src="static/lib/TrackballControls.js"></script>
+		<script src="static/lib/three-fly-controls.js"></script>
+		<script src="static/lib/KeyboardState.js"></script>
+		<script src="static/lib/THREEx.FullScreen.js"></script>
+		<script src="static/lib/THREEx.WindowResize.js"></script>
+		<script src="static/lib/StereoEffect.js"></script>
+		
+		<!-- for the color picker = spectrum : https://github.com/bgrins/spectrum -->
+		<link rel="stylesheet" href="static/lib/spectrum.css" />
+		<script src="static/lib/jquery-3.2.1.min.js"></script> 
+		<script src="static/lib/spectrum.js"></script>
+
+		<!-- noUIslider for filtering -->
+		<link href="static/lib/nouislider.min.css" rel="stylesheet">
+		<script src="static/lib/nouislider.min.js"></script>
+
+		<!-- wNumb number formatter -->
+		<script src="static/lib/wNumb.js"></script>
+
+		<!-- d3 -->
+		<script src="static/lib/d3.v4.10.2.min.js"></script>
+
+		<!-- web sockets -->
+	    <script src="static/lib/socket.io.min.js"></script>
+
+		<!-- the main attraction -->
+		<link rel="stylesheet" type="text/css" href="static/css/UIStyles.css" />
+		<link rel="stylesheet" type="text/css" href="static/css/mainStyles.css" />
+		<script src="static/js/misc/socketParams.js"></script>
+		<script src="static/js/gui/GUIParams.js"></script>
+		<script>
+			//called upon loading
+			defineSocketParams();			
+			defineGUIParams();
+			socketParams.socket.emit('separate_GUI');
+		</script>
+
+		<script src="static/js/misc/utils.js"></script>
+		<script src="static/js/misc/windowEvents.js"></script>
+		<script src="static/js/gui/GUIsocket.js"></script>
+		<script src="static/js/gui/initGUI.js"></script>
+		<script src="static/js/gui/sliders.js"></script>
+		<script src="static/js/gui/colormap.js"></script>
+		<script src="static/js/gui/particles.js"></script>
+		<script src="static/js/gui/UI.js"></script>
+
+		<script>
+			//called upon loading
+			connectGUISocket();
+			makeUI();
+		</script>
+	</body>
+
+
+</html>

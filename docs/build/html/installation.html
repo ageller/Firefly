@@ -19,7 +19,7 @@
     <script src="_static/js/theme.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Using an existing instance of Firefly" href="webapp/index.html" />
+    <link rel="next" title="Interacting with a Firefly visualization" href="webapp/index.html" />
     <link rel="prev" title="Firefly: a browser-based interactive particle data visualization platform" href="index.html" /> 
 </head>
 
@@ -40,16 +40,13 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Quickstart</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#requirements">Requirements</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#installation">Installation</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#download-the-latest-stable-release">Download the latest stable release</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#build-from-source">Build from source</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installing-the-latest-stable-release">Installing the latest stable release</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#install-from-source">Install from source</a></li>
 </ul>
 </li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="webapp/index.html">Using an existing instance of Firefly</a></li>
+<li class="toctree-l1"><a class="reference internal" href="webapp/index.html">Interacting with a Firefly visualization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="data_reader/index.html">Creating your own instance of Firefly</a></li>
 <li class="toctree-l1"><a class="reference internal" href="server.html">Hosting a Firefly webserver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="experimental.html">Experimental features</a></li>
@@ -121,13 +118,11 @@
 <li><p>h5py</p></li>
 <li><p>pandas</p></li>
 <li><p>eventlet</p></li>
-<li><p>flask-socketio</p></li>
 <li><p>flask</p></li>
+<li><p>flask-socketio</p></li>
 <li><p>requests</p></li>
 </ul>
 </div></blockquote>
-</li>
-</ul>
 </section>
 <section id="installation">
 <span id="install"></span><h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline"></a></h2>
@@ -149,27 +144,26 @@ of the source-code by cloning/forking the GitHub repository</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/ageller/Firefly.git
 </pre></div>
 </div>
-<p>or manually download the zip file and unpack it
-(though this is not recommended as the development version is
-inherently unstable and you would not be able to update without
-repeating this step).</p>
 <p>Once you have the source, you can build Firefly (and add it to your environment)
-by executing:</p>
+by executing</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python setup.py install
+</pre></div>
+</div>
+<p>or</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install -e .
 </pre></div>
 </div>
 <p>in the top level directory. The required Python packages will automatically be
 installed as well.</p>
-<p>You can test your installation by looking for the Firefly
+<p>You can test your installation by looking for the firefly
 executable built by the installation</p>
-<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>which Firefly
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>which firefly
 </pre></div>
 </div>
-<p>and by importing the Firefly Python frontend</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">Firefly</span>
+<p>and by importing the Firefly Python frontend in Python</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">firefly</span>
 </pre></div>
 </div>
-</section>
 </section>
 </section>
 

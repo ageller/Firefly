@@ -19,8 +19,8 @@
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
-    <link rel="next" title="Firefly.data_reader.Settings" href="Firefly.data_reader.Settings.html" />
-    <link rel="prev" title="Firefly.data_reader.Reader" href="Firefly.data_reader.Reader.html" /> 
+    <link rel="next" title="firefly.data_reader.Settings" href="firefly.data_reader.Settings.html" />
+    <link rel="prev" title="firefly.data_reader.Reader" href="firefly.data_reader.Reader.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -40,18 +40,18 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Quickstart</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../webapp/index.html">Using an existing instance of Firefly</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../webapp/index.html">Interacting with a Firefly visualization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../data_reader/index.html">Creating your own instance of Firefly</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../server.html">Hosting a Firefly webserver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../experimental.html">Experimental features</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="../api.html#special-field-names">Special field names</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../api.html#base-classes">Base classes</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="Firefly.data_reader.Reader.html">Firefly.data_reader.Reader</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Firefly.data_reader.ParticleGroup</a></li>
-<li class="toctree-l3"><a class="reference internal" href="Firefly.data_reader.Settings.html">Firefly.data_reader.Settings</a></li>
-<li class="toctree-l3"><a class="reference internal" href="Firefly.data_reader.TweenParams.html">Firefly.data_reader.TweenParams</a></li>
+<li class="toctree-l3"><a class="reference internal" href="firefly.data_reader.Reader.html">firefly.data_reader.Reader</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">firefly.data_reader.ParticleGroup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="firefly.data_reader.Settings.html">firefly.data_reader.Settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="firefly.data_reader.TweenParams.html">firefly.data_reader.TweenParams</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../api.html#pre-built-readers">Pre-built Readers</a></li>
@@ -144,7 +144,7 @@ method please be careful!!</p>
 <dt class="sig sig-object py" id="Firefly.data_reader.ParticleGroup.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">UIname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coordinates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tracked_arrays</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tracked_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tracked_filter_flags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tracked_colormap_flags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimation_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filenames_and_nparts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attached_settings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">doSPHrad</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loud</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">settings_kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/Firefly/data_reader/particlegroup.html#ParticleGroup.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Firefly.data_reader.ParticleGroup.__init__" title="Permalink to this definition"></a></dt>
 <dd><dl class="simple">
-<dt>Accepts pass-through kwargs for <a class="reference internal" href="Firefly.data_reader.Settings.html#Firefly.data_reader.Settings" title="Firefly.data_reader.Settings"><code class="xref py py-class docutils literal notranslate"><span class="pre">Firefly.data_reader.Settings</span></code></a> whether one is attached</dt><dd><p>at initialization or not.</p>
+<dt>Accepts pass-through kwargs for <a class="reference internal" href="firefly.data_reader.Settings.html#firefly.data_reader.Settings" title="firefly.data_reader.Settings"><code class="xref py py-class docutils literal notranslate"><span class="pre">firefly.data_reader.Settings</span></code></a> whether one is attached</dt><dd><p>at initialization or not.</p>
 </dd>
 </dl>
 <dl class="field-list simple">
@@ -173,13 +173,13 @@ you should pass a list of tuples in the form</p>
 <p><code class="code docutils literal notranslate"><span class="pre">[(&quot;json_name0.json&quot;,nparts_this_file0),(&quot;json_name1.json&quot;,nparts_this_file1)</span> <span class="pre">...</span> <span class="pre">]</span></code></p>
 <p>where where the sum of <code class="code docutils literal notranslate"><span class="pre">nparts_this_file%d</span></code> is exactly <code class="code docutils literal notranslate"><span class="pre">nparts</span></code>. These files
 will automatically be added to <code class="code docutils literal notranslate"><span class="pre">filenames.json</span></code> if you use
-an attached <a class="reference internal" href="Firefly.data_reader.Reader.html#Firefly.data_reader.Reader" title="Firefly.data_reader.Reader"><code class="xref py py-class docutils literal notranslate"><span class="pre">Firefly.data_reader.Reader</span></code></a> and 
-its <a class="reference internal" href="Firefly.data_reader.Reader.html#Firefly.data_reader.Reader.dumpToJSON" title="Firefly.data_reader.Reader.dumpToJSON"><code class="xref py py-class docutils literal notranslate"><span class="pre">dumpToJSON</span></code></a> method, defaults to None</p>
+an attached <a class="reference internal" href="firefly.data_reader.Reader.html#firefly.data_reader.Reader" title="firefly.data_reader.Reader"><code class="xref py py-class docutils literal notranslate"><span class="pre">firefly.data_reader.Reader</span></code></a> and 
+its <a class="reference internal" href="firefly.data_reader.Reader.html#firefly.data_reader.Reader.dumpToJSON" title="firefly.data_reader.Reader.dumpToJSON"><code class="xref py py-class docutils literal notranslate"><span class="pre">dumpToJSON</span></code></a> method, defaults to None</p>
 </p></li>
-<li><p><strong>attached_settings</strong> (<a class="reference internal" href="Firefly.data_reader.Settings.html#Firefly.data_reader.Settings" title="Firefly.data_reader.Settings"><code class="xref py py-class docutils literal notranslate"><span class="pre">Firefly.data_reader.Settings</span></code></a>, optional) – <a class="reference internal" href="Firefly.data_reader.Settings.html#Firefly.data_reader.Settings" title="Firefly.data_reader.Settings"><code class="xref py py-class docutils literal notranslate"><span class="pre">Settings</span></code></a> instance that should be linked
+<li><p><strong>attached_settings</strong> (<a class="reference internal" href="firefly.data_reader.Settings.html#firefly.data_reader.Settings" title="firefly.data_reader.Settings"><code class="xref py py-class docutils literal notranslate"><span class="pre">firefly.data_reader.Settings</span></code></a>, optional) – <a class="reference internal" href="firefly.data_reader.Settings.html#firefly.data_reader.Settings" title="firefly.data_reader.Settings"><code class="xref py py-class docutils literal notranslate"><span class="pre">Settings</span></code></a> instance that should be linked
 to this particle group such that GUI elements are connected correctly. If not provided here
 can be attached after-the-fact using the
-<code class="xref py py-func docutils literal notranslate"><span class="pre">Firefly.data-reader.Settings.attachSettings()</span></code> method, defaults to None</p></li>
+<code class="xref py py-func docutils literal notranslate"><span class="pre">firefly.data-reader.Settings.attachSettings()</span></code> method, defaults to None</p></li>
 <li><p><strong>doSPHrad</strong> (<em>bool</em><em>, </em><em>optional</em>) – flag to vary the opacity across a particle by a cubic spline 
 (as commonly done in SPH).
 Must then also provide <code class="code docutils literal notranslate"><span class="pre">SmoothingLength</span></code> as a tracked_array., defaults to False
@@ -219,7 +219,7 @@ not an RGBA iterable</p></li>
 <span class="sig-name descname"><span class="pre">__setitem__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/Firefly/data_reader/particlegroup.html#ParticleGroup.__setitem__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Firefly.data_reader.ParticleGroup.__setitem__" title="Permalink to this definition"></a></dt>
 <dd><dl class="simple">
 <dt>Implementation of builtin function __setitem__ to replace</dt><dd><p>field data or track new fields. Filter flag and colormap flags
-will be set to true, call <a class="reference internal" href="#Firefly.data_reader.ParticleGroup.trackArray" title="Firefly.data_reader.ParticleGroup.trackArray"><code class="xref py py-func docutils literal notranslate"><span class="pre">Firefly.data_reader.ParticleGroup.trackArray()</span></code></a>
+will be set to true, call <a class="reference internal" href="#firefly.data_reader.ParticleGroup.trackArray" title="firefly.data_reader.ParticleGroup.trackArray"><code class="xref py py-func docutils literal notranslate"><span class="pre">firefly.data_reader.ParticleGroup.trackArray()</span></code></a>
 directly if this is undesired.</p>
 </dd>
 </dl>
@@ -263,7 +263,7 @@ matching the tracked field arrays.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>dec_inds</strong> (<em>np.ndarray</em><em>, </em><em>optional</em>) – the decimation indices to 
-use, defining a subset of the <a class="reference internal" href="#Firefly.data_reader.ParticleGroup" title="Firefly.data_reader.ParticleGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParticleGroup</span></code></a> data to 
+use, defining a subset of the <a class="reference internal" href="#firefly.data_reader.ParticleGroup" title="firefly.data_reader.ParticleGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParticleGroup</span></code></a> data to 
 output, defaults to np.arange(self.nparts)</p></li>
 <li><p><strong>store_extra_keys</strong> (<em>bool</em><em>, </em><em>optional</em>) – flag to store filter and colormap flags, defaults to True</p></li>
 <li><p><strong>loud</strong> (<em>bool</em><em>, </em><em>optional</em>) – flag to print status information to the console, defaults to False</p></li>
@@ -282,8 +282,8 @@ output, defaults to np.arange(self.nparts)</p></li>
 <dt class="sig sig-object py" id="Firefly.data_reader.ParticleGroup.outputToJSON">
 <span class="sig-name descname"><span class="pre">outputToJSON</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">short_data_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hard_data_path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">JSON_prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loud</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nparts_per_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clean_JSONdir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_jsons_to_disk</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">not_reader</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/Firefly/data_reader/particlegroup.html#ParticleGroup.outputToJSON"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Firefly.data_reader.ParticleGroup.outputToJSON" title="Permalink to this definition"></a></dt>
 <dd><dl class="simple">
-<dt>Outputs this ParticleGroup instance’s data to JSON format, splitting it up into </dt><dd><p>multiple sub-JSON files. Best used when coupled with a <a class="reference internal" href="Firefly.data_reader.Reader.html#Firefly.data_reader.Reader" title="Firefly.data_reader.Reader"><code class="xref py py-class docutils literal notranslate"><span class="pre">Firefly.data_reader.Reader</span></code></a>’s
-<a class="reference internal" href="Firefly.data_reader.Reader.html#Firefly.data_reader.Reader.dumpToJSON" title="Firefly.data_reader.Reader.dumpToJSON"><code class="xref py py-func docutils literal notranslate"><span class="pre">dumpToJSON()</span></code></a> method.</p>
+<dt>Outputs this ParticleGroup instance’s data to JSON format, splitting it up into </dt><dd><p>multiple sub-JSON files. Best used when coupled with a <a class="reference internal" href="firefly.data_reader.Reader.html#firefly.data_reader.Reader" title="firefly.data_reader.Reader"><code class="xref py py-class docutils literal notranslate"><span class="pre">firefly.data_reader.Reader</span></code></a>’s
+<a class="reference internal" href="firefly.data_reader.Reader.html#firefly.data_reader.Reader.dumpToJSON" title="firefly.data_reader.Reader.dumpToJSON"><code class="xref py py-func docutils literal notranslate"><span class="pre">dumpToJSON()</span></code></a> method.</p>
 </dd>
 </dl>
 <dl class="field-list simple">
@@ -291,7 +291,7 @@ output, defaults to np.arange(self.nparts)</p></li>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>short_data_path</strong> (<em>str</em>) – the sub-directory you want to put these files into</p></li>
 <li><p><strong>hard_data_path</strong> (<em>str</em>) – the path to the directory containing different datasets’
-JSON sub-directories (often <code class="code docutils literal notranslate"><span class="pre">/path/toFirefly/static/data</span></code>)</p></li>
+JSON sub-directories (often <code class="code docutils literal notranslate"><span class="pre">/path/to/firefly/static/data</span></code>)</p></li>
 <li><p><strong>JSON_prefix</strong> (<em>str</em><em>, </em><em>optional</em>) – Prefix for any <code class="code docutils literal notranslate"><span class="pre">.json</span></code> files created, <code class="code docutils literal notranslate"><span class="pre">.json</span></code> files will be of the format:
 <code class="code docutils literal notranslate"><span class="pre">&lt;JSON_prefix&gt;&lt;parttype&gt;_%d.json</span></code>, defaults to ‘’</p></li>
 <li><p><strong>loud</strong> (<em>bool</em><em>, </em><em>optional</em>) – flag to print status information to the console, defaults to True</p></li>

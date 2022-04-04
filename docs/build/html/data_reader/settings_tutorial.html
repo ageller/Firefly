@@ -22,7 +22,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Managing multiple datasets" href="multiple_datasets.html" />
-    <link rel="prev" title="Tutorial notebook: Using the Reader class" href="reader_tutorial.html" /> 
+    <link rel="prev" title="Convert FIRE data" href="convert_FIRE_data.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -42,22 +42,24 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../installation.html">Quickstart</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../webapp/index.html">Using an existing instance of Firefly</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../webapp/index.html">Interacting with a Firefly visualization</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Creating your own instance of Firefly</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="files.html">Understanding Firefly’s input requirements</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="reader.html">Producing Firefly formatted <code class="code docutils literal notranslate"><span class="pre">.json</span></code> files using the <span class="xref std std-ref">Python API</span></a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="reader.html#the-reader-class">The <code class="xref py py-class docutils literal notranslate"><span class="pre">Reader</span></code> class</a></li>
-<li class="toctree-l3"><a class="reference internal" href="reader.html#the-particlegroup-class">The <code class="xref py py-class docutils literal notranslate"><span class="pre">ParticleGroup</span></code> class</a></li>
-<li class="toctree-l3 current"><a class="reference internal" href="reader.html#the-settings-class">The <code class="xref py py-class docutils literal notranslate"><span class="pre">Settings</span></code> class</a><ul class="current">
-<li class="toctree-l4 current"><a class="current reference internal" href="#">Tutorial notebook: Managing Custom Settings</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#quickstart">Quickstart</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html#next-steps">Next steps</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="files.html">Understanding Firefly’s input requirements</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="reader.html">Producing Firefly formatted <code class="code docutils literal notranslate"><span class="pre">.json</span></code> files using the <span class="xref std std-ref">Python API</span></a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="reader.html#the-reader-class">The <code class="xref py py-class docutils literal notranslate"><span class="pre">Reader</span></code> class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="reader.html#the-particlegroup-class">The <code class="xref py py-class docutils literal notranslate"><span class="pre">ParticleGroup</span></code> class</a></li>
+<li class="toctree-l4 current"><a class="reference internal" href="reader.html#the-settings-class">The <code class="xref py py-class docutils literal notranslate"><span class="pre">Settings</span></code> class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="reader.html#the-tweenparams-class">The <code class="xref py py-class docutils literal notranslate"><span class="pre">TweenParams</span></code> class</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="reader.html#the-tweenparams-class">The <code class="xref py py-class docutils literal notranslate"><span class="pre">TweenParams</span></code> class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="multiple_datasets.html">Managing multiple datasets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="flask.html">Sending data to a Firefly server via Flask</a></li>
+<li class="toctree-l3"><a class="reference internal" href="fire_quickstart.html">Using Firefly to view FIRE data</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="multiple_datasets.html">Managing multiple datasets</a></li>
-<li class="toctree-l2"><a class="reference internal" href="flask.html">Sending data to a Firefly server via Flask</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../server.html">Hosting a Firefly webserver</a></li>
@@ -361,7 +363,7 @@ div.rendered_html tbody tr:hover {
     text-align: unset;
 }
 </style>
-<p><code class="docutils literal notranslate"><span class="pre">Firefly/ntbks/settings_tutorial.ipynb</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">firefly/ntbks/settings_tutorial.ipynb</span></code></p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
@@ -426,7 +428,7 @@ div.rendered_html tbody tr:hover {
 <span></span><span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">from</span> <span class="nn">Firefly.data_reader</span> <span class="kn">import</span> <span class="n">ParticleGroup</span><span class="p">,</span><span class="n">Settings</span><span class="p">,</span><span class="n">ArrayReader</span>
+<span class="kn">from</span> <span class="nn">firefly.data_reader</span> <span class="kn">import</span> <span class="n">ParticleGroup</span><span class="p">,</span><span class="n">Settings</span><span class="p">,</span><span class="n">ArrayReader</span>
 </pre></div>
 </div>
 </div>
@@ -459,7 +461,7 @@ div.rendered_html tbody tr:hover {
 </tbody>
 </table>
 <p>Specific information for each key can be found in this documentation.</p>
-<p>To create the necessary JSON files one should use the <code class="docutils literal notranslate"><span class="pre">Firefly.data_reader.Settings</span></code> class to create a <code class="docutils literal notranslate"><span class="pre">Settings</span></code> object. Once you have a <code class="docutils literal notranslate"><span class="pre">Settings</span></code> object you can manipulate the settings as you see fit and then either 1. manually save it to a file using the <code class="docutils literal notranslate"><span class="pre">outputToJSON()</span></code> method or 2. connect it to a <code class="docutils literal notranslate"><span class="pre">Firefly.data_reader.Reader</span></code> object in order to link it to a specific visualization (see the reader documentation for details on how to use a <code class="docutils literal notranslate"><span class="pre">Reader</span></code> object).</p>
+<p>To create the necessary JSON files one should use the <code class="docutils literal notranslate"><span class="pre">firefly.data_reader.Settings</span></code> class to create a <code class="docutils literal notranslate"><span class="pre">Settings</span></code> object. Once you have a <code class="docutils literal notranslate"><span class="pre">Settings</span></code> object you can manipulate the settings as you see fit and then either 1. manually save it to a file using the <code class="docutils literal notranslate"><span class="pre">outputToJSON()</span></code> method or 2. connect it to a <code class="docutils literal notranslate"><span class="pre">firefly.data_reader.Reader</span></code> object in order to link it to a specific visualization (see the reader documentation for details on how to use a <code class="docutils literal notranslate"><span class="pre">Reader</span></code> object).</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
@@ -606,7 +608,7 @@ showColormap {}
 
 </pre></div></div>
 </div>
-<p>We’ll use a <code class="docutils literal notranslate"><span class="pre">Firefly.data_reader.ArrayReader</span></code>, a workhorse <code class="docutils literal notranslate"><span class="pre">Firefly.data_reader.Reader</span></code> sub-class with many convenient functions. See the reader documentation for details that are outside the scope of this tutorial.</p>
+<p>We’ll use a <code class="docutils literal notranslate"><span class="pre">firefly.data_reader.ArrayReader</span></code>, a workhorse <code class="docutils literal notranslate"><span class="pre">firefly.data_reader.Reader</span></code> sub-class with many convenient functions. See the reader documentation for details that are outside the scope of this tutorial.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
@@ -626,7 +628,7 @@ showColormap {}
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-JSONdir is None, defaulting to /Users/agurvich/research/repos/Firefly/src/Firefly/static/data/Data
+JSONdir is None, defaulting to /Users/agurvich/research/repos/firefly/src/firefly/static/data/Data
 Make sure each tracked_array (2) has a tracked_filter_flag (0), assuming True.
 Make sure each tracked_array (2) has a tracked_colormap_flag (0), assuming True.
 Outputting: PGroup_0 - 7999/7999 particles - 0 tracked fields

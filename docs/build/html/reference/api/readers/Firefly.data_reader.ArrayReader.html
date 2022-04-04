@@ -19,8 +19,8 @@
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
-    <link rel="next" title="Firefly.data_reader.FIREreader" href="Firefly.data_reader.FIREreader.html" />
-    <link rel="prev" title="Firefly.data_reader.SimpleReader" href="Firefly.data_reader.SimpleReader.html" /> 
+    <link rel="next" title="firefly.data_reader.FIREreader" href="firefly.data_reader.FIREreader.html" />
+    <link rel="prev" title="firefly.data_reader.SimpleReader" href="firefly.data_reader.SimpleReader.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -40,8 +40,8 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Quickstart</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../webapp/index.html">Using an existing instance of Firefly</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../webapp/index.html">Interacting with a Firefly visualization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../data_reader/index.html">Creating your own instance of Firefly</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../server.html">Hosting a Firefly webserver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../experimental.html">Experimental features</a></li>
@@ -49,10 +49,10 @@
 <li class="toctree-l2"><a class="reference internal" href="../api.html#special-field-names">Special field names</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api.html#base-classes">Base classes</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../api.html#pre-built-readers">Pre-built Readers</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="Firefly.data_reader.SimpleReader.html">Firefly.data_reader.SimpleReader</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Firefly.data_reader.ArrayReader</a></li>
-<li class="toctree-l3"><a class="reference internal" href="Firefly.data_reader.FIREreader.html">Firefly.data_reader.FIREreader</a></li>
-<li class="toctree-l3"><a class="reference internal" href="Firefly.data_reader.SimpleFIREreader.html">Firefly.data_reader.SimpleFIREreader</a></li>
+<li class="toctree-l3"><a class="reference internal" href="firefly.data_reader.SimpleReader.html">firefly.data_reader.SimpleReader</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">firefly.data_reader.ArrayReader</a></li>
+<li class="toctree-l3"><a class="reference internal" href="firefly.data_reader.FIREreader.html">firefly.data_reader.FIREreader</a></li>
+<li class="toctree-l3"><a class="reference internal" href="firefly.data_reader.SimpleFIREreader.html">firefly.data_reader.SimpleFIREreader</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../api.html#server-utitities">Server Utitities</a></li>
@@ -121,7 +121,7 @@ raw numpy array data without opening anything from disk.</p>
 <dt class="sig sig-object py" id="Firefly.data_reader.ArrayReader.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coordinates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">UInames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fields</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimation_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_jsons_to_disk</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loud</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/Firefly/data_reader/reader.html#ArrayReader.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Firefly.data_reader.ArrayReader.__init__" title="Permalink to this definition"></a></dt>
 <dd><dl class="simple">
-<dt>Takes a list of opened numpy arrays and creates a <a class="reference internal" href="../classes/Firefly.data_reader.Reader.html#Firefly.data_reader.Reader" title="Firefly.data_reader.Reader"><code class="xref py py-class docutils literal notranslate"><span class="pre">Firefly.data_reader.Reader</span></code></a> instance</dt><dd><p>with their data. Takes <a class="reference internal" href="../classes/Firefly.data_reader.Reader.html#Firefly.data_reader.Reader" title="Firefly.data_reader.Reader"><code class="xref py py-class docutils literal notranslate"><span class="pre">Firefly.data_reader.Reader</span></code></a> passthrough kwargs.</p>
+<dt>Takes a list of opened numpy arrays and creates a <a class="reference internal" href="../classes/firefly.data_reader.Reader.html#firefly.data_reader.Reader" title="firefly.data_reader.Reader"><code class="xref py py-class docutils literal notranslate"><span class="pre">firefly.data_reader.Reader</span></code></a> instance</dt><dd><p>with their data. Takes <a class="reference internal" href="../classes/firefly.data_reader.Reader.html#firefly.data_reader.Reader" title="firefly.data_reader.Reader"><code class="xref py py-class docutils literal notranslate"><span class="pre">firefly.data_reader.Reader</span></code></a> passthrough kwargs.</p>
 </dd>
 </dl>
 <dl class="field-list simple">

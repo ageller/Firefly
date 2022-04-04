@@ -21,7 +21,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Tutorial notebook: Managing Custom Settings" href="settings_tutorial.html" />
+    <link rel="next" title="Convert FIRE data" href="convert_FIRE_data.html" />
     <link rel="prev" title="Producing Firefly formatted .json files using the Python API" href="reader.html" /> 
 </head>
 
@@ -42,22 +42,24 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../installation.html">Quickstart</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../webapp/index.html">Using an existing instance of Firefly</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../webapp/index.html">Interacting with a Firefly visualization</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Creating your own instance of Firefly</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="files.html">Understanding Firefly’s input requirements</a></li>
-<li class="toctree-l2 current"><a class="reference internal" href="reader.html">Producing Firefly formatted <code class="code docutils literal notranslate"><span class="pre">.json</span></code> files using the <span class="xref std std-ref">Python API</span></a><ul class="current">
-<li class="toctree-l3 current"><a class="reference internal" href="reader.html#the-reader-class">The <code class="xref py py-class docutils literal notranslate"><span class="pre">Reader</span></code> class</a><ul class="current">
-<li class="toctree-l4 current"><a class="current reference internal" href="#">Tutorial notebook: Using the <code class="docutils literal notranslate"><span class="pre">Reader</span></code> class</a></li>
+<li class="toctree-l2"><a class="reference internal" href="index.html#quickstart">Quickstart</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html#next-steps">Next steps</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="files.html">Understanding Firefly’s input requirements</a></li>
+<li class="toctree-l3 current"><a class="reference internal" href="reader.html">Producing Firefly formatted <code class="code docutils literal notranslate"><span class="pre">.json</span></code> files using the <span class="xref std std-ref">Python API</span></a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="reader.html#the-reader-class">The <code class="xref py py-class docutils literal notranslate"><span class="pre">Reader</span></code> class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="reader.html#the-particlegroup-class">The <code class="xref py py-class docutils literal notranslate"><span class="pre">ParticleGroup</span></code> class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="reader.html#the-settings-class">The <code class="xref py py-class docutils literal notranslate"><span class="pre">Settings</span></code> class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="reader.html#the-tweenparams-class">The <code class="xref py py-class docutils literal notranslate"><span class="pre">TweenParams</span></code> class</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="reader.html#the-particlegroup-class">The <code class="xref py py-class docutils literal notranslate"><span class="pre">ParticleGroup</span></code> class</a></li>
-<li class="toctree-l3"><a class="reference internal" href="reader.html#the-settings-class">The <code class="xref py py-class docutils literal notranslate"><span class="pre">Settings</span></code> class</a></li>
-<li class="toctree-l3"><a class="reference internal" href="reader.html#the-tweenparams-class">The <code class="xref py py-class docutils literal notranslate"><span class="pre">TweenParams</span></code> class</a></li>
+<li class="toctree-l3"><a class="reference internal" href="multiple_datasets.html">Managing multiple datasets</a></li>
+<li class="toctree-l3"><a class="reference internal" href="flask.html">Sending data to a Firefly server via Flask</a></li>
+<li class="toctree-l3"><a class="reference internal" href="fire_quickstart.html">Using Firefly to view FIRE data</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="multiple_datasets.html">Managing multiple datasets</a></li>
-<li class="toctree-l2"><a class="reference internal" href="flask.html">Sending data to a Firefly server via Flask</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../server.html">Hosting a Firefly webserver</a></li>
@@ -361,7 +363,7 @@ div.rendered_html tbody tr:hover {
     text-align: unset;
 }
 </style>
-<p><code class="docutils literal notranslate"><span class="pre">Firefly/ntbks/reader_tutorial.ipynb</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">firefly/ntbks/reader_tutorial.ipynb</span></code></p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
@@ -404,8 +406,8 @@ div.rendered_html tbody tr:hover {
 <span></span><span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="s2">&quot;/Users/agurvich/research/repos/Firefly/src/&quot;</span><span class="p">)</span>
-<span class="kn">from</span> <span class="nn">Firefly.data_reader</span> <span class="kn">import</span> <span class="n">Reader</span><span class="p">,</span><span class="n">ArrayReader</span><span class="p">,</span><span class="n">ParticleGroup</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="s2">&quot;/Users/agurvich/research/repos/firefly/src/&quot;</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">firefly.data_reader</span> <span class="kn">import</span> <span class="n">Reader</span><span class="p">,</span><span class="n">ArrayReader</span><span class="p">,</span><span class="n">ParticleGroup</span>
 </pre></div>
 </div>
 </div>
@@ -416,14 +418,14 @@ div.rendered_html tbody tr:hover {
 <section id="Creating-a-Reader-instance">
 <h2>Creating a Reader instance<a class="headerlink" href="#Creating-a-Reader-instance" title="Permalink to this headline"></a></h2>
 <p>To begin, we’ll start by initializing a <code class="docutils literal notranslate"><span class="pre">Reader</span></code> object. Users are encouraged to familiarize themselves with the different keyword arguments through the documentation linked above.</p>
-<p>Perhaps the most important keyword argument is the <code class="docutils literal notranslate"><span class="pre">JSONdir</span></code>, which tells your <code class="docutils literal notranslate"><span class="pre">Reader</span></code> object where it should collect the different <code class="docutils literal notranslate"><span class="pre">.json</span></code> files it will produce. The <code class="docutils literal notranslate"><span class="pre">.json</span></code> files have to be readable from the <code class="docutils literal notranslate"><span class="pre">Firefly/static/data</span></code> directory of the iteration of Firefly that’s trying to open the data. The <code class="docutils literal notranslate"><span class="pre">Reader</span></code> class will automatically create a shortcut to the directory if you don’t choose a path that lives in <code class="docutils literal notranslate"><span class="pre">Firefly/static/data</span></code>. If you enter a relative path it will assume
+<p>Perhaps the most important keyword argument is the <code class="docutils literal notranslate"><span class="pre">JSONdir</span></code>, which tells your <code class="docutils literal notranslate"><span class="pre">Reader</span></code> object where it should collect the different <code class="docutils literal notranslate"><span class="pre">.json</span></code> files it will produce. The <code class="docutils literal notranslate"><span class="pre">.json</span></code> files have to be readable from the <code class="docutils literal notranslate"><span class="pre">firefly/static/data</span></code> directory of the iteration of Firefly that’s trying to open the data. The <code class="docutils literal notranslate"><span class="pre">Reader</span></code> class will automatically create a shortcut to the directory if you don’t choose a path that lives in <code class="docutils literal notranslate"><span class="pre">firefly/static/data</span></code>. If you enter a relative path it will assume
 you mean relative to your <code class="docutils literal notranslate"><span class="pre">${HOME}</span></code> directory. If no <code class="docutils literal notranslate"><span class="pre">JSONdir</span></code> is provided then it will default to <code class="docutils literal notranslate"><span class="pre">${HOME}/&lt;JSONprefix&gt;</span></code> (which itself defaults to <code class="docutils literal notranslate"><span class="pre">Data</span></code> if nothing is passed).</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1">## initialize a Reader object, cwd will be Firefly/ntbks</span>
+<span></span><span class="c1">## initialize a Reader object, cwd will be firefly/ntbks</span>
 <span class="n">JSONdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span><span class="s1">&#39;..&#39;</span><span class="p">,</span><span class="s1">&#39;static&#39;</span><span class="p">,</span><span class="s1">&#39;data&#39;</span><span class="p">,</span><span class="s1">&#39;tutorial&#39;</span><span class="p">))</span>
 <span class="n">my_reader</span> <span class="o">=</span> <span class="n">Reader</span><span class="p">(</span><span class="n">JSONdir</span><span class="o">=</span><span class="n">JSONdir</span><span class="p">)</span>
 </pre></div>

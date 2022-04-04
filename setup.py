@@ -4,8 +4,8 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="Firefly-vis",
-    version="2.0.2",
+    name="firefly",
+    version="2.0.6",
     author = 'Alex Gurvich, Aaron Geller',
     author_email = 'agurvich@u.northwestern.edu, ageller@northwestern.edu',
     description="A browser-based particle visualization platform",
@@ -31,9 +31,9 @@ setuptools.setup(
           'flask-socketio',
           'flask',
           'requests',
-          'abg_python'
+          'abg_python>=1.0.2'
       ],
     include_package_data=True,
-    scripts=["src/Firefly/bin/Firefly"]
+    scripts=["src/firefly/bin/firefly"]
 )
 

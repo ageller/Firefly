@@ -19,8 +19,7 @@
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
-    <link rel="next" title="Firefly.server.startFireflyServer" href="../server/Firefly.server.startFireflyServer.html" />
-    <link rel="prev" title="Firefly.data_reader.FIREreader" href="Firefly.data_reader.FIREreader.html" /> 
+    <link rel="prev" title="firefly.data_reader.FIREreader" href="firefly.data_reader.FIREreader.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -40,8 +39,8 @@
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
-<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Quickstart</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../webapp/index.html">Using an existing instance of Firefly</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../webapp/index.html">Interacting with a Firefly visualization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../data_reader/index.html">Creating your own instance of Firefly</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../server.html">Hosting a Firefly webserver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../experimental.html">Experimental features</a></li>
@@ -49,10 +48,10 @@
 <li class="toctree-l2"><a class="reference internal" href="../api.html#special-field-names">Special field names</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../api.html#base-classes">Base classes</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../api.html#pre-built-readers">Pre-built Readers</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="Firefly.data_reader.SimpleReader.html">Firefly.data_reader.SimpleReader</a></li>
-<li class="toctree-l3"><a class="reference internal" href="Firefly.data_reader.ArrayReader.html">Firefly.data_reader.ArrayReader</a></li>
-<li class="toctree-l3"><a class="reference internal" href="Firefly.data_reader.FIREreader.html">Firefly.data_reader.FIREreader</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">Firefly.data_reader.SimpleFIREreader</a></li>
+<li class="toctree-l3"><a class="reference internal" href="firefly.data_reader.SimpleReader.html">firefly.data_reader.SimpleReader</a></li>
+<li class="toctree-l3"><a class="reference internal" href="firefly.data_reader.ArrayReader.html">firefly.data_reader.ArrayReader</a></li>
+<li class="toctree-l3"><a class="reference internal" href="firefly.data_reader.FIREreader.html">firefly.data_reader.FIREreader</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">firefly.data_reader.SimpleFIREreader</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="../api.html#server-utitities">Server Utitities</a></li>
@@ -119,8 +118,8 @@
 <dt class="sig sig-object py" id="Firefly.data_reader.SimpleFIREreader.__init__">
 <span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path_to_snapshot</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimation_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">JSONdir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_jsons_to_disk</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">com_offset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/Firefly/data_reader/FIREreader.html#SimpleFIREreader.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Firefly.data_reader.SimpleFIREreader.__init__" title="Permalink to this definition"></a></dt>
 <dd><dl>
-<dt>A wrapper to <a class="reference internal" href="Firefly.data_reader.FIREreader.html#Firefly.data_reader.FIREreader" title="Firefly.data_reader.FIREreader"><code class="xref py py-class docutils literal notranslate"><span class="pre">Firefly.data_reader.FIREreader</span></code></a> that will open </dt><dd><p>FIRE collaboration formatted data with minimal interaction from the user 
-and use a “standard” Firefly setup with:</p>
+<dt>A wrapper to <a class="reference internal" href="firefly.data_reader.FIREreader.html#firefly.data_reader.FIREreader" title="firefly.data_reader.FIREreader"><code class="xref py py-class docutils literal notranslate"><span class="pre">firefly.data_reader.FIREreader</span></code></a> that will open </dt><dd><p>FIRE collaboration formatted data with minimal interaction from the user 
+and use a “standard” firefly setup with:</p>
 <blockquote>
 <div><p><code class="code docutils literal notranslate"><span class="pre">ptypes</span> <span class="pre">=</span> <span class="pre">[0,4]</span></code></p>
 <p><code class="code docutils literal notranslate"><span class="pre">UInames</span> <span class="pre">=</span> <span class="pre">['gas','stars']</span></code></p>
