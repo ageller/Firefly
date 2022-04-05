@@ -1085,7 +1085,7 @@ function sendInitGUI(prepend=[], append=[]){
 	forGUI.push({'setGUIParamByKey':[viewerParams.haveOctree,"haveOctree"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.haveAnyOctree,"haveAnyOctree"]});
 	if (viewerParams.haveAnyOctree) {
-		forGUI.push({'setGUIParamByKey':[viewerParams.octree.memoryLimit,"octreeMemoryLimit"]});
+		forGUI.push({'setGUIParamByKey':[viewerParams.memoryLimit,"octreeMemoryLimit"]});
 		forGUI.push({'setGUIParamByKey':[viewerParams.octree.normCameraDistance,"octreeNormCameraDistance"]});
 		}
 	append.forEach(function(x,i){
