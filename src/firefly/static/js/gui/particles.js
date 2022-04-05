@@ -199,7 +199,7 @@ function createParticleBase(UI, p){
 	stateBar.append('div')
 		.attr('id',p + 'UIStateTextContainer')
 		.attr('class','UIdiv')
-		.style('width', (GUIParams.containerWidth - 47) + 'px')
+		.style('width', (GUIParams.containerWidth - 45) + 'px')
 		.style('margin-left','1px')
 		.style('height', '16px')
 		.style('font-size','12px')

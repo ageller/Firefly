@@ -1,8 +1,7 @@
-GLOBAL_arrow = '&#129044;';
+//GLOBAL_arrow = '&#129044;';
 GLOBAL_arrow = '&#11104;';
 
 // TO DO: create radii controls for particles
-// particle state bar needs to be a few pixels larger
 // fix multiple colormaps (alex may have already fixed this, wait until merged into kaitai_io)
 
 window.addEventListener('mouseup',function(){GUIParams.movingUI = false;});
@@ -207,11 +206,10 @@ function createUI(){
 	sendToViewer([{'applyUIoptions':null}]);
 	sendToViewer([{'setViewerParamByKey':[true, "haveUI"]}]);
 
-	// collapse the UI initially
-	var hamburger = document.getElementById('UItopbar');
-	hideUI.call(hamburger);
-	hamburger.classList.toggle("change");	
-
+	// collapse the UI initially, but wait a bit to make sure the full UI has been created
+	setTimeout(function(){
+		hideUI.call(document.getElementById('UIicon'));
+	}, 100);
 
 	// and now reveal the result
 	UIcontainer.classed('hidden', false);
@@ -1446,6 +1444,7 @@ function hideUI(){
 
 		var elem = d3.select('#UIcontainer');
 		var bbox = elem.node().getBoundingClientRect();
+		console.log('checking', bbox)
 		if (GUIParams.UIhidden){
 			elem.style('clip-path','inset(3px ' + (bbox.width - 35) + 'px ' + (bbox.height - 35) + 'px 3px round 10px');
 		}else{
