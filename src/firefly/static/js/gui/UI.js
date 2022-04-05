@@ -410,6 +410,9 @@ function transitionUIWindows(state=null, pID=null){
 	}
 	setToZero(GUIParams.GUIState);
 
+	// make sure that we are not cutting off the colormap
+	var inset = getUIcontainerInset()
+	d3.select('#UIcontainer').style('clip-path','inset(-20px ' + (-20 - inset.cbar[0]) + 'px ' + (-20 - inset.cbar[1]) + 'px 0px)');
 
 	// check if we need a scroll bar
 	setTimeout(checkGUIsize, 500);
