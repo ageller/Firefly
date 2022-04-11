@@ -43,7 +43,7 @@ function selectColormapVariable() {
 
 	// update colormap variable here and for the viewer
 	GUIParams.colormapVariable[p] = selectValue;
-	createColormapSVG(p);
+	if (GUIParams.showColormap[p] && GUIParams.showParts[p]) createColormapSVG(p);
 
 	// tell the viewer the colormapVariable was changed, so it can 
 	//  update the colormap variable for p's meshes on the next render pass
