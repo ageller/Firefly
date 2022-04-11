@@ -587,7 +587,7 @@ class Reader(object):
                 self.static_data_dir = os.path.join(target,'static','data')
 
                 if not os.path.isdir(self.static_data_dir): os.makedirs(self.static_data_dir)
-                self.dumpToJSON(symlink=False)
+                self.writeToDisk(symlink=False)
             except:
                 raise
             finally:
