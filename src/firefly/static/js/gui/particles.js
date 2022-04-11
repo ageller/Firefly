@@ -122,11 +122,12 @@ function createParticleBase(UI, p){
 
 
 	// add the particle size slider
+	left = 210;
 	container.append('div')
 		.attr('id',p+'_PSlider')
 		.attr('class','PSliderClass')
-		.style('left',(GUIParams.containerWidth - 210) + 'px')
-		.style('width',(GUIParams.containerWidth - 214) + 'px')
+		.style('left',(GUIParams.containerWidth - left) + 'px')
+		.style('width',(GUIParams.containerWidth - (left+4-75+GUIParams.longestPartLabelLen)) + 'px')
 		.style('height', '25px');
 
 	// add the particle size text input
