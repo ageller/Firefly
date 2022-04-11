@@ -95,10 +95,9 @@ function checkColormapBox(p, checked){
 
 	forViewer = [];
 	forViewer.push({'setViewerParamByKey':[GUIParams.showColormap[p], 'showColormap', p]});
-	if (GUIParams.showColormap[p]) {
-		forViewer.push({'changeBlendingForColormap':[p, checked]});
-	}
+	forViewer.push({'changeBlendingForColormap':[p, checked]});
 	sendToViewer(forViewer);
+	updateUIBlending([p,checked]);
 }
 
 
