@@ -109,7 +109,16 @@ function createParticleBase(UI, p){
 		.attr('autocomplete','off')
 		.attr('checked','true')
 		.on('change',function(){
-			sendToViewer([{'checkshowParts':[p,this.checked]}]);})
+			sendToViewer([{'checkshowParts':[p,this.checked]}]);
+			// update the checkbox on the GUI side
+			elm = document.getElementById(p+'Check');
+				elm.checked = this.checked;
+				elm.value = this.checked;
+			GUIParams.showParts[p] = this.checked;
+
+			if (!this.checked && GUIParams.showColormap[p]) removeColorbar(p);
+			else if (this.checked && GUIParams.showColormap[p]) checkColormapBox(p,this.checked);
+		})
 
 	if (!GUIParams.showParts[p]){
 		elm = document.getElementById(p+'Check');
@@ -581,7 +590,8 @@ function createParticleColormapWindow(container, p){
 		.attr('type','checkbox')
 		.attr('autocomplete','off')
 		.on('change',function(){
-			checkColormapBox(p, this.checked);
+			if (GUIParams.showParts[p]) checkColormapBox(p, this.checked);
+			else this.checked=GUIParams.showColormap[p];
 		})
 
 	ColorDiv.append('label')
