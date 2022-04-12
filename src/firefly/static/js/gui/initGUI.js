@@ -31,12 +31,12 @@ function confirmGUIInit(){
 	if (!GUIParams.GUIready) return false;
 
 	var keys = ["partsKeys", "PsizeMult", "plotNmax", "decimate", "stereoSepMax", "friction", "Pcolors", "showParts", "showVel", "velopts", "velType", "ckeys", "colormapVals", "colormapLims", "colormapVariable", "colormap", "showColormap", "fkeys", "filterVals", "filterLims"];
-	var ready = true;
-	keys.forEach(function(k,i){
+	var ready = keys.every(function(k,i){
 		if (GUIParams[k] == null) {
 			//console.log("GUI missing ", k)
-			ready = false;
+			return false;
 		}
+		return true;
 	});
 	return ready
 }

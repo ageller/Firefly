@@ -15,7 +15,7 @@ function selectColormap() {
 	//console.log(p, ' selected colormap:', GUIParams.colormapList[selectValue], GUIParams.colormap[p])
 
 	// redraw particle type if colormap is on
-	if (GUIParams.showColormap[p]){
+	if (GUIParams.showColormap[p] && GUIParams.showParts[p]){
 		//createPartsMesh(pDraw = [p]);
 		populateColormapImage(p);
 	}
@@ -43,7 +43,7 @@ function selectColormapVariable() {
 
 	// update colormap variable here and for the viewer
 	GUIParams.colormapVariable[p] = selectValue;
-	createColormapSVG(p);
+	if (GUIParams.showColormap[p] && GUIParams.showParts[p]) createColormapSVG(p);
 
 	// tell the viewer the colormapVariable was changed, so it can 
 	//  update the colormap variable for p's meshes on the next render pass
@@ -67,25 +67,8 @@ function checkColormapBox(p, checked){
 		d3.select('#colormap_outer_container').style('visibility','visible');
 		//create the colormap for this particle
 		createColormapSVG(p);
-	} else {
-		var w = 76; //I think this is the width of the colormap, but how do I get this from the DOM?
-		var w0 = parseFloat(d3.select('#colormap_container').style('height'));
-		d3.select('#' + p + 'colormap').remove();
-		d3.select('#colormap_container').style('height',(w0 - w) + 'px')
-		//var trans = parseTranslateStyle(d3.select('#colormap_outer_container'));
-		var m0 = parseFloat(d3.select('#colormap_outer_container').style('margin-left'));
-		d3.select('#colormap_outer_container').style('margin-left', (m0 - w) + 'px');
-		//also subtract 16 off the tranlateY styles for all the other colormaps (again I wish I could get 16 from the DOM)
-		GUIParams.partsKeys.forEach(function(k){
-			var elem = d3.select('#' + k + 'colormap');
-			if (elem.node()) {
-				var trans = parseTranslateStyle(elem);
-				console.log('checking', k, trans)
-				if (parseFloat(trans.y) > 20) elem.style('transform','scale('+trans.sx + ',' + trans.sy + ')translate(' + trans.x + ',' + (parseFloat(trans.y) - 16) + 'px)')
-			}
-		})
-
 	}
+	else removeColorbar(p);
 
 	if (hide){
 		//hide the colomap div
@@ -95,10 +78,38 @@ function checkColormapBox(p, checked){
 
 	forViewer = [];
 	forViewer.push({'setViewerParamByKey':[GUIParams.showColormap[p], 'showColormap', p]});
-	if (GUIParams.showColormap[p]) {
-		forViewer.push({'changeBlendingForColormap':[p, checked]});
-	}
+	forViewer.push({'changeBlendingForColormap':[p, checked]});
 	sendToViewer(forViewer);
+	updateUIBlending([p,checked]);
+}
+
+function removeColorbar(p){
+	var w = 76; //I think this is the width of the colormap, but how do I get this from the DOM?
+	var w0 = parseFloat(d3.select('#colormap_container').style('height'));
+	d3.select('#' + p + 'colormap').remove();
+	d3.select('#colormap_container').style('height',(w0 - w) + 'px')
+	//var trans = parseTranslateStyle(d3.select('#colormap_outer_container'));
+	var m0 = parseFloat(d3.select('#colormap_outer_container').style('margin-left'));
+	d3.select('#colormap_outer_container').style('margin-left', (m0 - w) + 'px');
+	//also subtract 16 off the tranlateY styles for all the other colormaps (again I wish I could get 16 from the DOM)
+	GUIParams.partsKeys.forEach(function(k){
+		var elem = d3.select('#' + k + 'colormap');
+		if (elem.node()) {
+			var trans = parseTranslateStyle(elem);
+			console.log('checking', k, trans)
+			if (parseFloat(trans.y) > 20) elem.style('transform','scale('+trans.sx + ',' + trans.sy + ')translate(' + trans.x + ',' + (parseFloat(trans.y) - 16) + 'px)')
+		}
+	})
+	// if there are no visible colormapped particles need to hide the colorbar container
+	var hide = true;
+	GUIParams.partsKeys.forEach(function (k){
+		hide = hide && (!GUIParams.showColormap[k] || (GUIParams.showColormap[k] && !GUIParams.showParts[k]));
+	})
+	if (hide){
+		//hide the colomap div
+		if (d3.select('#colormap_outer_container').classed('show')) expandColormapTab();
+		d3.select('#colormap_outer_container').style('visibility','hidden');
+	}
 }
 
 
@@ -156,7 +167,7 @@ function createColormapSVG(particle_group_UIname){
 	var imgContainer = d3.select('#' + particle_group_UIname + 'colormapImgContainer');
 	if (!imgContainer.node()) imgContainer = svg.append('g').attr('id',particle_group_UIname + 'colormapImgContainer')
 
-	populateColormapImage(particle_group_UIname);
+	if (GUIParams.showParts[particle_group_UIname]) populateColormapImage(particle_group_UIname);
 
 
 	// Add the X Axis

@@ -109,7 +109,16 @@ function createParticleBase(UI, p){
 		.attr('autocomplete','off')
 		.attr('checked','true')
 		.on('change',function(){
-			sendToViewer([{'checkshowParts':[p,this.checked]}]);})
+			sendToViewer([{'checkshowParts':[p,this.checked]}]);
+			// update the checkbox on the GUI side
+			elm = document.getElementById(p+'Check');
+				elm.checked = this.checked;
+				elm.value = this.checked;
+			GUIParams.showParts[p] = this.checked;
+
+			if (!this.checked && GUIParams.showColormap[p]) removeColorbar(p);
+			else if (this.checked && GUIParams.showColormap[p]) checkColormapBox(p,this.checked);
+		})
 
 	if (!GUIParams.showParts[p]){
 		elm = document.getElementById(p+'Check');
@@ -122,11 +131,12 @@ function createParticleBase(UI, p){
 
 
 	// add the particle size slider
+	left = 210;
 	container.append('div')
 		.attr('id',p+'_PSlider')
 		.attr('class','PSliderClass')
-		.style('left',(GUIParams.containerWidth - 210) + 'px')
-		.style('width',(GUIParams.containerWidth - 214) + 'px')
+		.style('left',(GUIParams.containerWidth - left) + 'px')
+		.style('width',(GUIParams.containerWidth - (left+4-75+GUIParams.longestPartLabelLen)) + 'px')
 		.style('height', '25px');
 
 	// add the particle size text input
@@ -580,7 +590,8 @@ function createParticleColormapWindow(container, p){
 		.attr('type','checkbox')
 		.attr('autocomplete','off')
 		.on('change',function(){
-			checkColormapBox(p, this.checked);
+			if (GUIParams.showParts[p]) checkColormapBox(p, this.checked);
+			else this.checked=GUIParams.showColormap[p];
 		})
 
 	ColorDiv.append('label')

@@ -977,7 +977,10 @@ function sendInitGUI(prepend=[], append=[]){
 
 	var forGUI = prepend;
 	forGUI.push({'setGUIParamByKey':[false,"GUIready"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.partsKeys, "partsKeys"]});
+	var subparts = viewerParams.partsKeys.filter(function (key){
+		return viewerParams.parts.options.UIparticle[key];
+	})
+	forGUI.push({'setGUIParamByKey':[subparts, "partsKeys"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.PsizeMult, "PsizeMult"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.plotNmax, "plotNmax"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.decimate, "decimate"]});
