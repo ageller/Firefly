@@ -157,7 +157,7 @@ function makeViewer(pSize=null, prepend=[], append=[]){
 			viewerParams.ready = true;
 			viewerParams.pauseAnimation = false;
 			viewerParams.parts.options_initial = createPreset(); //this might break things if the presets don't work...
-			console.log("initial options", viewerParams.parts.options)
+			//console.log("initial options", viewerParams.parts.options)
 
 			//to test
 			if (pSize) {
@@ -172,7 +172,7 @@ function makeViewer(pSize=null, prepend=[], append=[]){
 //if startup.json exists, this is called first
 function getFilenames(prefix=""){
 	d3.json(prefix+viewerParams.startup,  function(dir) {
-		console.log(prefix, dir, viewerParams.startup, viewerParams)
+		//console.log(prefix, dir, viewerParams.startup, viewerParams)
 		if (dir != null){
 			var i = 0;
 			viewerParams.dir = dir;
@@ -216,7 +216,7 @@ function callLoadData(args){
 
 	drawLoadingBar();
 	viewerParams.filenames = files;
-	console.log("loading new data", files)
+	//console.log("loading new data", files)
 	loadData(WebGLStart, prefix);
 }
 
@@ -853,7 +853,7 @@ function initControls(updateGUI = true){
 	// Firefly seems to behave best when it is initialized with trackball controls.  If the user chooses a different set of controls
 	// I will still initialize it with trackball, and then change after the first render pass
 	if (viewerParams.useTrackball || viewerParams.drawPass < 1) { 
-		console.log('initializing TrackballControls')
+		//console.log('initializing TrackballControls')
 		viewerParams.controlsName = 'TrackballControls'
 		var xx = new THREE.Vector3(0,0,0);
 		viewerParams.camera.getWorldDirection(xx);
@@ -973,7 +973,7 @@ function confirmViewerInit(){
 // makeViewer ->
 function sendInitGUI(prepend=[], append=[]){
 	//general particle settings
-	console.log('Sending init to GUI', viewerParams);
+	//console.log('Sending init to GUI', viewerParams);
 
 	var forGUI = prepend;
 	forGUI.push({'setGUIParamByKey':[false,"GUIready"]});
@@ -1167,7 +1167,7 @@ function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
 					//  which reference .fftree files. Those are loaded
 					//  separately on demand.)
 					if (readf.toLowerCase().includes('.json')){
-						console.log(prefix+readf)
+						//console.log(prefix+readf)
 						d3.json(prefix+readf, function(foo) {
 							compileJSONData(foo, p, callback, initialLoadFrac);
 						});
@@ -1521,7 +1521,7 @@ function clearloading(){
 	//show the rest of the page
 	d3.select("#ContentContainer").style("visibility","visible")
 
-	console.log("loaded")
+	//console.log("loaded")
 	d3.select("#loader").style("display","none")
 	if (viewerParams.local){
 		d3.select("#splashdiv5").text("Click to begin.");

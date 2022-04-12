@@ -215,7 +215,7 @@ function createCamNormSlider(p){
 function createVelWidthSlider(p){
 	if (GUIParams.haveVelocities[p]){
 		var initialValue = parseFloat(GUIParams.velVectorWidth[p]); 
-		console.log('check', initialValue, p, GUIParams.velVectorWidth)
+		//console.log('check', initialValue, p, GUIParams.velVectorWidth)
 
 		var sliderArgs = {
 			start: [initialValue], 

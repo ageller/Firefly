@@ -32,7 +32,7 @@ window.addEventListener('resize', debounce(resetTransition));
 ////// create the UI
 //////////////////////////////
 function createUI(){
-	console.log("Creating UI", GUIParams.partsKeys, GUIParams.decimate);
+	//console.log("Creating UI", GUIParams.partsKeys, GUIParams.decimate);
 
 	//add particle data to the GUIState object
 	defineGUIParticleState();

@@ -85,7 +85,7 @@ function defineGUIParams(){
 		img.onload = function(){
 			this.colormapImageX = img.width;
 			this.colormapImageY = img.height;
-			console.log("checking", this.colormapImageX, this.colormapImageY)
+			//console.log("checking", this.colormapImageX, this.colormapImageY)
 			img = null;
 		}.bind(this)
 		img.src = this.colormapImage;
