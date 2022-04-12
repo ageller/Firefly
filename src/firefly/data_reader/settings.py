@@ -258,8 +258,8 @@ class Settings(object):
         self,
         title='Firefly',
         annotation=None,
-        showFPS=False,
-        showMemoryUsage=False,
+        showFPS=True,
+        showMemoryUsage=True,
         memoryLimit=2e9,
         **extra):
         """Settings that affect the browser window
