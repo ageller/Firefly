@@ -547,29 +547,11 @@ function update_framerate(seconds,time){
 	viewerParams.FPS = viewerParams.fps_list.slice().sort()[15]
 
 	// fill FPS container div with calculated FPS and memory usage
-	if (viewerParams.showfps){
-		var forGUI = [];
-		forGUI.push({'setGUIParamByKey':[viewerParams.FPS, "FPS"]});
-		forGUI.push({'setGUIParamByKey':[viewerParams.memoryUsage, "memoryUsage"]});
-		forGUI.push({'updateFPSContainer':null});
-		sendToGUI(forGUI);
-
-	}
-
-	if (viewerParams.showMemoryUsage && viewerParams.memoryUsage > 0){
-		if (viewerParams.showFPS) txt += ', ';
-		else var txt = '';
-
-		txt += (Math.round(viewerParams.memoryUsage/1e9*100.)/100.).toFixed(2) + ' Gb'
-		if (elm){
-			elm.innerHTML = txt;
-			elm.style.display='block';
-		}
-	}
-	 
-	if (!viewerParams.showFPS && !viewerParams.showMemoryUsage){
-		if (elm) elm.style.display='none';
-	}
+	var forGUI = [];
+	forGUI.push({'setGUIParamByKey':[viewerParams.FPS, "FPS"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.memoryUsage, "memoryUsage"]});
+	forGUI.push({'updateFPSContainer':null});
+	sendToGUI(forGUI);
 
 	// update the stored current time from the last time we were here
 	viewerParams.currentTime=seconds;

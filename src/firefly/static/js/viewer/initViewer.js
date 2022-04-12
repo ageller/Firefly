@@ -1091,6 +1091,10 @@ function sendInitGUI(prepend=[], append=[]){
 		forGUI.push({'setGUIParamByKey':[viewerParams.memoryLimit,"octreeMemoryLimit"]});
 		forGUI.push({'setGUIParamByKey':[viewerParams.octree.normCameraDistance,"octreeNormCameraDistance"]});
 		}
+
+	forGUI.push({'setGUIParamByKey':[viewerParams.showFPS,"showFPS"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.showMemoryUsage,"showMemoryUsage"]});
+
 	append.forEach(function(x,i){
 		forGUI.push(x);
 	})
