@@ -331,7 +331,11 @@ function updateFPSContainer(){
 }
 
 function updateOctreeLoadingBarUI(input){
-	var width = parseFloat(d3.select('#' + input.p + 'octreeLoadingOutline').attr('width'));
+	var id = '#' + input.p + 'octreeLoadingOutline';
+	var selection = d3.select(id)
+	// size checks if the selection caught anything
+	if (selection.size() < 1) return
+	var width = parseFloat(selection.attr('width'));
 	if (input.denominator > 0){
 		var frac = THREE.Math.clamp(input.numerator/input.denominator, 0, 1);
 		//var frac = Math.max(viewerParams.octree.loadingCount[p][1]/viewerParams.octree.loadingCount[p][0], 0);

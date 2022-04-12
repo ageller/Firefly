@@ -44,7 +44,7 @@ function createUI(){
 	GUIParams.longestPartLabelLen = 0;
 
 	GUIParams.partsKeys.forEach(function(p,i){
-		if (p.length > longestPartLabel.length) longestPartLabel = p;
+		if (p.length > longestPartLabel.length && GUIParams.UIparticle[p]) longestPartLabel = p;
 		if (i == GUIParams.partsKeys.length - 1){
 			var elem = d3.select('body').append('div')
 				.attr('class','pLabelDivCHECK')
@@ -304,6 +304,7 @@ function transitionUIWindows(state=null, pID=null){
 
 	// deal with the particle show classes
 	GUIParams.partsKeys.forEach(function(k){
+		if (!GUIParams.UIparticle[k]) return;
 		var ddiv = d3.select('#' + k + 'Dropdown');
 		ddiv.selectAll('.dropdown-content').classed('show', false);
 		if ((inParticles || id2 == 'GUIParticlesBase') && ddiv.classed('show')){
@@ -348,6 +349,7 @@ function transitionUIWindows(state=null, pID=null){
 		var hdrop = 0;
 		var pheight = 0;
 		GUIParams.partsKeys.forEach(function(k){
+			if (!GUIParams.UIparticle[k]) return;
 			var ddiv = d3.select('#' + k + 'Dropdown');
 			var pdiv = d3.select('#' + k + 'Div');
 
@@ -397,7 +399,8 @@ function transitionUIWindows(state=null, pID=null){
 		if (obj.hasOwnProperty('id')){
 			if (obj.id != id1 && obj.id != id2 && obj.id != id3){
 				var elem = d3.select('#' + obj.id);
-				if (!elem.classed('show')) elem.style('height','0px');
+				// size checks if the selection caught anything
+				if (elem.size()>0 && !elem.classed('show')) elem.style('height','0px');
 				elem.select('.dropdown-content').filter(function(){
 					if (d3.select(this).classed('show')) return false;
 					return true;

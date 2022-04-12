@@ -977,10 +977,7 @@ function sendInitGUI(prepend=[], append=[]){
 
 	var forGUI = prepend;
 	forGUI.push({'setGUIParamByKey':[false,"GUIready"]});
-	var subparts = viewerParams.partsKeys.filter(function (key){
-		return viewerParams.parts.options.UIparticle[key];
-	})
-	forGUI.push({'setGUIParamByKey':[subparts, "partsKeys"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.partsKeys, "partsKeys"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.PsizeMult, "PsizeMult"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.plotNmax, "plotNmax"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.decimate, "decimate"]});
@@ -1094,6 +1091,10 @@ function sendInitGUI(prepend=[], append=[]){
 
 	forGUI.push({'setGUIParamByKey':[viewerParams.showFPS,"showFPS"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.showMemoryUsage,"showMemoryUsage"]});
+
+	forGUI.push({'setGUIParamByKey':[viewerParams.parts.options.UIparticle,"UIparticle"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.parts.options.UIdropdown,"UIdropdown"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.parts.options.UIcolorPicker,"UIcolorPicker"]});
 
 	append.forEach(function(x,i){
 		forGUI.push(x);

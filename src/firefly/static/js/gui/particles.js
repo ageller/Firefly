@@ -68,7 +68,7 @@ function createParticlesWindow(container){
 
 	// create each of the particle group UI base panels containing:
 	GUIParams.partsKeys.forEach(function(p,i){
-		createParticleBase(UI,p);
+		if (GUIParams.UIparticle[p]) createParticleBase(UI,p);
 	});
 	
 
@@ -149,13 +149,13 @@ function createParticleBase(UI, p){
 	// add the particle color picker
 	container.append('input')
 		.attr('id',p+'ColorPicker');
-
 	createColorPicker(p);
 	container.select('.sp-replacer').style('left',(GUIParams.containerWidth - 54) + 'px');
 
 	createPsizeSlider(p);
 
 	// add the dropdown button and a dropdown container div
+	if (GUIParams.UIdropdown[p]){
 	container.append('button')
 		.attr('id', p+'Dropbtn')
 		.attr('class', 'dropbtn')
@@ -163,6 +163,7 @@ function createParticleBase(UI, p){
 		.style('left',(GUIParams.containerWidth - 28) + 'px')
 		.style('top','-22px')
 		.html('&#x25BC');
+	}
 
 	var keys = Object.keys(GUIParams.GUIState.main.particles[p].base).filter(function(d){return (d != 'id' && d != 'name' && d != 'current')});
 	//var h = 34*keys.length
@@ -872,7 +873,7 @@ function createColorPicker(p){
 	});
 
 	if (!GUIParams.useColorPicker[p]){
-		$("#"+d+"ColorPicker").spectrum({
+		$("#"+p+"ColorPicker").spectrum({
 			color: "rgba("+(GUIParams.Pcolors[p][0]*255)+","+(GUIParams.Pcolors[p][1]*255)+","+(GUIParams.Pcolors[p][2]*255)+","+GUIParams.Pcolors[p][3]+")",
 			disabled: true,
 		});		
