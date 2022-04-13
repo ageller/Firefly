@@ -181,6 +181,7 @@ function createUI(){
 	createGeneralWindow(UI);
 	createDataWindow(UI);
 	createCameraWindow(UI);
+	createColumnDensityWindow(UI);
 
 	createParticlesWindow(UI);
 
@@ -527,6 +528,28 @@ function createCameraWindow(container){
 	//  friction and stereo separation sliders
 	//  stereo checkbox
 	createCameraControlBox(UI);
+}
+
+function createColumnDensityWindow(container){
+
+	var UI = container.append('div')
+		.attr('id',GUIParams.GUIState.main.general.projection.id)
+		.attr('class','UImover')
+		.style('position','absolute')
+		.style('top','0px')
+		.style('height','60px')
+		.attr('trueHeight','60px')
+		.style('width', GUIParams.containerWidth + 'px')
+		.style('transform','translateX(' + GUIParams.containerWidth + 'px)')
+
+	// create camera controls pane containing:
+	//  camera center (camera focus) text boxes
+	//  camera location text boxes
+	//  camera rotation text boxes
+	//  save, reset, and recenter buttons
+	//  friction and stereo separation sliders
+	//  stereo checkbox
+	createColumnDensityBox(UI);
 }
 
 
@@ -1195,6 +1218,98 @@ function createCameraControlBox(UI){
 	disableCameraInputBoxes();
 }
 
+function createColumnDensityBox(UI){
+	var pheight = 60;
+	var columnDensityDiv = UI.append('div')
+		.attr('class','dropdown-content')
+		.attr('id','projectionControls')
+		.style('margin','0px')
+		.style('padding','0px 0px 0px 5px')
+		.style('width',GUIParams.containerWidth + 'px')
+		.style('border-radius',0)
+		.attr('trueHeight',pheight)
+	
+	// add checkbox to enable colormap
+	columnDensityDiv.append('input')
+		.attr('id','columnDensityCheckBox')
+		.attr('value',GUIParams.columnDensity)
+		.attr('type','checkbox')
+		.attr('autocomplete','off')
+		.on('change',function(){
+			checkColormapBox(GUIParams.CDkey,this.checked)
+			sendToViewer([{'setViewerParamByKey':[this.checked, "columnDensity"]}]);
+			GUIParams.columnDensity = this.checked;
+		})
+		.style('margin','8px 0px 0px 0px')
+
+	columnDensityDiv.append('label')
+		.attr('for','columnDensityCheckBox')
+		.text('Projection')
+		.style('margin-left','10px')
+	
+	// dropdown to select colormap
+	var selectCMap = columnDensityDiv.append('select')
+		.attr('class','selectCMap')
+		.attr('id',GUIParams.CDkey+'_SelectCMap')
+		.style('margin-left','10px')
+		.style('margin-top','5px')
+		.on('change', selectColormap)
+
+	// add checkbox to toggle log10
+	columnDensityDiv.append('input')
+		.attr('id','columnDensityLog10CheckBox')
+		.attr('value',false)
+		.attr('type','checkbox')
+		.attr('autocomplete','off')
+		.on('change',function(){
+			sendToViewer([{'setCDlognorm':[this.checked]}]);
+			GUIParams.CDlognorm = this.checked;
+			// change the colorbar label
+			if (GUIParams.showParts[GUIParams.CDkey] && 
+				GUIParams.showColormap[GUIParams.CDkey]) populateColormapAxis(GUIParams.CDkey);
+		})
+		.style('margin','8px 0px 0px 100px')
+
+	columnDensityDiv.append('label')
+		.attr('for','columnDensityLog10CheckBox')
+		.text('Take Log10')
+		.style('margin-left','10px')
+
+	var options = selectCMap.selectAll('option')
+		.data(GUIParams.colormapList).enter()
+		.append('option')
+			.attr('value',function(d,i){ return i; })
+			.text(function (d) { return d; });
+
+	// create colorbar limits slider
+	colormapsliders = columnDensityDiv.append('div')
+		.attr('id',GUIParams.CDkey+'_CK_'+GUIParams.ckeys[GUIParams.CDkey][0]+'_END_CMap')
+		.attr('class','CMapClass')
+		.style('width', (GUIParams.containerWidth - 100) + 'px');
+
+	colormapsliders.append('div')
+		.attr('class','CMapClassLabel')
+
+	colormapsliders.append('div')
+		.attr('id',GUIParams.CDkey+'_CK_'+GUIParams.ckeys[GUIParams.CDkey][0]+'_END_CMapSlider')
+		.style("margin-top","-1px")
+		.style('left','-8px')
+
+	colormapsliders.append('input')
+		.attr('id',GUIParams.CDkey+'_CK_'+GUIParams.ckeys[GUIParams.CDkey][0]+'_END_CMapMinT')
+		.attr('class','CMapMinTClass')
+		.attr('type','text');
+
+	colormapsliders.append('input')
+		.attr('id',GUIParams.CDkey+'_CK_'+GUIParams.ckeys[GUIParams.CDkey][0]+'_END_CMapMaxT')
+		.attr('class','CMapMaxTClass')
+		.attr('type','text')
+		.style('left',(GUIParams.containerWidth - 103) + 'px');
+
+	createColormapSlider(GUIParams.CDkey,GUIParams.ckeys[GUIParams.CDkey][0]);
+
+}
+
 //////////////////////// ////////////////////////
 // helper functions vvvvvvv
 //////////////////////// ////////////////////////
@@ -1627,6 +1742,9 @@ function updateUIBlending(args){
 	var p = args[0];
 	var mode = args[1] ? 'normal':'additive';
 	var dTest = args[1]; // have dTest and mode share
+
+	// don't change the blending mode for column density projection
+	if (p == GUIParams.CDkey) return;
 
 	// set the blending mode value in the dropdown
 	document.getElementById(p+'_selectBlendingMode').value = mode;

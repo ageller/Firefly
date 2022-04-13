@@ -681,6 +681,14 @@ function setBlendingMode(args){
 	});
 }
 
+function setCDlognorm(args){
+	var checked = args[0];
+	viewerParams.CDlognorm = checked;
+	viewerParams.materialCD.uniforms.lognorm.value = checked;
+	// apparently it doesn't want me to set needsUpdate 
+	//viewerParams.meterialCD.needsUpdate = true;
+}
+
 function setDepthMode(args){
 	var p = args[0];
 	var checked = args[1];

@@ -625,7 +625,7 @@ function applyOptions(){
 	//  --------- column density options ----------- 
 
 	// flag to launch the app with the column density projection mode enabled
-	if (viewerParams.parts.options.hasOwnProperty('columnDensity')){
+	if (viewerParams.parts.options.hasOwnProperty(viewerParams.CDkey)){
 		if (viewerParams.parts.options.columnDensity != null){
 			viewerParams.columnDensity = viewerParams.parts.options.columnDensity;
 		}
@@ -842,6 +842,21 @@ function applyOptions(){
 			options.radiusVariable[p] != null) viewerParams.radiusVariable[p] = copyValue(options.radiusVariable[p]);
 
 	}// particle specific options
+
+	// initialize all the colormap stuff that columnDensity will need. Because it's
+	//  not a real particle group it won't get set in the loop above
+	//  do it here so it happens in the presets too and load settings, etc...
+	viewerParams.showParts[viewerParams.CDkey] = viewerParams.partsKeys.some(
+		function (key){return viewerParams.showParts[key]});
+	viewerParams.colormap[viewerParams.CDkey] = 4/256
+	viewerParams.ckeys[viewerParams.CDkey] = [viewerParams.CDckey]
+	viewerParams.colormapLims[viewerParams.CDkey] = {}
+	viewerParams.colormapLims[viewerParams.CDkey][viewerParams.ckeys[viewerParams.CDkey][0]] = [viewerParams.CDmin,viewerParams.CDmax]
+	viewerParams.colormapVals[viewerParams.CDkey] = {}
+	viewerParams.colormapVals[viewerParams.CDkey][viewerParams.ckeys[viewerParams.CDkey][0]] = [viewerParams.CDmin,viewerParams.CDmax]
+	viewerParams.colormapVariable[viewerParams.CDkey] = 0;
+	viewerParams.showColormap[viewerParams.CDkey] = false;
+	viewerParams.updateColormapVariable[viewerParams.CDkey] = false;
 }
 
 // connect fly/trackball controls
@@ -920,14 +935,13 @@ function initColumnDensity(){
 	} );
 
 	//for now, just use the first colormap
-	var p = viewerParams.partsKeys[0];
 	viewerParams.materialCD = new THREE.ShaderMaterial( {
 		uniforms: { 
 			tex: { value: viewerParams.textureCD.texture }, 
 			cmap: { type:'t', value: viewerParams.cmap },
-			colormap: {value: viewerParams.colormap[p]},
-			CDmin: {value: viewerParams.CDmin}, // bottom of CD renormalization
-			CDmax: {value: viewerParams.CDmax}, // top of CD renormalization
+			colormap: {value: viewerParams.colormap[viewerParams.CDkey]},
+			CDmin: {value: viewerParams.colormapVals[viewerParams.CDkey][viewerParams.ckeys[viewerParams.CDkey][0]][0]}, // bottom of CD renormalization
+			CDmax: {value: viewerParams.colormapVals[viewerParams.CDkey][viewerParams.ckeys[viewerParams.CDkey][0]][1]}, // top of CD renormalization
 			lognorm: {value: viewerParams.CDlognorm}, // flag to normalize column densities in log space
 		},
 		vertexShader: myVertexShader,
@@ -1102,6 +1116,14 @@ function sendInitGUI(prepend=[], append=[]){
 	forGUI.push({'setGUIParamByKey':[viewerParams.parts.options.UIparticle,"UIparticle"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.parts.options.UIdropdown,"UIdropdown"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.parts.options.UIcolorPicker,"UIcolorPicker"]});
+
+
+	forGUI.push({'setGUIParamByKey':[viewerParams.columnDensity,"columnDensity"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.CDmin,"CDmin"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.CDmax,"CDmax"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.CDkey,"CDkey"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.CDckey,"CDckey"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.CDlognorm,"CDlognorm"]});
 
 	append.forEach(function(x,i){
 		forGUI.push(x);

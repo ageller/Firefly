@@ -132,6 +132,10 @@ function defineGUIParams(){
 		this.invertFilter = null;
 
 		this.columnDensity = false;
+		this.CDmin = 0;
+		this.CDmax = 1;
+		this.CDlognorm = 0;
+		this.scaleCD = 0.1; //scaling factor for the shader so that it adds up to one at highest density
 		
 		this.updateTween = false;
 		this.inTween = false;
@@ -188,6 +192,10 @@ function defineGUIParams(){
 					'camera':{
 						'id':'GUICamera',
 						'name':'Camera'
+					},
+					'projection':{
+						'id':'GUIProjection',
+						'name':'Projection'
 					},
 				},
 				'particles':{

@@ -55,13 +55,7 @@ function selectColormapVariable() {
 
 //turn on/off the colormap
 function checkColormapBox(p, checked){
-	//check all colormaps to see if we need to turn it off
 	GUIParams.showColormap[p] = checked;
-	var hide = true
-	GUIParams.partsKeys.forEach(function(k){
-		if (GUIParams.showColormap[k]) hide = false;
-	})
-
 	if (GUIParams.showColormap[p]) {
 		//show the colormap div
 		d3.select('#colormap_outer_container').style('visibility','visible');
@@ -70,15 +64,10 @@ function checkColormapBox(p, checked){
 	}
 	else removeColorbar(p);
 
-	if (hide){
-		//hide the colomap div
-		if (d3.select('#colormap_outer_container').classed('show')) expandColormapTab();
-		d3.select('#colormap_outer_container').style('visibility','hidden');
-	}
-
 	forViewer = [];
 	forViewer.push({'setViewerParamByKey':[GUIParams.showColormap[p], 'showColormap', p]});
-	forViewer.push({'changeBlendingForColormap':[p, checked]});
+	// don't change blending for column density
+	if (p!= GUIParams.CDkey) forViewer.push({'changeBlendingForColormap':[p, checked]});
 	sendToViewer(forViewer);
 	updateUIBlending([p,checked]);
 }
@@ -92,7 +81,7 @@ function removeColorbar(p){
 	var m0 = parseFloat(d3.select('#colormap_outer_container').style('margin-left'));
 	d3.select('#colormap_outer_container').style('margin-left', (m0 - w) + 'px');
 	//also subtract 16 off the tranlateY styles for all the other colormaps (again I wish I could get 16 from the DOM)
-	GUIParams.partsKeys.forEach(function(k){
+	Object.keys(GUIParams.showColormap).forEach(function(k){
 		var elem = d3.select('#' + k + 'colormap');
 		if (elem.node()) {
 			var trans = parseTranslateStyle(elem);
@@ -102,7 +91,7 @@ function removeColorbar(p){
 	})
 	// if there are no visible colormapped particles need to hide the colorbar container
 	var hide = true;
-	GUIParams.partsKeys.forEach(function (k){
+	Object.keys(GUIParams.showColormap).forEach(function(k){
 		hide = hide && (!GUIParams.showColormap[k] || (GUIParams.showColormap[k] && !GUIParams.showParts[k]));
 	})
 	if (hide){
@@ -111,7 +100,6 @@ function removeColorbar(p){
 		d3.select('#colormap_outer_container').style('visibility','hidden');
 	}
 }
-
 
 ///////////////////////////////
 ///// create a new SVG for the colormap
@@ -285,8 +273,15 @@ function populateColormapAxis(particle_group_UIname){
 		.style('stroke',color)
 
 	// update the label
-	d3.select('#' + particle_group_UIname + 'colormapLabel')
-		.text(particle_group_UIname + ' ' +  GUIParams.ckeys[particle_group_UIname][GUIParams.colormapVariable[particle_group_UIname]])
+	if (particle_group_UIname!=GUIParams.CDkey){
+		d3.select('#' + particle_group_UIname + 'colormapLabel')
+			.text(particle_group_UIname + ' ' +  GUIParams.ckeys[particle_group_UIname][GUIParams.colormapVariable[particle_group_UIname]])
+	}
+	else{
+		clabel = GUIParams.ckeys[particle_group_UIname][GUIParams.colormapVariable[particle_group_UIname]]
+		d3.select('#' + particle_group_UIname + 'colormapLabel')
+			.text(GUIParams.CDlognorm ? 'log10('+clabel+')' :clabel)
+	}
 
 }
 

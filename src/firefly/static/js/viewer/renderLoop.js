@@ -126,11 +126,6 @@ function update_keypress(time){
 		}
 	}
 
-	// toggle column density projection
-	if (viewerParams.keyboard.down("P")){
-		viewerParams.columnDensity = !viewerParams.columnDensity;
-	}
-
 }
 
 function update_particle_groups(time){
@@ -477,8 +472,9 @@ function render_column_density(){
 
 	//then back to the canvas
 	//for now, just use the colormap from the first particle group
-	var p = viewerParams.partsKeys[0];
-	viewerParams.quadCD.material.uniforms.colormap.value = viewerParams.colormap[p];
+	viewerParams.quadCD.material.uniforms.colormap.value = viewerParams.colormap[viewerParams.CDkey];
+	viewerParams.quadCD.material.uniforms.CDmin.value = viewerParams.colormapVals[viewerParams.CDkey][viewerParams.ckeys[viewerParams.CDkey][0]][0];
+	viewerParams.quadCD.material.uniforms.CDmax.value = viewerParams.colormapVals[viewerParams.CDkey][viewerParams.ckeys[viewerParams.CDkey][0]][1];
 
 	viewerParams.renderer.setRenderTarget(null)
 	viewerParams.renderer.render( viewerParams.sceneCD, viewerParams.cameraCD );
