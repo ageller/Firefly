@@ -126,11 +126,6 @@ function update_keypress(time){
 		}
 	}
 
-	// toggle column density projection
-	if (viewerParams.keyboard.down("P")){
-		viewerParams.columnDensity = !viewerParams.columnDensity;
-	}
-
 }
 
 function update_particle_groups(time){
