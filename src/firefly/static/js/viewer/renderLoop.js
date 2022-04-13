@@ -544,7 +544,7 @@ function update_framerate(seconds,time){
 	//viewerParams.FPS = viewerParams.fps_list.reduce((a, b) => a + b, 0)/viewerParams.fps_list.length;
 	// use median FPS rather than mean; when it's going real slow it will skip frames
 	//  and put in a weirdly high value (like >100 fps) that biases the mean high
-	viewerParams.FPS = viewerParams.fps_list.slice().sort()[15]
+	viewerParams.FPS = viewerParams.fps_list.slice().sort(function(a, b){return a-b})[15]
 
 	if ((viewerParams.drawPass % 10) == 0){
 		// fill FPS container div with calculated FPS and memory usage
