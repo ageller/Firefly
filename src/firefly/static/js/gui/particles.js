@@ -363,7 +363,7 @@ function createParticleGeneralWindow(container, p){
 		});
 
 	dNcontent.append('div')
-		.attr('id',p+'_NSlider')
+		.attr('id',p+'_plotNmaxSlider')
 		.attr('class','NSliderClass')
 		.style('width',(GUIParams.containerWidth - 106) + 'px');
 
