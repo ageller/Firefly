@@ -132,7 +132,7 @@ function resetCamera() {
 	if (viewerParams.parts.options.hasOwnProperty('center')){
 		if (viewerParams.parts.options.center != null){
 			viewerParams.center = new THREE.Vector3(viewerParams.parts.options.center[0], viewerParams.parts.options.center[1], viewerParams.parts.options.center[2]);
-			setBoxSize(viewerParams.parts[viewerParams.partsKeys[0]].Coordinates);
+			setBoxSize(viewerParams.parts[viewerParams.partsKeys[0]].Coordinates_flat);
 		}
 	} 
 
@@ -687,6 +687,19 @@ function setCDlognorm(args){
 	viewerParams.materialCD.uniforms.lognorm.value = checked;
 	// apparently it doesn't want me to set needsUpdate 
 	//viewerParams.meterialCD.needsUpdate = true;
+}
+
+function toggleTween(args){
+
+	checked = args[0];// ignore for now?
+
+	if (viewerParams.inTween){
+		viewerParams.updateTween = false
+		viewerParams.inTween = false
+	} else {
+		viewerParams.updateTween = true	
+		setTweenviewerParams();
+	}
 }
 
 function setDepthMode(args){

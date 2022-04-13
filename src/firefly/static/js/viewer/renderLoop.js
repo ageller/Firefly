@@ -115,17 +115,6 @@ function update_keypress(time){
 		console.log('fly speed', viewerParams.flyffac)
 	}
 
-	// toggle tween loop
-	if (viewerParams.keyboard.down("T")) {
-		if (viewerParams.inTween){
-			viewerParams.updateTween = false
-			viewerParams.inTween = false
-		} else {
-			viewerParams.updateTween = true	
-			setTweenviewerParams();
-		}
-	}
-
 }
 
 function update_particle_groups(time){

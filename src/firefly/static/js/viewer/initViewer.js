@@ -1117,13 +1117,14 @@ function sendInitGUI(prepend=[], append=[]){
 	forGUI.push({'setGUIParamByKey':[viewerParams.parts.options.UIdropdown,"UIdropdown"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.parts.options.UIcolorPicker,"UIcolorPicker"]});
 
-
 	forGUI.push({'setGUIParamByKey':[viewerParams.columnDensity,"columnDensity"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.CDmin,"CDmin"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.CDmax,"CDmax"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.CDkey,"CDkey"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.CDckey,"CDckey"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.CDlognorm,"CDlognorm"]});
+
+	forGUI.push({'setGUIParamByKey':[viewerParams.inTween,"inTween"]});
 
 	append.forEach(function(x,i){
 		forGUI.push(x);
