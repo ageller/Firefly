@@ -181,7 +181,7 @@ function createUI(){
 	createGeneralWindow(UI);
 	createDataWindow(UI);
 	createCameraWindow(UI);
-	createProjectionWindow(UI);
+	createColumnDensityWindow(UI);
 
 	createParticlesWindow(UI);
 
@@ -530,7 +530,7 @@ function createCameraWindow(container){
 	createCameraControlBox(UI);
 }
 
-function createProjectionWindow(container){
+function createColumnDensityWindow(container){
 
 	var UI = container.append('div')
 		.attr('id',GUIParams.GUIState.main.general.projection.id)
@@ -549,7 +549,7 @@ function createProjectionWindow(container){
 	//  save, reset, and recenter buttons
 	//  friction and stereo separation sliders
 	//  stereo checkbox
-	createProjectionBox(UI);
+	createColumnDensityBox(UI);
 }
 
 
@@ -1218,9 +1218,9 @@ function createCameraControlBox(UI){
 	disableCameraInputBoxes();
 }
 
-function createProjectionBox(UI){
+function createColumnDensityBox(UI){
 	var pheight = 60;
-	var projectionDiv = UI.append('div')
+	var columnDensityDiv = UI.append('div')
 		.attr('class','dropdown-content')
 		.attr('id','projectionControls')
 		.style('margin','0px')
@@ -1230,8 +1230,8 @@ function createProjectionBox(UI){
 		.attr('trueHeight',pheight)
 	
 	// add checkbox to enable colormap
-	projectionDiv.append('input')
-		.attr('id','projectionCheckBox')
+	columnDensityDiv.append('input')
+		.attr('id','columnDensityCheckBox')
 		.attr('value',GUIParams.columnDensity)
 		.attr('type','checkbox')
 		.attr('autocomplete','off')
@@ -1241,24 +1241,22 @@ function createProjectionBox(UI){
 		})
 		.style('margin','8px 0px 0px 0px')
 
-	projectionDiv.append('label')
-		.attr('for','projectionCheckBox')
+	columnDensityDiv.append('label')
+		.attr('for','columnDensityCheckBox')
 		.text('Projection')
 		.style('margin-left','10px')
-
-
 	
 	// dropdown to select colormap
-	var selectCMap = projectionDiv.append('select')
+	var selectCMap = columnDensityDiv.append('select')
 		.attr('class','selectCMap')
-		.attr('id','GUIprojection_SelectCMap')
+		.attr('id','columnDensity_SelectCMap')
 		.style('margin-left','10px')
 		.style('margin-top','5px')
 		.on('change', selectColormap)
 
 	// add checkbox to toggle log10
-	projectionDiv.append('input')
-		.attr('id','projectionLog10CheckBox')
+	columnDensityDiv.append('input')
+		.attr('id','columnDensityLog10CheckBox')
 		.attr('value',false)
 		.attr('type','checkbox')
 		.attr('autocomplete','off')
@@ -1268,8 +1266,8 @@ function createProjectionBox(UI){
 		})
 		.style('margin','8px 0px 0px 100px')
 
-	projectionDiv.append('label')
-		.attr('for','projectionLog10CheckBox')
+	columnDensityDiv.append('label')
+		.attr('for','columnDensityLog10CheckBox')
 		.text('Take Log10')
 		.style('margin-left','10px')
 
@@ -1280,8 +1278,8 @@ function createProjectionBox(UI){
 			.text(function (d) { return d; });
 
 	// create colorbar limits slider
-	colormapsliders = projectionDiv.append('div')
-		.attr('id','projection_END_CMap')
+	colormapsliders = columnDensityDiv.append('div')
+		.attr('id','columnDensity_END_CMap')
 		.attr('class','CMapClass')
 		.style('width', (GUIParams.containerWidth - 100) + 'px');
 
@@ -1289,22 +1287,22 @@ function createProjectionBox(UI){
 		.attr('class','CMapClassLabel')
 
 	colormapsliders.append('div')
-		.attr('id','projection_END_CMapSlider')
+		.attr('id','columnDensity_END_CMapSlider')
 		.style("margin-top","-1px")
 		.style('left','-8px')
 
 	colormapsliders.append('input')
-		.attr('id','projection_END_CMapMinT')
+		.attr('id','columnDensity_END_CMapMinT')
 		.attr('class','CMapMinTClass')
 		.attr('type','text');
 
 	colormapsliders.append('input')
-		.attr('id','projection_END_CMapMaxT')
+		.attr('id','columnDensity_END_CMapMaxT')
 		.attr('class','CMapMaxTClass')
 		.attr('type','text')
 		.style('left',(GUIParams.containerWidth - 103) + 'px');
 
-	createColormapSliders('projection');
+	//createColormapSliders('columnDensity');
 
 }
 
