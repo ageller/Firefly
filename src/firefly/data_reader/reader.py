@@ -36,7 +36,7 @@ class Reader(object):
         JSONdir=None, 
         JSON_prefix='Data',
         clean_JSONdir=False,
-        max_npart_per_file=10**4,
+        max_npart_per_file=10**5,
         write_startup='append',
         write_only_data=False,
         settings:Settings=None,
