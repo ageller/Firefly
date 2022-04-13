@@ -44,8 +44,13 @@ function setSliderHandle(i, value, parent, varArgs, resetEnd, type, varVals=null
 		var r = parent.noUiSlider.get()
 		if (Array.isArray(r)) r[i] = value; else r = value; //this could also be type 'double' vs. 'single'
 
+		unsafe_slider = !['plotNmaxSlider','PSlider','VelWidthSlider'].every(
+			function(id){
+				return !parent.id.includes(id);});
 		// don't automatically update the size, make people slide it so it's safer
-		if (!GUIParams.safePSizeSliders || (!parent.id.includes('PSlider') || value < max)){
+		if (!GUIParams.safePSizeSliders || 
+			value < max || 
+			!unsafe_slider){
 			parent.noUiSlider.set(r);
 			//update the attached variables (already taken care of when we change the slider value)
 			updateUIValues(parseFloat(value), varArgs, i, type);
@@ -168,16 +173,16 @@ function createNpartsSlider(p){
 		})
 	}
 
-	var slider = document.getElementById(p+'_NSlider');
+	var slider = document.getElementById(p+'_plotNmaxSlider');
 	var text = [document.getElementById(p+'_NMaxT')];
 	var varToSet = [initialValue, "plotNmax",p]
 	var varArgs = {'f':'setViewerParamByKey','v':varToSet};
 
-	createSlider(slider, text, sliderArgs, varArgs, [null, 0]);
+	createSlider(slider, text, sliderArgs, varArgs, [null, 1]);
 
 	//reformat
-	w = parseInt(d3.select('#'+p+'_NSlider').style('width').slice(0,-2));
-	d3.select('#'+p+'_NSlider').select('.noUi-base').style('width',w-10+"px");
+	w = parseInt(d3.select('#'+p+'_plotNmaxSlider').style('width').slice(0,-2));
+	d3.select('#'+p+'_plotNmaxSlider').select('.noUi-base').style('width',w-10+"px");
 }
 
 
