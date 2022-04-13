@@ -125,7 +125,7 @@ function defineViewerParams(){
 		this.colormapTexture = new THREE.TextureLoader().load( "static/textures/colormap.png" );
 
 		// determines which colormap is applied to each particle type
-		this.colormap = {};
+		this.colormap = {'columnDensity':4/256};
 
 		// determines which colormap variable is activated for each particle type
 		this.colormapVariable = {};
@@ -169,9 +169,11 @@ function defineViewerParams(){
 		this.sceneCD = null;
 		this.cameraCD = null;
 		this.scaleCD = 0.1; //scaling factor for the shader so that it adds up to one at highest density
+
 		this.CDmin = 0;
 		this.CDmax = 1;
 		this.CDlognorm = 0;
+
 		this.cmap = this.colormapTexture;//new THREE.TextureLoader().load( "textures/cmap.png");
 		this.cmap.minFilter = THREE.LinearFilter;
 		this.cmap.magFilter = THREE.NearestFilter;

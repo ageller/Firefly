@@ -477,8 +477,7 @@ function render_column_density(){
 
 	//then back to the canvas
 	//for now, just use the colormap from the first particle group
-	var p = viewerParams.partsKeys[0];
-	viewerParams.quadCD.material.uniforms.colormap.value = viewerParams.colormap[p];
+	viewerParams.quadCD.material.uniforms.colormap.value = viewerParams.colormap['columnDensity'];
 
 	viewerParams.renderer.setRenderTarget(null)
 	viewerParams.renderer.render( viewerParams.sceneCD, viewerParams.cameraCD );

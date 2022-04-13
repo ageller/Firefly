@@ -113,8 +113,12 @@ function removeColorbar(p){
 }
 
 function checkProjectionBox(checked){
-	this.value = this.checked;
-	console.log(Object.keys(GUIParams.showColormap));
+	GUIParams.columnDensity = checked;
+	var toViewer = []
+	//toViewer.push({'setViewerParamByKey':[selectValue, 'colormapVariable', p]});
+	debugger;
+	toViewer.push({'setViewerParamByKey':[checked, 'columnDensity']})
+	sendToViewer(toViewer);
 }
 
 

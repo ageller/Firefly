@@ -1232,7 +1232,7 @@ function createProjectionBox(UI){
 	// add checkbox to enable colormap
 	projectionDiv.append('input')
 		.attr('id','projectionCheckBox')
-		.attr('value',false)
+		.attr('value',GUIParams.columnDensity)
 		.attr('type','checkbox')
 		.attr('autocomplete','off')
 		.on('change',function(){
