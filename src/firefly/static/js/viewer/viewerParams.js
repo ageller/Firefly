@@ -131,16 +131,16 @@ function defineViewerParams(){
 		this.colormapVariable = {};
 
 		// list of possible colormap variables for each particle type
-		this.ckeys = {};
+		this.ckeys = {'columnDensity':['default']};
 
 		// determines if colormap is on or off
 		this.showColormap = {};
 
 		// slider limits for colormap
-		this.colormapVals = {};
+		this.colormapVals = {'columnDensity':{'default':[]}};
 
 		// textbox limits for colormap
-		this.colormapLims = {};
+		this.colormapLims = {'columnDensity':{'default':[]}};
 
 		//check if we need to update the colormap when rendering
 		this.updateColormapVariable = {};

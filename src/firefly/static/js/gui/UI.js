@@ -1279,7 +1279,7 @@ function createColumnDensityBox(UI){
 
 	// create colorbar limits slider
 	colormapsliders = columnDensityDiv.append('div')
-		.attr('id','columnDensity_END_CMap')
+		.attr('id','columnDensity_CK_default_END_CMap')
 		.attr('class','CMapClass')
 		.style('width', (GUIParams.containerWidth - 100) + 'px');
 
@@ -1287,22 +1287,22 @@ function createColumnDensityBox(UI){
 		.attr('class','CMapClassLabel')
 
 	colormapsliders.append('div')
-		.attr('id','columnDensity_END_CMapSlider')
+		.attr('id','columnDensity_CK_default_END_CMapSlider')
 		.style("margin-top","-1px")
 		.style('left','-8px')
 
 	colormapsliders.append('input')
-		.attr('id','columnDensity_END_CMapMinT')
+		.attr('id','columnDensity_CK_default_END_CMapMinT')
 		.attr('class','CMapMinTClass')
 		.attr('type','text');
 
 	colormapsliders.append('input')
-		.attr('id','columnDensity_END_CMapMaxT')
+		.attr('id','columnDensity_CK_default_END_CMapMaxT')
 		.attr('class','CMapMaxTClass')
 		.attr('type','text')
 		.style('left',(GUIParams.containerWidth - 103) + 'px');
 
-	//createColormapSliders('columnDensity');
+	createColormapSlider('columnDensity','default');
 
 }
 

@@ -652,6 +652,14 @@ function applyOptions(){
 		}
 	}	
 
+	viewerParams.colormapLims['columnDensity']['default'].push(viewerParams.CDmin)
+	viewerParams.colormapLims['columnDensity']['default'].push(viewerParams.CDmax)
+	viewerParams.colormapVals['columnDensity']['default'].push(viewerParams.CDmin)
+	viewerParams.colormapVals['columnDensity']['default'].push(viewerParams.CDmax)
+	viewerParams.colormapVariable['columnDensity'] = 0;
+	viewerParams.showColormap['columnDensity'] = false;
+	viewerParams.updateColormapVariable['columnDensity'] = false;
+
 	//particle specific options
 	for (var i=0; i<viewerParams.partsKeys.length; i++){
 		var p = viewerParams.partsKeys[i];
@@ -920,14 +928,13 @@ function initColumnDensity(){
 	} );
 
 	//for now, just use the first colormap
-	var p = viewerParams.partsKeys[0];
 	viewerParams.materialCD = new THREE.ShaderMaterial( {
 		uniforms: { 
 			tex: { value: viewerParams.textureCD.texture }, 
 			cmap: { type:'t', value: viewerParams.cmap },
-			colormap: {value: viewerParams.colormap[p]},
-			CDmin: {value: viewerParams.CDmin}, // bottom of CD renormalization
-			CDmax: {value: viewerParams.CDmax}, // top of CD renormalization
+			colormap: {value: viewerParams.colormap['columnDensity']},
+			CDmin: {value: viewerParams.colormapVals['columnDensity']['default'][0]}, // bottom of CD renormalization
+			CDmax: {value: viewerParams.colormapVals['columnDensity']['default'][1]}, // top of CD renormalization
 			lognorm: {value: viewerParams.CDlognorm}, // flag to normalize column densities in log space
 		},
 		vertexShader: myVertexShader,
