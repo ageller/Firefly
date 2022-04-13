@@ -1324,6 +1324,20 @@ function selectBlendingMode() {
 	sendToViewer([{'setBlendingMode':[selectValue, p]}]);
 }
 
+function selectRadiusVariable(){
+	var option = d3.select(this)
+		.selectAll("option")
+		.filter(function (d, i) { 
+			return this.selected; 
+	});
+
+	var p = this.id.slice(0,-21) // 21 is length of _selectRadiusVariable
+	var selectValue = GUIParams.rkeys[p].indexOf(option.property('value'));
+
+	sendToViewer([{'setRadiusVariable':[selectValue, p]}]);
+}
+
+
 function changeUISnapSizes(){
 	//size of the snapshot (from text input)
 	var el = document.getElementById("RenderXText");

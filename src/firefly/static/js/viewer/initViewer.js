@@ -1060,7 +1060,8 @@ function sendInitGUI(prepend=[], append=[]){
 
 
 	//TO DO: need a check for radii values.  For now, I'm just setting it to false
-	forGUI.push({'setGUIParamByKey':[false,"haveRadii"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.rkeys,"rkeys"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.radiusVariable,"radiusVariable"]});
 
 
 	//for camera

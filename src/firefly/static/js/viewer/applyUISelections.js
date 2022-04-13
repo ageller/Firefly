@@ -690,3 +690,11 @@ function setDepthMode(args){
 	viewerParams.depthWrite[p] = checked;
 	viewerParams.depthTest[p] = checked;
 }
+
+function setRadiusVariable(args){
+	var radiusVariable = args[0];
+	var p = args[1];
+	viewerParams.radiusVariable[p] = radiusVariable;
+	viewerParams.updateRadiusVariable[p] = true;
+	console.log(radiusVariable)
+}

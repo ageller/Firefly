@@ -41,6 +41,9 @@ function defineGUIParticleState(){
 			}
 		}
 
+		// rather than make its own window let's put radii in general
+		//  since we'll only ever need the dropdown
+		/*
 		if (GUIParams.haveRadii[p]){
 			GUIParams.GUIState.main.particles[p].base.radii = {
 				'id' : 'GUI'+p+'Radii',
@@ -48,6 +51,7 @@ function defineGUIParticleState(){
 				//TO DO : create a function and enter it here
 			};
 		}
+		*/
 
 	})
 }
@@ -400,6 +404,39 @@ function createParticleGeneralWindow(container, p){
 			.style('left',(GUIParams.containerWidth - 48) + 'px');
 		dheight += 32;
 		createCamNormSlider(p);
+	}
+
+	if (GUIParams.rkeys[p].length > 1){
+
+		UI.append('hr')
+			.style('margin','0')
+			.style('border','1px solid #909090');
+
+		//dropdown to change blending mode
+		var dRcontent = UI.append('div')
+			.attr('class','NdDiv');
+
+		dRcontent.append('span')
+			.attr('class','pLabelDiv')
+			.style('width','115px')
+			.text('Radius Variable');
+
+		// add blending mode selector
+		var selectRType = dRcontent.append('select')
+			.attr('class','selectRadiusVariable')
+			.attr('id',p+'_selectRadiusVariable')
+			.on('change',selectRadiusVariable)
+
+		var optionsR = selectRType.selectAll('option')
+			.data(GUIParams.rkeys[p]).enter()
+			.append('option')
+				.text(function (d) { return d; });
+
+		elm = document.getElementById(p+'_selectRadiusVariable');
+		elm.value = GUIParams.rkeys[p][GUIParams.radiusVariable[p]];
+
+		dheight += 32;
+
 	}
 
 	UI.style('height',dheight + 'px')

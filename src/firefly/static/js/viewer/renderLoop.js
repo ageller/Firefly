@@ -440,7 +440,7 @@ function update_particle_mesh_radius_variable(p,m){
 	// .radiusVariable[p] holds the *index* of the radius variable
 	if (viewerParams.radiusVariable[p] > 0){
 		var rkey = viewerParams.rkeys[p][viewerParams.radiusVariable[p]]
-		if (this_parts.hasOwnProperty[rkey]) var radii = this_parts[rkey];
+		if (this_parts.hasOwnProperty(rkey)) var radii = this_parts[rkey];
 		else var radii = Array(radiusScale.length).fill(1)
 	} 
 	else var radii = Array(radiusScale.length).fill(1)
