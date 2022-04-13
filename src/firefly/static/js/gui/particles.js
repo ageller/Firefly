@@ -841,7 +841,7 @@ function expandParticleDropdown(handle) {
 	//reset the height of the containers
 	d3.select('#GUIParticlesBase').style('height',h0 + 'px')
 	d3.select('#UIStateContainer')
-		.style('height',(h0 + 2*GUIParams.partsKeys.length) + 'px') //I think I need this offset, but required further testing
+		.style('height',h0 + 'px') 
 		.attr('trueHeight',h0 + 'px')
 
 	//if the colormap is open be sure to update the overall clip-path
