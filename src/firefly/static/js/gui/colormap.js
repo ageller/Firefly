@@ -67,7 +67,7 @@ function checkColormapBox(p, checked){
 	forViewer = [];
 	forViewer.push({'setViewerParamByKey':[GUIParams.showColormap[p], 'showColormap', p]});
 	// don't change blending for column density
-	if (p!= 'columnDensity') forViewer.push({'changeBlendingForColormap':[p, checked]});
+	if (p!= GUIParams.CDkey) forViewer.push({'changeBlendingForColormap':[p, checked]});
 	sendToViewer(forViewer);
 	updateUIBlending([p,checked]);
 }
@@ -273,7 +273,7 @@ function populateColormapAxis(particle_group_UIname){
 		.style('stroke',color)
 
 	// update the label
-	if (particle_group_UIname!='columnDensity'){
+	if (particle_group_UIname!=GUIParams.CDkey){
 		d3.select('#' + particle_group_UIname + 'colormapLabel')
 			.text(particle_group_UIname + ' ' +  GUIParams.ckeys[particle_group_UIname][GUIParams.colormapVariable[particle_group_UIname]])
 	}

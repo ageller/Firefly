@@ -172,7 +172,9 @@ function defineViewerParams(){
 		this.CDmin = 0;
 		this.CDmax = 1;
 		this.CDlognorm = 0;
-		this.CDkey = 'ColumnDensity' // the name of the ckey, shows up in the colorbar label
+		this.CDckey = 'ColumnDensity' // the name of the ckey, shows up in the colorbar label
+		this.CDkey = '__column__density__foo__abg' // the name of the pseudo particle group, salted so that no one overwrites it
+
 
 		this.cmap = this.colormapTexture;//new THREE.TextureLoader().load( "textures/cmap.png");
 		this.cmap.minFilter = THREE.LinearFilter;

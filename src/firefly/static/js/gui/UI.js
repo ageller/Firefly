@@ -1236,7 +1236,7 @@ function createColumnDensityBox(UI){
 		.attr('type','checkbox')
 		.attr('autocomplete','off')
 		.on('change',function(){
-			checkColormapBox('columnDensity',this.checked)
+			checkColormapBox(GUIParams.CDkey,this.checked)
 			sendToViewer([{'setViewerParamByKey':[this.checked, "columnDensity"]}]);
 			GUIParams.columnDensity = this.checked;
 		})
@@ -1250,7 +1250,7 @@ function createColumnDensityBox(UI){
 	// dropdown to select colormap
 	var selectCMap = columnDensityDiv.append('select')
 		.attr('class','selectCMap')
-		.attr('id','columnDensity_SelectCMap')
+		.attr('id',GUIParams.CDkey+'_SelectCMap')
 		.style('margin-left','10px')
 		.style('margin-top','5px')
 		.on('change', selectColormap)
@@ -1265,8 +1265,8 @@ function createColumnDensityBox(UI){
 			sendToViewer([{'setCDlognorm':[this.checked]}]);
 			GUIParams.CDlognorm = this.checked;
 			// change the colorbar label
-			if (GUIParams.showParts['columnDensity'] && 
-				GUIParams.showColormap['columnDensity']) populateColormapAxis('columnDensity');
+			if (GUIParams.showParts[GUIParams.CDkey] && 
+				GUIParams.showColormap[GUIParams.CDkey]) populateColormapAxis(GUIParams.CDkey);
 		})
 		.style('margin','8px 0px 0px 100px')
 
@@ -1283,7 +1283,7 @@ function createColumnDensityBox(UI){
 
 	// create colorbar limits slider
 	colormapsliders = columnDensityDiv.append('div')
-		.attr('id','columnDensity_CK_'+GUIParams.ckeys['columnDensity'][0]+'_END_CMap')
+		.attr('id',GUIParams.CDkey+'_CK_'+GUIParams.ckeys[GUIParams.CDkey][0]+'_END_CMap')
 		.attr('class','CMapClass')
 		.style('width', (GUIParams.containerWidth - 100) + 'px');
 
@@ -1291,22 +1291,22 @@ function createColumnDensityBox(UI){
 		.attr('class','CMapClassLabel')
 
 	colormapsliders.append('div')
-		.attr('id','columnDensity_CK_'+GUIParams.ckeys['columnDensity'][0]+'_END_CMapSlider')
+		.attr('id',GUIParams.CDkey+'_CK_'+GUIParams.ckeys[GUIParams.CDkey][0]+'_END_CMapSlider')
 		.style("margin-top","-1px")
 		.style('left','-8px')
 
 	colormapsliders.append('input')
-		.attr('id','columnDensity_CK_'+GUIParams.ckeys['columnDensity'][0]+'_END_CMapMinT')
+		.attr('id',GUIParams.CDkey+'_CK_'+GUIParams.ckeys[GUIParams.CDkey][0]+'_END_CMapMinT')
 		.attr('class','CMapMinTClass')
 		.attr('type','text');
 
 	colormapsliders.append('input')
-		.attr('id','columnDensity_CK_'+GUIParams.ckeys['columnDensity'][0]+'_END_CMapMaxT')
+		.attr('id',GUIParams.CDkey+'_CK_'+GUIParams.ckeys[GUIParams.CDkey][0]+'_END_CMapMaxT')
 		.attr('class','CMapMaxTClass')
 		.attr('type','text')
 		.style('left',(GUIParams.containerWidth - 103) + 'px');
 
-	createColormapSlider('columnDensity',GUIParams.ckeys['columnDensity'][0]);
+	createColormapSlider(GUIParams.CDkey,GUIParams.ckeys[GUIParams.CDkey][0]);
 
 }
 
@@ -1744,7 +1744,7 @@ function updateUIBlending(args){
 	var dTest = args[1]; // have dTest and mode share
 
 	// don't change the blending mode for column density projection
-	if (p == 'columnDensity') return;
+	if (p == GUIParams.CDkey) return;
 
 	// set the blending mode value in the dropdown
 	document.getElementById(p+'_selectBlendingMode').value = mode;
