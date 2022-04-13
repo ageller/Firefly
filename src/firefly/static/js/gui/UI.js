@@ -81,17 +81,21 @@ function createUI(){
 		.style('opacity',1)
 
 	//UIt.append('table');
-	// var UIr1 = UIt.append('div')
-	// 	.attr('id','Hamburger')
-	// 	.style('padding','2px 0px 0px 4px')
-	// 	.style('float','left')
-	// 	.style('cursor','pointer')
-	// 	.on('mouseup',hideUI)
-	// UIr1.append('div').attr('class','bar1');
-	// UIr1.append('div').attr('class','bar2');
-	// UIr1.append('div').attr('class','bar3');
+	var UIr1 = UIt.append('div')
+		.attr('id','Hamburger')
+		.style('padding','2px 0px 0px 4px')
+		.style('float','left')
+		.style('cursor','pointer')
+		.on('mouseup',hideUI)
+	UIr1.append('div').attr('class','bar1');
+	UIr1.append('div').attr('class','bar2');
+	UIr1.append('div').attr('class','bar3');
+	// don't know how to start it expanded so we can hide it later
+	//  so will just toggle the bars to an x
+	UIr1.node().classList.toggle("change");
 
 	// append the Firefly logo (instead of the bars?)
+	/*
 	UIt.append('div')
 		.attr('id','UIicon')
 		.on('mousedown',dragElement)
@@ -104,6 +108,7 @@ function createUI(){
 			.attr('src','static/docs/GUIicon.png')
 			.attr('draggable',false)
 			.style('height','30px')
+	*/
 
 	var UIr2 = UIt.append('div')
 		.style('float','left')
@@ -190,29 +195,12 @@ function createUI(){
 	// 		//.style('padding-left',pd + 'px')
 	// }
 
-
-
-
-
-
-
-
 	//create the octree loading bar
 	if (GUIParams.haveAnyOctree) createOctreeLoadingBar(UIcontainer);
-
-
 
 	// tell the viewer the UI has been initialized
 	sendToViewer([{'applyUIoptions':null}]);
 	sendToViewer([{'setViewerParamByKey':[true, "haveUI"]}]);
-
-	// collapse the UI initially, but wait a bit to make sure the full UI has been created
-	setTimeout(function(){
-		hideUI.call(document.getElementById('UIicon'));
-	}, 100);
-
-	// and now reveal the result
-	UIcontainer.classed('hidden', false);
 
 }
 
@@ -1468,7 +1456,7 @@ function hideUI(){
 
 		var elem = d3.select('#UIcontainer');
 		var bbox = elem.node().getBoundingClientRect();
-		console.log('checking', bbox)
+		//console.log('checking', bbox)
 		if (GUIParams.UIhidden){
 			elem.style('clip-path','inset(3px ' + (bbox.width - 35) + 'px ' + (bbox.height - 35) + 'px 3px round 10px');
 		}else{
@@ -1729,4 +1717,14 @@ function resetGUILocation(){
 		elem.style.top = '30px';
 		elem.style.left = '10px';
 	}
+}
+
+function countNodes(obj){
+	var count=1;
+	if (obj.hasChildNodes()){
+		obj.childNodes.forEach(
+		function (cnode){count+=countNodes(cnode)})
+	}
+	else count+=1;
+	return count;
 }
