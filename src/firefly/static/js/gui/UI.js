@@ -181,6 +181,7 @@ function createUI(){
 	createGeneralWindow(UI);
 	createDataWindow(UI);
 	createCameraWindow(UI);
+	createProjectionWindow(UI);
 
 	createParticlesWindow(UI);
 
@@ -527,6 +528,28 @@ function createCameraWindow(container){
 	//  friction and stereo separation sliders
 	//  stereo checkbox
 	createCameraControlBox(UI);
+}
+
+function createProjectionWindow(container){
+
+	var UI = container.append('div')
+		.attr('id',GUIParams.GUIState.main.general.projection.id)
+		.attr('class','UImover')
+		.style('position','absolute')
+		.style('top','0px')
+		.style('height','60px')
+		.attr('trueHeight','60px')
+		.style('width', GUIParams.containerWidth + 'px')
+		.style('transform','translateX(' + GUIParams.containerWidth + 'px)')
+
+	// create camera controls pane containing:
+	//  camera center (camera focus) text boxes
+	//  camera location text boxes
+	//  camera rotation text boxes
+	//  save, reset, and recenter buttons
+	//  friction and stereo separation sliders
+	//  stereo checkbox
+	createProjectionBox(UI);
 }
 
 
@@ -1193,6 +1216,92 @@ function createCameraControlBox(UI){
 
 	// remove this after fixing the camera input boxes!
 	disableCameraInputBoxes();
+}
+
+function createProjectionBox(UI){
+	var pheight = 60;
+	var projectionDiv = UI.append('div')
+		.attr('class','dropdown-content')
+		.attr('id','projectionControls')
+		.style('margin','0px')
+		.style('padding','0px 0px 0px 5px')
+		.style('width',GUIParams.containerWidth + 'px')
+		.style('border-radius',0)
+		.attr('trueHeight',pheight)
+	
+	// add checkbox to enable colormap
+	projectionDiv.append('input')
+		.attr('id','projectionCheckBox')
+		.attr('value',false)
+		.attr('type','checkbox')
+		.attr('autocomplete','off')
+		.on('change',function(){
+			checkProjectionBox(this.checked);
+		})
+		.style('margin','8px 0px 0px 0px')
+
+	projectionDiv.append('label')
+		.attr('for','projectionCheckBox')
+		.text('Projection')
+		.style('margin-left','10px')
+
+
+	
+	// dropdown to select colormap
+	var selectCMap = projectionDiv.append('select')
+		.attr('class','selectCMap')
+		.attr('id','GUIprojection_SelectCMap')
+		.style('margin-left','10px')
+		.style('margin-top','5px')
+		.on('change', selectColormap)
+
+	// add checkbox to toggle log10
+	projectionDiv.append('input')
+		.attr('id','projectionLog10CheckBox')
+		.attr('value',false)
+		.attr('type','checkbox')
+		.attr('autocomplete','off')
+		.on('change',function(){
+			console.log('log10',this.checked);
+		})
+		.style('margin','8px 0px 0px 100px')
+
+	projectionDiv.append('label')
+		.attr('for','projectionLog10CheckBox')
+		.text('Take Log10')
+		.style('margin-left','10px')
+
+	var options = selectCMap.selectAll('option')
+		.data(GUIParams.colormapList).enter()
+		.append('option')
+			.attr('value',function(d,i){ return i; })
+			.text(function (d) { return d; });
+
+	// create colorbar limits slider
+	colormapsliders = projectionDiv.append('div')
+		.attr('id','projection_END_CMap')
+		.attr('class','CMapClass')
+		.style('width', (GUIParams.containerWidth - 100) + 'px');
+
+	colormapsliders.append('div')
+		.attr('class','CMapClassLabel')
+
+	colormapsliders.append('div')
+		.attr('id','projection_END_CMapSlider')
+		.style("margin-top","-1px")
+		.style('left','-8px')
+
+	colormapsliders.append('input')
+		.attr('id','projection_END_CMapMinT')
+		.attr('class','CMapMinTClass')
+		.attr('type','text');
+
+	colormapsliders.append('input')
+		.attr('id','projection_END_CMapMaxT')
+		.attr('class','CMapMaxTClass')
+		.attr('type','text')
+		.style('left',(GUIParams.containerWidth - 103) + 'px');
+
 }
 
 //////////////////////// ////////////////////////

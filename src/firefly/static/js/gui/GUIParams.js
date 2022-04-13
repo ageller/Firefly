@@ -189,6 +189,10 @@ function defineGUIParams(){
 						'id':'GUICamera',
 						'name':'Camera'
 					},
+					'projection':{
+						'id':'GUIProjection',
+						'name':'Projection'
+					},
 				},
 				'particles':{
 					'id':'GUIParticlesBase',

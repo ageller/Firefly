@@ -112,6 +112,11 @@ function removeColorbar(p){
 	}
 }
 
+function checkProjectionBox(checked){
+	this.value = this.checked;
+	console.log(Object.keys(GUIParams.showColormap));
+}
+
 
 ///////////////////////////////
 ///// create a new SVG for the colormap
