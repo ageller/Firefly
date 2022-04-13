@@ -856,6 +856,12 @@ function initControls(updateGUI = true){
 		//console.log('initializing TrackballControls')
 		viewerParams.controlsName = 'TrackballControls'
 		var xx = new THREE.Vector3(0,0,0);
+		if (viewerParams.center.x == viewerParams.camera.position.x &&
+			viewerParams.center.y == viewerParams.camera.position.y &&
+			viewerParams.center.z == viewerParams.camera.position.z){
+			viewerParams.camera.position.z+=1e-2
+		}
+
 		viewerParams.camera.getWorldDirection(xx);
 		viewerParams.controls = new THREE.TrackballControls( viewerParams.camera, viewerParams.renderer.domElement );
 		viewerParams.controls.target = new THREE.Vector3(viewerParams.camera.position.x + xx.x, viewerParams.camera.position.y + xx.y, viewerParams.camera.position.z + xx.z);
