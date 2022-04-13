@@ -273,8 +273,15 @@ function populateColormapAxis(particle_group_UIname){
 		.style('stroke',color)
 
 	// update the label
-	d3.select('#' + particle_group_UIname + 'colormapLabel')
-		.text(particle_group_UIname + ' ' +  GUIParams.ckeys[particle_group_UIname][GUIParams.colormapVariable[particle_group_UIname]])
+	if (particle_group_UIname!='columnDensity'){
+		d3.select('#' + particle_group_UIname + 'colormapLabel')
+			.text(particle_group_UIname + ' ' +  GUIParams.ckeys[particle_group_UIname][GUIParams.colormapVariable[particle_group_UIname]])
+	}
+	else{
+		clabel = GUIParams.ckeys[particle_group_UIname][GUIParams.colormapVariable[particle_group_UIname]]
+		d3.select('#' + particle_group_UIname + 'colormapLabel')
+			.text(GUIParams.CDlognorm ? 'log10('+clabel+')' :clabel)
+	}
 
 }
 

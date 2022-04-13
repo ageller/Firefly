@@ -652,14 +652,6 @@ function applyOptions(){
 		}
 	}	
 
-	viewerParams.colormapLims['columnDensity']['default'].push(viewerParams.CDmin)
-	viewerParams.colormapLims['columnDensity']['default'].push(viewerParams.CDmax)
-	viewerParams.colormapVals['columnDensity']['default'].push(viewerParams.CDmin)
-	viewerParams.colormapVals['columnDensity']['default'].push(viewerParams.CDmax)
-	viewerParams.colormapVariable['columnDensity'] = 0;
-	viewerParams.showColormap['columnDensity'] = false;
-	viewerParams.updateColormapVariable['columnDensity'] = false;
-
 	//particle specific options
 	for (var i=0; i<viewerParams.partsKeys.length; i++){
 		var p = viewerParams.partsKeys[i];
@@ -851,8 +843,20 @@ function applyOptions(){
 
 	}// particle specific options
 
+	// initialize all the colormap stuff that columnDensity will need. Because it's
+	//  not a real particle group it won't get set in the loop above
+	//  do it here so it happens in the presets too and load settings, etc...
 	viewerParams.showParts['columnDensity'] = viewerParams.partsKeys.some(
 		function (key){return viewerParams.showParts[key]});
+	viewerParams.colormap['columnDensity'] = 4/256
+	viewerParams.ckeys['columnDensity'] = [viewerParams.CDkey]
+	viewerParams.colormapLims['columnDensity'] = {}
+	viewerParams.colormapLims['columnDensity'][viewerParams.ckeys['columnDensity'][0]] = [viewerParams.CDmin,viewerParams.CDmax]
+	viewerParams.colormapVals['columnDensity'] = {}
+	viewerParams.colormapVals['columnDensity'][viewerParams.ckeys['columnDensity'][0]] = [viewerParams.CDmin,viewerParams.CDmax]
+	viewerParams.colormapVariable['columnDensity'] = 0;
+	viewerParams.showColormap['columnDensity'] = false;
+	viewerParams.updateColormapVariable['columnDensity'] = false;
 }
 
 // connect fly/trackball controls
@@ -936,8 +940,8 @@ function initColumnDensity(){
 			tex: { value: viewerParams.textureCD.texture }, 
 			cmap: { type:'t', value: viewerParams.cmap },
 			colormap: {value: viewerParams.colormap['columnDensity']},
-			CDmin: {value: viewerParams.colormapVals['columnDensity']['default'][0]}, // bottom of CD renormalization
-			CDmax: {value: viewerParams.colormapVals['columnDensity']['default'][1]}, // top of CD renormalization
+			CDmin: {value: viewerParams.colormapVals['columnDensity'][viewerParams.ckeys['columnDensity'][0]][0]}, // bottom of CD renormalization
+			CDmax: {value: viewerParams.colormapVals['columnDensity'][viewerParams.ckeys['columnDensity'][0]][1]}, // top of CD renormalization
 			lognorm: {value: viewerParams.CDlognorm}, // flag to normalize column densities in log space
 		},
 		vertexShader: myVertexShader,

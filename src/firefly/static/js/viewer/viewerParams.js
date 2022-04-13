@@ -125,22 +125,21 @@ function defineViewerParams(){
 		this.colormapTexture = new THREE.TextureLoader().load( "static/textures/colormap.png" );
 
 		// determines which colormap is applied to each particle type
-		this.colormap = {'columnDensity':4/256};
+		this.colormap = {};
 
 		// determines which colormap variable is activated for each particle type
 		this.colormapVariable = {};
 
 		// list of possible colormap variables for each particle type
-		this.ckeys = {'columnDensity':['default']};
+		this.ckeys = {};
 
 		// determines if colormap is on or off
 		this.showColormap = {};
 
 		// slider limits for colormap
-		this.colormapVals = {'columnDensity':{'default':[]}};
-
+		this.colormapVals = {};
 		// textbox limits for colormap
-		this.colormapLims = {'columnDensity':{'default':[]}};
+		this.colormapLims = {};
 
 		//check if we need to update the colormap when rendering
 		this.updateColormapVariable = {};
@@ -173,6 +172,7 @@ function defineViewerParams(){
 		this.CDmin = 0;
 		this.CDmax = 1;
 		this.CDlognorm = 0;
+		this.CDkey = 'ColumnDensity' // the name of the ckey, shows up in the colorbar label
 
 		this.cmap = this.colormapTexture;//new THREE.TextureLoader().load( "textures/cmap.png");
 		this.cmap.minFilter = THREE.LinearFilter;
