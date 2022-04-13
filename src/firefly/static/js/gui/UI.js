@@ -986,7 +986,7 @@ function createCameraControlBox(UI){
 		.attr('id','CenterCheckDiv')
 		.style('width','45px')
 		.style('margin',0)
-		.style('margin-left','10px')
+		.style('margin-left','2px')
 		.style('padding',0);
 	c4.append('input')
 		.attr('id','CenterCheckBox')
@@ -994,7 +994,7 @@ function createCameraControlBox(UI){
 		.attr('autocomplete','off')
 		.on('change',function(){
 			sendToViewer([{'checkCenterLock':this.checked}]);
-		})
+		})	
 	if (GUIParams.useTrackball){
 		elm = document.getElementById("CenterCheckBox");
 		elm.value = true
@@ -1009,10 +1009,11 @@ function createCameraControlBox(UI){
 		.attr('id','CenterCheckLabel')
 		.style('font-size','10pt')
 		.text('Lock');
+
 	//camera text boxes
 	c3 = c2.append('div')
 		.attr('class','pLabelDiv')
-		.style('width','280px')
+		.style('width',(GUIParams.containerWidth - 10) + 'px')
 		.style('margin-top','5px') 
 	c3.append('div')
 		.style('width','62px')
@@ -1034,7 +1035,7 @@ function createCameraControlBox(UI){
 		.attr('id','CameraYText')
 		.attr('value','1')
 		.attr('autocomplete','off')
-		.style('width','60px')
+		.style('width',(GUIParams.containerWidth - 150)/3. + 'px')
 		.style('margin-right','8px')
 		.on('keypress',function(){
 			var key = event.keyCode || event.which;
@@ -1050,10 +1051,33 @@ function createCameraControlBox(UI){
 			var key = event.keyCode || event.which;
 			if (key == 13) sendToViewer([{'checkText':[this.id, this.value]}]);
 		})
+
+	// tween checkbox
+	var c4 = c3.append('span')
+		.attr('id','TweenCheckDiv')
+		.style('width','65px')
+		.style('margin',0)
+		.style('margin-left','2px')
+		.style('padding',0);
+	c4.append('input')
+		.attr('id','TweenCheckBox')
+		.attr('type','checkbox')
+		.attr('autocomplete','off')
+		.attr('value',GUIParams.inTween)
+		.on('change',function(){
+			GUIParams.inTween = this.checked;
+			sendToViewer([{'toggleTween':this.checked}]);
+		});
+	c4.append('label')
+		.attr('for','CenterCheckBox')
+		.attr('id','CenterCheckLabel')
+		.style('font-size','10pt')
+		.text('Tween');
+
 	//rotation text boxes
 	c3 = c2.append('div')
 		.attr('class','pLabelDiv')
-		.style('width','280px')
+		.style('width',(GUIParams.containerWidth - 10) + 'px')
 		.style('margin-top','5px') 
 	c3.append('div')
 		.style('width','62px')
