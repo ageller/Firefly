@@ -112,16 +112,6 @@ function removeColorbar(p){
 	}
 }
 
-function checkProjectionBox(checked){
-	GUIParams.columnDensity = checked;
-	var toViewer = []
-	//toViewer.push({'setViewerParamByKey':[selectValue, 'colormapVariable', p]});
-	debugger;
-	toViewer.push({'setViewerParamByKey':[checked, 'columnDensity']})
-	sendToViewer(toViewer);
-}
-
-
 ///////////////////////////////
 ///// create a new SVG for the colormap
 ///////////////////////////////

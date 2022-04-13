@@ -1236,7 +1236,8 @@ function createProjectionBox(UI){
 		.attr('type','checkbox')
 		.attr('autocomplete','off')
 		.on('change',function(){
-			checkProjectionBox(this.checked);
+			sendToViewer([{'setViewerParamByKey':[this.checked, "columnDensity"]}]);
+			GUIParams.columnDensity = this.checked;
 		})
 		.style('margin','8px 0px 0px 0px')
 
@@ -1262,7 +1263,8 @@ function createProjectionBox(UI){
 		.attr('type','checkbox')
 		.attr('autocomplete','off')
 		.on('change',function(){
-			console.log('log10',this.checked);
+			sendToViewer([{'setCDlognorm':[this.checked]}]);
+			GUIParams.CDlognorm = this.checked;
 		})
 		.style('margin','8px 0px 0px 100px')
 
@@ -1301,6 +1303,8 @@ function createProjectionBox(UI){
 		.attr('class','CMapMaxTClass')
 		.attr('type','text')
 		.style('left',(GUIParams.containerWidth - 103) + 'px');
+
+	createColormapSliders('projection');
 
 }
 
