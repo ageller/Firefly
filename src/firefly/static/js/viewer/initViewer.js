@@ -850,6 +850,9 @@ function applyOptions(){
 			options.radiusVariable[p] != null) viewerParams.radiusVariable[p] = copyValue(options.radiusVariable[p]);
 
 	}// particle specific options
+
+	viewerParams.showParts['columnDensity'] = viewerParams.partsKeys.some(
+		function (key){return viewerParams.showParts[key]});
 }
 
 // connect fly/trackball controls

@@ -120,8 +120,27 @@ function createParticleBase(UI, p){
 				elm.value = this.checked;
 			GUIParams.showParts[p] = this.checked;
 
+			var any_shown = GUIParams.partsKeys.some(
+				function (key){return GUIParams.showParts[key]});
+			GUIParams.showParts['columnDensity'] = any_shown;
+
 			if (!this.checked && GUIParams.showColormap[p]) removeColorbar(p);
 			else if (this.checked && GUIParams.showColormap[p]) checkColormapBox(p,this.checked);
+
+			// need to determine if we should show/hide the colorbar container
+			//  for column density b.c. if we turn off all the particles it should disappear
+			if (GUIParams.showColormap['columnDensity']){
+				if (any_shown){
+					// show the colorbar container
+					d3.select('#colormap_outer_container').style('visibility','visible');
+				}
+				else{
+					// hide the colorbar container
+					//hide the colomap div
+					if (d3.select('#colormap_outer_container').classed('show')) expandColormapTab();
+					d3.select('#colormap_outer_container').style('visibility','hidden');
+				}
+			}
 		})
 
 	if (!GUIParams.showParts[p]){

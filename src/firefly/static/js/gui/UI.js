@@ -1236,6 +1236,7 @@ function createColumnDensityBox(UI){
 		.attr('type','checkbox')
 		.attr('autocomplete','off')
 		.on('change',function(){
+			checkColormapBox('columnDensity',this.checked)
 			sendToViewer([{'setViewerParamByKey':[this.checked, "columnDensity"]}]);
 			GUIParams.columnDensity = this.checked;
 		})
@@ -1738,6 +1739,9 @@ function updateUIBlending(args){
 	var p = args[0];
 	var mode = args[1] ? 'normal':'additive';
 	var dTest = args[1]; // have dTest and mode share
+
+	// don't change the blending mode for column density projection
+	if (p == 'columnDensity') return;
 
 	// set the blending mode value in the dropdown
 	document.getElementById(p+'_selectBlendingMode').value = mode;
