@@ -888,16 +888,20 @@ function createDataControlsBox(UI){
 			.text('Load Settings');
 
 	//load new data button
-	m2.append('div').attr('id','loadNewDataDiv')
-		.append('button')
-		.attr('id','loadNewDataButton')
-		.attr('class','button')
-		.style('width',(GUIParams.containerWidth - 10) + 'px')
-		.on('click',function(){
-			sendToViewer([{'loadNewData':null}]);
-		})
-		.append('span')
-			.text('Load New Data');
+	if (GUIParams.usingSocket){
+		m2.append('div').attr('id','loadNewDataDiv')
+			.append('button')
+			.attr('id','loadNewDataButton')
+			.attr('class','button')
+			.style('width',(GUIParams.containerWidth - 10) + 'px')
+			.on('click',function(){
+				sendToViewer([{'loadNewData':null}]);
+			})
+			.append('span')
+				.text('Load New Data');
+	}
+	// height of the load new data button and its padding (found by trial and error)
+	else m2height-=45;
 
 	m2.style('height', m2height + 'px')
 		.attr('trueHeight', m2height + 'px')
