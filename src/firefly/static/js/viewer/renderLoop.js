@@ -546,7 +546,7 @@ function update_framerate(seconds,time){
 	//  and put in a weirdly high value (like >100 fps) that biases the mean high
 	viewerParams.FPS = viewerParams.fps_list.slice().sort(function(a, b){return a-b})[15]
 
-	if ((viewerParams.drawPass % 10) == 0){
+	if ((viewerParams.drawPass % Math.round(viewerParams.FPS)) == 0){
 		// fill FPS container div with calculated FPS and memory usage
 		var forGUI = [];
 		forGUI.push({'setGUIParamByKey':[viewerParams.FPS, "FPS"]});
