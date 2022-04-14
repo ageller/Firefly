@@ -138,7 +138,6 @@ function defineViewerParams(){
 
 		// slider limits for colormap
 		this.colormapVals = {};
-
 		// textbox limits for colormap
 		this.colormapLims = {};
 
@@ -169,9 +168,14 @@ function defineViewerParams(){
 		this.sceneCD = null;
 		this.cameraCD = null;
 		this.scaleCD = 0.1; //scaling factor for the shader so that it adds up to one at highest density
+
 		this.CDmin = 0;
 		this.CDmax = 1;
 		this.CDlognorm = 0;
+		this.CDckey = 'ColumnDensity' // the name of the ckey, shows up in the colorbar label
+		this.CDkey = '__column__density__foo__abg' // the name of the pseudo particle group, salted so that no one overwrites it
+
+
 		this.cmap = this.colormapTexture;//new THREE.TextureLoader().load( "textures/cmap.png");
 		this.cmap.minFilter = THREE.LinearFilter;
 		this.cmap.magFilter = THREE.NearestFilter;

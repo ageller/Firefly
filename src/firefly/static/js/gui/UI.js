@@ -1,8 +1,7 @@
-GLOBAL_arrow = '&#129044;';
+//GLOBAL_arrow = '&#129044;';
 GLOBAL_arrow = '&#11104;';
 
 // TO DO: create radii controls for particles
-// particle state bar needs to be a few pixels larger
 // fix multiple colormaps (alex may have already fixed this, wait until merged into kaitai_io)
 
 window.addEventListener('mouseup',function(){GUIParams.movingUI = false;});
@@ -33,7 +32,7 @@ window.addEventListener('resize', debounce(resetTransition));
 ////// create the UI
 //////////////////////////////
 function createUI(){
-	console.log("Creating UI", GUIParams.partsKeys, GUIParams.decimate);
+	//console.log("Creating UI", GUIParams.partsKeys, GUIParams.decimate);
 
 	//add particle data to the GUIState object
 	defineGUIParticleState();
@@ -45,7 +44,7 @@ function createUI(){
 	GUIParams.longestPartLabelLen = 0;
 
 	GUIParams.partsKeys.forEach(function(p,i){
-		if (p.length > longestPartLabel.length) longestPartLabel = p;
+		if (p.length > longestPartLabel.length && GUIParams.UIparticle[p]) longestPartLabel = p;
 		if (i == GUIParams.partsKeys.length - 1){
 			var elem = d3.select('body').append('div')
 				.attr('class','pLabelDivCHECK')
@@ -82,17 +81,21 @@ function createUI(){
 		.style('opacity',1)
 
 	//UIt.append('table');
-	// var UIr1 = UIt.append('div')
-	// 	.attr('id','Hamburger')
-	// 	.style('padding','2px 0px 0px 4px')
-	// 	.style('float','left')
-	// 	.style('cursor','pointer')
-	// 	.on('mouseup',hideUI)
-	// UIr1.append('div').attr('class','bar1');
-	// UIr1.append('div').attr('class','bar2');
-	// UIr1.append('div').attr('class','bar3');
+	var UIr1 = UIt.append('div')
+		.attr('id','Hamburger')
+		.style('padding','2px 0px 0px 4px')
+		.style('float','left')
+		.style('cursor','pointer')
+		.on('mouseup',hideUI)
+	UIr1.append('div').attr('class','bar1');
+	UIr1.append('div').attr('class','bar2');
+	UIr1.append('div').attr('class','bar3');
+	// don't know how to start it expanded so we can hide it later
+	//  so will just toggle the bars to an x
+	UIr1.node().classList.toggle("change");
 
 	// append the Firefly logo (instead of the bars?)
+	/*
 	UIt.append('div')
 		.attr('id','UIicon')
 		.on('mousedown',dragElement)
@@ -105,6 +108,7 @@ function createUI(){
 			.attr('src','static/docs/GUIicon.png')
 			.attr('draggable',false)
 			.style('height','30px')
+	*/
 
 	var UIr2 = UIt.append('div')
 		.style('float','left')
@@ -177,6 +181,7 @@ function createUI(){
 	createGeneralWindow(UI);
 	createDataWindow(UI);
 	createCameraWindow(UI);
+	createColumnDensityWindow(UI);
 
 	createParticlesWindow(UI);
 
@@ -191,30 +196,12 @@ function createUI(){
 	// 		//.style('padding-left',pd + 'px')
 	// }
 
-
-
-
-
-
-
-
 	//create the octree loading bar
 	if (GUIParams.haveAnyOctree) createOctreeLoadingBar(UIcontainer);
-
-
 
 	// tell the viewer the UI has been initialized
 	sendToViewer([{'applyUIoptions':null}]);
 	sendToViewer([{'setViewerParamByKey':[true, "haveUI"]}]);
-
-	// collapse the UI initially
-	var hamburger = document.getElementById('UItopbar');
-	hideUI.call(hamburger);
-	hamburger.classList.toggle("change");	
-
-
-	// and now reveal the result
-	UIcontainer.classed('hidden', false);
 
 }
 
@@ -306,6 +293,7 @@ function transitionUIWindows(state=null, pID=null){
 
 	// deal with the particle show classes
 	GUIParams.partsKeys.forEach(function(k){
+		if (!GUIParams.UIparticle[k]) return;
 		var ddiv = d3.select('#' + k + 'Dropdown');
 		ddiv.selectAll('.dropdown-content').classed('show', false);
 		if ((inParticles || id2 == 'GUIParticlesBase') && ddiv.classed('show')){
@@ -350,6 +338,7 @@ function transitionUIWindows(state=null, pID=null){
 		var hdrop = 0;
 		var pheight = 0;
 		GUIParams.partsKeys.forEach(function(k){
+			if (!GUIParams.UIparticle[k]) return;
 			var ddiv = d3.select('#' + k + 'Dropdown');
 			var pdiv = d3.select('#' + k + 'Div');
 
@@ -399,7 +388,8 @@ function transitionUIWindows(state=null, pID=null){
 		if (obj.hasOwnProperty('id')){
 			if (obj.id != id1 && obj.id != id2 && obj.id != id3){
 				var elem = d3.select('#' + obj.id);
-				if (!elem.classed('show')) elem.style('height','0px');
+				// size checks if the selection caught anything
+				if (elem.size()>0 && !elem.classed('show')) elem.style('height','0px');
 				elem.select('.dropdown-content').filter(function(){
 					if (d3.select(this).classed('show')) return false;
 					return true;
@@ -412,6 +402,9 @@ function transitionUIWindows(state=null, pID=null){
 	}
 	setToZero(GUIParams.GUIState);
 
+	// make sure that we are not cutting off the colormap
+	var inset = getUIcontainerInset()
+	d3.select('#UIcontainer').style('clip-path','inset(-20px ' + (-20 - inset.cbar[0]) + 'px ' + (-20 - inset.cbar[1]) + 'px 0px)');
 
 	// check if we need a scroll bar
 	setTimeout(checkGUIsize, 500);
@@ -535,6 +528,28 @@ function createCameraWindow(container){
 	//  friction and stereo separation sliders
 	//  stereo checkbox
 	createCameraControlBox(UI);
+}
+
+function createColumnDensityWindow(container){
+
+	var UI = container.append('div')
+		.attr('id',GUIParams.GUIState.main.general.projection.id)
+		.attr('class','UImover')
+		.style('position','absolute')
+		.style('top','0px')
+		.style('height','60px')
+		.attr('trueHeight','60px')
+		.style('width', GUIParams.containerWidth + 'px')
+		.style('transform','translateX(' + GUIParams.containerWidth + 'px)')
+
+	// create camera controls pane containing:
+	//  camera center (camera focus) text boxes
+	//  camera location text boxes
+	//  camera rotation text boxes
+	//  save, reset, and recenter buttons
+	//  friction and stereo separation sliders
+	//  stereo checkbox
+	createColumnDensityBox(UI);
 }
 
 
@@ -884,16 +899,20 @@ function createDataControlsBox(UI){
 			.text('Load Settings');
 
 	//load new data button
-	m2.append('div').attr('id','loadNewDataDiv')
-		.append('button')
-		.attr('id','loadNewDataButton')
-		.attr('class','button')
-		.style('width',(GUIParams.containerWidth - 10) + 'px')
-		.on('click',function(){
-			sendToViewer([{'loadNewData':null}]);
-		})
-		.append('span')
-			.text('Load New Data');
+	if (GUIParams.usingSocket){
+		m2.append('div').attr('id','loadNewDataDiv')
+			.append('button')
+			.attr('id','loadNewDataButton')
+			.attr('class','button')
+			.style('width',(GUIParams.containerWidth - 10) + 'px')
+			.on('click',function(){
+				sendToViewer([{'loadNewData':null}]);
+			})
+			.append('span')
+				.text('Load New Data');
+	}
+	// height of the load new data button and its padding (found by trial and error)
+	else m2height-=45;
 
 	m2.style('height', m2height + 'px')
 		.attr('trueHeight', m2height + 'px')
@@ -967,7 +986,7 @@ function createCameraControlBox(UI){
 		.attr('id','CenterCheckDiv')
 		.style('width','45px')
 		.style('margin',0)
-		.style('margin-left','10px')
+		.style('margin-left','2px')
 		.style('padding',0);
 	c4.append('input')
 		.attr('id','CenterCheckBox')
@@ -975,7 +994,7 @@ function createCameraControlBox(UI){
 		.attr('autocomplete','off')
 		.on('change',function(){
 			sendToViewer([{'checkCenterLock':this.checked}]);
-		})
+		})	
 	if (GUIParams.useTrackball){
 		elm = document.getElementById("CenterCheckBox");
 		elm.value = true
@@ -990,10 +1009,11 @@ function createCameraControlBox(UI){
 		.attr('id','CenterCheckLabel')
 		.style('font-size','10pt')
 		.text('Lock');
+
 	//camera text boxes
 	c3 = c2.append('div')
 		.attr('class','pLabelDiv')
-		.style('width','280px')
+		.style('width',(GUIParams.containerWidth - 10) + 'px')
 		.style('margin-top','5px') 
 	c3.append('div')
 		.style('width','62px')
@@ -1015,7 +1035,7 @@ function createCameraControlBox(UI){
 		.attr('id','CameraYText')
 		.attr('value','1')
 		.attr('autocomplete','off')
-		.style('width','60px')
+		.style('width',(GUIParams.containerWidth - 150)/3. + 'px')
 		.style('margin-right','8px')
 		.on('keypress',function(){
 			var key = event.keyCode || event.which;
@@ -1031,10 +1051,33 @@ function createCameraControlBox(UI){
 			var key = event.keyCode || event.which;
 			if (key == 13) sendToViewer([{'checkText':[this.id, this.value]}]);
 		})
+
+	// tween checkbox
+	var c4 = c3.append('span')
+		.attr('id','TweenCheckDiv')
+		.style('width','65px')
+		.style('margin',0)
+		.style('margin-left','2px')
+		.style('padding',0);
+	c4.append('input')
+		.attr('id','TweenCheckBox')
+		.attr('type','checkbox')
+		.attr('autocomplete','off')
+		.attr('value',GUIParams.inTween)
+		.on('change',function(){
+			GUIParams.inTween = this.checked;
+			sendToViewer([{'toggleTween':this.checked}]);
+		});
+	c4.append('label')
+		.attr('for','CenterCheckBox')
+		.attr('id','CenterCheckLabel')
+		.style('font-size','10pt')
+		.text('Tween');
+
 	//rotation text boxes
 	c3 = c2.append('div')
 		.attr('class','pLabelDiv')
-		.style('width','280px')
+		.style('width',(GUIParams.containerWidth - 10) + 'px')
 		.style('margin-top','5px') 
 	c3.append('div')
 		.style('width','62px')
@@ -1199,6 +1242,98 @@ function createCameraControlBox(UI){
 	disableCameraInputBoxes();
 }
 
+function createColumnDensityBox(UI){
+	var pheight = 60;
+	var columnDensityDiv = UI.append('div')
+		.attr('class','dropdown-content')
+		.attr('id','projectionControls')
+		.style('margin','0px')
+		.style('padding','0px 0px 0px 5px')
+		.style('width',GUIParams.containerWidth + 'px')
+		.style('border-radius',0)
+		.attr('trueHeight',pheight)
+	
+	// add checkbox to enable colormap
+	columnDensityDiv.append('input')
+		.attr('id','columnDensityCheckBox')
+		.attr('value',GUIParams.columnDensity)
+		.attr('type','checkbox')
+		.attr('autocomplete','off')
+		.on('change',function(){
+			checkColormapBox(GUIParams.CDkey,this.checked)
+			sendToViewer([{'setViewerParamByKey':[this.checked, "columnDensity"]}]);
+			GUIParams.columnDensity = this.checked;
+		})
+		.style('margin','8px 0px 0px 0px')
+
+	columnDensityDiv.append('label')
+		.attr('for','columnDensityCheckBox')
+		.text('Projection')
+		.style('margin-left','10px')
+	
+	// dropdown to select colormap
+	var selectCMap = columnDensityDiv.append('select')
+		.attr('class','selectCMap')
+		.attr('id',GUIParams.CDkey+'_SelectCMap')
+		.style('margin-left','10px')
+		.style('margin-top','5px')
+		.on('change', selectColormap)
+
+	// add checkbox to toggle log10
+	columnDensityDiv.append('input')
+		.attr('id','columnDensityLog10CheckBox')
+		.attr('value',false)
+		.attr('type','checkbox')
+		.attr('autocomplete','off')
+		.on('change',function(){
+			sendToViewer([{'setCDlognorm':[this.checked]}]);
+			GUIParams.CDlognorm = this.checked;
+			// change the colorbar label
+			if (GUIParams.showParts[GUIParams.CDkey] && 
+				GUIParams.showColormap[GUIParams.CDkey]) populateColormapAxis(GUIParams.CDkey);
+		})
+		.style('margin','8px 0px 0px 100px')
+
+	columnDensityDiv.append('label')
+		.attr('for','columnDensityLog10CheckBox')
+		.text('Take Log10')
+		.style('margin-left','10px')
+
+	var options = selectCMap.selectAll('option')
+		.data(GUIParams.colormapList).enter()
+		.append('option')
+			.attr('value',function(d,i){ return i; })
+			.text(function (d) { return d; });
+
+	// create colorbar limits slider
+	colormapsliders = columnDensityDiv.append('div')
+		.attr('id',GUIParams.CDkey+'_CK_'+GUIParams.ckeys[GUIParams.CDkey][0]+'_END_CMap')
+		.attr('class','CMapClass')
+		.style('width', (GUIParams.containerWidth - 100) + 'px');
+
+	colormapsliders.append('div')
+		.attr('class','CMapClassLabel')
+
+	colormapsliders.append('div')
+		.attr('id',GUIParams.CDkey+'_CK_'+GUIParams.ckeys[GUIParams.CDkey][0]+'_END_CMapSlider')
+		.style("margin-top","-1px")
+		.style('left','-8px')
+
+	colormapsliders.append('input')
+		.attr('id',GUIParams.CDkey+'_CK_'+GUIParams.ckeys[GUIParams.CDkey][0]+'_END_CMapMinT')
+		.attr('class','CMapMinTClass')
+		.attr('type','text');
+
+	colormapsliders.append('input')
+		.attr('id',GUIParams.CDkey+'_CK_'+GUIParams.ckeys[GUIParams.CDkey][0]+'_END_CMapMaxT')
+		.attr('class','CMapMaxTClass')
+		.attr('type','text')
+		.style('left',(GUIParams.containerWidth - 103) + 'px');
+
+	createColormapSlider(GUIParams.CDkey,GUIParams.ckeys[GUIParams.CDkey][0]);
+
+}
+
 //////////////////////// ////////////////////////
 // helper functions vvvvvvv
 //////////////////////// ////////////////////////
@@ -1315,6 +1450,20 @@ function selectBlendingMode() {
 	var p = this.id.slice(0,-19)
 	sendToViewer([{'setBlendingMode':[selectValue, p]}]);
 }
+
+function selectRadiusVariable(){
+	var option = d3.select(this)
+		.selectAll("option")
+		.filter(function (d, i) { 
+			return this.selected; 
+	});
+
+	var p = this.id.slice(0,-21) // 21 is length of _selectRadiusVariable
+	var selectValue = GUIParams.rkeys[p].indexOf(option.property('value'));
+
+	sendToViewer([{'setRadiusVariable':[selectValue, p]}]);
+}
+
 
 function changeUISnapSizes(){
 	//size of the snapshot (from text input)
@@ -1446,6 +1595,7 @@ function hideUI(){
 
 		var elem = d3.select('#UIcontainer');
 		var bbox = elem.node().getBoundingClientRect();
+		//console.log('checking', bbox)
 		if (GUIParams.UIhidden){
 			elem.style('clip-path','inset(3px ' + (bbox.width - 35) + 'px ' + (bbox.height - 35) + 'px 3px round 10px');
 		}else{
@@ -1617,6 +1767,9 @@ function updateUIBlending(args){
 	var mode = args[1] ? 'normal':'additive';
 	var dTest = args[1]; // have dTest and mode share
 
+	// don't change the blending mode for column density projection
+	if (p == GUIParams.CDkey) return;
+
 	// set the blending mode value in the dropdown
 	document.getElementById(p+'_selectBlendingMode').value = mode;
 
@@ -1706,4 +1859,14 @@ function resetGUILocation(){
 		elem.style.top = '30px';
 		elem.style.left = '10px';
 	}
+}
+
+function countNodes(obj){
+	var count=1;
+	if (obj.hasChildNodes()){
+		obj.childNodes.forEach(
+		function (cnode){count+=countNodes(cnode)})
+	}
+	else count+=1;
+	return count;
 }

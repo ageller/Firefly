@@ -132,7 +132,7 @@ function resetCamera() {
 	if (viewerParams.parts.options.hasOwnProperty('center')){
 		if (viewerParams.parts.options.center != null){
 			viewerParams.center = new THREE.Vector3(viewerParams.parts.options.center[0], viewerParams.parts.options.center[1], viewerParams.parts.options.center[2]);
-			setBoxSize(viewerParams.parts[viewerParams.partsKeys[0]].Coordinates);
+			setBoxSize(viewerParams.parts[viewerParams.partsKeys[0]].Coordinates_flat);
 		}
 	} 
 
@@ -250,7 +250,7 @@ function changeBlendingForColormap(args){
 	//  (otherwise non-colormapped particles will blend with colormapped particles)
 	viewerParams.partsKeys.forEach(function (p,i){
 
-		if ( p == pkey_to_colormap && checked){
+		if ( viewerParams.showColormap[p]){
 			viewerParams.blendingMode[p] = 'normal';
 			viewerParams.depthWrite[p] = true;
 			viewerParams.depthTest[p] = true;
@@ -681,6 +681,27 @@ function setBlendingMode(args){
 	});
 }
 
+function setCDlognorm(args){
+	var checked = args[0];
+	viewerParams.CDlognorm = checked;
+	viewerParams.materialCD.uniforms.lognorm.value = checked;
+	// apparently it doesn't want me to set needsUpdate 
+	//viewerParams.meterialCD.needsUpdate = true;
+}
+
+function toggleTween(args){
+
+	checked = args[0];// ignore for now?
+
+	if (viewerParams.inTween){
+		viewerParams.updateTween = false
+		viewerParams.inTween = false
+	} else {
+		viewerParams.updateTween = true	
+		setTweenviewerParams();
+	}
+}
+
 function setDepthMode(args){
 	var p = args[0];
 	var checked = args[1];
@@ -689,4 +710,12 @@ function setDepthMode(args){
 	//  to apply them.
 	viewerParams.depthWrite[p] = checked;
 	viewerParams.depthTest[p] = checked;
+}
+
+function setRadiusVariable(args){
+	var radiusVariable = args[0];
+	var p = args[1];
+	viewerParams.radiusVariable[p] = radiusVariable;
+	viewerParams.updateRadiusVariable[p] = true;
+	//console.log(radiusVariable)
 }

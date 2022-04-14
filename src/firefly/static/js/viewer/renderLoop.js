@@ -115,22 +115,6 @@ function update_keypress(time){
 		console.log('fly speed', viewerParams.flyffac)
 	}
 
-	// toggle tween loop
-	if (viewerParams.keyboard.down("T")) {
-		if (viewerParams.inTween){
-			viewerParams.updateTween = false
-			viewerParams.inTween = false
-		} else {
-			viewerParams.updateTween = true	
-			setTweenviewerParams();
-		}
-	}
-
-	// toggle column density projection
-	if (viewerParams.keyboard.down("P")){
-		viewerParams.columnDensity = !viewerParams.columnDensity;
-	}
-
 }
 
 function update_particle_groups(time){
@@ -221,7 +205,7 @@ function update_particle_playback(p,time){
 				viewerParams.filterVals[p][fkey][0] = soft_limits[0] + filter_step;
 				viewerParams.filterVals[p][fkey][1] = soft_limits[1] + filter_step;
 			}
-			console.log('playback', dfilter, viewerParams.filterVals[p][fkey]);
+			//console.log('playback', dfilter, viewerParams.filterVals[p][fkey]);
 
 			// update the left slider position
 			var forGUI = [];
@@ -267,7 +251,7 @@ function update_particle_playback(p,time){
 		
 		// apply particle radii and alpha values 
 		// according to current filter handle settings
-		if (update_filter || update_onoff) update_particle_mesh_filter(p,m);
+		if (update_filter || update_onoff || update_radius_variable) update_particle_mesh_filter(p,m);
 
 		// only update the colormap variable if we're actually
 		//  colormapping. we'll get to it eventually
@@ -275,7 +259,6 @@ function update_particle_playback(p,time){
 			update_particle_mesh_colormap_variable(p,m);
 		} 
 
-		if (update_radius_variable) update_particle_mesh_radius_variable(p,m); 
 
 		update_velocity_animation(p,m);
 
@@ -372,11 +355,7 @@ function update_particle_mesh_filter(p,m){
 	var alpha = m.geometry.attributes.alpha.array;
 
 	// reset the buffer values
-	if (viewerParams.radiusVariable[p] > 0){
-		var rkey = viewerParams.rkeys[p][viewerParams.radiusVariable[p]]
-		if (this_parts.hasOwnProperty(rkey)) radiusScale.set(this_parts[rkey]);
-		else radiusScale.fill(1);
-	}
+	if (viewerParams.radiusVariable[p] > 0) update_particle_mesh_radius_variable(p,m);
 	else radiusScale.fill(1);
 
 	alpha.fill(1);
@@ -436,16 +415,20 @@ function update_particle_mesh_radius_variable(p,m){
 	var this_parts = m.geometry.userData;
 
 	var radiusScale = m.geometry.attributes.radiusScale.array;
-
+	var minmax = {'min':0,'max':1}
 	// .radiusVariable[p] holds the *index* of the radius variable
 	if (viewerParams.radiusVariable[p] > 0){
 		var rkey = viewerParams.rkeys[p][viewerParams.radiusVariable[p]]
-		if (this_parts.hasOwnProperty[rkey]) var radii = this_parts[rkey];
-		else var radii = Array(radiusScale.length).fill(1)
+		if (this_parts.hasOwnProperty(rkey)){
+			// copy the values from this_parts[rkey] into radii
+			radii = this_parts[rkey];
+			minmax = calcMinMax(p,rkey);
+		}
+		else radii = Array(radiusScale.length).fill(1);
 	} 
-	else var radii = Array(radiusScale.length).fill(1)
-
-	for( var ii = 0; ii < radiusScale.length; ii ++ ) radiusScale[ii] = radii[ii];
+	else radii = Array(radiusScale.length).fill(1);
+	// renormalize the radius variable to scale between 0 and 1, when you're right you're right aaron.
+	for( var ii = 0; ii < radiusScale.length; ii ++ ) radiusScale[ii] = (radii[ii]-minmax.min)/(minmax.max-minmax.min);
 	m.geometry.attributes.radiusScale.needsUpdate = true;
 }
 
@@ -477,8 +460,9 @@ function render_column_density(){
 
 	//then back to the canvas
 	//for now, just use the colormap from the first particle group
-	var p = viewerParams.partsKeys[0];
-	viewerParams.quadCD.material.uniforms.colormap.value = viewerParams.colormap[p];
+	viewerParams.quadCD.material.uniforms.colormap.value = viewerParams.colormap[viewerParams.CDkey];
+	viewerParams.quadCD.material.uniforms.CDmin.value = viewerParams.colormapVals[viewerParams.CDkey][viewerParams.ckeys[viewerParams.CDkey][0]][0];
+	viewerParams.quadCD.material.uniforms.CDmax.value = viewerParams.colormapVals[viewerParams.CDkey][viewerParams.ckeys[viewerParams.CDkey][0]][1];
 
 	viewerParams.renderer.setRenderTarget(null)
 	viewerParams.renderer.render( viewerParams.sceneCD, viewerParams.cameraCD );
@@ -544,32 +528,17 @@ function update_framerate(seconds,time){
 	//viewerParams.FPS = viewerParams.fps_list.reduce((a, b) => a + b, 0)/viewerParams.fps_list.length;
 	// use median FPS rather than mean; when it's going real slow it will skip frames
 	//  and put in a weirdly high value (like >100 fps) that biases the mean high
-	viewerParams.FPS = viewerParams.fps_list.slice().sort()[15]
+	viewerParams.FPS = viewerParams.fps_list.slice().sort(function(a, b){return a-b})[15]
 
-	// fill FPS container div with calculated FPS and memory usage
-	if (viewerParams.showfps){
+	if ((viewerParams.drawPass % Math.round(viewerParams.FPS)) == 0){
+		// fill FPS container div with calculated FPS and memory usage
 		var forGUI = [];
 		forGUI.push({'setGUIParamByKey':[viewerParams.FPS, "FPS"]});
 		forGUI.push({'setGUIParamByKey':[viewerParams.memoryUsage, "memoryUsage"]});
-		forGUI.push({'updateFPSContainer':null});
+		forGUI.push({'updateFPSContainer':[]});
 		sendToGUI(forGUI);
-
 	}
 
-	if (viewerParams.showMemoryUsage && viewerParams.memoryUsage > 0){
-		if (viewerParams.showFPS) txt += ', ';
-		else var txt = '';
-
-		txt += (Math.round(viewerParams.memoryUsage/1e9*100.)/100.).toFixed(2) + ' Gb'
-		if (elm){
-			elm.innerHTML = txt;
-			elm.style.display='block';
-		}
-	}
-	 
-	if (!viewerParams.showFPS && !viewerParams.showMemoryUsage){
-		if (elm) elm.style.display='none';
-	}
 
 	// update the stored current time from the last time we were here
 	viewerParams.currentTime=seconds;

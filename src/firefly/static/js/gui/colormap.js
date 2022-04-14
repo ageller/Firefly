@@ -15,7 +15,7 @@ function selectColormap() {
 	//console.log(p, ' selected colormap:', GUIParams.colormapList[selectValue], GUIParams.colormap[p])
 
 	// redraw particle type if colormap is on
-	if (GUIParams.showColormap[p]){
+	if (GUIParams.showColormap[p] && GUIParams.showParts[p]){
 		//createPartsMesh(pDraw = [p]);
 		populateColormapImage(p);
 	}
@@ -43,7 +43,7 @@ function selectColormapVariable() {
 
 	// update colormap variable here and for the viewer
 	GUIParams.colormapVariable[p] = selectValue;
-	createColormapSVG(p);
+	if (GUIParams.showColormap[p] && GUIParams.showParts[p]) createColormapSVG(p);
 
 	// tell the viewer the colormapVariable was changed, so it can 
 	//  update the colormap variable for p's meshes on the next render pass
@@ -55,52 +55,51 @@ function selectColormapVariable() {
 
 //turn on/off the colormap
 function checkColormapBox(p, checked){
-	//check all colormaps to see if we need to turn it off
 	GUIParams.showColormap[p] = checked;
-	var hide = true
-	GUIParams.partsKeys.forEach(function(k){
-		if (GUIParams.showColormap[k]) hide = false;
-	})
-
 	if (GUIParams.showColormap[p]) {
 		//show the colormap div
 		d3.select('#colormap_outer_container').style('visibility','visible');
 		//create the colormap for this particle
 		createColormapSVG(p);
-	} else {
-		var w = 76; //I think this is the width of the colormap, but how do I get this from the DOM?
-		var w0 = parseFloat(d3.select('#colormap_container').style('height'));
-		d3.select('#' + p + 'colormap').remove();
-		d3.select('#colormap_container').style('height',(w0 - w) + 'px')
-		//var trans = parseTranslateStyle(d3.select('#colormap_outer_container'));
-		var m0 = parseFloat(d3.select('#colormap_outer_container').style('margin-left'));
-		d3.select('#colormap_outer_container').style('margin-left', (m0 - w) + 'px');
-		//also subtract 16 off the tranlateY styles for all the other colormaps (again I wish I could get 16 from the DOM)
-		GUIParams.partsKeys.forEach(function(k){
-			var elem = d3.select('#' + k + 'colormap');
-			if (elem.node()) {
-				var trans = parseTranslateStyle(elem);
-				console.log('checking', k, trans)
-				if (parseFloat(trans.y) > 20) elem.style('transform','scale('+trans.sx + ',' + trans.sy + ')translate(' + trans.x + ',' + (parseFloat(trans.y) - 16) + 'px)')
-			}
-		})
-
 	}
+	else removeColorbar(p);
 
+	forViewer = [];
+	forViewer.push({'setViewerParamByKey':[GUIParams.showColormap[p], 'showColormap', p]});
+	// don't change blending for column density
+	if (p!= GUIParams.CDkey) forViewer.push({'changeBlendingForColormap':[p, checked]});
+	sendToViewer(forViewer);
+	updateUIBlending([p,checked]);
+}
+
+function removeColorbar(p){
+	var w = 76; //I think this is the width of the colormap, but how do I get this from the DOM?
+	var w0 = parseFloat(d3.select('#colormap_container').style('height'));
+	d3.select('#' + p + 'colormap').remove();
+	d3.select('#colormap_container').style('height',(w0 - w) + 'px')
+	//var trans = parseTranslateStyle(d3.select('#colormap_outer_container'));
+	var m0 = parseFloat(d3.select('#colormap_outer_container').style('margin-left'));
+	d3.select('#colormap_outer_container').style('margin-left', (m0 - w) + 'px');
+	//also subtract 16 off the tranlateY styles for all the other colormaps (again I wish I could get 16 from the DOM)
+	Object.keys(GUIParams.showColormap).forEach(function(k){
+		var elem = d3.select('#' + k + 'colormap');
+		if (elem.node()) {
+			var trans = parseTranslateStyle(elem);
+			console.log('checking', k, trans)
+			if (parseFloat(trans.y) > 20) elem.style('transform','scale('+trans.sx + ',' + trans.sy + ')translate(' + trans.x + ',' + (parseFloat(trans.y) - 16) + 'px)')
+		}
+	})
+	// if there are no visible colormapped particles need to hide the colorbar container
+	var hide = true;
+	Object.keys(GUIParams.showColormap).forEach(function(k){
+		hide = hide && (!GUIParams.showColormap[k] || (GUIParams.showColormap[k] && !GUIParams.showParts[k]));
+	})
 	if (hide){
 		//hide the colomap div
 		if (d3.select('#colormap_outer_container').classed('show')) expandColormapTab();
 		d3.select('#colormap_outer_container').style('visibility','hidden');
 	}
-
-	forViewer = [];
-	forViewer.push({'setViewerParamByKey':[GUIParams.showColormap[p], 'showColormap', p]});
-	if (GUIParams.showColormap[p]) {
-		forViewer.push({'changeBlendingForColormap':[p, checked]});
-	}
-	sendToViewer(forViewer);
 }
-
 
 ///////////////////////////////
 ///// create a new SVG for the colormap
@@ -156,7 +155,7 @@ function createColormapSVG(particle_group_UIname){
 	var imgContainer = d3.select('#' + particle_group_UIname + 'colormapImgContainer');
 	if (!imgContainer.node()) imgContainer = svg.append('g').attr('id',particle_group_UIname + 'colormapImgContainer')
 
-	populateColormapImage(particle_group_UIname);
+	if (GUIParams.showParts[particle_group_UIname]) populateColormapImage(particle_group_UIname);
 
 
 	// Add the X Axis
@@ -274,8 +273,15 @@ function populateColormapAxis(particle_group_UIname){
 		.style('stroke',color)
 
 	// update the label
-	d3.select('#' + particle_group_UIname + 'colormapLabel')
-		.text(particle_group_UIname + ' ' +  GUIParams.ckeys[particle_group_UIname][GUIParams.colormapVariable[particle_group_UIname]])
+	if (particle_group_UIname!=GUIParams.CDkey){
+		d3.select('#' + particle_group_UIname + 'colormapLabel')
+			.text(particle_group_UIname + ' ' +  GUIParams.ckeys[particle_group_UIname][GUIParams.colormapVariable[particle_group_UIname]])
+	}
+	else{
+		clabel = GUIParams.ckeys[particle_group_UIname][GUIParams.colormapVariable[particle_group_UIname]]
+		d3.select('#' + particle_group_UIname + 'colormapLabel')
+			.text(GUIParams.CDlognorm ? 'log10('+clabel+')' :clabel)
+	}
 
 }
 
