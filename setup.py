@@ -5,13 +5,13 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="firefly",
-    version="2.0.6",
+    version="3.0.0",
     author = 'Alex Gurvich, Aaron Geller',
     author_email = 'agurvich@u.northwestern.edu, ageller@northwestern.edu',
     description="A browser-based particle visualization platform",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/ageller/Firefly",
+    url="https://alexbgurvi.ch/Firefly",
     project_urls={
         "Bug Tracker": "https://github.com/ageller/Firefly/issues",
     },
@@ -31,7 +31,7 @@ setuptools.setup(
           'flask-socketio',
           'flask',
           'requests',
-          'abg_python>=1.0.2'
+          'abg_python>=1.0.5'
       ],
     include_package_data=True,
     scripts=["src/firefly/bin/firefly"]
