@@ -19,7 +19,7 @@ function defineGUIParams(){
 		this.zmax = 5.e10;
 		this.zmin = 1;
 		this.fov = 45.
-		this.flyffac = 0.2;
+		this.flyffac = 1.;
 		
 		//when ready the GUI will be created
 		this.waitForInit = null;
@@ -30,9 +30,6 @@ function defineGUIParams(){
 		//for show/hide UI
 		this.movingUI = false;
 		this.UIhidden = false;
-
-		//for dropdowns
-		this.gtoggle = {};
 
 		//for sockets
 		this.usingSocket = true;
@@ -55,6 +52,10 @@ function defineGUIParams(){
 		this.haveFilter = {};
 		this.haveFilterSlider = {};
 
+		//check for radii -- set in initViewer
+		this.rkeys = {};
+		this.radiusVariable = {};
+
 		this.currentlyShownFilter = {};
 
 		//the startup file
@@ -75,11 +76,22 @@ function defineGUIParams(){
 			for (i=0; i <32; i++){
 				colormapList.push(name_file['names'][i])
 			}
-			console.log(colormapList)
+			//console.log(colormapList)
 		});
-
 		this.colormapList = colormapList
 
+		this.colormapImage = 'static/textures/colormap.png';
+		// get the image size
+		var img = new Image();
+		img.onload = function(){
+			this.colormapImageX = img.width;
+			this.colormapImageY = img.height;
+			//console.log("checking", this.colormapImageX, this.colormapImageY)
+			img = null;
+		}.bind(this)
+		img.src = this.colormapImage;
+
+		this.colormapScale = 2; //size scale for the final colorbar
 
 		///////////////////
 		// these below are shared with viewerParams (passed from viewerParams to GUIParams)
@@ -98,6 +110,14 @@ function defineGUIParams(){
 		this.velopts = null; 
 		this.velType = null; 
 
+		this.animateVel = null;
+		this.animateVelDt = null;
+		this.animateVelTmax = null;
+		this.velVectorWidth = null;
+
+		this.blendingOpts = null; 
+		this.blendingMode = null; 
+
 		this.ckeys = null;
 		this.colormapVals = null;
 		this.colormapLims = null;
@@ -112,6 +132,10 @@ function defineGUIParams(){
 		this.invertFilter = null;
 
 		this.columnDensity = false;
+		this.CDmin = 0;
+		this.CDmax = 1;
+		this.CDlognorm = 0;
+		this.scaleCD = 0.1; //scaling factor for the shader so that it adds up to one at highest density
 		
 		this.updateTween = false;
 		this.inTween = false;
@@ -129,8 +153,58 @@ function defineGUIParams(){
 
 		this.boxSize = 1.;
 
+		// prevent users from accidentally making particles big enough to 
+		//  freeze their computer by forcing them to interactively slide the sliders
+		//  up to the maximum value after they set it.
+		this.safePSizeSliders = true;
+
+		this.haveOctree = {}; //will be initialized to false for each of the parts keys in loadData
+		this.haveAnyOctree = false;
+		this.octreeMemoryLimit = 0;
+		this.octreeNormCameraDistance = {};
+
 		//only need to pass the controls target?
 		this.controlsTarget = new THREE.Vector3(0,0,0);
+
+		// extra checking for fly controls
+		this.mouseDown = false;
+
+		this.FPS = 0;
+		this.memoryUsage = 0;
+		
+
+		//object to hold the current visible window in the GUI
+		//current will hold the key that defines the currently visible window
+		//the rest of the keys will point to the IDs for the DOM elements that hold those windows
+		//the particles state will be populated in createUI
+		this.GUIState = {
+			'current':'main',
+			'main':{
+				'id':'GUIMain',
+				'name':'Main',
+				'general' : {
+					'id':'GUIGeneral',
+					'name':'General',
+					'data':{
+						'id':'GUIData',
+						'name':'Data'
+					},
+					'camera':{
+						'id':'GUICamera',
+						'name':'Camera'
+					},
+					'projection':{
+						'id':'GUIProjection',
+						'name':'Projection'
+					},
+				},
+				'particles':{
+					'id':'GUIParticlesBase',
+					'name':'Particles'
+				}
+			},
+	
+		}
 
 		//check for mobile
 		//https://stackoverflow.com/questions/3514784/what-is-the-best-way-to-detect-a-mobile-device-in-jquery

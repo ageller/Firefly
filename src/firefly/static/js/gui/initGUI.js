@@ -25,18 +25,36 @@ function makeUI(local=false){
 			createUI();
 		}
 	}, 1000);
+
+	// check that the width stabilizes before revealing the UI
+	UIcontainer = d3.select('#UIContainer')
+	var bbox = UIcontainer.node().getBoundingClientRect();
+	prev_count = bbox.width;//countNodes(UIcontainer.node());
+	waitForBuild = setInterval(function(){
+		var bbox = UIcontainer.node().getBoundingClientRect();
+		next_count = bbox.width;//countNodes(UIcontainer.node());
+		//console.log('UI width:',prev_count,next_count)
+		if (prev_count == next_count && next_count > 10){
+			clearInterval(waitForBuild);
+			// collapse the UI initially, but wait a bit to make sure the full UI has been created
+			hideUI.call(document.getElementById('Hamburger'));
+			// and now reveal the result
+			UIcontainer.classed('hidden', false)
+		}
+		prev_count = next_count;
+	},100);
 }
 
 function confirmGUIInit(){
 	if (!GUIParams.GUIready) return false;
 
 	var keys = ["partsKeys", "PsizeMult", "plotNmax", "decimate", "stereoSepMax", "friction", "Pcolors", "showParts", "showVel", "velopts", "velType", "ckeys", "colormapVals", "colormapLims", "colormapVariable", "colormap", "showColormap", "fkeys", "filterVals", "filterLims"];
-	var ready = true;
-	keys.forEach(function(k,i){
+	var ready = keys.every(function(k,i){
 		if (GUIParams[k] == null) {
 			//console.log("GUI missing ", k)
-			ready = false;
+			return false;
 		}
+		return true;
 	});
 	return ready
 }
@@ -153,6 +171,7 @@ d3.select('body').append('input')
 	.attr('multiple', true)
 	.on('change', function(e){
 		var foundFile = false;
+		// search for a filenames.json, if one exists then use it
 		for (i=0; i<this.files.length; i++){
 			if (this.files[i].name == "filenames.json" && !foundFile){
 				foundFile = true;
@@ -162,14 +181,19 @@ d3.select('body').append('input')
 				reader.onload = function(){
 					var foo = JSON.parse(this.result);
 					if (foo != null){
-						sendToViewer([{'callLoadData':[foo, 'static/']}])
+						return sendToViewer([{'callLoadData':[foo, 'static/']}])
 					} else {
 						alert("Cannot load data. Please select another directory.");
 					}
 				}
 			}
+		}
+		// okay, no filenames.json, but maybe there are just csv or hdf5 files then? 
+		// NOTE: we don't need to support just .ffly files because those would only exist if 
+		// they had used a reader which would've made a filenames.json file. just JSON files
+		//  would be weird but they can do that with filenames.json so yeah they should make 1 more .json 
+		for (i=0; i<this.files.length; i++){
 			if ((this.files[i].name.includes('.hdf5') || this.files[i].name.includes('.csv')) && !foundFile){
-				console.log('here', GUIParams.usingSocket)
 				if (GUIParams.usingSocket){
 					foundFile = true;
 					var dir = this.files[i].webkitRelativePath.replace(this.files[i].name,'');

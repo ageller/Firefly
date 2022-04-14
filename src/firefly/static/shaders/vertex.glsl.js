@@ -1,70 +1,70 @@
 var myVertexShader = `
 
-attribute float radiusScale;
+attribute float radiusScale; // scales the radius *after* clamping, also used to filter to save memory
 attribute float alpha;
-attribute vec4 velVals;
-attribute vec4 colorArray;
-attribute float colormapArray;
+attribute vec4 rgbaColor;
+attribute float colormapField;
 
-varying float vID;
+uniform float vID;
+attribute vec4 velVals;
 varying float vTheta;
 varying float vColormapMag;
 varying float vAlpha;
-varying vec2 vUv; //for the column density 
 varying float vPointSize;
 varying vec4 vColor;
 
+varying vec2 vUv; //for the column density 
+
 uniform float colormapMax;
 uniform float colormapMin;
-uniform float oID;
-uniform float uVertexScale;
-uniform float maxDistance;
 uniform vec3 cameraX;
 uniform vec3 cameraY;
+uniform float minPointScale;
+uniform float maxPointScale;
+uniform float uVertexScale; //from the GUI
 
-const float minPointScale = 0.0;//1;
-const float maxPointScale = 1000.;
+uniform float velTime;
+
 const float PI = 3.1415926535897932384626433832795;
-const float sizeFac = 70.5; //trying to make physical sizes, I have NO idea why this number is needed.  This came from trial and error
-const float vectorFac = 5.; //so that vectors aren't smaller
+// vectors are substantially smaller (b.c. they're built by discarding) so we need to scale them 
+// to compensate, otherwise they are /tiny/
+const float velVectorSizeFac = 100.; 
 
 void main(void) {
-	vID = oID;
 	vTheta = 0.;
 	vAlpha = alpha;
 	vUv = uv;
-	
-	//vVertexScale = uVertexScale;
 
-	vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+	//vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+	vec4 mvPosition = modelViewMatrix * vec4( position + velVals.xyz*velTime, 1.0 );
 
 	float cameraDist = length(mvPosition.xyz);
-	float pointScale = 1./cameraDist;//maxDistance/cameraDist;
-	pointScale = clamp(pointScale, minPointScale, maxPointScale);
-	
-	// send colormap array to fragment shader
-	vColormapMag = clamp(((colormapArray - colormapMin) / (colormapMax - colormapMin)), 0., 1.);
+	float pointScale = 1./cameraDist * 2000.*uVertexScale;
+	//gl_PointSize = clamp(pointScale, minPointScale, maxPointScale)*radiusScale;
+	gl_PointSize = pointScale*radiusScale;
 
-	//gl_PointSize = uVertexScale * pointScale * radiusScale;
-	gl_PointSize = pointScale * uVertexScale * radiusScale * sizeFac;
+	// send colormap array to fragment shader
+	vColormapMag = clamp(((colormapField - colormapMin) / (colormapMax - colormapMin)), 0., 1.);
 
 	if (vID > 0.5){ //velocities (==1, but safer this way)
+		// find projection onto camera
 		float vyc= -dot(velVals.xyz,cameraY);
 		float vxc = dot(velVals.xyz,cameraX); 
 		float vSize = sqrt(vyc*vyc+vxc*vxc)/sqrt(dot(velVals.xyz,velVals.xyz))*velVals[3] * 0.5;
 		vTheta = atan(vyc,vxc);
-		if (vTheta<0.0){
-			vTheta=vTheta+2.0*PI;
-		}
-		gl_PointSize = gl_PointSize*vSize*vectorFac;
-
+		if (vTheta<0.0) vTheta=vTheta+2.0*PI;
+		// velVectorSizeFac = 100 empirically tested seems to match particle size
+		//  when it's a fuzzy sphere.  the clamping ensures particles don't disappear when
+		//  you enable velocity vectors
+		gl_PointSize = clamp(
+			gl_PointSize*vSize*velVectorSizeFac,
+			minPointScale*velVectorSizeFac,
+			maxPointScale*velVectorSizeFac)*radiusScale;
 	}
 
 	vPointSize = gl_PointSize;
 
-	//glPointSize = gl_PointSize;
-
-	vColor = colorArray;
+	vColor = rgbaColor;
 
 	gl_Position = projectionMatrix * mvPosition;
 

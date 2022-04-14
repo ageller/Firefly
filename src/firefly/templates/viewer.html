@@ -40,14 +40,13 @@
 			</div>
 
 			<div id="annotate_container" class="dropdown-content"></div>
-			<div id="fps_container" class="dropdown-content"></div>
 
 			<div id="WebGLContainer" ></div>
 
 		</div>
 
 <!-- three.js resources -->		
-		<script src="static/lib/three.min.r102.js"></script>
+		<script src="static/lib/three.min.r137.js"></script>
 		<script src="static/lib/Detector.js"></script>
 		<script src="static/lib/TrackballControls.js"></script>
 		<script src="static/lib/three-fly-controls.js"></script>
@@ -93,6 +92,16 @@
 		<script src="static/js/viewer/initViewer.js"></script>
 		<script src="static/js/viewer/runTweens.js"></script>
 
+		<script src="static/js/octree/octreeInit.js"></script>
+		<script src="static/js/octree/octreeCreatePartsMesh.js"></script>
+		<script src="static/js/octree/octreeRenderLoop.js"></script>
+
+		<!-- katai.io reqs-->
+		<script src="static/js/misc/kaitai-struct/KaitaiStream.js"></script>
+		<script src="static/js/misc/MyArrayBuffer.js"></script>
+		<script src="static/js/misc/FireflyFormat1.js"></script>
+		<script src="static/js/misc/FireflyOctnodeSubstring.js"></script>
+		
 		<script>
 			//called upon loading
 			connectViewerSocket();

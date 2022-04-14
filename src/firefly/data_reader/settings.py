@@ -130,35 +130,86 @@ class Settings(object):
         self.camera_settings(**kwargs)
         self.particle_startup_settings(**kwargs)
         self.particle_UI_settings(**kwargs)
+        self.particle_velocity_settings(**kwargs)
         self.particle_filter_settings(**kwargs)
         self.particle_colormap_settings(**kwargs)
 
-    def window_settings(
+    def startup_settings(
         self,
-        title='Firefly',
-        annotation=None,
-        showfps=False,
+        decimate=None,
+        maxVrange=2000.,
+        friction=0.1,
+        zmin=1,
+        zmax=5e10,
+        stereo=False,
+        stereoSep=0.06,
+        minPointScale=0.01,
+        maxPointScale=10,
+        startFly=False,
+        startTween=False,
+        startVR=False,
+        startColumnDensity=False,
         **extra):
-        """Settings that affect the browser window
-
-        :param title: the title of the webpage, shows up in browser tab,
-            defaults to 'Firefly'
-        :type title: str, optional
-        :param annotation: text to include at the top of the
-            Firefly window as an annotation, defaults to None
-        :type annotation: str, optional
-        :param showfps: flag to display the FPS (frames per second) of the 
-            Firefly scene, defaults to False
-        :type showfps: bool, optional
+        """General settings that affect the app state
+        :param decimate: set the initial global decimation 
+            (e.g, you could load in all the data by setting 
+            the :code:`decimation_factor` to 1 for any individual
+            :class:`firefly.data_reader.ParticleGroup`,
+            but only _display_ some fraction by setting
+            decimate > 1 here).  
+            This is a single value (not a dict), defaults to None
+        :type decimate: int, optional
+        :param maxVrange: maximum range in velocities to use in deciding 
+            the length of the velocity vectors (making maxVrange 
+            larger will enhance the difference between small and large velocities),
+            defaults to 2000.
+        :type maxVrange: float, optional 
+        :param friction: set the initial friction for the controls, defaults to 0.1
+        :type friction: float, optional
+        :param zmin: set the minimum distance a particle must be to appear on the screen
+            (defines the front edge of the frustum), defaults to 1
+        :type zmin: float, optional
+        :param zmin: set the maximum distance a particle can be to appear on the screen
+            (defines the back edge of the frustum), defaults to 5e10
+        :type zmax: float, optional
+        :param stereo: flag to start in stereo mode, defaults to False
+        :type stereo: bool, optional
+        :param stereoSep: camera (eye) separation in the stereo 
+            mode (should be < 1), defaults to 0.06
+        :type stereoSep: float, optional
+        :param minPointScale: minimum size of particles, defaults to 0.01
+        :type minPointScale: float, optional
+        :param maxPointScale: maximum size of particles, defaults to 10
+        :type maxPointScale: float, optional
+        :param startFly: flag to start in Fly controls
+            (if False, then start in the default Trackball controls),
+            defaults to False
+        :type startFly: bool, optional
+        :param startTween: flag to initialize the Firefly scene in tween mode, 
+            requires a valid tweenParams.json file to be present in the JSONdir,
+            defaults to False
+        :type startTween: bool, optional
+        :param startVR: flag to initialize Firefly in VR mode, defaults to False
+        :type startVR: bool, optional
+        :param startColumnDensity: flag to initialize Firefly in the (mostly) experimental column density
+            projection mode, defaults to False
+        :type startColumnDensity: bool, optional
         """
 
-        self.__window_settings = {
-            'title':title, 
-            ## used in the web app to check if the settings have been read in
-            ##  this should not be modified
-            'loaded':True, 
-            'annotation':annotation ,
-            'showfps':showfps
+        self.__startup_settings = {
+            'maxVrange':maxVrange,
+            'startFly':startFly,
+            'friction':friction,
+            'stereo':stereo,
+            'stereoSep':stereoSep,
+            'decimate':decimate,
+            'startTween':startTween,
+            'startVR':startVR,
+            'startColumnDensity':startColumnDensity,
+            'zmin':zmin,
+            'zmax':zmax,
+            'minPointScale':minPointScale,
+            'maxPointScale':maxPointScale,
         }
 
     def UI_settings(
@@ -203,34 +254,45 @@ class Settings(object):
             'UIdecimation':UIdecimation, 
         }
 
-    def particle_UI_settings(
+    def window_settings(
         self,
-        UIparticle=None,
-        UIdropdown=None,
-        UIcolorPicker=None,
+        title='Firefly',
+        annotation=None,
+        showFPS=True,
+        showMemoryUsage=True,
+        memoryLimit=2e9,
         **extra):
-        """Flags that control how the UI for each particle group looks like
+        """Settings that affect the browser window
 
-        :param UIparticle: do you want to show the particles 
-            in the user interface.
-            This is a dict with keys of the particle UInames mapped to bools,
-            defaults to dict([(UIname,True) for UIname in UInames])
-        :type UIparticle: dict of UIname:bool, optional
-        :param UIdropdown: do you want to enable the dropdown menus for 
-               particles in the user interface.
-               This is a dict with keys of the particle UInames mapped to bools,
-               defaults to dict([(UIname,True) for UIname in UInames])
-        :type UIdropdown: dict of UIname:bool, optional
-        :param UIcolorPicker: do you want to allow the user to change the color.
-               This is a dict with keys of the particle UInames mapped to bools,
-               defaults to dict([(UIname,True) for UIname in UInames])
-        :type UIcolorPicker: dict of UIname:bool, optional
+        :param title: the title of the webpage, shows up in browser tab,
+            defaults to 'Firefly'
+        :type title: str, optional
+        :param annotation: text to include at the top of the
+            Firefly window as an annotation, defaults to None
+        :type annotation: str, optional
+        :param showFPS: flag to display the FPS (frames per second) of the 
+            Firefly scene, defaults to False
+        :type showFPS: bool, optional
+        :param showMemoryUsage: flag to display the memory usage in GB of the 
+            loaded data-- useful for octrees when memory usage changes over time, defaults to False
+        :type showMemoryUsage: bool, optional
+        :param memoryLimit: maximum memory in bytes to use when loading an octree dataset.
+            If this limit is exceeded then previously loaded nodes will be discarded
+            to bring the memory usage back below. Works best in Chrome which exposes
+            the memory usage directly, otherwise memory usage is only estimated, 
+            defaults to 2e9 
+        :type memoryLimit: float, optional
         """
 
-        self.__particle_UI_settings = {
-            'UIparticle':dict() if UIparticle is None else UIparticle,
-            'UIdropdown':dict() if UIdropdown is None else UIdropdown,
-            'UIcolorPicker':dict() if UIcolorPicker is None else UIcolorPicker,
+        self.__window_settings = {
+            'title':title, 
+            ## used in the web app to check if the settings have been read in
+            ##  this should not be modified
+            'loaded':True, 
+            'annotation':annotation ,
+            'showFPS':showFPS,
+            'showMemoryUsage':showMemoryUsage,
+            'memoryLimit':memoryLimit,
         }
 
     def camera_settings(
@@ -342,11 +404,10 @@ class Settings(object):
     def particle_startup_settings(
         self,
         plotNmax=None,
-        showVel=None,
-        velType=None,
         color=None,
         sizeMult=None,
         showParts=None,
+        radiusVariable=None,
         **extra):
         """Settings that will define the initial values of the particle UI panes
 
@@ -376,22 +437,110 @@ class Settings(object):
             This is a dict with keys of the particle UInames mapped to bools,
             defaults to dict([(UIname,True) for UIname in UInames])
         :type showParts: dict of UIname:bool, optional
+
+        :param radiusVariable: dict of UIname:int which are indices for
+            which variable to scale the radius by (if any have been flagged
+            as allowable to be a radius scale). 0 is always 'None' and will
+            make all particles the same radius, optional
+            defaults to dict([(UIname,0) for UIname in UInames])
+        :type radiusVariable: dict of UIname:int, optional
         """
 
         self.__particle_startup_settings = {
             'plotNmax':dict() if plotNmax is None else plotNmax,
-            'showVel':dict() if showVel is None else showVel,
-            'velType':dict() if velType is None else velType,
             'color':dict() if color is None else color,
             'sizeMult':dict() if sizeMult is None else sizeMult,
-            'showParts':dict() if showParts is None else showParts
+            'showParts':dict() if showParts is None else showParts,
+            'radiusVariable':dict() if radiusVariable is None else radiusVariable
+        }
+
+    def particle_UI_settings(
+        self,
+        UIparticle=None,
+        UIdropdown=None,
+        UIcolorPicker=None,
+        **extra):
+        """Flags that control how the UI for each particle group looks like
+
+        :param UIparticle: do you want to show the particles 
+            in the user interface.
+            This is a dict with keys of the particle UInames mapped to bools,
+            defaults to dict([(UIname,True) for UIname in UInames])
+        :type UIparticle: dict of UIname:bool, optional
+        :param UIdropdown: do you want to enable the dropdown menus for 
+               particles in the user interface.
+               This is a dict with keys of the particle UInames mapped to bools,
+               defaults to dict([(UIname,True) for UIname in UInames])
+        :type UIdropdown: dict of UIname:bool, optional
+        :param UIcolorPicker: do you want to allow the user to change the color.
+               This is a dict with keys of the particle UInames mapped to bools,
+               defaults to dict([(UIname,True) for UIname in UInames])
+        :type UIcolorPicker: dict of UIname:bool, optional
+        """
+
+        self.__particle_UI_settings = {
+            'UIparticle':dict() if UIparticle is None else UIparticle,
+            'UIdropdown':dict() if UIdropdown is None else UIdropdown,
+            'UIcolorPicker':dict() if UIcolorPicker is None else UIcolorPicker,
+        }
+    
+    def particle_velocity_settings(
+        self,
+        showVel=None,
+        velType=None,
+        velVectorWidth=None,
+        velGradient=None,
+        animateVel=None,
+        animateVelDt=None,
+        animateVelTmax=None,
+        **extra):
+        """ Settings used to define properties of the velocity vector field
+            which can also be used to extrapolate new positions using the
+            ``animateVel`` kwarg.
+
+        :param showVel: flag to start showing the velocity vectors
+            This is a dict with keys of the particle UInames mapped to bools,
+            defaults to dict([(UIname,False) for UIname in UInames])
+        :type showVel: dict of UIname:bool, optional
+        :param velType: type of velocity vectors to plot.  
+            This is a dict with keys of the particle UInames mapped to strs that
+            must be one of 'line', 'arrow', or 'triangle',
+            defaults to dict([(UIname,'line') for UIname in UInames])
+        :param velVectorWidth: width of the velocity vectors,
+            defaults to dict([(UIname,1) for UIname in UInames])
+        :type velVectorWidth: dict of UIname:float, optional
+        :param velGradient: flags for whether there should be a gradient
+            to white applied along the length of the velocity vector
+            to indicate direction, defaults to dict([(UIname,False) for UIname in UInames])
+        :type velGradient: dict of UIname:bool, optional
+        :param animateVel: flags for whether velocity extrapolation should
+            be enabled at startup,
+            defaults to dict([(UIname,False) for UIname in UInames])
+        :type animateVel: dict of UIname:bool, optional
+        :param animateVelDt: DT for which to increment the extrapolation
+            defaults to dict([(UIname,0) for UIname in UInames])
+        :type animateVelDt: dict of UIname:float, optional
+        :param animateVelTmax: maximum time to extrapolate before resetting
+            particles to their original positions
+            defaults to dict([(UIname,1) for UIname in UInames])
+        :type animateVelTmax: dict of UIname:float, optional
+        """
+
+        self.__particle_velocity_settings = {
+            'showVel':dict() if showVel is None else showVel,
+            'velType':dict() if velType is None else velType,
+            'velVectorWidth': dict() if velVectorWidth is None else velVectorWidth,
+            'velGradient': dict() if velGradient is None else velGradient,
+            'animateVel': dict() if animateVel is None else animateVel,
+            'animateVelDt': dict() if animateVelDt is None else animateVelDt,
+            'animateVelTmax': dict() if animateVelTmax is None else animateVelTmax
         }
     
     def particle_filter_settings(
         self,
         filterLims=None,
         filterVals=None,
-        invertFilter=False,
+        invertFilter=None,
         **extra):
         """Settings that will define the initial values of the filters in the particle UI panes
         and consequently what particles are filtered at startup.
@@ -408,14 +557,15 @@ class Settings(object):
             (e.g., {'Gas':{'log10Density':[.1,0.5],'magVelocities':[50, 60]}}),
             defaults to None and is set in the web app to [min, max] of that field
         :type filterVals: dict of UIname:dict of field:[min,max] range, optional
-        :param invertFilter: flag to invert the filter and *exclude* the [min,max] range
-        :type invertFilter: bool, optional
+        :param invertFilter: flags for whether filters should _hide_ particles within
+            their range (True) or not (False), defaults to UIname:dict of field:False
+        :type invertFilter: dict of UIname:dict of field:bool, optional
         """
 
         self.__particle_filter_settings = {
             'filterLims':dict() if filterLims is None else filterLims, 
             'filterVals':dict() if filterVals is None else filterVals, 
-            'invertFilter':invertFilter
+            'invertFilter':dict() if invertFilter is None else invertFilter
         }
 
     def particle_colormap_settings(
@@ -483,10 +633,11 @@ class Settings(object):
         ## transfer keys from particle group
         for key in [
             'UIparticle','UIdropdown','UIcolorPicker',
-            'color','sizeMult','showParts','plotNmax',
-            'filterVals','filterLims',
+            'color','sizeMult','showParts','plotNmax','radiusVariable',
+            'filterVals','filterLims','invertFilter',
             'colormapVals','colormapLims',
-            'showVel','velType',
+            'showVel','velType','velVectorWidth','velGradient',
+            'animateVel','animateVelDt','animateVelTmax',
             'colormap','colormapVariable','showColormap']:
             self[key][particleGroup.UIname]=particleGroup.settings_default[key]
         
@@ -521,7 +672,7 @@ class Settings(object):
         JSON_prefix='',
         filename=None,
         loud=True,
-        write_jsons_to_disk=True,
+        write_to_disk=True,
         not_reader=True):
         """ Saves the current settings to a JSON file.
 
@@ -538,11 +689,11 @@ class Settings(object):
         :type JSON_prefix: str, optional
         :param loud: flag to print status information to the console, defaults to True
         :type loud: bool, optional
-        :param write_jsons_to_disk: flag that controls whether data is saved to disk (:code:`True`)
+        :param write_to_disk: flag that controls whether data is saved to disk (:code:`True`)
             or only converted to a string and returned (:code:`False`), defaults to True
-        :type write_jsons_to_disk: bool, optional
+        :type write_to_disk: bool, optional
         :param not_reader: flag for whether to print the Reader :code:`filenames.json` warning, defaults to True
-        :type write_jsons_to_disk: bool, optional
+        :type write_to_disk: bool, optional
         :return: filename, JSON(all_settings_dict) (either a filename if
             written to disk or a JSON strs)
         :rtype: str, str
@@ -562,7 +713,7 @@ class Settings(object):
         ## convert dictionary to a JSON (either write to disk or get back a str)
         return filename,write_to_json(
             all_settings_dict,
-            filename if write_jsons_to_disk else None) ## None -> string
+            filename if write_to_disk else None) ## None -> string
 
     def loadFromJSON(
         self,

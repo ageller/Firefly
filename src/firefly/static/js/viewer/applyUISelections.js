@@ -28,8 +28,8 @@ function resetViewer(){
 
 //reset to the initial Options file
 function resetToOptions(){
-	console.log("Resetting to Default", viewerParams.parts.options0);
-	viewerParams.parts.options = JSON.parse(JSON.stringify(viewerParams.parts.options0));
+	console.log("Resetting to initial", viewerParams.parts.options_initial);
+	viewerParams.parts.options = JSON.parse(JSON.stringify(viewerParams.parts.options_initial));
 	resetViewer();
 }
 
@@ -44,10 +44,20 @@ function loadNewData(){
 	forGUI.push({'defineGUIParams':null});
 	sendToGUI(forGUI);
 
+	viewerParams.partsKeys.forEach(
+		function (pkey){
+		if (viewerParams.parts[pkey].hasOwnProperty('octree')) disposeOctreeNodes(pkey);
+	});
+
+
 	viewerParams.parts = null;
 	viewerParams.camera = null;
 	viewerParams.boxSize = 0;
 	viewerParams.controls.dispose();
+
+	// reset to default options
+	defineViewerParams()
+	// rebuild the viewer with new options
 	makeViewer();
 	//if (viewerParams.local) makeUI(local=true);
 	forGUI = [{'makeUI':viewerParams.local}];
@@ -56,7 +66,8 @@ function loadNewData(){
 		forGUI.push({'showSplash':true});
 	}
 
-	d3.select('#particleUI').html("");
+	//AMG: should this be moved to the GUI (generally we won't have these in the viewer window...)
+	d3.select('#stateContainer').html("");
 	d3.select('.UIcontainer').html("");
 	d3.select("#splashdivLoader").selectAll('svg').remove();
 	d3.select("#splashdiv5").text("Loading...");
@@ -82,8 +93,8 @@ function loadNewData(){
 
 //reset to a preset file
 function resetToPreset(preset){
-	console.log(preset,viewerParams.parts.options0)
 	console.log("Resetting to Preset");
+	console.log('new',preset,'prev:',viewerParams.parts.options)
 	viewerParams.parts.options = preset;
 	resetViewer();
 }
@@ -113,7 +124,7 @@ function resetCamera() {
 	viewerParams.camera.up.set(0, -1, 0);
 	viewerParams.scene.add(viewerParams.camera); 
 
-	setCenter(viewerParams.parts[viewerParams.partsKeys[0]].Coordinates);
+	setCenter(viewerParams.parts[viewerParams.partsKeys[0]].Coordinates_flat);
 	viewerParams.camera.position.set(viewerParams.center.x, viewerParams.center.y, viewerParams.center.z - viewerParams.boxSize/2.);
 	viewerParams.camera.lookAt(viewerParams.scene.position);  
 
@@ -121,7 +132,7 @@ function resetCamera() {
 	if (viewerParams.parts.options.hasOwnProperty('center')){
 		if (viewerParams.parts.options.center != null){
 			viewerParams.center = new THREE.Vector3(viewerParams.parts.options.center[0], viewerParams.parts.options.center[1], viewerParams.parts.options.center[2]);
-			setBoxSize(viewerParams.parts[viewerParams.partsKeys[0]].Coordinates);
+			setBoxSize(viewerParams.parts[viewerParams.partsKeys[0]].Coordinates_flat);
 		}
 	} 
 
@@ -210,27 +221,47 @@ function checkVelBox(args){
 	}
 }
 
-//turn on/off the colormap
-function checkColormapBox(args){
+//turn on/off velocity animation
+function toggleVelocityAnimation(args){
 	var p = args[0];
 	var checked = args[1];
-	var forGUI = []; 
-	viewerParams.showColormap[p] = false;
+	viewerParams.animateVel[p] = false;
 	if (checked){
-		viewerParams.showColormap[p] = true;
-		viewerParams.updateColormap[p] = true;
-		viewerParams.updateFilter[p] = true;
-		
+		viewerParams.animateVel[p] = true;
 	}
+}
+
+//turn on/off velocity gradient
+function toggleVelocityGradient(args){
+	var p = args[0];
+	var checked = args[1];
+	viewerParams.velGradient[p] = 0;
+	if (checked){
+		viewerParams.velGradient[p] = 1;
+	}
+}
 
 
-	forGUI.push({'setGUIParamByKey':[viewerParams.showColormap, "showColormap"]});
-	forGUI.push({'fillColorbarContainer':p});
-	sendToGUI(forGUI);
-	console.log(p, " showColormap:", viewerParams.showColormap[p]);
+function changeBlendingForColormap(args){
+	var pkey_to_colormap = args[0];
+	var checked = args[1];
 
-	updateColormapVariable(p);
+	// update the blending mode for all particles
+	//  (otherwise non-colormapped particles will blend with colormapped particles)
+	viewerParams.partsKeys.forEach(function (p,i){
 
+		if ( viewerParams.showColormap[p]){
+			viewerParams.blendingMode[p] = 'normal';
+			viewerParams.depthWrite[p] = true;
+			viewerParams.depthTest[p] = true;
+		}
+		else {
+			// update the blending mode for the whole particle group (kind of wasteful)
+			viewerParams.blendingMode[p] = 'additive';
+			viewerParams.depthWrite[p] = false;
+			viewerParams.depthTest[p] = false;
+		}
+	})
 }
 
 //turn on/off the invert filter option
@@ -251,6 +282,11 @@ function checkColor(args){
 	var p = args[0];
 	var rgb = args[1];
 	viewerParams.Pcolors[p] = [rgb.r/255., rgb.g/255., rgb.b/255., rgb.a];
+	//update the octree loading bar if it exists
+	if (viewerParams.haveOctree[p]){
+		d3.select('#' + p + 'octreeLoadingFill').attr('fill','rgb(' + (255*viewerParams.Pcolors[p][0]) + ',' + (255*viewerParams.Pcolors[p][1]) + ',' + (255*viewerParams.Pcolors[p][2]) + ')')
+		d3.select('#' + p + 'octreeLoadingText').attr('fill','rgb(' + (255*viewerParams.Pcolors[p][0]) + ',' + (255*viewerParams.Pcolors[p][1]) + ',' + (255*viewerParams.Pcolors[p][2]) + ')')
+	}
 }
 
 //function to check which types to plot
@@ -258,16 +294,13 @@ function checkshowParts(args){
 	var p = args[0];
 	var checked = args[1];
 	
+	viewerParams.showParts[p] = checked;
 	viewerParams.updateOnOff[p] = true;
-	viewerParams.updateFilter[p] = true;
-	viewerParams.showParts[p] = false;
-	if (checked){
-		viewerParams.showParts[p] = true;
-	}
 }
 
 //check for stereo separation
 function checkStereoLock(checked){
+	console.log('stereo', checked)
 	if (checked) {
 		viewerParams.normalRenderer = viewerParams.renderer;
 		viewerParams.renderer = viewerParams.effect;
@@ -283,6 +316,8 @@ function checkStereoLock(checked){
 function checkText(args){
 	var id = args[0];
 	var value = args[1];
+	var p = null;
+	if (args.length > 2) p = args[2];
 
 	var cameraPosition = new THREE.Vector3(viewerParams.camera.position.x, viewerParams.camera.position.y, viewerParams.camera.position.z);
 	var cameraRotation = new THREE.Vector3(viewerParams.camera.rotation.x, viewerParams.camera.rotation.y, viewerParams.camera.rotation.z);
@@ -298,14 +333,37 @@ function checkText(args){
 	if (id == "RotZText") cameraRotation.z = parseFloat(value)
 	if (id == "RenderXText") viewerParams.renderWidth = parseInt(value);
 	if (id == "RenderYText") viewerParams.renderHeight = parseInt(value);
+	if (id == "RenderYText") viewerParams.renderHeight = parseInt(value);
 
-	viewerParams.camera.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z);
-	console.log('===here camera', cameraRotation);
-	viewerParams.camera.rotation.set(cameraRotation.x, cameraRotation.y, cameraRotation.z);
-	viewerParams.controls.target = new THREE.Vector3(viewerParams.center.x, viewerParams.center.y, viewerParams.center.z);
+	if (p){
+		if (id == p+'velAnimateDt') {
+			viewerParams.animateVelDt = Math.max(0,parseFloat(value));
+			d3.selectAll('.velAnimateDt').each(function(){
+				this.value = viewerParams.animateVelDt;
+			})
+		}
+		if (id == p+'velAnimateTmax') {
+			viewerParams.animateVelTmax = Math.max(1,parseFloat(value));
+			d3.selectAll('.velAnimateTmax').each(function(){
+				this.value = viewerParams.animateVelTmax;
+			})
+		}
+	}
 
+	if (!p){
+		viewerParams.camera.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z);
+		console.log('===here camera', cameraRotation);
+		viewerParams.camera.rotation.set(cameraRotation.x, cameraRotation.y, cameraRotation.z);
+		viewerParams.controls.target = new THREE.Vector3(viewerParams.center.x, viewerParams.center.y, viewerParams.center.z);
+	}
 }
 
+function updateVelocityVectorWidth(args){
+	//update the width of the velocity vector
+	var value = args[0];
+	var p = args[1];
+	viewerParams.velVectorWidth[p] = parseFloat(value);
+}
 
 //apply the options file to the UI
 function applyUIoptions(){
@@ -446,17 +504,37 @@ function createPreset(){
 		viewerParams.camera.getWorldDirection(xx);
 		preset.center = copyValue([xx.x + viewerParams.camera.position.x, xx.y + viewerParams.camera.position.y, xx.z + viewerParams.camera.position.z]);
 	}
+
+	preset.zmin = copyValue(viewerParams.zmin);
+	preset.zmax = copyValue(viewerParams.zmax);
+
 	preset.camera = copyValue([viewerParams.camera.position.x, viewerParams.camera.position.y, viewerParams.camera.position.z]);
-	preset.startFly = !viewerParams.useTrackball;
 	preset.cameraRotation = copyValue([viewerParams.camera.rotation.x, viewerParams.camera.rotation.y, viewerParams.camera.rotation.z]);
 	preset.cameraUp = copyValue([viewerParams.camera.up.x, viewerParams.camera.up.y, viewerParams.camera.up.z]);
 	preset.quaternion = copyValue([viewerParams.camera.quaternion.w,viewerParams.camera.quaternion.x, viewerParams.camera.quaternion.y, viewerParams.camera.quaternion.z]);
 
+	preset.startFly = copyValue(!viewerParams.useTrackball);
+	preset.startVR = copyValue(viewerParams.allowVRControls);
+	preset.startColumnDensity = copyValue(viewerParams.columnDensity);
+	preset.startTween = copyValue(viewerParams.updateTween);
+
 	preset.friction = copyValue(viewerParams.friction);
 	preset.stereo = copyValue(viewerParams.useStereo);
 	preset.stereoSep = copyValue(viewerParams.stereoSep);
+
 	preset.decimate = copyValue(viewerParams.decimate);
 	preset.maxVrange = copyValue(viewerParams.maxVrange);
+	preset.minPointScale = copyValue(viewerParams.minPointScale);
+	preset.maxPointScale = copyValue(viewerParams.maxPointScale);
+
+	elm = document.getElementById('annotate_container');
+	if (elm.style.display == 'block') preset.annotation = elm.innerHTML;
+
+	// flag to show fps in top right corner
+	preset.showfps = copyValue(viewerParams.showfps);
+
+	// change the memory limit for octrees, in bytes
+	preset.memoryLimit = copyValue(viewerParams.memoryLimit);
 
 	//for the UI
 	preset.UI = copyValue(viewerParams.parts.options.UI);
@@ -470,56 +548,78 @@ function createPreset(){
 
 
 	//particle specific options
+	preset.UIparticle = {};
+	preset.UIdropdown = {};
+	preset.UIcolorPicker = {};
+
 	preset.showParts = {};
 	preset.sizeMult = {};
 	preset.color = {};
 	preset.plotNmax = {};
+
 	preset.showVel = {};
 	preset.velType = {};
+	preset.velVectorWidth = {};
+	preset.velGradient = {};
+	preset.animateVel = {};
+	preset.animateVelDt = {};
+	preset.animateVelTmax = {};
+
 	preset.filterLims = {};
 	preset.filterVals = {};
 	preset.invertFilter = {};
+
 	preset.colormapLims = {};
 	preset.colormapVals = {};
-	preset.UIparticle = {};
-	preset.UIdropdown = {};
-	preset.UIcolorPicker = {};
 	preset.showColormap = {};
 	preset.colormap = {};
 	preset.colormapVariable = {};
+
+	preset.radiusVariable = {};
+
 	for (var i=0; i<viewerParams.partsKeys.length; i++){
 		var p = copyValue(viewerParams.partsKeys[i]);
+
+		preset.UIparticle[p] = copyValue(viewerParams.parts.options.UIparticle[p]);
+		preset.UIdropdown[p] = copyValue(viewerParams.parts.options.UIdropdown[p]);
+		preset.UIcolorPicker[p] = copyValue(viewerParams.parts.options.UIcolorPicker[p]);
 
 		preset.showParts[p] = copyValue(viewerParams.showParts[p]);
 		preset.sizeMult[p] = copyValue(viewerParams.PsizeMult[p]);
 		preset.color[p] = copyValue(viewerParams.Pcolors[p]);
 		preset.plotNmax[p] = copyValue(viewerParams.plotNmax[p]);
+
 		preset.showVel[p] = copyValue(viewerParams.showVel[p]);
 		preset.velType[p] = copyValue(viewerParams.velType[p]);
-		preset.showColormap[p] = copyValue(viewerParams.showColormap[p]);
-		preset.colormap[p] = copyValue(viewerParams.colormap[p]);
-		preset.colormapVariable[p] = copyValue(viewerParams.colormapVariable[p]);	
+		preset.velVectorWidth[p] = copyValue(viewerParams.velVectorWidth[p]);
+		preset.velGradient[p] = copyValue(viewerParams.velGradient[p]);
+		preset.animateVel[p] = copyValue(viewerParams.animateVel[p]);
+		preset.animateVelDt[p] = copyValue(viewerParams.animateVelDt[p]);
+		preset.animateVelTmax[p] = copyValue(viewerParams.animateVelTmax[p]);
 
-		preset.UIparticle[p] = copyValue(viewerParams.parts.options.UIparticle[p]);
-		preset.UIdropdown[p] = copyValue(viewerParams.parts.options.UIdropdown[p]);
-		preset.UIcolorPicker[p] = copyValue(viewerParams.parts.options.UIcolorPicker[p]);
 		preset.filterLims[p] = {};
 		preset.filterVals[p] = {};
 		preset.invertFilter[p] = {};
-		preset.colormapLims[p] = {};
-		preset.colormapVals[p] = {};
 		for (k=0; k<viewerParams.fkeys[p].length; k++){
 			var fkey = copyValue(viewerParams.fkeys[p][k]);
 			preset.filterLims[p][fkey] = copyValue(viewerParams.filterLims[p][fkey]);
 			preset.filterVals[p][fkey] = copyValue(viewerParams.filterVals[p][fkey]);
 			preset.invertFilter[p][fkey] = copyValue(viewerParams.invertFilter[p][fkey]);
 		}
+
+		preset.colormapLims[p] = {};
+		preset.colormapVals[p] = {};
 		for (k=0; k<viewerParams.ckeys[p].length; k++){
 			var ckey = copyValue(viewerParams.ckeys[p][k]);
 			preset.colormapLims[p][ckey] = copyValue(viewerParams.colormapLims[p][ckey]);
 			preset.colormapVals[p][ckey] = copyValue(viewerParams.colormapVals[p][ckey]);
 		}
-	}
+		preset.showColormap[p] = copyValue(viewerParams.showColormap[p]);
+		preset.colormap[p] = copyValue(viewerParams.colormap[p]);
+		preset.colormapVariable[p] = copyValue(viewerParams.colormapVariable[p]);	
+
+		preset.radiusVariable[p] = viewerParams.radiusVariable[p];
+	}// per particle options
 
 	preset.loaded = true;
 	return preset;
@@ -542,7 +642,7 @@ function updateFriction(value){
 	if (viewerParams.useTrackball){
 		viewerParams.controls.dynamicDampingFactor = value;
 	} else {
-		viewerParams.controls.movementSpeed = 1. - Math.pow(value, viewerParams.flyffac);
+		viewerParams.controls.movementSpeed = (1. - value)*viewerParams.flyffac;
 	}
 	viewerParams.friction = value;
 }
@@ -550,4 +650,72 @@ function updateFriction(value){
 function updateStereoSep(value){
 	viewerParams.stereoSep = value;
 	viewerParams.effect.setEyeSeparation(viewerParams.stereoSep);
+}
+
+function updateMemoryLimit(value){
+	viewerParams.octree.memoryLimit = parseFloat(value*1e9);
+	viewerParams.octree.NParticleMemoryModifierFac = 1.;
+	viewerParams.octree.NParticleMemoryModifier = THREE.Math.clamp(viewerParams.octree.NParticleMemoryModifierFac*viewerParams.octree.memoryLimit/viewerParams.memoryUsage, 0., 1.);
+	updateOctreeDecimationSpan();
+}
+
+function updateNormCameraDistance(vals){
+	var value = vals[0];
+	var p = vals[1];
+	viewerParams.octree.normCameraDistance[p] = parseFloat(value);
+}
+
+function setBlendingMode(args){
+	var mode = args[0];
+	var p = args[1];
+
+	viewerParams.blendingMode[p] = mode;
+	var blend = viewerParams.blendingOpts[mode];
+
+	viewerParams.partsMesh[p].forEach( function( m, j ) {
+		m.material.depthWrite = viewerParams.depthWrite[p];
+		m.material.depthTest = viewerParams.depthTest[p];
+		m.material.blending = blend;
+		m.material.uniforms.useDepth.value = +viewerParams.depthTest[p]
+		m.material.needsUpdate = true;
+	});
+}
+
+function setCDlognorm(args){
+	var checked = args[0];
+	viewerParams.CDlognorm = checked;
+	viewerParams.materialCD.uniforms.lognorm.value = checked;
+	// apparently it doesn't want me to set needsUpdate 
+	//viewerParams.meterialCD.needsUpdate = true;
+}
+
+function toggleTween(args){
+
+	checked = args[0];// ignore for now?
+
+	if (viewerParams.inTween){
+		viewerParams.updateTween = false
+		viewerParams.inTween = false
+	} else {
+		viewerParams.updateTween = true	
+		setTweenviewerParams();
+	}
+}
+
+function setDepthMode(args){
+	var p = args[0];
+	var checked = args[1];
+
+	// update the viewer params and rely on the render loop
+	//  to apply them.
+	viewerParams.depthWrite[p] = checked;
+	viewerParams.depthTest[p] = checked;
+}
+
+function setRadiusVariable(args){
+	var radiusVariable = args[0];
+	var p = args[1];
+	viewerParams.radiusVariable[p] = radiusVariable;
+	viewerParams.updateRadiusVariable[p] = true;
+	//console.log(radiusVariable)
 }

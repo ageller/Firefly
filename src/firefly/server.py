@@ -120,7 +120,7 @@ def separate_GUI():
 #     socketio.emit('update_streamer', blob, namespace=namespace)
 
 
-########reading in hdf5 or csv files
+########reading in a directory of hdf5 or csv files
 @socketio.on('input_otherType', namespace=namespace)
 def input_otherType(filedir):
     print('======= showing loader')
@@ -140,7 +140,7 @@ def input_otherType(filedir):
         pass
 
     print('======= have input '+ftype+' data file(s) in', fdir)
-    reader = SimpleReader(fdir, write_jsons_to_disk=False, extension=ftype, decimation_factor=dec)
+    reader = SimpleReader(fdir, write_to_disk=False, extension=ftype, decimation_factor=dec)
     data = json.loads(reader.JSON)
 
     print('======= have data from file(s), sending to viewer ...')
@@ -178,9 +178,9 @@ def index():
 def combined(): 
     return render_template("combined.html")
 
-@app.route("/cardboard")
+@app.route("/VR")
 def cardboard(): 
-    return render_template("cardboard.html")
+    return render_template("VR.html")
 
 @app.route('/data_input', methods = ['POST'])
 def data_input():
@@ -260,7 +260,7 @@ def startFireflyServer(port=5000, frames_per_second=30, decimation_factor=1):
         dec = decimation_factor
 
         print("Launching Firefly at: http://localhost:%d"%port)
-        socketio.run(app, host='0.0.0.0', port=port, use_reloader=False)
+        socketio.run(app, host='0.0.0.0', port=port, use_reloader=True)
     except:
         raise
     finally:

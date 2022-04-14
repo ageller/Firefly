@@ -85,6 +85,13 @@ function initGUIControls(initial=false){
 	console.log("initializing controls", GUIParams.useTrackball)
 	var forViewer = [];
 
+	d3.select('#WebGLContainer').node().removeEventListener("keydown", sendCameraInfoToViewer,true);//for fly controls
+	d3.select('#WebGLContainer').node().removeEventListener("keyup", sendCameraInfoToViewer,true);//for fly controls
+	d3.select('#WebGLContainer').node().removeEventListener("mousedown", function(){GUIParams.mouseDown = true;},true);//for fly controls
+	d3.select('#WebGLContainer').node().removeEventListener("mouseup", function(){GUIParams.mouseDown = false;},true);//for fly controls
+	d3.select('#WebGLContainer').node().removeEventListener("mousemove", function(){if (GUIParams.mouseDown) sendCameraInfoToViewer()},true);//for fly controls
+
+
 	if (!initial) {
 		forViewer.push({'setViewerParamByKey':[GUIParams.useTrackball, "useTrackball"]});
 		forViewer.push({'initControls':null});
@@ -118,11 +125,13 @@ function initGUIControls(initial=false){
 	else {
 		GUIParams.controlsName = "FlyControls";
 		GUIParams.controls = new THREE.FlyControls( GUIParams.camera , GUIParams.renderer.domElement);
-		GUIParams.controls.movementSpeed = 1. - Math.pow(GUIParams.friction, GUIParams.flyffac);
-		d3.select('#WebGLContainer').node().removeEventListener("keydown", sendCameraInfoToViewer,true);//for fly controls
+		GUIParams.controls.movementSpeed = (1. - GUIParams.friction)*GUIParams.flyffac;
+
 		d3.select('#WebGLContainer').node().addEventListener("keydown", sendCameraInfoToViewer,true);//for fly controls
-		d3.select('#WebGLContainer').node().removeEventListener("keyup", sendCameraInfoToViewer,true);//for fly controls
 		d3.select('#WebGLContainer').node().addEventListener("keyup", sendCameraInfoToViewer,true);//for fly controls
+		d3.select('#WebGLContainer').node().addEventListener("mousedown", function(){GUIParams.mouseDown = true;},true);//for fly controls
+		d3.select('#WebGLContainer').node().addEventListener("mouseup", function(){GUIParams.mouseDown = false;},true);//for fly controls
+		d3.select('#WebGLContainer').node().addEventListener("mousemove", function(){if (GUIParams.mouseDown) sendCameraInfoToViewer()},true);//for fly controls
 	}
 
 	var elm = document.getElementById("CenterCheckBox")
@@ -141,7 +150,7 @@ function initGUIControls(initial=false){
 function createCube(){
 	var size = GUIParams.boxSize/100.;
 	// CUBE
-	var geometry = new THREE.CubeGeometry(size, size, size);
+	var geometry = new THREE.BoxGeometry(size, size, size);
 	var cubeMaterials = [ 
 		new THREE.MeshBasicMaterial({color:"yellow", side: THREE.DoubleSide}),
 		new THREE.MeshBasicMaterial({color:"orange", side: THREE.DoubleSide}), 
@@ -192,6 +201,20 @@ function animateGUIupdate(){
 			//GUIParams.switchControls = true;
 			GUIParams.controls.dispose();
 			initGUIControls();
+		}
+
+		// increase and decrease speed for fly controls
+		if (GUIParams.keyboard.down("+")){
+			GUIParams.flyffac += 1;
+			sendToViewer([{'setViewerParamByKey':[GUIParams.flyffac, "flyffac"]}]);
+			updateFlyMovementSpeed(GUIParams.flyffac);
+			console.log('fly speed', GUIParams.flyffac)
+		}
+		if (GUIParams.keyboard.down("-")){
+			GUIParams.flyffac = Math.max(1., GUIParams.flyffac - 1);
+			sendToViewer([{'setViewerParamByKey':[GUIParams.flyffac, "flyffac"]}]);
+			updateFlyMovementSpeed(GUIParams.flyffac);
+			console.log('fly speed', GUIParams.flyffac)
 		}
 
 		// handle keyboard event to initialize tweening
@@ -248,6 +271,10 @@ function sendCameraInfoToViewer(){
 	//console.log(GUIParams.camera.position, GUIParams.camera.rotation, GUIParams.camera.up);
 
 	sendToViewer(forViewer);
+
+	// in case we are not in trackball controls, this needs to be set (but might as well set it here always)
+	GUIParams.cameraPosition = GUIParams.camera.position.clone();
+	updateUICameraText();
 }
 
 function updateGUICamera(){
@@ -271,7 +298,49 @@ function updateFriction(value){
 		console.log(GUIParams)
 		GUIParams.controls.dynamicDampingFactor = value;
 	} else {
-		GUIParams.controls.movementSpeed = 1. - Math.pow(value, GUIParams.flyffac);
+		GUIParams.controls.movementSpeed = (1. - value)*GUIParams.flyffac;
 	}
 	GUIParams.friction = value;
+}
+
+function updateFlyMovementSpeed(flyffac){
+	GUIParams.flyffac = flyffac;
+	
+	//update for the GUI cube
+	if (GUIParams.controls){
+		if (GUIParams.controlsName == 'FlyControls') GUIParams.controls.movementSpeed = (1. - GUIParams.friction)*GUIParams.flyffac;
+	}
+
+	//update for the viewer
+
+
+
+}
+
+function updateFPSContainer(){
+	var txt = ''
+	if (GUIParams.showFPS){
+		txt += Math.round(GUIParams.FPS) + ' fps';
+		if (GUIParams.showMemoryUsage) txt += ', ';
+	}
+	if (GUIParams.memoryUsage > 0 && GUIParams.showMemoryUsage) txt+= (Math.round(GUIParams.memoryUsage/1e9*100.)/100.).toFixed(2) + ' Gb'
+	elm = document.getElementById("fps_container");
+	if (elm) elm.innerHTML = txt;
+	// hide the element if we're not showing anything
+	if (!GUIParams.showFPS && !GUIParams.showMemoryUsage && elm) elm.style.display='none';
+}
+
+function updateOctreeLoadingBarUI(input){
+	var id = '#' + input.p + 'octreeLoadingOutline';
+	var selection = d3.select(id)
+	// size checks if the selection caught anything
+	if (selection.size() < 1) return
+	var width = parseFloat(selection.attr('width'));
+	if (input.denominator > 0){
+		var frac = THREE.Math.clamp(input.numerator/input.denominator, 0, 1);
+		//var frac = Math.max(viewerParams.octree.loadingCount[p][1]/viewerParams.octree.loadingCount[p][0], 0);
+		//console.log('loading',p, width,viewerParams.octree.loadingCount[p], frac)
+		d3.select('#' + input.p + 'octreeLoadingFill').transition().attr('width', (width*frac) + 'px');
+		d3.select('#' + input.p + 'octreeLoadingText').text(input.p + ' (' + input.numerator + '/' + input.denominator + ')');
+	}
 }

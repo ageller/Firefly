@@ -1,3 +1,4 @@
+//https://gist.github.com/kopiro/86aac4eb19ac29ae62c950ad2106a10e
 /**
  * @author richt / http://richt.me
  * @author WestLangley / http://github.com/WestLangley
@@ -35,7 +36,8 @@ THREE.DeviceOrientationControls = function( object ) {
 			time: undefined
 		}
 	];
-	this.moveMult = new THREE.Vector3(25,10,10);
+	//this.moveMult = new THREE.Vector3(25,10,10);
+	this.moveMult = new THREE.Vector3(1,1,1);
 
 
 	var onDeviceOrientationChangeEvent = function( event ) {
@@ -89,6 +91,7 @@ THREE.DeviceOrientationControls = function( object ) {
 	// euler double integration
 	var eulerStep = function(state0, state1) {
 		var dt = (state1.time - state0.time) / 1000; // convert ms to s
+		//console.log('checking', dt, state1.position, state0.position)
 		if (dt) {
 			state1.position.x = state0.position.x + state0.velocity.x*dt;
 			state1.velocity.x = state0.velocity.x + state0.acceleration.x*dt;
@@ -128,9 +131,10 @@ THREE.DeviceOrientationControls = function( object ) {
 			//added by AMG to apply the move
 			var dPosition = this.accPosition[1].position.clone();
 			dPosition.sub(this.accPosition[0].position);
-			dPosition.multiplyScalar(moveMult);
+			//dPosition.multiplyScalar(this.moveMult);
+			dPosition.multiplyVectors(this.moveMult, dPosition);
 
-			//console.log(dPosition, this.accPosition[1].position, this.accPosition[0].position)
+			//console.log(dPosition, this.moveMult, this.accPosition[1].position, this.accPosition[0].position)
 			this.object.translateX( dPosition.x*this.moveMult.x );
 			this.object.translateY( dPosition.y*this.moveMult.y );
 			this.object.translateZ( dPosition.z*this.moveMult.z );
@@ -139,6 +143,7 @@ THREE.DeviceOrientationControls = function( object ) {
 		}
 
 
+		//console.log('checking acceleration', newPosition.position)
 	};
 
 	this.connect = function() {
@@ -178,7 +183,7 @@ THREE.DeviceOrientationControls = function( object ) {
 		this.alpha = alpha;
 
 
-		if ('acceleration' in scope.deviceMotion)this.accelerate(scope.deviceMotion.acceleration, scope.deviceMotion.timeStamp);
+		if ('acceleration' in scope.deviceMotion) this.accelerate(scope.deviceMotion.acceleration, scope.deviceMotion.timeStamp);
 
 	};
 

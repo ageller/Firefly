@@ -8,3 +8,4 @@ from .tween import TweenParams
 
 from .FIREreader import FIREreader,SimpleFIREreader,STARFORGEreader
 
+from .octree import Octree
