@@ -157,7 +157,7 @@ class ParticleGroup(object):
         field_names = [] if field_names is None else field_names
         field_filter_flags = [] if field_filter_flags is None else field_filter_flags
         field_colormap_flags = [] if field_colormap_flags is None else field_colormap_flags
-        field_radius_flags = [] if field_radius_flags is None else field_colormap_flags
+        field_radius_flags = [] if field_radius_flags is None else field_radius_flags
 
         if 'Velocities' in field_names:
             raise SyntaxError(
@@ -318,6 +318,10 @@ class ParticleGroup(object):
                 raise KeyError("Invalid settings kwarg %s"%settings_kwarg)
 
         self.attached_settings = attached_settings
+
+        ## add magnitude of velocity to fields
+        if self.velocities is not None:
+            self.trackArray('Velocity',np.linalg.norm(self.velocities,axis=1),radius_flag=False)
         
     def trackArray(
         self,
@@ -325,7 +329,7 @@ class ParticleGroup(object):
         arr,
         filter_flag=True,
         colormap_flag=True,
-        radius_flag=True,
+        radius_flag=False,
         filterLims=None,
         filterVals=None,
         colormapLims=None,
