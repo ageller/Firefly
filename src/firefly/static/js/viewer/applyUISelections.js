@@ -250,7 +250,7 @@ function changeBlendingForColormap(args){
 	//  (otherwise non-colormapped particles will blend with colormapped particles)
 	viewerParams.partsKeys.forEach(function (p,i){
 
-		if ( p == pkey_to_colormap && checked){
+		if ( viewerParams.showColormap[p]){
 			viewerParams.blendingMode[p] = 'normal';
 			viewerParams.depthWrite[p] = true;
 			viewerParams.depthTest[p] = true;
