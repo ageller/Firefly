@@ -1,17 +1,15 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Quickstart &mdash; Firefly 2.0.0 documentation</title>
-      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <title>Installation &mdash; Firefly 2.0.5 documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  
-        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+  <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
@@ -28,8 +26,7 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="index.html">
-            <img src="_static/logo_banner.png" class="logo" alt="Logo"/>
+            <a href="index.html"><img src="_static/logo_banner.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -67,7 +64,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
-      <li>Quickstart</li>
+      <li>Installation</li>
       <li class="wy-breadcrumbs-aside">
             <a href="_sources/installation.rst.txt" rel="nofollow"> View page source</a>
       </li>
@@ -101,17 +98,18 @@
     text-align: unset;
 }
 </style>
-<section id="quickstart">
-<h1>Quickstart<a class="headerlink" href="#quickstart" title="Permalink to this headline"></a></h1>
+<section id="installation">
+<span id="install"></span><h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<p>The below will help you quickly install Firefly so you can create your own Firefly visualization.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Viewing an existing Firefly instance requires no installation.
+Simply navigate to the visualization web address with a modern web browser.</p>
+</aside>
 <section id="requirements">
-<h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline"></a></h2>
-<p>To use an existing copy of Firefly you will need:</p>
-<ul class="simple">
-<li><p>An internet browser; we recommend Firefox or Google Chrome</p></li>
-</ul>
-<p>To visualize your own data with Firefly you will need:</p>
-<ul>
-<li><p>A working Python installation; we recommend installing <a class="reference external" href="https://www.anaconda.com/download/">Anaconda</a> Python version 3.x, with the following packages:</p>
+<h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h2>
+<p>You will need a working Python installation; we recommend installing <a class="reference external" href="https://www.anaconda.com/download/">Anaconda</a> Python version 3.x.
+You will also need to install the following packages:</p>
 <blockquote>
 <div><ul class="simple">
 <li><p>numpy</p></li>
@@ -124,11 +122,9 @@
 </ul>
 </div></blockquote>
 </section>
-<section id="installation">
-<span id="install"></span><h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline"></a></h2>
-<section id="download-the-latest-stable-release">
-<h3>Download the latest stable release<a class="headerlink" href="#download-the-latest-stable-release" title="Permalink to this headline"></a></h3>
-<p>To install the latest stable release you can <code class="code docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span></code> Firefly</p>
+<section id="installing-the-latest-stable-release">
+<h2>Installing the latest stable release<a class="headerlink" href="#installing-the-latest-stable-release" title="Permalink to this headline">¶</a></h2>
+<p>Install the latest stable release with</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install firefly
 </pre></div>
 </div>
@@ -137,9 +133,9 @@ automatically install the necessary requirements and put Firefly
 into your <code class="code docutils literal notranslate"><span class="pre">${PYTHONPATH}</span></code> environment variable so you can
 import it.</p>
 </section>
-<section id="build-from-source">
-<h3>Build from source<a class="headerlink" href="#build-from-source" title="Permalink to this headline"></a></h3>
-<p>Build the latest version directly from the most up-to-date version
+<section id="install-from-source">
+<h2>Install from source<a class="headerlink" href="#install-from-source" title="Permalink to this headline">¶</a></h2>
+<p>Alternatively, you can install the latest version directly from the most up-to-date version
 of the source-code by cloning/forking the GitHub repository</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/ageller/Firefly.git
 </pre></div>
@@ -172,7 +168,7 @@ executable built by the installation</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="index.html" class="btn btn-neutral float-left" title="Firefly: a browser-based interactive particle data visualization platform" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="webapp/index.html" class="btn btn-neutral float-right" title="Using an existing instance of Firefly" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="webapp/index.html" class="btn btn-neutral float-right" title="Interacting with a Firefly visualization" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

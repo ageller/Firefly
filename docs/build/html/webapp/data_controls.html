@@ -1,17 +1,15 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Data controls &mdash; Firefly 2.0.0 documentation</title>
-      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <title>Data controls &mdash; Firefly 2.0.5 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  
-        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
@@ -28,8 +26,7 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html">
-            <img src="../_static/logo_banner.png" class="logo" alt="Logo"/>
+            <a href="../index.html"><img src="../_static/logo_banner.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -77,7 +74,7 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="index.html">Using an existing instance of Firefly</a> &raquo;</li>
+          <li><a href="index.html">Interacting with a Firefly visualization</a> &raquo;</li>
       <li>Data controls</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../_sources/webapp/data_controls.rst.txt" rel="nofollow"> View page source</a>
@@ -113,13 +110,13 @@
 }
 </style>
 <section id="data-controls">
-<h1>Data controls<a class="headerlink" href="#data-controls" title="Permalink to this headline"></a></h1>
+<h1>Data controls<a class="headerlink" href="#data-controls" title="Permalink to this headline">¶</a></h1>
 <img alt="../_images/data_controls.png" src="../_images/data_controls.png" />
 <p>Upon startup this sub-panel will be collapsed.
 Click on the downward facing arrow on the right side to expand
 the sub-panel, as shown in the image above.</p>
 <section id="decimation">
-<h2>Decimation<a class="headerlink" href="#decimation" title="Permalink to this headline"></a></h2>
+<h2>Decimation<a class="headerlink" href="#decimation" title="Permalink to this headline">¶</a></h2>
 <p>At the top of the data controls sub-panel is the Decimation slider
 and text entry box.
 Larger values of decimation causes less particles to be drawn by the
@@ -128,12 +125,12 @@ corresponding factor
 The minimum value is 1.).</p>
 </section>
 <section id="fullscreen">
-<h2>Fullscreen<a class="headerlink" href="#fullscreen" title="Permalink to this headline"></a></h2>
+<h2>Fullscreen<a class="headerlink" href="#fullscreen" title="Permalink to this headline">¶</a></h2>
 <p>Click on the Fullscreen button to resize the window into fullscreen mode.
 Use the escape key to go back to the previous view.</p>
 </section>
 <section id="take-snapshot">
-<h2>Take Snapshot<a class="headerlink" href="#take-snapshot" title="Permalink to this headline"></a></h2>
+<h2>Take Snapshot<a class="headerlink" href="#take-snapshot" title="Permalink to this headline">¶</a></h2>
 <p>This button will take a snapshot of the current view (without the Controls panel).
 There are two text boxes with numbers that you can change which default to the
 dimensions of the current Firefly canvas (here showing 1920, 1200).
@@ -143,7 +140,7 @@ you should be prompted to download the snapshot as a png file.
 This feature may work best in Firefox.</p>
 </section>
 <section id="save-settings">
-<h2>Save Settings<a class="headerlink" href="#save-settings" title="Permalink to this headline"></a></h2>
+<h2>Save Settings<a class="headerlink" href="#save-settings" title="Permalink to this headline">¶</a></h2>
 <p>This button will save a file named “preset.json” to your computer.
 This preset file contains all the information needed to restart Firefly
 from the current configuration.
@@ -153,12 +150,12 @@ You can move this file wherever you want, and rename it
 (but do not change its contents.)</p>
 </section>
 <section id="default-settings">
-<h2>Default Settings<a class="headerlink" href="#default-settings" title="Permalink to this headline"></a></h2>
+<h2>Default Settings<a class="headerlink" href="#default-settings" title="Permalink to this headline">¶</a></h2>
 <p>Click this button to reset all values to the defaults that were
 used when Firefly was launched.</p>
 </section>
 <section id="load-settings">
-<h2>Load Settings<a class="headerlink" href="#load-settings" title="Permalink to this headline"></a></h2>
+<h2>Load Settings<a class="headerlink" href="#load-settings" title="Permalink to this headline">¶</a></h2>
 <p>Click this button to reset all values to a preset file
 that you either created with the Python reader (see the <a class="reference internal" href="../reference/api/api.html#api"><span class="std std-ref">API Reference</span></a>),
 or by clicking the <a class="reference internal" href="#save-settings"><span class="std std-ref">Save Settings</span></a> button.
@@ -168,7 +165,7 @@ Once you select it, Firefly will reset to the configuration saved in
 the preset file.</p>
 </section>
 <section id="load-new-data">
-<span id="load-new-data-button"></span><h2>Load New Data<a class="headerlink" href="#load-new-data" title="Permalink to this headline"></a></h2>
+<span id="load-new-data-button"></span><h2>Load New Data<a class="headerlink" href="#load-new-data" title="Permalink to this headline">¶</a></h2>
 <p>Click this button to select a new data set to display in Firefly.
 Once clicked, you will be prompted to select a directory on your
 computer using your operating system’s standard file browser.
@@ -182,13 +179,13 @@ internet could read your personal files).
 As a result, Firefly can only parse data files that are within
 its static/data directory.
 See <a class="reference internal" href="../data_reader/multiple_datasets.html#multiple-datasets"><span class="std std-ref">Managing multiple datasets</span></a> for more details.</p>
-</div>
+</aside>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p>As a result of the above, this only works if you are hosting
 the Firefly webserver locally.
 See <a class="reference internal" href="../server.html#local"><span class="std std-ref">Hosting Firefly locally</span></a> for more details.</p>
-</div>
+</aside>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>After you select the directory, some browsers may show a
@@ -197,7 +194,7 @@ to the site and to only do so if you trust the site.
 You are only uploading the data to you <strong>browser</strong>, not to any
 online repository (even if you are using an instance of Firefly
 hosted on the internet).</p>
-</div>
+</aside>
 </section>
 </section>
 
@@ -205,7 +202,7 @@ hosted on the internet).</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="index.html" class="btn btn-neutral float-left" title="Using an existing instance of Firefly" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="index.html" class="btn btn-neutral float-left" title="Interacting with a Firefly visualization" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="camera_controls.html" class="btn btn-neutral float-right" title="Camera controls" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

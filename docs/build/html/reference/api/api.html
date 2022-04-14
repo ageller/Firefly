@@ -1,17 +1,15 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>API Reference &mdash; Firefly 2.0.0 documentation</title>
-      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <title>API Reference &mdash; Firefly 2.0.5 documentation</title><link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  
-        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+  <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
         <script src="../../_static/jquery.js"></script>
         <script src="../../_static/underscore.js"></script>
         <script src="../../_static/doctools.js"></script>
@@ -19,7 +17,6 @@
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="firefly.data_reader.Reader" href="classes/firefly.data_reader.Reader.html" />
     <link rel="prev" title="Experimental features" href="../../experimental.html" /> 
 </head>
 
@@ -28,8 +25,7 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../index.html">
-            <img src="../../_static/logo_banner.png" class="logo" alt="Logo"/>
+            <a href="../../index.html"><img src="../../_static/logo_banner.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
@@ -51,20 +47,8 @@
 <li class="toctree-l3"><a class="reference internal" href="#smoothinglength">SmoothingLength</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#base-classes">Base classes</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="classes/firefly.data_reader.Reader.html">firefly.data_reader.Reader</a></li>
-<li class="toctree-l3"><a class="reference internal" href="classes/firefly.data_reader.ParticleGroup.html">firefly.data_reader.ParticleGroup</a></li>
-<li class="toctree-l3"><a class="reference internal" href="classes/firefly.data_reader.Settings.html">firefly.data_reader.Settings</a></li>
-<li class="toctree-l3"><a class="reference internal" href="classes/firefly.data_reader.TweenParams.html">firefly.data_reader.TweenParams</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="#pre-built-readers">Pre-built Readers</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="readers/firefly.data_reader.SimpleReader.html">firefly.data_reader.SimpleReader</a></li>
-<li class="toctree-l3"><a class="reference internal" href="readers/firefly.data_reader.ArrayReader.html">firefly.data_reader.ArrayReader</a></li>
-<li class="toctree-l3"><a class="reference internal" href="readers/firefly.data_reader.FIREreader.html">firefly.data_reader.FIREreader</a></li>
-<li class="toctree-l3"><a class="reference internal" href="readers/firefly.data_reader.SimpleFIREreader.html">firefly.data_reader.SimpleFIREreader</a></li>
-</ul>
-</li>
+<li class="toctree-l2"><a class="reference internal" href="#base-classes">Base classes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#pre-built-readers">Pre-built Readers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#server-utitities">Server Utitities</a></li>
 </ul>
 </li>
@@ -119,18 +103,18 @@
 }
 </style>
 <section id="api-reference">
-<span id="api"></span><h1>API Reference<a class="headerlink" href="#api-reference" title="Permalink to this headline"></a></h1>
+<span id="api"></span><h1>API Reference<a class="headerlink" href="#api-reference" title="Permalink to this headline">¶</a></h1>
 <section id="special-field-names">
-<span id="field-names"></span><h2>Special field names<a class="headerlink" href="#special-field-names" title="Permalink to this headline"></a></h2>
+<span id="field-names"></span><h2>Special field names<a class="headerlink" href="#special-field-names" title="Permalink to this headline">¶</a></h2>
 <section id="velocities">
-<h3>Velocities<a class="headerlink" href="#velocities" title="Permalink to this headline"></a></h3>
+<h3>Velocities<a class="headerlink" href="#velocities" title="Permalink to this headline">¶</a></h3>
 <p>Allows one to visualize vector field data by checking the
 “Show Velocity Vectors” checkbox in a particle group UI sub-panel.
 This checkbox will only appear if one of the fields is named
 <em>specifically</em> “Velocities.”</p>
 </section>
 <section id="smoothinglength">
-<h3>SmoothingLength<a class="headerlink" href="#smoothinglength" title="Permalink to this headline"></a></h3>
+<h3>SmoothingLength<a class="headerlink" href="#smoothinglength" title="Permalink to this headline">¶</a></h3>
 <p>If a field is named <em>specifically</em> “SmoothingLength” and the
 <code class="code docutils literal notranslate"><span class="pre">doSPHrad</span></code> flag in the settings file is set to <code class="code docutils literal notranslate"><span class="pre">True</span></code>
 then the particles in that group will be scaled by their smoothing
@@ -138,71 +122,59 @@ lengths and have opacities that vary across their face according to
 a cubic spline.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>This feature is <a class="reference internal" href="../../experimental.html#experimental-features"><span class="std std-ref">experimental</span></a>.</p>
-</div>
+<p>This feature is <a class="reference internal" href="../../experimental.html#experimental-features-1"><span class="std std-ref">experimental</span></a>.</p>
+</aside>
 </section>
 </section>
 <section id="base-classes">
-<span id="frontend-api"></span><h2>Base classes<a class="headerlink" href="#base-classes" title="Permalink to this headline"></a></h2>
+<span id="frontend-api"></span><h2>Base classes<a class="headerlink" href="#base-classes" title="Permalink to this headline">¶</a></h2>
 <table class="longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="classes/Firefly.data_reader.Reader.html#Firefly.data_reader.Reader" title="Firefly.data_reader.Reader"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Firefly.data_reader.Reader</span></code></a>([JSONdir, ...])</p></td>
-<td><p>This class provides a framework to unify the Settings and ParticleGroup classes to make sure that the user can easily produce Firefly compatible files.</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">firefly.data_reader.Reader</span></code>([JSONdir, …])</p></td>
+<td><p>This class provides a framework to unify the Settings and ParticleGroup classes to make sure that the user can easily produce firefly compatible files.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="classes/Firefly.data_reader.ParticleGroup.html#Firefly.data_reader.ParticleGroup" title="Firefly.data_reader.ParticleGroup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Firefly.data_reader.ParticleGroup</span></code></a>(UIname, ...)</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">firefly.data_reader.ParticleGroup</span></code>(UIname, …)</p></td>
 <td><p>This is a class for organizing data that you want to interface with a  Reader instance.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="classes/firefly.data_reader.Settings.html#firefly.data_reader.Settings" title="firefly.data_reader.Settings"><code class="xref py py-obj docutils literal notranslate"><span class="pre">firefly.data_reader.Settings</span></code></a>([settings_filename])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">firefly.data_reader.Settings</span></code>([settings_filename])</p></td>
 <td><p>This is a class for organizing the various settings you can pass to  Firefly to customize how the app is initialized and what features  the user has access to.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="classes/Firefly.data_reader.TweenParams.html#Firefly.data_reader.TweenParams" title="Firefly.data_reader.TweenParams"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Firefly.data_reader.TweenParams</span></code></a>([coords, ...])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">firefly.data_reader.TweenParams</span></code>([coords, …])</p></td>
 <td><p>A class to store tween parameters and make an output file</p></td>
 </tr>
 </tbody>
 </table>
 </section>
 <section id="pre-built-readers">
-<h2>Pre-built Readers<a class="headerlink" href="#pre-built-readers" title="Permalink to this headline"></a></h2>
+<h2>Pre-built Readers<a class="headerlink" href="#pre-built-readers" title="Permalink to this headline">¶</a></h2>
 <table class="longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="readers/firefly.data_reader.SimpleReader.html#firefly.data_reader.SimpleReader" title="firefly.data_reader.SimpleReader"><code class="xref py py-obj docutils literal notranslate"><span class="pre">firefly.data_reader.SimpleReader</span></code></a>(path_to_data)</p></td>
-<td><p>A wrapper to <a class="reference internal" href="readers/firefly.data_reader.ArrayReader.html#firefly.data_reader.ArrayReader" title="firefly.data_reader.ArrayReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">firefly.data_reader.ArrayReader</span></code></a> that attempts to  flexibily open generically formatetd data with minimal interaction from the user.</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">firefly.data_reader.SimpleReader</span></code>(path_to_data)</p></td>
+<td><p>A wrapper to <code class="xref py py-class docutils literal notranslate"><span class="pre">firefly.data_reader.ArrayReader</span></code> that attempts to  flexibily open generically formatetd data with minimal interaction from the user.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="readers/firefly.data_reader.ArrayReader.html#firefly.data_reader.ArrayReader" title="firefly.data_reader.ArrayReader"><code class="xref py py-obj docutils literal notranslate"><span class="pre">firefly.data_reader.ArrayReader</span></code></a>(coordinates)</p></td>
-<td><p>A wrapper to <a class="reference internal" href="classes/firefly.data_reader.Reader.html#firefly.data_reader.Reader" title="firefly.data_reader.Reader"><code class="xref py py-class docutils literal notranslate"><span class="pre">firefly.data_reader.Reader</span></code></a> that stores  raw numpy array data without opening anything from disk.</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">firefly.data_reader.ArrayReader</span></code>(coordinates)</p></td>
+<td><p>A wrapper to <code class="xref py py-class docutils literal notranslate"><span class="pre">firefly.data_reader.Reader</span></code> that stores  raw numpy array data without opening anything from disk.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="readers/Firefly.data_reader.FIREreader.html#Firefly.data_reader.FIREreader" title="Firefly.data_reader.FIREreader"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Firefly.data_reader.FIREreader</span></code></a>(snapdir, snapnum)</p></td>
-<td><p>This is an example of a &quot;custom&quot; Reader that has been tuned to  open data from the FIRE galaxy formation collaboration  (<a class="reference external" href="https://fire.northwestern.edu">https://fire.northwestern.edu</a>).</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">firefly.data_reader.FIREreader</span></code>(snapdir, snapnum)</p></td>
+<td><p>This is an example of a “custom” Reader that has been tuned to  open data from the <a class="reference external" href="https://fire.northwestern.edu">FIRE galaxy formation collaboration</a>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="readers/Firefly.data_reader.SimpleFIREreader.html#Firefly.data_reader.SimpleFIREreader" title="Firefly.data_reader.SimpleFIREreader"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Firefly.data_reader.SimpleFIREreader</span></code></a>(...[, ...])</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">firefly.data_reader.SimpleFIREreader</span></code>(…[, …])</p></td>
 <td><p></p></td>
 </tr>
 </tbody>
 </table>
 </section>
 <section id="server-utitities">
-<span id="server-api"></span><h2>Server Utitities<a class="headerlink" href="#server-utitities" title="Permalink to this headline"></a></h2>
+<span id="server-api"></span><h2>Server Utitities<a class="headerlink" href="#server-utitities" title="Permalink to this headline">¶</a></h2>
 <table class="longtable docutils align-default">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="server/Firefly.server.startFireflyServer.html#Firefly.server.startFireflyServer" title="Firefly.server.startFireflyServer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Firefly.server.startFireflyServer</span></code></a>([port, ...])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">firefly.server.startFireflyServer</span></code>([port, …])</p></td>
 <td><p>Creates a global interpreter locked process to host a mock web-server</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="server/Firefly.server.spawnFireflyServer.html#Firefly.server.spawnFireflyServer" title="Firefly.server.spawnFireflyServer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Firefly.server.spawnFireflyServer</span></code></a>([port, ...])</p></td>
-<td><p>Wrapper to <a class="reference internal" href="server/Firefly.server.startFireflyServer.html#Firefly.server.startFireflyServer" title="Firefly.server.startFireflyServer"><code class="xref py py-func docutils literal notranslate"><span class="pre">Firefly.server.startFireflyServer()</span></code></a> that instead starts a background process.</p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">firefly.server.spawnFireflyServer</span></code>([port, …])</p></td>
+<td><p>Wrapper to <code class="xref py py-func docutils literal notranslate"><span class="pre">firefly.server.startFireflyServer()</span></code> that instead starts a background process.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="server/Firefly.server.killAllFireflyServers.html#firefly.server.killAllFireflyServers" title="firefly.server.killAllFireflyServers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">firefly.server.killAllFireflyServers</span></code></a>([pid])</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">firefly.server.killAllFireflyServers</span></code>([pid])</p></td>
 <td><p>Kill python processes associated with hosting Flask web-servers.</p></td>
 </tr>
 </tbody>
@@ -215,7 +187,6 @@ a cubic spline.</p>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="../../experimental.html" class="btn btn-neutral float-left" title="Experimental features" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="classes/Firefly.data_reader.Reader.html" class="btn btn-neutral float-right" title="Firefly.data_reader.Reader" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
