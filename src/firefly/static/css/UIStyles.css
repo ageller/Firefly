@@ -21,6 +21,7 @@
 	font-family: Sans-Serif;
 	-webkit-transition: width 0.25s, height 0.25s, clip-path 0.25s;
 	transition: width 0.25s, height 0.25s, clip-path 0.25s; 
+	user-select: none;
 }
 .UIStateContainer{
 	-webkit-transition: width 0.25s, height 0.25s, clip-path 0.25s;
