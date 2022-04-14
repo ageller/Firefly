@@ -717,5 +717,5 @@ function setRadiusVariable(args){
 	var p = args[1];
 	viewerParams.radiusVariable[p] = radiusVariable;
 	viewerParams.updateRadiusVariable[p] = true;
-	console.log(radiusVariable)
+	//console.log(radiusVariable)
 }

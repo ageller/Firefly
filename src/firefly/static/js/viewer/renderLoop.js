@@ -420,16 +420,20 @@ function update_particle_mesh_radius_variable(p,m){
 	var this_parts = m.geometry.userData;
 
 	var radiusScale = m.geometry.attributes.radiusScale.array;
-
+	var minmax = {'min':0,'max':1}
 	// .radiusVariable[p] holds the *index* of the radius variable
 	if (viewerParams.radiusVariable[p] > 0){
 		var rkey = viewerParams.rkeys[p][viewerParams.radiusVariable[p]]
-		if (this_parts.hasOwnProperty(rkey)) var radii = this_parts[rkey];
-		else var radii = Array(radiusScale.length).fill(1)
+		if (this_parts.hasOwnProperty(rkey)){
+			// copy the values from this_parts[rkey] into radii
+			radii = this_parts[rkey];
+			minmax = calcMinMax(p,rkey);
+		}
+		else radii = Array(radiusScale.length).fill(1);
 	} 
-	else var radii = Array(radiusScale.length).fill(1)
-
-	for( var ii = 0; ii < radiusScale.length; ii ++ ) radiusScale[ii] = radii[ii];
+	else radii = Array(radiusScale.length).fill(1);
+	// renormalize the radius variable to scale between 0 and 1, when you're right you're right aaron.
+	for( var ii = 0; ii < radiusScale.length; ii ++ ) radiusScale[ii] = (radii[ii]-minmax.min)/(minmax.max-minmax.min);
 	m.geometry.attributes.radiusScale.needsUpdate = true;
 }
 
