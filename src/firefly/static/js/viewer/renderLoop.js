@@ -205,7 +205,7 @@ function update_particle_playback(p,time){
 				viewerParams.filterVals[p][fkey][0] = soft_limits[0] + filter_step;
 				viewerParams.filterVals[p][fkey][1] = soft_limits[1] + filter_step;
 			}
-			console.log('playback', dfilter, viewerParams.filterVals[p][fkey]);
+			//console.log('playback', dfilter, viewerParams.filterVals[p][fkey]);
 
 			// update the left slider position
 			var forGUI = [];
@@ -251,7 +251,7 @@ function update_particle_playback(p,time){
 		
 		// apply particle radii and alpha values 
 		// according to current filter handle settings
-		if (update_filter || update_onoff) update_particle_mesh_filter(p,m);
+		if (update_filter || update_onoff || update_radius_variable) update_particle_mesh_filter(p,m);
 
 		// only update the colormap variable if we're actually
 		//  colormapping. we'll get to it eventually
@@ -259,7 +259,6 @@ function update_particle_playback(p,time){
 			update_particle_mesh_colormap_variable(p,m);
 		} 
 
-		if (update_radius_variable) update_particle_mesh_radius_variable(p,m); 
 
 		update_velocity_animation(p,m);
 
@@ -356,11 +355,7 @@ function update_particle_mesh_filter(p,m){
 	var alpha = m.geometry.attributes.alpha.array;
 
 	// reset the buffer values
-	if (viewerParams.radiusVariable[p] > 0){
-		var rkey = viewerParams.rkeys[p][viewerParams.radiusVariable[p]]
-		if (this_parts.hasOwnProperty(rkey)) radiusScale.set(this_parts[rkey]);
-		else radiusScale.fill(1);
-	}
+	if (viewerParams.radiusVariable[p] > 0) update_particle_mesh_radius_variable(p,m);
 	else radiusScale.fill(1);
 
 	alpha.fill(1);
