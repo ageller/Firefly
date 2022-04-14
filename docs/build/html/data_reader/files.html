@@ -142,8 +142,8 @@ select the dataset from a dropdown when the webapp is initialized.</p>
 <p>This is a <code class="code docutils literal notranslate"><span class="pre">.json</span></code> file that contains the default settings for
 various aspects of Firefly’s UI.</p>
 <p>as well as default filter settings for each of the particle groups.
-It should be created using a <code class="xref py py-class docutils literal notranslate"><span class="pre">firefly.data_reader.Settings</span></code> instance
-and its corresponding <code class="xref py py-func docutils literal notranslate"><span class="pre">outputToJSON()</span></code> method.
+It should be created using a <a class="reference internal" href="../reference/api/classes/firefly.data_reader.Settings.html#firefly.data_reader.Settings" title="firefly.data_reader.Settings"><code class="xref py py-class docutils literal notranslate"><span class="pre">firefly.data_reader.Settings</span></code></a> instance
+and its corresponding <a class="reference internal" href="../reference/api/classes/firefly.data_reader.Settings.html#firefly.data_reader.Settings.outputToJSON" title="firefly.data_reader.Settings.outputToJSON"><code class="xref py py-func docutils literal notranslate"><span class="pre">outputToJSON()</span></code></a> method.
 This lives in the <code class="code docutils literal notranslate"><span class="pre">JSONdir</span></code> sub-directory described above.
 It can be named whatever you’d like as long as it is linked to correctly
 within <code class="code docutils literal notranslate"><span class="pre">filenames.json</span></code>, described below.</p>
@@ -152,7 +152,7 @@ within <code class="code docutils literal notranslate"><span class="pre">filenam
 <h2>The particle group files, <code class="code docutils literal notranslate"><span class="pre">&lt;prefix&gt;&lt;particleGroup&gt;&lt;fileNumber&gt;.json</span></code><a class="headerlink" href="#the-particle-group-files-prefix-particlegroup-filenumber-json" title="Permalink to this headline">¶</a></h2>
 <p>These are the main data files, and contain the particle coordinates and their
 corresponding field values. They should exclusively be created using a
-<code class="xref py py-class docutils literal notranslate"><span class="pre">firefly.data_reader.ParticleGroup</span></code>
+<a class="reference internal" href="../reference/api/classes/firefly.data_reader.ParticleGroup.html#firefly.data_reader.ParticleGroup" title="firefly.data_reader.ParticleGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">firefly.data_reader.ParticleGroup</span></code></a>
 instance’s <code class="xref py py-func docutils literal notranslate"><span class="pre">outputToJSON()</span></code> method.
 These files live in the <code class="code docutils literal notranslate"><span class="pre">JSONdir</span></code> sub-directory described above.
 They can be named whatever you’d like as long as they are linked to correctly within
@@ -162,7 +162,7 @@ They can be named whatever you’d like as long as they are linked to correctly 
 <p>Datasets are chunked into multiple files to improve performance at startup and
 to enable a loading bar to give feedback to you, the user!
 You should not purposefully circumvent this feature by setting the <code class="code docutils literal notranslate"><span class="pre">nparts_per_file</span></code>
-keyword argument of <code class="xref py py-func docutils literal notranslate"><span class="pre">firefly.data_reader.ParticleGroup.outputToJSON()</span></code>
+keyword argument of <a class="reference internal" href="../reference/api/classes/firefly.data_reader.ParticleGroup.html#firefly.data_reader.ParticleGroup.outputToJSON" title="firefly.data_reader.ParticleGroup.outputToJSON"><code class="xref py py-func docutils literal notranslate"><span class="pre">firefly.data_reader.ParticleGroup.outputToJSON()</span></code></a>
 to a very large value.</p>
 </aside>
 </section>
@@ -180,9 +180,9 @@ of particles in each file along with the default settings file to use.</p>
 </div>
 <p>The easiest way to create this file is to use the
 <code class="xref py py-func docutils literal notranslate"><span class="pre">firefly.data_reader.Reader.dumpToJSON()</span></code> method of a
-<code class="xref py py-class docutils literal notranslate"><span class="pre">firefly.data_reader.Reader</span></code> instance containing
+<a class="reference internal" href="../reference/api/classes/firefly.data_reader.Reader.html#firefly.data_reader.Reader" title="firefly.data_reader.Reader"><code class="xref py py-class docutils literal notranslate"><span class="pre">firefly.data_reader.Reader</span></code></a> instance containing
 <code class="xref py py-class docutils literal notranslate"><span class="pre">firefly.data_reader.Options</span></code> and
-<code class="xref py py-class docutils literal notranslate"><span class="pre">firefly.data_reader.ParticleGroup</span></code> instances.</p>
+<a class="reference internal" href="../reference/api/classes/firefly.data_reader.ParticleGroup.html#firefly.data_reader.ParticleGroup" title="firefly.data_reader.ParticleGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">firefly.data_reader.ParticleGroup</span></code></a> instances.</p>
 </section>
 </section>
 

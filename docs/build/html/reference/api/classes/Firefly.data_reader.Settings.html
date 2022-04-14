@@ -1,17 +1,15 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Firefly.data_reader.Settings &mdash; Firefly 2.0.0 documentation</title>
-      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <title>firefly.data_reader.Settings &mdash; Firefly 2.0.5 documentation</title><link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+  <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/doctools.js"></script>
@@ -28,8 +26,7 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../../index.html">
-            <img src="../../../_static/logo_banner.png" class="logo" alt="Logo"/>
+            <a href="../../../index.html"><img src="../../../_static/logo_banner.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -75,9 +72,9 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="../api.html">API Reference</a> &raquo;</li>
-      <li>Firefly.data_reader.Settings</li>
+      <li>firefly.data_reader.Settings</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../../../_sources/reference/api/classes/Firefly.data_reader.Settings.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../../../_sources/reference/api/classes/firefly.data_reader.Settings.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -110,10 +107,10 @@
 }
 </style>
 <section id="firefly-data-reader-settings">
-<h1>Firefly.data_reader.Settings<a class="headerlink" href="#firefly-data-reader-settings" title="Permalink to this headline"></a></h1>
+<h1>firefly.data_reader.Settings<a class="headerlink" href="#firefly-data-reader-settings" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
-<dt class="sig sig-object py" id="Firefly.data_reader.Settings">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">Firefly.data_reader.</span></span><span class="sig-name descname"><span class="pre">Settings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">settings_filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Settings.json'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/Firefly/data_reader/settings.html#Settings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Firefly.data_reader.Settings" title="Permalink to this definition"></a></dt>
+<dt id="firefly.data_reader.Settings">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">firefly.data_reader.</span></code><code class="sig-name descname"><span class="pre">Settings</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">settings_filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Settings.json'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/firefly/data_reader/settings.html#Settings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#firefly.data_reader.Settings" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>This is a class for organizing the various settings you can pass to 
 Firefly to customize how the app is initialized and what features 
@@ -121,11 +118,11 @@ the user has access to.</p>
 <p>It is easiest to use when instances of Settings are passed to a 
 <a class="reference internal" href="firefly.data_reader.Reader.html#firefly.data_reader.Reader" title="firefly.data_reader.Reader"><code class="xref py py-class docutils literal notranslate"><span class="pre">firefly.data_reader.Reader</span></code></a> instance when it is initialized.</p>
 <dl class="py method">
-<dt class="sig sig-object py" id="Firefly.data_reader.Settings.UI_settings">
-<span class="sig-name descname"><span class="pre">UI_settings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">UI</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">UIfullscreen</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">UIsnapshot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">UIreset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">UIsavePreset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">UIloadNewData</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">UIcameraControls</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">UIdecimation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">extra</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/Firefly/data_reader/settings.html#Settings.UI_settings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Firefly.data_reader.Settings.UI_settings" title="Permalink to this definition"></a></dt>
+<dt id="firefly.data_reader.Settings.UI_settings">
+<code class="sig-name descname"><span class="pre">UI_settings</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">UI</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">UIfullscreen</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">UIsnapshot</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">UIreset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">UIsavePreset</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">UIloadNewData</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">UIcameraControls</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">UIdecimation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">extra</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/firefly/data_reader/settings.html#Settings.UI_settings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#firefly.data_reader.Settings.UI_settings" title="Permalink to this definition">¶</a></dt>
 <dd><p>Flags for enabling different elements of the UI</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>UI</strong> (<em>bool</em><em>, </em><em>optional</em>) – flag to show the UI as a whole, defaults to True</p></li>
 <li><p><strong>UIfullscreen</strong> (<em>bool</em><em>, </em><em>optional</em>) – flag to show the fullscreen button, defaults to True</p></li>
@@ -141,25 +138,25 @@ the user has access to.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="Firefly.data_reader.Settings.__getitem__">
-<span class="sig-name descname"><span class="pre">__getitem__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/Firefly/data_reader/settings.html#Settings.__getitem__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Firefly.data_reader.Settings.__getitem__" title="Permalink to this definition"></a></dt>
+<dt id="firefly.data_reader.Settings.__getitem__">
+<code class="sig-name descname"><span class="pre">__getitem__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/firefly/data_reader/settings.html#Settings.__getitem__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#firefly.data_reader.Settings.__getitem__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Implementation of builtin function  __getitem__</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>key</strong> (<em>str</em>) – key to read</p>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>attr, the value from the settings dictionary</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>object</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="Firefly.data_reader.Settings.__init__">
-<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">settings_filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Settings.json'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/Firefly/data_reader/settings.html#Settings.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Firefly.data_reader.Settings.__init__" title="Permalink to this definition"></a></dt>
+<dt id="firefly.data_reader.Settings.__init__">
+<code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">settings_filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Settings.json'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/firefly/data_reader/settings.html#Settings.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#firefly.data_reader.Settings.__init__" title="Permalink to this definition">¶</a></dt>
 <dd><dl>
 <dt>Base initialization method for Settings instances. A Settings will store</dt><dd><p>the app state and produce firefly compatible <code class="code docutils literal notranslate"><span class="pre">.json</span></code> files.</p>
 <p>accepts passthrough kwargs from:</p>
@@ -174,7 +171,7 @@ the user has access to.</p>
 </dd>
 </dl>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>settings_filename</strong> (<em>str</em><em>, </em><em>optional</em>) – name of settings <code class="code docutils literal notranslate"><span class="pre">.json</span></code> file,
 defaults to ‘Settings.json’</p>
 </dd>
@@ -182,11 +179,11 @@ defaults to ‘Settings.json’</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="Firefly.data_reader.Settings.__setitem__">
-<span class="sig-name descname"><span class="pre">__setitem__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/Firefly/data_reader/settings.html#Settings.__setitem__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Firefly.data_reader.Settings.__setitem__" title="Permalink to this definition"></a></dt>
+<dt id="firefly.data_reader.Settings.__setitem__">
+<code class="sig-name descname"><span class="pre">__setitem__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/firefly/data_reader/settings.html#Settings.__setitem__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#firefly.data_reader.Settings.__setitem__" title="Permalink to this definition">¶</a></dt>
 <dd><p>Implementation of builtin function __setitem__</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>key</strong> (<em>str</em>) – key to set</p></li>
 <li><p><strong>value</strong> (<em>object</em>) – value to set to key</p></li>
@@ -196,18 +193,18 @@ defaults to ‘Settings.json’</p>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="Firefly.data_reader.Settings.__weakref__">
-<span class="sig-name descname"><span class="pre">__weakref__</span></span><a class="headerlink" href="#Firefly.data_reader.Settings.__weakref__" title="Permalink to this definition"></a></dt>
+<dt id="firefly.data_reader.Settings.__weakref__">
+<code class="sig-name descname"><span class="pre">__weakref__</span></code><a class="headerlink" href="#firefly.data_reader.Settings.__weakref__" title="Permalink to this definition">¶</a></dt>
 <dd><p>list of weak references to the object (if defined)</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="Firefly.data_reader.Settings.attachSettings">
-<span class="sig-name descname"><span class="pre">attachSettings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">particleGroup</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/Firefly/data_reader/settings.html#Settings.attachSettings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Firefly.data_reader.Settings.attachSettings" title="Permalink to this definition"></a></dt>
-<dd><p>Adds a <a class="reference internal" href="Firefly.data_reader.ParticleGroup.html#Firefly.data_reader.ParticleGroup" title="Firefly.data_reader.ParticleGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParticleGroup</span></code></a>’s settings to the
+<dt id="firefly.data_reader.Settings.attachSettings">
+<code class="sig-name descname"><span class="pre">attachSettings</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">particleGroup</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/firefly/data_reader/settings.html#Settings.attachSettings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#firefly.data_reader.Settings.attachSettings" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a <a class="reference internal" href="firefly.data_reader.ParticleGroup.html#firefly.data_reader.ParticleGroup" title="firefly.data_reader.ParticleGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParticleGroup</span></code></a>’s settings to the
 relevant settings dictionaries.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>particleGroup</strong> (<a class="reference internal" href="firefly.data_reader.ParticleGroup.html#firefly.data_reader.ParticleGroup" title="firefly.data_reader.ParticleGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">firefly.data_reader.ParticleGroup</span></code></a>) – the <a class="reference internal" href="firefly.data_reader.ParticleGroup.html#firefly.data_reader.ParticleGroup" title="firefly.data_reader.ParticleGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParticleGroup</span></code></a>
 that you want to link to this <a class="reference internal" href="#firefly.data_reader.Settings" title="firefly.data_reader.Settings"><code class="xref py py-class docutils literal notranslate"><span class="pre">Settings</span></code></a>.</p>
 </dd>
@@ -215,11 +212,11 @@ that you want to link to this <a class="reference internal" href="#firefly.data_
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="Firefly.data_reader.Settings.camera_settings">
-<span class="sig-name descname"><span class="pre">camera_settings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">center</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">camera</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cameraRotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/Firefly/data_reader/settings.html#Settings.camera_settings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Firefly.data_reader.Settings.camera_settings" title="Permalink to this definition"></a></dt>
+<dt id="firefly.data_reader.Settings.camera_settings">
+<code class="sig-name descname"><span class="pre">camera_settings</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">center</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">camera</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cameraRotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cameraUp</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">quaternion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">extra</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/firefly/data_reader/settings.html#Settings.camera_settings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#firefly.data_reader.Settings.camera_settings" title="Permalink to this definition">¶</a></dt>
 <dd><p>Settings that affect the position and orientation of the camera</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>center</strong> (<em>np.ndarray of shape</em><em> (</em><em>3</em><em>)</em><em>, </em><em>optional</em>) – do you want to explicilty define the initial camera focus/
 zero point (if not, the WebGL app will calculate the center as the mean 
@@ -228,54 +225,56 @@ of the coordinates of the first particle set loaded in), defaults to None</p></l
 NOTE: the magnitude must be &gt;0 , defaults to None</p></li>
 <li><p><strong>cameraRotation</strong> (<em>np.ndarray of shape</em><em> (</em><em>3</em><em>)</em><em>, </em><em>optional</em>) – can set camera rotation in units of radians 
 if you want, defaults to None</p></li>
+<li><p><strong>cameraUp</strong> (<em>np.ndarray of shape</em><em> (</em><em>3</em><em>)</em><em>, </em><em>optional</em>) – set camera orientation (north vector) using a quaternion, defaults to None</p></li>
+<li><p><strong>quaternion</strong> (<em>np.ndarray of shape</em><em> (</em><em>4</em><em>)</em><em>, </em><em>optional</em>) – can set camera rotation using a quaternion of form (w,x,y,z), defaults to None</p></li>
 </ul>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="Firefly.data_reader.Settings.keys">
-<span class="sig-name descname"><span class="pre">keys</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/Firefly/data_reader/settings.html#Settings.keys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Firefly.data_reader.Settings.keys" title="Permalink to this definition"></a></dt>
+<dt id="firefly.data_reader.Settings.keys">
+<code class="sig-name descname"><span class="pre">keys</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/firefly/data_reader/settings.html#Settings.keys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#firefly.data_reader.Settings.keys" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns a list of keys for all the different settings sub-dictionaries</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="Firefly.data_reader.Settings.loadFromJSON">
-<span class="sig-name descname"><span class="pre">loadFromJSON</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loud</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/Firefly/data_reader/settings.html#Settings.loadFromJSON"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Firefly.data_reader.Settings.loadFromJSON" title="Permalink to this definition"></a></dt>
+<dt id="firefly.data_reader.Settings.loadFromJSON">
+<code class="sig-name descname"><span class="pre">loadFromJSON</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loud</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/firefly/data_reader/settings.html#Settings.loadFromJSON"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#firefly.data_reader.Settings.loadFromJSON" title="Permalink to this definition">¶</a></dt>
 <dd><p>Replaces the current settings with those stored in a JSON file.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>filename</strong> (<em>str</em>) – full filepath to settings <code class="code docutils literal notranslate"><span class="pre">.json</span></code> file</p></li>
 <li><p><strong>loud</strong> (<em>bool</em><em>, </em><em>optional</em>) – flag to print status information to the console, defaults to True</p></li>
 </ul>
 </dd>
-<dt class="field-even">Raises</dt>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>FileNotFoundError</strong> – if the specified filename does not exist</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="Firefly.data_reader.Settings.outputToDict">
-<span class="sig-name descname"><span class="pre">outputToDict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/Firefly/data_reader/settings.html#Settings.outputToDict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Firefly.data_reader.Settings.outputToDict" title="Permalink to this definition"></a></dt>
+<dt id="firefly.data_reader.Settings.outputToDict">
+<code class="sig-name descname"><span class="pre">outputToDict</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/firefly/data_reader/settings.html#Settings.outputToDict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#firefly.data_reader.Settings.outputToDict" title="Permalink to this definition">¶</a></dt>
 <dd><p>Concatenates all the settings dicts into a single dictionary.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>all_settings_dict, concatenated settings dictionary</p>
 </dd>
-<dt class="field-even">Return type</dt>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>dict</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="Firefly.data_reader.Settings.outputToJSON">
-<span class="sig-name descname"><span class="pre">outputToJSON</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">JSONdir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">JSON_prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loud</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_jsons_to_disk</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">not_reader</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/Firefly/data_reader/settings.html#Settings.outputToJSON"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Firefly.data_reader.Settings.outputToJSON" title="Permalink to this definition"></a></dt>
+<dt id="firefly.data_reader.Settings.outputToJSON">
+<code class="sig-name descname"><span class="pre">outputToJSON</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">JSONdir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">JSON_prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loud</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_to_disk</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">not_reader</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/firefly/data_reader/settings.html#Settings.outputToJSON"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#firefly.data_reader.Settings.outputToJSON" title="Permalink to this definition">¶</a></dt>
 <dd><p>Saves the current settings to a JSON file.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>JSONdir</strong> (<em>str</em><em>, </em><em>optional</em>) – the sub-directory that will contain your JSON files, relative
 to your <code class="code docutils literal notranslate"><span class="pre">$HOME</span> <span class="pre">directory</span></code>. , defaults to <code class="code docutils literal notranslate"><span class="pre">$HOME/&lt;JSON_prefix&gt;</span></code></p></li>
@@ -285,27 +284,27 @@ to your <code class="code docutils literal notranslate"><span class="pre">$HOME<
 defaults to self.settings_filename</p></li>
 <li><p><strong>JSON_prefix</strong> – string that is prepended to filename, defaults to ‘’</p></li>
 <li><p><strong>loud</strong> (<em>bool</em><em>, </em><em>optional</em>) – flag to print status information to the console, defaults to True</p></li>
-<li><p><strong>write_jsons_to_disk</strong> (<em>bool</em><em>, </em><em>optional</em>) – flag that controls whether data is saved to disk (<code class="code docutils literal notranslate"><span class="pre">True</span></code>)
+<li><p><strong>write_to_disk</strong> (<em>bool</em><em>, </em><em>optional</em>) – flag that controls whether data is saved to disk (<code class="code docutils literal notranslate"><span class="pre">True</span></code>)
 or only converted to a string and returned (<code class="code docutils literal notranslate"><span class="pre">False</span></code>), defaults to True</p></li>
 <li><p><strong>not_reader</strong> – flag for whether to print the Reader <code class="code docutils literal notranslate"><span class="pre">filenames.json</span></code> warning, defaults to True</p></li>
 </ul>
 </dd>
-<dt class="field-even">Returns</dt>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>filename, JSON(all_settings_dict) (either a filename if
 written to disk or a JSON strs)</p>
 </dd>
-<dt class="field-odd">Return type</dt>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>str, str</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="Firefly.data_reader.Settings.particle_UI_settings">
-<span class="sig-name descname"><span class="pre">particle_UI_settings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">UIparticle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">UIdropdown</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">UIcolorPicker</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">extra</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/Firefly/data_reader/settings.html#Settings.particle_UI_settings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Firefly.data_reader.Settings.particle_UI_settings" title="Permalink to this definition"></a></dt>
+<dt id="firefly.data_reader.Settings.particle_UI_settings">
+<code class="sig-name descname"><span class="pre">particle_UI_settings</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">UIparticle</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">UIdropdown</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">UIcolorPicker</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">extra</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/firefly/data_reader/settings.html#Settings.particle_UI_settings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#firefly.data_reader.Settings.particle_UI_settings" title="Permalink to this definition">¶</a></dt>
 <dd><p>Flags that control how the UI for each particle group looks like</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>UIparticle</strong> (<em>dict of UIname:bool</em><em>, </em><em>optional</em>) – do you want to show the particles 
 in the user interface.
@@ -324,11 +323,11 @@ defaults to dict([(UIname,True) for UIname in UInames])</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="Firefly.data_reader.Settings.particle_colormap_settings">
-<span class="sig-name descname"><span class="pre">particle_colormap_settings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">colormapLims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colormapVals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colormap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colormapVariable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">showColormap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">extra</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/Firefly/data_reader/settings.html#Settings.particle_colormap_settings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Firefly.data_reader.Settings.particle_colormap_settings" title="Permalink to this definition"></a></dt>
+<dt id="firefly.data_reader.Settings.particle_colormap_settings">
+<code class="sig-name descname"><span class="pre">particle_colormap_settings</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">colormapLims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colormapVals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colormap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colormapVariable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">showColormap</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">extra</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/firefly/data_reader/settings.html#Settings.particle_colormap_settings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#firefly.data_reader.Settings.particle_colormap_settings" title="Permalink to this definition">¶</a></dt>
 <dd><p>Settings that will define the initial values of the colormaps in the particle UI panes.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>colormapLims</strong> (<em>dict of UIname:dict of field:</em><em>[</em><em>min</em><em>,</em><em>max</em><em>] </em><em>range</em><em>, </em><em>optional</em>) – initial [min, max] limits to the colormaps. 
 This is a nested dict of the particle UInames, 
@@ -363,12 +362,12 @@ This is a dict with keys of the particle UInames mapped to ints,
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="Firefly.data_reader.Settings.particle_filter_settings">
-<span class="sig-name descname"><span class="pre">particle_filter_settings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filterLims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filterVals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">extra</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/Firefly/data_reader/settings.html#Settings.particle_filter_settings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Firefly.data_reader.Settings.particle_filter_settings" title="Permalink to this definition"></a></dt>
+<dt id="firefly.data_reader.Settings.particle_filter_settings">
+<code class="sig-name descname"><span class="pre">particle_filter_settings</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filterLims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filterVals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">invertFilter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">extra</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/firefly/data_reader/settings.html#Settings.particle_filter_settings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#firefly.data_reader.Settings.particle_filter_settings" title="Permalink to this definition">¶</a></dt>
 <dd><p>Settings that will define the initial values of the filters in the particle UI panes
 and consequently what particles are filtered at startup.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>filterLims</strong> (<em>dict of UIname:dict of field:</em><em>[</em><em>min</em><em>,</em><em>max</em><em>] </em><em>range</em><em>, </em><em>optional</em>) – initial [min, max] limits to the filters. 
 This is a nested dict of the particle UInames, 
@@ -380,17 +379,19 @@ This is a nested dict of the particle UInames,
 then for each filterble field the [min, max] range 
 (e.g., {‘Gas’:{‘log10Density’:[.1,0.5],’magVelocities’:[50, 60]}}),
 defaults to None and is set in the web app to [min, max] of that field</p></li>
+<li><p><strong>invertFilter</strong> (<em>dict of UIname:dict of field:bool</em><em>, </em><em>optional</em>) – flags for whether filters should _hide_ particles within
+their range (True) or not (False), defaults to UIname:dict of field:False</p></li>
 </ul>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="Firefly.data_reader.Settings.particle_startup_settings">
-<span class="sig-name descname"><span class="pre">particle_startup_settings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plotNmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">showVel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velType</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sizeMult</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">showParts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">extra</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/Firefly/data_reader/settings.html#Settings.particle_startup_settings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Firefly.data_reader.Settings.particle_startup_settings" title="Permalink to this definition"></a></dt>
+<dt id="firefly.data_reader.Settings.particle_startup_settings">
+<code class="sig-name descname"><span class="pre">particle_startup_settings</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plotNmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sizeMult</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">showParts</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radiusVariable</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">extra</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/firefly/data_reader/settings.html#Settings.particle_startup_settings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#firefly.data_reader.Settings.particle_startup_settings" title="Permalink to this definition">¶</a></dt>
 <dd><p>Settings that will define the initial values of the particle UI panes</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>plotNmax</strong> (<em>int</em><em>, </em><em>optional</em>) – maximum number of particles to plot 
 This is a dict with keys of the particle UInames mapped to ints,
@@ -412,17 +413,58 @@ defaults to dict([(UIname,1) for UIname in UInames])</p></li>
 <li><p><strong>showParts</strong> (<em>dict of UIname:bool</em><em>, </em><em>optional</em>) – show particles by default.
 This is a dict with keys of the particle UInames mapped to bools,
 defaults to dict([(UIname,True) for UIname in UInames])</p></li>
+<li><p><strong>radiusVariable</strong> (<em>dict of UIname:int</em><em>, </em><em>optional</em>) – dict of UIname:int which are indices for
+which variable to scale the radius by (if any have been flagged
+as allowable to be a radius scale). 0 is always ‘None’ and will
+make all particles the same radius, optional
+defaults to dict([(UIname,0) for UIname in UInames])</p></li>
 </ul>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="Firefly.data_reader.Settings.printKeys">
-<span class="sig-name descname"><span class="pre">printKeys</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/Firefly/data_reader/settings.html#Settings.printKeys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Firefly.data_reader.Settings.printKeys" title="Permalink to this definition"></a></dt>
+<dt id="firefly.data_reader.Settings.particle_velocity_settings">
+<code class="sig-name descname"><span class="pre">particle_velocity_settings</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">showVel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velType</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velVectorWidth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velGradient</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">animateVel</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">animateVelDt</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">animateVelTmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">extra</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/firefly/data_reader/settings.html#Settings.particle_velocity_settings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#firefly.data_reader.Settings.particle_velocity_settings" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="simple">
+<dt>Settings used to define properties of the velocity vector field</dt><dd><p>which can also be used to extrapolate new positions using the
+<code class="docutils literal notranslate"><span class="pre">animateVel</span></code> kwarg.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>showVel</strong> (<em>dict of UIname:bool</em><em>, </em><em>optional</em>) – flag to start showing the velocity vectors
+This is a dict with keys of the particle UInames mapped to bools,
+defaults to dict([(UIname,False) for UIname in UInames])</p></li>
+<li><p><strong>velType</strong> – type of velocity vectors to plot.  
+This is a dict with keys of the particle UInames mapped to strs that
+must be one of ‘line’, ‘arrow’, or ‘triangle’,
+defaults to dict([(UIname,’line’) for UIname in UInames])</p></li>
+<li><p><strong>velVectorWidth</strong> (<em>dict of UIname:float</em><em>, </em><em>optional</em>) – width of the velocity vectors,
+defaults to dict([(UIname,1) for UIname in UInames])</p></li>
+<li><p><strong>velGradient</strong> (<em>dict of UIname:bool</em><em>, </em><em>optional</em>) – flags for whether there should be a gradient
+to white applied along the length of the velocity vector
+to indicate direction, defaults to dict([(UIname,False) for UIname in UInames])</p></li>
+<li><p><strong>animateVel</strong> (<em>dict of UIname:bool</em><em>, </em><em>optional</em>) – flags for whether velocity extrapolation should
+be enabled at startup,
+defaults to dict([(UIname,False) for UIname in UInames])</p></li>
+<li><p><strong>animateVelDt</strong> (<em>dict of UIname:float</em><em>, </em><em>optional</em>) – DT for which to increment the extrapolation
+defaults to dict([(UIname,0) for UIname in UInames])</p></li>
+<li><p><strong>animateVelTmax</strong> (<em>dict of UIname:float</em><em>, </em><em>optional</em>) – maximum time to extrapolate before resetting
+particles to their original positions
+defaults to dict([(UIname,1) for UIname in UInames])</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="firefly.data_reader.Settings.printKeys">
+<code class="sig-name descname"><span class="pre">printKeys</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pattern</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/firefly/data_reader/settings.html#Settings.printKeys"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#firefly.data_reader.Settings.printKeys" title="Permalink to this definition">¶</a></dt>
 <dd><p>Prints keys (and optionally their values) to the console in an organized (and pretty) fashion.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>pattern</strong> (<em>str</em><em>, </em><em>optional</em>) – string that settings group must contain to be printed, defaults to None</p></li>
 <li><p><strong>values</strong> (<em>bool</em><em>, </em><em>optional</em>) – flag to print what the settings are set to, in addition to the key, defaults to True</p></li>
@@ -432,11 +474,11 @@ defaults to dict([(UIname,True) for UIname in UInames])</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="Firefly.data_reader.Settings.startup_settings">
-<span class="sig-name descname"><span class="pre">startup_settings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">maxVrange</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startFly</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">friction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stereo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stereoSep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">extra</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/Firefly/data_reader/settings.html#Settings.startup_settings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Firefly.data_reader.Settings.startup_settings" title="Permalink to this definition"></a></dt>
+<dt id="firefly.data_reader.Settings.startup_settings">
+<code class="sig-name descname"><span class="pre">startup_settings</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">maxVrange</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2000.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">startFly</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">friction</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stereo</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stereoSep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.06</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimate</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_tween</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">CDmin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">CDmax</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">CDlognorm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">columnDensity</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">extra</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/firefly/data_reader/settings.html#Settings.startup_settings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#firefly.data_reader.Settings.startup_settings" title="Permalink to this definition">¶</a></dt>
 <dd><p>General settings that affect the state app state</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>maxVrange</strong> (<em>float</em><em>, </em><em>optional</em>) – maximum range in velocities to use in deciding 
 the length of the velocity vectors (making maxVrange 
@@ -473,18 +515,25 @@ should be enabled at startup. Toggle this mode by pressing ‘p’ on the keyboa
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="Firefly.data_reader.Settings.window_settings">
-<span class="sig-name descname"><span class="pre">window_settings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Firefly'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">extra</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/Firefly/data_reader/settings.html#Settings.window_settings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#Firefly.data_reader.Settings.window_settings" title="Permalink to this definition"></a></dt>
+<dt id="firefly.data_reader.Settings.window_settings">
+<code class="sig-name descname"><span class="pre">window_settings</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Firefly'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">annotation</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">showFPS</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">showMemoryUsage</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">memoryLimit</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2000000000.0</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">extra</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/firefly/data_reader/settings.html#Settings.window_settings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#firefly.data_reader.Settings.window_settings" title="Permalink to this definition">¶</a></dt>
 <dd><p>Settings that affect the browser window</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>title</strong> (<em>str</em><em>, </em><em>optional</em>) – the title of the webpage, shows up in browser tab,
 defaults to ‘Firefly’</p></li>
 <li><p><strong>annotation</strong> (<em>str</em><em>, </em><em>optional</em>) – text to include at the top of the
 Firefly window as an annotation, defaults to None</p></li>
-<li><p><strong>showfps</strong> (<em>bool</em><em>, </em><em>optional</em>) – flag to display the FPS (frames per second) of the 
+<li><p><strong>showFPS</strong> (<em>bool</em><em>, </em><em>optional</em>) – flag to display the FPS (frames per second) of the 
 Firefly scene, defaults to False</p></li>
+<li><p><strong>showMemoryUsage</strong> (<em>bool</em><em>, </em><em>optional</em>) – flag to display the memory usage in GB of the 
+loaded data– useful for octrees when memory usage changes over time, defaults to False</p></li>
+<li><p><strong>memoryLimit</strong> (<em>float</em><em>, </em><em>optional</em>) – maximum memory in bytes to use when loading an octree dataset.
+If this limit is exceeded then previously loaded nodes will be discarded
+to bring the memory usage back below. Works best in Chrome which exposes
+the memory usage directly, otherwise memory usage is only estimated, 
+defaults to 2e9</p></li>
 </ul>
 </dd>
 </dl>
@@ -498,8 +547,8 @@ Firefly scene, defaults to False</p></li>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="Firefly.data_reader.ParticleGroup.html" class="btn btn-neutral float-left" title="Firefly.data_reader.ParticleGroup" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="Firefly.data_reader.TweenParams.html" class="btn btn-neutral float-right" title="Firefly.data_reader.TweenParams" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="firefly.data_reader.ParticleGroup.html" class="btn btn-neutral float-left" title="firefly.data_reader.ParticleGroup" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="firefly.data_reader.TweenParams.html" class="btn btn-neutral float-right" title="firefly.data_reader.TweenParams" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

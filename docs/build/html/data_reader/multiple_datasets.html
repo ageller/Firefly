@@ -159,7 +159,7 @@ specified is not a sub-directory of <code class="code docutils literal notransla
 and prefer to have a menu of these data files to choose
 from at the start of Firefly, you can append entries to the
 <code class="code docutils literal notranslate"><span class="pre">startup.json</span></code> file to create a list of directories
-.  For instance, a <code class="xref py py-class docutils literal notranslate"><span class="pre">Reader</span></code> may create a
+.  For instance, a <a class="reference internal" href="../reference/api/classes/firefly.data_reader.Reader.html#firefly.data_reader.Reader" title="firefly.data_reader.Reader"><code class="xref py py-class docutils literal notranslate"><span class="pre">Reader</span></code></a> may create a
 <code class="code docutils literal notranslate"><span class="pre">startup.json</span></code> file that contains the following:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s2">&quot;0&quot;</span><span class="p">:</span><span class="s2">&quot;data\/snapdir_001&quot;</span><span class="p">}</span>
 </pre></div>
@@ -172,7 +172,7 @@ from at the start of Firefly, you can append entries to the
 </pre></div>
 </div>
 <p>Or use the <code class="code docutils literal notranslate"><span class="pre">write_startup=append</span></code>
-keyword argument of <code class="xref py py-func docutils literal notranslate"><span class="pre">__init__()</span></code>
+keyword argument of <a class="reference internal" href="../reference/api/classes/firefly.data_reader.Reader.html#firefly.data_reader.Reader.__init__" title="firefly.data_reader.Reader.__init__"><code class="xref py py-func docutils literal notranslate"><span class="pre">__init__()</span></code></a>
 when initializing your second dataset.</p>
 <p>With this <code class="code docutils literal notranslate"><span class="pre">startup.json</span></code>, you would see a button when
 Firefly loads that, when clicked, will allow you to choose
@@ -187,7 +187,7 @@ to your local browser (which can only see your local file system).</p>
 <p>Alternatively, one could make many copies of the Firefly source directory,
 each with their own <code class="code docutils literal notranslate"><span class="pre">startup.json</span></code>.</p>
 <p>To facilitate this, we provide the
-<code class="xref py py-func docutils literal notranslate"><span class="pre">firefly.data_reader.Reader.copyFireflySourceToTarget()</span></code>
+<a class="reference internal" href="../reference/api/classes/firefly.data_reader.Reader.html#firefly.data_reader.Reader.copyFireflySourceToTarget" title="firefly.data_reader.Reader.copyFireflySourceToTarget"><code class="xref py py-func docutils literal notranslate"><span class="pre">firefly.data_reader.Reader.copyFireflySourceToTarget()</span></code></a>
 method which will create a new directory and copy the necessary source
 files to run Firefly within it (without the Python frontend API).</p>
 <p>You can optionally specify to also copy the necessary Flask files to
@@ -202,7 +202,7 @@ by GitHub, enabled.</p>
 <p class="admonition-title">Note</p>
 <p>To use the <code class="code docutils literal notranslate"><span class="pre">init_gh_pages</span></code> keyword argument you must have created
 a GitHub OAUTH token somewhere on your system and passed it to
-<code class="xref py py-func docutils literal notranslate"><span class="pre">copyFireflySourceToTarget()</span></code>
+<a class="reference internal" href="../reference/api/classes/firefly.data_reader.Reader.html#firefly.data_reader.Reader.copyFireflySourceToTarget" title="firefly.data_reader.Reader.copyFireflySourceToTarget"><code class="xref py py-func docutils literal notranslate"><span class="pre">copyFireflySourceToTarget()</span></code></a>
 using the <code class="code docutils literal notranslate"><span class="pre">GHOAUTHTOKENPATH</span></code> keyword argument (which defaults
 to <code class="code docutils literal notranslate"><span class="pre">$HOME/.github.token</span></code>.
 Attempting to use the <code class="code docutils literal notranslate"><span class="pre">init_gh_pages</span></code> flag without doing so

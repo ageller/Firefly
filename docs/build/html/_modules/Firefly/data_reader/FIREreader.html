@@ -3,14 +3,12 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Firefly.data_reader.FIREreader &mdash; Firefly 2.0.0 documentation</title>
-      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <title>firefly.data_reader.FIREreader &mdash; Firefly 2.0.5 documentation</title><link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+  <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/doctools.js"></script>
@@ -25,8 +23,7 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../../index.html">
-            <img src="../../../_static/logo_banner.png" class="logo" alt="Logo"/>
+            <a href="../../../index.html"><img src="../../../_static/logo_banner.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -60,7 +57,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="../../index.html">Module code</a> &raquo;</li>
-      <li>Firefly.data_reader.FIREreader</li>
+      <li>firefly.data_reader.FIREreader</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -69,13 +66,14 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <h1>Source code for Firefly.data_reader.FIREreader</h1><div class="highlight"><pre>
+  <h1>Source code for firefly.data_reader.FIREreader</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">os</span>
 
 <span class="kn">from</span> <span class="nn">.reader</span> <span class="kn">import</span> <span class="n">Reader</span><span class="p">,</span><span class="n">ParticleGroup</span>
 
-<span class="kn">from</span> <span class="nn">abg_python.snapshot_utils</span> <span class="kn">import</span> <span class="n">openSnapshot</span>
+<span class="kn">from</span> <span class="nn">abg_python.snapshot_utils</span> <span class="kn">import</span> <span class="n">openSnapshot</span><span class="p">,</span><span class="n">iterativeCoM</span>
+<span class="kn">from</span> <span class="nn">abg_python.cosmo_utils</span> <span class="kn">import</span> <span class="n">load_rockstar</span>
 
 <div class="viewcode-block" id="FIREreader"><a class="viewcode-back" href="../../../reference/api/readers/firefly.data_reader.FIREreader.html#firefly.data_reader.FIREreader">[docs]</a><span class="k">class</span> <span class="nc">FIREreader</span><span class="p">(</span><span class="n">Reader</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;This is an example of a &quot;custom&quot; Reader that has been tuned to </span>
@@ -91,7 +89,7 @@
         <span class="n">fields</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
         <span class="n">filterFlags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
         <span class="n">colormapFlags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">magFlags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+        <span class="n">radiusFlags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">logFlags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
         <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Base initialization method for FIREreader instances.</span>
@@ -113,11 +111,11 @@
 <span class="sd">            defaults to :code:`[1 for i in ptypes]`</span>
 <span class="sd">        :type decimation_factors: list of int, optional</span>
 <span class="sd">        :param fields: names of fields to open from snapshot data</span>
-<span class="sd">            (e.g. Temperature, AgeGyr, Velocities, Density). Shared between </span>
+<span class="sd">            (e.g. Temperature, AgeGyr, Density). Shared between </span>
 <span class="sd">            particle types but if a particle type does not have a field </span>
 <span class="sd">            (e.g. PartType4 does not have Temperature, PartType0 does not have AgeGyr)</span>
 <span class="sd">            then that field is skipped for that particle type.</span>
-<span class="sd">            defaults to [&#39;Velocities&#39;]</span>
+<span class="sd">            defaults to []</span>
 <span class="sd">        :type fields: list of str, optional</span>
 <span class="sd">        :param filterFlags: flags to signal whether field should be in filter dropdown,</span>
 <span class="sd">            defaults to [True for i in fields]</span>
@@ -125,17 +123,16 @@
 <span class="sd">        :param colormapFlags: flags to signal whether field should be in colormap dropdown,</span>
 <span class="sd">            defaults to [True for i in fields]</span>
 <span class="sd">        :type colormapFlags: list of bool, optional</span>
-<span class="sd">        :param magFlags: flags to signal whether the magnitude of the field should be taken,</span>
-<span class="sd">            rather than the field itself (e.g. for vector quantities),</span>
+<span class="sd">        :param radiusFlags: flags to signal whether field should be in radius dropdown,</span>
 <span class="sd">            defaults to [False for i in fields]</span>
-<span class="sd">        :type magFlags: list of bool, optional</span>
+<span class="sd">        :type radiusFlags: list of bool, optional</span>
 <span class="sd">        :param logFlags: flags to signal whether the log of the field should be taken,</span>
 <span class="sd">            defaults to [False for i in fields]</span>
 <span class="sd">        :type logFlags: list of bool, optional</span>
 <span class="sd">        :raises ValueError: if the length of ptypes, UInames, and decimation factors</span>
 <span class="sd">            does not match.</span>
 <span class="sd">        :raises ValueError: if the length of fields, filterFlags,</span>
-<span class="sd">            colormapFlags, magFlags, and logFlags does not match.</span>
+<span class="sd">            colormapFlags, radiusFlags, and logFlags does not match.</span>
 <span class="sd">        :raises FileNotFoundError: if snapdir cannot be found</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -145,10 +142,10 @@
         <span class="k">if</span> <span class="n">decimation_factors</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">decimation_factors</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ptypes</span><span class="p">]</span>
 
         <span class="c1">## handle default input for fields</span>
-        <span class="k">if</span> <span class="n">fields</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Velocities&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">fields</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">fields</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="n">filterFlags</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">filterFlags</span> <span class="o">=</span> <span class="p">[</span><span class="kc">True</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">colormapFlags</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">colormapFlags</span> <span class="o">=</span> <span class="p">[</span><span class="kc">True</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">magFlags</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">magFlags</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">radiusFlags</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">radiusFlags</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">logFlags</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">logFlags</span> <span class="o">=</span> <span class="p">[</span><span class="kc">False</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">]</span>
 
         <span class="c1">## input validation</span>
@@ -162,8 +159,8 @@
                     <span class="n">name</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">llist</span><span class="p">),</span><span class="nb">len</span><span class="p">(</span><span class="n">ptypes</span><span class="p">)))</span>
 
         <span class="c1">##  fields</span>
-        <span class="n">lists</span> <span class="o">=</span> <span class="p">[</span><span class="n">filterFlags</span><span class="p">,</span><span class="n">colormapFlags</span><span class="p">,</span><span class="n">magFlags</span><span class="p">,</span><span class="n">logFlags</span><span class="p">]</span>
-        <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;filterFlags&#39;</span><span class="p">,</span><span class="s1">&#39;colormapFlags&#39;</span><span class="p">,</span><span class="s1">&#39;magFlags&#39;</span><span class="p">,</span><span class="s1">&#39;logFlags&#39;</span><span class="p">]</span>
+        <span class="n">lists</span> <span class="o">=</span> <span class="p">[</span><span class="n">filterFlags</span><span class="p">,</span><span class="n">colormapFlags</span><span class="p">,</span><span class="n">radiusFlags</span><span class="p">,</span><span class="n">logFlags</span><span class="p">]</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;filterFlags&#39;</span><span class="p">,</span><span class="s1">&#39;colormapFlags&#39;</span><span class="p">,</span><span class="s1">&#39;radiusFlags&#39;</span><span class="p">,</span><span class="s1">&#39;logFlags&#39;</span><span class="p">]</span>
         <span class="k">for</span> <span class="n">name</span><span class="p">,</span><span class="n">llist</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">names</span><span class="p">,</span><span class="n">lists</span><span class="p">):</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">llist</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">fields</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
@@ -180,12 +177,12 @@
             <span class="n">fields</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span>
             <span class="n">filterFlags</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">filterFlags</span><span class="p">)</span>
             <span class="n">colormapFlags</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">colormapFlags</span><span class="p">)</span>
-            <span class="n">magFlags</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">magFlags</span><span class="p">)</span>
+            <span class="n">radiusFlags</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">radiusFlags</span><span class="p">)</span>
             <span class="n">logFlags</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">logFlags</span><span class="p">)</span>
 
             <span class="n">index</span> <span class="o">=</span> <span class="n">fields</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;Coordinates&#39;</span><span class="p">)</span>
 
-            <span class="k">for</span> <span class="n">llist</span> <span class="ow">in</span> <span class="p">[</span><span class="n">fields</span><span class="p">,</span><span class="n">filterFlags</span><span class="p">,</span><span class="n">magFlags</span><span class="p">,</span><span class="n">logFlags</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">llist</span> <span class="ow">in</span> <span class="p">[</span><span class="n">fields</span><span class="p">,</span><span class="n">filterFlags</span><span class="p">,</span><span class="n">logFlags</span><span class="p">]:</span>
                 <span class="n">llist</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
 
         <span class="c1">## where to find the HDF5 files</span>
@@ -209,9 +206,9 @@
 
         <span class="c1">## do we want to color by that attribute?</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">colormapFlags</span> <span class="o">=</span> <span class="n">colormapFlags</span>
-        
-        <span class="c1">## do we need to take the magnitude of it? (velocity? typically not..)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">magFlags</span> <span class="o">=</span> <span class="n">magFlags</span>
+
+        <span class="c1">## do we want to scale particle size by that attribute?</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">radiusFlags</span> <span class="o">=</span> <span class="n">radiusFlags</span>
         
         <span class="c1">## do we need to take the log of it </span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logFlags</span> <span class="o">=</span> <span class="n">logFlags</span>
@@ -219,18 +216,20 @@
         <span class="c1">####### execute generic Reader __init__ below #######</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="FIREreader.loadData"><a class="viewcode-back" href="../../../reference/api/readers/firefly.data_reader.FIREreader.html#firefly.data_reader.FIREreader.loadData">[docs]</a>    <span class="k">def</span> <span class="nf">loadData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">com_offset</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="FIREreader.loadData"><a class="viewcode-back" href="../../../reference/api/readers/firefly.data_reader.FIREreader.html#firefly.data_reader.FIREreader.loadData">[docs]</a>    <span class="k">def</span> <span class="nf">loadData</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">com</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">vcom</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Loads FIRE snapshot data using Alex Gurvich&#39;s</span>
 <span class="sd">        :func:`firefly.data_reader.snapshot_utils.openSnapshot`.</span>
 <span class="sd">        (reproduced from https://github.com/agurvich/abg_python) and binds it to a </span>
 <span class="sd">        corresponding :class:`firefly.data_reader.ParticleGroup` instance.</span>
 
-<span class="sd">        :param com_offset: flag to offset all coordinates by the COM of the </span>
-<span class="sd">            snapshot, defaults to False </span>
-<span class="sd">        :type com_offset: bool, optional</span>
+<span class="sd">        :param com: position to offset all coordinates by if None, </span>
+<span class="sd">            will calculate the CoM, defaults to None</span>
+<span class="sd">        :type com: np.ndarray, optional</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="n">com</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="k">for</span> <span class="n">ptype</span><span class="p">,</span><span class="n">UIname</span><span class="p">,</span><span class="n">dec_factor</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span>
             <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ptypes</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">UInames</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">decimation_factors</span><span class="p">))[::</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
@@ -241,58 +240,38 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">snapdir</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">snapnum</span><span class="p">,</span>
                 <span class="nb">int</span><span class="p">(</span><span class="n">ptype</span><span class="p">),</span> <span class="c1">## ptype should be 1,2,3,4,etc...</span>
-                <span class="n">keys_to_extract</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Coordinates&#39;</span><span class="p">]</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="o">+</span><span class="p">[</span><span class="s1">&#39;Masses&#39;</span><span class="p">]</span><span class="o">*</span><span class="n">com_offset</span>
+                <span class="n">keys_to_extract</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Coordinates&#39;</span><span class="p">]</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="o">+</span><span class="p">[</span><span class="s1">&#39;Masses&#39;</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="n">com</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">)</span><span class="o">+</span><span class="p">[</span><span class="s1">&#39;Velocities&#39;</span><span class="p">]</span>
             <span class="p">)</span>
 
-            <span class="k">if</span> <span class="n">com_offset</span> <span class="ow">and</span> <span class="n">com</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">com</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
-                <span class="c1">## use concentric shells to find an estimate</span>
-                <span class="c1">##  for the center of mass</span>
-                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">):</span>
-                    <span class="n">rs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">snapdict</span><span class="p">[</span><span class="s1">&#39;Coordinates&#39;</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
-                    <span class="n">rmax</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">rs</span><span class="p">)</span><span class="o">/</span><span class="mi">10</span><span class="o">**</span><span class="n">i</span>
+            <span class="k">if</span> <span class="n">com</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">snapdir</span><span class="p">,</span><span class="s1">&#39;..&#39;</span><span class="p">,</span><span class="s1">&#39;halo&#39;</span><span class="p">,</span><span class="s1">&#39;rockstar_dm&#39;</span><span class="p">)):</span>
+                    <span class="n">com</span><span class="p">,</span><span class="n">rvir</span><span class="p">,</span><span class="n">vcom</span> <span class="o">=</span> <span class="n">load_rockstar</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">snapdir</span><span class="p">,</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">snapnum</span><span class="p">,</span>
+                        <span class="n">extra_names_to_read</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;velocity&#39;</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">com</span><span class="p">,</span><span class="n">vcom</span> <span class="o">=</span> <span class="n">iterativeCoM</span><span class="p">(</span>
+                        <span class="n">snapdict</span><span class="p">[</span><span class="s1">&#39;Coordinates&#39;</span><span class="p">],</span>
+                        <span class="n">snapdict</span><span class="p">[</span><span class="s1">&#39;Masses&#39;</span><span class="p">],</span>
+                        <span class="n">snapdict</span><span class="p">[</span><span class="s1">&#39;Velocities&#39;</span><span class="p">])</span>
 
+            <span class="k">if</span> <span class="n">vcom</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">vcom</span> <span class="o">=</span> <span class="mi">0</span>
 
-                    <span class="n">rmask</span> <span class="o">=</span> <span class="n">rs</span> <span class="o">&lt;=</span> <span class="n">rmax</span>
-
-                    <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">rmask</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                        <span class="k">break</span>
-
-                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Centering on particles within </span><span class="si">%.2f</span><span class="s2"> kpc&quot;</span><span class="o">%</span><span class="n">rmax</span><span class="p">)</span>
-
-                    <span class="c1">## compute the center of mass of the particles within this shell</span>
-                    <span class="n">this_com</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">snapdict</span><span class="p">[</span><span class="s1">&#39;Coordinates&#39;</span><span class="p">][</span><span class="n">rmask</span><span class="p">]</span> <span class="o">*</span>
-                        <span class="n">snapdict</span><span class="p">[</span><span class="s1">&#39;Masses&#39;</span><span class="p">][</span><span class="n">rmask</span><span class="p">][:,</span><span class="kc">None</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">/</span> 
-                        <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">snapdict</span><span class="p">[</span><span class="s1">&#39;Masses&#39;</span><span class="p">][</span><span class="n">rmask</span><span class="p">]))</span>
-
-
-                    <span class="n">snapdict</span><span class="p">[</span><span class="s1">&#39;Coordinates&#39;</span><span class="p">]</span><span class="o">-=</span><span class="n">this_com</span>
-
-                    <span class="c1">## keep track of total com</span>
-                    <span class="n">com</span> <span class="o">+=</span> <span class="n">this_com</span>
-
-                <span class="n">vcom</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">snapdict</span><span class="p">[</span><span class="s1">&#39;Velocities&#39;</span><span class="p">][</span><span class="n">rmask</span><span class="p">]</span> <span class="o">*</span>
-                    <span class="n">snapdict</span><span class="p">[</span><span class="s1">&#39;Masses&#39;</span><span class="p">][</span><span class="n">rmask</span><span class="p">][:,</span><span class="kc">None</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">/</span>
-                    <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">snapdict</span><span class="p">[</span><span class="s1">&#39;Masses&#39;</span><span class="p">][</span><span class="n">rmask</span><span class="p">]))</span>
-
-                <span class="n">snapdict</span><span class="p">[</span><span class="s1">&#39;Velocities&#39;</span><span class="p">]</span><span class="o">-=</span><span class="n">vcom</span>
-
-            <span class="k">elif</span> <span class="n">com</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> 
-                <span class="n">snapdict</span><span class="p">[</span><span class="s1">&#39;Coordinates&#39;</span><span class="p">]</span><span class="o">-=</span><span class="n">com</span>
-                <span class="n">snapdict</span><span class="p">[</span><span class="s1">&#39;Velocities&#39;</span><span class="p">]</span><span class="o">-=</span><span class="n">vcom</span>
-
+            <span class="n">snapdict</span><span class="p">[</span><span class="s1">&#39;Coordinates&#39;</span><span class="p">]</span><span class="o">-=</span><span class="n">com</span>
+            <span class="n">snapdict</span><span class="p">[</span><span class="s1">&#39;Velocities&#39;</span><span class="p">]</span> <span class="o">-=</span><span class="n">vcom</span>
 
             <span class="c1">## initialize output arrays for fields</span>
-            <span class="n">tracked_names</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="n">tracked_arrays</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="n">tracked_filter_flags</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="n">tracked_colormap_flags</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">field_names</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">field_arrays</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">field_filter_flags</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">field_colormap_flags</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">field_radius_flags</span> <span class="o">=</span> <span class="p">[]</span>
 
-            <span class="k">for</span> <span class="n">field</span><span class="p">,</span><span class="n">filterFlag</span><span class="p">,</span><span class="n">colormapFlag</span><span class="p">,</span><span class="n">magFlag</span><span class="p">,</span><span class="n">logFlag</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span>
+            <span class="k">for</span> <span class="n">field</span><span class="p">,</span><span class="n">filterFlag</span><span class="p">,</span><span class="n">colormapFlag</span><span class="p">,</span><span class="n">radiusFlag</span><span class="p">,</span><span class="n">logFlag</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">filterFlags</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">colormapFlags</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">magFlags</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">radiusFlags</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">logFlags</span><span class="p">)):</span>
 
                 <span class="c1">## easypeasy, just read from the snapdict</span>
@@ -308,28 +287,28 @@
                     <span class="k">continue</span>
 
                 <span class="c1">## take the log and/or magnitude if requested</span>
-                <span class="k">if</span> <span class="n">magFlag</span><span class="p">:</span>
-                    <span class="n">arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">arr</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-                    <span class="n">field</span> <span class="o">=</span> <span class="s1">&#39;mag</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="n">field</span>
                 <span class="k">if</span> <span class="n">logFlag</span><span class="p">:</span>
                     <span class="n">arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">log10</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>
                     <span class="n">field</span> <span class="o">=</span> <span class="s1">&#39;log10</span><span class="si">%s</span><span class="s1">&#39;</span><span class="o">%</span><span class="n">field</span>
                 
-
                 <span class="c1">## append this field into the arrays</span>
-                <span class="n">tracked_names</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="n">tracked_names</span><span class="p">,</span>
+                <span class="n">field_names</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">field_names</span><span class="p">,</span>
                     <span class="p">[</span><span class="n">field</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
-                <span class="n">tracked_filter_flags</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="n">tracked_filter_flags</span><span class="p">,</span>
+                <span class="n">field_filter_flags</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">field_filter_flags</span><span class="p">,</span>
                     <span class="p">[</span><span class="n">filterFlag</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
-                <span class="n">tracked_colormap_flags</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                    <span class="n">tracked_colormap_flags</span><span class="p">,</span>
+                <span class="n">field_colormap_flags</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">field_colormap_flags</span><span class="p">,</span>
                     <span class="p">[</span><span class="n">colormapFlag</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
-                <span class="n">tracked_arrays</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>
+                <span class="n">field_radius_flags</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="n">field_radius_flags</span><span class="p">,</span>
+                    <span class="p">[</span><span class="n">radiusFlag</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+                <span class="n">field_arrays</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">arr</span><span class="p">)</span>
                 
             <span class="c1">## initialize a particleGroup instance</span>
             <span class="c1">##  for this particle type</span>
@@ -338,12 +317,13 @@
                 <span class="p">[</span><span class="n">ParticleGroup</span><span class="p">(</span>
                     <span class="n">UIname</span><span class="p">,</span>
                     <span class="n">snapdict</span><span class="p">[</span><span class="s1">&#39;Coordinates&#39;</span><span class="p">],</span>
-                    <span class="n">tracked_names</span><span class="o">=</span><span class="n">tracked_names</span><span class="p">,</span>
-                    <span class="n">tracked_arrays</span><span class="o">=</span><span class="n">tracked_arrays</span><span class="p">,</span>
+                    <span class="n">snapdict</span><span class="p">[</span><span class="s1">&#39;Velocities&#39;</span><span class="p">],</span>
+                    <span class="n">field_names</span><span class="o">=</span><span class="n">field_names</span><span class="p">,</span>
+                    <span class="n">field_arrays</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">field_arrays</span><span class="p">,</span><span class="n">ndmin</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
                     <span class="n">decimation_factor</span><span class="o">=</span><span class="n">dec_factor</span><span class="p">,</span>
-                    <span class="n">tracked_filter_flags</span><span class="o">=</span><span class="n">tracked_filter_flags</span><span class="p">,</span>
-                    <span class="n">tracked_colormap_flags</span><span class="o">=</span><span class="n">tracked_colormap_flags</span><span class="p">,</span>
-                    <span class="n">doSPHrad</span> <span class="o">=</span> <span class="s1">&#39;SmoothingLength&#39;</span> <span class="ow">in</span> <span class="n">tracked_names</span><span class="p">)],</span>
+                    <span class="n">field_filter_flags</span><span class="o">=</span><span class="n">field_filter_flags</span><span class="p">,</span>
+                    <span class="n">field_colormap_flags</span><span class="o">=</span><span class="n">field_colormap_flags</span><span class="p">,</span>
+                    <span class="n">field_radius_flags</span><span class="o">=</span><span class="n">field_radius_flags</span><span class="p">)],</span>
                 <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
 
@@ -376,7 +356,7 @@
 
 <span class="sd">                :code:`UInames = [&#39;gas&#39;,&#39;stars&#39;]`</span>
 
-<span class="sd">                :code:`fields = [&#39;Velocities&#39;,&#39;AgeGyr&#39;,&#39;Temperature&#39;,&#39;GCRadius&#39;]`</span>
+<span class="sd">                :code:`fields = [&#39;AgeGyr&#39;,&#39;Temperature&#39;,&#39;GCRadius&#39;]`</span>
 
 <span class="sd">            along  with some &quot;standard&quot; settings with:</span>
 <span class="sd">                :code:`settings[&#39;color&#39;][&#39;gas&#39;] = [1,0,0,1]`</span>
@@ -410,13 +390,22 @@
         <span class="k">if</span> <span class="n">path_to_snapshot</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">:]</span> <span class="o">==</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="p">:</span>
             <span class="n">path_to_snapshot</span> <span class="o">=</span> <span class="n">path_to_snapshot</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
-        <span class="n">snapdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">path_to_snapshot</span><span class="p">)</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">snapnum</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">path_to_snapshot</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> should be formatted as &#39;path/to/output/snapdir_xxx&#39;&quot;</span><span class="o">%</span><span class="n">path_to_snapshot</span><span class="o">+</span>
-                <span class="s2">&quot; where xxx is an integer&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;.hdf5&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">path_to_snapshot</span><span class="p">:</span>
+            <span class="n">snapdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">path_to_snapshot</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">snapnum</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">path_to_snapshot</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> should be formatted as &#39;path/to/output/snapdir_xxx&#39;&quot;</span><span class="o">%</span><span class="n">path_to_snapshot</span><span class="o">+</span>
+                    <span class="s2">&quot; where xxx is an integer&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">snapdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">path_to_snapshot</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span> <span class="n">snapnum</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">path_to_snapshot</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">][:</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="s1">&#39;.hdf5&#39;</span><span class="p">)])</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> should be formatted as &#39;path/to/output/snapshot_xxx.hdf5&#39;&quot;</span><span class="o">%</span><span class="n">path_to_snapshot</span><span class="o">+</span>
+                    <span class="s2">&quot; where xxx is an integer&quot;</span><span class="p">)</span>
+
 
         <span class="c1">## relative path -&gt; symbolic link</span>
         <span class="k">if</span> <span class="n">JSONdir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">JSONdir</span><span class="o">=</span><span class="s2">&quot;FIREData_</span><span class="si">%d</span><span class="s2">&quot;</span><span class="o">%</span><span class="n">snapnum</span>
@@ -428,9 +417,8 @@
             <span class="n">ptypes</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">4</span><span class="p">],</span> 
             <span class="n">UInames</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Gas&#39;</span><span class="p">,</span><span class="s1">&#39;Stars&#39;</span><span class="p">],</span>
             <span class="n">decimation_factors</span><span class="o">=</span><span class="p">[</span><span class="n">decimation_factor</span><span class="p">,</span><span class="n">decimation_factor</span><span class="p">],</span>
-            <span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;AgeGyr&#39;</span><span class="p">,</span><span class="s1">&#39;Temperature&#39;</span><span class="p">,</span><span class="s1">&#39;Velocities&#39;</span><span class="p">,</span><span class="s1">&#39;GCRadius&#39;</span><span class="p">],</span>
-            <span class="n">magFlags</span><span class="o">=</span><span class="p">[</span><span class="kc">False</span><span class="p">,</span><span class="kc">False</span><span class="p">,</span><span class="kc">False</span><span class="p">,</span><span class="kc">False</span><span class="p">],</span> 
-            <span class="n">logFlags</span><span class="o">=</span><span class="p">[</span><span class="kc">False</span><span class="p">,</span><span class="kc">True</span><span class="p">,</span><span class="kc">False</span><span class="p">,</span><span class="kc">False</span><span class="p">],</span> 
+            <span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;AgeGyr&#39;</span><span class="p">,</span><span class="s1">&#39;Temperature&#39;</span><span class="p">,</span><span class="s1">&#39;GCRadius&#39;</span><span class="p">],</span>
+            <span class="n">logFlags</span><span class="o">=</span><span class="p">[</span><span class="kc">False</span><span class="p">,</span><span class="kc">True</span><span class="p">,</span><span class="kc">False</span><span class="p">],</span> 
             <span class="n">JSON_prefix</span><span class="o">=</span><span class="s1">&#39;Data&#39;</span><span class="p">,</span>
             <span class="n">JSONdir</span><span class="o">=</span><span class="n">JSONdir</span><span class="p">,</span>
             <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -447,7 +435,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;camera&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">15</span><span class="p">]</span>
 
         <span class="c1">## dump the JSON files</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dumpToJSON</span><span class="p">(</span><span class="n">loud</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">write_jsons_to_disk</span><span class="o">=</span><span class="n">write_jsons_to_disk</span><span class="p">)</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dumpToJSON</span><span class="p">(</span><span class="n">loud</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">write_jsons_to_disk</span><span class="o">=</span><span class="n">write_jsons_to_disk</span><span class="p">,</span><span class="n">use_format</span><span class="o">=</span><span class="s1">&#39;ffly&#39;</span><span class="p">)</span></div></div>
 
 <span class="k">class</span> <span class="nc">STARFORGEreader</span><span class="p">(</span><span class="n">FIREreader</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
@@ -465,7 +453,7 @@
 
 <span class="sd">                :code:`UInames = [&#39;gas&#39;,&#39;stars&#39;]`</span>
 
-<span class="sd">                :code:`fields = [&#39;Velocities&#39;,&#39;AgeGyr&#39;,&#39;Temperature&#39;,&#39;GCRadius&#39;]`</span>
+<span class="sd">                :code:`fields = [&#39;AgeGyr&#39;,&#39;Temperature&#39;,&#39;GCRadius&#39;]`</span>
 
 <span class="sd">            along  with some &quot;standard&quot; settings with:</span>
 <span class="sd">                :code:`settings[&#39;color&#39;][&#39;gas&#39;] = [1,0,0,1]`</span>
@@ -517,8 +505,7 @@
             <span class="n">ptypes</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">5</span><span class="p">],</span> 
             <span class="n">UInames</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Gas&#39;</span><span class="p">,</span><span class="s1">&#39;Stars&#39;</span><span class="p">],</span>
             <span class="n">decimation_factors</span><span class="o">=</span><span class="p">[</span><span class="n">decimation_factor</span><span class="p">,</span><span class="n">decimation_factor</span><span class="p">],</span>
-            <span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;AgeGyr&#39;</span><span class="p">,</span><span class="s1">&#39;Temperature&#39;</span><span class="p">,</span><span class="s1">&#39;Velocities&#39;</span><span class="p">,</span><span class="s1">&#39;GCRadius&#39;</span><span class="p">],</span>
-            <span class="n">magFlags</span><span class="o">=</span><span class="p">[</span><span class="kc">False</span><span class="p">,</span><span class="kc">False</span><span class="p">,</span><span class="kc">False</span><span class="p">,</span><span class="kc">False</span><span class="p">],</span> 
+            <span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;AgeGyr&#39;</span><span class="p">,</span><span class="s1">&#39;Temperature&#39;</span><span class="p">,</span><span class="s1">&#39;GCRadius&#39;</span><span class="p">],</span>
             <span class="n">logFlags</span><span class="o">=</span><span class="p">[</span><span class="kc">False</span><span class="p">,</span><span class="kc">True</span><span class="p">,</span><span class="kc">False</span><span class="p">,</span><span class="kc">False</span><span class="p">],</span> 
             <span class="n">JSON_prefix</span><span class="o">=</span><span class="s1">&#39;Data&#39;</span><span class="p">,</span>
             <span class="n">JSONdir</span><span class="o">=</span><span class="n">JSONdir</span><span class="p">,</span>

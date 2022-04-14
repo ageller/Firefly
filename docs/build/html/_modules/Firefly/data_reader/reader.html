@@ -3,14 +3,12 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Firefly.data_reader.reader &mdash; Firefly 2.0.0 documentation</title>
-      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <title>firefly.data_reader.reader &mdash; Firefly 2.0.5 documentation</title><link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+  <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/doctools.js"></script>
@@ -25,8 +23,7 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../../index.html">
-            <img src="../../../_static/logo_banner.png" class="logo" alt="Logo"/>
+            <a href="../../../index.html"><img src="../../../_static/logo_banner.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -60,7 +57,7 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="../../index.html">Module code</a> &raquo;</li>
-      <li>Firefly.data_reader.reader</li>
+      <li>firefly.data_reader.reader</li>
       <li class="wy-breadcrumbs-aside">
       </li>
   </ul>
@@ -69,7 +66,7 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <h1>Source code for Firefly.data_reader.reader</h1><div class="highlight"><pre>
+  <h1>Source code for firefly.data_reader.reader</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">h5py</span>
 <span class="kn">import</span> <span class="nn">os</span> 
 <span class="kn">import</span> <span class="nn">shutil</span> 
@@ -108,10 +105,11 @@
         <span class="n">JSONdir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
         <span class="n">JSON_prefix</span><span class="o">=</span><span class="s1">&#39;Data&#39;</span><span class="p">,</span>
         <span class="n">clean_JSONdir</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">max_npart_per_file</span><span class="o">=</span><span class="mi">10</span><span class="o">**</span><span class="mi">4</span><span class="p">,</span>
+        <span class="n">max_npart_per_file</span><span class="o">=</span><span class="mi">10</span><span class="o">**</span><span class="mi">5</span><span class="p">,</span>
         <span class="n">write_startup</span><span class="o">=</span><span class="s1">&#39;append&#39;</span><span class="p">,</span>
-        <span class="n">settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">tweenParams</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">write_only_data</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">settings</span><span class="p">:</span><span class="n">Settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">tweenParams</span><span class="p">:</span><span class="n">TweenParams</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Base initialization method for Reader instances. A Reader will read data and produce</span>
 <span class="sd">            firefly compatible :code:`.json` files. </span>
 
@@ -136,6 +134,11 @@
 <span class="sd">            :code:`False`: does not alter :code:`startup.json`, </span>
 <span class="sd">            , defaults to &#39;append&#39;</span>
 <span class="sd">        :type write_startup: str/bool, optional</span>
+<span class="sd">        :param write_only_data: flag for whether writeToDisk should exclude Settings and tweenParams instances</span>
+<span class="sd">            as well as the filenames.json and startup.json files. If True, then the reader will only</span>
+<span class="sd">            export the raw data files (useful for not overwriting things or only loading single files at a time</span>
+<span class="sd">            to append onto an existing dataset), defaults to False</span>
+<span class="sd">        :type write_only_data: bool, optional</span>
 <span class="sd">        :param settings: a :class:`firefly.data_reader.Settings` instance, defaults to </span>
 <span class="sd">            a new default :class:`firefly.data_reader.Settings` instance.</span>
 <span class="sd">        :type settings: :class:`firefly.data_reader.Settings`, optional</span>
@@ -179,6 +182,9 @@
         <span class="c1">## how are we managing multiple datasets?</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">write_startup</span> <span class="o">=</span> <span class="n">write_startup</span>
 
+        <span class="c1">## should we exclude settings, tween params, filenames.json, and startup.json when writing to disk?</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_only_data</span> <span class="o">=</span> <span class="n">write_only_data</span>
+
         <span class="c1">#set the maximum number of particles per data file</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">max_npart_per_file</span> <span class="o">=</span> <span class="n">max_npart_per_file</span>
 
@@ -189,16 +195,15 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">clean_JSONdir</span> <span class="o">=</span> <span class="n">clean_JSONdir</span> 
     
         <span class="c1">## array of particle groups</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">particleGroups</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">particleGroups</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ParticleGroup</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="k">if</span> <span class="n">settings</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">!=</span> <span class="s1">&#39;Settings&#39;</span><span class="p">:</span>
                 <span class="c1">## fun fact, assert isinstance(settings,Settings) won&#39;t work with jupyter notebooks</span>
                 <span class="c1">##  that use %load_ext autoreload</span>
                 <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Make sure you use a Settings instance to specify firefly settings.&quot;</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="c1">## we&#39;ll use the default ones then</span>
-            <span class="n">settings</span> <span class="o">=</span> <span class="n">Settings</span><span class="p">()</span>
+        <span class="c1">## we&#39;ll use the default ones then</span>
+        <span class="k">else</span><span class="p">:</span> <span class="n">settings</span> <span class="o">=</span> <span class="n">Settings</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">settings</span> <span class="o">=</span> <span class="n">settings</span>
 
@@ -206,7 +211,7 @@
             <span class="k">if</span> <span class="n">tweenParams</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">!=</span> <span class="s1">&#39;TweenParams&#39;</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Make sure you use a TweenParams instance to specify fly-through paths.&quot;</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">tweenParams</span> <span class="o">=</span> <span class="n">tweenParams</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tweenParams</span><span class="p">:</span><span class="n">TweenParams</span> <span class="o">=</span> <span class="n">tweenParams</span></div>
 
     <span class="k">def</span> <span class="nf">__splitAndValidateDatadir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">loud</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;[summary]</span>
@@ -265,12 +270,35 @@
 
         <span class="c1">## add this particle group to the reader&#39;s settings file</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">attachSettings</span><span class="p">(</span><span class="n">particleGroup</span><span class="p">)</span></div>
+    
+    <span class="k">def</span> <span class="nf">createOctrees</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 
-<div class="viewcode-block" id="Reader.dumpToJSON"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Reader.html#firefly.data_reader.Reader.dumpToJSON">[docs]</a>    <span class="k">def</span> <span class="nf">dumpToJSON</span><span class="p">(</span>
+        <span class="c1">## validate mask length entry , each particle group</span>
+        <span class="c1">##  should have a true or false entry</span>
+        <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">particleGroups</span><span class="p">):</span> <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;mask must be of length: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">particleGroups</span><span class="p">)</span><span class="si">:</span><span class="s2">d</span><span class="si">}</span><span class="s2">&quot;</span><span class="o">+</span>
+            <span class="sa">f</span><span class="s2">&quot; not length </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span><span class="si">:</span><span class="s2">d</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">particleGroup</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">particleGroups</span><span class="p">):</span> 
+            <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">mask</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span> <span class="n">particleGroup</span><span class="o">.</span><span class="n">createOctree</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">pruneOctrees</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">min_npart_per_node</span><span class="p">,</span><span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="c1">## validate mask length entry , each particle group</span>
+        <span class="c1">##  should have a true or false entry</span>
+        <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">particleGroups</span><span class="p">):</span> <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;mask must be of length: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">particleGroups</span><span class="p">)</span><span class="si">:</span><span class="s2">d</span><span class="si">}</span><span class="s2">&quot;</span><span class="o">+</span>
+            <span class="sa">f</span><span class="s2">&quot; not length </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span><span class="si">:</span><span class="s2">d</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">particleGroup</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">particleGroups</span><span class="p">):</span> 
+            <span class="k">if</span> <span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="n">particleGroup</span><span class="p">,</span><span class="s1">&#39;octree&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">mask</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">mask</span><span class="p">[</span><span class="n">i</span><span class="p">])):</span> 
+                <span class="n">particleGroup</span><span class="o">.</span><span class="n">octree</span><span class="o">.</span><span class="n">pruneOctree</span><span class="p">(</span><span class="n">min_npart_per_node</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Reader.writeToDisk"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Reader.html#firefly.data_reader.Reader.writeToDisk">[docs]</a>    <span class="k">def</span> <span class="nf">writeToDisk</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">loud</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">write_jsons_to_disk</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">symlink</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="n">write_to_disk</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">symlink</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">extension</span><span class="o">=</span><span class="s1">&#39;.ffly&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Creates all the necessary JSON files to run firefly and ensures they are</span>
 <span class="sd">        properly linked and cross-referenced correctly using the</span>
 <span class="sd">        :func:`firefly.data_reader.Settings.outputToJSON` and</span>
@@ -278,15 +306,17 @@
 <span class="sd">        (and :func:`firefly.data_reader.TweenParams.outputToJSON` if one is attached).</span>
 <span class="sd">        :param loud: flag to print status information to the console, defaults to False</span>
 <span class="sd">        :type loud: bool, optional</span>
-<span class="sd">        :param write_jsons_to_disk: flag that controls whether data is saved to disk (:code:`True`) </span>
+<span class="sd">        :param write_to_disk: flag that controls whether data is saved to disk (:code:`True`) </span>
 <span class="sd">            or only converted to a string and stored in :code:`self.JSON` (:code:`False`), defaults to True</span>
-<span class="sd">        :type write_jsons_to_disk: bool, optional</span>
+<span class="sd">        :type write_to_disk: bool, optional</span>
 <span class="sd">        :param symlink: flag for whether a soft link should be created between where the data is stored on </span>
 <span class="sd">            disk and the :code:`self.static_data_dir` directory (:code:`True`) or whether it should be </span>
 <span class="sd">            saved directly to :code:`self.static_data_dir` directory (:code:`False`). </span>
 <span class="sd">            Note that :code:`symlink=False` will not _also_ save results in :code:`self.JSONdir`, defaults to True</span>
 <span class="sd">        :type symlink: bool, optional</span>
-<span class="sd">        :return: :code:`self.JSON` or :code:`&quot;&quot;` according to :code:`write_jsons_to_disk`</span>
+<span class="sd">        :param extension: what output format should the particle data be saved in, JSON or binary &#39;ffly&#39;</span>
+<span class="sd">        :type: str</span>
+<span class="sd">        :return: :code:`self.JSON` or :code:`&quot;&quot;` according to :code:`write_to_disk`</span>
 <span class="sd">        :rtype: str</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         
@@ -311,7 +341,7 @@
 
         <span class="c1">## if we don&#39;t actually want to write to disk then we don&#39;t need</span>
         <span class="c1">##  to do any filesystem tasks</span>
-        <span class="k">if</span> <span class="n">write_jsons_to_disk</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">write_to_disk</span><span class="p">:</span>
             <span class="c1">## make the output directory</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">JSONdir</span><span class="p">):</span>
                 <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">JSONdir</span><span class="p">)</span>
@@ -345,15 +375,26 @@
             <span class="k">if</span> <span class="n">loud</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Outputting:&quot;</span><span class="p">,</span><span class="n">particleGroup</span><span class="p">)</span>
 
-            <span class="n">this_JSON_array</span><span class="p">,</span><span class="n">filenames_and_nparts</span> <span class="o">=</span> <span class="n">particleGroup</span><span class="o">.</span><span class="n">outputToJSON</span><span class="p">(</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">JSONdir</span><span class="p">),</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">JSONdir</span><span class="p">),</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">JSON_prefix</span><span class="p">,</span>
-                <span class="n">loud</span><span class="o">=</span><span class="n">loud</span><span class="p">,</span>
-                <span class="n">nparts_per_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_npart_per_file</span><span class="p">,</span>
-                <span class="n">clean_JSONdir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">clean_JSONdir</span> <span class="k">if</span> <span class="n">particleGroup</span> <span class="ow">is</span> <span class="bp">self</span><span class="o">.</span><span class="n">particleGroups</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">else</span> <span class="kc">False</span><span class="p">,</span>
-                <span class="n">write_jsons_to_disk</span><span class="o">=</span><span class="n">write_jsons_to_disk</span><span class="p">,</span>
-                <span class="n">not_reader</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">extension</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;.json&#39;</span><span class="p">:</span>
+                <span class="n">this_JSON_array</span><span class="p">,</span><span class="n">filenames_and_nparts</span> <span class="o">=</span> <span class="n">particleGroup</span><span class="o">.</span><span class="n">outputToJSON</span><span class="p">(</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">JSONdir</span><span class="p">),</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">JSONdir</span><span class="p">),</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">JSON_prefix</span><span class="p">,</span>
+                    <span class="n">loud</span><span class="o">=</span><span class="n">loud</span><span class="p">,</span>
+                    <span class="n">max_npart_per_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_npart_per_file</span><span class="p">,</span>
+                    <span class="n">clean_JSONdir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">clean_JSONdir</span> <span class="k">if</span> <span class="n">particleGroup</span> <span class="ow">is</span> <span class="bp">self</span><span class="o">.</span><span class="n">particleGroups</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">else</span> <span class="kc">False</span><span class="p">,</span>
+                    <span class="n">write_to_disk</span><span class="o">=</span><span class="n">write_to_disk</span><span class="p">,</span>
+                    <span class="n">not_reader</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">extension</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;.ffly&#39;</span><span class="p">:</span>
+                <span class="n">this_JSON_array</span><span class="p">,</span><span class="n">filenames_and_nparts</span> <span class="o">=</span> <span class="n">particleGroup</span><span class="o">.</span><span class="n">outputToFFLY</span><span class="p">(</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">JSONdir</span><span class="p">),</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">JSONdir</span><span class="p">),</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">JSON_prefix</span><span class="p">,</span>
+                    <span class="n">loud</span><span class="o">=</span><span class="n">loud</span><span class="p">,</span>
+                    <span class="n">max_npart_per_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_npart_per_file</span><span class="p">,</span>
+                    <span class="n">clean_FFLYdir</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clean_JSONdir</span> <span class="k">if</span> <span class="n">particleGroup</span> <span class="ow">is</span> <span class="bp">self</span><span class="o">.</span><span class="n">particleGroups</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">else</span> <span class="kc">False</span><span class="p">,</span>
+                    <span class="n">not_reader</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;Requested format </span><span class="si">%s</span><span class="s2"> not understood. Choose .json or .ffly.&quot;</span><span class="o">%</span><span class="n">extension</span><span class="p">)</span>
 
             <span class="c1">## append the JSON arrays for this particle group</span>
             <span class="n">JSON_array</span> <span class="o">+=</span> <span class="n">this_JSON_array</span>
@@ -361,72 +402,71 @@
             <span class="n">filenamesDict</span><span class="p">[</span><span class="n">particleGroup</span><span class="o">.</span><span class="n">UIname</span><span class="p">]</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">filenames_and_nparts</span><span class="p">)</span>
 
         <span class="c1">## output the settings.json file</span>
-        <span class="n">JSON_array</span> <span class="o">+=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">outputToJSON</span><span class="p">(</span>
-            <span class="n">JSONdir</span><span class="p">,</span>
-            <span class="n">JSON_prefix</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">JSON_prefix</span><span class="p">,</span>
-            <span class="n">loud</span><span class="o">=</span><span class="n">loud</span><span class="p">,</span>
-            <span class="n">write_jsons_to_disk</span><span class="o">=</span><span class="n">write_jsons_to_disk</span><span class="p">,</span>
-            <span class="n">not_reader</span><span class="o">=</span><span class="kc">False</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">write_only_data</span><span class="p">:</span> 
+            <span class="n">JSON_array</span> <span class="o">+=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">dumpSettingsToJSON</span><span class="p">(</span><span class="n">symlink</span><span class="p">,</span><span class="n">write_to_disk</span><span class="p">,</span><span class="n">loud</span><span class="p">)]</span>
 
-        <span class="c1">## format and output the filenames.json file</span>
-        <span class="n">filenamesDict</span><span class="p">[</span><span class="s1">&#39;options&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">JSONdir</span><span class="p">),</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">JSON_prefix</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">settings_filename</span><span class="p">),</span><span class="mi">0</span><span class="p">)]</span>
+            <span class="c1">## format and output the filenames.json file</span>
+            <span class="n">filenamesDict</span><span class="p">[</span><span class="s1">&#39;options&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">JSONdir</span><span class="p">),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">JSON_prefix</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">settings_filename</span><span class="p">),</span><span class="mi">0</span><span class="p">)]</span>
 
-        <span class="n">filename</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">JSONdir</span><span class="p">,</span><span class="s1">&#39;filenames.json&#39;</span><span class="p">)</span>
-        <span class="n">JSON_array</span> <span class="o">+=</span><span class="p">[(</span>
-            <span class="n">filename</span><span class="p">,</span>
-            <span class="n">write_to_json</span><span class="p">(</span>
-                <span class="n">filenamesDict</span><span class="p">,</span>
-                <span class="n">filename</span> <span class="k">if</span> <span class="n">write_jsons_to_disk</span> <span class="k">else</span> <span class="kc">None</span><span class="p">))]</span> <span class="c1">## None -&gt; returns JSON string</span>
+            <span class="c1">## write a tweenParams file if a TweenParams instance is attached to reader</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;tweenParams&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">tweenParams</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">filenamesDict</span><span class="p">[</span><span class="s1">&#39;tweenParams&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">JSONdir</span><span class="p">),</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">tweenParams</span><span class="o">.</span><span class="n">filename</span><span class="p">),</span><span class="mi">0</span><span class="p">)]</span>
+                <span class="n">JSON_array</span><span class="o">+=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">tweenParams</span><span class="o">.</span><span class="n">outputToJSON</span><span class="p">(</span>
+                    <span class="n">JSONdir</span><span class="p">,</span>
+                    <span class="n">JSON_prefix</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">JSON_prefix</span><span class="p">,</span>
+                    <span class="n">loud</span><span class="o">=</span><span class="n">loud</span><span class="p">,</span>
+                    <span class="n">write_to_disk</span><span class="o">=</span><span class="n">write_to_disk</span><span class="p">,</span>
+                    <span class="n">not_reader</span><span class="o">=</span><span class="kc">False</span><span class="p">)]</span> <span class="c1">## None -&gt; returns JSON string</span>
 
-        <span class="c1">## write a tweenParams file if a TweenParams instance is attached to reader</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;tweenParams&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">tweenParams</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">JSON_array</span><span class="o">+=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">tweenParams</span><span class="o">.</span><span class="n">outputToJSON</span><span class="p">(</span>
-                <span class="n">JSONdir</span><span class="p">,</span>
-                <span class="n">JSON_prefix</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">JSON_prefix</span><span class="p">,</span>
-                <span class="n">loud</span><span class="o">=</span><span class="n">loud</span><span class="p">,</span>
-                <span class="n">write_jsons_to_disk</span><span class="o">=</span><span class="n">write_jsons_to_disk</span><span class="p">,</span>
-                <span class="n">not_reader</span><span class="o">=</span><span class="kc">False</span><span class="p">)]</span> <span class="c1">## None -&gt; returns JSON string</span>
-
-        <span class="c1">## handle the startup.json file, may need to append or totally overwrite</span>
-        <span class="n">startup_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">static_data_dir</span><span class="p">,</span>
-            <span class="s1">&#39;startup.json&#39;</span><span class="p">)</span>
-
-        <span class="c1">## relative path from .js interpreter (which runs in /firefly/static) </span>
-        <span class="c1">##  to this dataset</span>
-        <span class="n">startup_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">JSONdir</span><span class="p">))</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">write_startup</span> <span class="o">==</span> <span class="s1">&#39;append&#39;</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">startup_file</span><span class="p">):</span>
-            <span class="n">startup_dict</span> <span class="o">=</span> <span class="n">load_from_json</span><span class="p">(</span><span class="n">startup_file</span><span class="p">)</span>
-
-            <span class="n">maxx</span> <span class="o">=</span> <span class="mi">0</span> 
-            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">startup_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">maxx</span><span class="p">:</span> 
-                    <span class="n">maxx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-
-                <span class="c1">## it&#39;s already in startup.json</span>
-                <span class="k">if</span> <span class="n">startup_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">==</span> <span class="n">startup_path</span><span class="p">:</span>
-                    <span class="n">startup_file</span> <span class="o">=</span> <span class="kc">None</span> 
-                    <span class="n">maxx</span><span class="o">-=</span><span class="mi">1</span> <span class="c1">## since we&#39;ll add 1 below</span>
-            
-            <span class="n">startup_dict</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">maxx</span><span class="o">+</span><span class="mi">1</span><span class="p">)]</span><span class="o">=</span><span class="n">startup_path</span>
-            <span class="n">JSON_array</span><span class="o">+=</span><span class="p">[(</span>
-                <span class="c1">## recreate in case we overwrote the startup_file variable in loop above</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">static_data_dir</span><span class="p">,</span><span class="s1">&#39;startup.json&#39;</span><span class="p">),</span> 
+            <span class="n">filename</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">JSONdir</span><span class="p">,</span><span class="s1">&#39;filenames.json&#39;</span><span class="p">)</span>
+            <span class="n">JSON_array</span> <span class="o">+=</span><span class="p">[(</span>
+                <span class="n">filename</span><span class="p">,</span>
                 <span class="n">write_to_json</span><span class="p">(</span>
-                    <span class="n">startup_dict</span><span class="p">,</span>
-                    <span class="n">startup_file</span> <span class="k">if</span> <span class="n">write_jsons_to_disk</span> <span class="k">else</span> <span class="kc">None</span><span class="p">))]</span> <span class="c1">## None -&gt; returns JSON string</span>
+                    <span class="n">filenamesDict</span><span class="p">,</span>
+                    <span class="n">filename</span> <span class="k">if</span> <span class="n">write_to_disk</span> <span class="k">else</span> <span class="kc">None</span><span class="p">))]</span> <span class="c1">## None -&gt; returns JSON string</span>
 
-        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">write_startup</span><span class="p">:</span>
-            <span class="n">JSON_array</span><span class="o">+=</span><span class="p">[(</span>
-                <span class="n">startup_file</span><span class="p">,</span>
-                <span class="n">write_to_json</span><span class="p">(</span>
-                    <span class="p">{</span><span class="s2">&quot;0&quot;</span><span class="p">:</span><span class="n">startup_path</span><span class="p">},</span>
-                    <span class="n">startup_file</span> <span class="k">if</span> <span class="n">write_jsons_to_disk</span> <span class="k">else</span> <span class="kc">None</span><span class="p">))]</span> <span class="c1">## None -&gt; returns JSON string</span>
+            <span class="c1">## handle the startup.json file, may need to append or totally overwrite</span>
+            <span class="n">startup_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">static_data_dir</span><span class="p">,</span>
+                <span class="s1">&#39;startup.json&#39;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">write_jsons_to_disk</span><span class="p">:</span>
+            <span class="c1">## relative path from .js interpreter (which runs in /firefly/static) </span>
+            <span class="c1">##  to this dataset</span>
+            <span class="n">startup_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">JSONdir</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">write_startup</span> <span class="o">==</span> <span class="s1">&#39;append&#39;</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">startup_file</span><span class="p">):</span>
+                <span class="n">startup_dict</span> <span class="o">=</span> <span class="n">load_from_json</span><span class="p">(</span><span class="n">startup_file</span><span class="p">)</span>
+
+                <span class="n">maxx</span> <span class="o">=</span> <span class="mi">0</span> 
+                <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">startup_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">maxx</span><span class="p">:</span> 
+                        <span class="n">maxx</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+
+                    <span class="c1">## it&#39;s already in startup.json</span>
+                    <span class="k">if</span> <span class="n">startup_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">==</span> <span class="n">startup_path</span><span class="p">:</span>
+                        <span class="n">startup_file</span> <span class="o">=</span> <span class="kc">None</span> 
+                        <span class="n">maxx</span><span class="o">-=</span><span class="mi">1</span> <span class="c1">## since we&#39;ll add 1 below</span>
+                
+                <span class="n">startup_dict</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">maxx</span><span class="o">+</span><span class="mi">1</span><span class="p">)]</span><span class="o">=</span><span class="n">startup_path</span>
+                <span class="n">JSON_array</span><span class="o">+=</span><span class="p">[(</span>
+                    <span class="c1">## recreate in case we overwrote the startup_file variable in loop above</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">static_data_dir</span><span class="p">,</span><span class="s1">&#39;startup.json&#39;</span><span class="p">),</span> 
+                    <span class="n">write_to_json</span><span class="p">(</span>
+                        <span class="n">startup_dict</span><span class="p">,</span>
+                        <span class="n">startup_file</span> <span class="k">if</span> <span class="n">write_to_disk</span> <span class="k">else</span> <span class="kc">None</span><span class="p">))]</span> <span class="c1">## None -&gt; returns JSON string</span>
+
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">write_startup</span><span class="p">:</span>
+                <span class="n">JSON_array</span><span class="o">+=</span><span class="p">[(</span>
+                    <span class="n">startup_file</span><span class="p">,</span>
+                    <span class="n">write_to_json</span><span class="p">(</span>
+                        <span class="p">{</span><span class="s2">&quot;0&quot;</span><span class="p">:</span><span class="n">startup_path</span><span class="p">},</span>
+                        <span class="n">startup_file</span> <span class="k">if</span> <span class="n">write_to_disk</span> <span class="k">else</span> <span class="kc">None</span><span class="p">))]</span> <span class="c1">## None -&gt; returns JSON string</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">write_to_disk</span><span class="p">:</span>
             <span class="c1">## create a single &quot;big JSON&quot; with all the data in it in case</span>
             <span class="c1">##  we want to send dataViaFlask</span>
             <span class="n">JSON_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">JSON_array</span><span class="p">)</span>
@@ -439,6 +479,28 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">JSON</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">JSON</span></div>
+
+    <span class="k">def</span> <span class="nf">dumpSettingsToJSON</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">symlink</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">write_to_disk</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">loud</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+        <span class="c1">## path where data needs to be visible to firefly</span>
+        <span class="n">static_data_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">static_data_dir</span><span class="p">,</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">JSONdir</span><span class="p">))</span>
+
+        <span class="c1">## where to put hard JSON files, if no symlink then we will</span>
+        <span class="c1">##  need to save directly to static_data_path</span>
+        <span class="n">JSONdir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">JSONdir</span> <span class="k">if</span> <span class="n">symlink</span> <span class="k">else</span> <span class="n">static_data_path</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">outputToJSON</span><span class="p">(</span>
+            <span class="n">JSONdir</span><span class="p">,</span>
+            <span class="n">JSON_prefix</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">JSON_prefix</span><span class="p">,</span>
+            <span class="n">loud</span><span class="o">=</span><span class="n">loud</span><span class="p">,</span>
+            <span class="n">write_to_disk</span><span class="o">=</span><span class="n">write_to_disk</span><span class="p">,</span>
+            <span class="n">not_reader</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Reader.outputToDict"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Reader.html#firefly.data_reader.Reader.outputToDict">[docs]</a>    <span class="k">def</span> <span class="nf">outputToDict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Formats the data in the reader to a python dictionary using</span>
@@ -481,7 +543,8 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;JSON&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">JSON</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">dumpToJSON</span><span class="p">(</span>
                 <span class="n">loud</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                <span class="n">write_jsons_to_disk</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="n">write_to_disk</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">extension</span><span class="o">=</span><span class="s1">&#39;json&#39;</span><span class="p">)</span>
 
         <span class="c1">## post the json to the listening url data_input</span>
         <span class="c1">##  defined in server.py</span>
@@ -593,7 +656,7 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">static_data_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">target</span><span class="p">,</span><span class="s1">&#39;static&#39;</span><span class="p">,</span><span class="s1">&#39;data&#39;</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">static_data_dir</span><span class="p">):</span> <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">static_data_dir</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">dumpToJSON</span><span class="p">(</span><span class="n">symlink</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">writeToDisk</span><span class="p">(</span><span class="n">symlink</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="k">raise</span>
             <span class="k">finally</span><span class="p">:</span>
@@ -667,7 +730,7 @@
         <span class="n">fields</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">field_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">decimation_factor</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-        <span class="n">write_jsons_to_disk</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">write_to_disk</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">loud</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Takes a list of opened numpy arrays and creates a :class:`firefly.data_reader.Reader` instance</span>
@@ -692,9 +755,9 @@
 <span class="sd">        :param decimation_factor: factor by which to reduce the data randomly </span>
 <span class="sd">            i.e. :code:`data=data[::decimation_factor]`, defaults to 1</span>
 <span class="sd">        :type decimation_factor: int, optional</span>
-<span class="sd">        :param write_jsons_to_disk: flag that controls whether data is saved to disk (:code:`True`)</span>
+<span class="sd">        :param write_to_disk: flag that controls whether data is saved to disk (:code:`True`)</span>
 <span class="sd">            or only converted to a string and stored in :code:`self.JSON` (:code:`False`), defaults to True</span>
-<span class="sd">        :type write_jsons_to_disk: bool, optional</span>
+<span class="sd">        :type write_to_disk: bool, optional</span>
 <span class="sd">        :param loud: flag to print status information to the console, defaults to False</span>
 <span class="sd">        :type loud: bool, optional</span>
 <span class="sd">        :raises np.AxisError: if the coordinate data cannot be interpreted</span>
@@ -794,17 +857,18 @@
                 <span class="n">UIname</span><span class="p">,</span>
                 <span class="n">coords</span><span class="p">,</span>
                 <span class="n">decimation_factor</span><span class="o">=</span><span class="n">decimation_factor</span><span class="p">,</span>
-                <span class="n">tracked_arrays</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="n">fields</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">fields</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
-                <span class="n">tracked_names</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="n">field_names</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">field_names</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="n">field_arrays</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="n">fields</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">fields</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                <span class="n">field_names</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="n">field_names</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">field_names</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
 
             <span class="c1">## attach the instance to the reader</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">addParticleGroup</span><span class="p">(</span><span class="n">firefly_particleGroup</span><span class="p">)</span>
 
         <span class="c1">## either write a bunch of mini JSONs to disk or store </span>
         <span class="c1">##  a single big JSON in self.JSON</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dumpToJSON</span><span class="p">(</span>
-            <span class="n">write_jsons_to_disk</span><span class="o">=</span><span class="n">write_jsons_to_disk</span><span class="p">,</span>
-            <span class="n">loud</span><span class="o">=</span><span class="n">loud</span><span class="p">)</span></div></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">writeToDisk</span><span class="p">(</span>
+            <span class="n">write_to_disk</span><span class="o">=</span><span class="n">write_to_disk</span><span class="p">,</span>
+            <span class="n">loud</span><span class="o">=</span><span class="n">loud</span><span class="p">,</span>
+            <span class="n">extension</span><span class="o">=</span><span class="s1">&#39;.json&#39;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">write_to_disk</span> <span class="k">else</span> <span class="s1">&#39;.ffly&#39;</span><span class="p">)</span></div></div>
 
 <div class="viewcode-block" id="SimpleReader"><a class="viewcode-back" href="../../../reference/api/readers/firefly.data_reader.SimpleReader.html#firefly.data_reader.SimpleReader">[docs]</a><span class="k">class</span> <span class="nc">SimpleReader</span><span class="p">(</span><span class="n">ArrayReader</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; A wrapper to :class:`firefly.data_reader.ArrayReader` that attempts to </span>
@@ -815,9 +879,10 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">path_to_data</span><span class="p">,</span>
         <span class="n">field_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">write_jsons_to_disk</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">write_to_disk</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">extension</span><span class="o">=</span><span class="s1">&#39;.hdf5&#39;</span><span class="p">,</span>
         <span class="n">loud</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">csv_sep</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;A simple reader that will take as minimal input the path to a </span>
 <span class="sd">        (set of) .hdf5 file(s) and extract each top level group&#39;s</span>
@@ -835,6 +900,8 @@
 <span class="sd">        :type extension: str, optional</span>
 <span class="sd">        :param loud: flag to print status information to the console, defaults to False</span>
 <span class="sd">        :type loud: bool, optional</span>
+<span class="sd">        :param csv_sep: separator between values in the csv, defaults to &#39;,&#39;</span>
+<span class="sd">        :type csv_sep: str, optional</span>
 <span class="sd">        :raises ValueError: if :code:`path_to_data` is not a directory or doesn&#39;t contain</span>
 <span class="sd">            :code:`extension`</span>
 <span class="sd">        :raises ValueError: if :code:`extension` is passed anything either </span>
@@ -892,8 +959,8 @@
                     <span class="n">fieldss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__getHDF5Fields</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span><span class="n">particle_group</span><span class="p">,</span><span class="n">field_names</span><span class="p">,</span><span class="n">fieldss</span><span class="p">)</span> 
             <span class="k">elif</span> <span class="n">extension</span> <span class="o">==</span> <span class="s1">&#39;.csv&#39;</span><span class="p">:</span>
                 <span class="c1">## each file corresponds to a single set of coordinates and fields</span>
-                <span class="n">coordinates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__getCSVCoordinates</span><span class="p">(</span><span class="n">fnames</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> 
-                <span class="n">fieldss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__getCSVFields</span><span class="p">(</span><span class="n">fnames</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">field_names</span><span class="p">)</span> 
+                <span class="n">coordinates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__getCSVCoordinates</span><span class="p">(</span><span class="n">fnames</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">csv_sep</span><span class="p">)</span> 
+                <span class="n">fieldss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__getCSVFields</span><span class="p">(</span><span class="n">fnames</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">field_names</span><span class="p">,</span><span class="n">csv_sep</span><span class="p">)</span> 
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid extension </span><span class="si">%s</span><span class="s2">, must be .hdf5 or .csv&quot;</span><span class="o">%</span><span class="n">extension</span><span class="p">)</span> 
             <span class="n">coordss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
@@ -904,19 +971,22 @@
             <span class="n">coordinates</span><span class="o">=</span><span class="n">coordss</span><span class="p">,</span>
             <span class="n">UInames</span><span class="o">=</span><span class="n">particle_groups</span><span class="p">,</span>
             <span class="n">fields</span><span class="o">=</span><span class="n">fieldsss</span><span class="p">,</span>
-            <span class="n">write_jsons_to_disk</span><span class="o">=</span><span class="n">write_jsons_to_disk</span><span class="p">,</span>
-            <span class="n">loud</span><span class="o">=</span><span class="n">loud</span><span class="p">)</span></div>
+            <span class="n">write_to_disk</span><span class="o">=</span><span class="n">write_to_disk</span><span class="p">,</span>
+            <span class="n">loud</span><span class="o">=</span><span class="n">loud</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">__getCSVCoordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">fname</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__getCSVCoordinates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">fname</span><span class="p">,</span><span class="n">csv_sep</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Simple parser for opening a CSV file and extracting</span>
 <span class="sd">            its coordinates.</span>
 
 <span class="sd">        :param fname: full filepath to :code:`.csv` file</span>
 <span class="sd">        :type fname: str</span>
+<span class="sd">        :param csv_sep: separator between values in the csv, defaults to &#39;,&#39;</span>
+<span class="sd">        :type csv_sep: str, optional</span>
 <span class="sd">        :return: :code:`coordinates`</span>
 <span class="sd">        :rtype: np.ndarray</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">full_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span><span class="n">sep</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+        <span class="n">full_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span><span class="n">sep</span><span class="o">=</span><span class="n">csv_sep</span><span class="p">)</span>
         <span class="n">coordinates</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">full_df</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="mi">3</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="s1">&#39;x&#39;</span> <span class="ow">in</span> <span class="n">full_df</span> <span class="ow">and</span> <span class="s1">&#39;y&#39;</span> <span class="ow">in</span> <span class="n">full_df</span> <span class="ow">and</span> <span class="s1">&#39;z&#39;</span> <span class="ow">in</span> <span class="n">full_df</span><span class="p">:</span>
@@ -930,7 +1000,7 @@
 
         <span class="k">return</span> <span class="n">coordinates</span>
 
-    <span class="k">def</span> <span class="nf">__getCSVFields</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">fname</span><span class="p">,</span><span class="n">field_names</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__getCSVFields</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">fname</span><span class="p">,</span><span class="n">field_names</span><span class="p">,</span><span class="n">csv_sep</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Use pandas to interpret csv data in order to load field data matching</span>
 <span class="sd">            field names (field names that are not present are ignored).</span>
 
@@ -938,6 +1008,8 @@
 <span class="sd">        :type fname: str</span>
 <span class="sd">        :param field_names: strings to try and extract from .csv. There must be a header row</span>
 <span class="sd">        :type field_names: list of strs</span>
+<span class="sd">        :param csv_sep: separator between values in the csv, defaults to &#39;,&#39;</span>
+<span class="sd">        :type csv_sep: str, optional</span>
 <span class="sd">        :return: dictionary of fields and field name pairings</span>
 <span class="sd">        :rtype: dict if field_names is not None else None</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -947,7 +1019,7 @@
         <span class="n">fieldss</span> <span class="o">=</span> <span class="p">{}</span>
 
         <span class="c1">## trust pandas to open the .csv and detect if there&#39;s a header \_(ツ)_/</span>
-        <span class="n">full_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span><span class="n">sep</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+        <span class="n">full_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span><span class="n">sep</span><span class="o">=</span><span class="n">csv_sep</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">field_name</span> <span class="ow">in</span> <span class="n">field_names</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">field_name</span> <span class="ow">in</span> <span class="n">full_df</span><span class="p">:</span> <span class="n">fieldss</span><span class="p">[</span><span class="n">field_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">full_df</span><span class="p">[</span><span class="n">field_name</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">fieldss</span>
