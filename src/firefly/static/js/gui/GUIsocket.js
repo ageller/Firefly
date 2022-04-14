@@ -318,14 +318,24 @@ function updateFlyMovementSpeed(flyffac){
 }
 
 function updateFPSContainer(){
-	var txt = Math.round(GUIParams.FPS) + ' fps'
-	if (GUIParams.memoryUsage > 0) txt += ', ' + (Math.round(GUIParams.memoryUsage/1e9*100.)/100.).toFixed(2) + ' Gb'
+	var txt = ''
+	if (GUIParams.showFPS){
+		txt += Math.round(GUIParams.FPS) + ' fps';
+		if (GUIParams.showMemoryUsage) txt += ', ';
+	}
+	if (GUIParams.memoryUsage > 0 && GUIParams.showMemoryUsage) txt+= (Math.round(GUIParams.memoryUsage/1e9*100.)/100.).toFixed(2) + ' Gb'
 	elm = document.getElementById("fps_container");
 	if (elm) elm.innerHTML = txt;
+	// hide the element if we're not showing anything
+	if (!GUIParams.showFPS && !GUIParams.showMemoryUsage && elm) elm.style.display='none';
 }
 
 function updateOctreeLoadingBarUI(input){
-	var width = parseFloat(d3.select('#' + input.p + 'octreeLoadingOutline').attr('width'));
+	var id = '#' + input.p + 'octreeLoadingOutline';
+	var selection = d3.select(id)
+	// size checks if the selection caught anything
+	if (selection.size() < 1) return
+	var width = parseFloat(selection.attr('width'));
 	if (input.denominator > 0){
 		var frac = THREE.Math.clamp(input.numerator/input.denominator, 0, 1);
 		//var frac = Math.max(viewerParams.octree.loadingCount[p][1]/viewerParams.octree.loadingCount[p][0], 0);

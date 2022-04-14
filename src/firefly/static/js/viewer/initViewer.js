@@ -157,7 +157,7 @@ function makeViewer(pSize=null, prepend=[], append=[]){
 			viewerParams.ready = true;
 			viewerParams.pauseAnimation = false;
 			viewerParams.parts.options_initial = createPreset(); //this might break things if the presets don't work...
-			console.log("initial options", viewerParams.parts.options)
+			//console.log("initial options", viewerParams.parts.options)
 
 			//to test
 			if (pSize) {
@@ -172,7 +172,7 @@ function makeViewer(pSize=null, prepend=[], append=[]){
 //if startup.json exists, this is called first
 function getFilenames(prefix=""){
 	d3.json(prefix+viewerParams.startup,  function(dir) {
-		console.log(prefix, dir, viewerParams.startup, viewerParams)
+		//console.log(prefix, dir, viewerParams.startup, viewerParams)
 		if (dir != null){
 			var i = 0;
 			viewerParams.dir = dir;
@@ -216,7 +216,7 @@ function callLoadData(args){
 
 	drawLoadingBar();
 	viewerParams.filenames = files;
-	console.log("loading new data", files)
+	//console.log("loading new data", files)
 	loadData(WebGLStart, prefix);
 }
 
@@ -625,7 +625,7 @@ function applyOptions(){
 	//  --------- column density options ----------- 
 
 	// flag to launch the app with the column density projection mode enabled
-	if (viewerParams.parts.options.hasOwnProperty('columnDensity')){
+	if (viewerParams.parts.options.hasOwnProperty(viewerParams.CDkey)){
 		if (viewerParams.parts.options.columnDensity != null){
 			viewerParams.columnDensity = viewerParams.parts.options.columnDensity;
 		}
@@ -842,6 +842,21 @@ function applyOptions(){
 			options.radiusVariable[p] != null) viewerParams.radiusVariable[p] = copyValue(options.radiusVariable[p]);
 
 	}// particle specific options
+
+	// initialize all the colormap stuff that columnDensity will need. Because it's
+	//  not a real particle group it won't get set in the loop above
+	//  do it here so it happens in the presets too and load settings, etc...
+	viewerParams.showParts[viewerParams.CDkey] = viewerParams.partsKeys.some(
+		function (key){return viewerParams.showParts[key]});
+	viewerParams.colormap[viewerParams.CDkey] = 4/256
+	viewerParams.ckeys[viewerParams.CDkey] = [viewerParams.CDckey]
+	viewerParams.colormapLims[viewerParams.CDkey] = {}
+	viewerParams.colormapLims[viewerParams.CDkey][viewerParams.ckeys[viewerParams.CDkey][0]] = [viewerParams.CDmin,viewerParams.CDmax]
+	viewerParams.colormapVals[viewerParams.CDkey] = {}
+	viewerParams.colormapVals[viewerParams.CDkey][viewerParams.ckeys[viewerParams.CDkey][0]] = [viewerParams.CDmin,viewerParams.CDmax]
+	viewerParams.colormapVariable[viewerParams.CDkey] = 0;
+	viewerParams.showColormap[viewerParams.CDkey] = false;
+	viewerParams.updateColormapVariable[viewerParams.CDkey] = false;
 }
 
 // connect fly/trackball controls
@@ -853,9 +868,15 @@ function initControls(updateGUI = true){
 	// Firefly seems to behave best when it is initialized with trackball controls.  If the user chooses a different set of controls
 	// I will still initialize it with trackball, and then change after the first render pass
 	if (viewerParams.useTrackball || viewerParams.drawPass < 1) { 
-		console.log('initializing TrackballControls')
+		//console.log('initializing TrackballControls')
 		viewerParams.controlsName = 'TrackballControls'
 		var xx = new THREE.Vector3(0,0,0);
+		if (viewerParams.center.x == viewerParams.camera.position.x &&
+			viewerParams.center.y == viewerParams.camera.position.y &&
+			viewerParams.center.z == viewerParams.camera.position.z){
+			viewerParams.camera.position.z+=1e-2
+		}
+
 		viewerParams.camera.getWorldDirection(xx);
 		viewerParams.controls = new THREE.TrackballControls( viewerParams.camera, viewerParams.renderer.domElement );
 		viewerParams.controls.target = new THREE.Vector3(viewerParams.camera.position.x + xx.x, viewerParams.camera.position.y + xx.y, viewerParams.camera.position.z + xx.z);
@@ -914,14 +935,13 @@ function initColumnDensity(){
 	} );
 
 	//for now, just use the first colormap
-	var p = viewerParams.partsKeys[0];
 	viewerParams.materialCD = new THREE.ShaderMaterial( {
 		uniforms: { 
 			tex: { value: viewerParams.textureCD.texture }, 
 			cmap: { type:'t', value: viewerParams.cmap },
-			colormap: {value: viewerParams.colormap[p]},
-			CDmin: {value: viewerParams.CDmin}, // bottom of CD renormalization
-			CDmax: {value: viewerParams.CDmax}, // top of CD renormalization
+			colormap: {value: viewerParams.colormap[viewerParams.CDkey]},
+			CDmin: {value: viewerParams.colormapVals[viewerParams.CDkey][viewerParams.ckeys[viewerParams.CDkey][0]][0]}, // bottom of CD renormalization
+			CDmax: {value: viewerParams.colormapVals[viewerParams.CDkey][viewerParams.ckeys[viewerParams.CDkey][0]][1]}, // top of CD renormalization
 			lognorm: {value: viewerParams.CDlognorm}, // flag to normalize column densities in log space
 		},
 		vertexShader: myVertexShader,
@@ -973,7 +993,7 @@ function confirmViewerInit(){
 // makeViewer ->
 function sendInitGUI(prepend=[], append=[]){
 	//general particle settings
-	console.log('Sending init to GUI', viewerParams);
+	//console.log('Sending init to GUI', viewerParams);
 
 	var forGUI = prepend;
 	forGUI.push({'setGUIParamByKey':[false,"GUIready"]});
@@ -1054,7 +1074,8 @@ function sendInitGUI(prepend=[], append=[]){
 
 
 	//TO DO: need a check for radii values.  For now, I'm just setting it to false
-	forGUI.push({'setGUIParamByKey':[false,"haveRadii"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.rkeys,"rkeys"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.radiusVariable,"radiusVariable"]});
 
 
 	//for camera
@@ -1085,9 +1106,26 @@ function sendInitGUI(prepend=[], append=[]){
 	forGUI.push({'setGUIParamByKey':[viewerParams.haveOctree,"haveOctree"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.haveAnyOctree,"haveAnyOctree"]});
 	if (viewerParams.haveAnyOctree) {
-		forGUI.push({'setGUIParamByKey':[viewerParams.octree.memoryLimit,"octreeMemoryLimit"]});
+		forGUI.push({'setGUIParamByKey':[viewerParams.memoryLimit,"octreeMemoryLimit"]});
 		forGUI.push({'setGUIParamByKey':[viewerParams.octree.normCameraDistance,"octreeNormCameraDistance"]});
 		}
+
+	forGUI.push({'setGUIParamByKey':[viewerParams.showFPS,"showFPS"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.showMemoryUsage,"showMemoryUsage"]});
+
+	forGUI.push({'setGUIParamByKey':[viewerParams.parts.options.UIparticle,"UIparticle"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.parts.options.UIdropdown,"UIdropdown"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.parts.options.UIcolorPicker,"UIcolorPicker"]});
+
+	forGUI.push({'setGUIParamByKey':[viewerParams.columnDensity,"columnDensity"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.CDmin,"CDmin"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.CDmax,"CDmax"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.CDkey,"CDkey"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.CDckey,"CDckey"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.CDlognorm,"CDlognorm"]});
+
+	forGUI.push({'setGUIParamByKey':[viewerParams.inTween,"inTween"]});
+
 	append.forEach(function(x,i){
 		forGUI.push(x);
 	})
@@ -1160,7 +1198,7 @@ function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
 					//  which reference .fftree files. Those are loaded
 					//  separately on demand.)
 					if (readf.toLowerCase().includes('.json')){
-						console.log(prefix+readf)
+						//console.log(prefix+readf)
 						d3.json(prefix+readf, function(foo) {
 							compileJSONData(foo, p, callback, initialLoadFrac);
 						});
@@ -1514,7 +1552,7 @@ function clearloading(){
 	//show the rest of the page
 	d3.select("#ContentContainer").style("visibility","visible")
 
-	console.log("loaded")
+	//console.log("loaded")
 	d3.select("#loader").style("display","none")
 	if (viewerParams.local){
 		d3.select("#splashdiv5").text("Click to begin.");

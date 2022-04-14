@@ -122,7 +122,7 @@ function createParticleMaterial(p, color=null,minPointScale=null,maxPointScale=n
 function createPartsMesh(pdraw = viewerParams.partsKeys, node=null){
 	
 	clearPartsMesh(pClear = pdraw);
-	console.log("drawing", pdraw, viewerParams.plotNmax,viewerParams.decimate)
+	//console.log("drawing", pdraw, viewerParams.plotNmax,viewerParams.decimate)
 
 	//d3.select("#splashdiv5").text("Drawing...");
 	viewerParams.drawfrac = 0.;
@@ -168,7 +168,7 @@ function createPartsMesh(pdraw = viewerParams.partsKeys, node=null){
 	//this will not be printed if you change the N value in the slider, and therefore only redraw one particle type
 	//because ndraw will not be large enough, but I don't think this will cause a problem
 	//if (ndraw >= Math.floor(viewerParams.parts.totalSize/viewerParams.decimate)){
-	console.log("done drawing")
+	//console.log("done drawing")
 
 	clearloading();
 

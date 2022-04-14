@@ -4,6 +4,7 @@ import os
 from .reader import Reader,ParticleGroup
 
 from abg_python.snapshot_utils import openSnapshot,iterativeCoM
+from abg_python.cosmo_utils import load_rockstar
 
 class FIREreader(Reader):
     """This is an example of a "custom" Reader that has been tuned to 
@@ -19,7 +20,7 @@ class FIREreader(Reader):
         fields=None, 
         filterFlags=None, 
         colormapFlags=None,
-        magFlags=None, 
+        radiusFlags=None,
         logFlags=None, 
         **kwargs):
         """Base initialization method for FIREreader instances.
@@ -53,17 +54,16 @@ class FIREreader(Reader):
         :param colormapFlags: flags to signal whether field should be in colormap dropdown,
             defaults to [True for i in fields]
         :type colormapFlags: list of bool, optional
-        :param magFlags: flags to signal whether the magnitude of the field should be taken,
-            rather than the field itself (e.g. for vector quantities),
+        :param radiusFlags: flags to signal whether field should be in radius dropdown,
             defaults to [False for i in fields]
-        :type magFlags: list of bool, optional
+        :type radiusFlags: list of bool, optional
         :param logFlags: flags to signal whether the log of the field should be taken,
             defaults to [False for i in fields]
         :type logFlags: list of bool, optional
         :raises ValueError: if the length of ptypes, UInames, and decimation factors
             does not match.
         :raises ValueError: if the length of fields, filterFlags,
-            colormapFlags, magFlags, and logFlags does not match.
+            colormapFlags, radiusFlags, and logFlags does not match.
         :raises FileNotFoundError: if snapdir cannot be found
         """
 
@@ -76,7 +76,7 @@ class FIREreader(Reader):
         if fields is None: fields = []
         if filterFlags is None: filterFlags = [True for i in fields]
         if colormapFlags is None: colormapFlags = [True for i in fields]
-        if magFlags is None: magFlags = [False for i in fields]
+        if radiusFlags is None: radiusFlags = [False for i in fields]
         if logFlags is None: logFlags = [False for i in fields]
 
         ## input validation
@@ -90,8 +90,8 @@ class FIREreader(Reader):
                     name,len(llist),len(ptypes)))
 
         ##  fields
-        lists = [filterFlags,colormapFlags,magFlags,logFlags]
-        names = ['filterFlags','colormapFlags','magFlags','logFlags']
+        lists = [filterFlags,colormapFlags,radiusFlags,logFlags]
+        names = ['filterFlags','colormapFlags','radiusFlags','logFlags']
         for name,llist in zip(names,lists):
             if len(llist) != len(fields):
                 raise ValueError(
@@ -108,12 +108,12 @@ class FIREreader(Reader):
             fields = list(fields)
             filterFlags = list(filterFlags)
             colormapFlags = list(colormapFlags)
-            magFlags = list(magFlags)
+            radiusFlags = list(radiusFlags)
             logFlags = list(logFlags)
 
             index = fields.index('Coordinates')
 
-            for llist in [fields,filterFlags,magFlags,logFlags]:
+            for llist in [fields,filterFlags,logFlags]:
                 llist.pop(index)
 
         ## where to find the HDF5 files
@@ -137,9 +137,9 @@ class FIREreader(Reader):
 
         ## do we want to color by that attribute?
         self.colormapFlags = colormapFlags
-        
-        ## do we need to take the magnitude of it? (velocity? typically not..)
-        self.magFlags = magFlags
+
+        ## do we want to scale particle size by that attribute?
+        self.radiusFlags = radiusFlags
         
         ## do we need to take the log of it 
         self.logFlags = logFlags
@@ -149,7 +149,8 @@ class FIREreader(Reader):
 
     def loadData(
         self,
-        com = None
+        com = None,
+        vcom = None,
         ):
         """Loads FIRE snapshot data using Alex Gurvich's
         :func:`firefly.data_reader.snapshot_utils.openSnapshot`.
@@ -174,11 +175,18 @@ class FIREreader(Reader):
             )
 
             if com is None:
-                com,vcom = iterativeCoM(
-                    snapdict['Coordinates'],
-                    snapdict['Masses'],
-                    snapdict['Velocities'])
-            else: vcom = 0
+                if os.path.isdir(os.path.join(self.snapdir,'..','halo','rockstar_dm')):
+                    com,rvir,vcom = load_rockstar(
+                        self.snapdir,
+                        self.snapnum,
+                        extra_names_to_read=['velocity'])
+                else:
+                    com,vcom = iterativeCoM(
+                        snapdict['Coordinates'],
+                        snapdict['Masses'],
+                        snapdict['Velocities'])
+
+            if vcom is None: vcom = 0
 
             snapdict['Coordinates']-=com
             snapdict['Velocities'] -=vcom
@@ -188,12 +196,13 @@ class FIREreader(Reader):
             field_arrays = []
             field_filter_flags = []
             field_colormap_flags = []
+            field_radius_flags = []
 
-            for field,filterFlag,colormapFlag,magFlag,logFlag in list(zip(
+            for field,filterFlag,colormapFlag,radiusFlag,logFlag in list(zip(
                 self.fields,
                 self.filterFlags,
                 self.colormapFlags,
-                self.magFlags,
+                self.radiusFlags,
                 self.logFlags)):
 
                 ## easypeasy, just read from the snapdict
@@ -209,14 +218,10 @@ class FIREreader(Reader):
                     continue
 
                 ## take the log and/or magnitude if requested
-                if magFlag:
-                    arr = np.linalg.norm(arr,axis=1)
-                    field = 'mag%s'%field
                 if logFlag:
                     arr = np.log10(arr)
                     field = 'log10%s'%field
                 
-
                 ## append this field into the arrays
                 field_names = np.append(
                     field_names,
@@ -229,6 +234,10 @@ class FIREreader(Reader):
                 field_colormap_flags = np.append(
                     field_colormap_flags,
                     [colormapFlag],axis=0)
+
+                field_radius_flags = np.append(
+                    field_radius_flags,
+                    [radiusFlag],axis=0)
 
                 field_arrays.append(arr)
                 
@@ -244,7 +253,8 @@ class FIREreader(Reader):
                     field_arrays=np.array(field_arrays,ndmin=2),
                     decimation_factor=dec_factor,
                     field_filter_flags=field_filter_flags,
-                    field_colormap_flags=field_colormap_flags)],
+                    field_colormap_flags=field_colormap_flags,
+                    field_radius_flags=field_radius_flags)],
                 axis=0)
 
 
@@ -339,7 +349,6 @@ class SimpleFIREreader(FIREreader):
             UInames=['Gas','Stars'],
             decimation_factors=[decimation_factor,decimation_factor],
             fields=['AgeGyr','Temperature','GCRadius'],
-            magFlags=[False,False,False], 
             logFlags=[False,True,False], 
             JSON_prefix='Data',
             JSONdir=JSONdir,
@@ -428,7 +437,6 @@ class STARFORGEreader(FIREreader):
             UInames=['Gas','Stars'],
             decimation_factors=[decimation_factor,decimation_factor],
             fields=['AgeGyr','Temperature','GCRadius'],
-            magFlags=[False,False,False,False], 
             logFlags=[False,True,False,False], 
             JSON_prefix='Data',
             JSONdir=JSONdir,

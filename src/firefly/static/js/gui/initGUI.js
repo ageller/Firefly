@@ -25,18 +25,36 @@ function makeUI(local=false){
 			createUI();
 		}
 	}, 1000);
+
+	// check that the width stabilizes before revealing the UI
+	UIcontainer = d3.select('#UIContainer')
+	var bbox = UIcontainer.node().getBoundingClientRect();
+	prev_count = bbox.width;//countNodes(UIcontainer.node());
+	waitForBuild = setInterval(function(){
+		var bbox = UIcontainer.node().getBoundingClientRect();
+		next_count = bbox.width;//countNodes(UIcontainer.node());
+		//console.log('UI width:',prev_count,next_count)
+		if (prev_count == next_count && next_count > 10){
+			clearInterval(waitForBuild);
+			// collapse the UI initially, but wait a bit to make sure the full UI has been created
+			hideUI.call(document.getElementById('Hamburger'));
+			// and now reveal the result
+			UIcontainer.classed('hidden', false)
+		}
+		prev_count = next_count;
+	},100);
 }
 
 function confirmGUIInit(){
 	if (!GUIParams.GUIready) return false;
 
 	var keys = ["partsKeys", "PsizeMult", "plotNmax", "decimate", "stereoSepMax", "friction", "Pcolors", "showParts", "showVel", "velopts", "velType", "ckeys", "colormapVals", "colormapLims", "colormapVariable", "colormap", "showColormap", "fkeys", "filterVals", "filterLims"];
-	var ready = true;
-	keys.forEach(function(k,i){
+	var ready = keys.every(function(k,i){
 		if (GUIParams[k] == null) {
 			//console.log("GUI missing ", k)
-			ready = false;
+			return false;
 		}
+		return true;
 	});
 	return ready
 }

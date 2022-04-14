@@ -36,7 +36,7 @@ class Reader(object):
         JSONdir=None, 
         JSON_prefix='Data',
         clean_JSONdir=False,
-        max_npart_per_file=10**4,
+        max_npart_per_file=10**5,
         write_startup='append',
         write_only_data=False,
         settings:Settings=None,
@@ -587,7 +587,7 @@ class Reader(object):
                 self.static_data_dir = os.path.join(target,'static','data')
 
                 if not os.path.isdir(self.static_data_dir): os.makedirs(self.static_data_dir)
-                self.dumpToJSON(symlink=False)
+                self.writeToDisk(symlink=False)
             except:
                 raise
             finally:
@@ -813,6 +813,7 @@ class SimpleReader(ArrayReader):
         write_to_disk=True,
         extension='.hdf5',
         loud=True,
+        csv_sep=',',
         **kwargs):
         """A simple reader that will take as minimal input the path to a 
         (set of) .hdf5 file(s) and extract each top level group's
@@ -830,6 +831,8 @@ class SimpleReader(ArrayReader):
         :type extension: str, optional
         :param loud: flag to print status information to the console, defaults to False
         :type loud: bool, optional
+        :param csv_sep: separator between values in the csv, defaults to ','
+        :type csv_sep: str, optional
         :raises ValueError: if :code:`path_to_data` is not a directory or doesn't contain
             :code:`extension`
         :raises ValueError: if :code:`extension` is passed anything either 
@@ -887,8 +890,8 @@ class SimpleReader(ArrayReader):
                     fieldss = self.__getHDF5Fields(fname,particle_group,field_names,fieldss) 
             elif extension == '.csv':
                 ## each file corresponds to a single set of coordinates and fields
-                coordinates = self.__getCSVCoordinates(fnames[i]) 
-                fieldss = self.__getCSVFields(fnames[i],field_names) 
+                coordinates = self.__getCSVCoordinates(fnames[i],csv_sep) 
+                fieldss = self.__getCSVFields(fnames[i],field_names,csv_sep) 
             else:
                 raise ValueError("Invalid extension %s, must be .hdf5 or .csv"%extension) 
             coordss.append(coordinates)
@@ -903,16 +906,18 @@ class SimpleReader(ArrayReader):
             loud=loud,
             **kwargs)
 
-    def __getCSVCoordinates(self,fname,sep=' '):
+    def __getCSVCoordinates(self,fname,csv_sep=','):
         """Simple parser for opening a CSV file and extracting
             its coordinates.
 
         :param fname: full filepath to :code:`.csv` file
         :type fname: str
+        :param csv_sep: separator between values in the csv, defaults to ','
+        :type csv_sep: str, optional
         :return: :code:`coordinates`
         :rtype: np.ndarray
         """
-        full_df = pd.read_csv(fname,sep=sep)
+        full_df = pd.read_csv(fname,sep=csv_sep)
         coordinates = np.empty((full_df.shape[0],3))
 
         if 'x' in full_df and 'y' in full_df and 'z' in full_df:
@@ -926,7 +931,7 @@ class SimpleReader(ArrayReader):
 
         return coordinates
 
-    def __getCSVFields(self,fname,field_names):
+    def __getCSVFields(self,fname,field_names,csv_sep=','):
         """Use pandas to interpret csv data in order to load field data matching
             field names (field names that are not present are ignored).
 
@@ -934,6 +939,8 @@ class SimpleReader(ArrayReader):
         :type fname: str
         :param field_names: strings to try and extract from .csv. There must be a header row
         :type field_names: list of strs
+        :param csv_sep: separator between values in the csv, defaults to ','
+        :type csv_sep: str, optional
         :return: dictionary of fields and field name pairings
         :rtype: dict if field_names is not None else None
         """
@@ -943,7 +950,7 @@ class SimpleReader(ArrayReader):
         fieldss = {}
 
         ## trust pandas to open the .csv and detect if there's a header \_(ツ)_/
-        full_df = pd.read_csv(fname,sep=' ')
+        full_df = pd.read_csv(fname,sep=csv_sep)
         for field_name in field_names:
             if field_name in full_df: fieldss[field_name] = full_df[field_name].to_numpy()
         return fieldss

@@ -41,6 +41,9 @@ function defineGUIParticleState(){
 			}
 		}
 
+		// rather than make its own window let's put radii in general
+		//  since we'll only ever need the dropdown
+		/*
 		if (GUIParams.haveRadii[p]){
 			GUIParams.GUIState.main.particles[p].base.radii = {
 				'id' : 'GUI'+p+'Radii',
@@ -48,6 +51,7 @@ function defineGUIParticleState(){
 				//TO DO : create a function and enter it here
 			};
 		}
+		*/
 
 	})
 }
@@ -68,7 +72,7 @@ function createParticlesWindow(container){
 
 	// create each of the particle group UI base panels containing:
 	GUIParams.partsKeys.forEach(function(p,i){
-		createParticleBase(UI,p);
+		if (GUIParams.UIparticle[p]) createParticleBase(UI,p);
 	});
 	
 
@@ -109,7 +113,35 @@ function createParticleBase(UI, p){
 		.attr('autocomplete','off')
 		.attr('checked','true')
 		.on('change',function(){
-			sendToViewer([{'checkshowParts':[p,this.checked]}]);})
+			sendToViewer([{'checkshowParts':[p,this.checked]}]);
+			// update the checkbox on the GUI side
+			elm = document.getElementById(p+'Check');
+				elm.checked = this.checked;
+				elm.value = this.checked;
+			GUIParams.showParts[p] = this.checked;
+
+			var any_shown = GUIParams.partsKeys.some(
+				function (key){return GUIParams.showParts[key]});
+			GUIParams.showParts[GUIParams.CDkey] = any_shown;
+
+			if (!this.checked && GUIParams.showColormap[p]) removeColorbar(p);
+			else if (this.checked && GUIParams.showColormap[p]) checkColormapBox(p,this.checked);
+
+			// need to determine if we should show/hide the colorbar container
+			//  for column density b.c. if we turn off all the particles it should disappear
+			if (GUIParams.showColormap[GUIParams.CDkey]){
+				if (any_shown){
+					// show the colorbar container
+					d3.select('#colormap_outer_container').style('visibility','visible');
+				}
+				else{
+					// hide the colorbar container
+					//hide the colomap div
+					if (d3.select('#colormap_outer_container').classed('show')) expandColormapTab();
+					d3.select('#colormap_outer_container').style('visibility','hidden');
+				}
+			}
+		})
 
 	if (!GUIParams.showParts[p]){
 		elm = document.getElementById(p+'Check');
@@ -122,11 +154,12 @@ function createParticleBase(UI, p){
 
 
 	// add the particle size slider
+	left = 210;
 	container.append('div')
 		.attr('id',p+'_PSlider')
 		.attr('class','PSliderClass')
-		.style('left',(GUIParams.containerWidth - 210) + 'px')
-		.style('width',(GUIParams.containerWidth - 214) + 'px')
+		.style('left',(GUIParams.containerWidth - left) + 'px')
+		.style('width',(GUIParams.containerWidth - (left+4-75+GUIParams.longestPartLabelLen)) + 'px')
 		.style('height', '25px');
 
 	// add the particle size text input
@@ -139,13 +172,13 @@ function createParticleBase(UI, p){
 	// add the particle color picker
 	container.append('input')
 		.attr('id',p+'ColorPicker');
-
 	createColorPicker(p);
 	container.select('.sp-replacer').style('left',(GUIParams.containerWidth - 54) + 'px');
 
 	createPsizeSlider(p);
 
 	// add the dropdown button and a dropdown container div
+	if (GUIParams.UIdropdown[p]){
 	container.append('button')
 		.attr('id', p+'Dropbtn')
 		.attr('class', 'dropbtn')
@@ -153,6 +186,7 @@ function createParticleBase(UI, p){
 		.style('left',(GUIParams.containerWidth - 28) + 'px')
 		.style('top','-22px')
 		.html('&#x25BC');
+	}
 
 	var keys = Object.keys(GUIParams.GUIState.main.particles[p].base).filter(function(d){return (d != 'id' && d != 'name' && d != 'current')});
 	//var h = 34*keys.length
@@ -199,7 +233,7 @@ function createParticleBase(UI, p){
 	stateBar.append('div')
 		.attr('id',p + 'UIStateTextContainer')
 		.attr('class','UIdiv')
-		.style('width', (GUIParams.containerWidth - 47) + 'px')
+		.style('width', (GUIParams.containerWidth - 45) + 'px')
 		.style('margin-left','1px')
 		.style('height', '16px')
 		.style('font-size','12px')
@@ -352,7 +386,7 @@ function createParticleGeneralWindow(container, p){
 		});
 
 	dNcontent.append('div')
-		.attr('id',p+'_NSlider')
+		.attr('id',p+'_plotNmaxSlider')
 		.attr('class','NSliderClass')
 		.style('width',(GUIParams.containerWidth - 106) + 'px');
 
@@ -389,6 +423,39 @@ function createParticleGeneralWindow(container, p){
 			.style('left',(GUIParams.containerWidth - 48) + 'px');
 		dheight += 32;
 		createCamNormSlider(p);
+	}
+
+	if (GUIParams.rkeys[p].length > 1){
+
+		UI.append('hr')
+			.style('margin','0')
+			.style('border','1px solid #909090');
+
+		//dropdown to change blending mode
+		var dRcontent = UI.append('div')
+			.attr('class','NdDiv');
+
+		dRcontent.append('span')
+			.attr('class','pLabelDiv')
+			.style('width','115px')
+			.text('Radius Variable');
+
+		// add blending mode selector
+		var selectRType = dRcontent.append('select')
+			.attr('class','selectRadiusVariable')
+			.attr('id',p+'_selectRadiusVariable')
+			.on('change',selectRadiusVariable)
+
+		var optionsR = selectRType.selectAll('option')
+			.data(GUIParams.rkeys[p]).enter()
+			.append('option')
+				.text(function (d) { return d; });
+
+		elm = document.getElementById(p+'_selectRadiusVariable');
+		elm.value = GUIParams.rkeys[p][GUIParams.radiusVariable[p]];
+
+		dheight += 32;
+
 	}
 
 	UI.style('height',dheight + 'px')
@@ -580,7 +647,8 @@ function createParticleColormapWindow(container, p){
 		.attr('type','checkbox')
 		.attr('autocomplete','off')
 		.on('change',function(){
-			checkColormapBox(p, this.checked);
+			if (GUIParams.showParts[p]) checkColormapBox(p, this.checked);
+			else this.checked=GUIParams.showColormap[p];
 		})
 
 	ColorDiv.append('label')
@@ -829,7 +897,7 @@ function expandParticleDropdown(handle) {
 	//reset the height of the containers
 	d3.select('#GUIParticlesBase').style('height',h0 + 'px')
 	d3.select('#UIStateContainer')
-		.style('height',(h0 + 2*GUIParams.partsKeys.length) + 'px') //I think I need this offset, but required further testing
+		.style('height',h0 + 'px') 
 		.attr('trueHeight',h0 + 'px')
 
 	//if the colormap is open be sure to update the overall clip-path
@@ -861,7 +929,7 @@ function createColorPicker(p){
 	});
 
 	if (!GUIParams.useColorPicker[p]){
-		$("#"+d+"ColorPicker").spectrum({
+		$("#"+p+"ColorPicker").spectrum({
 			color: "rgba("+(GUIParams.Pcolors[p][0]*255)+","+(GUIParams.Pcolors[p][1]*255)+","+(GUIParams.Pcolors[p][2]*255)+","+GUIParams.Pcolors[p][3]+")",
 			disabled: true,
 		});		

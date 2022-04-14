@@ -7,7 +7,8 @@ class BinaryWriter(object):
         fname,
         coordinates,
         velocities=None,
-        rgba_colors=None):
+        rgba_colors=None,
+        shuffle=True):
         
         ## bind input
         self.fname = fname
@@ -44,6 +45,12 @@ class BinaryWriter(object):
         self.filter_flags = []
         self.colormap_flags = []
         self.radius_flags = []
+
+        self.shuffle_indices = None
+        if shuffle: 
+            self.shuffle_indices = np.arange(coordinates.shape[0],dtype=int)
+            ## modifies in-place
+            np.random.shuffle(self.shuffle_indices)
     
     def write(self):
         with open(self.fname,'wb') as handle:
@@ -113,10 +120,12 @@ class BinaryWriter(object):
         
     def write_vector_field(self,handle,vfield):
         ## flatten the vector field to write it, row-major order.
+        if self.shuffle_indices is not None: vfield = vfield[self.shuffle_indices]
         handle.write(np.array(vfield,dtype=np.float32).flatten())
         return vfield.size*4
 
     def write_field(self,handle,field):
+        if self.shuffle_indices is not None: field = field[self.shuffle_indices]
         handle.write(field.astype(np.float32))
         return field.size*4
      
