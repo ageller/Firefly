@@ -1,21 +1,23 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tutorial notebook: Using the Reader class &mdash; Firefly 2.0.5 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <title>Tutorial notebook: Using the Reader class &mdash; Firefly 3.0.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "tex2jax_ignore|mathjax_ignore|document", "processClass": "tex2jax_process|mathjax_process|math|output_area"}})</script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -28,7 +30,8 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html"><img src="../_static/logo_banner.png" class="logo" alt="Logo"/>
+            <a href="../index.html">
+            <img src="../_static/logo_banner.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -406,11 +409,11 @@ div.rendered_html tbody tr:hover {
 </div>
 </div>
 <section id="Tutorial-notebook:-Using-the-Reader-class">
-<h1>Tutorial notebook: Using the <code class="docutils literal notranslate"><span class="pre">Reader</span></code> class<a class="headerlink" href="#Tutorial-notebook:-Using-the-Reader-class" title="Permalink to this headline">¶</a></h1>
+<h1>Tutorial notebook: Using the <code class="docutils literal notranslate"><span class="pre">Reader</span></code> class<a class="headerlink" href="#Tutorial-notebook:-Using-the-Reader-class" title="Permalink to this headline"></a></h1>
 <p>One of the main purposes of Firefly is to enable users to interactively explore their <em>own</em> data (or else interactively explore someone else’s respective own data). While it is possible to format one’s data manually using a text editor we have provided a python API for producing the <code class="docutils literal notranslate"><span class="pre">.json</span></code> files that are necessary to run an iteration of firefly.</p>
 <p>The central piece of that API is the <code class="docutils literal notranslate"><span class="pre">firefly.data_reader.Reader</span></code> class, which acts to collect the different parts of the API together to produce consistently formatted and linked <code class="docutils literal notranslate"><span class="pre">.json</span></code> files that the Firefly webapp can interpret. The <code class="docutils literal notranslate"><span class="pre">Reader</span></code> class is documented here but here we only provide a brief example of how to use the API.</p>
 <section id="Creating-a-Reader-instance">
-<h2>Creating a Reader instance<a class="headerlink" href="#Creating-a-Reader-instance" title="Permalink to this headline">¶</a></h2>
+<h2>Creating a Reader instance<a class="headerlink" href="#Creating-a-Reader-instance" title="Permalink to this headline"></a></h2>
 <p>To begin, we’ll start by initializing a <code class="docutils literal notranslate"><span class="pre">Reader</span></code> object. Users are encouraged to familiarize themselves with the different keyword arguments through the documentation linked above.</p>
 <p>Perhaps the most important keyword argument is the <code class="docutils literal notranslate"><span class="pre">JSONdir</span></code>, which tells your <code class="docutils literal notranslate"><span class="pre">Reader</span></code> object where it should collect the different <code class="docutils literal notranslate"><span class="pre">.json</span></code> files it will produce. The <code class="docutils literal notranslate"><span class="pre">.json</span></code> files have to be readable from the <code class="docutils literal notranslate"><span class="pre">firefly/static/data</span></code> directory of the iteration of Firefly that’s trying to open the data. The <code class="docutils literal notranslate"><span class="pre">Reader</span></code> class will automatically create a shortcut to the directory if you don’t choose a path that lives in <code class="docutils literal notranslate"><span class="pre">firefly/static/data</span></code>. If you enter a relative path it will assume
 you mean relative to your <code class="docutils literal notranslate"><span class="pre">${HOME}</span></code> directory. If no <code class="docutils literal notranslate"><span class="pre">JSONdir</span></code> is provided then it will default to <code class="docutils literal notranslate"><span class="pre">${HOME}/&lt;JSONprefix&gt;</span></code> (which itself defaults to <code class="docutils literal notranslate"><span class="pre">Data</span></code> if nothing is passed).</p>
@@ -441,7 +444,7 @@ you mean relative to your <code class="docutils literal notranslate"><span class
 </div>
 </section>
 <section id="Store-the-coordinates-in-a-ParticleGroup">
-<h2>Store the coordinates in a ParticleGroup<a class="headerlink" href="#Store-the-coordinates-in-a-ParticleGroup" title="Permalink to this headline">¶</a></h2>
+<h2>Store the coordinates in a ParticleGroup<a class="headerlink" href="#Store-the-coordinates-in-a-ParticleGroup" title="Permalink to this headline"></a></h2>
 <p>Particle data is validated and organized in <code class="docutils literal notranslate"><span class="pre">firefly.data_reader.ParticleGroup</span></code> objects. In general users should not sub-class the <code class="docutils literal notranslate"><span class="pre">ParticleGroup</span></code> class but if you’re an enterprising user with a specific use case I’m a tutorial not a cop! For details about how the <code class="docutils literal notranslate"><span class="pre">ParticleGroup</span></code> class works, check the particle group documentation.</p>
 <p>For our purposes, we’ll take advantage of the fact that any keyword arguments passed here go directly to the <code class="docutils literal notranslate"><span class="pre">particleGroup.settings_default</span></code> dictionary which controls which elements appear in the particle panes in the UI, see the settings documentation or see <code class="docutils literal notranslate"><span class="pre">settings_tutorial.ipynb</span></code> for an example.</p>
 <p><strong>Note:</strong> Sometimes data is too large to load directly into Firefly, we encourage users who are trying a new dataset for the first time to use the <code class="docutils literal notranslate"><span class="pre">decimation_factor</span></code> keyword argument to reduce the dataset size by the factor specified (the implementation is just a <code class="docutils literal notranslate"><span class="pre">shuffle(coords)[::decimation_factor]</span></code>).</p>
@@ -507,7 +510,7 @@ Reader with 2 particle groups
 <p>Notice that the decimation factor is represented by the fraction 800/8000 in the second particle group “decimated”.</p>
 </section>
 <section id="Outputting-to-JSON">
-<h2>Outputting to JSON<a class="headerlink" href="#Outputting-to-JSON" title="Permalink to this headline">¶</a></h2>
+<h2>Outputting to JSON<a class="headerlink" href="#Outputting-to-JSON" title="Permalink to this headline"></a></h2>
 <p>At this point we’re ready to output our data to <code class="docutils literal notranslate"><span class="pre">.json</span></code> format in order to load in with firefly. The <code class="docutils literal notranslate"><span class="pre">Reader</span></code> object will automatically dump all of the necessary files associated with each of the <code class="docutils literal notranslate"><span class="pre">ParticleGroup</span></code> objects and <code class="docutils literal notranslate"><span class="pre">Settings</span></code> objects we’ve attached to it as described in the reader documentation.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
@@ -560,7 +563,7 @@ big_JSON has 468730 characters
 </div>
 </section>
 <section id="Using-an-ArrayReader-sub-class">
-<h2>Using an <code class="docutils literal notranslate"><span class="pre">ArrayReader</span></code> sub-class<a class="headerlink" href="#Using-an-ArrayReader-sub-class" title="Permalink to this headline">¶</a></h2>
+<h2>Using an <code class="docutils literal notranslate"><span class="pre">ArrayReader</span></code> sub-class<a class="headerlink" href="#Using-an-ArrayReader-sub-class" title="Permalink to this headline"></a></h2>
 <p>The procedure outlined above is a common use case, and so we’ve provided a sub-class to <code class="docutils literal notranslate"><span class="pre">firefly.data_reader.Reader</span></code>, <code class="docutils literal notranslate"><span class="pre">firefly.data_reader.ArrayReader</span></code> which wraps the <code class="docutils literal notranslate"><span class="pre">ParticleGroup</span></code> and <code class="docutils literal notranslate"><span class="pre">.addParticleGroup</span></code> so the user can get a <code class="docutils literal notranslate"><span class="pre">Reader</span></code> containing their data with a single initialization. It will automatically name particle groups and fields unless they are specified directly (see reader documentation).</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
@@ -598,7 +601,7 @@ Outputting: PGroup_0 - 8000/8000 particles - 1 tracked fields
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2021, Alex Gurvich, Aaron Geller.</p>
+    <p>&#169; Copyright 2022, Alex Gurvich, Aaron Geller.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

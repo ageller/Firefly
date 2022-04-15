@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>firefly.data_reader.FIREreader &mdash; Firefly 2.0.5 documentation</title><link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <title>firefly.data_reader.FIREreader &mdash; Firefly 3.0.0 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/doctools.js"></script>
@@ -26,7 +28,8 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../../index.html"><img src="../../../_static/logo_banner.png" class="logo" alt="Logo"/>
+            <a href="../../../index.html">
+            <img src="../../../_static/logo_banner.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -107,23 +110,23 @@
 }
 </style>
 <section id="firefly-data-reader-firereader">
-<h1>firefly.data_reader.FIREreader<a class="headerlink" href="#firefly-data-reader-firereader" title="Permalink to this headline">¶</a></h1>
+<h1>firefly.data_reader.FIREreader<a class="headerlink" href="#firefly-data-reader-firereader" title="Permalink to this headline"></a></h1>
 <dl class="py class">
-<dt id="firefly.data_reader.FIREreader">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">firefly.data_reader.</span></code><code class="sig-name descname"><span class="pre">FIREreader</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">snapdir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snapnum</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ptypes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">UInames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimation_factors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fields</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filterFlags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colormapFlags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radiusFlags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logFlags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/firefly/data_reader/FIREreader.html#FIREreader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#firefly.data_reader.FIREreader" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">firefly.data_reader.reader.Reader</span></code></p>
+<dt class="sig sig-object py" id="firefly.data_reader.FIREreader">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firefly.data_reader.</span></span><span class="sig-name descname"><span class="pre">FIREreader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">snapdir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snapnum</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ptypes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">UInames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimation_factors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fields</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filterFlags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colormapFlags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radiusFlags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logFlags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/firefly/data_reader/FIREreader.html#FIREreader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#firefly.data_reader.FIREreader" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="../classes/firefly.data_reader.Reader.html#firefly.data_reader.Reader" title="firefly.data_reader.reader.Reader"><code class="xref py py-class docutils literal notranslate"><span class="pre">firefly.data_reader.reader.Reader</span></code></a></p>
 <p>This is an example of a “custom” Reader that has been tuned to 
 open data from the <a class="reference external" href="https://fire.northwestern.edu">FIRE galaxy formation collaboration</a>.</p>
 <dl class="py method">
-<dt id="firefly.data_reader.FIREreader.__init__">
-<code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">snapdir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snapnum</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ptypes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">UInames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimation_factors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fields</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filterFlags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colormapFlags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radiusFlags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logFlags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/firefly/data_reader/FIREreader.html#FIREreader.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#firefly.data_reader.FIREreader.__init__" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="firefly.data_reader.FIREreader.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">snapdir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">snapnum</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ptypes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">UInames</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimation_factors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fields</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filterFlags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colormapFlags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radiusFlags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logFlags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/firefly/data_reader/FIREreader.html#FIREreader.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#firefly.data_reader.FIREreader.__init__" title="Permalink to this definition"></a></dt>
 <dd><dl class="simple">
 <dt>Base initialization method for FIREreader instances.</dt><dd><p>A FIREreader will conveniently read <a class="reference external" href="http://fire.northwestern.edu">FIRE collaboration</a> 
 data and produce firefly compatible <code class="code docutils literal notranslate"><span class="pre">.json</span></code> files.</p>
 </dd>
 </dl>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>snapdir</strong> (<em>str</em>) – directory that contains all the hdf5 data files</p></li>
 <li><p><strong>snapnum</strong> (<em>int</em>) – which snapshot to open</p></li>
@@ -150,7 +153,7 @@ defaults to [False for i in fields]</p></li>
 defaults to [False for i in fields]</p></li>
 </ul>
 </dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dt class="field-even">Raises</dt>
 <dd class="field-even"><ul class="simple">
 <li><p><strong>ValueError</strong> – if the length of ptypes, UInames, and decimation factors
 does not match.</p></li>
@@ -163,14 +166,14 @@ colormapFlags, radiusFlags, and logFlags does not match.</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt id="firefly.data_reader.FIREreader.loadData">
-<code class="sig-name descname"><span class="pre">loadData</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">com</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vcom</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/firefly/data_reader/FIREreader.html#FIREreader.loadData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#firefly.data_reader.FIREreader.loadData" title="Permalink to this definition">¶</a></dt>
+<dt class="sig sig-object py" id="firefly.data_reader.FIREreader.loadData">
+<span class="sig-name descname"><span class="pre">loadData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">com</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vcom</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/firefly/data_reader/FIREreader.html#FIREreader.loadData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#firefly.data_reader.FIREreader.loadData" title="Permalink to this definition"></a></dt>
 <dd><p>Loads FIRE snapshot data using Alex Gurvich’s
 <code class="xref py py-func docutils literal notranslate"><span class="pre">firefly.data_reader.snapshot_utils.openSnapshot()</span></code>.
 (reproduced from <a class="reference external" href="https://github.com/agurvich/abg_python">https://github.com/agurvich/abg_python</a>) and binds it to a 
 corresponding <a class="reference internal" href="../classes/firefly.data_reader.ParticleGroup.html#firefly.data_reader.ParticleGroup" title="firefly.data_reader.ParticleGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">firefly.data_reader.ParticleGroup</span></code></a> instance.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>com</strong> (<em>np.ndarray</em><em>, </em><em>optional</em>) – position to offset all coordinates by if None, 
 will calculate the CoM, defaults to None</p>
 </dd>
@@ -192,7 +195,7 @@ will calculate the CoM, defaults to None</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2021, Alex Gurvich, Aaron Geller.</p>
+    <p>&#169; Copyright 2022, Alex Gurvich, Aaron Geller.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

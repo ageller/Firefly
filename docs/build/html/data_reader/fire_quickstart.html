@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Using Firefly to view FIRE data &mdash; Firefly 2.0.5 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <title>Using Firefly to view FIRE data &mdash; Firefly 3.0.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
@@ -26,7 +28,8 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html"><img src="../_static/logo_banner.png" class="logo" alt="Logo"/>
+            <a href="../index.html">
+            <img src="../_static/logo_banner.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -109,11 +112,11 @@
 }
 </style>
 <section id="using-firefly-to-view-fire-data">
-<span id="fire-viz-creation"></span><h1>Using Firefly to view FIRE data<a class="headerlink" href="#using-firefly-to-view-fire-data" title="Permalink to this headline">¶</a></h1>
+<h1>Using Firefly to view FIRE data<a class="headerlink" href="#using-firefly-to-view-fire-data" title="Permalink to this headline"></a></h1>
 <section id="quickstart">
-<h2>Quickstart<a class="headerlink" href="#quickstart" title="Permalink to this headline">¶</a></h2>
+<h2>Quickstart<a class="headerlink" href="#quickstart" title="Permalink to this headline"></a></h2>
 <section id="to-easily-create-a-fire-firefly-visualization">
-<h3>To easily create a FIRE Firefly visualization<a class="headerlink" href="#to-easily-create-a-fire-firefly-visualization" title="Permalink to this headline">¶</a></h3>
+<h3>To easily create a FIRE Firefly visualization<a class="headerlink" href="#to-easily-create-a-fire-firefly-visualization" title="Permalink to this headline"></a></h3>
 <p>After following the <a class="reference internal" href="../installation.html#install"><span class="std std-ref">installation instructions</span></a>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Import Firefly API</span>
 <span class="kn">from</span> <span class="nn">firefly.data_reader</span> <span class="kn">import</span> <span class="n">SimpleFIREreader</span>
@@ -122,12 +125,12 @@
 <span class="c1"># Here we&#39;re using the shared Stampede2 directory as an example</span>
 <span class="n">reader</span> <span class="o">=</span> <span class="n">SimpleFIREreader</span><span class="p">(</span>
     <span class="s1">&#39;/scratch/projects/xsede/GalaxiesOnFIRE/core/m12i_res7100/output/snapdir_600&#39;</span><span class="p">,</span>
-<span class="p">)</span>
+    <span class="n">write_to_disk</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
 <section id="to-view-the-firefly-visualization">
-<h3>To view the Firefly visualization<a class="headerlink" href="#to-view-the-firefly-visualization" title="Permalink to this headline">¶</a></h3>
+<h3>To view the Firefly visualization<a class="headerlink" href="#to-view-the-firefly-visualization" title="Permalink to this headline"></a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Spawn a server to host the visualization</span>
 <span class="kn">from</span> <span class="nn">Firefly.server</span> <span class="kn">import</span> <span class="n">spawnFireflyServer</span>
 <span class="n">process</span> <span class="o">=</span> <span class="n">spawnFireflyServer</span><span class="p">()</span>
@@ -143,13 +146,13 @@ Alternatively, if you’re using a <a class="reference external" href="https://j
 </div>
 <p>Regardless of browser or notebook, the final step is to send the data to the visualization.
 This will update your web browser or IFrame.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">my_arrayReader</span><span class="o">.</span><span class="n">sendDataViaFlask</span><span class="p">()</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">reader</span><span class="o">.</span><span class="n">sendDataViaFlask</span><span class="p">()</span>
 </pre></div>
 </div>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p>A more in-depth example of formatting <strong>FIRE</strong> data <a class="reference external" href="https://ageller.github.io/Firefly/docs/build/html/data_reader/convert_FIRE_data.html">is available here</a>.</p>
-</aside>
+</div>
 </section>
 </section>
 </section>
@@ -165,7 +168,7 @@ This will update your web browser or IFrame.</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2021, Alex Gurvich, Aaron Geller.</p>
+    <p>&#169; Copyright 2022, Alex Gurvich, Aaron Geller.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

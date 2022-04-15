@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Creating your own instance of Firefly &mdash; Firefly 2.0.5 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <title>Creating your own instance of Firefly &mdash; Firefly 3.0.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
@@ -26,7 +28,8 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html"><img src="../_static/logo_banner.png" class="logo" alt="Logo"/>
+            <a href="../index.html">
+            <img src="../_static/logo_banner.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -109,9 +112,9 @@
 }
 </style>
 <section id="creating-your-own-instance-of-firefly">
-<span id="viz-creation"></span><h1>Creating your own instance of Firefly<a class="headerlink" href="#creating-your-own-instance-of-firefly" title="Permalink to this headline">¶</a></h1>
+<span id="viz-creation"></span><h1>Creating your own instance of Firefly<a class="headerlink" href="#creating-your-own-instance-of-firefly" title="Permalink to this headline"></a></h1>
 <section id="quickstart">
-<h2>Quickstart<a class="headerlink" href="#quickstart" title="Permalink to this headline">¶</a></h2>
+<h2>Quickstart<a class="headerlink" href="#quickstart" title="Permalink to this headline"></a></h2>
 <p>Starting with some particle data, for example:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Some random particle data, including locations and a property</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -124,9 +127,9 @@
 <p>If you are using FIRE data, check out <a class="reference internal" href="fire_quickstart.html#fire-viz-creation"><span class="std std-ref">the FIRE quickstart page</span></a>
 which demonstrates how to create a Firefly visualization with only the path to a FIRE
 snapshot.</p>
-</aside>
+</div>
 <section id="to-format-your-data-for-firefly">
-<h3>To format your data for Firefly<a class="headerlink" href="#to-format-your-data-for-firefly" title="Permalink to this headline">¶</a></h3>
+<h3>To format your data for Firefly<a class="headerlink" href="#to-format-your-data-for-firefly" title="Permalink to this headline"></a></h3>
 <p>After following the <a class="reference internal" href="../installation.html#install"><span class="std std-ref">install instructions</span></a>:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Import Firefly API</span>
 <span class="kn">from</span> <span class="nn">firefly.data_reader</span> <span class="kn">import</span> <span class="n">ArrayReader</span>
@@ -136,13 +139,13 @@ snapshot.</p>
     <span class="n">coords</span><span class="p">,</span>
     <span class="n">fields</span> <span class="o">=</span> <span class="n">fields</span><span class="p">,</span>
     <span class="n">JSONdir</span> <span class="o">=</span> <span class="n">JSONdir</span><span class="p">,</span>
-    <span class="n">write_jsons_to_disk</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">write_to_disk</span> <span class="o">=</span> <span class="kc">True</span>
 <span class="p">)</span>
 </pre></div>
 </div>
 </section>
 <section id="to-view-the-firefly-visualization">
-<h3>To view the Firefly visualization<a class="headerlink" href="#to-view-the-firefly-visualization" title="Permalink to this headline">¶</a></h3>
+<h3>To view the Firefly visualization<a class="headerlink" href="#to-view-the-firefly-visualization" title="Permalink to this headline"></a></h3>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Spawn a server to host the visualization</span>
 <span class="kn">from</span> <span class="nn">Firefly.server</span> <span class="kn">import</span> <span class="n">spawnFireflyServer</span>
 <span class="n">process</span> <span class="o">=</span> <span class="n">spawnFireflyServer</span><span class="p">()</span>
@@ -164,7 +167,7 @@ This will update your web browser or IFrame.</p>
 </section>
 </section>
 <section id="next-steps">
-<h2>Next steps<a class="headerlink" href="#next-steps" title="Permalink to this headline">¶</a></h2>
+<h2>Next steps<a class="headerlink" href="#next-steps" title="Permalink to this headline"></a></h2>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="files.html">Understanding Firefly’s input requirements</a></li>
@@ -200,7 +203,7 @@ This will update your web browser or IFrame.</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2021, Alex Gurvich, Aaron Geller.</p>
+    <p>&#169; Copyright 2022, Alex Gurvich, Aaron Geller.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

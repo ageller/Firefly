@@ -8,6 +8,13 @@ Firefly: a browser-based interactive particle data visualization platform
 
 .. image:: _static/screenGrab.png
 
+.. warning::  WebGL performance is severely degraded in Google Chrome
+   by default on the new Apple Silicon M1 processor. 
+   If you're using an M1 processor
+   see `this github issue <https://github.com/ageller/Firefly/issues/84>`_
+   for instructions on how to enable hardware acceleration using 
+   Chrome's internal flags. 
+
 Firefly is an interactive application for visualizing particle-based data 
 from within the web browser.
 Firefly can also be run from entirely within a Jupyter notebook using the

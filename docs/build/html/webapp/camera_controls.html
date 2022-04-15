@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Camera controls &mdash; Firefly 2.0.5 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <title>Camera controls &mdash; Firefly 3.0.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
@@ -17,7 +19,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Particle controls" href="particle_controls.html" />
+    <link rel="next" title="Volume rendering with 2d projection" href="projection_controls.html" />
     <link rel="prev" title="Data controls" href="data_controls.html" /> 
 </head>
 
@@ -26,7 +28,8 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html"><img src="../_static/logo_banner.png" class="logo" alt="Logo"/>
+            <a href="../index.html">
+            <img src="../_static/logo_banner.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -40,12 +43,12 @@
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Interacting with a Firefly visualization</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="index.html#flying-with-the-mouse-or-keyboard">Flying with the mouse or keyboard</a></li>
-<li class="toctree-l2"><a class="reference internal" href="index.html#tweening">Tweening</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="index.html#using-the-user-interface">Using the user interface</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="index.html#the-top-bar">The top bar</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="index.html#sub-panels">Sub-panels</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="data_controls.html">Data controls</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">Camera controls</a></li>
+<li class="toctree-l4"><a class="reference internal" href="projection_controls.html">Volume rendering with 2d projection</a></li>
 <li class="toctree-l4"><a class="reference internal" href="particle_controls.html">Particle controls</a></li>
 </ul>
 </li>
@@ -110,7 +113,7 @@
 }
 </style>
 <section id="camera-controls">
-<h1>Camera controls<a class="headerlink" href="#camera-controls" title="Permalink to this headline">¶</a></h1>
+<span id="id1"></span><h1>Camera controls<a class="headerlink" href="#camera-controls" title="Permalink to this headline"></a></h1>
 <img alt="../_images/camera_controls.png" src="../_images/camera_controls.png" />
 <p>Upon startup this sub-panel will be collapsed.
 Click on the downward facing arrow on the right side to expand
@@ -125,14 +128,14 @@ of the Center, Camera and Rotation.</p>
 as text input boxes. They are only for reference, i.e. if you
 want to use a different program to render your data from the same
 perspective.</p>
-</aside>
+</div>
 <section id="lock">
-<span id="lock-button"></span><h2>Lock<a class="headerlink" href="#lock" title="Permalink to this headline">¶</a></h2>
+<span id="lock-button"></span><h2>Lock<a class="headerlink" href="#lock" title="Permalink to this headline"></a></h2>
 <p>Next to the Center text boxes, you will see a checkbox labelled “Lock”.
 This will allow you to switch between Trackball and Fly controls.</p>
 </section>
 <section id="save-reset-recenter">
-<h2>Save/Reset/Recenter<a class="headerlink" href="#save-reset-recenter" title="Permalink to this headline">¶</a></h2>
+<h2>Save/Reset/Recenter<a class="headerlink" href="#save-reset-recenter" title="Permalink to this headline"></a></h2>
 <p>Below the text boxes you will see three buttons.</p>
 <p>“Save” allows you to mark the current location,
 which you can return to if you click the “Reset” button.
@@ -140,13 +143,13 @@ which you can return to if you click the “Reset” button.
 (or the previous save, if clicked).</p>
 </section>
 <section id="friction">
-<h2>Friction<a class="headerlink" href="#friction" title="Permalink to this headline">¶</a></h2>
+<h2>Friction<a class="headerlink" href="#friction" title="Permalink to this headline"></a></h2>
 <p>Below those buttons, is the “Friction” slider and text entry box.
 For Trackball mode, this controls the rate that the camera stops moving after you release the mouse.
 For Fly mode this controls the speed that you move around while pressing the keyboard control buttons.</p>
 </section>
 <section id="stereo">
-<h2>Stereo<a class="headerlink" href="#stereo" title="Permalink to this headline">¶</a></h2>
+<h2>Stereo<a class="headerlink" href="#stereo" title="Permalink to this headline"></a></h2>
 <p>Finally, there is a “Stereo” checkbox, slider and text entry box.
 If you click the checkbox, the renderer changes to stereoscopic side-by-side mode.  The slider and text entry box controls the separation between the cameras in the stereoscopic mode.
 This can be used with a 3D display and glasses that can overlay
@@ -156,8 +159,15 @@ effect.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p>There is experimental support for VR using the stereoscopic mode,
-see <a class="reference internal" href="../experimental.html#experimental-features-1"><span class="std std-ref">Experimental features</span></a>.</p>
-</aside>
+see <a class="reference internal" href="../experimental.html#experimental-features"><span class="std std-ref">Experimental features</span></a>.</p>
+</div>
+</section>
+<section id="tweening">
+<h2>Tweening<a class="headerlink" href="#tweening" title="Permalink to this headline"></a></h2>
+<p>Using the checkbox labeled Tween, the camera’s position
+and orientation will be smoothly adjusted according to the keyframes
+defined by the user in the <code class="code docutils literal notranslate"><span class="pre">TweenParams</span></code>.</p>
+<p>See the <a class="reference internal" href="../reference/api/api.html#frontend-api"><span class="std std-ref">frontend documentation</span></a> for details.</p>
 </section>
 </section>
 
@@ -166,13 +176,13 @@ see <a class="reference internal" href="../experimental.html#experimental-featur
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="data_controls.html" class="btn btn-neutral float-left" title="Data controls" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="particle_controls.html" class="btn btn-neutral float-right" title="Particle controls" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="projection_controls.html" class="btn btn-neutral float-right" title="Volume rendering with 2d projection" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2021, Alex Gurvich, Aaron Geller.</p>
+    <p>&#169; Copyright 2022, Alex Gurvich, Aaron Geller.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

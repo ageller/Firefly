@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sending data to a Firefly server via Flask &mdash; Firefly 2.0.5 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <title>Sending data to a Firefly server via Flask &mdash; Firefly 3.0.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
@@ -26,7 +28,8 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html"><img src="../_static/logo_banner.png" class="logo" alt="Logo"/>
+            <a href="../index.html">
+            <img src="../_static/logo_banner.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -109,21 +112,21 @@
 }
 </style>
 <section id="sending-data-to-a-firefly-server-via-flask">
-<span id="flask"></span><h1>Sending data to a Firefly server via Flask<a class="headerlink" href="#sending-data-to-a-firefly-server-via-flask" title="Permalink to this headline">¶</a></h1>
+<span id="flask"></span><h1>Sending data to a Firefly server via Flask<a class="headerlink" href="#sending-data-to-a-firefly-server-via-flask" title="Permalink to this headline"></a></h1>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>To send data to an active Firefly webserver you will
 need to launch Firefly
 <a class="reference internal" href="../server.html#flask-host"><span class="std std-ref">using a method involving Flask</span></a>.</p>
-</aside>
+</div>
 <p>When Firefly is hosted with a Flask webserver a
 <a class="reference external" href="http://localhost:xxxx/data_input">localhost:xxxx/data_input</a>
 endpoint is exposed through which new particle data, settings, and
 tween params can passed to an active Firefly visualization.</p>
 <p>Using this endpoint, it is possible to circumvent the need to output
-data to <code class="code docutils literal notranslate"><span class="pre">.json</span></code> files entirely, instead creating a Python
+data to <code class="code docutils literal notranslate"><span class="pre">.ffly</span></code> files entirely, instead creating a Python
 string (formatted to contain the <code class="code docutils literal notranslate"><span class="pre">.json</span></code> data that <em>would’ve</em> been
-written to disk) that is <code class="code docutils literal notranslate"><span class="pre">POST</span></code>’d to the data input
+written to disk as a <code class="code docutils literal notranslate"><span class="pre">.ffly</span></code> file) that is <code class="code docutils literal notranslate"><span class="pre">POST</span></code>’d to the data input
 endpoint using the <code class="code docutils literal notranslate"><span class="pre">requests</span></code> Python module.</p>
 <p>To facilitate this, we provide the
 <a class="reference internal" href="../reference/api/classes/firefly.data_reader.Reader.html#firefly.data_reader.Reader.sendDataViaFlask" title="firefly.data_reader.Reader.sendDataViaFlask"><code class="xref py py-func docutils literal notranslate"><span class="pre">firefly.data_reader.Reader.sendDataViaFlask()</span></code></a> method,
@@ -156,7 +159,7 @@ the specified localhost port.</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2021, Alex Gurvich, Aaron Geller.</p>
+    <p>&#169; Copyright 2022, Alex Gurvich, Aaron Geller.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

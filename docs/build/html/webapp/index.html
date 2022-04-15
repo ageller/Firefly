@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Interacting with a Firefly visualization &mdash; Firefly 2.0.5 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <title>Interacting with a Firefly visualization &mdash; Firefly 3.0.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
@@ -26,7 +28,8 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html"><img src="../_static/logo_banner.png" class="logo" alt="Logo"/>
+            <a href="../index.html">
+            <img src="../_static/logo_banner.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -44,12 +47,12 @@
 <li class="toctree-l3"><a class="reference internal" href="#fly-controls">Fly Controls</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#tweening">Tweening</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#using-the-user-interface">Using the user interface</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#the-top-bar">The top bar</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#sub-panels">Sub-panels</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="data_controls.html">Data controls</a></li>
 <li class="toctree-l4"><a class="reference internal" href="camera_controls.html">Camera controls</a></li>
+<li class="toctree-l4"><a class="reference internal" href="projection_controls.html">Volume rendering with 2d projection</a></li>
 <li class="toctree-l4"><a class="reference internal" href="particle_controls.html">Particle controls</a></li>
 </ul>
 </li>
@@ -113,11 +116,11 @@
 }
 </style>
 <section id="interacting-with-a-firefly-visualization">
-<span id="viz-navigation"></span><h1>Interacting with a Firefly visualization<a class="headerlink" href="#interacting-with-a-firefly-visualization" title="Permalink to this headline">¶</a></h1>
+<h1>Interacting with a Firefly visualization<a class="headerlink" href="#interacting-with-a-firefly-visualization" title="Permalink to this headline"></a></h1>
 <section id="flying-with-the-mouse-or-keyboard">
-<h2>Flying with the mouse or keyboard<a class="headerlink" href="#flying-with-the-mouse-or-keyboard" title="Permalink to this headline">¶</a></h2>
+<h2>Flying with the mouse or keyboard<a class="headerlink" href="#flying-with-the-mouse-or-keyboard" title="Permalink to this headline"></a></h2>
 <section id="trackball-controls">
-<h3>Trackball Controls<a class="headerlink" href="#trackball-controls" title="Permalink to this headline">¶</a></h3>
+<h3>Trackball Controls<a class="headerlink" href="#trackball-controls" title="Permalink to this headline"></a></h3>
 <p>When you launch Firefly in the default configuration, you can use the mouse to rotate your view and zoom in and out.
 To rotate the view, left click and drag.  To zoom, use the mouse wheel (or two-finger scroll).
 The default view uses the “Trackball controls” from the three.js library.
@@ -127,7 +130,7 @@ You are always looking toward that center.
 And you can rotate your view around that center.</p>
 </section>
 <section id="fly-controls">
-<h3>Fly Controls<a class="headerlink" href="#fly-controls" title="Permalink to this headline">¶</a></h3>
+<h3>Fly Controls<a class="headerlink" href="#fly-controls" title="Permalink to this headline"></a></h3>
 <p>If you press the space bar, or use the user interface
 to uncheck the center <a class="reference internal" href="camera_controls.html#lock-button"><span class="std std-ref">Lock</span></a> button,
 you will switch to the “Fly controls” from the three.js library.</p>
@@ -155,20 +158,13 @@ to Trackball mode.
 This will lock the center on your region of interest.
 Now in Trackball mode, you can <strong>“orbit”</strong> that region of interest,
 while always facing it.</p>
-</aside>
+</div>
 </section>
-</section>
-<section id="tweening">
-<h2>Tweening<a class="headerlink" href="#tweening" title="Permalink to this headline">¶</a></h2>
-<p>When the <strong>T</strong> key is pressed on the keyboard the camera’s position
-and orientation will be smoothly adjusted according to the keyframes
-defined by the user in the <code class="code docutils literal notranslate"><span class="pre">TweenParams</span></code>.</p>
-<p>See the <a class="reference internal" href="../reference/api/api.html#frontend-api"><span class="std std-ref">frontend documentation</span></a> for details.</p>
 </section>
 <section id="using-the-user-interface">
-<span id="ui"></span><h2>Using the user interface<a class="headerlink" href="#using-the-user-interface" title="Permalink to this headline">¶</a></h2>
+<span id="ui"></span><h2>Using the user interface<a class="headerlink" href="#using-the-user-interface" title="Permalink to this headline"></a></h2>
 <section id="the-top-bar">
-<h3>The top bar<a class="headerlink" href="#the-top-bar" title="Permalink to this headline">¶</a></h3>
+<h3>The top bar<a class="headerlink" href="#the-top-bar" title="Permalink to this headline"></a></h3>
 <p>This contains the word Controls and an X or “hamburger” symbol.
 Click in here to show or hide the Controls panel.
 If you click and drag in the top bar, you can move the Controls panel.
@@ -189,21 +185,22 @@ If something is not updating try hitting enter a couple more times.
 If the issue persists submit a
 <a class="reference external" href="https://github.com/ageller/Firefly/issues">GitHub issue</a> and select
 the appropriate issue template.</p>
-</aside>
+</div>
 </section>
 <section id="sub-panels">
-<h3>Sub-panels<a class="headerlink" href="#sub-panels" title="Permalink to this headline">¶</a></h3>
+<h3>Sub-panels<a class="headerlink" href="#sub-panels" title="Permalink to this headline"></a></h3>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="data_controls.html">Data controls</a></li>
 <li class="toctree-l1"><a class="reference internal" href="camera_controls.html">Camera controls</a></li>
+<li class="toctree-l1"><a class="reference internal" href="projection_controls.html">Volume rendering with 2d projection</a></li>
 <li class="toctree-l1"><a class="reference internal" href="particle_controls.html">Particle controls</a></li>
 </ul>
 </div>
 </section>
 </section>
 <section id="splitting-the-viewer-and-gui-with-flask">
-<h2>Splitting the Viewer and GUI with Flask<a class="headerlink" href="#splitting-the-viewer-and-gui-with-flask" title="Permalink to this headline">¶</a></h2>
+<h2>Splitting the Viewer and GUI with Flask<a class="headerlink" href="#splitting-the-viewer-and-gui-with-flask" title="Permalink to this headline"></a></h2>
 <img alt="../_images/flask_gui.png" class="align-center" src="../_images/flask_gui.png" />
 <p>When Firefly is being hosted locally using a Flask server
 (see <a class="reference internal" href="../server.html#local"><span class="std std-ref">Hosting Firefly locally</span></a> for details on how to accomplish this)
@@ -229,8 +226,8 @@ if the host exposes their IP address to the internet by opening a port
 on their router then one’s Firefly view could be controlled remotely by
 another user over the internet.
 See <a class="reference internal" href="../server.html#port-forwarding"><span class="std std-ref">Accessing remote Firefly servers via port forwarding</span></a>.</p>
-</aside>
-</aside>
+</div>
+</div>
 </section>
 </section>
 
@@ -245,7 +242,7 @@ See <a class="reference internal" href="../server.html#port-forwarding"><span cl
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2021, Alex Gurvich, Aaron Geller.</p>
+    <p>&#169; Copyright 2022, Alex Gurvich, Aaron Geller.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

@@ -18,8 +18,8 @@ After following the :ref:`installation instructions<install>`:
     # The simple reader only needs the snapshot location
     # Here we're using the shared Stampede2 directory as an example
     reader = SimpleFIREreader(
-	'/scratch/projects/xsede/GalaxiesOnFIRE/core/m12i_res7100/output/snapdir_600',
-    )
+        '/scratch/projects/xsede/GalaxiesOnFIRE/core/m12i_res7100/output/snapdir_600',
+        write_to_disk=False)
 
 To view the Firefly visualization
 +++++++++++++++++++++++++++++++++
@@ -45,7 +45,7 @@ This will update your web browser or IFrame.
 
 .. code-block:: python
 
-    my_arrayReader.sendDataViaFlask()
+    reader.sendDataViaFlask()
 
 .. seealso:: 
     A more in-depth example of formatting **FIRE** data `is available here <https://ageller.github.io/Firefly/docs/build/html/data_reader/convert_FIRE_data.html>`_.

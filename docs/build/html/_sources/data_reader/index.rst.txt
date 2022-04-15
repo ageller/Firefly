@@ -34,7 +34,7 @@ After following the :ref:`install instructions<install>`:
         coords,
         fields = fields,
         JSONdir = JSONdir,
-        write_jsons_to_disk = True
+        write_to_disk = True
     )
 
 To view the Firefly visualization

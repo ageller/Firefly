@@ -15,7 +15,7 @@ The :class:`~firefly.data_reader.Reader` class
 
 A :class:`~firefly.data_reader.Reader` instance serves to link instances of
 each of the below classes. 
-Its :func:`~firefly.data_reader.dumpToJSON` method will take the data from each of the 
+Its :func:`~firefly.data_reader.writeToDisk` method will take the data from each of the 
 attached instances and collect it into a single :code:`JSONdir`, producing each of the 
 necessary files listed in :ref:`files` automatically.
 
@@ -94,11 +94,11 @@ The :class:`~firefly.data_reader.TweenParams` class
 
 A :class:`~firefly.data_reader.TweenParams` instance allows the user to 
 pre-define interpolated camera paths (tweening; from in-betweening) that visitors to the Firefly
-webapp can activate by pressing the **T** key on the keyboard. 
+webapp can activate through the UI (see :ref:`camera controls`). 
 Keyframe camera locations are specified and are linearly interpolated to produce a smoothly 
 varying camera path within the webapp. 
 This feature is available whenever a :code:`JSONdir` contains a 
 :code:`TweenParams.json` file.
 This file will be produced if a :class:`~firefly.data_reader.Reader` has a 
 :class:`~firefly.data_reader.TweenParams` attached to it
-when the :func:`~firefly.data_reader.Reader.dumpToJSON` method is called.
+when the :func:`~firefly.data_reader.Reader.writeToDisk` method is called.

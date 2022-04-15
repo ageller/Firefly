@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Managing multiple datasets &mdash; Firefly 2.0.5 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <title>Managing multiple datasets &mdash; Firefly 3.0.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
@@ -26,7 +28,8 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html"><img src="../_static/logo_banner.png" class="logo" alt="Logo"/>
+            <a href="../index.html">
+            <img src="../_static/logo_banner.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -111,7 +114,7 @@
 }
 </style>
 <section id="managing-multiple-datasets">
-<span id="multiple-datasets"></span><h1>Managing multiple datasets<a class="headerlink" href="#managing-multiple-datasets" title="Permalink to this headline">¶</a></h1>
+<span id="multiple-datasets"></span><h1>Managing multiple datasets<a class="headerlink" href="#managing-multiple-datasets" title="Permalink to this headline"></a></h1>
 <div class="toctree-wrapper compound">
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="multiple_datasets_tutorial.html">Tutorial notebook: Managing multiple datasets with Firefly</a><ul>
@@ -122,7 +125,7 @@
 </ul>
 </div>
 <section id="with-startup-json">
-<h2>With <code class="code docutils literal notranslate"><span class="pre">startup.json</span></code><a class="headerlink" href="#with-startup-json" title="Permalink to this headline">¶</a></h2>
+<h2>With <code class="code docutils literal notranslate"><span class="pre">startup.json</span></code><a class="headerlink" href="#with-startup-json" title="Permalink to this headline"></a></h2>
 <p>When Firefly first opens it searches for <a class="reference internal" href="files.html#docsstartup"><span class="std std-ref">the startup file</span></a>, <code class="code docutils literal notranslate"><span class="pre">startup.json</span></code>,
 in <code class="code docutils literal notranslate"><span class="pre">firefly/static/data</span></code>. If <code class="code docutils literal notranslate"><span class="pre">startup.json</span></code> does not exist,
 Firefly will display a button that will allow you to
@@ -139,7 +142,7 @@ to only do so if you trust the site.
 Please allow Firefly to upload these files–
 you are not uploading them to the internet,
 only to your browser.</p>
-</aside>
+</div>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>For most browsers, you will only be able to select a
@@ -151,10 +154,10 @@ disk, e.g.,</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ln -s /home/mydirectory/snapdir_XXX
 </pre></div>
 </div>
-<p><code class="xref py py-func docutils literal notranslate"><span class="pre">firefly.data_reader.Reader.dumpToJSON()</span></code> will automatically
+<p><a class="reference internal" href="../reference/api/classes/firefly.data_reader.Reader.html#firefly.data_reader.Reader.writeToDisk" title="firefly.data_reader.Reader.writeToDisk"><code class="xref py py-func docutils literal notranslate"><span class="pre">firefly.data_reader.Reader.writeToDisk()</span></code></a> will automatically
 create a symbolic link if it detects that the <code class="code docutils literal notranslate"><span class="pre">JSONdir</span></code> you
 specified is not a sub-directory of <code class="code docutils literal notranslate"><span class="pre">firefly/static/data</span></code>.</p>
-</aside>
+</div>
 <p>If you have multiple data sets available on your computer
 and prefer to have a menu of these data files to choose
 from at the start of Firefly, you can append entries to the
@@ -183,7 +186,7 @@ being <a class="reference internal" href="../server.html#port-forwarding"><span 
 to your local browser (which can only see your local file system).</p>
 </section>
 <section id="with-separate-firefly-source-directories">
-<h2>With separate Firefly source directories<a class="headerlink" href="#with-separate-firefly-source-directories" title="Permalink to this headline">¶</a></h2>
+<h2>With separate Firefly source directories<a class="headerlink" href="#with-separate-firefly-source-directories" title="Permalink to this headline"></a></h2>
 <p>Alternatively, one could make many copies of the Firefly source directory,
 each with their own <code class="code docutils literal notranslate"><span class="pre">startup.json</span></code>.</p>
 <p>To facilitate this, we provide the
@@ -208,7 +211,7 @@ to <code class="code docutils literal notranslate"><span class="pre">$HOME/.gith
 Attempting to use the <code class="code docutils literal notranslate"><span class="pre">init_gh_pages</span></code> flag without doing so
 will raise an error message with instructions for how to generate
 a GitHub OAUTH token.</p>
-</aside>
+</div>
 </section>
 </section>
 
@@ -223,7 +226,7 @@ a GitHub OAUTH token.</p>
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2021, Alex Gurvich, Aaron Geller.</p>
+    <p>&#169; Copyright 2022, Alex Gurvich, Aaron Geller.</p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
