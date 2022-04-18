@@ -53,7 +53,7 @@ process = spawnFireflyServer()
 
 
 from IPython.display import IFrame
-url = "http://localhost:5000"
+url = "http://localhost:5500"
 IFrame(url, width=1000, height=500)
 
 

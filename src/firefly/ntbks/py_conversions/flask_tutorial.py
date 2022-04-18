@@ -53,7 +53,7 @@ process = spawnFireflyServer(5500)
 
 
 # ## Show Firefly in an IFrame
-# IPython allows one to embed webpages into a notebook using an IFrame, we'll take advantage of that to embed Firefly here (you can also visit the localhost:5000 url in your browser if you'd prefer). 
+# IPython allows one to embed webpages into a notebook using an IFrame, we'll take advantage of that to embed Firefly here (you can also visit the localhost:5500 url in your browser if you'd prefer). 
 
 # In[5]:
 
@@ -95,7 +95,7 @@ my_arrayReader = ArrayReader(
 # In[34]:
 
 
-## make a POST request to port 5000, supplying the JSON produced by setting 
+## make a POST request to port 5500, supplying the JSON produced by setting 
 ##  write_jsons_to_disk=False and calling .dumpToJSON"
 port = 5500
 print('sending to Firefly', sys.getsizeof(my_arrayReader.JSON))
