@@ -26,6 +26,7 @@ import numpy as np
 import os
 
 import sys
+## ignore this line, you do not need to add this if Firefly is pip installed into your PYTHONPATH
 sys.path.insert(0,'/Users/agurvich/research/repos/firefly/src')
 from firefly.data_reader import ArrayReader
 
@@ -38,7 +39,7 @@ from firefly.data_reader import ArrayReader
 # 1 and 2 can be combined so that visitors to different "standalone" iterations of Firefly can select between different sets of multiple datasets using a dropdown see <a href="https://agurvich.github.io/firefly_versions">this example</a>.
 
 # ## Editing the entries of `startup.json`
-# When the Firefly webapp starts up it looks for a `firefly/static/data/startup.json` file to tell it which dataset to display. If only a single entry is present then it will automatically begin loading that dataset. If multiple entries are listed then it will present the user with a dropdown box to select which dataset to load. See the <a href="https://ageller.github.io/Firefly/docs/build/html/data_reader/multiple_datasets.html">documentation for managing multiple datasets</a> for how to format the `startup.json` file to list multiple entries manually. We provide a method of easily adding datasets to the `startup.json` file using the `write_startup` keyword argument of the `firefly.data_reader.Reader` (sub-)class(es). 
+# When the Firefly webapp starts up it looks for a `firefly/static/data/startup.json` file to tell it which dataset to display. If only a single entry is present then it will automatically begin loading that dataset. If multiple entries are listed then it will present the user with a dropdown box to select which dataset to load. See the <a href="https://alexbgurvi.ch/Firefly/docs/build/html/data_reader/multiple_datasets.html">documentation for managing multiple datasets</a> for how to format the `startup.json` file to list multiple entries manually. We provide a method of easily adding datasets to the `startup.json` file using the `write_startup` keyword argument of the `firefly.data_reader.Reader` (sub-)class(es). 
 
 # In[4]:
 
@@ -92,7 +93,7 @@ get_ipython().system('cat /Users/agurvich/research/repos/firefly/src/firefly/sta
 # ## Creating a standalone iteration of Firefly
 # You can copy the necessary Firefly source files by creating a `Reader` object containing your data and using the `copyFireflySourceToTarget`. 
 # We've also included a script that will automatically create a new Github repository and enable GitHub pages so that your data can be visited by users over the internet via URL. 
-# For instructions on how to configure this feature and details for copying the Firefly source see the <a href="https://ageller.github.io/Firefly/docs/build/html/data_reader/multiple_datasets.html">documentation for managing multiple datasets</a>.
+# For instructions on how to configure this feature and details for copying the Firefly source see the <a href="https://alexbgurvi.ch/Firefly/docs/build/html/data_reader/multiple_datasets.html">documentation for managing multiple datasets</a>.
 
 # In[7]:
 

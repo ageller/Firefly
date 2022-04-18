@@ -29,10 +29,11 @@ import requests
 
 
 import sys
+## ignore these lines, you do not need to add this if Firefly is pip installed into your PYTHONPATH
 sys.path.insert(0, '/Users/ageller/VISUALIZATIONS/Firefly')
 sys.path.insert(0,'/Users/agurvich/research/repos/firefly/src')
 from firefly.data_reader import ArrayReader
-from firefly.server import spawnFireflyServer,killAllFireflyServers
+from firefly.server import spawnFireflyServer,quitAllFireflyServers
 
 
 # # Tutorial notebook: Sending data to a local Firefly server through Flask
@@ -40,31 +41,31 @@ from firefly.server import spawnFireflyServer,killAllFireflyServers
 # 1. take up a lot of unnecessary disk space 
 # 2. take a long time to read from disk
 # 
-# To address these problems, we use Flask to host a webserver and parse data directly from Python at a data upload endpoint. This procedure is detailed in the <a href="https://ageller.github.io/Firefly/docs/build/html/server/index.html">server documentation</a>. From the user's perspective, all they need to do is POST their data to a specific port on their local machine and they will be able to explore their own data without ever having to write a file to disk. 
+# To address these problems, we use Flask to host a webserver and parse data directly from Python at a data upload endpoint. This procedure is detailed in the <a href="https://alexbgurvi.ch/Firefly/docs/build/html/server/index.html">server documentation</a>. From the user's perspective, all they need to do is POST their data to a specific port on their local machine and they will be able to explore their own data without ever having to write a file to disk. 
 
 # ## Start the Firefly server as a background process
-# In this tutorial we'll demonstrate how to update the data being shown in a live instance of Firefly running on a local webserver through Flask. Before attempting this tutorial read through the <a href="https://ageller.github.io/Firefly/docs/build/html/server/index.html">server documentation</a> which explains how to specify the listening port and different methods of hosting a Flask Firefly server (here we use the `firefly.server.spawnFireflyServer` function which starts a background process).
+# In this tutorial we'll demonstrate how to update the data being shown in a live instance of Firefly running on a local webserver through Flask. Before attempting this tutorial read through the <a href="https://alexbgurvi.ch/Firefly/docs/build/html/server/index.html">server documentation</a> which explains how to specify the listening port and different methods of hosting a Flask Firefly server (here we use the `firefly.server.spawnFireflyServer` function which starts a background process).
 
-# In[4]:
+# In[33]:
 
 
-process = spawnFireflyServer()
+process = spawnFireflyServer(5500)
 
 
 # ## Show Firefly in an IFrame
-# IPython allows one to embed webpages into a notebook using an IFrame, we'll take advantage of that to embed Firefly here (you can also visit the localhost:5000 url in your browser if you'd prefer). 
+# IPython allows one to embed webpages into a notebook using an IFrame, we'll take advantage of that to embed Firefly here (you can also visit the localhost:5500 url in your browser if you'd prefer). 
 
 # In[5]:
 
 
-url = "http://localhost:5000"
+url = "http://localhost:5500"
 IFrame(url, width=1000, height=500)
 
 
 # ## Create some example data and put it into a `firefly.data_reader.Reader` object
-# See the <a href="https://ageller.github.io/Firefly/docs/build/html/data_reader/reader.html">reader documentation</a> or the `reader_tutorial.ipynb` example notebook. 
+# See the <a href="https://alexbgurvi.ch/Firefly/docs/build/html/data_reader/reader.html">reader documentation</a> or the `reader_tutorial.ipynb` example notebook. 
 
-# In[6]:
+# In[11]:
 
 
 ## let's create some sample data, a grid of points in a 3d cube
@@ -79,42 +80,50 @@ fields = np.random.random(size=xs.size)
 
 # We'll use an `ArrayReader` here, check out the `reader_tutorial.ipynb` example notebook if this is new for you!
 
-# In[7]:
+# In[24]:
 
 
 my_arrayReader = ArrayReader(
     coords,
     fields=fields,
-    write_jsons_to_disk=False)
+    write_to_disk=False)
 
 
 # ## Send this data to the Flask app
-# The data will be sent to the Firefly server via a POST request, we can do this in python using the `requests` module. One the POST has been made scroll back up to the window above and see the new data (if you don't see new data, it's possible that you've overwritten the default `startup.json` that shipped with Firefly by following some of the other tutorials. That's okay! See the <a href="https://ageller.github.io/Firefly/docs/build/html/data_reader/multiple_datasets.html">multiple datasets documentation</a> or the `multiple_datasets.ipynb` example notebook to learn more about the `startup.json` file. 
+# The data will be sent to the Firefly server via a POST request, we can do this in python using the `requests` module. One the POST has been made scroll back up to the window above and see the new data (if you don't see new data, it's possible that you've overwritten the default `startup.json` that shipped with Firefly by following some of the other tutorials. That's okay! See the <a href="https://alexbgurvi.ch/Firefly/docs/build/html/data_reader/multiple_datasets.html">multiple datasets documentation</a> or the `multiple_datasets.ipynb` example notebook to learn more about the `startup.json` file. 
 
-# In[8]:
+# In[34]:
 
 
-## make a POST request to port 5000, supplying the JSON produced by setting 
-##  write_jsons_to_disk=False and calling .dumpToJSON
-port = 5000
+## make a POST request to port 5500, supplying the JSON produced by setting 
+##  write_jsons_to_disk=False and calling .dumpToJSON"
+port = 5500
 print('sending to Firefly', sys.getsizeof(my_arrayReader.JSON))
 requests.post(f'http://localhost:{port:d}/data_input',json=my_arrayReader.JSON)
 
 
 # We've also wrapped this code in the `.sendDataViaFlask` method.
 
-# In[9]:
+# In[39]:
 
 
 ## make a POST request
-my_arrayReader.sendDataViaFlask()
+my_arrayReader.sendDataViaFlask(5500)
 
 
-# ## Killing the Firefly server process when you're done
-# Because the Firefly server was started in the background, the process will persist even when you're done with it. You should make sure to kill it using the `firefly.server.killAllFireflyServers` function. If you supply a process id (which is returned by the `spawnFireflyServer` function) then it will only kill that one process. However, processes are a bit defensive and sometimes we've found they survive the attempt on their life and then hide under a different PID. In which case, it's always safest to just kill all the servers indiscriminately. Generally the two are interchangeable unless you're hosting multiple local servers of Firefly on different ports. This is pretty uncommon/advanced in which case you hopefully know what you're doing. 
+# ## Quitting the Firefly server process when you're done
+# Because the Firefly server was started in the background, the process will persist even when you're done with it. You should make sure to quit it using the `firefly.server.quitAllFireflyServers` function. If you supply a process id (which is returned by the `spawnFireflyServer` function) then it will only quit that one process. However, processes are a bit defensive and sometimes we've found they survive the attempt on their life and then hide under a different PID. In which case, it's always safest to just quit all the servers indiscriminately. Generally the two are interchangeable unless you're hosting multiple local servers of Firefly on different ports. This is pretty uncommon/advanced in which case you hopefully know what you're doing. 
+# 
+# The `firefly.server.quitAllFireflyServers` function will print all of the output the Firefly server 
 
-# In[10]:
+# In[32]:
 
 
-killAllFireflyServers()
+return_code = quitAllFireflyServers()
+
+
+# In[ ]:
+
+
+
 

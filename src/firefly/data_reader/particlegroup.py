@@ -264,7 +264,7 @@ class ParticleGroup(object):
             'UIdropdown':True,
             'UIcolorPicker':True,
             'color': np.append(np.random.random(3),[1]),
-            'sizeMult':1.,
+            'sizeMult':.1,
             'showParts':True,
             'filterVals':dict(),
             'filterLims':dict(),
@@ -699,7 +699,7 @@ class ParticleGroup(object):
             ## fill necessary attributes
             binary_writer.nfields = len(self.field_names)
             binary_writer.field_names = self.field_names
-            if len(self.field_names): binary_writer.fields = self.field_arrays[:,these_dec_inds]
+            if len(self.field_names): binary_writer.fields = np.array(self.field_arrays)[:,these_dec_inds]
             else: binary_writer.fields = []
             binary_writer.filter_flags = self.field_filter_flags
             binary_writer.colormap_flags = self.field_colormap_flags
