@@ -237,11 +237,11 @@ def reload():
     socketio.emit('reload_viewer', None, namespace=namespace)
 
 # Helper functions to start/stop the server
-def startFireflyServer(port=5000, frames_per_second=30, decimation_factor=1):
+def startFireflyServer(port=5500, frames_per_second=30, decimation_factor=1):
     """Creates a global interpreter locked process to host a mock web-server
 		that can be accessed via localhost:<port>. 
 
-    :param port: port number to serve the :code:`.html` files on, defaults to 5000
+    :param port: port number to serve the :code:`.html` files on, defaults to 5500
     :type port: int, optional
     :param frames_per_second: enforced FPS for stream quality, used only if
 		localhost:<port>/stream is accessed, defaults to 30
@@ -266,10 +266,10 @@ def startFireflyServer(port=5000, frames_per_second=30, decimation_factor=1):
     finally:
         os.chdir(old_dir)
 
-def spawnFireflyServer(port=5000,frames_per_second=30,decimation_factor=1,max_time=10):
+def spawnFireflyServer(port=5500,frames_per_second=30,decimation_factor=1,max_time=10):
     """Wrapper to :func:`firefly.server.startFireflyServer` that instead starts a background process.
 
-    :param port: port number to serve the :code:`.html` files on, defaults to 5000
+    :param port: port number to serve the :code:`.html` files on, defaults to 5500
     :type port: int, optional
     :param frames_per_second: enforced FPS for stream quality, used only if
 		localhost:<port>/stream is accessed, defaults to 30
@@ -317,14 +317,16 @@ def spawnFireflyServer(port=5000,frames_per_second=30,decimation_factor=1,max_ti
 
     return process
 
-def killAllFireflyServers(pid=None):
-    """Kill python processes associated with hosting Flask web-servers.
+def quitAllFireflyServers(pid=None):
+    """Quit python processes associated with hosting Flask web-servers.
 
-    :param pid: process id to kill, defaults to None, killing all processes
+    :param pid: process id to kill, defaults to None, quitting all processes
     :type pid: int, optional
     :return: return_code
     :rtype: int 
     """
+    print("Server output:")
+    print("--------------")
     if pid is None:
         ## kill indiscriminately
         return_code = os.system("ps aux | grep 'run_server.py' | awk '{print $2}' | xargs kill")

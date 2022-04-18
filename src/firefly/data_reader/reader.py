@@ -472,7 +472,7 @@ class Reader(object):
         ## retrieve a single "big JSON" of all the mini-JSON 
         ##  sub-files. 
         if not hasattr(self,'JSON') or self.JSON is None:
-            self.dumpToJSON(
+            self.writeToDisk(
                 loud=False,
                 write_to_disk=False,
                 extension='json')
