@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>firefly.data_reader.settings &mdash; Firefly 3.0.0 documentation</title><link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html"><img src="../../../_static/logo_banner.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../webapp/index.html">Interacting with a Firefly visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../data_reader/index.html">Creating your own instance of Firefly</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../server.html">Hosting a Firefly webserver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../experimental.html">Experimental features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/api/api.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Firefly</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>firefly.data_reader.settings</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for firefly.data_reader.settings</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">print_function</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">import</span> <span class="nn">os</span> 
+
+<span class="kn">from</span> <span class="nn">.json_utils</span> <span class="kn">import</span> <span class="n">write_to_json</span><span class="p">,</span><span class="n">load_from_json</span>
+
+<div class="viewcode-block" id="Settings"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Settings.html#firefly.data_reader.Settings">[docs]</a><span class="k">class</span> <span class="nc">Settings</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This is a class for organizing the various settings you can pass to </span>
+<span class="sd">        Firefly to customize how the app is initialized and what features </span>
+<span class="sd">        the user has access to. </span>
+
+<span class="sd">        It is easiest to use when instances of Settings are passed to a </span>
+<span class="sd">        :class:`firefly.data_reader.Reader` instance when it is initialized.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="Settings.__getitem__"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Settings.html#firefly.data_reader.Settings.__getitem__">[docs]</a>    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">key</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Implementation of builtin function  __getitem__</span>
+
+<span class="sd">        :param key: key to read</span>
+<span class="sd">        :type key: str</span>
+<span class="sd">        :return: attr, the value from the settings dictionary</span>
+<span class="sd">        :rtype: object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">attr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__findWhichSettingsDict</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">attr</span><span class="p">)[</span><span class="n">key</span><span class="p">]</span></div>
+        
+<div class="viewcode-block" id="Settings.__setitem__"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Settings.html#firefly.data_reader.Settings.__setitem__">[docs]</a>    <span class="k">def</span> <span class="fm">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">key</span><span class="p">,</span><span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Implementation of builtin function __setitem__ </span>
+
+<span class="sd">        :param key: key to set</span>
+<span class="sd">        :type key: str</span>
+<span class="sd">        :param value: value to set to key</span>
+<span class="sd">        :type value: object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">attr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__findWhichSettingsDict</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="c1">## set that dictonary&#39;s value</span>
+        <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">attr</span><span class="p">)[</span><span class="n">key</span><span class="p">]</span><span class="o">=</span><span class="n">value</span></div>
+
+    <span class="k">def</span> <span class="nf">__findWhichSettingsDict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">key</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Find which sub-dictionary a key belongs to.</span>
+
+<span class="sd">        :param key: key to search for</span>
+<span class="sd">        :type key: str</span>
+<span class="sd">        :raises KeyError: if no sub-dictionary matches</span>
+<span class="sd">        :return: attr</span>
+<span class="sd">        :rtype: private str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="s1">&#39;_settings&#39;</span> <span class="ow">in</span> <span class="n">attr</span><span class="p">:</span>
+                <span class="n">obj</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">attr</span><span class="p">)</span>
+
+                <span class="c1">## distinguish between methods and private dictionaries</span>
+                <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span> <span class="o">==</span> <span class="nb">dict</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                        <span class="k">return</span> <span class="n">attr</span>
+
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;Invalid settings key </span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="n">key</span><span class="p">)</span>
+        
+<div class="viewcode-block" id="Settings.printKeys"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Settings.html#firefly.data_reader.Settings.printKeys">[docs]</a>    <span class="k">def</span> <span class="nf">printKeys</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">pattern</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">values</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Prints keys (and optionally their values) to the console in an organized (and pretty) fashion.</span>
+
+<span class="sd">        :param pattern: string that settings group must contain to be printed, defaults to None</span>
+<span class="sd">        :type pattern: str, optional</span>
+<span class="sd">        :param values: flag to print what the settings are set to, in addition to the key, defaults to True</span>
+<span class="sd">        :type values: bool, optional</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="s1">&#39;_settings&#39;</span> <span class="ow">in</span> <span class="n">attr</span><span class="p">:</span>
+                <span class="n">obj</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">attr</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span> <span class="o">==</span> <span class="nb">dict</span> <span class="ow">and</span> <span class="p">(</span><span class="n">pattern</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">pattern</span> <span class="ow">in</span> <span class="n">attr</span><span class="p">):</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;--&#39;</span><span class="p">,</span>
+                        <span class="n">attr</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span><span class="s1">&#39; &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;  &#39;</span><span class="p">,</span><span class="s1">&#39;: &#39;</span><span class="p">),</span>
+                        <span class="s1">&#39;--&#39;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">values</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">attr</span><span class="p">)</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+                            <span class="nb">print</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">],)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="nb">print</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">attr</span><span class="p">)</span><span class="o">.</span><span class="n">keys</span><span class="p">()))</span>
+                    <span class="nb">print</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Settings.keys"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Settings.html#firefly.data_reader.Settings.keys">[docs]</a>    <span class="k">def</span> <span class="nf">keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Returns a list of keys for all the different settings sub-dictionaries &quot;&quot;&quot;</span>
+        <span class="n">this_keys</span> <span class="o">=</span> <span class="p">[]</span> 
+        <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="s1">&#39;_settings&#39;</span> <span class="ow">in</span> <span class="n">attr</span><span class="p">:</span>
+                <span class="n">this_keys</span> <span class="o">+=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">attr</span><span class="p">)</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">this_keys</span></div>
+
+<div class="viewcode-block" id="Settings.__init__"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Settings.html#firefly.data_reader.Settings.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+        <span class="n">settings_filename</span><span class="o">=</span><span class="s1">&#39;Settings.json&#39;</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Base initialization method for Settings instances. A Settings will store</span>
+<span class="sd">            the app state and produce firefly compatible :code:`.json` files.</span>
+
+<span class="sd">            accepts passthrough kwargs from:</span>
+
+<span class="sd">            :func:`firefly.data_reader.Settings.window_settings`</span>
+
+<span class="sd">            :func:`firefly.data_reader.Settings.UI_settings`</span>
+
+<span class="sd">            :func:`firefly.data_reader.Settings.particle_UI_settings`</span>
+
+<span class="sd">            :func:`firefly.data_reader.Settings.camera_settings`</span>
+
+<span class="sd">            :func:`firefly.data_reader.Settings.startup_settings`</span>
+
+<span class="sd">            :func:`firefly.data_reader.Settings.particle_startup_settings`</span>
+
+<span class="sd">            :func:`firefly.data_reader.Settings.particle_filter_settings`</span>
+
+<span class="sd">            :func:`firefly.data_reader.Settings.particle_colormap_settings`</span>
+<span class="sd">            </span>
+
+<span class="sd">        :param settings_filename: name of settings :code:`.json` file,</span>
+<span class="sd">            defaults to &#39;Settings.json&#39;</span>
+<span class="sd">        :type settings_filename: str, optional</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1">## where should this be saved if it&#39;s outputToJSON</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings_filename</span> <span class="o">=</span> <span class="n">settings_filename</span>
+
+        <span class="c1">## initialize default settings and apply any passed kwargs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">startup_settings</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">UI_settings</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">window_settings</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">camera_settings</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">particle_startup_settings</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">particle_UI_settings</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">particle_velocity_settings</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">particle_filter_settings</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">particle_colormap_settings</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">startup_settings</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">decimate</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">maxVrange</span><span class="o">=</span><span class="mf">2000.</span><span class="p">,</span>
+        <span class="n">friction</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+        <span class="n">zmin</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">zmax</span><span class="o">=</span><span class="mf">5e10</span><span class="p">,</span>
+        <span class="n">stereo</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">stereoSep</span><span class="o">=</span><span class="mf">0.06</span><span class="p">,</span>
+        <span class="n">minPointScale</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
+        <span class="n">maxPointScale</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+        <span class="n">startFly</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">startTween</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">startVR</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">startColumnDensity</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">extra</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;General settings that affect the app state</span>
+<span class="sd">        :param decimate: set the initial global decimation </span>
+<span class="sd">            (e.g, you could load in all the data by setting </span>
+<span class="sd">            the :code:`decimation_factor` to 1 for any individual</span>
+<span class="sd">            :class:`firefly.data_reader.ParticleGroup`,</span>
+<span class="sd">            but only _display_ some fraction by setting</span>
+<span class="sd">            decimate &gt; 1 here).  </span>
+<span class="sd">            This is a single value (not a dict), defaults to None</span>
+<span class="sd">        :type decimate: int, optional</span>
+<span class="sd">        :param maxVrange: maximum range in velocities to use in deciding </span>
+<span class="sd">            the length of the velocity vectors (making maxVrange </span>
+<span class="sd">            larger will enhance the difference between small and large velocities),</span>
+<span class="sd">            defaults to 2000.</span>
+<span class="sd">        :type maxVrange: float, optional </span>
+<span class="sd">        :param friction: set the initial friction for the controls, defaults to 0.1</span>
+<span class="sd">        :type friction: float, optional</span>
+<span class="sd">        :param zmin: set the minimum distance a particle must be to appear on the screen</span>
+<span class="sd">            (defines the front edge of the frustum), defaults to 1</span>
+<span class="sd">        :type zmin: float, optional</span>
+<span class="sd">        :param zmin: set the maximum distance a particle can be to appear on the screen</span>
+<span class="sd">            (defines the back edge of the frustum), defaults to 5e10</span>
+<span class="sd">        :type zmax: float, optional</span>
+<span class="sd">        :param stereo: flag to start in stereo mode, defaults to False</span>
+<span class="sd">        :type stereo: bool, optional</span>
+<span class="sd">        :param stereoSep: camera (eye) separation in the stereo </span>
+<span class="sd">            mode (should be &lt; 1), defaults to 0.06</span>
+<span class="sd">        :type stereoSep: float, optional</span>
+<span class="sd">        :param minPointScale: minimum size of particles, defaults to 0.01</span>
+<span class="sd">        :type minPointScale: float, optional</span>
+<span class="sd">        :param maxPointScale: maximum size of particles, defaults to 10</span>
+<span class="sd">        :type maxPointScale: float, optional</span>
+<span class="sd">        :param startFly: flag to start in Fly controls</span>
+<span class="sd">            (if False, then start in the default Trackball controls),</span>
+<span class="sd">            defaults to False</span>
+<span class="sd">        :type startFly: bool, optional</span>
+<span class="sd">        :param startTween: flag to initialize the Firefly scene in tween mode, </span>
+<span class="sd">            requires a valid tweenParams.json file to be present in the JSONdir,</span>
+<span class="sd">            defaults to False</span>
+<span class="sd">        :type startTween: bool, optional</span>
+<span class="sd">        :param startVR: flag to initialize Firefly in VR mode, defaults to False</span>
+<span class="sd">        :type startVR: bool, optional</span>
+<span class="sd">        :param startColumnDensity: flag to initialize Firefly in the (mostly) experimental column density</span>
+<span class="sd">            projection mode, defaults to False</span>
+<span class="sd">        :type startColumnDensity: bool, optional</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__startup_settings</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;maxVrange&#39;</span><span class="p">:</span><span class="n">maxVrange</span><span class="p">,</span>
+            <span class="s1">&#39;startFly&#39;</span><span class="p">:</span><span class="n">startFly</span><span class="p">,</span>
+            <span class="s1">&#39;friction&#39;</span><span class="p">:</span><span class="n">friction</span><span class="p">,</span>
+            <span class="s1">&#39;stereo&#39;</span><span class="p">:</span><span class="n">stereo</span><span class="p">,</span>
+            <span class="s1">&#39;stereoSep&#39;</span><span class="p">:</span><span class="n">stereoSep</span><span class="p">,</span>
+            <span class="s1">&#39;decimate&#39;</span><span class="p">:</span><span class="n">decimate</span><span class="p">,</span>
+            <span class="s1">&#39;startTween&#39;</span><span class="p">:</span><span class="n">startTween</span><span class="p">,</span>
+            <span class="s1">&#39;startVR&#39;</span><span class="p">:</span><span class="n">startVR</span><span class="p">,</span>
+            <span class="s1">&#39;startColumnDensity&#39;</span><span class="p">:</span><span class="n">startColumnDensity</span><span class="p">,</span>
+            <span class="s1">&#39;zmin&#39;</span><span class="p">:</span><span class="n">zmin</span><span class="p">,</span>
+            <span class="s1">&#39;zmax&#39;</span><span class="p">:</span><span class="n">zmax</span><span class="p">,</span>
+            <span class="s1">&#39;minPointScale&#39;</span><span class="p">:</span><span class="n">minPointScale</span><span class="p">,</span>
+            <span class="s1">&#39;maxPointScale&#39;</span><span class="p">:</span><span class="n">maxPointScale</span><span class="p">,</span>
+        <span class="p">}</span>
+
+<div class="viewcode-block" id="Settings.UI_settings"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Settings.html#firefly.data_reader.Settings.UI_settings">[docs]</a>    <span class="k">def</span> <span class="nf">UI_settings</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">UI</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">UIfullscreen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">UIsnapshot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">UIreset</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">UIsavePreset</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">UIloadNewData</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">UIcameraControls</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">UIdecimation</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">extra</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Flags for enabling different elements of the UI</span>
+
+<span class="sd">        :param UI: flag to show the UI as a whole, defaults to True</span>
+<span class="sd">        :type UI: bool, optional</span>
+<span class="sd">        :param UIfullscreen: flag to show the fullscreen button, defaults to True</span>
+<span class="sd">        :type UIfullscreen: bool, optional</span>
+<span class="sd">        :param UIsnapshot: flag to show the screenshot button, defaults to True</span>
+<span class="sd">        :type UIsnapshot: bool, optional</span>
+<span class="sd">        :param UIreset: flag to show the &quot;Default Settings&quot; button, defaults to True</span>
+<span class="sd">        :type UIreset: bool, optional</span>
+<span class="sd">        :param UIsavePreset: flag to show the &quot;Save Settings&quot; button, defaults to True</span>
+<span class="sd">        :type UIsavePreset: bool, optional</span>
+<span class="sd">        :param UIloadNewData: flag to show the &quot;Load Data&quot; button, defaults to True</span>
+<span class="sd">        :type UIloadNewData: bool, optional</span>
+<span class="sd">        :param UIcameraControls: flag to show the camera controls pane, defaults to True</span>
+<span class="sd">        :type UIcameraControls: bool, optional</span>
+<span class="sd">        :param UIdecimation: flag to show the decimation slider, defaults to True</span>
+<span class="sd">        :type UIdecimation: bool, optional</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__UI_settings</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;UI&#39;</span><span class="p">:</span><span class="n">UI</span><span class="p">,</span> 
+            <span class="s1">&#39;UIfullscreen&#39;</span><span class="p">:</span><span class="n">UIfullscreen</span><span class="p">,</span> 
+            <span class="s1">&#39;UIsnapshot&#39;</span><span class="p">:</span><span class="n">UIsnapshot</span><span class="p">,</span> 
+            <span class="s1">&#39;UIreset&#39;</span><span class="p">:</span><span class="n">UIreset</span><span class="p">,</span> 
+            <span class="s1">&#39;UIsavePreset&#39;</span><span class="p">:</span><span class="n">UIsavePreset</span><span class="p">,</span> 
+            <span class="s1">&#39;UIloadNewData&#39;</span><span class="p">:</span><span class="n">UIloadNewData</span><span class="p">,</span> 
+            <span class="s1">&#39;UIcameraControls&#39;</span><span class="p">:</span><span class="n">UIcameraControls</span><span class="p">,</span> 
+            <span class="s1">&#39;UIdecimation&#39;</span><span class="p">:</span><span class="n">UIdecimation</span><span class="p">,</span> 
+        <span class="p">}</span></div>
+
+<div class="viewcode-block" id="Settings.window_settings"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Settings.html#firefly.data_reader.Settings.window_settings">[docs]</a>    <span class="k">def</span> <span class="nf">window_settings</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Firefly&#39;</span><span class="p">,</span>
+        <span class="n">annotation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">showFPS</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">showMemoryUsage</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">memoryLimit</span><span class="o">=</span><span class="mf">2e9</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">extra</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Settings that affect the browser window</span>
+
+<span class="sd">        :param title: the title of the webpage, shows up in browser tab,</span>
+<span class="sd">            defaults to &#39;Firefly&#39;</span>
+<span class="sd">        :type title: str, optional</span>
+<span class="sd">        :param annotation: text to include at the top of the</span>
+<span class="sd">            Firefly window as an annotation, defaults to None</span>
+<span class="sd">        :type annotation: str, optional</span>
+<span class="sd">        :param showFPS: flag to display the FPS (frames per second) of the </span>
+<span class="sd">            Firefly scene, defaults to False</span>
+<span class="sd">        :type showFPS: bool, optional</span>
+<span class="sd">        :param showMemoryUsage: flag to display the memory usage in GB of the </span>
+<span class="sd">            loaded data-- useful for octrees when memory usage changes over time, defaults to False</span>
+<span class="sd">        :type showMemoryUsage: bool, optional</span>
+<span class="sd">        :param memoryLimit: maximum memory in bytes to use when loading an octree dataset.</span>
+<span class="sd">            If this limit is exceeded then previously loaded nodes will be discarded</span>
+<span class="sd">            to bring the memory usage back below. Works best in Chrome which exposes</span>
+<span class="sd">            the memory usage directly, otherwise memory usage is only estimated, </span>
+<span class="sd">            defaults to 2e9 </span>
+<span class="sd">        :type memoryLimit: float, optional</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__window_settings</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;title&#39;</span><span class="p">:</span><span class="n">title</span><span class="p">,</span> 
+            <span class="c1">## used in the web app to check if the settings have been read in</span>
+            <span class="c1">##  this should not be modified</span>
+            <span class="s1">&#39;loaded&#39;</span><span class="p">:</span><span class="kc">True</span><span class="p">,</span> 
+            <span class="s1">&#39;annotation&#39;</span><span class="p">:</span><span class="n">annotation</span> <span class="p">,</span>
+            <span class="s1">&#39;showFPS&#39;</span><span class="p">:</span><span class="n">showFPS</span><span class="p">,</span>
+            <span class="s1">&#39;showMemoryUsage&#39;</span><span class="p">:</span><span class="n">showMemoryUsage</span><span class="p">,</span>
+            <span class="s1">&#39;memoryLimit&#39;</span><span class="p">:</span><span class="n">memoryLimit</span><span class="p">,</span>
+        <span class="p">}</span></div>
+
+<div class="viewcode-block" id="Settings.camera_settings"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Settings.html#firefly.data_reader.Settings.camera_settings">[docs]</a>    <span class="k">def</span> <span class="nf">camera_settings</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">center</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">camera</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">cameraRotation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">cameraUp</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">quaternion</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">extra</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Settings that affect the position and orientation of the camera</span>
+
+<span class="sd">        :param center: do you want to explicilty define the initial camera focus/</span>
+<span class="sd">            zero point (if not, the WebGL app will calculate the center as the mean </span>
+<span class="sd">            of the coordinates of the first particle set loaded in), defaults to None</span>
+<span class="sd">        :type center: np.ndarray of shape (3), optional</span>
+<span class="sd">        :param camera: initial camera location, </span>
+<span class="sd">            NOTE: the magnitude must be &gt;0 , defaults to None</span>
+<span class="sd">        :type camera: np.ndarray of shape (3), optional</span>
+<span class="sd">        :param cameraRotation: can set camera rotation in units of radians </span>
+<span class="sd">            if you want, defaults to None</span>
+<span class="sd">        :type cameraRotation: np.ndarray of shape (3), optional</span>
+<span class="sd">        :param cameraUp: set camera orientation (north vector) using a quaternion, defaults to None</span>
+<span class="sd">        :type cameraUp: np.ndarray of shape (3), optional</span>
+<span class="sd">        :param quaternion: can set camera rotation using a quaternion of form (w,x,y,z), defaults to None</span>
+<span class="sd">        :type quaternion: np.ndarray of shape (4), optional</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__camera_settings</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;center&#39;</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="k">if</span> <span class="n">center</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">center</span><span class="p">,</span> 
+            <span class="s1">&#39;camera&#39;</span><span class="p">:</span><span class="n">camera</span><span class="p">,</span> 
+            <span class="s1">&#39;cameraRotation&#39;</span><span class="p">:</span><span class="n">cameraRotation</span><span class="p">,</span> 
+            <span class="s1">&#39;cameraUp&#39;</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span> <span class="k">if</span> <span class="n">cameraUp</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">cameraUp</span><span class="p">,</span>
+            <span class="s1">&#39;quaternion&#39;</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">])</span> <span class="k">if</span> <span class="n">quaternion</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">quaternion</span><span class="p">,</span>
+        <span class="p">}</span></div>
+
+<div class="viewcode-block" id="Settings.startup_settings"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Settings.html#firefly.data_reader.Settings.startup_settings">[docs]</a>    <span class="k">def</span> <span class="nf">startup_settings</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">maxVrange</span><span class="o">=</span><span class="mf">2000.</span><span class="p">,</span>
+        <span class="n">startFly</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">friction</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+        <span class="n">stereo</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">stereoSep</span><span class="o">=</span><span class="mf">0.06</span><span class="p">,</span>
+        <span class="n">decimate</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">start_tween</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">CDmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">CDmax</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">CDlognorm</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">columnDensity</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">extra</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;General settings that affect the state app state</span>
+
+<span class="sd">        :param maxVrange: maximum range in velocities to use in deciding </span>
+<span class="sd">            the length of the velocity vectors (making maxVrange </span>
+<span class="sd">            larger will enhance the difference between small and large velocities),</span>
+<span class="sd">            defaults to 2000.</span>
+<span class="sd">        :type maxVrange: float, optional</span>
+<span class="sd">        :param startFly: flag to start in Fly controls</span>
+<span class="sd">            (if False, then start in the default Trackball controls),</span>
+<span class="sd">            defaults to False</span>
+<span class="sd">        :type startFly: bool, optional</span>
+<span class="sd">        :param friction: set the initial friction for the controls, defaults to 0.1</span>
+<span class="sd">        :type friction: float, optional</span>
+<span class="sd">        :param stereo: flag to start in stereo mode, defaults to False</span>
+<span class="sd">        :type stereo: bool, optional</span>
+<span class="sd">        :param stereoSep: camera (eye) separation in the stereo </span>
+<span class="sd">            mode (should be &lt; 1), defaults to 0.06</span>
+<span class="sd">        :type stereoSep: float, optional</span>
+<span class="sd">        :param decimate: set the initial global decimation </span>
+<span class="sd">            (e.g, you could load in all the data by setting </span>
+<span class="sd">            the :code:`decimation_factor` to 1 for any individual</span>
+<span class="sd">            :class:`firefly.data_reader.ParticleGroup`,</span>
+<span class="sd">            but only _display_ some fraction by setting</span>
+<span class="sd">            decimate &gt; 1 here).  </span>
+<span class="sd">            This is a single value (not a dict), defaults to None</span>
+<span class="sd">        :type decimate: int, optional</span>
+<span class="sd">        :param start_tween: flag to initialize the Firefly scene in tween mode, </span>
+<span class="sd">            requires a valid tweenParams.json file to be present in the JSONdir,</span>
+<span class="sd">            defaults to False</span>
+<span class="sd">        :type start_tween: bool, optional</span>
+<span class="sd">        :param CDmin: bottom of the renormalization for the experimental column density</span>
+<span class="sd">            projection mode, defaults to 0</span>
+<span class="sd">        :type CDmin: float, optional</span>
+<span class="sd">        :param CDmax: top of the renormalization for the experimental column density</span>
+<span class="sd">            projection mode, defaults to 1</span>
+<span class="sd">        :type CDmax: float, optional</span>
+<span class="sd">        :param CDlognorm: flag for whether renormalization should be done in log (``CDlognorm=1``)</span>
+<span class="sd">            or linear (``CDlognorm=0``) space, defaults to 0</span>
+<span class="sd">        :type CDmax: bool, optional</span>
+<span class="sd">        :param columnDensity: flag for whether the experimental column density projection mode</span>
+<span class="sd">            should be enabled at startup. Toggle this mode by pressing &#39;p&#39; on the keyboard, defaults to 0</span>
+<span class="sd">        :type CDcolumnDensity: bool, optional</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__startup_settings</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;maxVrange&#39;</span><span class="p">:</span><span class="n">maxVrange</span><span class="p">,</span>
+            <span class="s1">&#39;startFly&#39;</span><span class="p">:</span><span class="n">startFly</span><span class="p">,</span>
+            <span class="s1">&#39;friction&#39;</span><span class="p">:</span><span class="n">friction</span><span class="p">,</span>
+            <span class="s1">&#39;stereo&#39;</span><span class="p">:</span><span class="n">stereo</span><span class="p">,</span>
+            <span class="s1">&#39;stereoSep&#39;</span><span class="p">:</span><span class="n">stereoSep</span><span class="p">,</span>
+            <span class="s1">&#39;decimate&#39;</span><span class="p">:</span><span class="n">decimate</span><span class="p">,</span>
+            <span class="s1">&#39;start_tween&#39;</span><span class="p">:</span><span class="n">start_tween</span><span class="p">,</span>
+            <span class="s1">&#39;CDmin&#39;</span><span class="p">:</span><span class="n">CDmin</span><span class="p">,</span>
+            <span class="s1">&#39;CDmax&#39;</span><span class="p">:</span><span class="n">CDmax</span><span class="p">,</span>
+            <span class="s1">&#39;CDlognorm&#39;</span><span class="p">:</span><span class="n">CDlognorm</span><span class="p">,</span>
+            <span class="s1">&#39;columnDensity&#39;</span><span class="p">:</span><span class="n">columnDensity</span>
+        <span class="p">}</span></div>
+    
+<div class="viewcode-block" id="Settings.particle_startup_settings"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Settings.html#firefly.data_reader.Settings.particle_startup_settings">[docs]</a>    <span class="k">def</span> <span class="nf">particle_startup_settings</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">plotNmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">color</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">sizeMult</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">showParts</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">radiusVariable</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">extra</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Settings that will define the initial values of the particle UI panes</span>
+
+<span class="sd">        :param plotNmax: maximum number of particles to plot </span>
+<span class="sd">            This is a dict with keys of the particle UInames mapped to ints,</span>
+<span class="sd">            defaults to all particles</span>
+<span class="sd">        :type plotNmax: int, optional</span>
+<span class="sd">        :param showVel: flag to start showing the velocity vectors</span>
+<span class="sd">            This is a dict with keys of the particle UInames mapped to bools,</span>
+<span class="sd">            defaults to dict([(UIname,False) for UIname in UInames])</span>
+<span class="sd">        :type showVel: dict of UIname:bool, optional</span>
+<span class="sd">        :param velType: type of velocity vectors to plot.  </span>
+<span class="sd">            This is a dict with keys of the particle UInames mapped to strs that</span>
+<span class="sd">            must be one of &#39;line&#39;, &#39;arrow&#39;, or &#39;triangle&#39;,</span>
+<span class="sd">            defaults to dict([(UIname,&#39;line&#39;) for UIname in UInames])</span>
+<span class="sd">        :type velType: dict of UIname:str, optional</span>
+<span class="sd">        :param color: the default colors for each particle group, </span>
+<span class="sd">            This is a dict with keys of the particle UInames mapped to</span>
+<span class="sd">            4-element lists of rgba float values,</span>
+<span class="sd">            defaults to random color with a = 1</span>
+<span class="sd">        :type color: dict of UIname:list of len = 4, optional</span>
+<span class="sd">        :param sizeMult: the default point size multiplier.</span>
+<span class="sd">            This is a dict with keys of the particle UInames mapped to floats,</span>
+<span class="sd">            defaults to dict([(UIname,1) for UIname in UInames])</span>
+<span class="sd">        :type sizeMult: dict of UIname:float, optional</span>
+<span class="sd">        :param showParts: show particles by default.</span>
+<span class="sd">            This is a dict with keys of the particle UInames mapped to bools,</span>
+<span class="sd">            defaults to dict([(UIname,True) for UIname in UInames])</span>
+<span class="sd">        :type showParts: dict of UIname:bool, optional</span>
+
+<span class="sd">        :param radiusVariable: dict of UIname:int which are indices for</span>
+<span class="sd">            which variable to scale the radius by (if any have been flagged</span>
+<span class="sd">            as allowable to be a radius scale). 0 is always &#39;None&#39; and will</span>
+<span class="sd">            make all particles the same radius, optional</span>
+<span class="sd">            defaults to dict([(UIname,0) for UIname in UInames])</span>
+<span class="sd">        :type radiusVariable: dict of UIname:int, optional</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__particle_startup_settings</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;plotNmax&#39;</span><span class="p">:</span><span class="nb">dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">plotNmax</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">plotNmax</span><span class="p">,</span>
+            <span class="s1">&#39;color&#39;</span><span class="p">:</span><span class="nb">dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">color</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">color</span><span class="p">,</span>
+            <span class="s1">&#39;sizeMult&#39;</span><span class="p">:</span><span class="nb">dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">sizeMult</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">sizeMult</span><span class="p">,</span>
+            <span class="s1">&#39;showParts&#39;</span><span class="p">:</span><span class="nb">dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">showParts</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">showParts</span><span class="p">,</span>
+            <span class="s1">&#39;radiusVariable&#39;</span><span class="p">:</span><span class="nb">dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">radiusVariable</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">radiusVariable</span>
+        <span class="p">}</span></div>
+
+<div class="viewcode-block" id="Settings.particle_UI_settings"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Settings.html#firefly.data_reader.Settings.particle_UI_settings">[docs]</a>    <span class="k">def</span> <span class="nf">particle_UI_settings</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">UIparticle</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">UIdropdown</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">UIcolorPicker</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">extra</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Flags that control how the UI for each particle group looks like</span>
+
+<span class="sd">        :param UIparticle: do you want to show the particles </span>
+<span class="sd">            in the user interface.</span>
+<span class="sd">            This is a dict with keys of the particle UInames mapped to bools,</span>
+<span class="sd">            defaults to dict([(UIname,True) for UIname in UInames])</span>
+<span class="sd">        :type UIparticle: dict of UIname:bool, optional</span>
+<span class="sd">        :param UIdropdown: do you want to enable the dropdown menus for </span>
+<span class="sd">               particles in the user interface.</span>
+<span class="sd">               This is a dict with keys of the particle UInames mapped to bools,</span>
+<span class="sd">               defaults to dict([(UIname,True) for UIname in UInames])</span>
+<span class="sd">        :type UIdropdown: dict of UIname:bool, optional</span>
+<span class="sd">        :param UIcolorPicker: do you want to allow the user to change the color.</span>
+<span class="sd">               This is a dict with keys of the particle UInames mapped to bools,</span>
+<span class="sd">               defaults to dict([(UIname,True) for UIname in UInames])</span>
+<span class="sd">        :type UIcolorPicker: dict of UIname:bool, optional</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__particle_UI_settings</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;UIparticle&#39;</span><span class="p">:</span><span class="nb">dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">UIparticle</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">UIparticle</span><span class="p">,</span>
+            <span class="s1">&#39;UIdropdown&#39;</span><span class="p">:</span><span class="nb">dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">UIdropdown</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">UIdropdown</span><span class="p">,</span>
+            <span class="s1">&#39;UIcolorPicker&#39;</span><span class="p">:</span><span class="nb">dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">UIcolorPicker</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">UIcolorPicker</span><span class="p">,</span>
+        <span class="p">}</span></div>
+    
+<div class="viewcode-block" id="Settings.particle_velocity_settings"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Settings.html#firefly.data_reader.Settings.particle_velocity_settings">[docs]</a>    <span class="k">def</span> <span class="nf">particle_velocity_settings</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">showVel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">velType</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">velVectorWidth</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">velGradient</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">animateVel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">animateVelDt</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">animateVelTmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">extra</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Settings used to define properties of the velocity vector field</span>
+<span class="sd">            which can also be used to extrapolate new positions using the</span>
+<span class="sd">            ``animateVel`` kwarg.</span>
+
+<span class="sd">        :param showVel: flag to start showing the velocity vectors</span>
+<span class="sd">            This is a dict with keys of the particle UInames mapped to bools,</span>
+<span class="sd">            defaults to dict([(UIname,False) for UIname in UInames])</span>
+<span class="sd">        :type showVel: dict of UIname:bool, optional</span>
+<span class="sd">        :param velType: type of velocity vectors to plot.  </span>
+<span class="sd">            This is a dict with keys of the particle UInames mapped to strs that</span>
+<span class="sd">            must be one of &#39;line&#39;, &#39;arrow&#39;, or &#39;triangle&#39;,</span>
+<span class="sd">            defaults to dict([(UIname,&#39;line&#39;) for UIname in UInames])</span>
+<span class="sd">        :param velVectorWidth: width of the velocity vectors,</span>
+<span class="sd">            defaults to dict([(UIname,1) for UIname in UInames])</span>
+<span class="sd">        :type velVectorWidth: dict of UIname:float, optional</span>
+<span class="sd">        :param velGradient: flags for whether there should be a gradient</span>
+<span class="sd">            to white applied along the length of the velocity vector</span>
+<span class="sd">            to indicate direction, defaults to dict([(UIname,False) for UIname in UInames])</span>
+<span class="sd">        :type velGradient: dict of UIname:bool, optional</span>
+<span class="sd">        :param animateVel: flags for whether velocity extrapolation should</span>
+<span class="sd">            be enabled at startup,</span>
+<span class="sd">            defaults to dict([(UIname,False) for UIname in UInames])</span>
+<span class="sd">        :type animateVel: dict of UIname:bool, optional</span>
+<span class="sd">        :param animateVelDt: DT for which to increment the extrapolation</span>
+<span class="sd">            defaults to dict([(UIname,0) for UIname in UInames])</span>
+<span class="sd">        :type animateVelDt: dict of UIname:float, optional</span>
+<span class="sd">        :param animateVelTmax: maximum time to extrapolate before resetting</span>
+<span class="sd">            particles to their original positions</span>
+<span class="sd">            defaults to dict([(UIname,1) for UIname in UInames])</span>
+<span class="sd">        :type animateVelTmax: dict of UIname:float, optional</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__particle_velocity_settings</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;showVel&#39;</span><span class="p">:</span><span class="nb">dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">showVel</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">showVel</span><span class="p">,</span>
+            <span class="s1">&#39;velType&#39;</span><span class="p">:</span><span class="nb">dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">velType</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">velType</span><span class="p">,</span>
+            <span class="s1">&#39;velVectorWidth&#39;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">velVectorWidth</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">velVectorWidth</span><span class="p">,</span>
+            <span class="s1">&#39;velGradient&#39;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">velGradient</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">velGradient</span><span class="p">,</span>
+            <span class="s1">&#39;animateVel&#39;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">animateVel</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">animateVel</span><span class="p">,</span>
+            <span class="s1">&#39;animateVelDt&#39;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">animateVelDt</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">animateVelDt</span><span class="p">,</span>
+            <span class="s1">&#39;animateVelTmax&#39;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">animateVelTmax</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">animateVelTmax</span>
+        <span class="p">}</span></div>
+    
+<div class="viewcode-block" id="Settings.particle_filter_settings"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Settings.html#firefly.data_reader.Settings.particle_filter_settings">[docs]</a>    <span class="k">def</span> <span class="nf">particle_filter_settings</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">filterLims</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">filterVals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">invertFilter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">extra</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Settings that will define the initial values of the filters in the particle UI panes</span>
+<span class="sd">        and consequently what particles are filtered at startup.</span>
+
+<span class="sd">        :param filterLims: initial [min, max] limits to the filters. </span>
+<span class="sd">            This is a nested dict of the particle UInames, </span>
+<span class="sd">            then for each filterble field the [min, max] range </span>
+<span class="sd">            (e.g., {&#39;Gas&#39;:{&#39;log10Density&#39;:[0,1],&#39;magVelocities&#39;:[20, 100]}}),</span>
+<span class="sd">            defaults to None and is set in the web app to [min, max] of that field</span>
+<span class="sd">        :type filterLims: dict of UIname:dict of field:[min,max] range, optional</span>
+<span class="sd">        :param filterVals: initial location of the filter slider handles.</span>
+<span class="sd">            This is a nested dict of the particle UInames, </span>
+<span class="sd">            then for each filterble field the [min, max] range </span>
+<span class="sd">            (e.g., {&#39;Gas&#39;:{&#39;log10Density&#39;:[.1,0.5],&#39;magVelocities&#39;:[50, 60]}}),</span>
+<span class="sd">            defaults to None and is set in the web app to [min, max] of that field</span>
+<span class="sd">        :type filterVals: dict of UIname:dict of field:[min,max] range, optional</span>
+<span class="sd">        :param invertFilter: flags for whether filters should _hide_ particles within</span>
+<span class="sd">            their range (True) or not (False), defaults to UIname:dict of field:False</span>
+<span class="sd">        :type invertFilter: dict of UIname:dict of field:bool, optional</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">__particle_filter_settings</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;filterLims&#39;</span><span class="p">:</span><span class="nb">dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">filterLims</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">filterLims</span><span class="p">,</span> 
+            <span class="s1">&#39;filterVals&#39;</span><span class="p">:</span><span class="nb">dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">filterVals</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">filterVals</span><span class="p">,</span> 
+            <span class="s1">&#39;invertFilter&#39;</span><span class="p">:</span><span class="nb">dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">invertFilter</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">invertFilter</span>
+        <span class="p">}</span></div>
+
+<div class="viewcode-block" id="Settings.particle_colormap_settings"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Settings.html#firefly.data_reader.Settings.particle_colormap_settings">[docs]</a>    <span class="k">def</span> <span class="nf">particle_colormap_settings</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">colormapLims</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">colormapVals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">colormap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">colormapVariable</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">showColormap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">extra</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Settings that will define the initial values of the colormaps in the particle UI panes.</span>
+
+<span class="sd">        :param colormapLims: initial [min, max] limits to the colormaps. </span>
+<span class="sd">            This is a nested dict of the particle UInames, </span>
+<span class="sd">            then for each colormappable field the [min, max] range </span>
+<span class="sd">            (e.g., {&#39;Gas&#39;:{&#39;log10Density&#39;:[0,1],&#39;magVelocities&#39;:[20, 100]}}),</span>
+<span class="sd">            defaults to None and is set in the web app to [min, max] of that field</span>
+<span class="sd">        :type colormapLims: dict of UIname:dict of field:[min,max] range, optional</span>
+<span class="sd">        :param colormapVals: initial location of the colormap slider handles.</span>
+<span class="sd">            This is a nested dict of the particle UInames, </span>
+<span class="sd">            then for each colormappable field the [min, max] range </span>
+<span class="sd">            (e.g., {&#39;Gas&#39;:{&#39;log10Density&#39;:[.1,0.5],&#39;magVelocities&#39;:[50, 60]}}),</span>
+<span class="sd">            defaults to None and is set in the web app to [min, max] of that field</span>
+<span class="sd">        :type colormapVals: dict of UIname:dict of field:[min,max] range, optional</span>
+<span class="sd">        :param colormap: index of the colormap to use for each gas particle,</span>
+<span class="sd">            defined by the grid of colors in firefly/static/textures/colormap.png</span>
+<span class="sd">            TODO: (index + 0.5) * (8/256)</span>
+<span class="sd">            This is a dict with keys of the particle UInames mapped to floats,</span>
+<span class="sd">            (e.g. {&#39;Gas&#39;:0.015625, &#39;Stars&#39;:0.015625}),</span>
+<span class="sd">            defaults to first colormap</span>
+<span class="sd">        :type colormap: dict of UIname:float, optional</span>
+<span class="sd">        :param colormapVariable: index in arrays_to_track of array to colormap by </span>
+<span class="sd">            This is a dict with keys of the particle UInames mapped to ints,</span>
+<span class="sd">            (e.g. {&#39;Gas&#39;:0, &#39;Stars&#39;:0}), defaults to 0</span>
+<span class="sd">        :type colormapVariable: dict of UIname:int, optional</span>
+<span class="sd">        :param showColormap: flags for whether the colormap should be initialized</span>
+<span class="sd">        at startup. </span>
+<span class="sd">            This is a dict with keys of the particle UInames mapped to bools,</span>
+<span class="sd">            (e.g. {&#39;Gas&#39;:False, &#39;Stars&#39;:False}), defaults to False</span>
+<span class="sd">        :type showColormap: dict of UIname:bool, optional</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1">## settings that will define the initial values of the /colormap/ in the particle UI panes</span>
+        <span class="c1">##  and consequently what particles are colored at startup.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__particle_colormap_settings</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;colormapLims&#39;</span><span class="p">:</span><span class="nb">dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">colormapLims</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">colormapLims</span><span class="p">,</span> 
+            <span class="s1">&#39;colormapVals&#39;</span><span class="p">:</span><span class="nb">dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">colormapVals</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">colormapVals</span><span class="p">,</span>  
+            <span class="s1">&#39;colormap&#39;</span><span class="p">:</span><span class="nb">dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">colormap</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">colormap</span><span class="p">,</span> 
+            <span class="s1">&#39;colormapVariable&#39;</span><span class="p">:</span><span class="nb">dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">colormapVariable</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">colormapVariable</span><span class="p">,</span>  
+            <span class="s1">&#39;showColormap&#39;</span><span class="p">:</span><span class="nb">dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">showColormap</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">showColormap</span><span class="p">,</span> 
+        <span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="Settings.attachSettings"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Settings.html#firefly.data_reader.Settings.attachSettings">[docs]</a>    <span class="k">def</span> <span class="nf">attachSettings</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">particleGroup</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Adds a :class:`~firefly.data_reader.ParticleGroup`&#39;s settings to the</span>
+<span class="sd">        relevant settings dictionaries.</span>
+
+<span class="sd">        :param particleGroup: the :class:`~firefly.data_reader.ParticleGroup`</span>
+<span class="sd">            that you want to link to this :class:`~firefly.data_reader.Settings`.</span>
+<span class="sd">        :type particleGroup: :class:`firefly.data_reader.ParticleGroup`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1">## transfer keys from particle group</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span>
+            <span class="s1">&#39;UIparticle&#39;</span><span class="p">,</span><span class="s1">&#39;UIdropdown&#39;</span><span class="p">,</span><span class="s1">&#39;UIcolorPicker&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;color&#39;</span><span class="p">,</span><span class="s1">&#39;sizeMult&#39;</span><span class="p">,</span><span class="s1">&#39;showParts&#39;</span><span class="p">,</span><span class="s1">&#39;plotNmax&#39;</span><span class="p">,</span><span class="s1">&#39;radiusVariable&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;filterVals&#39;</span><span class="p">,</span><span class="s1">&#39;filterLims&#39;</span><span class="p">,</span><span class="s1">&#39;invertFilter&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;colormapVals&#39;</span><span class="p">,</span><span class="s1">&#39;colormapLims&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;showVel&#39;</span><span class="p">,</span><span class="s1">&#39;velType&#39;</span><span class="p">,</span><span class="s1">&#39;velVectorWidth&#39;</span><span class="p">,</span><span class="s1">&#39;velGradient&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;animateVel&#39;</span><span class="p">,</span><span class="s1">&#39;animateVelDt&#39;</span><span class="p">,</span><span class="s1">&#39;animateVelTmax&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;colormap&#39;</span><span class="p">,</span><span class="s1">&#39;colormapVariable&#39;</span><span class="p">,</span><span class="s1">&#39;showColormap&#39;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">particleGroup</span><span class="o">.</span><span class="n">UIname</span><span class="p">]</span><span class="o">=</span><span class="n">particleGroup</span><span class="o">.</span><span class="n">settings_default</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        
+        <span class="c1">## and link the other way, this Settings instance to the particleGroup</span>
+        <span class="n">particleGroup</span><span class="o">.</span><span class="n">attached_settings</span> <span class="o">=</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="Settings.outputToDict"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Settings.html#firefly.data_reader.Settings.outputToDict">[docs]</a>    <span class="k">def</span> <span class="nf">outputToDict</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Concatenates all the settings dicts into a single dictionary.</span>
+
+<span class="sd">        :return: all_settings_dict, concatenated settings dictionary</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">all_settings_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="c1">## loop through all attributes to locate all the sub-dictionaries</span>
+            <span class="k">if</span> <span class="s1">&#39;_settings&#39;</span> <span class="ow">in</span> <span class="n">attr</span><span class="p">:</span>
+                <span class="n">obj</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">attr</span><span class="p">)</span>
+
+                <span class="c1">## distinguish between methods and private dictionaries</span>
+                <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span> <span class="o">==</span> <span class="nb">dict</span><span class="p">:</span>
+                    <span class="c1">## copy the keys over</span>
+                    <span class="n">all_settings_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">all_settings_dict</span></div>
+
+<div class="viewcode-block" id="Settings.outputToJSON"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Settings.html#firefly.data_reader.Settings.outputToJSON">[docs]</a>    <span class="k">def</span> <span class="nf">outputToJSON</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">JSONdir</span><span class="p">,</span>
+        <span class="n">JSON_prefix</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+        <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">loud</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">write_to_disk</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">not_reader</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Saves the current settings to a JSON file.</span>
+
+<span class="sd">        :param JSONdir: the sub-directory that will contain your JSON files, relative</span>
+<span class="sd">            to your :code:`$HOME directory`. , defaults to :code:`$HOME/&lt;JSON_prefix&gt;`</span>
+<span class="sd">        :type JSONdir: str, optional</span>
+<span class="sd">        :param JSON_prefix: Prefix for any :code:`.json` files created, :code:`.json` files will be of the format:</span>
+<span class="sd">            :code:`&lt;JSON_prefix&gt;&lt;filename&gt;.json`, defaults to &#39;Data&#39;</span>
+<span class="sd">        :type JSON_prefix: str, optional</span>
+<span class="sd">        :param filename: name of settings :code:`.json` file,</span>
+<span class="sd">            defaults to self.settings_filename</span>
+<span class="sd">        :type filename: str, optional</span>
+<span class="sd">        :param JSON_prefix: string that is prepended to filename, defaults to &#39;&#39;</span>
+<span class="sd">        :type JSON_prefix: str, optional</span>
+<span class="sd">        :param loud: flag to print status information to the console, defaults to True</span>
+<span class="sd">        :type loud: bool, optional</span>
+<span class="sd">        :param write_to_disk: flag that controls whether data is saved to disk (:code:`True`)</span>
+<span class="sd">            or only converted to a string and returned (:code:`False`), defaults to True</span>
+<span class="sd">        :type write_to_disk: bool, optional</span>
+<span class="sd">        :param not_reader: flag for whether to print the Reader :code:`filenames.json` warning, defaults to True</span>
+<span class="sd">        :type write_to_disk: bool, optional</span>
+<span class="sd">        :return: filename, JSON(all_settings_dict) (either a filename if</span>
+<span class="sd">            written to disk or a JSON strs)</span>
+<span class="sd">        :rtype: str, str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="c1">## determine where we&#39;re saving the file</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings_filename</span> <span class="k">if</span> <span class="n">filename</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">filename</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">JSONdir</span><span class="p">,</span><span class="n">JSON_prefix</span><span class="o">+</span><span class="n">filename</span><span class="p">)</span>
+
+        <span class="c1">## export settings to a dictionary</span>
+        <span class="n">all_settings_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">outputToDict</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">loud</span> <span class="ow">and</span> <span class="n">not_reader</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;You will need to add this settings filename to&quot;</span><span class="o">+</span>
+                <span class="s2">&quot; filenames.json if this was not called by a Reader instance.&quot;</span><span class="p">)</span>
+
+        <span class="c1">## convert dictionary to a JSON (either write to disk or get back a str)</span>
+        <span class="k">return</span> <span class="n">filename</span><span class="p">,</span><span class="n">write_to_json</span><span class="p">(</span>
+            <span class="n">all_settings_dict</span><span class="p">,</span>
+            <span class="n">filename</span> <span class="k">if</span> <span class="n">write_to_disk</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span> <span class="c1">## None -&gt; string</span></div>
+
+<div class="viewcode-block" id="Settings.loadFromJSON"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Settings.html#firefly.data_reader.Settings.loadFromJSON">[docs]</a>    <span class="k">def</span> <span class="nf">loadFromJSON</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">filename</span><span class="p">,</span>
+        <span class="n">loud</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Replaces the current settings with those stored in a JSON file.</span>
+
+<span class="sd">        :param filename: full filepath to settings :code:`.json` file</span>
+<span class="sd">        :type filename: str</span>
+<span class="sd">        :param loud: flag to print status information to the console, defaults to True</span>
+<span class="sd">        :type loud: bool, optional</span>
+<span class="sd">        :raises FileNotFoundError: if the specified filename does not exist </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1">## check for existence of the file</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+            <span class="n">settings_dict</span> <span class="o">=</span> <span class="n">load_from_json</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="s2">&quot;Settings file: </span><span class="si">%s</span><span class="s2"> doesn&#39;t exist.&quot;</span><span class="o">%</span><span class="n">filename</span><span class="p">)</span> 
+
+        <span class="c1">## import settings</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">settings_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">loud</span><span class="p">:</span>
+                <span class="c1">## notify user if any setting is being replacing, </span>
+                <span class="c1">##  but *only* if it&#39;s being replaced</span>
+                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">settings_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">]):</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;replacing&quot;</span><span class="p">,</span><span class="n">key</span><span class="p">)</span>
+                    <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">],</span><span class="s1">&#39;--&gt;&#39;</span><span class="p">,</span><span class="n">settings_dict</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+
+            <span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">=</span><span class="n">settings_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Alex Gurvich, Aaron Geller.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

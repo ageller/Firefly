@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Interacting with a Firefly visualization &mdash; Firefly 3.0.0 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Data controls" href="data_controls.html" />
+    <link rel="prev" title="Installation" href="../installation.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html"><img src="../_static/logo_banner.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Interacting with a Firefly visualization</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#flying-with-the-mouse-or-keyboard">Flying with the mouse or keyboard</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#trackball-controls">Trackball Controls</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#fly-controls">Fly Controls</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#using-the-user-interface">Using the user interface</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#the-top-bar">The top bar</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#sub-panels">Sub-panels</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="data_controls.html">Data controls</a></li>
+<li class="toctree-l4"><a class="reference internal" href="camera_controls.html">Camera controls</a></li>
+<li class="toctree-l4"><a class="reference internal" href="projection_controls.html">Volume rendering with 2d projection</a></li>
+<li class="toctree-l4"><a class="reference internal" href="particle_controls.html">Particle controls</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#splitting-the-viewer-and-gui-with-flask">Splitting the Viewer and GUI with Flask</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../data_reader/index.html">Creating your own instance of Firefly</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../server.html">Hosting a Firefly webserver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../experimental.html">Experimental features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/api/api.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Firefly</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Interacting with a Firefly visualization</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/webapp/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<section id="interacting-with-a-firefly-visualization">
+<span id="viz-navigation"></span><h1>Interacting with a Firefly visualization<a class="headerlink" href="#interacting-with-a-firefly-visualization" title="Permalink to this headline">¶</a></h1>
+<section id="flying-with-the-mouse-or-keyboard">
+<h2>Flying with the mouse or keyboard<a class="headerlink" href="#flying-with-the-mouse-or-keyboard" title="Permalink to this headline">¶</a></h2>
+<section id="trackball-controls">
+<h3>Trackball Controls<a class="headerlink" href="#trackball-controls" title="Permalink to this headline">¶</a></h3>
+<p>When you launch Firefly in the default configuration, you can use the mouse to rotate your view and zoom in and out.
+To rotate the view, left click and drag.  To zoom, use the mouse wheel (or two-finger scroll).
+The default view uses the “Trackball controls” from the three.js library.
+Within this Trackball mode, your center is fixed, but can be moved with a
+right-click and drag.
+You are always looking toward that center.
+And you can rotate your view around that center.</p>
+</section>
+<section id="fly-controls">
+<h3>Fly Controls<a class="headerlink" href="#fly-controls" title="Permalink to this headline">¶</a></h3>
+<p>If you press the space bar, or use the user interface
+to uncheck the center <a class="reference internal" href="camera_controls.html#lock-button"><span class="std std-ref">Lock</span></a> button,
+you will switch to the “Fly controls” from the three.js library.</p>
+<p>Fly mode gives you more freedom to move about because you are
+not constrained to a center position as you are in Trackball mode.</p>
+<p>Fly controls utilize the keyboard</p>
+<ul class="simple">
+<li><p><strong>W/A/S/D</strong> -  pan forward/left/backward/right</p></li>
+<li><p><strong>R/F</strong> - pan up/down</p></li>
+<li><p><strong>shift</strong> - reduces your speed by a factor of 10 while held in conjunction with another key</p></li>
+</ul>
+<p>in combination with the mouse.</p>
+<ul class="simple">
+<li><p><strong>up/down</strong> - pitch</p></li>
+<li><p><strong>left/right</strong> - yaw</p></li>
+</ul>
+<p>If you are in Fly mode, pressing the space bar will return you
+to Trackball mode now centered at your current location.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A common workflow is to use Fly controls
+to move the camera into the region of interest
+then press the space bar to switch
+to Trackball mode.
+This will lock the center on your region of interest.
+Now in Trackball mode, you can <strong>“orbit”</strong> that region of interest,
+while always facing it.</p>
+</aside>
+</section>
+</section>
+<section id="using-the-user-interface">
+<span id="ui"></span><h2>Using the user interface<a class="headerlink" href="#using-the-user-interface" title="Permalink to this headline">¶</a></h2>
+<section id="the-top-bar">
+<h3>The top bar<a class="headerlink" href="#the-top-bar" title="Permalink to this headline">¶</a></h3>
+<p>This contains the word Controls and an X or “hamburger” symbol.
+Click in here to show or hide the Controls panel.
+If you click and drag in the top bar, you can move the Controls panel.
+The user interface (UI) initializes in a collapsed state by default
+in the top left corner of the screen (represented by three vertically
+stacked black lines– a “hamburger”).</p>
+<p>Clicking on the hamburger will expose a number of “sub-panels” depending
+on how the number of groups of particles loaded in the dataset.
+Each will have a dropdown arrow that when clicked will reveal sets of buttons,
+sliders, and/or input boxes.
+For all input boxes,
+you must hit “enter” on your keyboard for the value to actually be recorded by Firefly.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>A common point of confusion is when input boxes don’t seem to update
+the view. Almost always, the culprit is that the “enter” did not register,
+If something is not updating try hitting enter a couple more times.
+If the issue persists submit a
+<a class="reference external" href="https://github.com/ageller/Firefly/issues">GitHub issue</a> and select
+the appropriate issue template.</p>
+</aside>
+</section>
+<section id="sub-panels">
+<h3>Sub-panels<a class="headerlink" href="#sub-panels" title="Permalink to this headline">¶</a></h3>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="data_controls.html">Data controls</a></li>
+<li class="toctree-l1"><a class="reference internal" href="camera_controls.html">Camera controls</a></li>
+<li class="toctree-l1"><a class="reference internal" href="projection_controls.html">Volume rendering with 2d projection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="particle_controls.html">Particle controls</a></li>
+</ul>
+</div>
+</section>
+</section>
+<section id="splitting-the-viewer-and-gui-with-flask">
+<h2>Splitting the Viewer and GUI with Flask<a class="headerlink" href="#splitting-the-viewer-and-gui-with-flask" title="Permalink to this headline">¶</a></h2>
+<img alt="../_images/flask_gui.png" class="align-center" src="../_images/flask_gui.png" />
+<p>When Firefly is being hosted locally using a Flask server
+(see <a class="reference internal" href="../server.html#local"><span class="std std-ref">Hosting Firefly locally</span></a> for details on how to accomplish this)
+the UI and viewer canvas can be split by visiting
+<code class="code docutils literal notranslate"><span class="pre">localhost:xxxx/gui</span></code> and <code class="code docutils literal notranslate"><span class="pre">localhost:xxxx/viewer</span></code>.</p>
+<p>The GUI will contain a multi-colored cube to help identify how the the
+scene is being rotated.</p>
+<p>All of the controls detailed in the sections above apply for
+the <code class="code docutils literal notranslate"><span class="pre">localhost:xxxx/gui</span></code> window.
+The <code class="code docutils literal notranslate"><span class="pre">localhost:xxxx/viewer</span></code> window on the other hand will show only
+the particles and will react to any changes made on the viewer.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Two devices on the same network can access the same Firefly webserver.
+Using one computer as the host which opens the
+<code class="code docutils literal notranslate"><span class="pre">localhost:xxxx/viewer</span></code> and another device (say, an iPad)
+which opens <code class="code docutils literal notranslate"><span class="pre">&lt;host's</span> <span class="pre">ip</span> <span class="pre">address&gt;:xxxx/gui</span></code> the view can
+be remotely controlled.</p>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p>This is not actually limited to only computers on the same network,
+if the host exposes their IP address to the internet by opening a port
+on their router then one’s Firefly view could be controlled remotely by
+another user over the internet.
+See <a class="reference internal" href="../server.html#port-forwarding"><span class="std std-ref">Accessing remote Firefly servers via port forwarding</span></a>.</p>
+</aside>
+</aside>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="../installation.html" class="btn btn-neutral float-left" title="Installation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="data_controls.html" class="btn btn-neutral float-right" title="Data controls" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Alex Gurvich, Aaron Geller.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

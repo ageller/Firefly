@@ -1,0 +1,11 @@
+﻿firefly.data\_reader.ParticleGroup
+==================================
+
+.. currentmodule:: firefly.data_reader
+
+.. autoclass:: ParticleGroup
+   :members:
+   :special-members:
+   :show-inheritance:
+
+   .. autoclasstoc::

@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>firefly.server &mdash; Firefly 3.0.0 documentation</title><link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../index.html"><img src="../../_static/logo_banner.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../webapp/index.html">Interacting with a Firefly visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../data_reader/index.html">Creating your own instance of Firefly</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../server.html">Hosting a Firefly webserver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../experimental.html">Experimental features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/api/api.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Firefly</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      <li>firefly.server</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for firefly.server</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">Flask</span><span class="p">,</span> <span class="n">render_template</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">session</span>
+<span class="kn">from</span> <span class="nn">flask_socketio</span> <span class="kn">import</span> <span class="n">SocketIO</span><span class="p">,</span> <span class="n">emit</span>
+
+<span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">Lock</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">import</span> <span class="nn">subprocess</span><span class="o">,</span><span class="nn">signal</span>
+<span class="kn">import</span> <span class="nn">socket</span><span class="o">,</span><span class="nn">requests</span>
+
+<span class="kn">import</span> <span class="nn">json</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="kn">from</span> <span class="nn">firefly.data_reader</span> <span class="kn">import</span> <span class="n">SimpleReader</span>
+
+<span class="c1">#in principle, we could read in the data here...</span>
+
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+<span class="c1"># Set this variable to &quot;threading&quot;, &quot;eventlet&quot; ,&quot;gevent&quot; or &quot;gevent_uwsgi&quot; to test the</span>
+<span class="c1"># different async modes, or leave it set to None for the application to choose</span>
+<span class="c1"># the best option based on installed packages.</span>
+<span class="n">async_mode</span> <span class="o">=</span> <span class="s2">&quot;eventlet&quot;</span> <span class="c1">#&quot;eventlet&quot; is WAY better than &quot;threading&quot;</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span> 
+<span class="n">app</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s1">&#39;SECRET_KEY&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;secret!&#39;</span>
+<span class="n">socketio</span> <span class="o">=</span> <span class="n">SocketIO</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">async_mode</span><span class="o">=</span><span class="n">async_mode</span><span class="p">)</span>
+<span class="n">thread</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">thread_lock</span> <span class="o">=</span> <span class="n">Lock</span><span class="p">()</span>
+
+<span class="c1">#global variables to hold the params object (not all of this needs to be passed along...)</span>
+<span class="n">viewerParams</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">updateViewerParams</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="n">GUIParams</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">updateGUIParams</span> <span class="o">=</span> <span class="kc">False</span>
+
+<span class="n">namespace</span> <span class="o">=</span> <span class="s1">&#39;/Firefly&#39;</span>
+<span class="c1">#number of seconds between updates</span>
+<span class="n">seconds</span> <span class="o">=</span> <span class="mf">0.01</span>
+
+<span class="c1">#for the stream</span>
+<span class="n">fps</span> <span class="o">=</span> <span class="mi">30</span>
+
+<span class="c1">#decimation</span>
+<span class="n">dec</span> <span class="o">=</span> <span class="mi">1</span>
+
+<span class="c1">#check if the GUI is separated to see if we need to send a reload signal (currently not used)</span>
+<span class="n">GUIseparated</span> <span class="o">=</span> <span class="kc">False</span>
+
+<span class="c1">#this will pass to the viewer every &quot;seconds&quot; </span>
+<span class="k">def</span> <span class="nf">background_thread</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;Example of how to send server generated events to clients.&quot;&quot;&quot;</span>
+    <span class="k">global</span> <span class="n">viewerParams</span><span class="p">,</span> <span class="n">updateViewerParams</span><span class="p">,</span> <span class="n">GUIParams</span><span class="p">,</span> <span class="n">updateGUIParams</span>
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">socketio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">seconds</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">updateViewerParams</span><span class="p">):</span>
+            <span class="c1">#print(&quot;========= viewerParams:&quot;,viewerParams)</span>
+            <span class="n">socketio</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s1">&#39;update_viewerParams&#39;</span><span class="p">,</span> <span class="n">viewerParams</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">namespace</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">updateGUIParams</span><span class="p">):</span>
+            <span class="c1">#print(&quot;========= GUIParams:&quot;,GUIParams)</span>
+            <span class="n">socketio</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s1">&#39;update_GUIParams&#39;</span><span class="p">,</span> <span class="n">GUIParams</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">namespace</span><span class="p">)</span>
+        <span class="n">updateViewerParams</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">updateGUIParams</span> <span class="o">=</span> <span class="kc">False</span>
+
+
+<span class="c1">#testing the connection</span>
+<span class="nd">@socketio</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="s1">&#39;connection_test&#39;</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">namespace</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">connection_test</span><span class="p">(</span><span class="n">message</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;======= connected&#39;</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span>
+    <span class="n">session</span><span class="p">[</span><span class="s1">&#39;receive_count&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;receive_count&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="n">emit</span><span class="p">(</span><span class="s1">&#39;connection_response&#39;</span><span class="p">,{</span><span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="n">message</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">],</span> <span class="s1">&#39;count&#39;</span><span class="p">:</span> <span class="n">session</span><span class="p">[</span><span class="s1">&#39;receive_count&#39;</span><span class="p">]},</span> <span class="n">namespace</span><span class="o">=</span><span class="n">namespace</span><span class="p">)</span>
+
+
+<span class="c1">######for viewer</span>
+<span class="c1">#will receive data from viewer </span>
+<span class="nd">@socketio</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="s1">&#39;viewer_input&#39;</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">namespace</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">viewer_input</span><span class="p">(</span><span class="n">message</span><span class="p">):</span>
+    <span class="k">global</span> <span class="n">viewerParams</span><span class="p">,</span> <span class="n">updateViewerParams</span>
+    <span class="n">updateViewerParams</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">viewerParams</span> <span class="o">=</span> <span class="n">message</span>
+
+<span class="c1">#the background task sends data to the viewer</span>
+<span class="nd">@socketio</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="s1">&#39;connect&#39;</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">namespace</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">from_viewer</span><span class="p">():</span>
+    <span class="k">global</span> <span class="n">thread</span>
+    <span class="k">with</span> <span class="n">thread_lock</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">thread</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">thread</span> <span class="o">=</span> <span class="n">socketio</span><span class="o">.</span><span class="n">start_background_task</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">background_thread</span><span class="p">)</span>
+
+
+<span class="c1">#######for GUI</span>
+<span class="c1">#will receive data from gui</span>
+<span class="nd">@socketio</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="s1">&#39;gui_input&#39;</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">namespace</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">gui_input</span><span class="p">(</span><span class="n">message</span><span class="p">):</span>
+    <span class="k">global</span> <span class="n">GUIParams</span><span class="p">,</span> <span class="n">updateGUIParams</span>
+    <span class="n">updateGUIParams</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">GUIParams</span> <span class="o">=</span> <span class="n">message</span>
+
+<span class="c1">#the background task sends data to the viewer</span>
+<span class="nd">@socketio</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="s1">&#39;connect&#39;</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">namespace</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">from_gui</span><span class="p">():</span>
+    <span class="k">global</span> <span class="n">thread</span>
+    <span class="k">with</span> <span class="n">thread_lock</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">thread</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">thread</span> <span class="o">=</span> <span class="n">socketio</span><span class="o">.</span><span class="n">start_background_task</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">background_thread</span><span class="p">)</span>
+
+<span class="nd">@socketio</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="s1">&#39;separate_GUI&#39;</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">namespace</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">separate_GUI</span><span class="p">():</span>
+    <span class="k">global</span> <span class="n">GUIseparated</span>
+    <span class="n">GUIseparated</span> <span class="o">=</span> <span class="kc">True</span>
+
+<span class="c1">#######for Streamer</span>
+<span class="c1">#passing the rendered texture</span>
+<span class="c1">#trying with post below because this only seems to work when on the same localhost</span>
+<span class="c1"># @socketio.on(&#39;streamer_input&#39;, namespace=namespace)</span>
+<span class="c1"># def streamer_input(blob):</span>
+<span class="c1">#     socketio.emit(&#39;update_streamer&#39;, blob, namespace=namespace)</span>
+
+
+<span class="c1">########reading in a directory of hdf5 or csv files</span>
+<span class="nd">@socketio</span><span class="o">.</span><span class="n">on</span><span class="p">(</span><span class="s1">&#39;input_otherType&#39;</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">namespace</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">input_otherType</span><span class="p">(</span><span class="n">filedir</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;======= showing loader&#39;</span><span class="p">)</span>
+    <span class="n">socketio</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s1">&#39;show_loader&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">namespace</span><span class="p">)</span>
+    <span class="n">socketio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span> <span class="c1">#to make sure that the above emit is executed</span>
+
+    <span class="n">fdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span><span class="s1">&#39;static&#39;</span><span class="p">,</span><span class="s1">&#39;data&#39;</span><span class="p">,</span><span class="n">filedir</span><span class="p">)</span>
+    <span class="c1">#check the file types</span>
+    <span class="n">ftype</span> <span class="o">=</span> <span class="s1">&#39;.hdf5&#39;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">fdir</span><span class="p">):</span>
+            <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;.csv&#39;</span> <span class="ow">in</span> <span class="n">f</span><span class="p">):</span>
+                <span class="n">ftype</span> <span class="o">=</span> <span class="s1">&#39;.csv&#39;</span>
+            <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;.hdf5&#39;</span> <span class="ow">in</span> <span class="n">f</span><span class="p">):</span>
+                <span class="n">ftype</span> <span class="o">=</span> <span class="s1">&#39;.hdf5&#39;</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;======= have input &#39;</span><span class="o">+</span><span class="n">ftype</span><span class="o">+</span><span class="s1">&#39; data file(s) in&#39;</span><span class="p">,</span> <span class="n">fdir</span><span class="p">)</span>
+    <span class="n">reader</span> <span class="o">=</span> <span class="n">SimpleReader</span><span class="p">(</span><span class="n">fdir</span><span class="p">,</span> <span class="n">write_to_disk</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">extension</span><span class="o">=</span><span class="n">ftype</span><span class="p">,</span> <span class="n">decimation_factor</span><span class="o">=</span><span class="n">dec</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">reader</span><span class="o">.</span><span class="n">JSON</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;======= have data from file(s), sending to viewer ...&#39;</span><span class="p">)</span>
+    <span class="n">socketio</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s1">&#39;input_data&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;status&#39;</span><span class="p">:</span><span class="s1">&#39;start&#39;</span><span class="p">,</span> <span class="s1">&#39;length&#39;</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)},</span> <span class="n">namespace</span><span class="o">=</span><span class="n">namespace</span><span class="p">)</span>
+    <span class="n">socketio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span> <span class="c1">#to make sure that the above emit is executed</span>
+    <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">fname</span><span class="p">]))</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="p">{</span><span class="n">fname</span><span class="p">:</span><span class="n">data</span><span class="p">[</span><span class="n">fname</span><span class="p">],</span> <span class="s1">&#39;status&#39;</span><span class="p">:</span><span class="s1">&#39;data&#39;</span><span class="p">}</span>
+        <span class="n">socketio</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s1">&#39;input_data&#39;</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">namespace</span><span class="p">)</span>
+        <span class="n">socketio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span> <span class="c1">#to make sure that the above emit is executed</span>
+    <span class="n">socketio</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s1">&#39;input_data&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;status&#39;</span><span class="p">:</span><span class="s1">&#39;done&#39;</span><span class="p">},</span> <span class="n">namespace</span><span class="o">=</span><span class="n">namespace</span><span class="p">)</span>
+    <span class="n">socketio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span> <span class="c1">#to make sure that the above emit is executed</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;======= done&#39;</span><span class="p">)</span>
+
+
+<span class="c1">##############</span>
+
+<span class="c1">#flask stuff</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/viewer&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">viewer</span><span class="p">():</span>  
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s2">&quot;viewer.html&quot;</span><span class="p">)</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/gui&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">gui</span><span class="p">():</span> 
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s2">&quot;gui.html&quot;</span><span class="p">)</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">default</span><span class="p">():</span> 
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s2">&quot;combined.html&quot;</span><span class="p">)</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/index&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">index</span><span class="p">():</span> 
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s2">&quot;combined.html&quot;</span><span class="p">)</span>
+<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/combined&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">combined</span><span class="p">():</span> 
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s2">&quot;combined.html&quot;</span><span class="p">)</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/VR&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">cardboard</span><span class="p">():</span> 
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s2">&quot;VR.html&quot;</span><span class="p">)</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/data_input&#39;</span><span class="p">,</span> <span class="n">methods</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">data_input</span><span class="p">():</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;======= showing loader&#39;</span><span class="p">)</span>
+    <span class="n">socketio</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s1">&#39;show_loader&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">namespace</span><span class="p">)</span>
+    <span class="n">socketio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span> <span class="c1">#to make sure that the above emit is executed</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;======= receiving data from server ...&#39;</span><span class="p">)</span>
+    <span class="n">jsondata</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">get_json</span><span class="p">()</span>
+    <span class="c1">#this loop may not be necessary</span>
+    <span class="c1"># sze = 0</span>
+    <span class="c1"># while (sze != sys.getsizeof(jsondata)):</span>
+    <span class="c1">#     socketio.sleep(0.1)</span>
+    <span class="c1">#     sze = sys.getsizeof(jsondata)</span>
+    <span class="c1">#     print(&quot;======= size of data&quot;, sze)</span>
+    <span class="n">sze</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">getsizeof</span><span class="p">(</span><span class="n">jsondata</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;======= size of data&quot;</span><span class="p">,</span> <span class="n">sze</span><span class="p">)</span>
+
+    <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">jsondata</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;======= sending data to viewer ...&#39;</span><span class="p">)</span><span class="c1">#,data.keys())</span>
+    <span class="n">socketio</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s1">&#39;input_data&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;status&#39;</span><span class="p">:</span><span class="s1">&#39;start&#39;</span><span class="p">,</span> <span class="s1">&#39;length&#39;</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)},</span> <span class="n">namespace</span><span class="o">=</span><span class="n">namespace</span><span class="p">)</span>
+    <span class="n">socketio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span> <span class="c1">#to make sure that the above emit is executed</span>
+    <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="n">fname</span><span class="p">]))</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="p">{</span><span class="n">fname</span><span class="p">:</span><span class="n">data</span><span class="p">[</span><span class="n">fname</span><span class="p">],</span> <span class="s1">&#39;status&#39;</span><span class="p">:</span><span class="s1">&#39;data&#39;</span><span class="p">}</span>
+        <span class="n">socketio</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s1">&#39;input_data&#39;</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">namespace</span><span class="p">)</span>
+        <span class="n">socketio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span> <span class="c1">#to make sure that the above emit is executed</span>
+    <span class="n">socketio</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s1">&#39;input_data&#39;</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;status&#39;</span><span class="p">:</span><span class="s1">&#39;done&#39;</span><span class="p">},</span> <span class="n">namespace</span><span class="o">=</span><span class="n">namespace</span><span class="p">)</span>
+    <span class="n">socketio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.1</span><span class="p">)</span> <span class="c1">#to make sure that the above emit is executed</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;======= done&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s1">&#39;Done&#39;</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/stream&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">streamer</span><span class="p">():</span>  
+    <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s2">&quot;streamer.html&quot;</span><span class="p">,</span> <span class="nb">input</span><span class="o">=</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">({</span><span class="s1">&#39;fps&#39;</span><span class="p">:</span><span class="n">fps</span><span class="p">}))</span>
+
+<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/stream_input&#39;</span><span class="p">,</span> <span class="n">methods</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span><span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">stream_input</span><span class="p">():</span>
+    <span class="n">blob</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">files</span><span class="p">[</span><span class="s1">&#39;image&#39;</span><span class="p">]</span>  <span class="c1"># get the image</span>
+    <span class="n">blob_binary</span> <span class="o">=</span> <span class="n">blob</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+    <span class="c1">#blob.save(&#39;tmp.jpg&#39;)</span>
+    <span class="n">socketio</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s1">&#39;update_streamer&#39;</span><span class="p">,</span> <span class="n">blob_binary</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">namespace</span><span class="p">,</span> <span class="n">broadcast</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="s1">&#39;Done&#39;</span>
+
+<span class="k">def</span> <span class="nf">reload</span><span class="p">():</span>
+    <span class="c1">#currently not used</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">GUIseparated</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;======= reloading GUI&#39;</span><span class="p">)</span>
+        <span class="n">socketio</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s1">&#39;reload_GUI&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">namespace</span><span class="p">)</span> 
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;======= reloading viewer&#39;</span><span class="p">)</span>
+    <span class="n">socketio</span><span class="o">.</span><span class="n">emit</span><span class="p">(</span><span class="s1">&#39;reload_viewer&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">namespace</span><span class="p">)</span>
+
+<span class="c1"># Helper functions to start/stop the server</span>
+<div class="viewcode-block" id="startFireflyServer"><a class="viewcode-back" href="../../reference/api/server/firefly.server.startFireflyServer.html#firefly.server.startFireflyServer">[docs]</a><span class="k">def</span> <span class="nf">startFireflyServer</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span> <span class="n">frames_per_second</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">decimation_factor</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Creates a global interpreter locked process to host a mock web-server</span>
+<span class="sd">		that can be accessed via localhost:&lt;port&gt;. </span>
+
+<span class="sd">    :param port: port number to serve the :code:`.html` files on, defaults to 5000</span>
+<span class="sd">    :type port: int, optional</span>
+<span class="sd">    :param frames_per_second: enforced FPS for stream quality, used only if</span>
+<span class="sd">		localhost:&lt;port&gt;/stream is accessed, defaults to 30</span>
+<span class="sd">    :type frames_per_second: int, optional</span>
+<span class="sd">    :param decimation_factor: factor to decimate data that is being passed through</span>
+<span class="sd">		localhost:&lt;port&gt;/data_input, defaults to 1</span>
+<span class="sd">    :type decimation_factor: int, optional</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">old_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
+        <span class="k">global</span> <span class="n">fps</span><span class="p">,</span> <span class="n">dec</span>
+
+        <span class="n">fps</span> <span class="o">=</span> <span class="n">frames_per_second</span>
+        <span class="n">dec</span> <span class="o">=</span> <span class="n">decimation_factor</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Launching Firefly at: http://localhost:</span><span class="si">%d</span><span class="s2">&quot;</span><span class="o">%</span><span class="n">port</span><span class="p">)</span>
+        <span class="n">socketio</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">app</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="s1">&#39;0.0.0.0&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">port</span><span class="p">,</span> <span class="n">use_reloader</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">raise</span>
+    <span class="k">finally</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="n">old_dir</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="spawnFireflyServer"><a class="viewcode-back" href="../../reference/api/server/firefly.server.spawnFireflyServer.html#firefly.server.spawnFireflyServer">[docs]</a><span class="k">def</span> <span class="nf">spawnFireflyServer</span><span class="p">(</span><span class="n">port</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span><span class="n">frames_per_second</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span><span class="n">decimation_factor</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">max_time</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Wrapper to :func:`firefly.server.startFireflyServer` that instead starts a background process.</span>
+
+<span class="sd">    :param port: port number to serve the :code:`.html` files on, defaults to 5000</span>
+<span class="sd">    :type port: int, optional</span>
+<span class="sd">    :param frames_per_second: enforced FPS for stream quality, used only if</span>
+<span class="sd">		localhost:&lt;port&gt;/stream is accessed, defaults to 30</span>
+<span class="sd">    :type frames_per_second: int, optional</span>
+<span class="sd">    :param decimation_factor: factor to decimate data that is being passed through</span>
+<span class="sd">		localhost:&lt;port&gt;/data_input, defaults to 1</span>
+<span class="sd">    :type decimation_factor: int, optional</span>
+<span class="sd">    :param max_time: maximum amount of time to wait for a Firefly server</span>
+<span class="sd">        to be available. </span>
+<span class="sd">    :type max_time: float, optional</span>
+<span class="sd">    :return: subprocess.Popen</span>
+<span class="sd">    :rtype: subprocess handler</span>
+<span class="sd">    :raises RuntimeError: if max_time elapses without a successful Firefly server being initialized.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1">## wrap passed arguments into a list of strings</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;</span><span class="si">%d</span><span class="s2">&quot;</span><span class="o">%</span><span class="n">port</span><span class="p">,</span><span class="s2">&quot;</span><span class="si">%d</span><span class="s2">&quot;</span><span class="o">%</span><span class="n">frames_per_second</span><span class="p">,</span><span class="s2">&quot;</span><span class="si">%d</span><span class="s2">&quot;</span><span class="o">%</span><span class="n">decimation_factor</span><span class="p">]</span>
+
+    <span class="n">run_server</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span><span class="s1">&#39;run_server.py&#39;</span><span class="p">)</span>
+    <span class="n">process</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">Popen</span><span class="p">([</span><span class="n">sys</span><span class="o">.</span><span class="n">executable</span><span class="p">,</span> <span class="n">run_server</span><span class="p">]</span><span class="o">+</span><span class="n">args</span><span class="p">)</span>
+
+    <span class="n">init_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="c1">## check if port is in use</span>
+    <span class="k">with</span> <span class="n">socket</span><span class="o">.</span><span class="n">socket</span><span class="p">(</span><span class="n">socket</span><span class="o">.</span><span class="n">AF_INET</span><span class="p">,</span> <span class="n">socket</span><span class="o">.</span><span class="n">SOCK_STREAM</span><span class="p">)</span> <span class="k">as</span> <span class="n">s</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="s2">&quot;Waiting up to </span><span class="si">%d</span><span class="s2"> seconds for background Firefly server to start&quot;</span><span class="o">%</span><span class="n">max_time</span><span class="p">,</span>
+            <span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span> 
+                <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;http://localhost:</span><span class="si">{</span><span class="n">port</span><span class="si">:</span><span class="s1">d</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span><span class="n">json</span><span class="o">=</span><span class="s2">&quot;test&quot;</span><span class="p">)</span>
+                <span class="k">break</span>
+            <span class="k">except</span><span class="p">:</span> 
+            <span class="c1">## need to re-check the connection each iteration</span>
+            <span class="c1">#if s.connect_ex((&#39;localhost&#39;, port)) != 0:</span>
+                <span class="c1">#break</span>
+
+                <span class="k">if</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span><span class="o">-</span><span class="n">init_time</span> <span class="o">&gt;=</span> <span class="n">max_time</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                    <span class="s2">&quot;Hit max wait-time of </span><span class="si">%d</span><span class="s2"> seconds.&quot;</span><span class="o">%</span><span class="n">max_time</span><span class="o">+</span>
+                    <span class="s2">&quot; A Firefly server could not be opened in the background.&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span> 
+                    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,</span><span class="n">end</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+                    <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;done! Your server is available at - http://localhost:</span><span class="si">%d</span><span class="s2">&quot;</span><span class="o">%</span><span class="n">port</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">process</span></div>
+
+<div class="viewcode-block" id="killAllFireflyServers"><a class="viewcode-back" href="../../reference/api/server/firefly.server.killAllFireflyServers.html#firefly.server.killAllFireflyServers">[docs]</a><span class="k">def</span> <span class="nf">killAllFireflyServers</span><span class="p">(</span><span class="n">pid</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Kill python processes associated with hosting Flask web-servers.</span>
+
+<span class="sd">    :param pid: process id to kill, defaults to None, killing all processes</span>
+<span class="sd">    :type pid: int, optional</span>
+<span class="sd">    :return: return_code</span>
+<span class="sd">    :rtype: int </span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">pid</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1">## kill indiscriminately</span>
+        <span class="n">return_code</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s2">&quot;ps aux | grep &#39;run_server.py&#39; | awk &#39;{print $2}&#39; | xargs kill&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1">## kill only the pid we were passed, ideally from the subprocess.Popen().pid but</span>
+        <span class="c1">##  you know I don&#39;t judge.  </span>
+        <span class="n">return_code</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">kill</span><span class="p">(</span><span class="n">pid</span><span class="p">,</span><span class="n">signal</span><span class="o">.</span><span class="n">SIGINT</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">return_code</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Alex Gurvich, Aaron Geller.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

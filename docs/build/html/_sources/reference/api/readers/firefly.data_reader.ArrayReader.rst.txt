@@ -1,0 +1,11 @@
+﻿firefly.data\_reader.ArrayReader
+================================
+
+.. currentmodule:: firefly.data_reader
+
+.. autoclass:: ArrayReader
+   :members:
+   :special-members:
+   :show-inheritance:
+
+   .. autoclasstoc::
