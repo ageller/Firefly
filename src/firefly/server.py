@@ -317,14 +317,16 @@ def spawnFireflyServer(port=5000,frames_per_second=30,decimation_factor=1,max_ti
 
     return process
 
-def killAllFireflyServers(pid=None):
-    """Kill python processes associated with hosting Flask web-servers.
+def quitAllFireflyServers(pid=None):
+    """Quit python processes associated with hosting Flask web-servers.
 
-    :param pid: process id to kill, defaults to None, killing all processes
+    :param pid: process id to kill, defaults to None, quitting all processes
     :type pid: int, optional
     :return: return_code
     :rtype: int 
     """
+    print("Server output:")
+    print("--------------")
     if pid is None:
         ## kill indiscriminately
         return_code = os.system("ps aux | grep 'run_server.py' | awk '{print $2}' | xargs kill")
