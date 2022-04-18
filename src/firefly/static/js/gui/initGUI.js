@@ -30,12 +30,12 @@ function makeUI(local=false){
 	UIcontainer = d3.select('#UIContainer')
 	var bbox = UIcontainer.node().getBoundingClientRect();
 	prev_count = bbox.width;//countNodes(UIcontainer.node());
-	waitForBuild = setInterval(function(){
+	GUIParams.waitForBuild = setInterval(function(){
 		var bbox = UIcontainer.node().getBoundingClientRect();
 		next_count = bbox.width;//countNodes(UIcontainer.node());
 		//console.log('UI width:',prev_count,next_count)
 		if (prev_count == next_count && next_count > 10){
-			clearInterval(waitForBuild);
+			clearInterval(GUIParams.waitForBuild);
 			// collapse the UI initially, but wait a bit to make sure the full UI has been created
 			hideUI.call(document.getElementById('Hamburger'));
 			// and now reveal the result
