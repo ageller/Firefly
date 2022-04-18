@@ -346,8 +346,8 @@
         <span class="n">path_to_snapshot</span><span class="p">,</span>
         <span class="n">decimation_factor</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
         <span class="n">JSONdir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">write_jsons_to_disk</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">com_offset</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
+        <span class="n">write_to_disk</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">com</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
         <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; A wrapper to :class:`firefly.data_reader.FIREreader` that will open </span>
 <span class="sd">            FIRE collaboration formatted data with minimal interaction from the user </span>
@@ -377,12 +377,12 @@
 <span class="sd">        :param JSONdir: the sub-directory that will contain your JSON files, relative</span>
 <span class="sd">            to your :code:`$HOME directory`. , defaults to :code:`$HOME/&lt;JSON_prefix&gt;`</span>
 <span class="sd">        :type JSONdir: str, optional</span>
-<span class="sd">        :param write_jsons_to_disk: flag that controls whether data is saved to disk (:code:`True`) </span>
+<span class="sd">        :param write_to_disk: flag that controls whether data is saved to disk (:code:`True`) </span>
 <span class="sd">            or only converted to a string and stored in :code:`self.JSON` (:code:`False`), defaults to True</span>
-<span class="sd">        :type write_jsons_to_disk: bool, optional</span>
-<span class="sd">        :param com_offset: flag to offset all coordinates by the COM of the </span>
+<span class="sd">        :type write_to_disk: bool, optional</span>
+<span class="sd">        :param com: flag to offset all coordinates by the COM of the </span>
 <span class="sd">            snapshot, defaults to False </span>
-<span class="sd">        :type com_offset: bool, optional</span>
+<span class="sd">        :type com: bool, optional</span>
 <span class="sd">        :raises ValueError: if a snapnum cannot be inferred from the path_to_snapshot</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -424,7 +424,7 @@
             <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="c1">## load the data</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">loadData</span><span class="p">(</span><span class="n">com_offset</span><span class="o">=</span><span class="n">com_offset</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loadData</span><span class="p">(</span><span class="n">com</span><span class="o">=</span><span class="n">com</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">][</span><span class="s1">&#39;Gas&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">][</span><span class="s1">&#39;Stars&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
@@ -434,8 +434,8 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;camera&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">15</span><span class="p">]</span>
 
-        <span class="c1">## dump the JSON files</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dumpToJSON</span><span class="p">(</span><span class="n">loud</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">write_jsons_to_disk</span><span class="o">=</span><span class="n">write_jsons_to_disk</span><span class="p">,</span><span class="n">use_format</span><span class="o">=</span><span class="s1">&#39;ffly&#39;</span><span class="p">)</span></div></div>
+        <span class="c1">## dump the data files to disk</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">writeToDisk</span><span class="p">(</span><span class="n">loud</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">write_to_disk</span><span class="o">=</span><span class="n">write_to_disk</span><span class="p">,</span><span class="n">extension</span><span class="o">=</span><span class="s1">&#39;.ffly&#39;</span><span class="p">)</span></div></div>
 
 <span class="k">class</span> <span class="nc">STARFORGEreader</span><span class="p">(</span><span class="n">FIREreader</span><span class="p">):</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
@@ -443,8 +443,8 @@
         <span class="n">path_to_snapshot</span><span class="p">,</span>
         <span class="n">decimation_factor</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
         <span class="n">JSONdir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">write_jsons_to_disk</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">com_offset</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
+        <span class="n">write_to_disk</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">com</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> 
         <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; A wrapper to :class:`firefly.data_reader.FIREreader` that will open </span>
 <span class="sd">            `STARFORGE collaboration &lt;http://starforge.space&gt;`_ formatted data with minimal interaction from the user </span>
@@ -474,12 +474,12 @@
 <span class="sd">        :param JSONdir: the sub-directory that will contain your JSON files, relative</span>
 <span class="sd">            to your :code:`$HOME directory`. , defaults to :code:`$HOME/&lt;JSON_prefix&gt;`</span>
 <span class="sd">        :type JSONdir: str, optional</span>
-<span class="sd">        :param write_jsons_to_disk: flag that controls whether data is saved to disk (:code:`True`) </span>
+<span class="sd">        :param write_to_disk: flag that controls whether data is saved to disk (:code:`True`) </span>
 <span class="sd">            or only converted to a string and stored in :code:`self.JSON` (:code:`False`), defaults to True</span>
-<span class="sd">        :type write_jsons_to_disk: bool, optional</span>
-<span class="sd">        :param com_offset: flag to offset all coordinates by the COM of the </span>
+<span class="sd">        :type write_to_disk: bool, optional</span>
+<span class="sd">        :param com: flag to offset all coordinates by the COM of the </span>
 <span class="sd">            snapshot, defaults to False </span>
-<span class="sd">        :type com_offset: bool, optional</span>
+<span class="sd">        :type com: bool, optional</span>
 <span class="sd">        :raises ValueError: if a snapnum cannot be inferred from the path_to_snapshot</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -512,7 +512,7 @@
             <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="c1">## load the data</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">loadData</span><span class="p">(</span><span class="n">com_offset</span><span class="o">=</span><span class="n">com_offset</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loadData</span><span class="p">(</span><span class="n">com</span><span class="o">=</span><span class="n">com</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">][</span><span class="s1">&#39;Gas&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">][</span><span class="s1">&#39;Stars&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
@@ -523,7 +523,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;camera&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">15</span><span class="p">]</span>
 
         <span class="c1">## dump the JSON files</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">dumpToJSON</span><span class="p">(</span><span class="n">loud</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">write_jsons_to_disk</span><span class="o">=</span><span class="n">write_jsons_to_disk</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">writeToDisk</span><span class="p">(</span><span class="n">loud</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">write_to_disk</span><span class="o">=</span><span class="n">write_to_disk</span><span class="p">)</span>
 </pre></div>
 
            </div>

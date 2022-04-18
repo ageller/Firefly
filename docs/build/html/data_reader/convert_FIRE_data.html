@@ -369,7 +369,7 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 </div>
-<div class="nbinput nblast docutils container">
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
@@ -377,11 +377,21 @@ div.rendered_html tbody tr:hover {
 <span class="kn">import</span> <span class="nn">os</span>
 
 <span class="kn">import</span> <span class="nn">sys</span>
+<span class="c1">## ignore these lines, you do not need to add this if Firefly is pip installed into your PYTHONPATH</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;/Users/ageller/VISUALIZATIONS/Firefly&#39;</span><span class="p">)</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;/Users/agurvich/research/repos/firefly/src&#39;</span><span class="p">)</span>
-<span class="kn">from</span> <span class="nn">firefly.data_reader</span> <span class="kn">import</span> <span class="n">FIREreader</span><span class="p">,</span><span class="n">SimpleFIREreader</span>
+<span class="kn">from</span> <span class="nn">firefly.data_reader</span> <span class="kn">import</span> <span class="n">FIREreader</span><span class="p">,</span><span class="n">SimpleFIREreader</span><span class="p">,</span><span class="n">TweenParams</span>
+<span class="kn">from</span> <span class="nn">abg_python.galaxy.gal_utils</span> <span class="kn">import</span> <span class="n">Galaxy</span>
 </pre></div>
 </div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+don&#39;t have phil&#39;s colormaps
+</pre></div></div>
 </div>
 <section id="Convert-FIRE-data">
 <h1>Convert FIRE data<a class="headerlink" href="#Convert-FIRE-data" title="Permalink to this headline">¶</a></h1>
@@ -390,48 +400,8 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">## create a FIRE reader object</span>
-<span class="n">reader</span> <span class="o">=</span> <span class="n">FIREreader</span><span class="p">(</span>
-    <span class="c1">## path to directory containing (optionally multiple) .hdf5 files</span>
-    <span class="n">snapdir</span> <span class="o">=</span> <span class="s2">&quot;/Users/agurvich/research/snaps/isolated_disks/Control_G4_20/snapdir_050/&quot;</span><span class="p">,</span>
-    <span class="c1">## the snapshot number, best to provide separately in order to disambiguate</span>
-    <span class="n">snapnum</span> <span class="o">=</span> <span class="mi">50</span><span class="p">,</span>
-    <span class="c1">## particle types one would like to extract from .hdf5 files</span>
-    <span class="n">ptypes</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">4</span><span class="p">],</span>
-    <span class="c1">## what to call them in the UI</span>
-    <span class="n">UInames</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Gas&#39;</span><span class="p">,</span><span class="s1">&#39;Stars&#39;</span><span class="p">],</span>
-    <span class="c1">## by what factor would we like to reduce the data for performance stability and disk space concerns</span>
-    <span class="n">decimation_factors</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span><span class="mi">100</span><span class="p">],</span>
-    <span class="c1">## what fields would we like to extract</span>
-    <span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Density&#39;</span><span class="p">,</span><span class="s1">&#39;Velocities&#39;</span><span class="p">,</span><span class="s1">&#39;Temperature&#39;</span><span class="p">],</span>
-    <span class="c1">## do we want to take the magnitude of any of these fields?</span>
-    <span class="n">magFlags</span><span class="o">=</span><span class="p">[</span><span class="kc">False</span><span class="p">,</span><span class="kc">False</span><span class="p">,</span><span class="kc">False</span><span class="p">],</span>
-    <span class="c1">## do we want to take the log?</span>
-    <span class="n">logFlags</span><span class="o">=</span><span class="p">[</span><span class="kc">True</span><span class="p">,</span><span class="kc">False</span><span class="p">,</span><span class="kc">True</span><span class="p">],</span>
-    <span class="c1">## which fields do we want to be able to filter on?</span>
-    <span class="n">filterFlags</span><span class="o">=</span><span class="p">[</span><span class="kc">True</span><span class="p">,</span><span class="kc">True</span><span class="p">,</span><span class="kc">True</span><span class="p">],</span>
-    <span class="c1">## which fields do we want to be able to colormap by?</span>
-    <span class="n">colormapFlags</span><span class="o">=</span><span class="p">[</span><span class="kc">True</span><span class="p">,</span><span class="kc">True</span><span class="p">,</span><span class="kc">True</span><span class="p">],</span>
-    <span class="c1">## where should the output .json files be saved to?</span>
-    <span class="c1">##  if a relative path is given, like here, saves to $HOME/&lt;JSONdir&gt;</span>
-    <span class="c1">##  and creates a soft-link to firefly/static/data</span>
-    <span class="n">JSONdir</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span><span class="s1">&#39;..&#39;</span><span class="p">,</span><span class="s1">&#39;static&#39;</span><span class="p">,</span><span class="s1">&#39;data&#39;</span><span class="p">,</span><span class="s1">&#39;FIREData_50&#39;</span><span class="p">)),</span>
-    <span class="c1">## overwrite the existing startup.json file</span>
-    <span class="n">write_startup</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-<span class="c1">## fetch data from .hdf5 files</span>
-<span class="n">reader</span><span class="o">.</span><span class="n">loadData</span><span class="p">()</span>
-
-<span class="c1">## set the color and size of the gas and star particles</span>
-<span class="c1">##  to be aesthetically pleasing</span>
-<span class="n">reader</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">][</span><span class="s1">&#39;Gas&#39;</span><span class="p">]</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
-<span class="n">reader</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">][</span><span class="s1">&#39;Stars&#39;</span><span class="p">]</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
-<span class="n">reader</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;sizeMult&#39;</span><span class="p">][</span><span class="s1">&#39;Gas&#39;</span><span class="p">]</span><span class="o">=</span><span class="mi">1</span>
-<span class="n">reader</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;sizeMult&#39;</span><span class="p">][</span><span class="s1">&#39;Stars&#39;</span><span class="p">]</span><span class="o">=</span><span class="mf">0.5</span>
-<span class="n">reader</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;camera&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="o">-</span><span class="mi">15</span><span class="p">]</span>
-
-<span class="c1">## dump output to .json files</span>
-<span class="n">reader</span><span class="o">.</span><span class="n">dumpToJSON</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">galaxy</span> <span class="o">=</span> <span class="n">Galaxy</span><span class="p">(</span><span class="s1">&#39;m12b_res57000&#39;</span><span class="p">,</span><span class="mi">600</span><span class="p">)</span>
+<span class="n">galaxy</span><span class="o">.</span><span class="n">extractMainHalo</span><span class="p">(</span><span class="n">use_saved_subsnapshots</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -440,14 +410,168 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Loading ptype 4
-/Users/agurvich/research/snaps/isolated_disks/Control_G4_20/snapdir_050/snapshot_050.hdf5
-Loading ptype 0
-/Users/agurvich/research/snaps/isolated_disks/Control_G4_20/snapdir_050/snapshot_050.hdf5
+Couldn&#39;t find a metadata file... for
+ Metadata object at /Users/agurvich/scratch/data/metal_diffusion/m12b_res57000/metadata/meta_Galaxy_600.hdf5
+Tracing the rockstar halo files with fancy:True and None Gyr smoothing.
+No rstar 1/2 in halo or metadata files, we will need to calculate it ourselves.
+Loading star particles of m12b_res57000 at 600 at /Users/agurvich/snaps/metal_diffusion/m12b_res57000/output
+Failed to open saved sub-snapshots AssertionError(&#39;Told not to use saved sub-snapshots&#39;)
+Loading gas particles of m12b_res57000 at 600 at /Users/agurvich/snaps/metal_diffusion/m12b_res57000/output
+Loading dark matter particles of m12b_res57000 at 600 at /Users/agurvich/snaps/metal_diffusion/m12b_res57000/output
+Reorienting...
+Done.
+extract_halo_inner(m12b_res57000 at 600,){&#39;orient_stars&#39;: True, &#39;use_saved_subsnapshots&#39;: False} 10.11 s elapsed
+Snapshot memory free
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+(12.27201256901771,
+ True,
+ 13.610546783496492,
+ -23.753615253930974,
+ 331.60968,
+ 2.454402513803542,
+ 140.56429531755958)
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">thetas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">360</span><span class="p">,</span><span class="mi">1000</span><span class="p">)</span><span class="o">/</span><span class="mi">180</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+<span class="n">coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">thetas</span><span class="o">.</span><span class="n">size</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+<span class="n">coords</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+<span class="n">coords</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">thetas</span><span class="p">)</span>
+<span class="n">coords</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">thetas</span><span class="p">)</span>
+<span class="n">coords</span><span class="o">*=</span><span class="mi">150</span>
+<span class="n">my_tweenParams</span> <span class="o">=</span> <span class="n">TweenParams</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span><span class="mi">30</span><span class="p">)</span> <span class="c1">## dt = 3000 ms between frames</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">## create a FIRE reader object</span>
+<span class="n">reader</span> <span class="o">=</span> <span class="n">FIREreader</span><span class="p">(</span>
+    <span class="c1">## path to directory containing (optionally multiple) .hdf5 files</span>
+    <span class="n">snapdir</span> <span class="o">=</span> <span class="s2">&quot;/Users/agurvich/research/snaps/metal_diffusion/m12b_res57000/output/&quot;</span><span class="p">,</span>
+    <span class="c1">## the snapshot number, best to provide separately in order to disambiguate</span>
+    <span class="n">snapnum</span> <span class="o">=</span> <span class="mi">600</span><span class="p">,</span>
+    <span class="c1">## particle types one would like to extract from .hdf5 files</span>
+    <span class="n">ptypes</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">],</span>
+    <span class="c1">## what to call them in the UI</span>
+    <span class="n">UInames</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Gas&#39;</span><span class="p">,</span><span class="s1">&#39;Stars&#39;</span><span class="p">,</span><span class="s1">&#39;HRDM&#39;</span><span class="p">,</span><span class="s1">&#39;LRDM&#39;</span><span class="p">],</span>
+    <span class="c1">## by what factor would we like to reduce the data for performance stability and disk space concerns</span>
+    <span class="n">decimation_factors</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">],</span>
+    <span class="c1">## what fields would we like to extract</span>
+    <span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Density&#39;</span><span class="p">,</span><span class="s1">&#39;Temperature&#39;</span><span class="p">,</span><span class="s1">&#39;AgeGyr&#39;</span><span class="p">,</span><span class="s1">&#39;GCRadius&#39;</span><span class="p">],</span>
+    <span class="c1">## do we want to take the magnitude of any of these fields?</span>
+    <span class="c1">## do we want to take the log?</span>
+    <span class="n">logFlags</span><span class="o">=</span><span class="p">[</span><span class="kc">True</span><span class="p">,</span><span class="kc">True</span><span class="p">,</span><span class="kc">False</span><span class="p">,</span><span class="kc">False</span><span class="p">],</span>
+    <span class="c1">## which fields do we want to be able to filter on?</span>
+    <span class="n">filterFlags</span><span class="o">=</span><span class="p">[</span><span class="kc">True</span><span class="p">,</span><span class="kc">True</span><span class="p">,</span><span class="kc">True</span><span class="p">,</span><span class="kc">True</span><span class="p">],</span>
+    <span class="c1">## which fields do we want to be able to colormap by?</span>
+    <span class="n">colormapFlags</span><span class="o">=</span><span class="p">[</span><span class="kc">True</span><span class="p">,</span><span class="kc">True</span><span class="p">,</span><span class="kc">True</span><span class="p">,</span><span class="kc">True</span><span class="p">],</span>
+    <span class="n">radiusFlags</span><span class="o">=</span><span class="p">[</span><span class="kc">False</span><span class="p">,</span><span class="kc">True</span><span class="p">,</span><span class="kc">True</span><span class="p">,</span><span class="kc">False</span><span class="p">],</span>
+    <span class="c1">## where should the output .json files be saved to?</span>
+    <span class="c1">##  if a relative path is given, like here, saves to $HOME/&lt;JSONdir&gt;</span>
+    <span class="c1">##  and creates a soft-link to firefly/static/data</span>
+    <span class="n">JSONdir</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span><span class="s1">&#39;..&#39;</span><span class="p">,</span><span class="s1">&#39;static&#39;</span><span class="p">,</span><span class="s1">&#39;data&#39;</span><span class="p">,</span><span class="s1">&#39;FIRESampleData&#39;</span><span class="p">)),</span>
+    <span class="c1">## overwrite the existing startup.json file</span>
+    <span class="n">write_startup</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">tweenParams</span><span class="o">=</span><span class="n">my_tweenParams</span><span class="p">)</span>
+
+<span class="c1">## fetch data from .hdf5 files</span>
+<span class="n">reader</span><span class="o">.</span><span class="n">loadData</span><span class="p">(</span><span class="n">com</span><span class="o">=</span><span class="n">galaxy</span><span class="o">.</span><span class="n">scom</span><span class="p">,</span><span class="n">vcom</span><span class="o">=</span><span class="n">galaxy</span><span class="o">.</span><span class="n">sub_snap</span><span class="p">[</span><span class="s1">&#39;vscom&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Loading ptype 2
+Loading ptype 1
+Loading ptype 4
+Loading ptype 0
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+array([Gas - 622573/6225729 particles - 4 tracked fields,
+       Stars - 326473/3264723 particles - 3 tracked fields,
+       HRDM - 932304/9323040 particles - 2 tracked fields,
+       LRDM - 304227/3042265 particles - 2 tracked fields], dtype=object)
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">## initialize the camera view</span>
+<span class="n">camera</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">251</span><span class="p">,</span><span class="o">-</span><span class="mi">117</span><span class="p">,</span><span class="mi">82</span><span class="p">])</span>
+<span class="n">camera</span> <span class="o">=</span> <span class="n">camera</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="n">camera</span><span class="p">)</span><span class="o">*</span><span class="mi">250</span>
+<span class="n">reader</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;camera&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">camera</span>
+
+<span class="c1">## set the initial colors of each of the particle groups</span>
+<span class="n">reader</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">][</span><span class="s1">&#39;Gas&#39;</span><span class="p">]</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">reader</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">][</span><span class="s1">&#39;Stars&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mf">0.025</span><span class="p">]</span>
+<span class="n">reader</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">][</span><span class="s1">&#39;HRDM&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+<span class="n">reader</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">][</span><span class="s1">&#39;LRDM&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mf">0.5</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+
+<span class="c1">## set the sizes of each of the particle groups</span>
+<span class="n">reader</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;sizeMult&#39;</span><span class="p">][</span><span class="s1">&#39;Gas&#39;</span><span class="p">]</span><span class="o">=</span><span class="mf">0.25</span>
+<span class="n">reader</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;sizeMult&#39;</span><span class="p">][</span><span class="s1">&#39;Stars&#39;</span><span class="p">]</span><span class="o">=</span><span class="mf">0.1</span>
+<span class="n">reader</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;sizeMult&#39;</span><span class="p">][</span><span class="s1">&#39;HRDM&#39;</span><span class="p">]</span><span class="o">=</span><span class="mi">1</span>
+<span class="n">reader</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;sizeMult&#39;</span><span class="p">][</span><span class="s1">&#39;LRDM&#39;</span><span class="p">]</span><span class="o">=</span><span class="mi">1</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">## initialize the gas with a colormap</span>
+<span class="n">reader</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;showColormap&#39;</span><span class="p">][</span><span class="s1">&#39;Gas&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">reader</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;colormapVariable&#39;</span><span class="p">][</span><span class="s1">&#39;Gas&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">reader</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;colormapLims&#39;</span><span class="p">][</span><span class="s1">&#39;Gas&#39;</span><span class="p">][</span><span class="s1">&#39;Velocity&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">50</span><span class="p">,</span><span class="mi">500</span><span class="p">]</span>
+<span class="n">reader</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;colormapVals&#39;</span><span class="p">][</span><span class="s1">&#39;Gas&#39;</span><span class="p">][</span><span class="s1">&#39;Velocity&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">50</span><span class="p">,</span><span class="mi">500</span><span class="p">]</span>
+
+<span class="c1">## initialize the gas with radius scaling (index 1 corresponds to Temperature, specified above)</span>
+<span class="n">reader</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;radiusVariable&#39;</span><span class="p">][</span><span class="s1">&#39;Gas&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span>
+
+<span class="c1">## initialize gas with velocity vectors</span>
+<span class="n">reader</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;showVel&#39;</span><span class="p">][</span><span class="s1">&#39;Gas&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">reader</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;velType&#39;</span><span class="p">][</span><span class="s1">&#39;Gas&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;arrow&#39;</span>
+
+<span class="c1">## initialize HRDM with a filter excluding the center so as not to crowd the view</span>
+<span class="n">reader</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;filterVals&#39;</span><span class="p">][</span><span class="s1">&#39;HRDM&#39;</span><span class="p">][</span><span class="s1">&#39;GCRadius&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">300</span><span class="p">,</span><span class="mi">5000</span><span class="p">]</span>
+<span class="n">reader</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;filterLims&#39;</span><span class="p">][</span><span class="s1">&#39;HRDM&#39;</span><span class="p">][</span><span class="s1">&#39;GCRadius&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">5000</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">## dump output to .ffly files</span>
+<span class="n">reader</span><span class="o">.</span><span class="n">writeToDisk</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
@@ -457,14 +581,14 @@ Loading ptype 0
 </div>
 <section id="Using-firefly.data_reader.SimpleFIREreader">
 <h2>Using <code class="docutils literal notranslate"><span class="pre">firefly.data_reader.SimpleFIREreader</span></code><a class="headerlink" href="#Using-firefly.data_reader.SimpleFIREreader" title="Permalink to this headline">¶</a></h2>
-<p>To simplify this process we have provided <code class="docutils literal notranslate"><span class="pre">firefly.data_reader.SimpleFIREreader</span></code> which takes a path to a FIRE snapshot and creates a “standard” iteration of Firefly given only a path to the data.</p>
+<p>To simplify this process we have provided <code class="docutils literal notranslate"><span class="pre">firefly.data_reader.SimpleFIREreader</span></code> which takes a path to a FIRE snapshot and creates a basic iteration of Firefly showing the gas and stars given only a path to the data.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">reader</span> <span class="o">=</span> <span class="n">SimpleFIREreader</span><span class="p">(</span>
     <span class="c1">## path to directory containing (optionally multiple) .hdf5 files</span>
-    <span class="s2">&quot;/Users/agurvich/research/snaps/isolated_disks/Control_G4_20/snapdir_050/&quot;</span><span class="p">,</span>
+    <span class="n">path_to_snapshot</span> <span class="o">=</span> <span class="s2">&quot;/Users/agurvich/research/snaps/metal_diffusion/m12b_res57000/output/snapdir_600&quot;</span><span class="p">,</span>
     <span class="c1">## overwrite the existing startup.json file</span>
     <span class="n">write_startup</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="c1">## pass absolute path to avoid symlink</span>
@@ -478,11 +602,9 @@ Loading ptype 0
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 Loading ptype 4
-/Users/agurvich/research/snaps/isolated_disks/Control_G4_20/snapdir_050/snapshot_050.hdf5
 Loading ptype 0
-/Users/agurvich/research/snaps/isolated_disks/Control_G4_20/snapdir_050/snapshot_050.hdf5
-Outputting: Gas - 106666/1066668 particles - 3 tracked fields
-Outputting: Stars - 51411/514118 particles - 3 tracked fields
+Outputting: Gas - 622573/6225729 particles - 3 tracked fields
+Outputting: Stars - 326473/3264723 particles - 3 tracked fields
 </pre></div></div>
 </div>
 </section>

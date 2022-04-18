@@ -391,6 +391,7 @@ div.rendered_html tbody tr:hover {
     src="https://www.youtube.com/embed/Xt1vce_2DYo"
     frameborder="0"
     allowfullscreen
+
 ></iframe></div>
 </div>
 <div class="nbinput docutils container">
@@ -412,9 +413,10 @@ div.rendered_html tbody tr:hover {
     src="https://www.youtube.com/embed/ft0Y3XNJhl4"
     frameborder="0"
     allowfullscreen
+
 ></iframe></div>
 </div>
-<div class="nbinput nblast docutils container">
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
@@ -424,6 +426,14 @@ div.rendered_html tbody tr:hover {
 <span class="kn">from</span> <span class="nn">firefly.data_reader</span> <span class="kn">import</span> <span class="n">ParticleGroup</span><span class="p">,</span><span class="n">Settings</span><span class="p">,</span><span class="n">ArrayReader</span>
 </pre></div>
 </div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+don&#39;t have phil&#39;s colormaps
+</pre></div></div>
 </div>
 <section id="Tutorial-notebook:-Managing-Custom-Settings">
 <h1>Tutorial notebook: Managing Custom Settings<a class="headerlink" href="#Tutorial-notebook:-Managing-Custom-Settings" title="Permalink to this headline">¶</a></h1>
@@ -470,25 +480,28 @@ div.rendered_html tbody tr:hover {
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 --  Settings: startup settings --
-[&#39;maxVrange&#39;, &#39;startFly&#39;, &#39;friction&#39;, &#39;stereo&#39;, &#39;stereoSep&#39;, &#39;decimate&#39;]
+[&#39;maxVrange&#39;, &#39;startFly&#39;, &#39;friction&#39;, &#39;stereo&#39;, &#39;stereoSep&#39;, &#39;decimate&#39;, &#39;start_tween&#39;, &#39;CDmin&#39;, &#39;CDmax&#39;, &#39;CDlognorm&#39;, &#39;columnDensity&#39;]
 
 --  Settings: UI settings --
 [&#39;UI&#39;, &#39;UIfullscreen&#39;, &#39;UIsnapshot&#39;, &#39;UIreset&#39;, &#39;UIsavePreset&#39;, &#39;UIloadNewData&#39;, &#39;UIcameraControls&#39;, &#39;UIdecimation&#39;]
 
 --  Settings: window settings --
-[&#39;title&#39;, &#39;loaded&#39;, &#39;annotation&#39;]
+[&#39;title&#39;, &#39;loaded&#39;, &#39;annotation&#39;, &#39;showFPS&#39;, &#39;showMemoryUsage&#39;, &#39;memoryLimit&#39;]
 
 --  Settings: camera settings --
-[&#39;center&#39;, &#39;camera&#39;, &#39;cameraRotation&#39;]
+[&#39;center&#39;, &#39;camera&#39;, &#39;cameraRotation&#39;, &#39;cameraUp&#39;, &#39;quaternion&#39;]
 
 --  Settings: particle startup settings --
-[&#39;plotNmax&#39;, &#39;showVel&#39;, &#39;velType&#39;, &#39;color&#39;, &#39;sizeMult&#39;, &#39;showParts&#39;]
+[&#39;plotNmax&#39;, &#39;color&#39;, &#39;sizeMult&#39;, &#39;showParts&#39;, &#39;radiusVariable&#39;]
 
 --  Settings: particle UI settings --
 [&#39;UIparticle&#39;, &#39;UIdropdown&#39;, &#39;UIcolorPicker&#39;]
 
+--  Settings: particle velocity settings --
+[&#39;showVel&#39;, &#39;velType&#39;, &#39;velVectorWidth&#39;, &#39;velGradient&#39;, &#39;animateVel&#39;, &#39;animateVelDt&#39;, &#39;animateVelTmax&#39;]
+
 --  Settings: particle filter settings --
-[&#39;filterLims&#39;, &#39;filterVals&#39;]
+[&#39;filterLims&#39;, &#39;filterVals&#39;, &#39;invertFilter&#39;]
 
 --  Settings: particle colormap settings --
 [&#39;colormapLims&#39;, &#39;colormapVals&#39;, &#39;colormap&#39;, &#39;colormapVariable&#39;, &#39;showColormap&#39;]
@@ -524,12 +537,18 @@ before:
 title Firefly
 loaded True
 annotation None
+showFPS True
+showMemoryUsage True
+memoryLimit 2000000000.0
 
 after:
 --  Settings: window settings --
 title ---&gt; My Favorite Data &lt;---
 loaded True
 annotation None
+showFPS True
+showMemoryUsage True
+memoryLimit 2000000000.0
 
 </pre></div></div>
 </div>
@@ -557,7 +576,7 @@ annotation None
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><br/><span></span><span class="n">settings</span><span class="o">.</span><span class="n">printKeys</span><span class="p">(</span><span class="n">pattern</span><span class="o">=</span><span class="s1">&#39;particle&#39;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">settings</span><span class="o">.</span><span class="n">printKeys</span><span class="p">(</span><span class="n">pattern</span><span class="o">=</span><span class="s1">&#39;particle&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -568,20 +587,29 @@ annotation None
 <div class="highlight"><pre>
 --  Settings: particle startup settings --
 plotNmax {}
-showVel {}
-velType {}
 color {}
 sizeMult {}
 showParts {}
+radiusVariable {}
 
 --  Settings: particle UI settings --
 UIparticle {}
 UIdropdown {}
 UIcolorPicker {}
 
+--  Settings: particle velocity settings --
+showVel {}
+velType {}
+velVectorWidth {}
+velGradient {}
+animateVel {}
+animateVelDt {}
+animateVelTmax {}
+
 --  Settings: particle filter settings --
 filterLims {}
 filterVals {}
+invertFilter {}
 
 --  Settings: particle colormap settings --
 colormapLims {}
@@ -600,7 +628,7 @@ showColormap {}
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">## initialize an ArrayReader</span>
 <span class="n">reader</span> <span class="o">=</span> <span class="n">ArrayReader</span><span class="p">(</span>
     <span class="n">coordinates</span><span class="o">=</span><span class="p">[</span><span class="n">coords</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="n">coords</span><span class="p">],</span> <span class="c1">## pass in two particle groups as a demonstration (just copies of our sample data)</span>
-    <span class="n">write_jsons_to_disk</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">write_to_disk</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">settings</span><span class="o">=</span><span class="n">settings</span><span class="p">,</span> <span class="c1">## the settings object to link</span>
     <span class="n">fields</span><span class="o">=</span><span class="p">[[],[</span><span class="n">fields</span><span class="p">,</span><span class="n">fields</span><span class="p">]])</span> <span class="c1">## field data for each particle group, 0 fields for 1 and 2 repeated fields for the other.</span>
 </pre></div>
@@ -611,9 +639,10 @@ showColormap {}
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-JSONdir is None, defaulting to /Users/agurvich/research/repos/firefly/src/firefly/static/data/Data
-Make sure each tracked_array (2) has a tracked_filter_flag (0), assuming True.
-Make sure each tracked_array (2) has a tracked_colormap_flag (0), assuming True.
+JSONdir is None, defaulting to /Users/agurvich/research/repos/Firefly/src/firefly/static/data/Data
+Make sure each field_array (2) has a field_filter_flag (0), assuming True.
+Make sure each field_array (2) has a field_colormap_flag (0), assuming True.
+Make sure each field_array (2) has a field_radius_flag (0), assuming False.
 Outputting: PGroup_0 - 7999/7999 particles - 0 tracked fields
 Outputting: PGroup_1 - 8000/8000 particles - 2 tracked fields
 </pre></div></div>
@@ -623,8 +652,10 @@ Outputting: PGroup_1 - 8000/8000 particles - 2 tracked fields
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/Users/agurvich/miniconda3/envs/firefly/lib/python3.9/site-packages/numpy/core/_asarray.py:102: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify &#39;dtype=object&#39; when creating the ndarray.
-  return array(a, dtype, copy=False, order=order)
+/opt/homebrew/Caskroom/miniconda/base/envs/python38/lib/python3.9/site-packages/numpy/core/fromnumeric.py:1970: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify &#39;dtype=object&#39; when creating the ndarray.
+  result = asarray(a).shape
+/opt/homebrew/Caskroom/miniconda/base/envs/python38/lib/python3.9/site-packages/numpy/core/fromnumeric.py:43: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify &#39;dtype=object&#39; when creating the ndarray.
+  result = getattr(asarray(obj), method)(*args, **kwds)
 </pre></div></div>
 </div>
 <p>The original <code class="docutils literal notranslate"><span class="pre">Settings</span></code> object is stored in <code class="docutils literal notranslate"><span class="pre">reader.settings</span></code>.</p>
@@ -649,27 +680,36 @@ Outputting: PGroup_1 - 8000/8000 particles - 2 tracked fields
 
 --  Settings: particle startup settings --
 plotNmax {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None}
-showVel {&#39;PGroup_0&#39;: False, &#39;PGroup_1&#39;: False}
-velType {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None}
-color {&#39;PGroup_0&#39;: array([0.09532231, 0.24132833, 0.13068872, 1.        ]), &#39;PGroup_1&#39;: array([0.9250689 , 0.38517182, 0.57390387, 1.        ])}
-sizeMult {&#39;PGroup_0&#39;: 1.0, &#39;PGroup_1&#39;: 1.0}
+color {&#39;PGroup_0&#39;: array([0.88100143, 0.73655243, 0.77324641, 1.        ]), &#39;PGroup_1&#39;: array([0.36571498, 0.50979664, 0.02474504, 1.        ])}
+sizeMult {&#39;PGroup_0&#39;: 0.1, &#39;PGroup_1&#39;: 0.1}
 showParts {&#39;PGroup_0&#39;: True, &#39;PGroup_1&#39;: True}
+radiusVariable {&#39;PGroup_0&#39;: 0, &#39;PGroup_1&#39;: 0}
 
 --  Settings: particle UI settings --
 UIparticle {&#39;PGroup_0&#39;: True, &#39;PGroup_1&#39;: True}
 UIdropdown {&#39;PGroup_0&#39;: True, &#39;PGroup_1&#39;: True}
 UIcolorPicker {&#39;PGroup_0&#39;: True, &#39;PGroup_1&#39;: True}
 
+--  Settings: particle velocity settings --
+showVel {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None}
+velType {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None}
+velVectorWidth {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None}
+velGradient {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None}
+animateVel {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None}
+animateVelDt {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None}
+animateVelTmax {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None}
+
 --  Settings: particle filter settings --
 filterLims {&#39;PGroup_0&#39;: {}, &#39;PGroup_1&#39;: {&#39;field0&#39;: None, &#39;field1&#39;: None}}
 filterVals {&#39;PGroup_0&#39;: {}, &#39;PGroup_1&#39;: {&#39;field0&#39;: None, &#39;field1&#39;: None}}
+invertFilter {&#39;PGroup_0&#39;: {}, &#39;PGroup_1&#39;: {}}
 
 --  Settings: particle colormap settings --
 colormapLims {&#39;PGroup_0&#39;: {}, &#39;PGroup_1&#39;: {&#39;field0&#39;: None, &#39;field1&#39;: None}}
 colormapVals {&#39;PGroup_0&#39;: {}, &#39;PGroup_1&#39;: {&#39;field0&#39;: None, &#39;field1&#39;: None}}
 colormap {&#39;PGroup_0&#39;: 0.015625, &#39;PGroup_1&#39;: 0.015625}
-colormapVariable {&#39;PGroup_0&#39;: 0, &#39;PGroup_1&#39;: 0}
-showColormap {&#39;PGroup_0&#39;: False, &#39;PGroup_1&#39;: False}
+colormapVariable {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None}
+showColormap {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None}
 
 </pre></div></div>
 </div>
@@ -729,26 +769,40 @@ replacing title
 Firefly --&gt; ---&gt; My Favorite Data &lt;---
 replacing plotNmax
 {} --&gt; {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None}
-replacing showVel
-{} --&gt; {&#39;PGroup_0&#39;: False, &#39;PGroup_1&#39;: False}
-replacing velType
-{} --&gt; {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None}
 replacing color
-{} --&gt; {&#39;PGroup_0&#39;: [0.0953223144, 0.24132833010000002, 0.13068871810000002, 1.0], &#39;PGroup_1&#39;: [0.9250688992, 0.38517182310000003, 0.5739038666, 1.0]}
+{} --&gt; {&#39;PGroup_0&#39;: [0.8810014255, 0.7365524281, 0.7732464137, 1.0], &#39;PGroup_1&#39;: [0.3657149758, 0.5097966367, 0.0247450409, 1.0]}
 replacing sizeMult
-{} --&gt; {&#39;PGroup_0&#39;: 1.0, &#39;PGroup_1&#39;: 1.0}
+{} --&gt; {&#39;PGroup_0&#39;: 0.1, &#39;PGroup_1&#39;: 0.1}
 replacing showParts
 {} --&gt; {&#39;PGroup_0&#39;: True, &#39;PGroup_1&#39;: True}
+replacing radiusVariable
+{} --&gt; {&#39;PGroup_0&#39;: 0, &#39;PGroup_1&#39;: 0}
 replacing UIparticle
 {} --&gt; {&#39;PGroup_0&#39;: True, &#39;PGroup_1&#39;: True}
 replacing UIdropdown
 {} --&gt; {&#39;PGroup_0&#39;: True, &#39;PGroup_1&#39;: True}
 replacing UIcolorPicker
 {} --&gt; {&#39;PGroup_0&#39;: True, &#39;PGroup_1&#39;: True}
+replacing showVel
+{} --&gt; {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None}
+replacing velType
+{} --&gt; {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None}
+replacing velVectorWidth
+{} --&gt; {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None}
+replacing velGradient
+{} --&gt; {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None}
+replacing animateVel
+{} --&gt; {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None}
+replacing animateVelDt
+{} --&gt; {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None}
+replacing animateVelTmax
+{} --&gt; {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None}
 replacing filterLims
 {} --&gt; {&#39;PGroup_0&#39;: {}, &#39;PGroup_1&#39;: {&#39;field0&#39;: None, &#39;field1&#39;: None}}
 replacing filterVals
 {} --&gt; {&#39;PGroup_0&#39;: {}, &#39;PGroup_1&#39;: {&#39;field0&#39;: None, &#39;field1&#39;: None}}
+replacing invertFilter
+{} --&gt; {&#39;PGroup_0&#39;: {}, &#39;PGroup_1&#39;: {}}
 replacing colormapLims
 {} --&gt; {&#39;PGroup_0&#39;: {}, &#39;PGroup_1&#39;: {&#39;field0&#39;: None, &#39;field1&#39;: None}}
 replacing colormapVals
@@ -756,9 +810,9 @@ replacing colormapVals
 replacing colormap
 {} --&gt; {&#39;PGroup_0&#39;: 0.015625, &#39;PGroup_1&#39;: 0.015625}
 replacing colormapVariable
-{} --&gt; {&#39;PGroup_0&#39;: 0, &#39;PGroup_1&#39;: 0}
+{} --&gt; {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None}
 replacing showColormap
-{} --&gt; {&#39;PGroup_0&#39;: False, &#39;PGroup_1&#39;: False}
+{} --&gt; {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None}
 </pre></div></div>
 </div>
 </section>
@@ -798,27 +852,36 @@ replacing showColormap
 
 --  Settings: particle startup settings --
 plotNmax {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None, &#39;test&#39;: None}
-showVel {&#39;PGroup_0&#39;: False, &#39;PGroup_1&#39;: False, &#39;test&#39;: False}
-velType {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None, &#39;test&#39;: None}
-color {&#39;PGroup_0&#39;: [0.0953223144, 0.24132833010000002, 0.13068871810000002, 1.0], &#39;PGroup_1&#39;: [0.9250688992, 0.38517182310000003, 0.5739038666, 1.0], &#39;test&#39;: [0, 0, 1, 1]}
-sizeMult {&#39;PGroup_0&#39;: 1.0, &#39;PGroup_1&#39;: 1.0, &#39;test&#39;: 1.0}
+color {&#39;PGroup_0&#39;: [0.8810014255, 0.7365524281, 0.7732464137, 1.0], &#39;PGroup_1&#39;: [0.3657149758, 0.5097966367, 0.0247450409, 1.0], &#39;test&#39;: [0, 0, 1, 1]}
+sizeMult {&#39;PGroup_0&#39;: 0.1, &#39;PGroup_1&#39;: 0.1, &#39;test&#39;: 0.1}
 showParts {&#39;PGroup_0&#39;: True, &#39;PGroup_1&#39;: True, &#39;test&#39;: True}
+radiusVariable {&#39;PGroup_0&#39;: 0, &#39;PGroup_1&#39;: 0, &#39;test&#39;: 0}
 
 --  Settings: particle UI settings --
 UIparticle {&#39;PGroup_0&#39;: True, &#39;PGroup_1&#39;: True, &#39;test&#39;: True}
 UIdropdown {&#39;PGroup_0&#39;: True, &#39;PGroup_1&#39;: True, &#39;test&#39;: True}
 UIcolorPicker {&#39;PGroup_0&#39;: True, &#39;PGroup_1&#39;: True, &#39;test&#39;: True}
 
+--  Settings: particle velocity settings --
+showVel {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None, &#39;test&#39;: None}
+velType {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None, &#39;test&#39;: None}
+velVectorWidth {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None, &#39;test&#39;: None}
+velGradient {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None, &#39;test&#39;: None}
+animateVel {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None, &#39;test&#39;: None}
+animateVelDt {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None, &#39;test&#39;: None}
+animateVelTmax {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None, &#39;test&#39;: None}
+
 --  Settings: particle filter settings --
 filterLims {&#39;PGroup_0&#39;: {}, &#39;PGroup_1&#39;: {&#39;field0&#39;: None, &#39;field1&#39;: None}, &#39;test&#39;: {}}
 filterVals {&#39;PGroup_0&#39;: {}, &#39;PGroup_1&#39;: {&#39;field0&#39;: None, &#39;field1&#39;: None}, &#39;test&#39;: {}}
+invertFilter {&#39;PGroup_0&#39;: {}, &#39;PGroup_1&#39;: {}, &#39;test&#39;: {}}
 
 --  Settings: particle colormap settings --
 colormapLims {&#39;PGroup_0&#39;: {}, &#39;PGroup_1&#39;: {&#39;field0&#39;: None, &#39;field1&#39;: None}, &#39;test&#39;: {}}
 colormapVals {&#39;PGroup_0&#39;: {}, &#39;PGroup_1&#39;: {&#39;field0&#39;: None, &#39;field1&#39;: None}, &#39;test&#39;: {}}
 colormap {&#39;PGroup_0&#39;: 0.015625, &#39;PGroup_1&#39;: 0.015625, &#39;test&#39;: 0.015625}
-colormapVariable {&#39;PGroup_0&#39;: 0, &#39;PGroup_1&#39;: 0, &#39;test&#39;: 0}
-showColormap {&#39;PGroup_0&#39;: False, &#39;PGroup_1&#39;: False, &#39;test&#39;: False}
+colormapVariable {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None, &#39;test&#39;: None}
+showColormap {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None, &#39;test&#39;: None}
 
 </pre></div></div>
 </div>

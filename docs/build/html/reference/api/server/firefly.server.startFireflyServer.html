@@ -48,7 +48,6 @@
 <li class="toctree-l2 current"><a class="reference internal" href="../api.html#server-utitities">Server Utitities</a><ul class="current">
 <li class="toctree-l3 current"><a class="current reference internal" href="#">firefly.server.startFireflyServer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="firefly.server.spawnFireflyServer.html">firefly.server.spawnFireflyServer</a></li>
-<li class="toctree-l3"><a class="reference internal" href="firefly.server.killAllFireflyServers.html">firefly.server.killAllFireflyServers</a></li>
 </ul>
 </li>
 </ul>
@@ -108,7 +107,7 @@
 <h1>firefly.server.startFireflyServer<a class="headerlink" href="#firefly-server-startfireflyserver" title="Permalink to this headline">¶</a></h1>
 <dl class="py function">
 <dt id="firefly.server.startFireflyServer">
-<code class="sig-prename descclassname"><span class="pre">firefly.server.</span></code><code class="sig-name descname"><span class="pre">startFireflyServer</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frames_per_second</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimation_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/firefly/server.html#startFireflyServer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#firefly.server.startFireflyServer" title="Permalink to this definition">¶</a></dt>
+<code class="sig-prename descclassname"><span class="pre">firefly.server.</span></code><code class="sig-name descname"><span class="pre">startFireflyServer</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frames_per_second</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimation_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/firefly/server.html#startFireflyServer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#firefly.server.startFireflyServer" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="simple">
 <dt>Creates a global interpreter locked process to host a mock web-server</dt><dd><p>that can be accessed via localhost:&lt;port&gt;.</p>
 </dd>
@@ -116,7 +115,7 @@
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>port</strong> (<em>int</em><em>, </em><em>optional</em>) – port number to serve the <code class="code docutils literal notranslate"><span class="pre">.html</span></code> files on, defaults to 5000</p></li>
+<li><p><strong>port</strong> (<em>int</em><em>, </em><em>optional</em>) – port number to serve the <code class="code docutils literal notranslate"><span class="pre">.html</span></code> files on, defaults to 5500</p></li>
 <li><p><strong>frames_per_second</strong> (<em>int</em><em>, </em><em>optional</em>) – enforced FPS for stream quality, used only if
 localhost:&lt;port&gt;/stream is accessed, defaults to 30</p></li>
 <li><p><strong>decimation_factor</strong> (<em>int</em><em>, </em><em>optional</em>) – factor to decimate data that is being passed through

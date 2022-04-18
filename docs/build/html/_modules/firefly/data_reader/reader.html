@@ -541,7 +541,7 @@
         <span class="c1">## retrieve a single &quot;big JSON&quot; of all the mini-JSON </span>
         <span class="c1">##  sub-files. </span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;JSON&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">JSON</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">dumpToJSON</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">writeToDisk</span><span class="p">(</span>
                 <span class="n">loud</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                 <span class="n">write_to_disk</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                 <span class="n">extension</span><span class="o">=</span><span class="s1">&#39;json&#39;</span><span class="p">)</span>

@@ -390,9 +390,10 @@ div.rendered_html tbody tr:hover {
     src="https://www.youtube.com/embed/TMq3IvnxGY8"
     frameborder="0"
     allowfullscreen
+
 ></iframe></div>
 </div>
-<div class="nbinput nblast docutils container">
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
@@ -400,10 +401,19 @@ div.rendered_html tbody tr:hover {
 <span class="kn">import</span> <span class="nn">os</span>
 
 <span class="kn">import</span> <span class="nn">sys</span>
+<span class="c1">## ignore this line, you do not need to add this if Firefly is pip installed into your PYTHONPATH</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;/Users/agurvich/research/repos/firefly/src&#39;</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">firefly.data_reader</span> <span class="kn">import</span> <span class="n">ArrayReader</span>
 </pre></div>
 </div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+don&#39;t have phil&#39;s colormaps
+</pre></div></div>
 </div>
 <section id="Tutorial-notebook:-Managing-multiple-datasets-with-Firefly">
 <h1>Tutorial notebook: Managing multiple datasets with Firefly<a class="headerlink" href="#Tutorial-notebook:-Managing-multiple-datasets-with-Firefly" title="Permalink to this headline">¶</a></h1>
@@ -461,20 +471,23 @@ datasets to the <code class="docutils literal notranslate"><span class="pre">sta
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 JSONdir is None, defaulting to /Users/agurvich/research/repos/firefly/src/firefly/static/data/Data
-Make sure each tracked_array (2) has a tracked_filter_flag (0), assuming True.
-Make sure each tracked_array (2) has a tracked_colormap_flag (0), assuming True.
+Make sure each field_array (2) has a field_filter_flag (0), assuming True.
+Make sure each field_array (2) has a field_colormap_flag (0), assuming True.
+Make sure each field_array (2) has a field_radius_flag (0), assuming False.
 Outputting: PGroup_0 - 7999/7999 particles - 0 tracked fields
 Outputting: PGroup_1 - 8000/8000 particles - 2 tracked fields
 JSONdir: /Users/agurvich/FakeData -- is not a sub-directory of firefly/static/data.
 This may produce confusing or inoperable results. As such, we will create a symlink for you when you  dumpToJSON.
-Make sure each tracked_array (2) has a tracked_filter_flag (0), assuming True.
-Make sure each tracked_array (2) has a tracked_colormap_flag (0), assuming True.
+Make sure each field_array (2) has a field_filter_flag (0), assuming True.
+Make sure each field_array (2) has a field_colormap_flag (0), assuming True.
+Make sure each field_array (2) has a field_radius_flag (0), assuming False.
 Outputting: PGroup_0 - 7999/7999 particles - 0 tracked fields
 Outputting: PGroup_1 - 8000/8000 particles - 2 tracked fields
 JSONdir: /Users/agurvich/NullData -- is not a sub-directory of firefly/static/data.
 This may produce confusing or inoperable results. As such, we will create a symlink for you when you  dumpToJSON.
-Make sure each tracked_array (2) has a tracked_filter_flag (0), assuming True.
-Make sure each tracked_array (2) has a tracked_colormap_flag (0), assuming True.
+Make sure each field_array (2) has a field_filter_flag (0), assuming True.
+Make sure each field_array (2) has a field_colormap_flag (0), assuming True.
+Make sure each field_array (2) has a field_radius_flag (0), assuming False.
 Outputting: PGroup_0 - 7999/7999 particles - 0 tracked fields
 Outputting: PGroup_1 - 8000/8000 particles - 2 tracked fields
 </pre></div></div>
@@ -484,8 +497,18 @@ Outputting: PGroup_1 - 8000/8000 particles - 2 tracked fields
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/Users/agurvich/miniconda3/envs/firefly/lib/python3.9/site-packages/numpy/core/_asarray.py:102: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify &#39;dtype=object&#39; when creating the ndarray.
-  return array(a, dtype, copy=False, order=order)
+/opt/homebrew/Caskroom/miniconda/base/envs/python38/lib/python3.9/site-packages/numpy/core/fromnumeric.py:1970: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify &#39;dtype=object&#39; when creating the ndarray.
+  result = asarray(a).shape
+/opt/homebrew/Caskroom/miniconda/base/envs/python38/lib/python3.9/site-packages/numpy/core/fromnumeric.py:43: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify &#39;dtype=object&#39; when creating the ndarray.
+  result = getattr(asarray(obj), method)(*args, **kwds)
+/opt/homebrew/Caskroom/miniconda/base/envs/python38/lib/python3.9/site-packages/numpy/core/fromnumeric.py:1970: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify &#39;dtype=object&#39; when creating the ndarray.
+  result = asarray(a).shape
+/opt/homebrew/Caskroom/miniconda/base/envs/python38/lib/python3.9/site-packages/numpy/core/fromnumeric.py:43: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify &#39;dtype=object&#39; when creating the ndarray.
+  result = getattr(asarray(obj), method)(*args, **kwds)
+/opt/homebrew/Caskroom/miniconda/base/envs/python38/lib/python3.9/site-packages/numpy/core/fromnumeric.py:1970: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify &#39;dtype=object&#39; when creating the ndarray.
+  result = asarray(a).shape
+/opt/homebrew/Caskroom/miniconda/base/envs/python38/lib/python3.9/site-packages/numpy/core/fromnumeric.py:43: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify &#39;dtype=object&#39; when creating the ndarray.
+  result = getattr(asarray(obj), method)(*args, **kwds)
 </pre></div></div>
 </div>
 <p>Let’s read the content of the <code class="docutils literal notranslate"><span class="pre">startup.json</span></code> file:</p>
