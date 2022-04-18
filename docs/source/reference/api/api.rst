@@ -3,12 +3,6 @@
 API Reference
 =============
 
-.. _field names:
-
-.. warning:: 
-
-    This feature is :ref:`experimental <experimental features>`.
-
 .. _frontend api:
 
 Base classes
