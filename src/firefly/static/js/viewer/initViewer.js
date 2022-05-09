@@ -1124,13 +1124,20 @@ function sendInitGUI(prepend=[], append=[]){
 	forGUI.push({'setGUIParamByKey':[viewerParams.CDckey,"CDckey"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.CDlognorm,"CDlognorm"]});
 
+	//check if there is a tween file
+	viewerParams.haveTween = false;
+	if (viewerParams.filenames.hasOwnProperty('tweenParams') &&  ('tweenParams' in viewerParams.parts && viewerParams.parts.tweenParams.loaded)) viewerParams.haveTween = true;
+	forGUI.push({'setGUIParamByKey':[viewerParams.haveTween,"haveTween"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.inTween,"inTween"]});
 
+
+	// add any extra commands
 	append.forEach(function(x,i){
 		forGUI.push(x);
 	})
 
 	forGUI.push({'setGUIParamByKey':[true,"GUIready"]});
+
 
 	sendToGUI(forGUI);
 

@@ -156,6 +156,7 @@ function defineViewerParams(){
 		//tweening
 		this.inTween = false;
 		this.updateTween = false;
+		this.haveTween = false;
 		this.tweenFile = null;
 		this.tweenParams = {};
 		this.tweenPos = [];
