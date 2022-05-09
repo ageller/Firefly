@@ -27,6 +27,7 @@ function makeUI(local=false){
 	}, 1000);
 
 	// check that the width stabilizes before revealing the UI
+	// might be better to have a check that various DOM elements exit (rather than waiting for the width to stabilize)
 	UIcontainer = d3.select('#UIContainer')
 	var bbox = UIcontainer.node().getBoundingClientRect();
 	prev_count = bbox.width;//countNodes(UIcontainer.node());
@@ -36,10 +37,7 @@ function makeUI(local=false){
 		//console.log('UI width:',prev_count,next_count)
 		if (prev_count == next_count && next_count > 10){
 			clearInterval(GUIParams.waitForBuild);
-			// collapse the UI initially, but wait a bit to make sure the full UI has been created
-			hideUI.call(document.getElementById('Hamburger'));
-			// and now reveal the result
-			UIcontainer.classed('hidden', false)
+			finalizeGUIInitialization();
 		}
 		prev_count = next_count;
 	},100);
@@ -56,10 +54,28 @@ function confirmGUIInit(){
 		}
 		return true;
 	});
+
 	return ready
 }
 
-function clearGUIinterval(){ clearInterval(GUIParams.waitForInit); }
+function clearGUIinterval(){
+	clearInterval(GUIParams.waitForInit);
+	clearInterval(GUIParams.waitForBuild);
+}
+
+// if there are initialization steps that are needed after the GUI is created, then go here
+function finalizeGUIInitialization(){
+
+	// collapse the UI initially, but wait a bit to make sure the full UI has been created
+	hideUI.call(document.getElementById('Hamburger'));
+	// and now reveal the result
+	UIcontainer.classed('hidden', false)
+
+	//check for an initial colormap and make adjustments if needed
+	GUIParams.partsKeys.forEach(function(p){
+		if (GUIParams.showColormap[p]) initialColormap(p);
+	})
+}
 
 // show the button on the splash screen
 function showLoadingButton(id){

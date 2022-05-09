@@ -286,3 +286,42 @@ function populateColormapAxis(particle_group_UIname){
 }
 
 
+function initialColormap(p){
+	// if colormap should be enabled at startup : 
+	//   pre-checking the box
+	//   setting the initial colormap
+	//   extending the colormap SVG container
+	//   changing the blending mode and depth for that particle
+
+	console.log('initial colormap for ',p)
+	var forViewer = [];
+
+	//check the box
+	var elm = document.getElementById(p+'colorCheckBox');
+	elm.checked = true;
+	elm.value = true;
+
+	//set the initial colormap
+	var idx = parseInt(Math.round(GUIParams.colormap[p]*256/8 - 0.5));
+	document.getElementById(p+'_SelectCMap').value = idx.toString();
+	document.getElementById(p+'_SelectCMapVar').value = GUIParams.colormapVariable[p].toString();
+
+	//create and extend the colormap SVG
+	createColormapSVG(p);
+	d3.select('#colormap_outer_container').style('visibility','visible');
+
+	//set the blending mode
+	GUIParams.blendingMode[p] = 'normal';
+	forViewer.push({'setViewerParamByKey':[GUIParams.blendingMode[p], "blendingMode", p]});
+	elm = document.getElementById(p+'_selectBlendingMode');
+	elm.value = GUIParams.blendingMode[p];
+	forViewer.push({'setBlendingMode':[GUIParams.blendingMode[p], p]});
+
+	//set the depth mode to True
+	elm = document.getElementById(p+'_depthCheckBox');
+	elm.checked = true;
+	elm.value = true;
+	forViewer.push({'setDepthMode':[p, true]})
+
+	sendToViewer(forViewer);
+}

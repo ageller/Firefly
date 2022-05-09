@@ -1075,7 +1075,7 @@ function createCameraControlBox(UI){
 			.style('font-size','10pt')
 			.text('Tween');
 	}
-	
+
 	//rotation text boxes
 	c3 = c2.append('div')
 		.attr('class','pLabelDiv')
@@ -1457,7 +1457,7 @@ function selectVelType() {
 }
 
 function selectBlendingMode() {
-	//type of symbol to draw velocity vectors (from input box)
+	//set the blending mode from the options selector
 	var option = d3.select(this)
 		.selectAll("option")
 		.filter(function (d, i) { 

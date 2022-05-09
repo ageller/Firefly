@@ -648,7 +648,7 @@ function createParticleColormapWindow(container, p){
 		.attr('autocomplete','off')
 		.on('change',function(){
 			if (GUIParams.showParts[p]) checkColormapBox(p, this.checked);
-			else this.checked=GUIParams.showColormap[p];
+			else this.checked = GUIParams.showColormap[p];
 		})
 
 	ColorDiv.append('label')
@@ -713,23 +713,11 @@ function createParticleColormapWindow(container, p){
 	});
 
 
-	// handle if colormap should be enabled at startup by pre-checking
-	//  the box
-	if (GUIParams.showColormap[p]){
-		elm = document.getElementById(p+'colorCheckBox');
-		elm.checked = true;
-		elm.value = true;
-		var idx = parseInt(Math.round(GUIParams.colormap[p]*256/8 - 0.5));
-		document.getElementById(p+'_SelectCMap').value = idx.toString();
-		document.getElementById(p+'_SelectCMapVar').value = GUIParams.colormapVariable[p].toString();
-		createColormapSVG(p);
-
-	} 
-
 	showHideColormapFilter(p, GUIParams.colormapVariable[p]);
 
 	createColormapSliders(p);
 }
+
 
 function createParticleFilterWindow(container, p){
 	/////////////////////////

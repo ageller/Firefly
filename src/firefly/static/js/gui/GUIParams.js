@@ -25,6 +25,9 @@ function defineGUIParams(){
 		this.waitForInit = null;
 		this.GUIready = true;
 
+		//will hold the GUI width as a check if it's done building
+		this.currentGUIwidth = 0;
+
 		this.cameraNeedsUpdate = false; 
 
 		//for show/hide UI
