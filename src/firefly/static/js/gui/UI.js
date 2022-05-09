@@ -842,9 +842,10 @@ function createDataControlsBox(UI){
 		.style('width','50px')
 		.style('margin-top','5px')
 		.style('margin-right','5px')
-		.on('keypress',function(){
+		.on('keyup',function(){
 			var key = event.keyCode || event.which;
-			if (key == 13) sendToViewer([{'checkText':[this.id, this.value]}]);
+			//if (key == 13) sendToViewer([{'checkText':[this.id, this.value]}]);
+			sendToViewer([{'checkText':[this.id, this.value]}]);
 		})
 	snap.append('input')
 		.attr('id','RenderYText')
@@ -854,9 +855,10 @@ function createDataControlsBox(UI){
 		.attr('class','pTextInput')
 		.style('width','50px')
 		.style('margin-top','5px')
-		.on('keypress',function(){
+		.on('keyup',function(){
 			var key = event.keyCode || event.which;
-			if (key == 13) sendToViewer([{'checkText':[this.id, this.value]}]);
+			//if (key == 13) sendToViewer([{'checkText':[this.id, this.value]}]);
+			sendToViewer([{'checkText':[this.id, this.value]}]);
 		})
 
 	//save preset button

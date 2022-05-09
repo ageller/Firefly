@@ -352,7 +352,7 @@ function checkText(args){
 
 	if (!p){
 		viewerParams.camera.position.set(cameraPosition.x, cameraPosition.y, cameraPosition.z);
-		console.log('===here camera', cameraRotation);
+		//console.log('===here camera', cameraRotation);
 		viewerParams.camera.rotation.set(cameraRotation.x, cameraRotation.y, cameraRotation.z);
 		viewerParams.controls.target = new THREE.Vector3(viewerParams.center.x, viewerParams.center.y, viewerParams.center.z);
 	}
