@@ -496,8 +496,6 @@ function createDataWindow(container){
 
 
 	// create data controls pane containing:
-	//  fullscreen button
-	//  take snapshot button
 	//  save settings button
 	//  default settings button
 	//  load settings button
@@ -521,6 +519,8 @@ function createCameraWindow(container){
 
 
 	// create camera controls pane containing:
+	//  fullscreen button
+	//  take snapshot button
 	//  camera center (camera focus) text boxes
 	//  camera location text boxes
 	//  camera rotation text boxes
@@ -537,8 +537,8 @@ function createColumnDensityWindow(container){
 		.attr('class','UImover')
 		.style('position','absolute')
 		.style('top','0px')
-		.style('height','135px')
-		.attr('trueHeight','135px')
+		.style('height','34px')
+		.attr('trueHeight','34px')
 		.style('width', GUIParams.containerWidth + 'px')
 		.style('transform','translateX(' + GUIParams.containerWidth + 'px)')
 
@@ -735,7 +735,7 @@ function createDataControlsBox(UI){
 		.style('margin','0px')
 		.style('width',GUIParams.containerWidth + 'px')
 		.style('border-radius',0)
-	var m2height = 224;
+	var m2height = 145;
 
 	//decimation
 	var dec = m2.append('div')
@@ -806,60 +806,6 @@ function createDataControlsBox(UI){
 			.style('width','40px');
 	}
 
-	//fullscreen button
-	m2.append('div').attr('id','fullScreenDiv')
-		.append('button')
-		.attr('id','fullScreenButton')
-		.attr('class','button')
-		.style('width',(GUIParams.containerWidth - 10) + 'px')
-		.attr('onclick','fullscreen();')
-		.append('span')
-			.text('Fullscreen');
-
-	//snapshots
-	var snap = m2.append('div')
-		.attr('id','snapshotDiv')
-		.attr('class', 'button-div')
-		.style('width',(GUIParams.containerWidth - 10) + 'px')
-	snap.append('button')
-		.attr('class','button')
-		.style('width','140px')
-		.style('padding','5px')
-		.style('margin',0)
-		.style('opacity',1)
-		.on('click',function(){
-			sendToViewer([{'renderImage':null}]);
-		})
-		.append('span')
-			.text('Take Snapshot');
-
-	snap.append('input')
-		.attr('id','RenderXText')
-		.attr('type', 'text')
-		.attr('value',GUIParams.renderWidth)
-		.attr('autocomplete','off')
-		.attr('class','pTextInput')
-		.style('width','50px')
-		.style('margin-top','5px')
-		.style('margin-right','5px')
-		.on('keyup',function(){
-			var key = event.keyCode || event.which;
-			//if (key == 13) sendToViewer([{'checkText':[this.id, this.value]}]);
-			sendToViewer([{'checkText':[this.id, this.value]}]);
-		})
-	snap.append('input')
-		.attr('id','RenderYText')
-		.attr('type', 'text')
-		.attr('value',GUIParams.renderHeight)
-		.attr('autocomplete','off')
-		.attr('class','pTextInput')
-		.style('width','50px')
-		.style('margin-top','5px')
-		.on('keyup',function(){
-			var key = event.keyCode || event.which;
-			//if (key == 13) sendToViewer([{'checkText':[this.id, this.value]}]);
-			sendToViewer([{'checkText':[this.id, this.value]}]);
-		})
 
 	//save preset button
 	m2.append('div').attr('id','savePresetDiv')
@@ -931,7 +877,7 @@ function createCameraControlBox(UI){
 	//camera controls
 
 
-	var c2height = 190;
+	var c2height = 260;
 	var c2 = UI.append('div')
 		.attr('class','dropdown-content')
 		.attr('id','cameraControls')
@@ -939,6 +885,8 @@ function createCameraControlBox(UI){
 		.style('padding','0px 0px 0px 5px')
 		.style('width',GUIParams.containerWidth + 'px')
 		.style('border-radius',0)
+
+
 
 	//center text boxes
 	var c3 = c2.append('div')
@@ -1158,6 +1106,64 @@ function createCameraControlBox(UI){
 		.append('span')
 			.text('Recenter');
 
+	//fullscreen button
+	c2.append('div')
+		.attr('id','fullScreenDiv')
+		.style('margin-left','-5px')
+		.append('button')
+			.attr('id','fullScreenButton')
+			.attr('class','button')
+			.style('width',(GUIParams.containerWidth - 10) + 'px')
+			.attr('onclick','fullscreen();')
+			.append('span')
+				.text('Fullscreen');
+
+	//snapshots
+	var snap = c2.append('div')
+		.attr('id','snapshotDiv')
+		.attr('class', 'button-div')
+		.style('width',(GUIParams.containerWidth - 10) + 'px')
+		.style('margin-left','0px')
+	snap.append('button')
+		.attr('class','button')
+		.style('width','140px')
+		.style('padding','5px')
+		.style('margin',0)
+		.style('opacity',1)
+		.on('click',function(){
+			sendToViewer([{'renderImage':null}]);
+		})
+		.append('span')
+			.text('Take Snapshot');
+
+	snap.append('input')
+		.attr('id','RenderXText')
+		.attr('type', 'text')
+		.attr('value',GUIParams.renderWidth)
+		.attr('autocomplete','off')
+		.attr('class','pTextInput')
+		.style('width','50px')
+		.style('margin-top','5px')
+		.style('margin-right','5px')
+		.on('keyup',function(){
+			var key = event.keyCode || event.which;
+			//if (key == 13) sendToViewer([{'checkText':[this.id, this.value]}]);
+			sendToViewer([{'checkText':[this.id, this.value]}]);
+		})
+	snap.append('input')
+		.attr('id','RenderYText')
+		.attr('type', 'text')
+		.attr('value',GUIParams.renderHeight)
+		.attr('autocomplete','off')
+		.attr('class','pTextInput')
+		.style('width','50px')
+		.style('margin-top','5px')
+		.on('keyup',function(){
+			var key = event.keyCode || event.which;
+			//if (key == 13) sendToViewer([{'checkText':[this.id, this.value]}]);
+			sendToViewer([{'checkText':[this.id, this.value]}]);
+		})
+
 	//camera friction
 	c3 = c2.append('div')
 		.attr('class','pLabelDiv')
@@ -1245,6 +1251,10 @@ function createCameraControlBox(UI){
 }
 
 function createColumnDensityBox(UI){
+
+	UI.style('height', '135px')
+		.attr('trueHeight', '135px')
+
 	var columnDensityDiv = UI.append('div')
 		.attr('class','dropdown-content')
 		.attr('id','projectionControls')
