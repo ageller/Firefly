@@ -537,18 +537,16 @@ function createColumnDensityWindow(container){
 		.attr('class','UImover')
 		.style('position','absolute')
 		.style('top','0px')
-		.style('height','60px')
-		.attr('trueHeight','60px')
+		.style('height','135px')
+		.attr('trueHeight','135px')
 		.style('width', GUIParams.containerWidth + 'px')
 		.style('transform','translateX(' + GUIParams.containerWidth + 'px)')
 
-	// create camera controls pane containing:
-	//  camera center (camera focus) text boxes
-	//  camera location text boxes
-	//  camera rotation text boxes
-	//  save, reset, and recenter buttons
-	//  friction and stereo separation sliders
-	//  stereo checkbox
+	// create column desnity pane containing:
+	//  on/off checkbox
+	//  log10 checkbox
+	//  colormap selector
+	//  slider to adjust limits
 	createColumnDensityBox(UI);
 }
 
@@ -1243,7 +1241,6 @@ function createCameraControlBox(UI){
 }
 
 function createColumnDensityBox(UI){
-	var pheight = 60;
 	var columnDensityDiv = UI.append('div')
 		.attr('class','dropdown-content')
 		.attr('id','projectionControls')
@@ -1251,7 +1248,6 @@ function createColumnDensityBox(UI){
 		.style('padding','0px 0px 0px 5px')
 		.style('width',GUIParams.containerWidth + 'px')
 		.style('border-radius',0)
-		.attr('trueHeight',pheight)
 	
 	// add checkbox to enable colormap
 	columnDensityDiv.append('input')
@@ -1268,19 +1264,16 @@ function createColumnDensityBox(UI){
 
 	columnDensityDiv.append('label')
 		.attr('for','columnDensityCheckBox')
-		.text('Projection')
+		.text('Enable column density projection')
 		.style('margin-left','10px')
 	
-	// dropdown to select colormap
-	var selectCMap = columnDensityDiv.append('select')
-		.attr('class','selectCMap')
-		.attr('id',GUIParams.CDkey+'_SelectCMap')
-		.style('margin-left','10px')
-		.style('margin-top','5px')
-		.on('change', selectColormap)
+
 
 	// add checkbox to toggle log10
-	columnDensityDiv.append('input')
+	var logContainer = columnDensityDiv.append('div')
+		.attr('id','columnDensityLog10Container');
+
+	logContainer.append('input')
 		.attr('id','columnDensityLog10CheckBox')
 		.attr('value',false)
 		.attr('type','checkbox')
@@ -1292,12 +1285,29 @@ function createColumnDensityBox(UI){
 			if (GUIParams.showParts[GUIParams.CDkey] && 
 				GUIParams.showColormap[GUIParams.CDkey]) populateColormapAxis(GUIParams.CDkey);
 		})
-		.style('margin','8px 0px 0px 100px')
+		.style('margin','8px 0px 0px 0px')
 
-	columnDensityDiv.append('label')
+	logContainer.append('label')
 		.attr('for','columnDensityLog10CheckBox')
 		.text('Take Log10')
 		.style('margin-left','10px')
+
+
+
+	// dropdown to select colormap
+	var cmapContainer = columnDensityDiv.append('div')
+		.attr('id','columnDensityCmapContainer')
+		.style('margin-top','5px');
+
+	cmapContainer.append('label')
+		.attr('for', GUIParams.CDkey+'_SelectCMap')
+		.text('Select colormap :')
+
+	var selectCMap = cmapContainer.append('select')
+		.attr('class','selectCMap')
+		.attr('id',GUIParams.CDkey+'_SelectCMap')
+		.style('margin-left','10px')
+		.on('change', selectColormap)
 
 	var options = selectCMap.selectAll('option')
 		.data(GUIParams.colormapList).enter()
@@ -1306,6 +1316,10 @@ function createColumnDensityBox(UI){
 			.text(function (d) { return d; });
 
 	// create colorbar limits slider
+	columnDensityDiv.append('div')
+		.style('margin-top','10px')
+		.text('Adjust limits below');
+
 	colormapsliders = columnDensityDiv.append('div')
 		.attr('id',GUIParams.CDkey+'_CK_'+GUIParams.ckeys[GUIParams.CDkey][0]+'_END_CMap')
 		.attr('class','CMapClass')
