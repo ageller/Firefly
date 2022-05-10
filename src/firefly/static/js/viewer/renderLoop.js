@@ -20,6 +20,18 @@ function animate(time) {
 		// get the memory usage
 		update_memory_usage();
 
+		if (viewerParams.initialize_time){
+			console.log(seconds-viewerParams.initialize_time + ' seconds to initialize');
+			console.log(viewerParams.memoryUsage/1e9 + ' GB allocated');
+			var numtot = 0;
+			viewerParams.partsKeys.forEach(function (pkey){
+				numtot = numtot + viewerParams.parts.count[pkey];
+				});
+			console.log(numtot + ',' + (seconds-viewerParams.initialize_time) + ',' + viewerParams.memoryUsage/1e9 );
+
+			viewerParams.initialize_time = null;
+		}
+
 		// velocity animation
 		//console.log('before', viewerParams.animateVelTime, viewerParams.animateVelDt, viewerParams.animateVelTmax)
 		viewerParams.animateVelTime = (viewerParams.animateVelTime + viewerParams.animateVelDt) % viewerParams.animateVelTmax;	

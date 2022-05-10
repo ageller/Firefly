@@ -3,6 +3,11 @@ var viewerParams;
 
 function defineViewerParams(){
 	viewerParams = new function() {
+
+		var currentTime = new Date();
+		// in seconds
+		this.initialize_time = currentTime.getTime()/1000;
+
 		this.container = null;
 		this.scene = null;
 		this.camera = null;
