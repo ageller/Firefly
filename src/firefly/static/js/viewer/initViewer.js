@@ -1481,6 +1481,11 @@ function setCenter(coords_flat){
 	viewerParams.center = new THREE.Vector3(sum[0], sum[1], sum[2]);
 	if (coords_flat.length > 0) viewerParams.center.divideScalar(coords_flat.length/3); 
 
+	// avoid having the camera center too close to 0,0,0.  If the target is also 0,0,0, then it is hard to zoom out initially.
+	var lim = 1e-5
+	if (Math.abs(viewerParams.center.x) < lim & Math.abs(viewerParams.center.y) < lim  & Math.abs(viewerParams.center.z) < lim){
+		viewerParams.center.z = 10;
+	}
 	setBoxSize(coords_flat);
 
 }
