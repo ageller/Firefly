@@ -90,9 +90,7 @@ function createUI(){
 	UIr1.append('div').attr('class','bar1');
 	UIr1.append('div').attr('class','bar2');
 	UIr1.append('div').attr('class','bar3');
-	// don't know how to start it expanded so we can hide it later
-	//  so will just toggle the bars to an x
-	UIr1.node().classList.toggle("change");
+
 
 	// append the Firefly logo (instead of the bars?)
 	/*
@@ -1621,7 +1619,7 @@ function hideUI(){
 
 		var elem = d3.select('#UIcontainer');
 		var bbox = elem.node().getBoundingClientRect();
-		//console.log('checking', bbox)
+		console.log('checking', GUIParams.UIhidden, this.classList, bbox)
 		if (GUIParams.UIhidden){
 			elem.style('clip-path','inset(3px ' + (bbox.width - 35) + 'px ' + (bbox.height - 35) + 'px 3px round 10px');
 		}else{

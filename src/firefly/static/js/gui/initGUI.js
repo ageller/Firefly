@@ -66,8 +66,14 @@ function clearGUIinterval(){
 // if there are initialization steps that are needed after the GUI is created, then go here
 function finalizeGUIInitialization(){
 
-	// collapse the UI initially, but wait a bit to make sure the full UI has been created
-	hideUI.call(document.getElementById('Hamburger'));
+	// collapse the UI initially
+	setTimeout(function(){
+		var hamb = document.getElementById('Hamburger');
+		hamb.classList.toggle("change");
+		GUIParams.UIhidden = false;
+		hideUI.call(hamb);
+	}, 100);
+
 	// and now reveal the result
 	UIcontainer.classed('hidden', false)
 
@@ -77,6 +83,7 @@ function finalizeGUIInitialization(){
 	})
 
 	addGUIlisteners();
+
 
 	// tell the viewer the UI has been initialized
 	sendToViewer([{'applyUIoptions':null}]);
