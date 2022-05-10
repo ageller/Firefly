@@ -54,7 +54,10 @@ function defineGUIParticleState(){
 		*/
 
 	})
+
+	getGUIIDs();
 }
+
 
 function createParticlesWindow(container){
 
@@ -890,7 +893,7 @@ function expandParticleDropdown(handle) {
 
 	//if the colormap is open be sure to update the overall clip-path
 	var inset = getUIcontainerInset(pID);
-	d3.select('#UIContainer').style('clip-path','inset(-20px ' + inset.inset[1] + 'px ' + inset.inset[2] + 'px 0px)');
+	d3.select('#UIcontainer').style('clip-path','inset(-20px ' + inset.inset[1] + 'px ' + inset.inset[2] + 'px 0px)');
 
 	setTimeout(checkGUIsize, 500);
 }

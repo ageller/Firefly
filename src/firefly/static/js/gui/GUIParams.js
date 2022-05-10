@@ -25,6 +25,7 @@ function defineGUIParams(){
 		this.waitForInit = null;
 		this.GUIready = true;
 		this.GUIbuilt = false;
+		this.GUIWidth = 0; //will hold the width of the GUI as a check if it is completely built
 
 		//will hold the GUI width as a check if it's done building
 		this.currentGUIwidth = 0;
@@ -210,6 +211,9 @@ function defineGUIParams(){
 			},
 	
 		}
+
+		// will hold a list of all the ides from GUIState
+		this.GUIIDs = [];
 
 		//check for mobile
 		//https://stackoverflow.com/questions/3514784/what-is-the-best-way-to-detect-a-mobile-device-in-jquery

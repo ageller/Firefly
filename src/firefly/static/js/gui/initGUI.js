@@ -26,27 +26,36 @@ function makeUI(local=false){
 		}
 	}, 1000);
 
-	// check that the width stabilizes before revealing the UI
-	// might be better to have a check that various DOM elements exit (rather than waiting for the width to stabilize)
-	UIcontainer = d3.select('#UIContainer')
-	var bbox = UIcontainer.node().getBoundingClientRect();
-	prev_count = bbox.width;//countNodes(UIcontainer.node());
+
+	// check that all the expected DOM elements exist in the GUI
 	GUIParams.waitForBuild = setInterval(function(){
-		var bbox = UIcontainer.node().getBoundingClientRect();
-		next_count = bbox.width;//countNodes(UIcontainer.node());
-		//console.log('UI width:',prev_count,next_count)
-		if (prev_count == next_count && next_count > 10){
+		var ready = confirmGUIBuild(GUIParams.GUIIDs);
+		if (ready){
 			clearInterval(GUIParams.waitForBuild);
 			finalizeGUIInitialization();
 		}
-		prev_count = next_count;
-	},100);
+	},1000);
+
+	// // check that the width stabilizes before revealing the UI
+	// // might be better to have a check that various DOM elements exit (rather than waiting for the width to stabilize)
+	// UIcontainer = d3.select('#UIcontainer')
+	// var bbox = UIcontainer.node().getBoundingClientRect();
+	// prev_count = bbox.width;//countNodes(UIcontainer.node());
+	// GUIParams.waitForBuild = setInterval(function(){
+	// 	var bbox = UIcontainer.node().getBoundingClientRect();
+	// 	next_count = bbox.width;//countNodes(UIcontainer.node());
+	// 	//console.log('UI width:',prev_count,next_count)
+	// 	if (prev_count == next_count && next_count > 10){
+	// 		clearInterval(GUIParams.waitForBuild);
+	// 		finalizeGUIInitialization();
+	// 	}
+	// 	prev_count = next_count;
+	// },100);
 }
 
-function confirmGUIInit(){
+function confirmGUIInit(keys = ["partsKeys", "PsizeMult", "plotNmax", "decimate", "stereoSepMax", "friction", "Pcolors", "showParts", "showVel", "velopts", "velType", "ckeys", "colormapVals", "colormapLims", "colormapVariable", "colormap", "showColormap", "fkeys", "filterVals", "filterLims"]){
 	if (!GUIParams.GUIready) return false;
 
-	var keys = ["partsKeys", "PsizeMult", "plotNmax", "decimate", "stereoSepMax", "friction", "Pcolors", "showParts", "showVel", "velopts", "velType", "ckeys", "colormapVals", "colormapLims", "colormapVariable", "colormap", "showColormap", "fkeys", "filterVals", "filterLims"];
 	var ready = keys.every(function(k,i){
 		if (GUIParams[k] == null) {
 			//console.log("GUI missing ", k)
@@ -57,6 +66,31 @@ function confirmGUIInit(){
 
 	return ready
 }
+
+function confirmGUIBuild(ids){
+	//check that all the DOM elements have been created
+	if (!GUIParams.GUIready) return false;
+	if (GUIParams.GUIIDs.length == 0) return false;
+
+	var ready = GUIParams.GUIIDs.every(function(id){
+		var elem = document.getElementById(id);
+		if (!elem) {
+			console.log("GUI build missing ", id)
+			return false;
+		}
+		return true;
+	})
+
+	// also check that the width has stabilized
+	if (ready){
+		var width = document.getElementById('UIcontainer').getBoundingClientRect().width;
+		if (width != GUIParams.GUIWidth) ready = false;
+		GUIParams.GUIWidth = width;
+	}
+
+	return ready;
+}
+
 
 function clearGUIinterval(){
 	clearInterval(GUIParams.waitForInit);
@@ -75,7 +109,7 @@ function finalizeGUIInitialization(){
 	}, 100);
 
 	// and now reveal the result
-	UIcontainer.classed('hidden', false)
+	d3.select('#UIcontainer').classed('hidden', false)
 
 	//check for an initial colormap and make adjustments if needed
 	GUIParams.partsKeys.forEach(function(p){
@@ -90,6 +124,8 @@ function finalizeGUIInitialization(){
 	sendToViewer([{'setViewerParamByKey':[true, "haveUI"]}]);
 
 	GUIParams.GUIbuilt = true;
+
+	console.log('GUI built.')
 }
 
 // show the button on the splash screen

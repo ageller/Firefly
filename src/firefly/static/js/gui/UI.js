@@ -1619,7 +1619,7 @@ function hideUI(){
 
 		var elem = d3.select('#UIcontainer');
 		var bbox = elem.node().getBoundingClientRect();
-		console.log('checking', GUIParams.UIhidden, this.classList, bbox)
+		//console.log('checking', GUIParams.UIhidden, this.classList, bbox)
 		if (GUIParams.UIhidden){
 			elem.style('clip-path','inset(3px ' + (bbox.width - 35) + 'px ' + (bbox.height - 35) + 'px 3px round 10px');
 		}else{
@@ -1898,3 +1898,17 @@ function countNodes(obj){
 	return count;
 }
 
+function getGUIIDs(){
+	// iterate through and grab all the id keys 
+	GUIParams.GUIIDs = ['UIcontainer'];
+
+	function iterate(obj) {
+		Object.keys(obj).forEach(function(key){
+
+			if (key == 'id') GUIParams.GUIIDs.push(obj[key]);
+
+			if (typeof obj[key] === 'object' && obj[key] !== null) iterate(obj[key])
+		})
+	}
+	iterate(GUIParams.GUIState);
+}
