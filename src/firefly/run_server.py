@@ -17,7 +17,7 @@ def main():
 	if len(args) >=1:
 		port = int(sys.argv[1])
 	else:
-		port = 5000
+		port = 5500
 
 	#stream fps as a second input
 	if len(args) >=2:
