@@ -1077,8 +1077,7 @@ function createCameraControlBox(UI){
 		.style('padding','2px')
 		.style('width',(GUIParams.containerWidth - 30)/3. + 'px')
 		.on('click',function(){
-			var key = event.keyCode || event.which;
-			if (key == 13) sendToViewer([{'checkText':[this.id, this.value]}]);
+			sendToViewer([{'saveCamera':null}]);
 		})
 		.append('span')
 			.text('Save');
