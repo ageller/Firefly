@@ -1,13 +1,6 @@
 //GLOBAL_arrow = '&#129044;';
 GLOBAL_arrow = '&#11104;';
 
-// TO DO: create radii controls for particles
-// fix multiple colormaps (alex may have already fixed this, wait until merged into kaitai_io)
-
-window.addEventListener('mouseup',function(){GUIParams.movingUI = false;});
-window.addEventListener('resize',checkGUIsize);
-document.body.addEventListener('dblclick',resetGUILocation);
-
 // while the window is resizing, I don't want transitions in the size of the GUI
 // execute a function after resize is finished
 // https://stackoverflow.com/questions/45905160/javascript-on-window-resize-end
@@ -25,8 +18,15 @@ function removeTransition() {
 function resetTransition() {
 	d3.select('#UIStateContainer').classed('noTransition', false);
 }
-window.addEventListener('resize', removeTransition);
-window.addEventListener('resize', debounce(resetTransition));
+
+function addGUIlisteners(){
+	window.addEventListener('mouseup',function(){GUIParams.movingUI = false;});
+	document.body.addEventListener('dblclick',resetGUILocation);
+
+	window.addEventListener('resize', checkGUIsize);
+	window.addEventListener('resize', removeTransition);
+	window.addEventListener('resize', debounce(resetTransition));
+}
 
 ///////////////////////////////
 ////// create the UI
@@ -199,9 +199,7 @@ function createUI(){
 	//create the octree loading bar
 	if (GUIParams.haveAnyOctree) createOctreeLoadingBar(UIcontainer);
 
-	// tell the viewer the UI has been initialized
-	sendToViewer([{'applyUIoptions':null}]);
-	sendToViewer([{'setViewerParamByKey':[true, "haveUI"]}]);
+
 
 }
 
@@ -1609,6 +1607,7 @@ function closeDragElement(e) {
 	document.removeEventListener('mousemove', elementDrag);
 	d3.select('#UIStateContainer').classed('noTransition', false);
 }
+
 /////////////
 // for show/hide of elements of the UI
 //////////////
@@ -1843,37 +1842,40 @@ function disableCameraInputBoxes(){
 //////////////////////// ////////////////////////
 
 function checkGUIsize(){
-	//if the bottom of the GUI extends off the page, force the GUI size to get smaller (is possible) and add a scroll bar
-	var bbox = document.getElementById('UIcontainer').getBoundingClientRect();
-	var bottom = bbox.bottom
-	if (GUIParams.haveAnyOctree) bottom += 20; //20 to account for the octree loading tab
-
-	var windowHeight = window.innerHeight;
 	var container = d3.select('#UIStateContainer');
-	var h = parseFloat(container.style('height'));
-	var h0 = parseFloat(container.attr('trueHeight'));
+	if (container.node() && GUIParams.GUIbuilt){
 
-	if (bottom > windowHeight){
-		if (h > 34){
-			//shrink
-			var newh = Math.max(h - (bottom - windowHeight), 34);
-			container.style('height', newh + 'px');
+		//if the bottom of the GUI extends off the page, force the GUI size to get smaller (is possible) and add a scroll bar
+		var bbox = document.getElementById('UIcontainer').getBoundingClientRect();
+		var bottom = bbox.bottom
+		if (GUIParams.haveAnyOctree) bottom += 20; //20 to account for the octree loading tab
+
+		var windowHeight = window.innerHeight;
+		var h = parseFloat(container.style('height'));
+		var h0 = parseFloat(container.attr('trueHeight'));
+
+		if (bottom > windowHeight){
+			if (h > 34){
+				//shrink
+				var newh = Math.max(h - (bottom - windowHeight), 34);
+				container.style('height', newh + 'px');
+			}
+		} else {
+			//grow
+			if (h < h0){
+				var newh = Math.min(h - (bottom - windowHeight), h0);
+				container.style('height', newh + 'px');
+
+			}
 		}
-	} else {
-		//grow
+
+		//add the scrollbar
+		h = parseFloat(container.style('height'));
 		if (h < h0){
-			var newh = Math.min(h - (bottom - windowHeight), h0);
-			container.style('height', newh + 'px');
-
+			container.style('overflow', 'hidden scroll')
+		} else {
+			container.style('overflow', 'hidden')
 		}
-	}
-
-	//add the scrollbar
-	h = parseFloat(container.style('height'));
-	if (h < h0){
-		container.style('overflow', 'hidden scroll')
-	} else {
-		container.style('overflow', 'hidden')
 	}
 
 }
@@ -1897,3 +1899,4 @@ function countNodes(obj){
 	else count+=1;
 	return count;
 }
+

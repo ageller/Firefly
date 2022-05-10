@@ -75,6 +75,14 @@ function finalizeGUIInitialization(){
 	GUIParams.partsKeys.forEach(function(p){
 		if (GUIParams.showColormap[p]) initialColormap(p);
 	})
+
+	addGUIlisteners();
+
+	// tell the viewer the UI has been initialized
+	sendToViewer([{'applyUIoptions':null}]);
+	sendToViewer([{'setViewerParamByKey':[true, "haveUI"]}]);
+
+	GUIParams.GUIbuilt = true;
 }
 
 // show the button on the splash screen
