@@ -136,6 +136,14 @@ class Reader(object):
         ## we'll use the default ones then
         else: settings = Settings()
 
+        self.settings_path = os.path.join(
+            self.static_data_dir,
+            os.path.basename(JSONdir),
+            self.JSON_prefix+settings.settings_filename)
+        if not self.clean_JSONdir and os.path.isfile(self.settings_path):
+            print(f"Importing existing settings from {self.settings_path}")
+            settings.loadFromJSON(self.settings_path,loud=False)
+
         self.settings = settings
 
         if tweenParams is not None:
@@ -301,7 +309,11 @@ class Reader(object):
 
         ## write each particleGroup to JSON using their own method
         ##  and save the filenames into a dictionary for filenames.json
-        filenamesDict = {}
+
+        manifest_file = os.path.join(JSONdir,'filenames.json')
+        if not self.clean_JSONdir and os.path.isfile(manifest_file):
+            filenamesDict = load_from_json(manifest_file)
+        else: filenamesDict = {}
         for particleGroup in self.particleGroups:
             if loud:
                 print("Outputting:",particleGroup)
@@ -353,12 +365,11 @@ class Reader(object):
                     write_to_disk=write_to_disk,
                     not_reader=False)] ## None -> returns JSON string
 
-            filename=os.path.join(JSONdir,'filenames.json')
             JSON_array +=[(
-                filename,
+                manifest_file,
                 write_to_json(
                     filenamesDict,
-                    filename if write_to_disk else None))] ## None -> returns JSON string
+                    manifest_file if write_to_disk else None))] ## None -> returns JSON string
 
             ## handle the startup.json file, may need to append or totally overwrite
             startup_file = os.path.join(

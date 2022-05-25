@@ -46,13 +46,13 @@ else
     git commit -m 'initial commit'
     ## push local repo to remote repo
     git remote add origin git@github.com:${USER}/${REPONAME}.git
-    git push --set-upstream origin master
+    git push --set-upstream origin main
 
     ## enable github pages
     curl -u ${USER}:${TOKEN} \
     -H "Accept: application/vnd.github.switcheroo-preview+json" \
     https://api.github.com/repos/${USER}/${REPONAME}/pages \
-    -d '{"source":{"branch":"master","path":"/"}}'
+    -d '{"source":{"branch":"main","path":"/"}}'
 
     echo Check the status of your new github pages site at: \
     https://github.com/${USER}/${REPONAME}/settings/pages \
