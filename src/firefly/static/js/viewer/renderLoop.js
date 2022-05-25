@@ -20,6 +20,19 @@ function animate(time) {
 		// get the memory usage
 		update_memory_usage();
 
+		if (viewerParams.initialize_time){
+			console.log(seconds-viewerParams.initialize_time + ' seconds to initialize');
+			console.log(viewerParams.memoryUsage/1e9 + ' GB allocated');
+			var numtot = 0;
+			viewerParams.partsKeys.forEach(function (pkey){
+				numtot = numtot + viewerParams.parts.count[pkey];
+				});
+			console.log(numtot + ',' + (seconds-viewerParams.initialize_time) + ',' + viewerParams.memoryUsage/1e9 );
+
+			viewerParams.initialize_time = null;
+			viewerParams.FPS_profile = [];
+		}
+
 		// velocity animation
 		//console.log('before', viewerParams.animateVelTime, viewerParams.animateVelDt, viewerParams.animateVelTmax)
 		viewerParams.animateVelTime = (viewerParams.animateVelTime + viewerParams.animateVelDt) % viewerParams.animateVelTmax;	
@@ -28,6 +41,18 @@ function animate(time) {
 
 		viewerParams.drawPass += 1;
 
+		FPS_profile_step = 50;
+		if (!(viewerParams.drawPass % FPS_profile_step) && viewerParams.drawPass < 10*FPS_profile_step){
+			viewerParams.FPS_profile.push(viewerParams.FPS)
+		}
+		else if (viewerParams.drawPass == (10*FPS_profile_step+1)){
+			var numtot = 0;
+			viewerParams.partsKeys.forEach(function (pkey){
+				numtot = numtot + viewerParams.parts.count[pkey];
+				});
+			profiled_FPS = viewerParams.FPS_profile.reduce((a, b) => a + b, 0)/viewerParams.FPS_profile.length;
+			console.log(numtot + ',' +  viewerParams.PsizeMult[viewerParams.partsKeys[0]] + ',' + profiled_FPS);
+		}
 		//console.log(viewerParams.camera.position)
 
 	}
