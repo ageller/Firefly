@@ -4,7 +4,7 @@
 [![PyPI](https://img.shields.io/pypi/v/Firefly)](https://pypi.org/project/Firefly-vis)
 <a href="https://ascl.net/1810.021"><img src="https://img.shields.io/badge/ascl-1810.021-blue.svg?colorB=262255" alt="ascl:1810.021" /></a>
 
-![logo banner](https://github.com/ageller/Firefly/blob/main/docs/source/_static/logo_banner_gradient.png?raw=true)
+![logo banner](https://github.com/ageller/Firefly/blob/main/docs/source/_static/four_view_banner.png?raw=true)
 
 
 Firefly is an interactive viewer for any particle-based data. A live example is available [here](https://ageller.github.io/Firefly/)
