@@ -37,13 +37,6 @@ class GUIbox{
 
 }
 
-class GUIconstructors{
-	foo = [
-		createDataControlsBox,
-		createCameraControlsBox,
-		createColumnDensityControlsBox]
-}
-
 //all "global" variables are contained within params object
 var GUIParams;
 
