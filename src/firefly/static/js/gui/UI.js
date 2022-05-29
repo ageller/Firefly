@@ -183,12 +183,6 @@ function createUI(){
 	//  it might be nice to generalize this so that I can just define the GUIParams.GUIState Object to determine what parts to create...
 
 	createMainWindow(UI);
-	createGeneralWindow(UI);
-	createDataWindow(UI);
-	createCameraWindow(UI);
-	createColumnDensityWindow(UI);
-
-	createParticlesWindow(UI);
 	
 	// if (GUIParams.containerWidth > 300) {
 	// 	//could be nice to center these, but there are lots of built in positions for the sliders and input boxes.  Not worth it
@@ -455,6 +449,9 @@ function createMainWindow(container){
 		)
 	})
 
+	createGeneralWindow(GUIParams.GUItree.d3Element);
+	createParticlesWindow(GUIParams.GUItree.d3Element);
+
 }
 
 function createGeneralWindow(container){
@@ -464,33 +461,51 @@ function createGeneralWindow(container){
 	var singleWidth = fullWidth/keys.length - 4;
 	console.log('hardcoded padding between general/',keys,'buttons');
 
-	var UI = container.append('div')
-		.attr('id',GUIParams.GUIState.main.general.id)
-		.attr('class','UImover')
-		.style('display','flex')
-		.style('position','absolute')
-		.style('top','0px')
-		.style('height','34px')
-		.attr('trueHeight','34px')
-		.style('width', fullWidth + 'px')
-		.style('transform','translateX(' + GUIParams.containerWidth + 'px)')
+	generalBox = GUIParams.GUItree.children[0].children[0].addChild(
+		fullWidth,
+		34,
+		GUIParams.GUIState.main.general.id,
+		function (){ // d3 constructor
+			return container.append('div')
+			.attr('id',GUIParams.GUIState.main.general.id)
+			.attr('class','UImover')
+			.style('display','flex')
+			.style('position','absolute')
+			.style('top','0px')
+			.style('height','34px')
+			.attr('trueHeight','34px')
+			.style('width', fullWidth + 'px')
+			.style('transform','translateX(' + GUIParams.containerWidth + 'px)')})
 
 
 	keys.forEach(function(k){
-		UI.append('div')
-			.attr('id',GUIParams.GUIState.main.general[k].id + 'button')
-			.attr('class','particleDiv')
-			.style('width', singleWidth + 'px')
-			.style('float','left')
-			.style('margin','2px')
-			.style('cursor','pointer')
-			.on('click',function(){
-				transitionUIWindows.call(this, 'main/general/' + k)
-			})
-			.append('div')
-				.attr('class','pLabelDiv')
-				.text(GUIParams.GUIState.main.general[k].name)
+		console.log(generalBox)
+		console.log(GUIParams.GUIState.main.general[k].id + 'button')
+		generalBox.addChild(
+			singleWidth,
+			null,
+			GUIParams.GUIState.main.general[k].id + 'button',
+			function () { // d3 constructor
+				return generalBox.d3Element.append('div')
+				.attr('id',GUIParams.GUIState.main.general[k].id + 'button')
+				.attr('class','particleDiv')
+				.style('width', singleWidth + 'px')
+				.style('float','left')
+				.style('margin','2px')
+				.style('cursor','pointer')
+				.on('click',function(){
+					transitionUIWindows.call(this, 'main/general/' + k)
+				})
+				.append('div')
+					.attr('class','pLabelDiv')
+					.text(GUIParams.GUIState.main.general[k].name)}
+		)
 	})
+
+	createDataWindow(GUIParams.GUItree.d3Element);
+	createCameraWindow(GUIParams.GUItree.d3Element);
+	createColumnDensityWindow(GUIParams.GUItree.d3Element);
+
 }
 
 function createDataWindow(container){

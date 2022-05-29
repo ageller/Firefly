@@ -6,6 +6,11 @@ class GUIbox{
 
 	children = [];
 
+	get nchildren() {
+		return this.children.length;
+	}
+
+
 	constructor(width,height,elementID,d3constructor=null){
 		this.height = height;
 		this.width = width;
