@@ -160,17 +160,24 @@ function createUI(){
 			.text('main')
 
 
-	var UI = UIcontainer.append('div')
-		.attr('id','UIStateContainer')
-		.attr('class','UIStateContainer')
-		.attr('trueHeight','34px')
-		.style('position','relative')
-		.style('height','34px')
-		.style('margin-bottom','38px')
-		.style('top','34px')
-		.style('clip-path','inset(0px)'); 
+	GUIParams.GUItree = new GUIbox(
+		GUIParams.containerWidth,
+		34,
+		'UIStateContainer',
+		function (){ // d3 element constructor
+			return UIcontainer.append('div')
+			.attr('id','UIStateContainer')
+			.attr('class','UIStateContainer')
+			.attr('trueHeight','34px')
+			.style('position','relative')
+			.style('height','34px')
+			.style('margin-bottom','38px')
+			.style('top','34px')
+			.style('clip-path','inset(0px)');
+		}
+		);
 
-
+	var UI =  GUIParams.GUItree.d3Element;
 	//start creating the rest of the elements
 	//work with the GUIState object
 	//  it might be nice to generalize this so that I can just define the GUIParams.GUIState Object to determine what parts to create...
@@ -182,9 +189,6 @@ function createUI(){
 	createColumnDensityWindow(UI);
 
 	createParticlesWindow(UI);
-
-
-
 	
 	// if (GUIParams.containerWidth > 300) {
 	// 	//could be nice to center these, but there are lots of built in positions for the sliders and input boxes.  Not worth it
@@ -196,8 +200,6 @@ function createUI(){
 
 	//create the octree loading bar
 	if (GUIParams.haveAnyOctree) createOctreeLoadingBar(UIcontainer);
-
-
 
 }
 
@@ -412,7 +414,8 @@ function createMainWindow(container){
 	//these will be side by side
 	var keys = Object.keys(GUIParams.GUIState.main).filter(function(d){return (d != 'id' && d != 'name')});
 	var fullWidth = GUIParams.containerWidth;
-	var singleWidth = fullWidth/keys.length - 4;
+	var singleWidth = fullWidth/keys.length - 4; 
+	console.log('hardcoded padding between main/',keys,'buttons');
 
 	var UI = container.append('div')
 		.attr('id',GUIParams.GUIState.main.id)
@@ -449,6 +452,7 @@ function createGeneralWindow(container){
 	var keys = Object.keys(GUIParams.GUIState.main.general).filter(function(d){return (d != 'id' && d != 'name')});
 	var fullWidth = GUIParams.containerWidth;
 	var singleWidth = fullWidth/keys.length - 4;
+	console.log('hardcoded padding between general/',keys,'buttons');
 
 	var UI = container.append('div')
 		.attr('id',GUIParams.GUIState.main.general.id)
@@ -497,8 +501,6 @@ function createDataWindow(container){
 	//  load settings button
 	//  load new data button
 	createDataControlsBox(UI);
-
-
 }
 
 function createCameraWindow(container){

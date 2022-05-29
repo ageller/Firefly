@@ -1,3 +1,37 @@
+class GUIbox{
+	height;
+	width;
+	elementID;
+	d3Element;
+
+	children = [];
+
+	constructor(height,width,elementID,d3constructor=null){
+		this.height = height;
+		this.width = width;
+		this.elementID = elementID;
+		if (d3constructor != null) this.d3Element = d3constructor();
+	}
+
+	addChild(){
+		this.children.push(new GUIbox(0,0,'hi'))
+		return this.children[this.children.length-1];
+	}
+
+	addDiv(id){
+		var div = this.D3Element.append('div')
+			.attr('id', id+'Div')
+			.style('width',(GUIParams.containerWidth - 10) + 'px')
+			.style('margin-left','5px')
+			.style('margin-top','10px')
+			.style('display','inline-block')
+
+		return div;
+
+	}
+
+}
+
 //all "global" variables are contained within params object
 var GUIParams;
 
