@@ -550,7 +550,7 @@ function createCameraWindow(container){
 	//  save, reset, and recenter buttons
 	//  friction and stereo separation sliders
 	//  stereo checkbox
-	createCameraControlBox(UI);
+	createCameraControlsBox(UI);
 }
 
 function createColumnDensityWindow(container){
@@ -570,7 +570,7 @@ function createColumnDensityWindow(container){
 	//  log10 checkbox
 	//  colormap selector
 	//  slider to adjust limits
-	createColumnDensityBox(UI);
+	createColumnDensityControlsBox(UI);
 }
 
 
@@ -895,7 +895,7 @@ function createDataControlsBox(UI){
 	if (GUIParams.haveAnyOctree) createMemorySlider();
 }
 
-function createCameraControlBox(UI){
+function createCameraControlsBox(UI){
 	/////////////////////////
 	//camera controls
 
@@ -1272,7 +1272,7 @@ function createCameraControlBox(UI){
 	disableCameraInputBoxes();
 }
 
-function createColumnDensityBox(UI){
+function createColumnDensityControlsBox(UI){
 
 	UI.style('height', '135px')
 		.attr('trueHeight', '135px')
