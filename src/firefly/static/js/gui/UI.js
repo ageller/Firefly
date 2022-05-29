@@ -160,24 +160,16 @@ function createUI(){
 			.text('main')
 
 
-	GUIParams.GUItree = new GUIbox(
-		GUIParams.containerWidth,
-		34,
-		'UIStateContainer',
-		function (){ // d3 element constructor
-			return UIcontainer.append('div')
-			.attr('id','UIStateContainer')
-			.attr('class','UIStateContainer')
-			.attr('trueHeight','34px')
-			.style('position','relative')
-			.style('height','34px')
-			.style('margin-bottom','38px')
-			.style('top','34px')
-			.style('clip-path','inset(0px)');
-		}
-		);
+	var UI =  UIcontainer.append('div')
+		.attr('id','UIStateContainer')
+		.attr('class','UIStateContainer')
+		.attr('trueHeight','34px')
+		.style('position','relative')
+		.style('height','34px')
+		.style('margin-bottom','38px')
+		.style('top','34px')
+		.style('clip-path','inset(0px)');
 
-	var UI =  GUIParams.GUItree.d3Element;
 	//start creating the rest of the elements
 	//work with the GUIState object
 	//  it might be nice to generalize this so that I can just define the GUIParams.GUIState Object to determine what parts to create...
@@ -459,7 +451,7 @@ function createGeneralWindow(container,parent,name){
 
 	this_pane.children.forEach(function(k){
 		var sub_url = this_pane.url+'/' + k;
-		console.log(sub_url)
+		//console.log(sub_url)
 		this_pane.d3Element.append('div')
 			.attr('id',this_pane[k].id + 'button')
 			.attr('class','particleDiv')
@@ -473,6 +465,7 @@ function createGeneralWindow(container,parent,name){
 			.append('div')
 				.attr('class','pLabelDiv')
 				.text(this_pane[k].id[0].toUpperCase()+this_pane[k].id.slice(1,))
+		// TODO need to handle this situation
 		if (k!='particles') createGeneralWindow(container,this_pane,k);
 	})
 	}
