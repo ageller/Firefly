@@ -182,7 +182,8 @@ function createUI(){
 	//work with the GUIState object
 	//  it might be nice to generalize this so that I can just define the GUIParams.GUIState Object to determine what parts to create...
 
-	createMainWindow(UI);
+	createMainWindow(UI,GUIParams.GUIState,'main');
+	createParticlesWindow(UI);
 	
 	// if (GUIParams.containerWidth > 300) {
 	// 	//could be nice to center these, but there are lots of built in positions for the sliders and input boxes.  Not worth it
@@ -409,9 +410,14 @@ function transitionUIWindows(state=null, pID=null){
 }
 
 
-function createMainWindow(container){
+function createMainWindow(container,parent,name){
 	//these will be side by side
-	var keys = Object.keys(GUIParams.GUIState.main).filter(function(d){return (d != 'id' && d != 'name')});
+	this_pane = parent[name]
+	var keys = Object.keys(this_pane).filter(function(key){return (key != 'id' && key != 'name' && key !='builder')});
+	var keys = Object.keys(this_pane).filter(function(key){return (key != 'id' && key != 'name' && key !='builder' && key != 'button')});
+	this_pane.children = keys;
+	this_pane.parent = parent;
+
 	var fullWidth = GUIParams.containerWidth;
 	var singleWidth = fullWidth/keys.length - 4; 
 	console.log('hardcoded padding between main/',keys,'buttons');
@@ -438,7 +444,7 @@ function createMainWindow(container){
 			null,
 			GUIParams.GUIState.main[k].id + 'button',
 			function (){ // d3 constructor
-				return mainBox.d3Element.append('div')
+				this_pane[k].button = mainBox.d3Element.append('div')
 				.attr('id',GUIParams.GUIState.main[k].id + 'button')
 				.attr('class','particleDiv')
 				.style('width', singleWidth + 'px')
@@ -450,19 +456,19 @@ function createMainWindow(container){
 				})
 				.append('div')
 					.attr('class','pLabelDiv')
-					.text(GUIParams.GUIState.main[k].name)}
+					.text(GUIParams.GUIState.main[k].name)
+				return this_pane[k].button}
 		)
 	})
 
-	createGeneralWindow(GUIParams.GUItree.d3Element,GUIParams.GUIState.main,'general');
-	createParticlesWindow(GUIParams.GUItree.d3Element);
-
+	this_pane.d3Element = mainBox.d3Element;
+	createGeneralWindow(container,this_pane,'general');
 }
 
 function createGeneralWindow(container,parent,name){
 	//these will be side by side
 	this_pane = parent[name];
-	var keys = Object.keys(this_pane).filter(function(key){return (key != 'id' && key != 'name' && key !='builder')});
+	var keys = Object.keys(this_pane).filter(function(key){return (key != 'id' && key != 'name' && key !='builder' && key != 'button')});
 	this_pane.children = keys;
 	this_pane.parent = parent;
 
@@ -470,51 +476,40 @@ function createGeneralWindow(container,parent,name){
 	var singleWidth = fullWidth/keys.length - 4;
 	console.log('hardcoded padding between',name,'/',keys,'buttons');
 
-	generalBox = GUIParams.GUItree.children[0].children[0].addChild(
-		fullWidth,
-		34,
-		GUIParams.GUIState.main.general.id,
-		function (){ // d3 constructor
-			return container.append('div')
-			.attr('id',GUIParams.GUIState.main.general.id)
-			.attr('class','UImover')
-			.style('display','flex')
-			.style('position','absolute')
-			.style('top','0px')
-			.style('height','34px')
-			.attr('trueHeight','34px')
-			.style('width', fullWidth + 'px')
-			.style('transform','translateX(' + GUIParams.containerWidth + 'px)')})
+	this_pane.d3Element = container.append('div')
+		.attr('id',this_pane.id)
+		.attr('class','UImover')
+		.style('display','flex')
+		.style('position','absolute')
+		.style('top','0px')
+		.style('height','34px')
+		.attr('trueHeight','34px')
+		.style('width', fullWidth + 'px')
+		.style('transform','translateX(' + GUIParams.containerWidth + 'px)')
 
-
-	keys.forEach(function(k){
-		generalBox.addChild(
-			singleWidth,
-			null,
-			GUIParams.GUIState.main.general[k].id + 'button',
-			function () { // d3 constructor
-				return generalBox.d3Element.append('div')
-				.attr('id',GUIParams.GUIState.main.general[k].id + 'button')
-				.attr('class','particleDiv')
-				.style('width', singleWidth + 'px')
-				.style('float','left')
-				.style('margin','2px')
-				.style('cursor','pointer')
-				.on('click',function(){
-					transitionUIWindows.call(this, 'main/general/' + k)
-				})
-				.append('div')
-					.attr('class','pLabelDiv')
-					.text(GUIParams.GUIState.main.general[k].name)}
-		)
+	this_pane.children.forEach(function(k){
+		this_pane.d3Element.append('div')
+			.attr('id',this_pane[k].id + 'button')
+			.attr('class','particleDiv')
+			.style('width', singleWidth + 'px')
+			.style('float','left')
+			.style('margin','2px')
+			.style('cursor','pointer')
+			.on('click',function(){
+				// TODO need to replace this, it's hard-coded
+				transitionUIWindows.call(this, 'main/general/' + k)
+			})
+			.append('div')
+				.attr('class','pLabelDiv')
+				.text(GUIParams.GUIState.main.general[k].name)
 	})
 
-	createWindows(GUIParams.GUItree.d3Element,keys)
+	createWindows(container,keys,this_pane)
 }
 
-function createWindows(container,GUIids){
+function createWindows(container,GUIids,parent){
 	GUIids.forEach(function (GUIid){
-		this_pane = GUIParams.GUIState.main.general[GUIid];
+		this_pane = parent[GUIid];
 		this_pane.builder(
 			container.append('div')
 			.attr('id',this_pane.id)
