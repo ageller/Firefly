@@ -218,6 +218,9 @@ function defineGUIParams(){
 		this.memoryUsage = 0;
 		
 
+		this.GUIState_variables = [
+			'id','name','builder','parent','children','url'
+		]
 		//object to hold the current visible window in the GUI
 		//current will hold the key that defines the currently visible window
 		//the rest of the keys will point to the IDs for the DOM elements that hold those windows
@@ -225,30 +228,25 @@ function defineGUIParams(){
 		this.GUIState = {
 			'current':'main',
 			'main':{
-				'id':'GUIMain',
-				'name':'Main',
+				'id':'main',
 				'general' : {
-					'id':'GUIGeneral',
-					'name':'General',
+					'id':'general',
+					'name':'general',
 					'data':{
-						'id':'GUIData',
-						'name':'Data',
+						'id':'data',
 						'builder':createDataControlsBox
 					},
 					'camera':{
-						'id':'GUICamera',
-						'name':'Camera',
+						'id':'camera',
 						'builder':createCameraControlsBox
 					},
 					'projection':{
-						'id':'GUIProjection',
-						'name':'Projection',
+						'id':'projection',
 						'builder':createColumnDensityControlsBox
 					},
 				},
 				'particles':{
-					'id':'GUIParticlesBase',
-					'name':'Particles'
+					'id':'particlesBase',
 				}
 			},
 	

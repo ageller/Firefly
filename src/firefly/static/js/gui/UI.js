@@ -289,7 +289,7 @@ function transitionUIWindows(state=null, pID=null){
 		if (!GUIParams.UIparticle[k]) return;
 		var ddiv = d3.select('#' + k + 'Dropdown');
 		ddiv.selectAll('.dropdown-content').classed('show', false);
-		if ((inParticles || id2 == 'GUIParticlesBase') && ddiv.classed('show')){
+		if ((inParticles || id2 == 'particlesBase') && ddiv.classed('show')){
 			var level = getCurrentLevel(GUIParams.GUIState.main.particles[k]);
 			d3.select('#' + level.id).classed('show', true);
 		}
@@ -327,7 +327,7 @@ function transitionUIWindows(state=null, pID=null){
 	var h = bbox2.height;
 	var dh = 0;
 	var id3 = '';
-	if (inParticles || id2 =='GUIParticlesBase'){
+	if (inParticles || id2 =='particlesBase'){
 		var hdrop = 0;
 		var pheight = 0;
 		GUIParams.partsKeys.forEach(function(k){
@@ -413,8 +413,7 @@ function transitionUIWindows(state=null, pID=null){
 function createMainWindow(container,parent,name){
 	//these will be side by side
 	this_pane = parent[name]
-	var keys = Object.keys(this_pane).filter(function(key){return (key != 'id' && key != 'name' && key !='builder')});
-	var keys = Object.keys(this_pane).filter(function(key){return (key != 'id' && key != 'name' && key !='builder' && key != 'button')});
+	var keys = Object.keys(this_pane).filter(function(key){return !GUIParams.GUIState_variables.includes(key)});
 	this_pane.children = keys;
 	this_pane.parent = parent;
 
@@ -422,46 +421,33 @@ function createMainWindow(container,parent,name){
 	var singleWidth = fullWidth/keys.length - 4; 
 	console.log('hardcoded padding between main/',keys,'buttons');
 
-	mainBox = GUIParams.GUItree.addChild(
-		fullWidth,
-		34,
-		GUIParams.GUIState.main.id,
-		function (){  // d3 constructor 
-			return container.append('div')
-			.attr('id',GUIParams.GUIState.main.id)
-			.attr('class','UImover')
-			.style('display','flex')
-			.style('position','absolute')
-			.style('top','0px')
-			.style('height','34px')
-			.attr('trueHeight','34px')
-			.style('width', fullWidth + 'px')
-			.style('transform','translateX(0px)')})
+	this_pane.d3Element = container.append('div')
+		.attr('id',this_pane.id)
+		.attr('class','UImover')
+		.style('display','flex')
+		.style('position','absolute')
+		.style('top','0px')
+		.style('height','34px')
+		.attr('trueHeight','34px')
+		.style('width', fullWidth + 'px')
+		.style('transform','translateX(0px)')
 
 	keys.forEach(function(k){
-		mainBox.addChild(
-			singleWidth,
-			null,
-			GUIParams.GUIState.main[k].id + 'button',
-			function (){ // d3 constructor
-				this_pane[k].button = mainBox.d3Element.append('div')
-				.attr('id',GUIParams.GUIState.main[k].id + 'button')
-				.attr('class','particleDiv')
-				.style('width', singleWidth + 'px')
-				.style('float','left')
-				.style('margin','2px')
-				.style('cursor','pointer')
-				.on('click',function(){
-					transitionUIWindows.call(this, 'main/' + k)
-				})
-				.append('div')
-					.attr('class','pLabelDiv')
-					.text(GUIParams.GUIState.main[k].name)
-				return this_pane[k].button}
-		)
+		this_pane[k].button = this_pane.d3Element.append('div')
+		.attr('id',this_pane[k].id + 'button')
+		.attr('class','particleDiv')
+		.style('width', singleWidth + 'px')
+		.style('float','left')
+		.style('margin','2px')
+		.style('cursor','pointer')
+		.on('click',function(){
+			transitionUIWindows.call(this, 'main/' + k)
+		})
+		.append('div')
+			.attr('class','pLabelDiv')
+			.text(this_pane[k].id[0].toUpperCase()+this_pane[k].id.slice(1,))
 	})
 
-	this_pane.d3Element = mainBox.d3Element;
 	createGeneralWindow(container,this_pane,'general');
 }
 
@@ -501,7 +487,7 @@ function createGeneralWindow(container,parent,name){
 			})
 			.append('div')
 				.attr('class','pLabelDiv')
-				.text(GUIParams.GUIState.main.general[k].name)
+				.text(this_pane[k].id[0].toUpperCase()+this_pane[k].id.slice(1,))
 	})
 
 	createWindows(container,keys,this_pane)
