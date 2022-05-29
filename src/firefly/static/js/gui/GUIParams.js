@@ -1,20 +1,20 @@
 class GUIbox{
-	height;
 	width;
+	height;
 	elementID;
 	d3Element;
 
 	children = [];
 
-	constructor(height,width,elementID,d3constructor=null){
+	constructor(width,height,elementID,d3constructor=null){
 		this.height = height;
 		this.width = width;
 		this.elementID = elementID;
 		if (d3constructor != null) this.d3Element = d3constructor();
 	}
 
-	addChild(){
-		this.children.push(new GUIbox(0,0,'hi'))
+	addChild(height,width,elementID,d3constructor=null){
+		this.children.push(new GUIbox(height,width,elementID,d3constructor))
 		return this.children[this.children.length-1];
 	}
 

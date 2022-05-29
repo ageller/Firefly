@@ -417,32 +417,42 @@ function createMainWindow(container){
 	var singleWidth = fullWidth/keys.length - 4; 
 	console.log('hardcoded padding between main/',keys,'buttons');
 
-	var UI = container.append('div')
-		.attr('id',GUIParams.GUIState.main.id)
-		.attr('class','UImover')
-		.style('display','flex')
-		.style('position','absolute')
-		.style('top','0px')
-		.style('height','34px')
-		.attr('trueHeight','34px')
-		.style('width', fullWidth + 'px')
-		.style('transform','translateX(0px)')
-
+	mainBox = GUIParams.GUItree.addChild(
+		fullWidth,
+		34,
+		GUIParams.GUIState.main.id,
+		function (){  // d3 constructor 
+			return container.append('div')
+			.attr('id',GUIParams.GUIState.main.id)
+			.attr('class','UImover')
+			.style('display','flex')
+			.style('position','absolute')
+			.style('top','0px')
+			.style('height','34px')
+			.attr('trueHeight','34px')
+			.style('width', fullWidth + 'px')
+			.style('transform','translateX(0px)')})
 
 	keys.forEach(function(k){
-		UI.append('div')
-			.attr('id',GUIParams.GUIState.main[k].id + 'button')
-			.attr('class','particleDiv')
-			.style('width', singleWidth + 'px')
-			.style('float','left')
-			.style('margin','2px')
-			.style('cursor','pointer')
-			.on('click',function(){
-				transitionUIWindows.call(this, 'main/' + k)
-			})
-			.append('div')
-				.attr('class','pLabelDiv')
-				.text(GUIParams.GUIState.main[k].name)
+		mainBox.addChild(
+			singleWidth,
+			null,
+			GUIParams.GUIState.main[k].id + 'button',
+			function (){ // d3 constructor
+				return mainBox.d3Element.append('div')
+				.attr('id',GUIParams.GUIState.main[k].id + 'button')
+				.attr('class','particleDiv')
+				.style('width', singleWidth + 'px')
+				.style('float','left')
+				.style('margin','2px')
+				.style('cursor','pointer')
+				.on('click',function(){
+					transitionUIWindows.call(this, 'main/' + k)
+				})
+				.append('div')
+					.attr('class','pLabelDiv')
+					.text(GUIParams.GUIState.main[k].name)}
+		)
 	})
 
 }
