@@ -219,7 +219,7 @@ function defineGUIParams(){
 		
 
 		this.GUIState_variables = [
-			'id','name','builder','parent','children','url'
+			'id','name','builder','parent','children','url','button'
 		]
 		//object to hold the current visible window in the GUI
 		//current will hold the key that defines the currently visible window

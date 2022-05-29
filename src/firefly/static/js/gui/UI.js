@@ -412,14 +412,18 @@ function transitionUIWindows(state=null, pID=null){
 
 function createMainWindow(container,parent,name){
 	//these will be side by side
-	this_pane = parent[name]
+	var this_pane = parent[name];
 	var keys = Object.keys(this_pane).filter(function(key){return !GUIParams.GUIState_variables.includes(key)});
+
+	// initialize some of the variables the node will need here
 	this_pane.children = keys;
 	this_pane.parent = parent;
+	if (this_pane.id != 'main') this_pane.url = parent.url+'/'+this_pane.id
+	else this_pane.url = this_pane.id
 
 	var fullWidth = GUIParams.containerWidth;
 	var singleWidth = fullWidth/keys.length - 4; 
-	console.log('hardcoded padding between main/',keys,'buttons');
+	console.log('hardcoded padding between',this_pane.url,keys,'buttons');
 
 	this_pane.d3Element = container.append('div')
 		.attr('id',this_pane.id)
@@ -432,8 +436,9 @@ function createMainWindow(container,parent,name){
 		.style('width', fullWidth + 'px')
 		.style('transform','translateX(0px)')
 
-	keys.forEach(function(k){
-		this_pane[k].button = this_pane.d3Element.append('div')
+	this_pane.children.forEach(function(k){
+		var sub_url = this_pane.url+'/' + k;
+		this_pane.d3Element.append('div')
 		.attr('id',this_pane[k].id + 'button')
 		.attr('class','particleDiv')
 		.style('width', singleWidth + 'px')
@@ -441,14 +446,16 @@ function createMainWindow(container,parent,name){
 		.style('margin','2px')
 		.style('cursor','pointer')
 		.on('click',function(){
-			transitionUIWindows.call(this, 'main/' + k)
+			transitionUIWindows(sub_url)
 		})
 		.append('div')
 			.attr('class','pLabelDiv')
 			.text(this_pane[k].id[0].toUpperCase()+this_pane[k].id.slice(1,))
+
+		if (k!='particles') createGeneralWindow(container,this_pane,k);
 	})
 
-	createGeneralWindow(container,this_pane,'general');
+	
 }
 
 function createGeneralWindow(container,parent,name){
@@ -457,10 +464,12 @@ function createGeneralWindow(container,parent,name){
 	var keys = Object.keys(this_pane).filter(function(key){return (key != 'id' && key != 'name' && key !='builder' && key != 'button')});
 	this_pane.children = keys;
 	this_pane.parent = parent;
+	if (this_pane.id != 'main') this_pane.url = parent.url+'/'+this_pane.id
+	else this_pane.url = this_pane.id
 
 	var fullWidth = GUIParams.containerWidth;
 	var singleWidth = fullWidth/keys.length - 4;
-	console.log('hardcoded padding between',name,'/',keys,'buttons');
+	console.log('hardcoded padding between',this_pane.url,'/',keys,'buttons');
 
 	this_pane.d3Element = container.append('div')
 		.attr('id',this_pane.id)
@@ -474,6 +483,7 @@ function createGeneralWindow(container,parent,name){
 		.style('transform','translateX(' + GUIParams.containerWidth + 'px)')
 
 	this_pane.children.forEach(function(k){
+		var sub_url = this_pane.url+'/' + k;
 		this_pane.d3Element.append('div')
 			.attr('id',this_pane[k].id + 'button')
 			.attr('class','particleDiv')
@@ -482,8 +492,7 @@ function createGeneralWindow(container,parent,name){
 			.style('margin','2px')
 			.style('cursor','pointer')
 			.on('click',function(){
-				// TODO need to replace this, it's hard-coded
-				transitionUIWindows.call(this, 'main/general/' + k)
+				transitionUIWindows(sub_url)
 			})
 			.append('div')
 				.attr('class','pLabelDiv')
