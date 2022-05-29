@@ -388,7 +388,12 @@ function transitionUIWindows(state=null, pID=null){
 				}).style('height','0px');
 			}
 		}
-		Object.keys(obj).forEach(function(k){
+
+		if (obj.hasOwnProperty('children')) keys = obj.children;
+		// TODO should be able to remove this else statement after doing particles
+		else keys = Object.keys(obj);
+
+		keys.forEach(function(k){
 			if (typeof obj[k] === 'object') setToZero(obj[k])
 		})
 	}
@@ -449,17 +454,21 @@ function createMainWindow(container){
 		)
 	})
 
-	createGeneralWindow(GUIParams.GUItree.d3Element);
+	createGeneralWindow(GUIParams.GUItree.d3Element,GUIParams.GUIState.main,'general');
 	createParticlesWindow(GUIParams.GUItree.d3Element);
 
 }
 
-function createGeneralWindow(container){
+function createGeneralWindow(container,parent,name){
 	//these will be side by side
-	var keys = Object.keys(GUIParams.GUIState.main.general).filter(function(d){return (d != 'id' && d != 'name')});
+	this_pane = parent[name];
+	var keys = Object.keys(this_pane).filter(function(key){return (key != 'id' && key != 'name' && key !='builder')});
+	this_pane.children = keys;
+	this_pane.parent = parent;
+
 	var fullWidth = GUIParams.containerWidth;
 	var singleWidth = fullWidth/keys.length - 4;
-	console.log('hardcoded padding between general/',keys,'buttons');
+	console.log('hardcoded padding between',name,'/',keys,'buttons');
 
 	generalBox = GUIParams.GUItree.children[0].children[0].addChild(
 		fullWidth,
@@ -500,18 +509,15 @@ function createGeneralWindow(container){
 		)
 	})
 
-	createWindows(
-		GUIParams.GUItree.d3Element,
-		['data','camera','projection'],
-		[createDataControlsBox,createCameraControlsBox,createColumnDensityControlsBox],
-		)
+	createWindows(GUIParams.GUItree.d3Element,keys)
 }
 
-function createWindows(container,GUIids,constructors){
-	GUIids.forEach(function (GUIid,index){
-		constructors[index](
+function createWindows(container,GUIids){
+	GUIids.forEach(function (GUIid){
+		this_pane = GUIParams.GUIState.main.general[GUIid];
+		this_pane.builder(
 			container.append('div')
-			.attr('id',GUIParams.GUIState.main.general[GUIid].id)
+			.attr('id',this_pane.id)
 			.attr('class','UImover')
 			.style('position','absolute')
 			.style('top','0px')

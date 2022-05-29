@@ -232,15 +232,18 @@ function defineGUIParams(){
 					'name':'General',
 					'data':{
 						'id':'GUIData',
-						'name':'Data'
+						'name':'Data',
+						'builder':createDataControlsBox
 					},
 					'camera':{
 						'id':'GUICamera',
-						'name':'Camera'
+						'name':'Camera',
+						'builder':createCameraControlsBox
 					},
 					'projection':{
 						'id':'GUIProjection',
-						'name':'Projection'
+						'name':'Projection',
+						'builder':createColumnDensityControlsBox
 					},
 				},
 				'particles':{
