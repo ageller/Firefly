@@ -588,24 +588,43 @@ function createStereoSepSegment(container,parent,name){
 	return segment_height;
 }
 
+function createColumnDensityControlsBox(container,parent,name){
 
-////     put in segments
-function createColumnDensityControlsBox(UI){
+	var this_pane  = parent[name];
 
-	UI.style('height', '135px')
-		.attr('trueHeight', '135px')
-
-	var columnDensityDiv = UI.append('div')
+	this_pane.d3Element = container.append('div')
 		.attr('class','dropdown-content')
-		.attr('id','projectionControls')
+		.attr('id',name+'Controls')
 		.style('margin','0px')
-		.style('padding','0px 0px 0px 5px')
+		.style('padding','0px 0px 0px 5px') // < --- data controls doesn't have this
 		.style('width',GUIParams.containerWidth + 'px')
 		.style('border-radius',0)
+
+	var height = 5; // <--- required to match AMG's original hard-coded var m2height = 135;
+	this_pane.children.forEach(function(name){
+		height+=createSegment(this_pane.d3Element,this_pane,name)})
+	console.log(height)
 	
+	this_pane.d3Element.style('height', height + 'px')
+		.attr('trueHeight', height + 'px')
+		.style('display','block')
+
+	container.style('height', height + 'px')
+		.attr('trueHeight', height + 'px')
+
+	createColormapSlider(GUIParams.CDkey,GUIParams.ckeys[GUIParams.CDkey][0]);
+	console.log(document.getElementById('columnDensityCheckBox'))
+}
+
+function createColumnDensityCheckBoxSegment(container,parent,name){
+	var segment_height = 25;
 	// add checkbox to enable colormap
-	columnDensityDiv.append('input')
-		.attr('id','columnDensityCheckBox')
+
+	var new_container = container.append('div')
+		.attr('id','columnDensityCheckBoxContainer');
+
+	new_container.append('input')
+		.attr('id',name+'Elm')
 		.attr('value',GUIParams.columnDensity)
 		.attr('type','checkbox')
 		.attr('autocomplete','off')
@@ -616,19 +635,22 @@ function createColumnDensityControlsBox(UI){
 		})
 		.style('margin','8px 0px 0px 0px')
 
-	columnDensityDiv.append('label')
+	new_container.append('label')
 		.attr('for','columnDensityCheckBox')
 		.text('Enable column density projection')
 		.style('margin-left','10px')
-	
 
+	return segment_height;
+}
 
+function createColumnDensityLogCheckBoxSegment(container,parent,name){
+	var segment_height = 25;
 	// add checkbox to toggle log10
-	var logContainer = columnDensityDiv.append('div')
+	var logContainer = container.append('div')
 		.attr('id','columnDensityLog10Container');
 
 	logContainer.append('input')
-		.attr('id','columnDensityLog10CheckBox')
+		.attr('id','columnDensityLogCheckBoxElm')
 		.attr('value',false)
 		.attr('type','checkbox')
 		.attr('autocomplete','off')
@@ -645,11 +667,13 @@ function createColumnDensityControlsBox(UI){
 		.attr('for','columnDensityLog10CheckBox')
 		.text('Take Log10')
 		.style('margin-left','10px')
+	return segment_height;
+}
 
-
-
+function createColumnDensitySelectCmapSegment(container,parent,name){
+	var segment_height = 25;
 	// dropdown to select colormap
-	var cmapContainer = columnDensityDiv.append('div')
+	var cmapContainer = container.append('div')
 		.attr('id','columnDensityCmapContainer')
 		.style('margin-top','5px');
 
@@ -668,13 +692,17 @@ function createColumnDensityControlsBox(UI){
 		.append('option')
 			.attr('value',function(d,i){ return i; })
 			.text(function (d) { return d; });
+	return segment_height;
+}
 
+function createColumnDensitySlidersSegment(container,parent,name){
+	var segment_height = 35+20;
 	// create colorbar limits slider
-	columnDensityDiv.append('div')
+	container.append('div')
 		.style('margin-top','10px')
 		.text('Adjust limits below');
 
-	colormapsliders = columnDensityDiv.append('div')
+	colormapsliders = container.append('div')
 		.attr('id',GUIParams.CDkey+'_CK_'+GUIParams.ckeys[GUIParams.CDkey][0]+'_END_CMap')
 		.attr('class','CMapClass')
 		.style('width', (GUIParams.containerWidth - 100) + 'px');
@@ -697,13 +725,12 @@ function createColumnDensityControlsBox(UI){
 		.attr('class','CMapMaxTClass')
 		.attr('type','text')
 		.style('left',(GUIParams.containerWidth - 103) + 'px');
-
-	createColormapSlider(GUIParams.CDkey,GUIParams.ckeys[GUIParams.CDkey][0]);
-
+	return segment_height;
 }
 
-//////// particle builder functions
+////     put in segments
 
+//////// particle builder functions
 function createParticleGeneralWindow(container, p){
 	/////////////////////////
 	//general controls for a particles
@@ -878,7 +905,6 @@ function createParticleGeneralWindow(container, p){
 	createNpartsSlider(p);
 
 }
-
 
 function createParticleVelocityWindow(container, p){
 	/////////////////////////

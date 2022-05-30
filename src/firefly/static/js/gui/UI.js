@@ -375,8 +375,10 @@ function transitionUIWindows(state=null, pID=null){
 
 	// set all hidden components of the GUI to a height of 0
 	function setToZero(obj){
+		debugger
 		if (obj.hasOwnProperty('id')){
 			if (obj.id != id1 && obj.id != id2 && obj.id != id3){
+				console.log(obj.id)
 				var elem = d3.select('#' + obj.id);
 				// size checks if the selection caught anything
 				if (elem.size()>0 && !elem.classed('show')) elem.style('height','0px');

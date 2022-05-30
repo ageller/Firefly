@@ -187,14 +187,17 @@ function defineGUIParams(){
 		//the rest of the keys will point to the IDs for the DOM elements that hold those windows
 		//the particles state will be populated in createUI
 		this.GUIExcludeList = [
-			'main/general/data/loadNewData',
-			'main/general/data/savePreset',
-			'main/general/camera/cameraButtons',
-			'main/general/camera/centerTextBoxes',
-			'main/general/camera/cameraTextBoxes',
-			'main/general/camera/rotationTextBoxes',
-			'main/general/camera/snapshot',
-			'main/general/camera/fullScreen',
+			//'main/general/data/loadNewData',
+			//'main/general/data/savePreset',
+			//'main/general/camera/cameraButtons',
+			//'main/general/camera/centerTextBoxes',
+			//'main/general/camera/cameraTextBoxes',
+			//'main/general/camera/rotationTextBoxes',
+			//'main/general/camera/snapshot',
+			//'main/general/camera/fullScreen',
+			//'main/general/projection/columnDensityCheckBox',
+			//'main/general/projection/columnDensityLogCheckBox',
+			//'main/general/projection/columnDensitySelectCmap',
 		];
 		this.GUIState = {
 			'current':'main',
@@ -261,7 +264,23 @@ function defineGUIParams(){
 					},
 					'projection':{
 						'id':'projection',
-						'builder':createColumnDensityControlsBox
+						'builder':createColumnDensityControlsBox,
+						'columnDensityCheckBox':{
+							'id':'columnDensityCheckBox',
+							'builder':createColumnDensityCheckBoxSegment
+						},
+						'columnDensityLogCheckBox':{
+							'id':'columnDensityLogCheckBox',
+							'builder':createColumnDensityLogCheckBoxSegment
+						},
+						'columnDensitySelectCmap':{
+							'id':'columnDensitySelectCmap',
+							'builder':createColumnDensitySelectCmapSegment
+						},
+						'columnDensitySliders':{
+							'id':'columnDensitySliders',
+							'builder':createColumnDensitySlidersSegment
+						}
 					},
 				},
 			'particles':{'id':'particles'}
