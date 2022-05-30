@@ -289,7 +289,7 @@ function transitionUIWindows(state=null, pID=null){
 	// deal with the particle show classes
 	GUIParams.partsKeys.forEach(function(k){
 		if (!GUIParams.UIparticle[k]) return;
-		var ddiv = d3.select('#' + k + 'Dropdown');
+		var ddiv = d3.select('#' + k + 'DropdownDiv');
 		if (ddiv.empty()) return;
 		ddiv.selectAll('.dropdown-content').classed('show', false);
 		if ((inParticles || id2 == 'particles') && ddiv.classed('show')){
@@ -320,7 +320,6 @@ function transitionUIWindows(state=null, pID=null){
 		elem1.selectAll('.dropdown-content').style('height', '0px');
 	}, 250);
 
-	console.log(elem1,elem2)
 	// these go on, but with special handling below for particles
 	elem2.style('height', elem2.attr('trueHeight'));
 	elem2.select('.dropdown-content').style('height', elem2.attr('trueHeight'));
@@ -336,7 +335,7 @@ function transitionUIWindows(state=null, pID=null){
 		var pheight = 0;
 		GUIParams.partsKeys.forEach(function(k){
 			if (!GUIParams.UIparticle[k]) return;
-			var ddiv = d3.select('#' + k + 'Dropdown');
+			var ddiv = d3.select('#' + k + 'DropdownDiv');
 			var pdiv = d3.select('#' + k + 'Div');
 
 			var htmp = 0;
@@ -965,7 +964,7 @@ function getUIcontainerInset(pID = null){
 	var newHeight = 0;
 	if (pID){
 		//for dropdown
-		var dbbox = document.getElementById(pID+'Dropdown').getBoundingClientRect();
+		var dbbox = document.getElementById(pID+'DropdownDiv').getBoundingClientRect();
 		var newHeight = bbox.height - dbbox.height;
 	}
 	var cwidth = 0;

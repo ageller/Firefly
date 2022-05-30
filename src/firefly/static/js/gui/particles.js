@@ -1,7 +1,7 @@
 function createParticleSegment(container,parent,name){
 	var this_pane = parent[name];
-	this_pane.url = parent.url+'/'+this_pane.id;
-
+	this_pane.url = parent.url+'/'+this_pane.id.replace(parent.name,'');
+	console.log(this_pane.url)
 	if (GUIParams.GUIExcludeList.includes(this_pane.url)) return 0;
 	return this_pane.builder(container,this_pane,this_pane.id,parent.name);
 }
@@ -28,7 +28,7 @@ function defineGUIParticleState(){
 				},
 				'dropdown':{
 					'name':p,
-					'id':'GUI'+p+'dropdown',
+					'id':p+'dropdown',
 					'builder':createParticleDropdown,
 					'general': {
 						'id' : p+'general',
@@ -73,6 +73,9 @@ function createParticleBase(container, parent, p){
 	this_pane.children = keys;
 	this_pane.parent = parent;
 	this_pane.url = p;
+	// can't decide if i want the url to be relative to particles or if it should include main/particles in it.
+	//  so i'll comment out the "absolute" url in case I change my mind
+	//this_pane.url = parent.url + '/' + p;
 
 	//  create container divs for each of the particle groups
 
@@ -199,7 +202,7 @@ function createParticleDropdown(container,this_pane,name,p){
 
 	var keys = Object.keys(this_pane).filter(function(key){return !GUIParams.GUIState_variables.includes(key)});
 	this_pane.children = keys;
-	this_pane.url = 'base';
+	this_pane.url = p + '/' + 'dropdown';
 
 	//var h = 34*keys.length
 	var segment_height = 75; //34*Math.ceil(this_pane.children.length/2.) + 1;
@@ -215,7 +218,7 @@ function createParticleDropdown(container,this_pane,name,p){
 		.html('&#x25BC');
 
 	dropdown = this_pane.d3Element = container.append('div')
-		.attr('id',p+'Dropdown')
+		.attr('id',p+'DropdownDiv')
 		.attr('class','dropdown-content')
 		.style('width',(GUIParams.containerWidth - 4) + 'px')
 		.style('display','flex-wrap')
@@ -285,6 +288,7 @@ function createParticleDropdown(container,this_pane,name,p){
 	this_pane.children.forEach(function(k,index){
 		//create the button on the base window
 		var sub_url = this_pane.url+'/' + k;
+		console.log(sub_url)
 		if (GUIParams.GUIExcludeList.includes(sub_url)) return;
 		else if (this_pane[k].hasOwnProperty('builder')) {
 			button_container.append('div')
@@ -302,7 +306,7 @@ function createParticleDropdown(container,this_pane,name,p){
 				})
 				.append('div')
 				.attr('class','pLabelDiv')
-				.text(this_pane[k].id[0].toUpperCase()+this_pane[k].id.slice(1,))
+				.text(k[0].toUpperCase()+k.slice(1,))
 
 			//create the UI for this key
 			this_pane[k].builder(dropdown,this_pane,k,p);
@@ -321,7 +325,7 @@ function expandParticleDropdown(handle) {
 
 	// find particle ID for this dropdown and toggle the classes
 	var pID = handle.id.slice(0,-7); // remove  "Dropbtn" from id
-	var ddiv = d3.select('#' + pID + 'Dropdown');
+	var ddiv = d3.select('#' + pID + 'DropdownDiv');
 	var pdiv = d3.select('#' + pID + 'Div');
 	ddiv.node().classList.toggle('show');
 
