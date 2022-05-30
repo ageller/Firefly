@@ -438,8 +438,9 @@ function createGeneralWindow(container,parent,name){
 			.style('height','34px')
 			.attr('trueHeight','34px')
 			.style('width', GUIParams.containerWidth + 'px')
-			.style('transform','translateX(' + width + 'px)')
-		)
+			.style('transform','translateX(' + width + 'px)'),
+			parent,
+			this_pane.id)
 	}
 	else { // this is a branch leading to more buttons
 		var sub_url;

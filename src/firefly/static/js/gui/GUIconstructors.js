@@ -1,147 +1,63 @@
-function createColumnDensityControlsBox(UI){
+function createSegment(container,parent,name){
+	var this_pane = parent[name];
+	this_pane.url = parent.url+'/'+this_pane.id;
 
-	UI.style('height', '135px')
-		.attr('trueHeight', '135px')
-
-	var columnDensityDiv = UI.append('div')
-		.attr('class','dropdown-content')
-		.attr('id','projectionControls')
-		.style('margin','0px')
-		.style('padding','0px 0px 0px 5px')
-		.style('width',GUIParams.containerWidth + 'px')
-		.style('border-radius',0)
-	
-	// add checkbox to enable colormap
-	columnDensityDiv.append('input')
-		.attr('id','columnDensityCheckBox')
-		.attr('value',GUIParams.columnDensity)
-		.attr('type','checkbox')
-		.attr('autocomplete','off')
-		.on('change',function(){
-			checkColormapBox(GUIParams.CDkey,this.checked)
-			sendToViewer([{'setViewerParamByKey':[this.checked, "columnDensity"]}]);
-			GUIParams.columnDensity = this.checked;
-		})
-		.style('margin','8px 0px 0px 0px')
-
-	columnDensityDiv.append('label')
-		.attr('for','columnDensityCheckBox')
-		.text('Enable column density projection')
-		.style('margin-left','10px')
-	
-
-
-	// add checkbox to toggle log10
-	var logContainer = columnDensityDiv.append('div')
-		.attr('id','columnDensityLog10Container');
-
-	logContainer.append('input')
-		.attr('id','columnDensityLog10CheckBox')
-		.attr('value',false)
-		.attr('type','checkbox')
-		.attr('autocomplete','off')
-		.on('change',function(){
-			sendToViewer([{'setCDlognorm':[this.checked]}]);
-			GUIParams.CDlognorm = this.checked;
-			// change the colorbar label
-			if (GUIParams.showParts[GUIParams.CDkey] && 
-				GUIParams.showColormap[GUIParams.CDkey]) populateColormapAxis(GUIParams.CDkey);
-		})
-		.style('margin','8px 0px 0px 0px')
-
-	logContainer.append('label')
-		.attr('for','columnDensityLog10CheckBox')
-		.text('Take Log10')
-		.style('margin-left','10px')
-
-
-
-	// dropdown to select colormap
-	var cmapContainer = columnDensityDiv.append('div')
-		.attr('id','columnDensityCmapContainer')
-		.style('margin-top','5px');
-
-	cmapContainer.append('label')
-		.attr('for', GUIParams.CDkey+'_SelectCMap')
-		.text('Select colormap :')
-
-	var selectCMap = cmapContainer.append('select')
-		.attr('class','selectCMap')
-		.attr('id',GUIParams.CDkey+'_SelectCMap')
-		.style('margin-left','10px')
-		.on('change', selectColormap)
-
-	var options = selectCMap.selectAll('option')
-		.data(GUIParams.colormapList).enter()
-		.append('option')
-			.attr('value',function(d,i){ return i; })
-			.text(function (d) { return d; });
-
-	// create colorbar limits slider
-	columnDensityDiv.append('div')
-		.style('margin-top','10px')
-		.text('Adjust limits below');
-
-	colormapsliders = columnDensityDiv.append('div')
-		.attr('id',GUIParams.CDkey+'_CK_'+GUIParams.ckeys[GUIParams.CDkey][0]+'_END_CMap')
-		.attr('class','CMapClass')
-		.style('width', (GUIParams.containerWidth - 100) + 'px');
-
-	colormapsliders.append('div')
-		.attr('class','CMapClassLabel')
-
-	colormapsliders.append('div')
-		.attr('id',GUIParams.CDkey+'_CK_'+GUIParams.ckeys[GUIParams.CDkey][0]+'_END_CMapSlider')
-		.style("margin-top","-1px")
-		.style('left','-8px')
-
-	colormapsliders.append('input')
-		.attr('id',GUIParams.CDkey+'_CK_'+GUIParams.ckeys[GUIParams.CDkey][0]+'_END_CMapMinT')
-		.attr('class','CMapMinTClass')
-		.attr('type','text');
-
-	colormapsliders.append('input')
-		.attr('id',GUIParams.CDkey+'_CK_'+GUIParams.ckeys[GUIParams.CDkey][0]+'_END_CMapMaxT')
-		.attr('class','CMapMaxTClass')
-		.attr('type','text')
-		.style('left',(GUIParams.containerWidth - 103) + 'px');
-
-	createColormapSlider(GUIParams.CDkey,GUIParams.ckeys[GUIParams.CDkey][0]);
-
+	if (GUIParams.GUIExcludeList.includes(this_pane.url)) return;
+	this_pane.builder(container,this_pane,this_pane.id)
 }
 
-function createDataControlsBox(UI){
+function createDataControlsBox(container,parent,name){
 	////////////////////////
 	//"data" controls"
 
-	var m2 = UI.append('div')
+	var this_pane  = parent[name];
+
+	this_pane.d3Element = container.append('div')
 		.attr('class','dropdown-content')
-		.attr('id','dataControls')
+		.attr('id',name+'Controls')
 		.style('margin','0px')
 		.style('width',GUIParams.containerWidth + 'px')
 		.style('border-radius',0)
 	var m2height = 145;
 
+	this_pane.children.forEach(function(name){createSegment(this_pane.d3Element,this_pane,name)})
+	
+	// height of the load new data button and its padding (found by trial and error)
+	if (!GUIParams.usingSocket) m2height-=45;
+
+	this_pane.d3Element.style('height', m2height + 'px')
+		.attr('trueHeight', m2height + 'px')
+		.style('display','block')
+
+	container.style('height', m2height + 'px')
+		.attr('trueHeight', m2height + 'px')
+
+	// create all the noUISliders
+	createDecimationSlider();
+	if (GUIParams.haveAnyOctree) createMemorySlider();
+}
+
+function createDecimationSegment(container,parent,name){
 	//decimation
-	var dec = m2.append('div')
-		.attr('id', 'decimationDiv')
+	var segment = container.append('div')
+		.attr('id', name+'Div')
 		.style('width',(GUIParams.containerWidth - 10) + 'px')
 		.style('margin-left','5px')
 		.style('margin-top','10px')
 		.style('display','inline-block')
-	dec.append('div')
+	segment.append('div')
 		.attr('class','pLabelDiv')
 		.style('width','85px')
 		.style('display','inline-block')
 		.text('Decimation');
-	dec.append('div')
+	segment.append('div')
 		.attr('class','NSliderClass')
 		.attr('id','DSlider')
 		.style('margin-left','40px')
 		.style('width',(GUIParams.containerWidth - 145) + 'px');
 		// .style('margin-left','90px')
 		// .style('width',(GUIParams.containerWidth - 200) + 'px');
-	dec.append('input')
+	segment.append('input')
 		.attr('class','NMaxTClass')
 		.attr('id','DMaxT')
 		.attr('type','text')
@@ -150,7 +66,7 @@ function createDataControlsBox(UI){
 	if (GUIParams.haveAnyOctree){
 		m2height += 50;
 		//text to show the memory-imposed decimation
-		m2.append('div')
+		container.append('div')
 			.attr('id', 'decimationOctreeDiv')
 			.style('width',(GUIParams.containerWidth - 10) + 'px')
 			.style('margin-left','5px')
@@ -167,7 +83,7 @@ function createDataControlsBox(UI){
 					.text('1.0');
 
 		//slider to controls the memory limit
-		var mem = m2.append('div')
+		var mem = container.append('div')
 			.attr('id', 'memoryDiv')
 			.style('width',(GUIParams.containerWidth - 10) + 'px')
 			.style('margin-left','5px')
@@ -190,10 +106,11 @@ function createDataControlsBox(UI){
 			.style('left',(GUIParams.containerWidth - 45) + 'px')
 			.style('width','40px');
 	}
+}
 
-
+function createPresetSegment(container,parent,name){
 	//save preset button
-	m2.append('div').attr('id','savePresetDiv')
+	container.append('div').attr('id','savePresetDiv')
 		.append('button')
 		.attr('id','savePresetButton')
 		.attr('class','button')
@@ -203,9 +120,10 @@ function createDataControlsBox(UI){
 		})
 		.append('span')
 			.text('Save Settings');
-
+}
+function createResetSegment(container,parent,name){
 	//reset to default button
-	m2.append('div').attr('id','resetDiv')
+	var sub_div = container.append('div').attr('id','resetDiv')
 		.append('button')
 		.attr('id','resetButton')
 		.attr('class','button')
@@ -215,8 +133,9 @@ function createDataControlsBox(UI){
 		})
 		.append('span')
 			.text('Initial Settings');
+
 	//reset to preset button
-	d3.select('#resetDiv')
+	d3.select("#resetDiv")
 		.append('button')
 		.attr('id','resetPButton')
 		.attr('class','button')
@@ -228,10 +147,12 @@ function createDataControlsBox(UI){
 		})
 		.append('span')
 			.text('Load Settings');
+}
 
+function createLoadNewDataSegment(container,parent,name){
 	//load new data button
 	if (GUIParams.usingSocket){
-		m2.append('div').attr('id','loadNewDataDiv')
+		container.append('div').attr('id','loadNewDataDiv')
 			.append('button')
 			.attr('id','loadNewDataButton')
 			.attr('class','button')
@@ -242,21 +163,9 @@ function createDataControlsBox(UI){
 			.append('span')
 				.text('Load New Data');
 	}
-	// height of the load new data button and its padding (found by trial and error)
-	else m2height-=45;
-
-	m2.style('height', m2height + 'px')
-		.attr('trueHeight', m2height + 'px')
-		.style('display','block')
-
-	UI.style('height', m2height + 'px')
-		.attr('trueHeight', m2height + 'px')
-
-	// create all the noUISliders
-	createDecimationSlider();
-	if (GUIParams.haveAnyOctree) createMemorySlider();
 }
 
+////     put in segments
 function createCameraControlsBox(UI){
 	/////////////////////////
 	//camera controls
@@ -632,6 +541,118 @@ function createCameraControlsBox(UI){
 
 	// remove this after fixing the camera input boxes!
 	disableCameraInputBoxes();
+}
+
+function createColumnDensityControlsBox(UI){
+
+	UI.style('height', '135px')
+		.attr('trueHeight', '135px')
+
+	var columnDensityDiv = UI.append('div')
+		.attr('class','dropdown-content')
+		.attr('id','projectionControls')
+		.style('margin','0px')
+		.style('padding','0px 0px 0px 5px')
+		.style('width',GUIParams.containerWidth + 'px')
+		.style('border-radius',0)
+	
+	// add checkbox to enable colormap
+	columnDensityDiv.append('input')
+		.attr('id','columnDensityCheckBox')
+		.attr('value',GUIParams.columnDensity)
+		.attr('type','checkbox')
+		.attr('autocomplete','off')
+		.on('change',function(){
+			checkColormapBox(GUIParams.CDkey,this.checked)
+			sendToViewer([{'setViewerParamByKey':[this.checked, "columnDensity"]}]);
+			GUIParams.columnDensity = this.checked;
+		})
+		.style('margin','8px 0px 0px 0px')
+
+	columnDensityDiv.append('label')
+		.attr('for','columnDensityCheckBox')
+		.text('Enable column density projection')
+		.style('margin-left','10px')
+	
+
+
+	// add checkbox to toggle log10
+	var logContainer = columnDensityDiv.append('div')
+		.attr('id','columnDensityLog10Container');
+
+	logContainer.append('input')
+		.attr('id','columnDensityLog10CheckBox')
+		.attr('value',false)
+		.attr('type','checkbox')
+		.attr('autocomplete','off')
+		.on('change',function(){
+			sendToViewer([{'setCDlognorm':[this.checked]}]);
+			GUIParams.CDlognorm = this.checked;
+			// change the colorbar label
+			if (GUIParams.showParts[GUIParams.CDkey] && 
+				GUIParams.showColormap[GUIParams.CDkey]) populateColormapAxis(GUIParams.CDkey);
+		})
+		.style('margin','8px 0px 0px 0px')
+
+	logContainer.append('label')
+		.attr('for','columnDensityLog10CheckBox')
+		.text('Take Log10')
+		.style('margin-left','10px')
+
+
+
+	// dropdown to select colormap
+	var cmapContainer = columnDensityDiv.append('div')
+		.attr('id','columnDensityCmapContainer')
+		.style('margin-top','5px');
+
+	cmapContainer.append('label')
+		.attr('for', GUIParams.CDkey+'_SelectCMap')
+		.text('Select colormap :')
+
+	var selectCMap = cmapContainer.append('select')
+		.attr('class','selectCMap')
+		.attr('id',GUIParams.CDkey+'_SelectCMap')
+		.style('margin-left','10px')
+		.on('change', selectColormap)
+
+	var options = selectCMap.selectAll('option')
+		.data(GUIParams.colormapList).enter()
+		.append('option')
+			.attr('value',function(d,i){ return i; })
+			.text(function (d) { return d; });
+
+	// create colorbar limits slider
+	columnDensityDiv.append('div')
+		.style('margin-top','10px')
+		.text('Adjust limits below');
+
+	colormapsliders = columnDensityDiv.append('div')
+		.attr('id',GUIParams.CDkey+'_CK_'+GUIParams.ckeys[GUIParams.CDkey][0]+'_END_CMap')
+		.attr('class','CMapClass')
+		.style('width', (GUIParams.containerWidth - 100) + 'px');
+
+	colormapsliders.append('div')
+		.attr('class','CMapClassLabel')
+
+	colormapsliders.append('div')
+		.attr('id',GUIParams.CDkey+'_CK_'+GUIParams.ckeys[GUIParams.CDkey][0]+'_END_CMapSlider')
+		.style("margin-top","-1px")
+		.style('left','-8px')
+
+	colormapsliders.append('input')
+		.attr('id',GUIParams.CDkey+'_CK_'+GUIParams.ckeys[GUIParams.CDkey][0]+'_END_CMapMinT')
+		.attr('class','CMapMinTClass')
+		.attr('type','text');
+
+	colormapsliders.append('input')
+		.attr('id',GUIParams.CDkey+'_CK_'+GUIParams.ckeys[GUIParams.CDkey][0]+'_END_CMapMaxT')
+		.attr('class','CMapMaxTClass')
+		.attr('type','text')
+		.style('left',(GUIParams.containerWidth - 103) + 'px');
+
+	createColormapSlider(GUIParams.CDkey,GUIParams.ckeys[GUIParams.CDkey][0]);
+
 }
 
 //////// particle builder functions

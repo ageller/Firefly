@@ -180,13 +180,13 @@ function defineGUIParams(){
 		
 
 		this.GUIState_variables = [
-			'id','name','builder','parent','children','url','button'
+			'id','name','builder','parent','children','url','button','segments'
 		]
 		//object to hold the current visible window in the GUI
 		//current will hold the key that defines the currently visible window
 		//the rest of the keys will point to the IDs for the DOM elements that hold those windows
 		//the particles state will be populated in createUI
-		this.GUIExcludeList = ['main/general/camera'];
+		this.GUIExcludeList = ['main/general/projection'];
 		this.GUIState = {
 			'current':'main',
 			'main':{
@@ -196,7 +196,23 @@ function defineGUIParams(){
 					'name':'general',
 					'data':{
 						'id':'data',
-						'builder':createDataControlsBox
+						'builder':createDataControlsBox, // createGeneralWindow <--- put this in after you flesh out the rest of the data children
+						'decimation':{
+							'id':'decimation',
+							'builder':createDecimationSegment
+						},
+						'savePreset':{
+							'id':'savePreset',
+							'builder':createPresetSegment
+						},
+						'reset':{
+							'id':'reset',
+							'builder':createResetSegment
+						},
+						'loadNewData':{
+							'id':'loadNewDataa',
+							'builder':createLoadNewDataSegment
+						}
 					},
 					'camera':{
 						'id':'camera',
