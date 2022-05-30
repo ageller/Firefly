@@ -262,7 +262,9 @@ function transitionUIWindows(state=null, pID=null){
 	GUIBase.current = state;
 
 	//update the state text
-	var stateText = state;
+	// because we're hiding the base layer for the particle dropdowns from the user,
+	//  make it say dropdown rather than base or base/dropdown
+	var stateText = state.replace('base/dropdown','dropdown').replace('base','dropdown');
 	var stateTextID  = 'UIStateText';
 	var stateTextContainerID  = 'UIStateTextContainer';
 	if (inParticles) {

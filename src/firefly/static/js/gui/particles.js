@@ -269,7 +269,8 @@ function createParticleDropdown(container,this_pane,name,p){
 			.style('float','left')
 			.style('padding','0px 0px 0px 10px')
 			.style('font-family', '"Lucida Console", "Courier New", monospace')
-			.text('base')
+			// because we're hiding the base layer make it say dropdown rather than base or base/dropdown
+			.text('dropdown') 
 
 	// buttons to navigate to additional particle controls
 	var button_container = dropdown.append('div')
