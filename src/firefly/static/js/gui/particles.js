@@ -301,14 +301,14 @@ function createParticleDropdown(container,this_pane,name,p){
 				.style('margin-top',(index/2 < 1 ? 4.5 : 2)+'px')
 				.style('cursor','pointer')
 				.on('click',function(){
-					transitionUIWindows.call(this, 'base/' + k, p)
+					transitionUIWindows.call(this, 'base/dropdown/' + k, p)
 				})
 				.append('div')
 				.attr('class','pLabelDiv')
 				.text(this_pane[k].id[0].toUpperCase()+this_pane[k].id.slice(1,))
 
 			//create the UI for this key
-			//GUIParams.GUIState.main.particles[p].base[k].builder(dropdown, p);
+			this_pane[k].builder(dropdown,this_pane,k,p);
 		}
 
 	})

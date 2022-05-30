@@ -675,13 +675,13 @@ function createColumnDensitySlidersSegment(container,parent,name){
 ////     put in segments
 
 //////// particle builder functions
-function createParticleGeneralWindow(container, p){
+function createParticleGeneralWindow(container,parent,name,p){
 	/////////////////////////
 	//general controls for a particles
 
 	var dheight = 0;
 	var UI = container.append('div')
-		.attr('id',GUIParams.GUIState.main.particles[p].base.general.id)
+		.attr('id',parent[name].id)
 		.attr('class','UImover')
 		.style('position','absolute')
 		.style('top','16px')
@@ -850,11 +850,11 @@ function createParticleGeneralWindow(container, p){
 
 }
 
-function createParticleVelocityWindow(container, p){
+function createParticleVelocityWindow(container,parent,name,p){
 	/////////////////////////
 	//velocity controls for a particles
 	var UI = container.append('div')
-		.attr('id',GUIParams.GUIState.main.particles[p].base.velocities.id)
+		.attr('id',parent[name].id)
 		.attr('class','UImover')
 		.style('position','absolute')
 		.style('top','16px')
@@ -1006,12 +1006,12 @@ function createParticleVelocityWindow(container, p){
 	createVelWidthSlider(p)
 }
 
-function createParticleColormapWindow(container, p){
+function createParticleColormapWindow(container,parent,name,p){
 	/////////////////////////
 	//colormap controls for a particles
 
 	var UI = container.append('div')
-		.attr('id',GUIParams.GUIState.main.particles[p].base.colormap.id)
+		.attr('id',parent[name].id)
 		.attr('class','UImover')
 		.style('position','absolute')
 		.style('top','16px')
@@ -1103,12 +1103,12 @@ function createParticleColormapWindow(container, p){
 }
 
 
-function createParticleFilterWindow(container, p){
+function createParticleFilterWindow(container,parent,name,p){
 	/////////////////////////
 	//filter controls for a particles
 
 	var UI = container.append('div')
-		.attr('id',GUIParams.GUIState.main.particles[p].base.filters.id)
+		.attr('id',parent[name].id)
 		.attr('class','UImover')
 		.style('position','absolute')
 		.style('top','16px')

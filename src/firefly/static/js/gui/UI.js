@@ -231,6 +231,7 @@ function transitionUIWindows(state=null, pID=null){
 	var id2 = null;
 	var elem2 = null;
 	if (state){
+		console.log(state,level)
 		// going forward to a deeper level of the GUI
 		level = getCurrentLevel(GUIBase, state)
 		id2 = level.id;
