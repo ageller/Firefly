@@ -206,9 +206,7 @@ function defineGUIParams(){
 						'builder':createColumnDensityControlsBox
 					},
 				},
-				'particles':{
-					'id':'particlesBase',
-				}
+			'particles':{'id':'particles'}
 			},
 	
 		}

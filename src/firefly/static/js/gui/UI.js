@@ -175,7 +175,12 @@ function createUI(){
 	//  it might be nice to generalize this so that I can just define the GUIParams.GUIState Object to determine what parts to create...
 
 	createGeneralWindow(UI,GUIParams.GUIState,'main');
-	createParticlesWindow(UI);
+
+	container = GUIParams.GUIState.main.particles.d3Element;
+	// create each of the particle group UI base panels containing:
+	GUIParams.partsKeys.forEach(function(p,i){
+		if (GUIParams.UIparticle[p]) createParticleBase(container,p);
+	});
 	
 	// if (GUIParams.containerWidth > 300) {
 	// 	//could be nice to center these, but there are lots of built in positions for the sliders and input boxes.  Not worth it
@@ -281,7 +286,7 @@ function transitionUIWindows(state=null, pID=null){
 		if (!GUIParams.UIparticle[k]) return;
 		var ddiv = d3.select('#' + k + 'Dropdown');
 		ddiv.selectAll('.dropdown-content').classed('show', false);
-		if ((inParticles || id2 == 'particlesBase') && ddiv.classed('show')){
+		if ((inParticles || id2 == 'particles') && ddiv.classed('show')){
 			var level = getCurrentLevel(GUIParams.GUIState.main.particles[k]);
 			d3.select('#' + level.id).classed('show', true);
 		}
@@ -319,7 +324,7 @@ function transitionUIWindows(state=null, pID=null){
 	var h = bbox2.height;
 	var dh = 0;
 	var id3 = '';
-	if (inParticles || id2 =='particlesBase'){
+	if (inParticles || id2 =='particles'){
 		var hdrop = 0;
 		var pheight = 0;
 		GUIParams.partsKeys.forEach(function(k){
@@ -435,40 +440,40 @@ function createGeneralWindow(container,parent,name){
 		)
 	}
 	else { // this is a branch leading to more buttons
-	var singleWidth = GUIParams.containerWidth/keys.length - 4;
-	console.log('hardcoded padding between',this_pane.url,'/',keys,'buttons');
+		var singleWidth = GUIParams.containerWidth/keys.length - 4;
+		//console.log('hardcoded padding between',this_pane.url,'/',keys,'buttons');
 
-	this_pane.d3Element = container.append('div')
-		.attr('id',this_pane.id)
-		.attr('class','UImover')
-		.style('display','flex')
-		.style('position','absolute')
-		.style('top','0px')
-		.style('height','34px')
-		.attr('trueHeight','34px')
-		.style('width', GUIParams.containerWidth + 'px')
-		.style('transform','translateX(' + width + 'px)')
+		this_pane.d3Element = container.append('div')
+			.attr('id',this_pane.id)
+			.attr('class','UImover')
+			.style('display','flex')
+			.style('position','absolute')
+			.style('top','0px')
+			.style('height','34px')
+			.attr('trueHeight','34px')
+			.style('width', GUIParams.containerWidth + 'px')
+			.style('transform','translateX(' + width + 'px)')
 
-	this_pane.children.forEach(function(k){
-		var sub_url = this_pane.url+'/' + k;
-		//console.log(sub_url)
-		this_pane.d3Element.append('div')
-			.attr('id',this_pane[k].id + 'button')
-			.attr('class','particleDiv')
-			.style('width', singleWidth + 'px')
-			.style('float','left')
-			.style('margin','2px')
-			.style('cursor','pointer')
-			.on('click',function(){
-				transitionUIWindows(sub_url)
+		// short-circuit once we've made the div for the particles above
+		if (this_pane.id != 'particles'){
+			this_pane.children.forEach(function(k){
+				var sub_url = this_pane.url+'/' + k;
+				this_pane.d3Element.append('div')
+					.attr('id',this_pane[k].id + 'button')
+					.attr('class','particleDiv')
+					.style('width', singleWidth + 'px')
+					.style('float','left')
+					.style('margin','2px')
+					.style('cursor','pointer')
+					.on('click',function(){transitionUIWindows(sub_url)})
+					.append('div')
+						.attr('class','pLabelDiv')
+						.text(this_pane[k].id[0].toUpperCase()+this_pane[k].id.slice(1,))
+				createGeneralWindow(container,this_pane,k);
 			})
-			.append('div')
-				.attr('class','pLabelDiv')
-				.text(this_pane[k].id[0].toUpperCase()+this_pane[k].id.slice(1,))
-		// TODO need to handle this situation
-		if (k!='particles') createGeneralWindow(container,this_pane,k);
-	})
-	}
+		}// this_pane.id != 'particles'
+		else this_pane.d3Element.style('display',null); // undo the styling above
+	}// else no builder
 }
 
 	// create data controls pane containing:
