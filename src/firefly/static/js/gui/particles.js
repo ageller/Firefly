@@ -1,87 +1,118 @@
+function createParticleSegment(container,parent,name){
+	var this_pane = parent[name];
+	this_pane.url = parent.url+'/'+this_pane.id;
+
+	if (GUIParams.GUIExcludeList.includes(this_pane.url)) return 0;
+	return this_pane.builder(container,this_pane,this_pane.id,parent.name);
+}
+
 function defineGUIParticleState(){
 	//I will add all the possible windows in here, though some may not be used (based on data and settings)
 	GUIParams.partsKeys.forEach(function(p){
 		GUIParams.GUIState.main.particles[p] = {
 			'current':'base',
 			'base':{
-				'id' : 'GUI'+p+'Base',
-				'name': 'Base',
-				'general': {
-					'id' : 'GUI'+p+'General',
-					'name' : 'General',
-					'function' : createParticleGeneralWindow
+				'name':p,
+				'id' : p+'Base',
+				'onoff':{
+					'id':'onoff',
+					'builder':createParticleOnOffSegment
 				},
-
-			},
+				'sizeSlider':{
+					'id':'sizeSlider',
+					'builder':createParticleSizeSliderSegment
+				},
+				'colorPicker':{
+					'id':'colorPicker',
+					'builder':createParticleColorPickerSegment
+				},
+				'dropdown':{
+					'name':p,
+					'id':'dropdown',
+					'builder':createParticleDropdown,
+					'general': {
+						'id' : 'general',
+						'builder' : createParticleGeneralWindow
+					}
+				}
+			}
 		};
 
-
 		if (GUIParams.haveVelocities[p]){
-			GUIParams.GUIState.main.particles[p].base.velocities = {
-				'id' : 'GUI'+p+'Velocities',
-				'name' : 'Velocities',
-				'function' : createParticleVelocityWindow
-
+			GUIParams.GUIState.main.particles[p].base.dropdown.velocities = {
+				'id' : 'velocities',
+				'builder' : createParticleVelocityWindow
 			};
 		}
 
 		if (GUIParams.haveColormap[p]){
-			GUIParams.GUIState.main.particles[p].base.colormap = {
-				'id' : 'GUI'+p+'Colormap',
-				'name' : 'Colormap',
-				'function' : createParticleColormapWindow
+			GUIParams.GUIState.main.particles[p].base.dropdown.colormap = {
+				'id' : 'colormap',
+				'builder' : createParticleColormapWindow
 			};
 		}
 
 		if (GUIParams.haveFilter[p]){
-			GUIParams.GUIState.main.particles[p].base.filters = {
-				'id' : 'GUI'+p+'Filters',
-				'name' : 'Filters',
-				'function' : createParticleFilterWindow
+			GUIParams.GUIState.main.particles[p].base.dropdown.filters = {
+				'id' : 'filters',
+				'builder' : createParticleFilterWindow
 			}
 		}
-
-		// rather than make its own window let's put radii in general
-		//  since we'll only ever need the dropdown
-		/*
-		if (GUIParams.haveRadii[p]){
-			GUIParams.GUIState.main.particles[p].base.radii = {
-				'id' : 'GUI'+p+'Radii',
-				'name' : 'Radii'
-				//TO DO : create a function and enter it here
-			};
-		}
-		*/
 
 	})
 
 	getGUIIDs();
 }
 
-function createParticleBase(UI, p){
+function createParticleBase(container, parent, p){
+
+	var this_pane = parent[p].base;
+	var keys = Object.keys(this_pane).filter(function(key){return !GUIParams.GUIState_variables.includes(key)});
+
+	// initialize some of the variables the node will need here
+	this_pane.children = keys;
+	this_pane.parent = parent;
+	this_pane.url = p;
 
 	//  create container divs for each of the particle groups
-	var controls = UI.append('div')
-		.attr('class',"particleDiv "+p+"Div")
-		.attr('id',p+"Div" ) 
-		.style('width', (GUIParams.containerWidth - 4) + 'px')
-		.style('height','32px')
-		.attr('trueHeight','32px')
-		.style('margin-bottom','0px')
-		.style('padding','0px')
 
-	var container = controls.append('div')
-		.attr('id',p + 'BaseContainer')
-		.style('height','33px')
-		.attr('trueHeight','33px');
+	var height = 0;
+	if (!GUIParams.GUIExcludeList.includes(this_pane.url)){
+		height += 33;
+		var controls = container.append('div')
+			.attr('class',"particleDiv "+p+"Div")
+			.attr('id',p+"Div" ) 
+			.style('width', (GUIParams.containerWidth - 4) + 'px')
+			.style('height',height+'px')
+			.attr('trueHeight',height+'px')
+			.style('margin-bottom','0px')
+			.style('padding','0px')
 
-	// size the overall particle group div
-	container.append('div')
-		.attr('class','pLabelDiv')
-		.style('padding-top','7px')
-		.style('width',GUIParams.longestPartLabelLen)
-		.text(p)
-		
+		this_pane.d3Element = controls.append('div')
+			.attr('id',p + 'BaseContainer')
+			.style('height',height+'px')
+			.attr('trueHeight',height+'px');
+
+		// size the overall particle group div
+		this_pane.d3Element.append('div')
+			.attr('class','pLabelDiv')
+			.style('padding-top','7px')
+			.style('width',GUIParams.longestPartLabelLen)
+			.text(p)
+
+		this_pane.children.forEach(function(name){
+			height+=createParticleSegment(this_pane.d3Element,this_pane,name)})
+
+		this_pane.d3Element.style('height', height + 'px')
+		.attr('trueHeight', height + 'px')
+		.style('display','block')
+	}
+
+	container.style('height', height + 'px')
+		.attr('trueHeight', height + 'px')
+}
+
+function createParticleOnOffSegment(container,parent,name,p){
 	// add the on-off switch
 	var onoff = container.append('label')
 		.attr('class','switch')
@@ -132,7 +163,9 @@ function createParticleBase(UI, p){
 	onoff.append('span')
 		.attr('class','slideroo');
 
-
+	return 0;
+}
+function createParticleSizeSliderSegment(container,parent,name,p){
 	// add the particle size slider
 	left = 210;
 	container.append('div')
@@ -149,13 +182,22 @@ function createParticleBase(UI, p){
 		.attr('type','text')
 		.style('left',(GUIParams.containerWidth - 94) + 'px');
 
+	createPsizeSlider(p);
+	return 0;
+}
+
+function createParticleColorPickerSegment(container,parent,name,p){
 	// add the particle color picker
 	container.append('input')
 		.attr('id',p+'ColorPicker');
 	createColorPicker(p);
 	container.select('.sp-replacer').style('left',(GUIParams.containerWidth - 54) + 'px');
+	return 0;
+}
 
-	createPsizeSlider(p);
+function createParticleDropdown(container,parent,name,p){
+	debugger;
+	var segment_height = 0;
 
 	// add the dropdown button and a dropdown container div
 	if (GUIParams.UIdropdown[p]){
@@ -168,7 +210,7 @@ function createParticleBase(UI, p){
 		.html('&#x25BC');
 	}
 
-	var keys = Object.keys(GUIParams.GUIState.main.particles[p].base).filter(function(d){return (d != 'id' && d != 'name' && d != 'current')});
+	var keys = Object.keys(this_pane).filter(function(key){return !GUIParams.GUIState_variables.includes(key)});
 	//var h = 34*keys.length
 	var h = 34*Math.ceil(keys.length/2.) + 1;
 
@@ -242,7 +284,7 @@ function createParticleBase(UI, p){
 
 	keys.forEach(function(k){
 		//create the button on the base window
-		if (GUIParams.GUIState.main.particles[p].base[k].hasOwnProperty('function')) {
+		if (GUIParams.GUIState.main.particles[p].base[k].hasOwnProperty('builder')) {
 			container.append('div')
 				.attr('id',GUIParams.GUIState.main.particles[p].base[k].id + 'button')
 				.attr('class','particleDiv')
@@ -259,7 +301,7 @@ function createParticleBase(UI, p){
 					.text(GUIParams.GUIState.main.particles[p].base[k].name)
 
 			//create the UI for this key
-			GUIParams.GUIState.main.particles[p].base[k].function(dropdown, p);
+			GUIParams.GUIState.main.particles[p].base[k].builder(dropdown, p);
 		}
 
 	})

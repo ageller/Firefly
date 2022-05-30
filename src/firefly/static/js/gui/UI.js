@@ -179,7 +179,7 @@ function createUI(){
 	container = GUIParams.GUIState.main.particles.d3Element;
 	// create each of the particle group UI base panels containing:
 	GUIParams.partsKeys.forEach(function(p,i){
-		if (GUIParams.UIparticle[p]) createParticleBase(container,p);
+		if (GUIParams.UIparticle[p]) createParticleBase(container,GUIParams.GUIState.main.particles,p);
 	});
 	
 	// if (GUIParams.containerWidth > 300) {
@@ -285,6 +285,7 @@ function transitionUIWindows(state=null, pID=null){
 	GUIParams.partsKeys.forEach(function(k){
 		if (!GUIParams.UIparticle[k]) return;
 		var ddiv = d3.select('#' + k + 'Dropdown');
+		if (ddiv.empty()) return;
 		ddiv.selectAll('.dropdown-content').classed('show', false);
 		if ((inParticles || id2 == 'particles') && ddiv.classed('show')){
 			var level = getCurrentLevel(GUIParams.GUIState.main.particles[k]);
@@ -332,10 +333,11 @@ function transitionUIWindows(state=null, pID=null){
 			var ddiv = d3.select('#' + k + 'Dropdown');
 			var pdiv = d3.select('#' + k + 'Div');
 
+			var htmp = 0;
 			// the main particle div without the dropdown
-			var htmp = parseFloat(pdiv.style('height')) + 2; //2 for margins
+			if (!pdiv.empty()) htmp += parseFloat(pdiv.style('height')) + 2; //2 for margins
 
-			if (ddiv.classed('show')){
+			if (!ddiv.empty() && ddiv.classed('show')){
 				// add on the height of the dropdown
 				var level = getCurrentLevel(GUIParams.GUIState.main.particles[k]);
 				if (inParticles && pID == k) id3 = level.id;
@@ -375,10 +377,9 @@ function transitionUIWindows(state=null, pID=null){
 
 	// set all hidden components of the GUI to a height of 0
 	function setToZero(obj){
-		debugger
 		if (obj.hasOwnProperty('id')){
 			if (obj.id != id1 && obj.id != id2 && obj.id != id3){
-				console.log(obj.id)
+				//console.log(obj.id)
 				var elem = d3.select('#' + obj.id);
 				// size checks if the selection caught anything
 				if (elem.size()>0 && !elem.classed('show')) elem.style('height','0px');
@@ -467,6 +468,7 @@ function createGeneralWindow(container,parent,name){
 		if (this_pane.id != 'particles'){
 			this_pane.children.forEach(function(k){
 				var sub_url = this_pane.url+'/' + k;
+				console.log(sub_url)
 				if (GUIParams.GUIExcludeList.includes(sub_url)) return;
 				this_pane.d3Element.append('div')
 					.attr('id',this_pane[k].id + 'button')
