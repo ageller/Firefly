@@ -186,7 +186,16 @@ function defineGUIParams(){
 		//current will hold the key that defines the currently visible window
 		//the rest of the keys will point to the IDs for the DOM elements that hold those windows
 		//the particles state will be populated in createUI
-		this.GUIExcludeList = ['main/general/projection','main/general/data/loadNewData','main/general/data/savePreset'];
+		this.GUIExcludeList = [
+			'main/general/data/loadNewData',
+			'main/general/data/savePreset',
+			'main/general/camera/cameraButtons',
+			'main/general/camera/centerTextBoxes',
+			'main/general/camera/cameraTextBoxes',
+			'main/general/camera/rotationTextBoxes',
+			'main/general/camera/snapshot',
+			'main/general/camera/fullScreen',
+		];
 		this.GUIState = {
 			'current':'main',
 			'main':{
@@ -216,7 +225,39 @@ function defineGUIParams(){
 					},
 					'camera':{
 						'id':'camera',
-						'builder':createCameraControlsBox
+						'builder':createCameraControlsBox,
+						'centerTextBoxes':{
+							'id':'centerTextBoxes',
+							'builder':createCenterTextBoxesSegment
+						},
+						'cameraTextBoxes':{
+							'id':'cameraTextBoxes',
+							'builder':createCameraTextBoxesSegment
+						},
+						'rotationTextBoxes':{
+							'id':'rotationTextBoxes',
+							'builder':createRotationTextBoxesSegment
+						},
+						'cameraButtons':{
+						 	'id':'cameraButtons',
+							'builder':createCameraButtonsSegment
+						},
+						'fullScreen':{
+							'id':'fullScreen',
+							'builder':createFullScreenSegment
+						},
+						'snapshot':{
+							'id':'snapshot',
+							'builder':createSnapshotSegment
+						},
+						'cameraFriction':{
+							'id':'cameraFriction',
+							'builder':createCameraFrictionSegment
+						},
+						'stereoSep':{
+							'id':'stereoSep',
+							'builder':createStereoSepSegment
+						}
 					},
 					'projection':{
 						'id':'projection',

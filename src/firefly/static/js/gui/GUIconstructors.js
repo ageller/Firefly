@@ -19,9 +19,8 @@ function createDataControlsBox(container,parent,name){
 		.style('width',GUIParams.containerWidth + 'px')
 		.style('border-radius',0)
 
-	var height = 17.5; // <--- required to match AMG's original hard-coded var m2height = 145;
+	var height = 5; // <--- required to match AMG's original hard-coded var m2height = 145;
 	this_pane.children.forEach(function(name){
-		console.log(name,height)
 		height+=createSegment(this_pane.d3Element,this_pane,name)})
 	
 	this_pane.d3Element.style('height', height + 'px')
@@ -37,7 +36,7 @@ function createDataControlsBox(container,parent,name){
 }
 
 function createDecimationSegment(container,parent,name){
-	var segment_height = 22.5;
+	var segment_height = 35;
 	//decimation
 	var segment = container.append('div')
 		.attr('id', name+'Div')
@@ -173,25 +172,50 @@ function createLoadNewDataSegment(container,parent,name){
 	return segment_height;
 }
 
-////     put in segments
-function createCameraControlsBox(UI){
+function createCameraControlsBox(container,parent,name){
 	/////////////////////////
 	//camera controls
+	var this_pane  = parent[name];
 
-
-	var c2height = 260;
-	var c2 = UI.append('div')
+	this_pane.d3Element = container.append('div')
 		.attr('class','dropdown-content')
-		.attr('id','cameraControls')
+		.attr('id',name+'Controls')
 		.style('margin','0px')
-		.style('padding','0px 0px 0px 5px')
+		.style('padding','0px 0px 0px 5px') // < --- data controls does not have this
 		.style('width',GUIParams.containerWidth + 'px')
-		.style('border-radius',0)
+		.style('border-radius',0)	
 
+	var height = 0; 
+	this_pane.children.forEach(function(name){
+		console.log(name,height)
+		height+=createSegment(this_pane.d3Element,this_pane,name)})
+	console.log(height)
+	
+	this_pane.d3Element.style('height', height + 'px')
+		.attr('trueHeight', height + 'px')
+		.style('display','block')
 
+	container.style('height', height + 'px')
+		.attr('trueHeight', height + 'px')
 
+	// camera sliders
+	createStereoSlider();
+	createFrictionSlider();
+
+	// update the text boxes for camera
+	updateUICenterText();
+	updateUICameraText();
+	updateUIRotText();
+
+	// remove this after fixing the camera input boxes!
+	//disableCameraInputBoxes();
+}
+
+function createCenterTextBoxesSegment(container,parent,name){
+	// TODO disabling the lock checkbox is tied disabling the center text box
+	var segment_height = 30;
 	//center text boxes
-	var c3 = c2.append('div')
+	var c3 = container.append('div')
 		.attr('class','pLabelDiv')
 		.style('width',(GUIParams.containerWidth - 10) + 'px')
 		.style('margin-top','5px') 
@@ -231,6 +255,7 @@ function createCameraControlsBox(UI){
 			var key = event.keyCode || event.which;
 			if (key == 13) sendToViewer([{'checkText':[this.id, this.value]}]);
 		})
+
 	//center lock checkbox
 	var c4 = c3.append('span')
 		.attr('id','CenterCheckDiv')
@@ -259,9 +284,14 @@ function createCameraControlsBox(UI){
 		.attr('id','CenterCheckLabel')
 		.style('font-size','10pt')
 		.text('Lock');
+	return segment_height;
+}
 
+function createCameraTextBoxesSegment(container,parent,name){
+	// TODO disabling the tween checkbox is tied disabling the camera text box
+	var segment_height = 30;
 	//camera text boxes
-	c3 = c2.append('div')
+	var c3 = container.append('div')
 		.attr('class','pLabelDiv')
 		.style('width',(GUIParams.containerWidth - 10) + 'px')
 		.style('margin-top','5px') 
@@ -325,9 +355,13 @@ function createCameraControlsBox(UI){
 			.style('font-size','10pt')
 			.text('Tween');
 	}
+	return segment_height;
+}
 
+function createRotationTextBoxesSegment(container,parent,name){
+	var segment_height = 30;
 	//rotation text boxes
-	c3 = c2.append('div')
+	var c3 = container.append('div')
 		.attr('class','pLabelDiv')
 		.style('width',(GUIParams.containerWidth - 10) + 'px')
 		.style('margin-top','5px') 
@@ -367,8 +401,13 @@ function createCameraControlsBox(UI){
 			var key = event.keyCode || event.which;
 			if (key == 13) sendToViewer([{'checkText':[this.id, this.value]}]);
 		})
+	return segment_height;
+}
+
+function createCameraButtonsSegment(container,parent,name){
+	var segment_height = 30;
 	//buttons
-	c3 = c2.append('div')
+	c3 = container.append('div')
 		.attr('class','pLabelDiv')
 		.style('width',(GUIParams.containerWidth - 10) + 'px');
 	c3.append('button')
@@ -406,9 +445,13 @@ function createCameraControlsBox(UI){
 		})
 		.append('span')
 			.text('Recenter');
+	return segment_height;
+}
 
+function createFullScreenSegment(container,parent,name){
+	var segment_height = 35;
 	//fullscreen button
-	c2.append('div')
+	container.append('div')
 		.attr('id','fullScreenDiv')
 		.style('margin-left','-5px')
 		.append('button')
@@ -417,10 +460,14 @@ function createCameraControlsBox(UI){
 			.style('width',(GUIParams.containerWidth - 10) + 'px')
 			.attr('onclick','fullscreen();')
 			.append('span')
-				.text('Fullscreen');
+			.text('Fullscreen');
+	return segment_height;
+}
 
+function createSnapshotSegment(container,parent,name){
+	var segment_height = 35;
 	//snapshots
-	var snap = c2.append('div')
+	var snap = container.append('div')
 		.attr('id','snapshotDiv')
 		.attr('class', 'button-div')
 		.style('width',(GUIParams.containerWidth - 10) + 'px')
@@ -435,7 +482,7 @@ function createCameraControlsBox(UI){
 			sendToViewer([{'renderImage':null}]);
 		})
 		.append('span')
-			.text('Take Snapshot');
+		.text('Take Snapshot');
 
 	snap.append('input')
 		.attr('id','RenderXText')
@@ -464,9 +511,13 @@ function createCameraControlsBox(UI){
 			//if (key == 13) sendToViewer([{'checkText':[this.id, this.value]}]);
 			sendToViewer([{'checkText':[this.id, this.value]}]);
 		})
+	return segment_height;
+}
 
+function createCameraFrictionSegment(container,parent,name){
+	var segment_height = 35;
 	//camera friction
-	c3 = c2.append('div')
+	c3 = container.append('div')
 		.attr('class','pLabelDiv')
 		.attr('id','FrictionDiv')
 		// .style('background-color','#808080')
@@ -489,9 +540,13 @@ function createCameraControlsBox(UI){
 		.style('left',(GUIParams.containerWidth - 45) + 'px')
 		.style('width','40px')
 		.style('margin-top','-2px');
+	return segment_height;
+}
 
+function createStereoSepSegment(container,parent,name){
+	var segment_height = 35;
 	//camera stereo separation
-	c3 = c2.append('div')
+	c3 = container.append('div')
 		.attr('class','pLabelDiv')
 		.attr('id','StereoSepDiv')
 		// .style('background-color','#808080')
@@ -530,27 +585,11 @@ function createCameraControlsBox(UI){
 		.style('left',(GUIParams.containerWidth - 45) + 'px')
 		.style('width','40px')
 		.style('margin-top','-2px');
-
-	c2.style('height', c2height + 'px')
-		.attr('trueHeight', c2height + 'px')
-		.style('display','block')
-
-	UI.style('height', c2height + 'px')
-		.attr('trueHeight', c2height + 'px')
-
-	// camera sliders
-	createStereoSlider();
-	createFrictionSlider();
-
-	// update the text boxes for camera
-	updateUICenterText();
-	updateUICameraText();
-	updateUIRotText();
-
-	// remove this after fixing the camera input boxes!
-	disableCameraInputBoxes();
+	return segment_height;
 }
 
+
+////     put in segments
 function createColumnDensityControlsBox(UI){
 
 	UI.style('height', '135px')
