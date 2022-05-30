@@ -6,9 +6,7 @@ function createSegment(container,parent,name){
 	return this_pane.builder(container,this_pane,this_pane.id);
 }
 
-function createDataControlsBox(container,parent,name){
-	////////////////////////
-	//"data" controls"
+function createControlsBox(container,parent,name){
 
 	var this_pane  = parent[name];
 
@@ -16,6 +14,7 @@ function createDataControlsBox(container,parent,name){
 		.attr('class','dropdown-content')
 		.attr('id',name+'Controls')
 		.style('margin','0px')
+		.style('padding','0px 0px 0px 5px') 
 		.style('width',GUIParams.containerWidth + 'px')
 		.style('border-radius',0)
 
@@ -30,9 +29,6 @@ function createDataControlsBox(container,parent,name){
 	container.style('height', height + 'px')
 		.attr('trueHeight', height + 'px')
 
-	// create all the noUISliders
-	createDecimationSlider();
-	if (GUIParams.haveAnyOctree) createMemorySlider();
 }
 
 function createDecimationSegment(container,parent,name){
@@ -104,7 +100,11 @@ function createDecimationSegment(container,parent,name){
 			.attr('type','text')
 			.style('left',(GUIParams.containerWidth - 45) + 'px')
 			.style('width','40px');
+
+		createMemorySlider();
 	}
+
+	createDecimationSlider();
 	return segment_height;
 }
 
@@ -172,47 +172,10 @@ function createLoadNewDataSegment(container,parent,name){
 	return segment_height;
 }
 
-function createCameraControlsBox(container,parent,name){
-	/////////////////////////
-	//camera controls
-	var this_pane  = parent[name];
-
-	this_pane.d3Element = container.append('div')
-		.attr('class','dropdown-content')
-		.attr('id',name+'Controls')
-		.style('margin','0px')
-		.style('padding','0px 0px 0px 5px') // < --- data controls does not have this
-		.style('width',GUIParams.containerWidth + 'px')
-		.style('border-radius',0)	
-
-	var height = 0; 
-	this_pane.children.forEach(function(name){
-		console.log(name,height)
-		height+=createSegment(this_pane.d3Element,this_pane,name)})
-	console.log(height)
-	
-	this_pane.d3Element.style('height', height + 'px')
-		.attr('trueHeight', height + 'px')
-		.style('display','block')
-
-	container.style('height', height + 'px')
-		.attr('trueHeight', height + 'px')
-
-	// camera sliders
-	createStereoSlider();
-	createFrictionSlider();
-
-	// update the text boxes for camera
-	updateUICenterText();
-	updateUICameraText();
-	updateUIRotText();
-
-	// remove this after fixing the camera input boxes!
-	//disableCameraInputBoxes();
-}
 
 function createCenterTextBoxesSegment(container,parent,name){
 	// TODO disabling the lock checkbox is tied disabling the center text box
+	// TODO: also removed this disableCameraInputBoxes();
 	var segment_height = 30;
 	//center text boxes
 	var c3 = container.append('div')
@@ -284,6 +247,7 @@ function createCenterTextBoxesSegment(container,parent,name){
 		.attr('id','CenterCheckLabel')
 		.style('font-size','10pt')
 		.text('Lock');
+	updateUICenterText();
 	return segment_height;
 }
 
@@ -355,6 +319,7 @@ function createCameraTextBoxesSegment(container,parent,name){
 			.style('font-size','10pt')
 			.text('Tween');
 	}
+	updateUICameraText();
 	return segment_height;
 }
 
@@ -401,6 +366,7 @@ function createRotationTextBoxesSegment(container,parent,name){
 			var key = event.keyCode || event.which;
 			if (key == 13) sendToViewer([{'checkText':[this.id, this.value]}]);
 		})
+	updateUIRotText();
 	return segment_height;
 }
 
@@ -540,6 +506,8 @@ function createCameraFrictionSegment(container,parent,name){
 		.style('left',(GUIParams.containerWidth - 45) + 'px')
 		.style('width','40px')
 		.style('margin-top','-2px');
+
+	createFrictionSlider();
 	return segment_height;
 }
 
@@ -585,35 +553,9 @@ function createStereoSepSegment(container,parent,name){
 		.style('left',(GUIParams.containerWidth - 45) + 'px')
 		.style('width','40px')
 		.style('margin-top','-2px');
+
+	createStereoSlider();
 	return segment_height;
-}
-
-function createColumnDensityControlsBox(container,parent,name){
-
-	var this_pane  = parent[name];
-
-	this_pane.d3Element = container.append('div')
-		.attr('class','dropdown-content')
-		.attr('id',name+'Controls')
-		.style('margin','0px')
-		.style('padding','0px 0px 0px 5px') // < --- data controls doesn't have this
-		.style('width',GUIParams.containerWidth + 'px')
-		.style('border-radius',0)
-
-	var height = 5; // <--- required to match AMG's original hard-coded var m2height = 135;
-	this_pane.children.forEach(function(name){
-		height+=createSegment(this_pane.d3Element,this_pane,name)})
-	console.log(height)
-	
-	this_pane.d3Element.style('height', height + 'px')
-		.attr('trueHeight', height + 'px')
-		.style('display','block')
-
-	container.style('height', height + 'px')
-		.attr('trueHeight', height + 'px')
-
-	createColormapSlider(GUIParams.CDkey,GUIParams.ckeys[GUIParams.CDkey][0]);
-	console.log(document.getElementById('columnDensityCheckBox'))
 }
 
 function createColumnDensityCheckBoxSegment(container,parent,name){
@@ -725,6 +667,8 @@ function createColumnDensitySlidersSegment(container,parent,name){
 		.attr('class','CMapMaxTClass')
 		.attr('type','text')
 		.style('left',(GUIParams.containerWidth - 103) + 'px');
+
+	createColormapSlider(GUIParams.CDkey,GUIParams.ckeys[GUIParams.CDkey][0]);
 	return segment_height;
 }
 

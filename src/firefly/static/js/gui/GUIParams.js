@@ -208,7 +208,7 @@ function defineGUIParams(){
 					'name':'general',
 					'data':{
 						'id':'data',
-						'builder':createDataControlsBox, // createGeneralWindow <--- put this in after you flesh out the rest of the data children
+						'builder':createControlsBox, // createGeneralWindow <--- put this in after you flesh out the rest of the data children
 						'decimation':{
 							'id':'decimation',
 							'builder':createDecimationSegment
@@ -228,7 +228,7 @@ function defineGUIParams(){
 					},
 					'camera':{
 						'id':'camera',
-						'builder':createCameraControlsBox,
+						'builder':createControlsBox,
 						'centerTextBoxes':{
 							'id':'centerTextBoxes',
 							'builder':createCenterTextBoxesSegment
@@ -264,7 +264,7 @@ function defineGUIParams(){
 					},
 					'projection':{
 						'id':'projection',
-						'builder':createColumnDensityControlsBox,
+						'builder':createControlsBox,
 						'columnDensityCheckBox':{
 							'id':'columnDensityCheckBox',
 							'builder':createColumnDensityCheckBoxSegment
