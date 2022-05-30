@@ -231,7 +231,6 @@ function transitionUIWindows(state=null, pID=null){
 	var id2 = null;
 	var elem2 = null;
 	if (state){
-		console.log(state,level)
 		// going forward to a deeper level of the GUI
 		level = getCurrentLevel(GUIBase, state)
 		id2 = level.id;
@@ -245,6 +244,11 @@ function transitionUIWindows(state=null, pID=null){
 		level = GUIBase;
 		state = ''
 		d.forEach(function(dd,i){
+			// short-circuit on dropdown, that pane doesn't actually exist
+			//  so we'll want to return to base. this ensures the state doesn't
+			//  have the trailing '/dropdown' that would try and transition to a
+			//  pane that doesn't actually exist.
+			if (dd == 'dropdown') return;
 			level = level[dd];
 			if (i > 0) state += '/';
 			state += dd;
@@ -316,6 +320,7 @@ function transitionUIWindows(state=null, pID=null){
 		elem1.selectAll('.dropdown-content').style('height', '0px');
 	}, 250);
 
+	console.log(elem1,elem2)
 	// these go on, but with special handling below for particles
 	elem2.style('height', elem2.attr('trueHeight'));
 	elem2.select('.dropdown-content').style('height', elem2.attr('trueHeight'));
@@ -348,7 +353,7 @@ function transitionUIWindows(state=null, pID=null){
 
 				//reset the heights
 				elem.style('height', elem.attr('trueHeight'));
-				ddiv.style('height', ph + 10 +'px');
+				ddiv.style('height', ph + 'px');
 				pdiv.style('margin-bottom', ph + 4 + 'px');
 
 				//save this to resize the particle dropdown
@@ -356,7 +361,7 @@ function transitionUIWindows(state=null, pID=null){
 
 				htmp += ph
 
-				dh += 2; // I think I need a slight addition to the sizing per particle, but this needs further testing
+				//dh += 2; // I think I need a slight addition to the sizing per particle, but this needs further testing
 			} else 	{
 				ddiv.style('height','0px');
 			}

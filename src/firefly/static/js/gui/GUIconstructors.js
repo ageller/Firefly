@@ -851,6 +851,7 @@ function createParticleGeneralWindow(container,parent,name,p){
 }
 
 function createParticleVelocityWindow(container,parent,name,p){
+	var segment_height = 154+20;
 	/////////////////////////
 	//velocity controls for a particles
 	var UI = container.append('div')
@@ -858,8 +859,8 @@ function createParticleVelocityWindow(container,parent,name,p){
 		.attr('class','UImover')
 		.style('position','absolute')
 		.style('top','16px')
-		.style('height','154px')
-		.attr('trueHeight','154px')
+		.style('height',segment_height+'px')
+		.attr('trueHeight',segment_height+'px')
 		.style('width', GUIParams.containerWidth + 'px')
 		.style('transform','translateX(' + GUIParams.containerWidth + 'px)')
 

@@ -19,19 +19,19 @@ function defineGUIParticleState(){
 					'builder':createParticleOnOffSegment
 				},
 				'sizeSlider':{
-					'id':'sizeSlider',
+					'id':p+'sizeSlider',
 					'builder':createParticleSizeSliderSegment
 				},
 				'colorPicker':{
-					'id':'colorPicker',
+					'id':p+'colorPicker',
 					'builder':createParticleColorPickerSegment
 				},
 				'dropdown':{
 					'name':p,
-					'id':'dropdown',
+					'id':'GUI'+p+'dropdown',
 					'builder':createParticleDropdown,
 					'general': {
-						'id' : 'general',
+						'id' : p+'general',
 						'builder' : createParticleGeneralWindow
 					}
 				}
@@ -40,21 +40,21 @@ function defineGUIParticleState(){
 
 		if (GUIParams.haveVelocities[p]){
 			GUIParams.GUIState.main.particles[p].base.dropdown.velocities = {
-				'id' : 'velocities',
+				'id' : p+'velocities',
 				'builder' : createParticleVelocityWindow
 			};
 		}
 
 		if (GUIParams.haveColormap[p]){
 			GUIParams.GUIState.main.particles[p].base.dropdown.colormap = {
-				'id' : 'colormap',
+				'id' : p+'colormap',
 				'builder' : createParticleColormapWindow
 			};
 		}
 
 		if (GUIParams.haveFilter[p]){
 			GUIParams.GUIState.main.particles[p].base.dropdown.filters = {
-				'id' : 'filters',
+				'id' : p+'filters',
 				'builder' : createParticleFilterWindow
 			}
 		}
@@ -204,8 +204,6 @@ function createParticleDropdown(container,this_pane,name,p){
 	//var h = 34*keys.length
 	var segment_height = 75; //34*Math.ceil(this_pane.children.length/2.) + 1;
 
-	console.log(p,this_pane.url)
-
 	// add the dropdown button and a dropdown container div
 	d3.select('#' + p + 'Div')
 		.append('button')
@@ -221,7 +219,7 @@ function createParticleDropdown(container,this_pane,name,p){
 		.attr('class','dropdown-content')
 		.style('width',(GUIParams.containerWidth - 4) + 'px')
 		.style('display','flex-wrap')
-		.style('top', '10px') 
+		.style('top','7px') 
 		//.style('height', h + 16 + 'px')
 		//.style('clip-path', 'inset(0px 0px ' + (h + 16) + 'px 0px)');
 		.style('height','0px')
@@ -282,7 +280,6 @@ function createParticleDropdown(container,this_pane,name,p){
 
 	var singleWidth = (GUIParams.containerWidth - 38)/2.+1;
 
-	console.log(singleWidth)
 	button_container.style('height', segment_height + 'px')
 		.attr('trueHeight', segment_height + 'px')
 	this_pane.children.forEach(function(k,index){
@@ -347,7 +344,7 @@ function expandParticleDropdown(handle) {
 		ddiv
 			.style('clip-path', 'inset(0px 0px 0px 0px')
 			.style('height',hdrop + 'px');
-		pdiv.style('margin-bottom', hdrop + 8 + 'px');
+		pdiv.style('margin-bottom', hdrop + 4 + 'px');
 		elem.style('height', elem.attr('trueHeight'));
 		h0 += hdrop
 	} else {
