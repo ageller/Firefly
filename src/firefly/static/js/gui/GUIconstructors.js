@@ -2,8 +2,8 @@ function createSegment(container,parent,name){
 	var this_pane = parent[name];
 	this_pane.url = parent.url+'/'+this_pane.id;
 
-	if (GUIParams.GUIExcludeList.includes(this_pane.url)) return;
-	this_pane.builder(container,this_pane,this_pane.id)
+	if (GUIParams.GUIExcludeList.includes(this_pane.url)) return 0;
+	return this_pane.builder(container,this_pane,this_pane.id);
 }
 
 function createDataControlsBox(container,parent,name){
@@ -18,19 +18,18 @@ function createDataControlsBox(container,parent,name){
 		.style('margin','0px')
 		.style('width',GUIParams.containerWidth + 'px')
 		.style('border-radius',0)
-	var m2height = 145;
 
-	this_pane.children.forEach(function(name){createSegment(this_pane.d3Element,this_pane,name)})
+	var height = 17.5; // <--- required to match AMG's original hard-coded var m2height = 145;
+	this_pane.children.forEach(function(name){
+		console.log(name,height)
+		height+=createSegment(this_pane.d3Element,this_pane,name)})
 	
-	// height of the load new data button and its padding (found by trial and error)
-	if (!GUIParams.usingSocket) m2height-=45;
-
-	this_pane.d3Element.style('height', m2height + 'px')
-		.attr('trueHeight', m2height + 'px')
+	this_pane.d3Element.style('height', height + 'px')
+		.attr('trueHeight', height + 'px')
 		.style('display','block')
 
-	container.style('height', m2height + 'px')
-		.attr('trueHeight', m2height + 'px')
+	container.style('height', height + 'px')
+		.attr('trueHeight', height + 'px')
 
 	// create all the noUISliders
 	createDecimationSlider();
@@ -38,6 +37,7 @@ function createDataControlsBox(container,parent,name){
 }
 
 function createDecimationSegment(container,parent,name){
+	var segment_height = 22.5;
 	//decimation
 	var segment = container.append('div')
 		.attr('id', name+'Div')
@@ -64,7 +64,7 @@ function createDecimationSegment(container,parent,name){
 		.style('left',(GUIParams.containerWidth - 45) + 'px')
 		.style('width','40px');
 	if (GUIParams.haveAnyOctree){
-		m2height += 50;
+		segment_height += 50;
 		//text to show the memory-imposed decimation
 		container.append('div')
 			.attr('id', 'decimationOctreeDiv')
@@ -106,9 +106,11 @@ function createDecimationSegment(container,parent,name){
 			.style('left',(GUIParams.containerWidth - 45) + 'px')
 			.style('width','40px');
 	}
+	return segment_height;
 }
 
 function createPresetSegment(container,parent,name){
+	var segment_height = 35;
 	//save preset button
 	container.append('div').attr('id','savePresetDiv')
 		.append('button')
@@ -119,9 +121,11 @@ function createPresetSegment(container,parent,name){
 			sendToViewer([{'savePreset':null}]);
 		})
 		.append('span')
-			.text('Save Settings');
+		.text('Save Settings');
+	return segment_height;
 }
 function createResetSegment(container,parent,name){
+	var segment_height = 35;
 	//reset to default button
 	var sub_div = container.append('div').attr('id','resetDiv')
 		.append('button')
@@ -132,7 +136,7 @@ function createResetSegment(container,parent,name){
 			sendToViewer([{'resetToOptions':null}]);
 		})
 		.append('span')
-			.text('Initial Settings');
+		.text('Initial Settings');
 
 	//reset to preset button
 	d3.select("#resetDiv")
@@ -146,10 +150,12 @@ function createResetSegment(container,parent,name){
 			loadPreset();
 		})
 		.append('span')
-			.text('Load Settings');
+		.text('Load Settings');
+	return segment_height;
 }
 
 function createLoadNewDataSegment(container,parent,name){
+	var segment_height = 0;
 	//load new data button
 	if (GUIParams.usingSocket){
 		container.append('div').attr('id','loadNewDataDiv')
@@ -162,7 +168,9 @@ function createLoadNewDataSegment(container,parent,name){
 			})
 			.append('span')
 				.text('Load New Data');
+		segment_height += 35;
 	}
+	return segment_height;
 }
 
 ////     put in segments

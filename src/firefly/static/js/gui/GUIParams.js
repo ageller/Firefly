@@ -186,7 +186,7 @@ function defineGUIParams(){
 		//current will hold the key that defines the currently visible window
 		//the rest of the keys will point to the IDs for the DOM elements that hold those windows
 		//the particles state will be populated in createUI
-		this.GUIExcludeList = ['main/general/projection'];
+		this.GUIExcludeList = ['main/general/projection','main/general/data/loadNewData','main/general/data/savePreset'];
 		this.GUIState = {
 			'current':'main',
 			'main':{
@@ -210,7 +210,7 @@ function defineGUIParams(){
 							'builder':createResetSegment
 						},
 						'loadNewData':{
-							'id':'loadNewDataa',
+							'id':'loadNewData',
 							'builder':createLoadNewDataSegment
 						}
 					},
