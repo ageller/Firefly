@@ -202,7 +202,7 @@ function createParticleDropdown(container,this_pane,name,p){
 	this_pane.url = 'base';
 
 	//var h = 34*keys.length
-	var segment_height = 74; //34*Math.ceil(this_pane.children.length/2.) + 1;
+	var segment_height = 75; //34*Math.ceil(this_pane.children.length/2.) + 1;
 
 	console.log(p,this_pane.url)
 
@@ -298,7 +298,7 @@ function createParticleDropdown(container,this_pane,name,p){
 				.style('float','left')
 				.style('margin','2px')
 				.style('margin-left',(index%2 ? 2 : 3)+'px')
-				.style('margin-top',(index/2 < 1 ? 4 : 2)+'px')
+				.style('margin-top',(index/2 < 1 ? 4.5 : 2)+'px')
 				.style('cursor','pointer')
 				.on('click',function(){
 					transitionUIWindows.call(this, 'base/' + k, p)
