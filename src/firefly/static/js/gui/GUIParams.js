@@ -186,6 +186,7 @@ function defineGUIParams(){
 		//current will hold the key that defines the currently visible window
 		//the rest of the keys will point to the IDs for the DOM elements that hold those windows
 		//the particles state will be populated in createUI
+		this.GUIExcludeList = ['main/general/camera'];
 		this.GUIState = {
 			'current':'main',
 			'main':{

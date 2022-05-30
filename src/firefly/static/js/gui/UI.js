@@ -423,6 +423,8 @@ function createGeneralWindow(container,parent,name){
 		var width = 0;
 	}
 
+	if (GUIParams.GUIExcludeList.includes(this_pane.url)) return;
+
 	// handle the base case
 	if (this_pane.hasOwnProperty('builder')){
 		// fill this pane with its content using the 
@@ -440,7 +442,11 @@ function createGeneralWindow(container,parent,name){
 		)
 	}
 	else { // this is a branch leading to more buttons
-		var singleWidth = GUIParams.containerWidth/keys.length - 4;
+		var sub_url;
+		var singleWidth = GUIParams.containerWidth/keys.filter(function (val){
+			sub_url = this_pane.url+'/' + val;
+			return !GUIParams.GUIExcludeList.includes(sub_url);
+		}).length - 4;
 		//console.log('hardcoded padding between',this_pane.url,'/',keys,'buttons');
 
 		this_pane.d3Element = container.append('div')
@@ -458,6 +464,7 @@ function createGeneralWindow(container,parent,name){
 		if (this_pane.id != 'particles'){
 			this_pane.children.forEach(function(k){
 				var sub_url = this_pane.url+'/' + k;
+				if (GUIParams.GUIExcludeList.includes(sub_url)) return;
 				this_pane.d3Element.append('div')
 					.attr('id',this_pane[k].id + 'button')
 					.attr('class','particleDiv')
