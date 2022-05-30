@@ -347,7 +347,7 @@ function transitionUIWindows(state=null, pID=null){
 
 				//reset the heights
 				elem.style('height', elem.attr('trueHeight'));
-				ddiv.style('height', ph + 'px');
+				ddiv.style('height', ph + 10 +'px');
 				pdiv.style('margin-bottom', ph + 4 + 'px');
 
 				//save this to resize the particle dropdown
@@ -468,7 +468,7 @@ function createGeneralWindow(container,parent,name){
 		if (this_pane.id != 'particles'){
 			this_pane.children.forEach(function(k){
 				var sub_url = this_pane.url+'/' + k;
-				console.log(sub_url)
+				//console.log(sub_url)
 				if (GUIParams.GUIExcludeList.includes(sub_url)) return;
 				this_pane.d3Element.append('div')
 					.attr('id',this_pane[k].id + 'button')

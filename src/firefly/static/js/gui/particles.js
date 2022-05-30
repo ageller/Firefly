@@ -202,7 +202,7 @@ function createParticleDropdown(container,this_pane,name,p){
 	this_pane.url = 'base';
 
 	//var h = 34*keys.length
-	var segment_height = 69; //34*Math.ceil(this_pane.children.length/2.) + 1;
+	var segment_height = 74; //34*Math.ceil(this_pane.children.length/2.) + 1;
 
 	console.log(p,this_pane.url)
 
@@ -271,40 +271,44 @@ function createParticleDropdown(container,this_pane,name,p){
 			.text('base')
 
 	// buttons to navigate to additional particle controls
-	var container = dropdown.append('div')
+	var button_container = dropdown.append('div')
 		.attr('id',GUIParams.GUIState.main.particles[p].base.id)
 		.attr('class','dropdown-content UImover')
 		.style('width',(GUIParams.containerWidth - 7) + 'px')
 		.style('display','flex-wrap')
-		.style('height', segment_height + 'px')
-		.attr('trueHeight', segment_height + 'px')
 		.style('margin-top','16px')
 		.style('margin-left','1px')
 		.style('clip-path', 'inset(0px 0px 0px 0px)');
 
-	return 0;
-	var singleWidth = (GUIParams.containerWidth - 38)/2. + 1.5;
+	var singleWidth = (GUIParams.containerWidth - 38)/2.+1;
 
-	keys.forEach(function(k){
+	console.log(singleWidth)
+	button_container.style('height', segment_height + 'px')
+		.attr('trueHeight', segment_height + 'px')
+	this_pane.children.forEach(function(k,index){
 		//create the button on the base window
-		if (GUIParams.GUIState.main.particles[p].base[k].hasOwnProperty('builder')) {
-			container.append('div')
-				.attr('id',GUIParams.GUIState.main.particles[p].base[k].id + 'button')
+		var sub_url = this_pane.url+'/' + k;
+		if (GUIParams.GUIExcludeList.includes(sub_url)) return;
+		else if (this_pane[k].hasOwnProperty('builder')) {
+			button_container.append('div')
+				.attr('id',this_pane[k].id + 'button')
 				.attr('class','particleDiv')
 				//.style('width', (GUIParams.containerWidth - 25) + 'px')
 				.style('width',singleWidth + 'px')
 				.style('float','left')
 				.style('margin','2px')
+				.style('margin-left',(index%2 ? 2 : 3)+'px')
+				.style('margin-top',(index/2 < 1 ? 4 : 2)+'px')
 				.style('cursor','pointer')
 				.on('click',function(){
 					transitionUIWindows.call(this, 'base/' + k, p)
 				})
 				.append('div')
-					.attr('class','pLabelDiv')
-					.text(GUIParams.GUIState.main.particles[p].base[k].name)
+				.attr('class','pLabelDiv')
+				.text(this_pane[k].id[0].toUpperCase()+this_pane[k].id.slice(1,))
 
 			//create the UI for this key
-			GUIParams.GUIState.main.particles[p].base[k].builder(dropdown, p);
+			//GUIParams.GUIState.main.particles[p].base[k].builder(dropdown, p);
 		}
 
 	})
