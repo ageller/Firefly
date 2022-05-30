@@ -195,31 +195,33 @@ function createParticleColorPickerSegment(container,parent,name,p){
 	return 0;
 }
 
-function createParticleDropdown(container,parent,name,p){
-	debugger;
-	var segment_height = 0;
+function createParticleDropdown(container,this_pane,name,p){
+
+	var keys = Object.keys(this_pane).filter(function(key){return !GUIParams.GUIState_variables.includes(key)});
+	this_pane.children = keys;
+	this_pane.url = 'base';
+
+	//var h = 34*keys.length
+	var segment_height = 69; //34*Math.ceil(this_pane.children.length/2.) + 1;
+
+	console.log(p,this_pane.url)
 
 	// add the dropdown button and a dropdown container div
-	if (GUIParams.UIdropdown[p]){
-	container.append('button')
+	d3.select('#' + p + 'Div')
+		.append('button')
 		.attr('id', p+'Dropbtn')
 		.attr('class', 'dropbtn')
 		.attr('onclick','expandParticleDropdown(this)')
 		.style('left',(GUIParams.containerWidth - 28) + 'px')
 		.style('top','-22px')
 		.html('&#x25BC');
-	}
 
-	var keys = Object.keys(this_pane).filter(function(key){return !GUIParams.GUIState_variables.includes(key)});
-	//var h = 34*keys.length
-	var h = 34*Math.ceil(keys.length/2.) + 1;
-
-	dropdown = controls.append('div')
+	dropdown = this_pane.d3Element = container.append('div')
 		.attr('id',p+'Dropdown')
 		.attr('class','dropdown-content')
 		.style('width',(GUIParams.containerWidth - 4) + 'px')
 		.style('display','flex-wrap')
-		.style('top', '0px') 
+		.style('top', '10px') 
 		//.style('height', h + 16 + 'px')
 		//.style('clip-path', 'inset(0px 0px ' + (h + 16) + 'px 0px)');
 		.style('height','0px')
@@ -274,12 +276,13 @@ function createParticleDropdown(container,parent,name,p){
 		.attr('class','dropdown-content UImover')
 		.style('width',(GUIParams.containerWidth - 7) + 'px')
 		.style('display','flex-wrap')
-		.style('height', h + 'px')
-		.attr('trueHeight', h + 'px')
+		.style('height', segment_height + 'px')
+		.attr('trueHeight', segment_height + 'px')
 		.style('margin-top','16px')
 		.style('margin-left','1px')
 		.style('clip-path', 'inset(0px 0px 0px 0px)');
 
+	return 0;
 	var singleWidth = (GUIParams.containerWidth - 38)/2. + 1.5;
 
 	keys.forEach(function(k){
@@ -340,7 +343,7 @@ function expandParticleDropdown(handle) {
 		ddiv
 			.style('clip-path', 'inset(0px 0px 0px 0px')
 			.style('height',hdrop + 'px');
-		pdiv.style('margin-bottom', hdrop + 4 + 'px');
+		pdiv.style('margin-bottom', hdrop + 8 + 'px');
 		elem.style('height', elem.attr('trueHeight'));
 		h0 += hdrop
 	} else {

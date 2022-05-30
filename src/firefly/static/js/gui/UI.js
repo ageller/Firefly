@@ -166,8 +166,8 @@ function createUI(){
 		.attr('trueHeight','34px')
 		.style('position','relative')
 		.style('height','34px')
-		.style('margin-bottom','38px')
-		.style('top','34px')
+		.style('margin-bottom','32px')
+		.style('top','30px')
 		.style('clip-path','inset(0px)');
 
 	//start creating the rest of the elements

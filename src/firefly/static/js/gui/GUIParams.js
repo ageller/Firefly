@@ -198,13 +198,6 @@ function defineGUIParams(){
 			//'main/general/projection/columnDensityCheckBox',
 			//'main/general/projection/columnDensityLogCheckBox',
 			//'main/general/projection/columnDensitySelectCmap',
-			'Gas',
-			'HRDM',
-			'Gas/onoff',
-			'Gas/sizeSlider',
-			'Gas/colorPicker',
-			'Gas/dropdown',
-			'Stars/dropdown',
 			'HRDM/dropdown',
 			'LRDM/dropdown'
 		];
