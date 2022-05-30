@@ -1,7 +1,7 @@
 function createParticleSegment(container,parent,name){
 	var this_pane = parent[name];
 	this_pane.url = parent.url+'/'+this_pane.id.replace(parent.name,'');
-	console.log(this_pane.url)
+	//console.log(this_pane.url)
 	if (GUIParams.GUIExcludeList.includes(this_pane.url)) return 0;
 	return this_pane.builder(container,this_pane,this_pane.id,parent.name);
 }
@@ -205,7 +205,7 @@ function createParticleDropdown(container,this_pane,name,p){
 	this_pane.url = p + '/' + 'dropdown';
 
 	//var h = 34*keys.length
-	var segment_height = 75; //34*Math.ceil(this_pane.children.length/2.) + 1;
+	var segment_height = 3; //34*Math.ceil(this_pane.children.length/2.) + 1;
 
 	// add the dropdown button and a dropdown container div
 	d3.select('#' + p + 'Div')
@@ -284,36 +284,54 @@ function createParticleDropdown(container,this_pane,name,p){
 
 	var singleWidth = (GUIParams.containerWidth - 38)/2.+1;
 
-	button_container.style('height', segment_height + 'px')
-		.attr('trueHeight', segment_height + 'px')
-	this_pane.children.forEach(function(k,index){
+	var button_count = 0;
+	var last_button;
+	var last_label;
+	this_pane.children.forEach(function(k){
 		//create the button on the base window
 		var sub_url = this_pane.url+'/' + k;
-		console.log(sub_url)
 		if (GUIParams.GUIExcludeList.includes(sub_url)) return;
 		else if (this_pane[k].hasOwnProperty('builder')) {
-			button_container.append('div')
+			//console.log(sub_url)
+			last_button = button_container.append('div')
 				.attr('id',this_pane[k].id + 'button')
 				.attr('class','particleDiv')
 				//.style('width', (GUIParams.containerWidth - 25) + 'px')
 				.style('width',singleWidth + 'px')
 				.style('float','left')
-				.style('margin','2px')
-				.style('margin-left',(index%2 ? 2 : 3)+'px')
-				.style('margin-top',(index/2 < 1 ? 4.5 : 2)+'px')
+				//.style('margin-right','2px')
+				.style('margin-left',3.5+'px')//(index%2 ? 2 : 3)+'px')
+				.style('margin-top',4.5+'px')//(index/2 < 1 ? 4.5 : 2)+'px')
 				.style('cursor','pointer')
 				.on('click',function(){
 					transitionUIWindows.call(this, 'base/dropdown/' + k, p)
 				})
-				.append('div')
+
+			last_label = last_button.append('div')
 				.attr('class','pLabelDiv')
 				.text(k[0].toUpperCase()+k.slice(1,))
+				.style('width',singleWidth + 'px')
+				// uncomment to center-align button labels
+				//.style('text-align','center')
 
+			if (!(button_count%2 )) segment_height+=36;
+			button_count+=1;
 			//create the UI for this key
 			this_pane[k].builder(dropdown,this_pane,k,p);
 		}
 
 	})
+
+	// if we have an odd number of buttons, make the last one wider
+	if (button_count%2){
+		last_button.style('width',GUIParams.containerWidth-22)
+		last_label.style('width',GUIParams.containerWidth-22)
+	}
+
+	console.log(this_pane.url,button_count,last_button)
+
+	button_container.style('height', segment_height + 'px')
+		.attr('trueHeight', segment_height + 'px')
 
 	return dropdown
 

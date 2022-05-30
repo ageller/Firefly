@@ -199,8 +199,11 @@ function defineGUIParams(){
 			//'main/general/projection/columnDensityLogCheckBox',
 			//'main/general/projection/columnDensitySelectCmap',
 			'Stars/onoff',
+			'Stars/dropdown/general',
 			'Stars/dropdown/filters',
-			'HRDM/dropdown',
+			'HRDM/dropdown/general',
+			'HRDM/dropdown/velocities',
+			'HRDM/dropdown/colormap',
 			'LRDM/dropdown'
 		];
 		this.GUIState = {
