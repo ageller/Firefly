@@ -32,11 +32,10 @@ function makeUI(local=false){
 	GUIParams.waitForBuild = setInterval(function(){
 		var ready = confirmGUIBuild(GUIParams.GUIState);
 		// check also that the width has stabilized
-		var width = document.getElementById('UIcontainer').getBoundingClientRect().width;
-		if (width != GUIParams.GUIWidth || width < 10) ready = false;
-		GUIParams.GUIWidth = width;
+		//var width = document.getElementById('UIcontainer').getBoundingClientRect().width;
+		//if (width != GUIParams.GUIWidth || width < 10) ready = false;
+		//GUIParams.GUIWidth = width;
 		if (ready){
-			console.log(GUIParams.GUIWidth)
 			clearInterval(GUIParams.waitForBuild);
 			finalizeGUIInitialization();
 			// reveal the result!
@@ -76,6 +75,7 @@ function confirmGUIBuild(parent){
 		// check until we find the first unbuilt child
 		built = children.every(function (child){
 			var child_built = confirmGUIBuild(parent[child]);
+			if (!child_built) console.log(child);
 			return built && child_built;
 		})
 	}
@@ -130,9 +130,11 @@ function finalizeGUIInitialization(){
 	//d3.select('#UIcontainer').classed('hidden', false)
 
 	//check for an initial colormap and make adjustments if needed
-	GUIParams.partsKeys.forEach(function(p){
-		if (GUIParams.showColormap[p]) initialColormap(p);
-	})
+	if (!GUIParams.GUIExcludeList.includes('colorbarContainer')){
+		GUIParams.partsKeys.forEach(function(p){
+			if (GUIParams.showColormap[p]) initialColormap(p);
+		})
+	}
 
 	addGUIlisteners();
 

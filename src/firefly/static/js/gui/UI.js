@@ -66,11 +66,15 @@ function createUI(){
 	UIcontainer.attr('style','position:relative; top:30px; left:10px; width:'+GUIParams.containerWidth+'px');
 	UIcontainer.style('clip-path','inset(-20px -20px -20px 0px)');
 
+	// set the children before going into createGeneralWindow
+	GUIParams.GUIState.children = Object.keys(GUIParams.GUIState).filter(function(key){return !GUIParams.GUIState_variables.includes(key)});
+
 	// create the FPS container
-	createFPSContainer(UIcontainer);
+	createGeneralWindow(UIcontainer,GUIParams.GUIState,'FPSContainer',UIcontainer);
 
 	//create the colormap tab (will be hidden until needed)
-	createColormapContainer(UIcontainer)
+	createGeneralWindow(UIcontainer,GUIParams.GUIState,'colorbarContainer',UIcontainer);
+	UIcontainer.append('div')
 
 	//define the top bar
 	var UIt = UIcontainer.append('div')
@@ -160,14 +164,15 @@ function createUI(){
 			.text('main')
 
 
+	var top_position = GUIParams.GUIExcludeList.includes('colorbarContainer') ? 50 : 30;
 	var UI =  UIcontainer.append('div')
 		.attr('id','UIStateContainer')
 		.attr('class','UIStateContainer')
 		.attr('trueHeight','34px')
 		.style('position','relative')
 		.style('height','34px')
-		.style('margin-bottom','32px')
-		.style('top','30px')
+		.style('margin-bottom',top_position + 2 + 'px')
+		.style('top',top_position+'px')
 		.style('clip-path','inset(0px)');
 
 	//start creating the rest of the elements
@@ -191,7 +196,12 @@ function createUI(){
 	// }
 
 	//create the octree loading bar
-	if (GUIParams.haveAnyOctree) createOctreeLoadingBar(UIcontainer);
+	if (GUIParams.haveAnyOctree) createGeneralWindow(
+		UIcontainer,GUIParams.GUIState,'octreeLoadingBarContainer',UIcontainer);
+	else delete GUIParams.GUIState['octreeLoadingBarContainer']
+
+	// bind the children here again so that we can look for them in GUI built
+	GUIParams.GUIState.children = Object.keys(GUIParams.GUIState).filter(function(key){return !GUIParams.GUIState_variables.includes(key)});
 
 }
 
@@ -416,7 +426,7 @@ function transitionUIWindows(state=null, pID=null){
 
 }
 
-function createGeneralWindow(container,parent,name){
+function createGeneralWindow(container,parent,name,this_UIcontainer=null){
 	//these will be side by side
 	var this_pane = parent[name];
 	var keys = Object.keys(this_pane).filter(function(key){return !GUIParams.GUIState_variables.includes(key)});
@@ -424,7 +434,8 @@ function createGeneralWindow(container,parent,name){
 	// initialize some of the variables the node will need here
 	this_pane.children = keys;
 	this_pane.parent = parent;
-	if (this_pane.id != 'main'){
+	//if (!GUIParams.GUIState.children.includes(this_pane.id)){
+	if (!parent.hasOwnProperty('current')){
 		this_pane.url = parent.url+'/'+this_pane.id;
 		var width = GUIParams.containerWidth;
 	}
@@ -433,22 +444,29 @@ function createGeneralWindow(container,parent,name){
 		var width = 0;
 	}
 
+	// don't actually want to make this or any of its children
 	if (GUIParams.GUIExcludeList.includes(this_pane.url)) return;
 
+	// allow to pass the UIcontainer to apply builder to if desired, 
+	//  otherwise will create a new one just for this pane
+	if (this_UIcontainer == null){
+		this_UIcontainer = container.append('div')
+		.attr('id',this_pane.id)
+		.attr('class','UImover')
+		.style('position','absolute')
+		.style('top','0px')
+		.style('height','34px')
+		.attr('trueHeight','34px')
+		.style('width', GUIParams.containerWidth + 'px')
+		.style('transform','translateX(' + width + 'px)')
+	}
+
 	// handle the base case
-	if (this_pane.hasOwnProperty('builder')){
+	if (this_pane.hasOwnProperty('builder')){	
 		// fill this pane with its content using the 
 		//  builder function defined in GUIParams
 		this_pane.builder(
-			container.append('div')
-			.attr('id',this_pane.id)
-			.attr('class','UImover')
-			.style('position','absolute')
-			.style('top','0px')
-			.style('height','34px')
-			.attr('trueHeight','34px')
-			.style('width', GUIParams.containerWidth + 'px')
-			.style('transform','translateX(' + width + 'px)'),
+			this_UIcontainer,	
 			parent,
 			this_pane.id)
 		// tell the pane it's been built
@@ -462,16 +480,7 @@ function createGeneralWindow(container,parent,name){
 		}).length - 4;
 		//console.log('hardcoded padding between',this_pane.url,'/',keys,'buttons');
 
-		this_pane.d3Element = container.append('div')
-			.attr('id',this_pane.id)
-			.attr('class','UImover')
-			.style('display','flex')
-			.style('position','absolute')
-			.style('top','0px')
-			.style('height','34px')
-			.attr('trueHeight','34px')
-			.style('width', GUIParams.containerWidth + 'px')
-			.style('transform','translateX(' + width + 'px)')
+		this_pane.d3Element = this_UIcontainer.style('display','flex')
 
 		// short-circuit once we've made the div for the particles above
 		if (this_pane.id != 'particles'){
@@ -516,177 +525,6 @@ function createGeneralWindow(container,parent,name){
 	//  log10 checkbox
 	//  colormap selector
 	//  slider to adjust limits
-
-function createFPSContainer(container){
-
-	var d = container.insert('div')
-		.attr('id','fps_container')
-		.style('display','block')
-		.style('border-radius','10px 10px 0px 0px')
-		.style('width', GUIParams.containerWidth + 4 + 'px') //+4 for the border
-		.style('margin','-21px 0px 3px -2px')
-		.style('height','20px')
-		.style('background-color',getComputedStyle(document.body).getPropertyValue('--UI-border-color'))
-		.style('color',getComputedStyle(document.body).getPropertyValue('--UI-text-color'))
-		.style('text-align','center')
-}
-
-
-function createColormapContainer(container){
-	var h = container.node().getBoundingClientRect().height;
-	var tabh = Math.max(h, 100);
-	var d = container.append('div')
-		.attr('id','colormap_outer_container')
-		.style('display','block')
-		.style('border-radius','10px 10px 0px 0px')
-		.style('width',tabh + 4 + 'px') //+4 for the border
-		.style('margin',0)
-		.style('height','20px')
-		.style('background-color',getComputedStyle(document.body).getPropertyValue('--UI-border-color'))
-		.style('transform','translate(' + (GUIParams.containerWidth + 21) + 'px,' + (4 - h) + 'px)rotate(90deg)')
-		.style('transform-origin', 'top left')
-		.style('visibility', 'hidden')
-
-	var elem = d.append('div')
-		.attr('id','colormap_container')
-		.attr('class','extension')
-		.style('width',h + 4 + 'px') 
-		.style('margin','0')
-		.style('transform','translate(0,20px)')
-		.style('border','2px solid ' + getComputedStyle(document.body).getPropertyValue('--UI-border-color'))
-		.style('border-radius','0px 10px 0px 0px')
-		.style('clip-path','inset(0px 0px 0px -1px)'); //using -1 so that it doesn't get set to (0px), which would not allow d3 transition!
-
-	var tab = d.append('div')
-		.attr('id','colormap_container_tab')
-		.style('display','block')
-		.style('border-radius','10px 10px 0px 0px')
-		.style('width',(tabh + 4) + 'px') //+4 for the border
-		.style('background-color',getComputedStyle(document.body).getPropertyValue('--UI-border-color'))
-		.style('color',getComputedStyle(document.body).getPropertyValue('--UI-text-color'))
-		.style('text-align','left')
-		.style('position','absolute')
-		.style('bottom','0px')
-		.style('height', '20px')
-		.append('span')
-			.style('padding-left','10px')
-			.text('Colormap')
-	var btn = tab.append('button')
-		.attr('class','dropbtn')
-		.attr('id','colormapDropbtn')
-		.attr('onclick','expandColormapTab()')
-		.style('left',(tabh - 24) + 'px')
-		.style('margin-top','2px')
-		.html('&#x25B2');
-
-}
-
-
-function createOctreeLoadingBar(container){
-
-	var d = container.append('div')
-		.attr('id','octree_loading_outer_container')
-		.style('display','block')
-		.style('border-radius','0px 0px 10px 10px')
-		.style('width', GUIParams.containerWidth + 4 + 'px') //+4 for the border
-		.style('margin','3px 0 -21px -2px')
-		.style('border-top','2px solid ' + getComputedStyle(document.body).getPropertyValue('--UI-border-color'))
-
-
-	var elem = d.append('div')
-		.attr('id','octree_loading_container')
-		.attr('class','extension')
-		.style('width', GUIParams.containerWidth + 'px') 
-		.style('margin','0px 0px 2px 1px')
-
-	var tab = d.append('div')
-		.attr('id','octree_loading_tab')
-		.style('display','block')
-		.style('border-radius','0px 0px 10px 10px')
-		.style('width', GUIParams.containerWidth + 4 + 'px') //+4 for the border
-		.style('background-color',getComputedStyle(document.body).getPropertyValue('--UI-border-color'))
-		.style('color',getComputedStyle(document.body).getPropertyValue('--UI-text-color'))
-		.style('text-align','center')
-		.style('height', '20px')
-		.text('Octree Loading Progress')
-	var btn = tab.append('button')
-		.attr('class','dropbtn')
-		.attr('id','octreeLoadingDropbtn')
-		.attr('onclick','expandLoadingTab()')
-		.style('left',(GUIParams.containerWidth - 28) + 'px')
-		.style('margin-top','4px')
-		.html('&#x25BC');
-
-	//start with the tabl open
-	btn.classed('dropbtn-open',true)
-	d.classed('show', true);
-
-
-
-	var height = 16;
-	var width = GUIParams.containerWidth - GUIParams.longestPartLabelLen - 50;
-	var offset = 5;
-	var margin = 10;
-
-	var svg = elem.append('svg')
-		.attr('id','octreeLoadingBars')
-		// .style('position','absolute')
-		// .style('left','0px')
-		// .style('bottom','0px')
-		.attr('width', (width + 2*margin + 120) + 'px')
-		.attr('height', height + 'px') //will be adjusted below
-		//.style('transform', 'translate(2px,2px)')
-
-	//count to get the full size of the SVG
-	var nRects = 0;
-	GUIParams.partsKeys.forEach(function(p){
-		if (GUIParams.haveOctree[p]){
-
-			svg.append('rect')
-				.attr('id',p + 'octreeLoadingOutline')
-				.attr('x', '10px')
-				.attr('y', (nRects*(height + offset) + margin) + 'px')
-				.attr('width',width + 'px')
-				.attr('height',height + 'px')
-				.attr('fill','rgba(0,0,0,0)')
-				.attr('stroke',getComputedStyle(document.body).getPropertyValue('--UI-border-color'))
-				.attr('stroke-width', '1')
-			svg.append('rect')
-				.attr('id',p + 'octreeLoadingFill')
-				.attr('class','octreeLoadingFill')
-				.attr('x', '10px')
-				.attr('y', (nRects*(height + offset) + margin) + 'px')
-				.attr('width','0px') //will be updated
-				.attr('height',height + 'px')
-				.attr('fill','rgb(' + (255*GUIParams.Pcolors[p][0]) + ',' + (255*GUIParams.Pcolors[p][1]) + ',' + (255*GUIParams.Pcolors[p][2]) + ')')
-			svg.append('text')
-				.attr('id',p + 'octreeLoadingText')
-				.attr('class','octreeLoadingText')
-				.attr('x', (width + margin + offset) + 'px')
-				.attr('y', (nRects*(height + offset) + margin + 0.75*height) + 'px')
-				.attr('fill','rgb(' + (255*GUIParams.Pcolors[p][0]) + ',' + (255*GUIParams.Pcolors[p][1]) + ',' + (255*GUIParams.Pcolors[p][2]) + ')')
-				.style('font-size', (0.75*height) + 'px')
-				.text(p + ' (0/0)')				
-			nRects += 1;
-		}
-	})
-
-	var h = (nRects*(height + offset) + 2.*margin);
-	svg.attr('height', h + 'px') 
-
-	//add the clip path
-	svg.append('clipPath')
-		.attr('id','loadingClipPath')
-		.append('rect')
-			.attr('id','loadingClipRect')
-			.attr('x','0px')
-			.attr('y','0px')
-			.attr('width',GUIParams.containerWidth + 'px')
-			.attr('height', h + 'px')
-
-	svg.attr('clip-path', 'url(#loadingClipPath)')
-
-}
 
 //////////////////////// ////////////////////////
 // helper functions vvvvvvv
@@ -974,7 +812,8 @@ function getUIcontainerInset(pID = null){
 	var cwidth = 0;
 	var cheight = 0;
 	var inset = parseInset(d3.select('#UIcontainer'));	
-	if (d3.select('#colormap_outer_container').classed('show')){
+	var colorbar_container = d3.select('#colormap_outer_container')
+	if (!colorbar_container.empty() && colorbar_container.classed('show')){
 		var cbar = d3.select('#colormap_container');
 		if (cbar.node()) {
 			//it's rotated

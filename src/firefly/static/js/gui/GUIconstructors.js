@@ -1249,3 +1249,173 @@ function createParticleFilterPlaybackSegment(container,parent,name,p){
 		.text('Playback');
 	return segment_height;
 }
+
+function createFPSContainer(container){
+	var d = container.insert('div')
+		.attr('id','fps_container')
+		.style('display','block')
+		.style('border-radius','10px 10px 0px 0px')
+		.style('width', GUIParams.containerWidth + 4 + 'px') //+4 for the border
+		.style('margin','-21px 0px 3px -2px')
+		.style('height','20px')
+		.style('background-color',getComputedStyle(document.body).getPropertyValue('--UI-border-color'))
+		.style('color',getComputedStyle(document.body).getPropertyValue('--UI-text-color'))
+		.style('text-align','center')
+}
+
+
+function createColormapContainer(container){
+	var h = container.node().getBoundingClientRect().height;
+	var tabh = Math.max(h, 100);
+	var d = container.append('div')
+		.attr('id','colormap_outer_container')
+		.style('display','block')
+		.style('border-radius','10px 10px 0px 0px')
+		.style('width',tabh + 4 + 'px') //+4 for the border
+		.style('margin',0)
+		.style('height','20px')
+		.style('background-color',getComputedStyle(document.body).getPropertyValue('--UI-border-color'))
+		.style('transform','translate(' + (GUIParams.containerWidth + 21) + 'px,' + (4 - h) + 'px)rotate(90deg)')
+		.style('transform-origin', 'top left')
+		.style('visibility', 'hidden')
+
+	var elem = d.append('div')
+		.attr('id','colormap_container')
+		.attr('class','extension')
+		.style('width',h + 4 + 'px') 
+		.style('margin','0')
+		.style('transform','translate(0,20px)')
+		.style('border','2px solid ' + getComputedStyle(document.body).getPropertyValue('--UI-border-color'))
+		.style('border-radius','0px 10px 0px 0px')
+		.style('clip-path','inset(0px 0px 0px -1px)'); //using -1 so that it doesn't get set to (0px), which would not allow d3 transition!
+
+	var tab = d.append('div')
+		.attr('id','colormap_container_tab')
+		.style('display','block')
+		.style('border-radius','10px 10px 0px 0px')
+		.style('width',(tabh + 4) + 'px') //+4 for the border
+		.style('background-color',getComputedStyle(document.body).getPropertyValue('--UI-border-color'))
+		.style('color',getComputedStyle(document.body).getPropertyValue('--UI-text-color'))
+		.style('text-align','left')
+		.style('position','absolute')
+		.style('bottom','0px')
+		.style('height', '20px')
+		.append('span')
+			.style('padding-left','10px')
+			.text('Colormap')
+	var btn = tab.append('button')
+		.attr('class','dropbtn')
+		.attr('id','colormapDropbtn')
+		.attr('onclick','expandColormapTab()')
+		.style('left',(tabh - 24) + 'px')
+		.style('margin-top','2px')
+		.html('&#x25B2');
+
+}
+
+
+function createOctreeLoadingBar(container){
+
+	var d = container.append('div')
+		.attr('id','octree_loading_outer_container')
+		.style('display','block')
+		.style('border-radius','0px 0px 10px 10px')
+		.style('width', GUIParams.containerWidth + 4 + 'px') //+4 for the border
+		.style('margin','3px 0 -21px -2px')
+		.style('border-top','2px solid ' + getComputedStyle(document.body).getPropertyValue('--UI-border-color'))
+
+
+	var elem = d.append('div')
+		.attr('id','octree_loading_container')
+		.attr('class','extension')
+		.style('width', GUIParams.containerWidth + 'px') 
+		.style('margin','0px 0px 2px 1px')
+
+	var tab = d.append('div')
+		.attr('id','octree_loading_tab')
+		.style('display','block')
+		.style('border-radius','0px 0px 10px 10px')
+		.style('width', GUIParams.containerWidth + 4 + 'px') //+4 for the border
+		.style('background-color',getComputedStyle(document.body).getPropertyValue('--UI-border-color'))
+		.style('color',getComputedStyle(document.body).getPropertyValue('--UI-text-color'))
+		.style('text-align','center')
+		.style('height', '20px')
+		.text('Octree Loading Progress')
+	var btn = tab.append('button')
+		.attr('class','dropbtn')
+		.attr('id','octreeLoadingDropbtn')
+		.attr('onclick','expandLoadingTab()')
+		.style('left',(GUIParams.containerWidth - 28) + 'px')
+		.style('margin-top','4px')
+		.html('&#x25BC');
+
+	//start with the tabl open
+	btn.classed('dropbtn-open',true)
+	d.classed('show', true);
+
+
+
+	var height = 16;
+	var width = GUIParams.containerWidth - GUIParams.longestPartLabelLen - 50;
+	var offset = 5;
+	var margin = 10;
+
+	var svg = elem.append('svg')
+		.attr('id','octreeLoadingBars')
+		// .style('position','absolute')
+		// .style('left','0px')
+		// .style('bottom','0px')
+		.attr('width', (width + 2*margin + 120) + 'px')
+		.attr('height', height + 'px') //will be adjusted below
+		//.style('transform', 'translate(2px,2px)')
+
+	//count to get the full size of the SVG
+	var nRects = 0;
+	GUIParams.partsKeys.forEach(function(p){
+		if (GUIParams.haveOctree[p]){
+
+			svg.append('rect')
+				.attr('id',p + 'octreeLoadingOutline')
+				.attr('x', '10px')
+				.attr('y', (nRects*(height + offset) + margin) + 'px')
+				.attr('width',width + 'px')
+				.attr('height',height + 'px')
+				.attr('fill','rgba(0,0,0,0)')
+				.attr('stroke',getComputedStyle(document.body).getPropertyValue('--UI-border-color'))
+				.attr('stroke-width', '1')
+			svg.append('rect')
+				.attr('id',p + 'octreeLoadingFill')
+				.attr('class','octreeLoadingFill')
+				.attr('x', '10px')
+				.attr('y', (nRects*(height + offset) + margin) + 'px')
+				.attr('width','0px') //will be updated
+				.attr('height',height + 'px')
+				.attr('fill','rgb(' + (255*GUIParams.Pcolors[p][0]) + ',' + (255*GUIParams.Pcolors[p][1]) + ',' + (255*GUIParams.Pcolors[p][2]) + ')')
+			svg.append('text')
+				.attr('id',p + 'octreeLoadingText')
+				.attr('class','octreeLoadingText')
+				.attr('x', (width + margin + offset) + 'px')
+				.attr('y', (nRects*(height + offset) + margin + 0.75*height) + 'px')
+				.attr('fill','rgb(' + (255*GUIParams.Pcolors[p][0]) + ',' + (255*GUIParams.Pcolors[p][1]) + ',' + (255*GUIParams.Pcolors[p][2]) + ')')
+				.style('font-size', (0.75*height) + 'px')
+				.text(p + ' (0/0)')				
+			nRects += 1;
+		}
+	})
+
+	var h = (nRects*(height + offset) + 2.*margin);
+	svg.attr('height', h + 'px') 
+
+	//add the clip path
+	svg.append('clipPath')
+		.attr('id','loadingClipPath')
+		.append('rect')
+			.attr('id','loadingClipRect')
+			.attr('x','0px')
+			.attr('y','0px')
+			.attr('width',GUIParams.containerWidth + 'px')
+			.attr('height', h + 'px')
+
+	svg.attr('clip-path', 'url(#loadingClipPath)')
+
+}

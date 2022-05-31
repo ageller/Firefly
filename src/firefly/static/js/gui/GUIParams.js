@@ -195,13 +195,12 @@ function defineGUIParams(){
 			'HRDM/dropdown/general',
 			'HRDM/dropdown/velocities',
 			'HRDM/dropdown/colormap',
-			'LRDM/dropdown'
+			'LRDM/dropdown',
+			'colorbarContainer',
+			'FPSContainer'
 		];
 		this.GUIState = {
 			'current':'main',
-			// other children will be identified automatically
-			'children':['main'], 
-			'url':'',
 			'main':{
 				'id':'main',
 				'general' : {
@@ -286,6 +285,18 @@ function defineGUIParams(){
 				},
 			'particles':{'id':'particles'}
 			},
+			'colorbarContainer':{
+				'id':'colorbarContainer',
+				'builder':createColormapContainer
+			},
+			'FPSContainer':{
+				'id':'FPSContainer',
+				'builder':createFPSContainer
+			},
+			'octreeLoadingBarContainer':{
+				'id':'octreeLoadingBarContainer',
+				'builder':createOctreeLoadingBar
+			}
 	
 		}
 
