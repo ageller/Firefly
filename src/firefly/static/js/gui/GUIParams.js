@@ -215,7 +215,7 @@ function defineGUIParams(){
 					'name':'general',
 					'data':{
 						'id':'data',
-						'builder':createControlsBox, // createGeneralWindow <--- put this in after you flesh out the rest of the data children
+						'builder':createControlsBox,
 						'decimation':{
 							'id':'decimation',
 							'builder':createDecimationSegment

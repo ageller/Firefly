@@ -264,12 +264,14 @@ function transitionUIWindows(state=null, pID=null){
 	//update the state text
 	// because we're hiding the base layer for the particle dropdowns from the user,
 	//  make it say dropdown rather than base or base/dropdown
-	var stateText = state.replace('base/dropdown','dropdown').replace('base','dropdown');
+	var stateText = state;
 	var stateTextID  = 'UIStateText';
 	var stateTextContainerID  = 'UIStateTextContainer';
 	if (inParticles) {
 		stateTextID = pID + 'UIStateText';
 		stateTextContainerID = pID + 'UIStateTextContainer';
+		stateText = stateText.replace('base/dropdown','dropdown').replace('base','dropdown');
+		stateText = stateText.replace('dropdown',pID+'/dropdown')
 	}
 	d3.select('#' + stateTextID).text(stateText);
 

@@ -705,10 +705,6 @@ function createParticleGeneralWindow(container,parent,name,p){
 			})
 		b.append('span').text('Clear from memory')
 
-		UI.append('hr')
-			.style('margin','0')
-			.style('border','1px solid #909090')
-
 		dheight += 34;
 
 	}
@@ -752,10 +748,6 @@ function createParticleGeneralWindow(container,parent,name,p){
 			sendToViewer([{'setDepthMode':[p, this.checked]}]);
 		})
 
-	UI.append('hr')
-		.style('margin','0')
-		.style('border','1px solid #909090');
-
 	dheight += 32;
 
 	// add max number of particles slider 
@@ -787,9 +779,6 @@ function createParticleGeneralWindow(container,parent,name,p){
 
 	//for octree, slider to change the camera limit
 	if (GUIParams.haveOctree[p]){
-		UI.append('hr')
-			.style('margin','0')
-			.style('border','1px solid #909090');
 		dCcontent = UI.append('div')
 			.attr('class','NdDiv');
 		dCcontent.append('span')
@@ -811,10 +800,6 @@ function createParticleGeneralWindow(container,parent,name,p){
 	}
 
 	if (GUIParams.rkeys[p].length > 1){
-
-		UI.append('hr')
-			.style('margin','0')
-			.style('border','1px solid #909090');
 
 		//dropdown to change blending mode
 		var dRcontent = UI.append('div')
@@ -922,10 +907,6 @@ function createParticleVelocityWindow(container,parent,name,p){
 		.attr('type','text')
 		.style('left',(GUIParams.containerWidth - 48) + 'px');
 
-	UI.append('hr')
-		.style('margin','0')
-		.style('border','1px solid #909090')
-
 	dVGcontent = UI.append('div')
 		.attr('class','NdDiv');
 
@@ -941,10 +922,6 @@ function createParticleVelocityWindow(container,parent,name,p){
 	dVGcontent.append('label')
 		.attr('for',p+'velGradientCheckBox')
 		.text('Apply Gradient to Vectors');
-
-	UI.append('hr')
-		.style('margin','0')
-		.style('border','1px solid #909090')
 
 	// add velocity animator checkbox
 	dAVcontent = UI.append('div')

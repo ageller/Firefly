@@ -270,7 +270,7 @@ function createParticleDropdown(container,this_pane,name,p){
 			.style('padding','0px 0px 0px 10px')
 			.style('font-family', '"Lucida Console", "Courier New", monospace')
 			// because we're hiding the base layer make it say dropdown rather than base or base/dropdown
-			.text('dropdown') 
+			.text(p+'/dropdown') 
 
 	// buttons to navigate to additional particle controls
 	var button_container = dropdown.append('div')
@@ -296,12 +296,10 @@ function createParticleDropdown(container,this_pane,name,p){
 			last_button = button_container.append('div')
 				.attr('id',this_pane[k].id + 'button')
 				.attr('class','particleDiv')
-				//.style('width', (GUIParams.containerWidth - 25) + 'px')
 				.style('width',singleWidth + 'px')
 				.style('float','left')
-				//.style('margin-right','2px')
-				.style('margin-left',3.5+'px')//(index%2 ? 2 : 3)+'px')
-				.style('margin-top',4.5+'px')//(index/2 < 1 ? 4.5 : 2)+'px')
+				.style('margin-left',3.5+'px')
+				.style('margin-top',4.5+'px')
 				.style('cursor','pointer')
 				.on('click',function(){
 					transitionUIWindows.call(this, 'base/dropdown/' + k, p)
