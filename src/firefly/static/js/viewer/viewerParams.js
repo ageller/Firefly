@@ -53,7 +53,7 @@ function defineViewerParams(){
 
 		//for frustum      
 		this.zmax = 5.e10;
-		this.zmin = 1;
+		this.zmin = 0.01;
 		this.fov = 45.
 
 		//camera controls
