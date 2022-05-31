@@ -1,11 +1,3 @@
-function createParticleSegment(container,parent,name){
-	var this_pane = parent[name];
-	this_pane.url = parent.url+'/'+this_pane.id.replace(parent.name,'');
-	//console.log(this_pane.url)
-	if (GUIParams.GUIExcludeList.includes(this_pane.url)) return 0;
-	return this_pane.builder(container,this_pane,this_pane.id,parent.name);
-}
-
 function defineGUIParticleState(){
 	//I will add all the possible windows in here, though some may not be used (based on data and settings)
 	GUIParams.partsKeys.forEach(function(p){
@@ -41,7 +33,27 @@ function defineGUIParticleState(){
 		if (GUIParams.haveVelocities[p]){
 			GUIParams.GUIState.main.particles[p].base.dropdown.velocities = {
 				'id' : p+'velocities',
-				'builder' : createParticleVelocityWindow
+				'builder' : createParticleControlsWindow,
+				'velocityCheckBox':{
+					'id':'velocityCheckBox',
+					'builder':createParticleVelocityCheckBoxSegment
+				},
+				'velocityWidthSlider':{
+					'id':'velocityWidthSlider',
+					'builder':createParticleVelocityWidthSliderSegment
+				},
+				'velocityGradientCheckBox':{
+					'id':'velocityGradientCheckBox',
+					'builder':createParticleVelocityGradientCheckBoxSegment
+				},
+				'velocityAnimatorCheckBox':{
+					'id':'velocityAnimatorCheckBox',
+					'builder':createParticleVelocityAnimatorCheckBoxSegment
+				},
+				'velocityAnimatorTextBoxes':{
+					'id':'velocityAnimatorTextBoxes',
+					'builder':createParticleVelocityAnimatorTextBoxesSegment
+				}
 			};
 		}
 

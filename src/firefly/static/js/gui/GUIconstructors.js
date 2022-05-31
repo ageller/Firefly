@@ -6,6 +6,14 @@ function createSegment(container,parent,name){
 	return this_pane.builder(container,this_pane,this_pane.id);
 }
 
+function createParticleSegment(container,parent,name){
+	var this_pane = parent[name];
+	this_pane.url = parent.url+'/'+this_pane.id.replace(parent.name,'');
+	console.log(this_pane.url)
+	if (GUIParams.GUIExcludeList.includes(this_pane.url)) return 0;
+	return this_pane.builder(container,this_pane,this_pane.id,parent.name);
+}
+
 function createControlsBox(container,parent,name){
 
 	var this_pane  = parent[name];
@@ -835,23 +843,40 @@ function createParticleGeneralWindow(container,parent,name,p){
 
 }
 
-function createParticleVelocityWindow(container,parent,name,p){
-	var segment_height = 154+20;
+function createParticleControlsWindow(container,parent,name,p){
+
+	var this_pane = parent[name];
+	var keys = Object.keys(this_pane).filter(function(key){return !GUIParams.GUIState_variables.includes(key)});
+	this_pane.children = keys;
+	this_pane.url = parent.url+'/'+name;
+	this_pane.name = p
+
+	var height = 0;
 	/////////////////////////
 	//velocity controls for a particles
-	var UI = container.append('div')
-		.attr('id',parent[name].id)
+	this_pane.d3Element = container.append('div')
+		.attr('id',this_pane.id)
 		.attr('class','UImover')
 		.style('position','absolute')
 		.style('top','16px')
-		.style('height',segment_height+'px')
-		.attr('trueHeight',segment_height+'px')
 		.style('width', GUIParams.containerWidth + 'px')
 		.style('transform','translateX(' + GUIParams.containerWidth + 'px)')
 
+	this_pane.children.forEach(function(name){
+		height+=createParticleSegment(this_pane.d3Element,this_pane,name)})
+	
+	this_pane.d3Element.style('height', height + 'px')
+		.attr('trueHeight', height + 'px')
+		.style('display','block')
 
+	container.style('height', height + 'px')
+		.attr('trueHeight', height + 'px')
 
-	dVcontent = UI.append('div')
+}
+
+function createParticleVelocityCheckBoxSegment(container,parent,name,p){
+	var segment_height = 30;
+	dVcontent = container.append('div')
 		.attr('class','NdDiv');
 
 	// add velocity vector checkbox
@@ -888,9 +913,13 @@ function createParticleVelocityWindow(container,parent,name,p){
 
 	elm = document.getElementById(p+'_SelectVelType');
 	elm.value = GUIParams.velType[p];
+	return segment_height;
+}
 
-	// add width input and gradient checkbox
-	dVWcontent = UI.append('div')
+function createParticleVelocityWidthSliderSegment(container,parent,name,p){
+	var segment_height = 30;
+	// add width input
+	dVWcontent = container.append('div')
 		.attr('class','NdDiv');
 	dVWcontent.append('span')
 		.attr('class','pLabelDiv')
@@ -907,7 +936,13 @@ function createParticleVelocityWindow(container,parent,name,p){
 		.attr('type','text')
 		.style('left',(GUIParams.containerWidth - 48) + 'px');
 
-	dVGcontent = UI.append('div')
+	createVelWidthSlider(p)
+	return segment_height;
+}
+
+function createParticleVelocityGradientCheckBoxSegment(container,parent,name,p){
+	segment_height = 30;
+	dVGcontent = container.append('div')
 		.attr('class','NdDiv');
 
 	dVGcontent.append('input')
@@ -922,9 +957,13 @@ function createParticleVelocityWindow(container,parent,name,p){
 	dVGcontent.append('label')
 		.attr('for',p+'velGradientCheckBox')
 		.text('Apply Gradient to Vectors');
+	return segment_height;
+}
 
+function createParticleVelocityAnimatorCheckBoxSegment(container,parent,name,p){
+	var segment_height = 30;
 	// add velocity animator checkbox
-	dAVcontent = UI.append('div')
+	dAVcontent = container.append('div')
 		.attr('class','NdDiv');
 
 	dAVcontent.append('input')
@@ -940,8 +979,19 @@ function createParticleVelocityWindow(container,parent,name,p){
 		.attr('for',p+'velAnimateCheckBox')
 		.text('Animate Velocities');
 
+	if (GUIParams.animateVel[p]){
+		elm = document.getElementById(p+'velAnimateCheckBox');
+		elm.checked = true;
+		elm.value = true;
+	}
+
+	return segment_height;
+}
+
+function createParticleVelocityAnimatorTextBoxesSegment(container,parent,name,p){
+	var segment_height = 30;
 	//add velocity animator input text boxes
-	dATVcontent = UI.append('div')
+	dATVcontent = container.append('div')
 		.attr('class','NdDiv');
 	dATVcontent.append('label')
 		.attr('for',p+'velAnimateDt')
@@ -974,16 +1024,10 @@ function createParticleVelocityWindow(container,parent,name,p){
 			var key = event.keyCode || event.which;
 			if (key == 13) sendToViewer([{'checkText':[this.id, this.value, p]}]);
 		})
-
-	if (GUIParams.animateVel[p]){
-		elm = document.getElementById(p+'velAnimateCheckBox');
-		elm.checked = true;
-		elm.value = true;
-	}
-
-	createVelWidthSlider(p)
+	return segment_height;
 }
 
+// put in here
 function createParticleColormapWindow(container,parent,name,p){
 	/////////////////////////
 	//colormap controls for a particles
