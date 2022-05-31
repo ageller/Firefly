@@ -24,7 +24,27 @@ function defineGUIParticleState(){
 					'builder':createParticleDropdown,
 					'general': {
 						'id' : p+'general',
-						'builder' : createParticleGeneralWindow
+						'builder' : createParticleControlsWindow,
+						'octreeClearMemory':{
+							'id':'octreeClearMemory',
+							'builder':createParticleClearOctreeMemorySegment
+						},
+						'blendingModeSelectors':{
+							'id':'blendingModeSelectors',
+							'builder':createParticleBlendingModeSelectorsSegment
+						},
+						'maxSlider':{
+							'id':'maxSlider',
+							'builder':createParticleMaxSliderSegment
+						},
+						'octreeCameraNorm':{
+							'id':'maxSlider',
+							'builder':createParticleOctreeCameraNormSliderSegment
+						},
+						'radiusVariableSelector':{
+							'id':'radiusVariableSelector',
+							'builder':createParticleRadiusVariableSelectorSegment
+						}
 					}
 				}
 			}

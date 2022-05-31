@@ -680,29 +680,13 @@ function createColumnDensitySlidersSegment(container,parent,name){
 	return segment_height;
 }
 
-////     put in segments
 
-//////// particle builder functions
-function createParticleGeneralWindow(container,parent,name,p){
-	/////////////////////////
-	//general controls for a particles
-
-	var dheight = 0;
-	var UI = container.append('div')
-		.attr('id',parent[name].id)
-		.attr('class','UImover')
-		.style('position','absolute')
-		.style('top','16px')
-		.style('height','34px')
-		.attr('trueHeight','34px')
-		.style('width', GUIParams.containerWidth + 'px')
-		.style('transform','translateX(' + GUIParams.containerWidth + 'px)')
-
-
+function createParticleClearOctreeMemorySegment(container,parent,name,p){
+	var segment_height = 0;
 	// for octree add a button to dispose of the nodes from memory
 	if (GUIParams.haveOctree[p]) {
 
-		var clearMem = UI.append('div')
+		var clearMem = container.append('div')
 			.attr('id',p+'_disposer')
 		var b = clearMem.append('button')
 			.attr('class','button centerButton')
@@ -713,12 +697,17 @@ function createParticleGeneralWindow(container,parent,name,p){
 			})
 		b.append('span').text('Clear from memory')
 
-		dheight += 34;
+		segment_height += 34;
 
 	}
+	return segment_height;
+}
+
+function createParticleBlendingModeSelectorsSegment(container,parent,name,p){
+	var segment_height = 32;
 
 	//dropdown to change blending mode
-	var dBcontent = UI.append('div')
+	var dBcontent = container.append('div')
 		.attr('class','NdDiv');
 
 	dBcontent.append('span')
@@ -756,10 +745,14 @@ function createParticleGeneralWindow(container,parent,name,p){
 			sendToViewer([{'setDepthMode':[p, this.checked]}]);
 		})
 
-	dheight += 32;
+	 return segment_height;
+}
+
+function createParticleMaxSliderSegment(container,parent,name,p){
+	var segment_height = 30; // height of the max particles section
 
 	// add max number of particles slider 
-	dNcontent = UI.append('div')
+	dNcontent = container.append('div')
 		.attr('class','NdDiv');
 
 	dNcontent.append('span')
@@ -782,12 +775,16 @@ function createParticleGeneralWindow(container,parent,name,p){
 		.attr('type','text')
 		.style('left',(GUIParams.containerWidth - 48) + 'px');
 
-	dheight += 30; // height of the max particles section
+	createNpartsSlider(p);
 
+	return segment_height;
+}
 
+function createParticleOctreeCameraNormSliderSegment(container,parent,name,p){
+	var segment_height = 0;
 	//for octree, slider to change the camera limit
 	if (GUIParams.haveOctree[p]){
-		dCcontent = UI.append('div')
+		dCcontent = container.append('div')
 			.attr('class','NdDiv');
 		dCcontent.append('span')
 			.attr('class','pLabelDiv')
@@ -803,14 +800,18 @@ function createParticleGeneralWindow(container,parent,name,p){
 			.attr('class', 'NMaxTClass')
 			.attr('type','text')
 			.style('left',(GUIParams.containerWidth - 48) + 'px');
-		dheight += 32;
+		segment_height += 32;
 		createCamNormSlider(p);
 	}
+	return segment_height;
+}
 
+function createParticleRadiusVariableSelectorSegment(container,parent,name,p){
+	var segment_height = 0;
 	if (GUIParams.rkeys[p].length > 1){
 
 		//dropdown to change blending mode
-		var dRcontent = UI.append('div')
+		var dRcontent = container.append('div')
 			.attr('class','NdDiv');
 
 		dRcontent.append('span')
@@ -832,17 +833,12 @@ function createParticleGeneralWindow(container,parent,name,p){
 		elm = document.getElementById(p+'_selectRadiusVariable');
 		elm.value = GUIParams.rkeys[p][GUIParams.radiusVariable[p]];
 
-		dheight += 32;
-
+		segment_height += 32;
 	}
-
-	UI.style('height',dheight + 'px')
-		.attr('trueHeight',dheight + 'px');
-
-	createNpartsSlider(p);
-
+	return segment_height;
 }
 
+////     put in segments
 function createParticleControlsWindow(container,parent,name,p){
 
 	var this_pane = parent[name];
@@ -1027,7 +1023,6 @@ function createParticleVelocityAnimatorTextBoxesSegment(container,parent,name,p)
 	return segment_height;
 }
 
-// put in here
 function createParticleColormapWindow(container,parent,name,p){
 	/////////////////////////
 	//colormap controls for a particles
