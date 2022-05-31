@@ -180,24 +180,13 @@ function defineGUIParams(){
 		
 
 		this.GUIState_variables = [
-			'current','id','name','builder','parent','children','url','button','segments'
+			'built','current','id','name','builder','parent','children','url','button','segments','d3Element'
 		]
 		//object to hold the current visible window in the GUI
 		//current will hold the key that defines the currently visible window
 		//the rest of the keys will point to the IDs for the DOM elements that hold those windows
 		//the particles state will be populated in createUI
 		this.GUIExcludeList = [
-			'Gas/dropdown/velocities/velocityWidthSlider',
-			'Gas/dropdown/filters/filterPlayback',
-			'Stars/onoff',
-			'Stars/dropdown/general/blendingModeSelectors',
-			'Stars/dropdown/filters',
-			'HRDM/dropdown/general',
-			'HRDM/dropdown/velocities',
-			'HRDM/dropdown/colormap',
-			'LRDM/dropdown',
-			'colorbarContainer',
-			'FPSContainer'
 		];
 		this.GUIState = {
 			'current':'main',
