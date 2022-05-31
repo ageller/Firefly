@@ -16,12 +16,7 @@ function makeUI(local=false){
 		if (ready){
 			console.log("GUI ready.")
 			clearInterval(GUIParams.waitForInit);
-
-			// handle detached socket case, draw a cube
-			if (!local) {
-				showSplash(false);
-				createCube();
-			}
+	
 			if (GUIParams.cameraNeedsUpdate) updateGUICamera();
 			createUI();
 		}
@@ -40,6 +35,13 @@ function makeUI(local=false){
 			finalizeGUIInitialization();
 			// reveal the result!
 			document.getElementById('UIcontainer').style.visibility = 'visible'
+			// handle detached socket case, draw a cube
+			if (!local) {
+				createCube();
+				sendToViewer([{'clearloading':true}]);
+				showSplash(false);
+			}
+			else clearloading(true);
 		}
 	},1500);
 }

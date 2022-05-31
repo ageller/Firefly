@@ -70,7 +70,7 @@ function loadNewData(){
 	d3.select('#stateContainer').html("");
 	d3.select('.UIcontainer').html("");
 	d3.select("#splashdivLoader").selectAll('svg').remove();
-	d3.select("#splashdiv5").text("Loading...");
+	d3.select("#splashdiv5").text("Loading particle data...");
 	if (Object.keys(viewerParams.dir).length > 1){
 		forGUI.push({'showLoadingButton':'#selectStartupButton'});
 	} else {
