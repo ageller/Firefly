@@ -180,29 +180,14 @@ function defineGUIParams(){
 		
 
 		this.GUIState_variables = [
-			'id','name','builder','parent','children','url','button','segments'
+			'current','id','name','builder','parent','children','url','button','segments'
 		]
 		//object to hold the current visible window in the GUI
 		//current will hold the key that defines the currently visible window
 		//the rest of the keys will point to the IDs for the DOM elements that hold those windows
 		//the particles state will be populated in createUI
 		this.GUIExcludeList = [
-			//'main/general/data/loadNewData',
-			//'main/general/data/savePreset',
-			//'main/general/camera/cameraButtons',
-			//'main/general/camera/centerTextBoxes',
-			//'main/general/camera/cameraTextBoxes',
-			//'main/general/camera/rotationTextBoxes',
-			//'main/general/camera/snapshot',
-			//'main/general/camera/fullScreen',
-			//'main/general/projection/columnDensityCheckBox',
-			//'main/general/projection/columnDensityLogCheckBox',
-			//'main/general/projection/columnDensitySelectCmap',
-			//'Gas/dropdown/velocities/velocityAnimatorTextBoxes',
 			'Gas/dropdown/velocities/velocityWidthSlider',
-			//'Gas/dropdown/velocities/velocityGradientCheckBox',
-			//'Gas/dropdown/velocities/velocityAnimatorCheckBox',
-			//'Gas/dropdown/colormap/colormapCheckBox',
 			'Gas/dropdown/filters/filterPlayback',
 			'Stars/onoff',
 			'Stars/dropdown/general/blendingModeSelectors',
@@ -214,6 +199,9 @@ function defineGUIParams(){
 		];
 		this.GUIState = {
 			'current':'main',
+			// other children will be identified automatically
+			'children':['main'], 
+			'url':'',
 			'main':{
 				'id':'main',
 				'general' : {

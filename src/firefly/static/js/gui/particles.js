@@ -3,6 +3,8 @@ function defineGUIParticleState(){
 	GUIParams.partsKeys.forEach(function(p){
 		GUIParams.GUIState.main.particles[p] = {
 			'current':'base',
+			'children':['base'],
+			'url':'',
 			'base':{
 				'name':p,
 				'id' : p+'Base',
@@ -347,7 +349,7 @@ function createParticleDropdown(container,this_pane,name,p){
 	var last_label;
 	this_pane.children.forEach(function(k){
 		//create the button on the base window
-		var sub_url = this_pane.url+'/' + k;
+		var sub_url = this_pane[k].url = this_pane.url+'/' + k;
 		if (GUIParams.GUIExcludeList.includes(sub_url)) return;
 		else if (this_pane[k].hasOwnProperty('builder')) {
 			//console.log(sub_url)
@@ -374,6 +376,7 @@ function createParticleDropdown(container,this_pane,name,p){
 			button_count+=1;
 			//create the UI for this key
 			this_pane[k].builder(dropdown,this_pane,k,p);
+			this_pane[k].built = true;
 		}
 
 	})

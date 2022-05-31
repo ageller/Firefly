@@ -451,6 +451,8 @@ function createGeneralWindow(container,parent,name){
 			.style('transform','translateX(' + width + 'px)'),
 			parent,
 			this_pane.id)
+		// tell the pane it's been built
+		this_pane.built = true;
 	}
 	else { // this is a branch leading to more buttons
 		var sub_url;
@@ -474,7 +476,7 @@ function createGeneralWindow(container,parent,name){
 		// short-circuit once we've made the div for the particles above
 		if (this_pane.id != 'particles'){
 			this_pane.children.forEach(function(k){
-				var sub_url = this_pane.url+'/' + k;
+				var sub_url = this_pane[k].url = this_pane.url+'/' + k;
 				//console.log(sub_url)
 				if (GUIParams.GUIExcludeList.includes(sub_url)) return;
 				this_pane.d3Element.append('div')

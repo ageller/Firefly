@@ -3,7 +3,10 @@ function createSegment(container,parent,name){
 	this_pane.url = parent.url+'/'+this_pane.id;
 
 	if (GUIParams.GUIExcludeList.includes(this_pane.url)) return 0;
-	return this_pane.builder(container,this_pane,this_pane.id);
+	var return_value = this_pane.builder(container,this_pane,this_pane.id);
+	// tell the pane it's been built
+	this_pane.built = true;
+	return return_value;
 }
 
 function createParticleSegment(container,parent,name){
@@ -11,7 +14,10 @@ function createParticleSegment(container,parent,name){
 	this_pane.url = parent.url+'/'+this_pane.id.replace(parent.name,'');
 	//console.log(this_pane.url)
 	if (GUIParams.GUIExcludeList.includes(this_pane.url)) return 0;
-	return this_pane.builder(container,this_pane,this_pane.id,parent.name);
+	return_value = this_pane.builder(container,this_pane,this_pane.id,parent.name);
+	// tell the pane it's been built
+	this_pane.built = true;
+	return return_value;
 }
 
 function createControlsBox(container,parent,name){
