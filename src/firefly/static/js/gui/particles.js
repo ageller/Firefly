@@ -384,13 +384,10 @@ function createParticleDropdown(container,this_pane,name,p){
 		last_label.style('width',GUIParams.containerWidth-22)
 	}
 
-	console.log(this_pane.url,button_count,last_button)
-
 	button_container.style('height', segment_height + 'px')
 		.attr('trueHeight', segment_height + 'px')
 
 	return dropdown
-
 }
 
 function expandParticleDropdown(handle) {

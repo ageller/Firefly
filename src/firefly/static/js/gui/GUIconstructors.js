@@ -9,7 +9,7 @@ function createSegment(container,parent,name){
 function createParticleSegment(container,parent,name){
 	var this_pane = parent[name];
 	this_pane.url = parent.url+'/'+this_pane.id.replace(parent.name,'');
-	console.log(this_pane.url)
+	//console.log(this_pane.url)
 	if (GUIParams.GUIExcludeList.includes(this_pane.url)) return 0;
 	return this_pane.builder(container,this_pane,this_pane.id,parent.name);
 }
