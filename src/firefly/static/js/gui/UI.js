@@ -1126,12 +1126,15 @@ function updateUIBlending(args){
 	if (p == GUIParams.CDkey) return;
 
 	// set the blending mode value in the dropdown
-	document.getElementById(p+'_selectBlendingMode').value = mode;
+	elm = document.getElementById(p+'_selectBlendingMode');
+	if (elm) elm.value = mode;
 
 	//also update the checkbox for the depth test
 	elm = document.getElementById(p+'_depthCheckBox');
-	elm.checked = dTest;
-	elm.value = dTest;
+	if (elm){
+		elm.checked = dTest;
+		elm.value = dTest;
+	}
 }
 
 //////////////////////////////////////////

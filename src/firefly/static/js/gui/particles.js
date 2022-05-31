@@ -80,7 +80,25 @@ function defineGUIParticleState(){
 		if (GUIParams.haveColormap[p]){
 			GUIParams.GUIState.main.particles[p].base.dropdown.colormap = {
 				'id' : p+'colormap',
-				'builder' : createParticleColormapWindow
+				'builder' : createParticleControlsWindow,
+				'colormapCheckBox':{
+					'id':'colormapCheckBox',
+					'builder':createParticleColormapCheckBoxSegment
+				},
+				/*
+				'colormapSelector':{
+					'id':'colormapSelector',
+					'builder':createParticleColormapSelectorSegment
+				},
+				'colormapVariableSelector':{
+					'id':'colormapVariableSelector',
+					'builder':createParticleColormapVariableSelectorSegment
+				},
+				*/
+				'colormapSliders':{
+					'id':'colormapSliders',
+					'builder':createParticleColormapSlidersSegment
+				}
 			};
 		}
 

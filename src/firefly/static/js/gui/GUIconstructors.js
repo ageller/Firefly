@@ -680,7 +680,41 @@ function createColumnDensitySlidersSegment(container,parent,name){
 	return segment_height;
 }
 
+//////////////
+////////////// particle pane constructors below //////////////
+//////////////
+function createParticleControlsWindow(container,parent,name,p){
 
+	var this_pane = parent[name];
+	var keys = Object.keys(this_pane).filter(function(key){return !GUIParams.GUIState_variables.includes(key)});
+	this_pane.children = keys;
+	this_pane.url = parent.url+'/'+name;
+	this_pane.name = p
+
+	var height = 0;
+	this_pane.d3Element = container.append('div')
+		.attr('id',this_pane.id)
+		.attr('class','UImover')
+		.style('position','absolute')
+		.style('top','16px')
+		.style('width', GUIParams.containerWidth + 'px')
+		.style('transform','translateX(' + GUIParams.containerWidth + 'px)')
+
+	this_pane.children.forEach(function(name){
+		height+=createParticleSegment(this_pane.d3Element,this_pane,name)})
+	
+	this_pane.d3Element.style('height', height + 'px')
+		.attr('trueHeight', height + 'px')
+		.style('display','block')
+
+	container.style('height', height + 'px')
+		.attr('trueHeight', height + 'px')
+
+}
+
+//////////////
+////////////// particle general pane constructors below //////////////
+//////////////
 function createParticleClearOctreeMemorySegment(container,parent,name,p){
 	var segment_height = 0;
 	// for octree add a button to dispose of the nodes from memory
@@ -838,38 +872,10 @@ function createParticleRadiusVariableSelectorSegment(container,parent,name,p){
 	return segment_height;
 }
 
-////     put in segments
-function createParticleControlsWindow(container,parent,name,p){
 
-	var this_pane = parent[name];
-	var keys = Object.keys(this_pane).filter(function(key){return !GUIParams.GUIState_variables.includes(key)});
-	this_pane.children = keys;
-	this_pane.url = parent.url+'/'+name;
-	this_pane.name = p
-
-	var height = 0;
-	/////////////////////////
-	//velocity controls for a particles
-	this_pane.d3Element = container.append('div')
-		.attr('id',this_pane.id)
-		.attr('class','UImover')
-		.style('position','absolute')
-		.style('top','16px')
-		.style('width', GUIParams.containerWidth + 'px')
-		.style('transform','translateX(' + GUIParams.containerWidth + 'px)')
-
-	this_pane.children.forEach(function(name){
-		height+=createParticleSegment(this_pane.d3Element,this_pane,name)})
-	
-	this_pane.d3Element.style('height', height + 'px')
-		.attr('trueHeight', height + 'px')
-		.style('display','block')
-
-	container.style('height', height + 'px')
-		.attr('trueHeight', height + 'px')
-
-}
-
+//////////////
+////////////// particle velocity pane constructors below //////////////
+//////////////
 function createParticleVelocityCheckBoxSegment(container,parent,name,p){
 	var segment_height = 30;
 	dVcontent = container.append('div')
@@ -1023,26 +1029,17 @@ function createParticleVelocityAnimatorTextBoxesSegment(container,parent,name,p)
 	return segment_height;
 }
 
-function createParticleColormapWindow(container,parent,name,p){
-	/////////////////////////
-	//colormap controls for a particles
-
-	var UI = container.append('div')
-		.attr('id',parent[name].id)
-		.attr('class','UImover')
-		.style('position','absolute')
-		.style('top','16px')
-		.style('height','54px')
-		.attr('trueHeight','54px')
-		.style('width', GUIParams.containerWidth + 'px')
-		.style('transform','translateX(' + GUIParams.containerWidth + 'px)');
-
-
-	var ColorDiv = UI.append('div')
-		.attr('style','margin:0px;  padding:5px; height:50px')
-
+//////////////
+////////////// particle colormap pane constructors below //////////////
+//////////////
+function createParticleColormapCheckBoxSegment(container,parent,name,p){
+	var segment_height = 30;
 	// add checkbox to enable colormap
-	ColorDiv.append('input')
+
+	var this_container = container.append('div')
+		.attr('class','NdDiv');
+
+	this_container.append('input')
 		.attr('id',p+'colorCheckBox')
 		.attr('value','false')
 		.attr('type','checkbox')
@@ -1051,13 +1048,19 @@ function createParticleColormapWindow(container,parent,name,p){
 			if (GUIParams.showParts[p]) checkColormapBox(p, this.checked);
 			else this.checked = GUIParams.showColormap[p];
 		})
-
-	ColorDiv.append('label')
+	this_container.append('label')
 		.attr('for',p+'colorCheckBox')
-		.text('Colormap');
+		.text('Colormap')
 
+/*
+	return segment_height;
+}
+
+function createParticleColormapSelectorSegment(container,parent,name,p){
+	var segment_height = 0;
+*/
 	// dropdown to select colormap
-	var selectCMap = ColorDiv.append('select')
+	var selectCMap = this_container.append('select')
 		.attr('class','selectCMap')
 		.attr('id',p+'_SelectCMap')
 		.style('margin-left','4px')
@@ -1069,8 +1072,15 @@ function createParticleColormapWindow(container,parent,name,p){
 			.attr('value',function(d,i){ return i; })
 			.text(function (d) { return d; });
 
+/*
+	return segment_height;
+}
+
+function createParticleColormapVariableSelectorSegment(container,parent,name,p){
+	var segment_height = 0;
+*/
 	// dropdown to select colormap variable
-	var selectCMapVar = ColorDiv.append('select')
+	var selectCMapVar = this_container.append('select')
 		.attr('class','selectCMapVar')
 		.attr('id',p+'_SelectCMapVar')
 		.style('width', (GUIParams.containerWidth - 192) + 'px')
@@ -1081,12 +1091,15 @@ function createParticleColormapWindow(container,parent,name,p){
 		.append('option')
 			.attr('value',function(d,i){ return i; })
 			.text(function (d) { return d; });
+	return segment_height;
+}
 
+function createParticleColormapSlidersSegment(container,parent,name,p){
+	var segment_height = 32;
 	// sliders for colormap limits
 	GUIParams.ckeys[p].forEach(function(ck){
 		if (GUIParams.haveColormapSlider){
-
-			colormapsliders = ColorDiv.append('div')
+			colormapsliders = container.append('div')
 				.attr('id',p+'_CK_'+ck+'_END_CMap')
 				.attr('class','CMapClass')
 				.style('width', (GUIParams.containerWidth - 100) + 'px');
@@ -1113,12 +1126,10 @@ function createParticleColormapWindow(container,parent,name,p){
 		}
 	});
 
-
-	showHideColormapFilter(p, GUIParams.colormapVariable[p]);
-
 	createColormapSliders(p);
+	showHideColormapFilter(p, GUIParams.colormapVariable[p]);
+	return segment_height;
 }
-
 
 function createParticleFilterWindow(container,parent,name,p){
 	/////////////////////////
