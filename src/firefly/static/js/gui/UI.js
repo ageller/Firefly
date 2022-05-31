@@ -382,8 +382,6 @@ function transitionUIWindows(state=null, pID=null){
 		.style('height',(h + dh) + 'px')
 		.attr('trueHeight',h + 'px');
 
-
-
 	// set all hidden components of the GUI to a height of 0
 	function setToZero(obj){
 		if (obj.hasOwnProperty('id')){

@@ -417,7 +417,6 @@ function expandParticleDropdown(handle) {
 	elem.node().classList.toggle('show');
 	var hdrop = parseFloat(elem.attr('trueHeight')) + 18; //18 for the state bar at the top
 
-
 	//transition the dropdown open or closed
 	if (ddiv.classed('show')){
 		ddiv
@@ -425,14 +424,14 @@ function expandParticleDropdown(handle) {
 			.style('height',hdrop + 'px');
 		pdiv.style('margin-bottom', hdrop + 4 + 'px');
 		elem.style('height', elem.attr('trueHeight'));
-		h0 += hdrop
+		h0 += hdrop + 2
 	} else {
 		ddiv
 			.style('clip-path', 'inset(0px 0px ' + parseFloat(ddiv.style.height) + 'px 0px')
 			.style('height','0px');
 		pdiv.style('margin-bottom', '0px');
 		elem.style('height', '0px');
-		h0 -= hdrop
+		h0 -= hdrop + 2
 	}
 
 
@@ -440,7 +439,7 @@ function expandParticleDropdown(handle) {
 	d3.select('#GUIParticlesBase').style('height',h0 + 'px')
 	d3.select('#UIStateContainer')
 		.style('height',h0 + 'px') 
-		.attr('trueHeight',h0 + 'px')
+		.attr('trueHeight',h0 +  'px')
 
 	//if the colormap is open be sure to update the overall clip-path
 	var inset = getUIcontainerInset(pID);
