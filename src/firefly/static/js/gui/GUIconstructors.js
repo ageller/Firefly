@@ -662,7 +662,7 @@ function createColumnDensitySlidersSegment(container,parent,name){
 
 	colormapsliders.append('div')
 		.attr('id',GUIParams.CDkey+'_CK_'+GUIParams.ckeys[GUIParams.CDkey][0]+'_END_CMapSlider')
-		.style("margin-top","-1px")
+		//.style("margin-top","-1px")
 		.style('left','-8px')
 
 	colormapsliders.append('input')
@@ -1109,7 +1109,7 @@ function createParticleColormapSlidersSegment(container,parent,name,p){
 
 			colormapsliders.append('div')
 				.attr('id',p+'_CK_'+ck+'_END_CMapSlider')
-				.style("margin-top","-1px")
+				//.style("margin-top","-1px")
 				.style('left','-8px')
 
 			colormapsliders.append('input')
@@ -1131,22 +1131,9 @@ function createParticleColormapSlidersSegment(container,parent,name,p){
 	return segment_height;
 }
 
-function createParticleFilterWindow(container,parent,name,p){
-	/////////////////////////
-	//filter controls for a particles
-
-	var UI = container.append('div')
-		.attr('id',parent[name].id)
-		.attr('class','UImover')
-		.style('position','absolute')
-		.style('top','16px')
-		.style('height','116px')
-		.attr('trueHeight','116px')
-		.style('width', GUIParams.containerWidth + 'px')
-		.style('transform','translateX(' + GUIParams.containerWidth + 'px)');
-
-
-	var filterDiv = UI.append('div')
+function createParticleFilterSlidersSegment(container,parent,name,p){
+	var segment_height = 58;
+	var filterDiv = container.append('div')
 		.attr('style','margin:0px;  padding:5px; height:45px')
 
 	// add filter key selector
@@ -1157,7 +1144,7 @@ function createParticleFilterWindow(container,parent,name,p){
 		.append('select')
 			.attr('class','selectFilter')
 			.attr('id',p+'_SelectFilter')
-			.style('width',(GUIParams.containerWidth - 62) + 'px')
+			.style('width',(GUIParams.containerWidth - 162) + 'px')
 			.on('change',selectFilter)
 
 	var options = selectF.selectAll('option')
@@ -1165,8 +1152,9 @@ function createParticleFilterWindow(container,parent,name,p){
 		.append('option')
 			.text(function (d) { return d; });
 
-	var invFilter = UI.append('div')
-		.attr('class','NdDiv');
+	var invFilter = filterDiv.append('span')
+		.style('position','absolute')
+		.style('right','8px')
 
 	var filtn = 0;
 	// create sliders for each of the filters
@@ -1184,7 +1172,7 @@ function createParticleFilterWindow(container,parent,name,p){
 
 			dfilters.append('div')
 				.attr('id',p+'_FK_'+fk+'_END_FilterSlider')
-				.style("margin-top","-1px")
+				//.style("margin-top","-1px")
 				.style('left','-8px')
 
 			dfilters.append('input')
@@ -1231,8 +1219,15 @@ function createParticleFilterWindow(container,parent,name,p){
 		}
 	});
 
+	createFilterSliders(p)
+
+	return segment_height;
+}
+
+function createParticleFilterPlaybackSegment(container,parent,name,p){
+	var segment_height = 25;
 	// add playback checkbox and label
-	playback = UI.append('div')
+	playback = container.append('div')
 		.attr('class','NdDiv');
 	playback.append('input')
 		.attr('id',p+'_PlaybackCheckbox')
@@ -1246,6 +1241,5 @@ function createParticleFilterWindow(container,parent,name,p){
 		.attr('for',p+'_'+'PlaybackLabel')
 		.attr('id',p+'_PlaybackLabel')
 		.text('Playback');
-
-	createFilterSliders(p)
+	return segment_height;
 }

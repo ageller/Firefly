@@ -105,7 +105,15 @@ function defineGUIParticleState(){
 		if (GUIParams.haveFilter[p]){
 			GUIParams.GUIState.main.particles[p].base.dropdown.filters = {
 				'id' : p+'filters',
-				'builder' : createParticleFilterWindow
+				'builder' : createParticleControlsWindow,
+				'filterSliders':{
+					'id':'filterSliders',
+					'builder':createParticleFilterSlidersSegment
+				},
+				'filterPlayback':{
+					'id':'filterPlayback',
+					'builder':createParticleFilterPlaybackSegment
+				}
 			}
 		}
 

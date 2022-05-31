@@ -203,6 +203,7 @@ function defineGUIParams(){
 			//'Gas/dropdown/velocities/velocityGradientCheckBox',
 			//'Gas/dropdown/velocities/velocityAnimatorCheckBox',
 			//'Gas/dropdown/colormap/colormapCheckBox',
+			'Gas/dropdown/filters/filterPlayback',
 			'Stars/onoff',
 			'Stars/dropdown/general/blendingModeSelectors',
 			'Stars/dropdown/filters',
