@@ -117,16 +117,16 @@ void main(void) {
 		}
 		//gl_FragColor.a = posRot.x/vSize;
 	}
-	gl_FragColor.a *= vAlpha;
 
 	if (columnDensity){
 		gl_FragColor.rgb *= scaleCD; //need some factor here so that it adds up progressively
 	}
 
-	if (vColor[3] >= 0.) {
+	if (vColor[3] >= 0. && vID > -1.) { //check vID because we use this to turn particle off
 		gl_FragColor.rgb = vColor.rgb;
 		gl_FragColor.a *= vColor[3];
 	}
 
+	gl_FragColor.a *= vAlpha;
 }
 `;
