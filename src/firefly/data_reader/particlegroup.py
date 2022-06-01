@@ -153,7 +153,6 @@ class ParticleGroup(object):
         self.octree: Octree = None
 
         ## handle default values for iterables
-        field_arrays = [] if field_arrays is None else field_arrays
         field_names = [] if field_names is None else field_names
         field_filter_flags = [] if field_filter_flags is None else field_filter_flags
         field_colormap_flags = [] if field_colormap_flags is None else field_colormap_flags
@@ -172,6 +171,7 @@ class ParticleGroup(object):
         self.velocities = np.array(velocities) if velocities is not None else None
         self.rgba_colors = np.array(rgba_colors) if rgba_colors is not None else None
         self.nparts = self.coordinates.shape[0]
+        field_arrays = np.empty((0,self.coordinates.shape[0])) if field_arrays is None else field_arrays
 
         ## reduce the decimation factor if someone has asked to skip
         ##  too many particles for the given dataset so that a single particle
