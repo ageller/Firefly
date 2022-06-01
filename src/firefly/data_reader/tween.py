@@ -164,3 +164,24 @@ class TweenParams(object):
         return filename,write_to_json(
             tween_params_dict,
             filename if write_to_disk else None) ## None-> returns a string
+
+
+def tweenOrbiter(radius=1,duration=10):
+    """Helper function to create tween parameters for a camera orbit
+        around the center.
+
+    :param radius: radius of the orbit, defaults to 1
+    :type radius: int, optional
+    :param duration: duration in seconds to complete a full orbit, defaults to 10
+    :type duration: int, optional
+    :return: a TweenParams object that can be attached to a reader.
+    :rtype: :class:`firefly.data_reader.TweenParams`
+    """
+    thetas = np.arange(0,360,1)
+    xs = np.sin(thetas/180*np.pi)*radius
+    zs = np.cos(thetas/180*np.pi)*radius
+    coords = np.zeros((thetas.size,3))
+    coords[:,1] = xs
+    coords[:,-1] = zs
+
+    return TweenParams(coords,duration=duration)
