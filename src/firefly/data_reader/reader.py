@@ -668,6 +668,7 @@ class ArrayReader(Reader):
     def __init__(
         self,
         coordinates,
+        velocities=None,
         UInames=None,
         fields=None,
         field_names=None,
@@ -683,6 +684,11 @@ class ArrayReader(Reader):
             coordinates or a jagged (M,N_m,3) list of np.arrays which is interpreted as M many 
             particle groups with each having N_m particles
         :type coordinates: list, optional
+        :param velocities: raw velocity data,
+            Can either pass N,3 np.array which is interpreted as a single particle group's 
+            velocities or a jagged (M,N_m,3) list of np.arrays which is interpreted as M many 
+            particle groups with each having N_m particles
+        :type velocities: list, optional
         :param UInames: list of particle group UInames
         :type UInames: list of str
         :param fields: list of field arrays corresponding to each point of the coordinate data, 
@@ -715,6 +721,7 @@ class ArrayReader(Reader):
         if len(np.shape(coordinates))==2 and np.shape(coordinates)[-1]==3:
             ## passed a single list of coordinates, prepend an axis for the single group
             coordinates = [coordinates]
+            velocities = [velocities]
         elif len(np.shape(coordinates[0]))==2 and np.shape(coordinates[0])[-1]==3:
             ## passed a jagged array of different coordinates
             pass
@@ -788,8 +795,8 @@ class ArrayReader(Reader):
         ## initialize default particle group names
         if UInames is None: UInames = ['PGroup_%d'%i for i in range(len(coordinates))]
         elif len(UInames) != len(coordinates): 
-            raise ValueError("%d UInames does not match passed"+
-            " number of %d coordinate arrays"%(len(UInames),len(coordinates)))
+            raise ValueError("%d UInames does not match passed"%len(UInames)+
+            " number of %d coordinate arrays"%(len(coordinates)))
 
         ## loop through each of the particle groups
         for i,(coords,UIname) in enumerate(zip(coordinates,UInames)):
@@ -798,6 +805,7 @@ class ArrayReader(Reader):
             firefly_particleGroup = ParticleGroup(
                 UIname,
                 coords,
+                velocities[i],
                 decimation_factor=decimation_factor,
                 field_arrays=None if fields is None else fields[i],
                 field_names=None if field_names is None else field_names[i])
