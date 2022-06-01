@@ -100,10 +100,6 @@ class Settings(object):
 
             :func:`firefly.data_reader.Settings.window_settings`
 
-            :func:`firefly.data_reader.Settings.UI_settings`
-
-            :func:`firefly.data_reader.Settings.particle_UI_settings`
-
             :func:`firefly.data_reader.Settings.camera_settings`
 
             :func:`firefly.data_reader.Settings.startup_settings`
@@ -125,11 +121,9 @@ class Settings(object):
 
         ## initialize default settings and apply any passed kwargs
         self.startup_settings(**kwargs)
-        self.UI_settings(**kwargs)
         self.window_settings(**kwargs)
         self.camera_settings(**kwargs)
         self.particle_startup_settings(**kwargs)
-        self.particle_UI_settings(**kwargs)
         self.particle_velocity_settings(**kwargs)
         self.particle_filter_settings(**kwargs)
         self.particle_colormap_settings(**kwargs)
@@ -210,48 +204,6 @@ class Settings(object):
             'zmax':zmax,
             'minPointScale':minPointScale,
             'maxPointScale':maxPointScale,
-        }
-
-    def UI_settings(
-        self,
-        UI=True,
-        UIfullscreen=True,
-        UIsnapshot=True,
-        UIreset=True,
-        UIsavePreset=True,
-        UIloadNewData=True,
-        UIcameraControls=True,
-        UIdecimation=True,
-        **extra):
-        """Flags for enabling different elements of the UI
-
-        :param UI: flag to show the UI as a whole, defaults to True
-        :type UI: bool, optional
-        :param UIfullscreen: flag to show the fullscreen button, defaults to True
-        :type UIfullscreen: bool, optional
-        :param UIsnapshot: flag to show the screenshot button, defaults to True
-        :type UIsnapshot: bool, optional
-        :param UIreset: flag to show the "Default Settings" button, defaults to True
-        :type UIreset: bool, optional
-        :param UIsavePreset: flag to show the "Save Settings" button, defaults to True
-        :type UIsavePreset: bool, optional
-        :param UIloadNewData: flag to show the "Load Data" button, defaults to True
-        :type UIloadNewData: bool, optional
-        :param UIcameraControls: flag to show the camera controls pane, defaults to True
-        :type UIcameraControls: bool, optional
-        :param UIdecimation: flag to show the decimation slider, defaults to True
-        :type UIdecimation: bool, optional
-        """
-
-        self.__UI_settings = {
-            'UI':UI, 
-            'UIfullscreen':UIfullscreen, 
-            'UIsnapshot':UIsnapshot, 
-            'UIreset':UIreset, 
-            'UIsavePreset':UIsavePreset, 
-            'UIloadNewData':UIloadNewData, 
-            'UIcameraControls':UIcameraControls, 
-            'UIdecimation':UIdecimation, 
         }
 
     def window_settings(
@@ -452,36 +404,6 @@ class Settings(object):
             'sizeMult':dict() if sizeMult is None else sizeMult,
             'showParts':dict() if showParts is None else showParts,
             'radiusVariable':dict() if radiusVariable is None else radiusVariable
-        }
-
-    def particle_UI_settings(
-        self,
-        UIparticle=None,
-        UIdropdown=None,
-        UIcolorPicker=None,
-        **extra):
-        """Flags that control how the UI for each particle group looks like
-
-        :param UIparticle: do you want to show the particles 
-            in the user interface.
-            This is a dict with keys of the particle UInames mapped to bools,
-            defaults to dict([(UIname,True) for UIname in UInames])
-        :type UIparticle: dict of UIname:bool, optional
-        :param UIdropdown: do you want to enable the dropdown menus for 
-               particles in the user interface.
-               This is a dict with keys of the particle UInames mapped to bools,
-               defaults to dict([(UIname,True) for UIname in UInames])
-        :type UIdropdown: dict of UIname:bool, optional
-        :param UIcolorPicker: do you want to allow the user to change the color.
-               This is a dict with keys of the particle UInames mapped to bools,
-               defaults to dict([(UIname,True) for UIname in UInames])
-        :type UIcolorPicker: dict of UIname:bool, optional
-        """
-
-        self.__particle_UI_settings = {
-            'UIparticle':dict() if UIparticle is None else UIparticle,
-            'UIdropdown':dict() if UIdropdown is None else UIdropdown,
-            'UIcolorPicker':dict() if UIcolorPicker is None else UIcolorPicker,
         }
     
     def particle_velocity_settings(
