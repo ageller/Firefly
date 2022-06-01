@@ -35,7 +35,7 @@ function createUI(){
 	//console.log("Creating UI", GUIParams.partsKeys, GUIParams.decimate);
 
 	// don't create the UI at all
-	if (GUIParams.GUIExcludeList.includes('')) return clearloading(true);
+	if (excluded('')) return clearloading(true);
 
 	//add particle data to the GUIState object
 	defineGUIParticleState();
@@ -45,7 +45,7 @@ function createUI(){
 	GUIParams.longestPartLabelLen = 0;
 
 	GUIParams.partsKeys.forEach(function(p,i){
-		if (p.length > longestPartLabel.length && !GUIParams.GUIExcludeList.includes(p)) longestPartLabel = p;
+		if (p.length > longestPartLabel.length && !excluded(p)) longestPartLabel = p;
 		if (i == GUIParams.partsKeys.length - 1){
 			var elem = d3.select('body').append('div')
 				.attr('class','pLabelDivCHECK')
@@ -165,7 +165,7 @@ function createUI(){
 			.text('main')
 
 
-	var top_position = GUIParams.GUIExcludeList.includes('colorbarContainer') ? 50 : 30;
+	var top_position = excluded('colorbarContainer') ? 50 : 30;
 	var UI =  UIcontainer.append('div')
 		.attr('id','UIStateContainer')
 		.attr('class','UIStateContainer')
@@ -182,7 +182,7 @@ function createUI(){
 
 	createGeneralWindow(UI,GUIParams.GUIState,'main');
 
-	if (!GUIParams.GUIExcludeList.includes('main/particles')){
+	if (!excluded('main/particles')){
 		container = GUIParams.GUIState.main.particles.d3Element;
 		// create each of the particle group UI base panels containing:
 		GUIParams.partsKeys.forEach(function(p,i){
@@ -446,7 +446,7 @@ function createGeneralWindow(container,parent,name,this_UIcontainer=null){
 	}
 
 	// don't actually want to make this or any of its children
-	if (GUIParams.GUIExcludeList.includes(this_pane.url)) return;
+	if (excluded(this_pane.url)) return;
 
 	// allow to pass the UIcontainer to apply builder to if desired, 
 	//  otherwise will create a new one just for this pane
@@ -477,7 +477,7 @@ function createGeneralWindow(container,parent,name,this_UIcontainer=null){
 		var sub_url;
 		var singleWidth = GUIParams.containerWidth/keys.filter(function (val){
 			sub_url = this_pane.url+'/' + val;
-			return !GUIParams.GUIExcludeList.includes(sub_url);
+			return !excluded(sub_url);
 		}).length - 4;
 		//console.log('hardcoded padding between',this_pane.url,'/',keys,'buttons');
 
@@ -488,7 +488,7 @@ function createGeneralWindow(container,parent,name,this_UIcontainer=null){
 			this_pane.children.forEach(function(k){
 				var sub_url = this_pane[k].url = this_pane.url+'/' + k;
 				//console.log(sub_url)
-				if (GUIParams.GUIExcludeList.includes(sub_url)) return;
+				if (excluded(sub_url)) return;
 				this_pane.d3Element.append('div')
 					.attr('id',this_pane[k].id + 'button')
 					.attr('class','particleDiv')

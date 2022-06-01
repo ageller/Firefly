@@ -140,7 +140,7 @@ function createParticleBase(container, parent, p){
 	//  create container divs for each of the particle groups
 
 	var height = 0;
-	if (!GUIParams.GUIExcludeList.includes(this_pane.url)){
+	if (!excluded(this_pane.url)){
 		height += 33;
 		var controls = container.append('div')
 			.attr('class',"particleDiv "+p+"Div")
@@ -350,7 +350,7 @@ function createParticleDropdown(container,this_pane,name,p){
 	this_pane.children.forEach(function(k){
 		//create the button on the base window
 		var sub_url = this_pane[k].url = this_pane.url+'/' + k;
-		if (GUIParams.GUIExcludeList.includes(sub_url)) return;
+		if (excluded(sub_url)) return;
 		else if (this_pane[k].hasOwnProperty('builder')) {
 			//console.log(sub_url)
 			last_button = button_container.append('div')
@@ -469,7 +469,9 @@ function createColorPicker(p){
 		},
 	});
 
-	if (!GUIParams.useColorPicker[p]){
+	// special URL to disable the colorpicker
+	console.log(p+'/colorPicker/onclick',excluded(p+'/colorPicker/onclick'))
+	if (excluded(p+'/colorPicker/onclick')){
 		$("#"+p+"ColorPicker").spectrum({
 			color: "rgba("+(GUIParams.Pcolors[p][0]*255)+","+(GUIParams.Pcolors[p][1]*255)+","+(GUIParams.Pcolors[p][2]*255)+","+GUIParams.Pcolors[p][3]+")",
 			disabled: true,

@@ -63,17 +63,17 @@ function confirmGUIInit(keys = ["partsKeys", "PsizeMult", "plotNmax", "decimate"
 function confirmGUIBuild(parent){
 
 	var has_url = parent.hasOwnProperty('url')
-	var excluded = GUIParams.GUIExcludeList.includes(parent.url)
+	var this_excluded = excluded(parent.url)
 	// either there's nothing to build or we have already built it and set the parent.built attribute
 	var built = (
-		has_url && excluded || // not intending to build
+		has_url && this_excluded || // not intending to build
 		!parent.hasOwnProperty('builder') || // nothing to build
 		parent.built); // actually was built
 
 	var children = Object.keys(parent).filter(function(key){
 		return !GUIParams.GUIState_variables.includes(key)});
 	// do we have children we need to check? 
-	if (built && children.length > 0 && !excluded){
+	if (built && children.length > 0 && !this_excluded){
 		// check until we find the first unbuilt child
 		built = children.every(function (child){
 			var child_built = confirmGUIBuild(parent[child]);
@@ -132,7 +132,7 @@ function finalizeGUIInitialization(){
 	//d3.select('#UIcontainer').classed('hidden', false)
 
 	//check for an initial colormap and make adjustments if needed
-	if (!GUIParams.GUIExcludeList.includes('colorbarContainer')){
+	if (!excluded('colorbarContainer')){
 		GUIParams.partsKeys.forEach(function(p){
 			if (GUIParams.showColormap[p]) initialColormap(p);
 		})
