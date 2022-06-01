@@ -142,7 +142,6 @@ function finalizeGUIInitialization(){
 
 
 	// tell the viewer the UI has been initialized
-	sendToViewer([{'applyUIoptions':null}]);
 	sendToViewer([{'setViewerParamByKey':[true, "haveUI"]}]);
 
 	GUIParams.GUIbuilt = true;

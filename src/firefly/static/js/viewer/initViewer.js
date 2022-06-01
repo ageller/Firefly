@@ -653,6 +653,13 @@ function applyOptions(){
 		}
 	}	
 
+	// disable GUI elements
+	if (viewerParams.parts.options.hasOwnProperty('GUIExcludeList')){
+		if (viewerParams.parts.options.GUIExcludeList != null){
+			viewerParams.GUIExcludeList = viewerParams.parts.options.GUIExcludeList;
+		}
+	}
+
 	//particle specific options
 	for (var i=0; i<viewerParams.partsKeys.length; i++){
 		var p = viewerParams.partsKeys[i];
@@ -1114,10 +1121,6 @@ function sendInitGUI(prepend=[], append=[]){
 	forGUI.push({'setGUIParamByKey':[viewerParams.showFPS,"showFPS"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.showMemoryUsage,"showMemoryUsage"]});
 
-	forGUI.push({'setGUIParamByKey':[viewerParams.parts.options.UIparticle,"UIparticle"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.parts.options.UIdropdown,"UIdropdown"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.parts.options.UIcolorPicker,"UIcolorPicker"]});
-
 	forGUI.push({'setGUIParamByKey':[viewerParams.columnDensity,"columnDensity"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.CDmin,"CDmin"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.CDmax,"CDmax"]});
@@ -1131,6 +1134,8 @@ function sendInitGUI(prepend=[], append=[]){
 	forGUI.push({'setGUIParamByKey':[viewerParams.haveTween,"haveTween"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.inTween,"inTween"]});
 
+	console.log(viewerParams.GUIExcludeList,'here')
+	forGUI.push({'setGUIParamByKey':[viewerParams.GUIExcludeList,"GUIExcludeList"]});
 
 	// add any extra commands
 	append.forEach(function(x,i){
@@ -1559,13 +1564,13 @@ document.addEventListener("keydown", sendCameraInfoToGUI);
 // called numerous times outside this file
 //check if the data is loaded
 function clearloading(gui_done=false){
-	viewerParams.loaded = true;
-	viewerParams.reset = false;
-
 	if (!gui_done){
 		d3.select("#splashdiv5").text("Building GUI...");
 		return;
 	}
+
+	viewerParams.loaded = true;
+	viewerParams.reset = false;
 
 	//show the rest of the page
 	d3.select("#ContentContainer").style("visibility","visible")

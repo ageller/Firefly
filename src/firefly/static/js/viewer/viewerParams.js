@@ -25,6 +25,9 @@ function defineViewerParams(){
 
 		this.loaded = false;
 
+		// for disabling GUI elements
+		this.GUIExcludeList = []
+
 		//positions, will be rest below ()
 		this.center;
 		this.boxSize = 0.;

@@ -298,13 +298,17 @@ function initialColormap(p){
 
 	//check the box
 	var elm = document.getElementById(p+'colorCheckBox');
-	elm.checked = true;
-	elm.value = true;
+	if (elm){
+		elm.checked = true;
+		elm.value = true;
+	}
 
 	//set the initial colormap
 	var idx = parseInt(Math.round(GUIParams.colormap[p]*256/8 - 0.5));
-	document.getElementById(p+'_SelectCMap').value = idx.toString();
-	document.getElementById(p+'_SelectCMapVar').value = GUIParams.colormapVariable[p].toString();
+	elm = document.getElementById(p+'_SelectCMap')
+	if (elm) elm.value = idx.toString();
+	elm = document.getElementById(p+'_SelectCMapVar')
+	if (elm) elm.value = GUIParams.colormapVariable[p].toString();
 
 	//create and extend the colormap SVG
 	createColormapSVG(p);
@@ -314,13 +318,15 @@ function initialColormap(p){
 	GUIParams.blendingMode[p] = 'normal';
 	forViewer.push({'setViewerParamByKey':[GUIParams.blendingMode[p], "blendingMode", p]});
 	elm = document.getElementById(p+'_selectBlendingMode');
-	elm.value = GUIParams.blendingMode[p];
+	if (elm) elm.value = GUIParams.blendingMode[p];
 	forViewer.push({'setBlendingMode':[GUIParams.blendingMode[p], p]});
 
 	//set the depth mode to True
 	elm = document.getElementById(p+'_depthCheckBox');
-	elm.checked = true;
-	elm.value = true;
+	if (elm){
+		elm.checked = true;
+		elm.value = true;
+	}
 	forViewer.push({'setDepthMode':[p, true]})
 
 	sendToViewer(forViewer);

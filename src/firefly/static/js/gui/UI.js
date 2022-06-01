@@ -34,17 +34,18 @@ function addGUIlisteners(){
 function createUI(){
 	//console.log("Creating UI", GUIParams.partsKeys, GUIParams.decimate);
 
+	// don't create the UI at all
+	if (GUIParams.GUIExcludeList.includes('')) return clearloading(true);
+
 	//add particle data to the GUIState object
 	defineGUIParticleState();
-
-
 
 	//first get the maximum width of the particle type labels
 	var longestPartLabel = '';
 	GUIParams.longestPartLabelLen = 0;
 
 	GUIParams.partsKeys.forEach(function(p,i){
-		if (p.length > longestPartLabel.length && GUIParams.UIparticle[p]) longestPartLabel = p;
+		if (p.length > longestPartLabel.length && !GUIParams.GUIExcludeList.includes(p)) longestPartLabel = p;
 		if (i == GUIParams.partsKeys.length - 1){
 			var elem = d3.select('body').append('div')
 				.attr('class','pLabelDivCHECK')
@@ -181,12 +182,14 @@ function createUI(){
 
 	createGeneralWindow(UI,GUIParams.GUIState,'main');
 
-	container = GUIParams.GUIState.main.particles.d3Element;
-	// create each of the particle group UI base panels containing:
-	GUIParams.partsKeys.forEach(function(p,i){
-		if (GUIParams.UIparticle[p]) createParticleBase(container,GUIParams.GUIState.main.particles,p);
-	});
-	
+	if (!GUIParams.GUIExcludeList.includes('main/particles')){
+		container = GUIParams.GUIState.main.particles.d3Element;
+		// create each of the particle group UI base panels containing:
+		GUIParams.partsKeys.forEach(function(p,i){
+			createParticleBase(container,GUIParams.GUIState.main.particles,p);
+		});
+	}
+		
 	// if (GUIParams.containerWidth > 300) {
 	// 	//could be nice to center these, but there are lots of built in positions for the sliders and input boxes.  Not worth it
 	// 	var pd = 0.//(GUIParams.containerWidth - 300)/2.;
@@ -302,7 +305,6 @@ function transitionUIWindows(state=null, pID=null){
 
 	// deal with the particle show classes
 	GUIParams.partsKeys.forEach(function(k){
-		if (!GUIParams.UIparticle[k]) return;
 		var ddiv = d3.select('#' + k + 'DropdownDiv');
 		if (ddiv.empty()) return;
 		ddiv.selectAll('.dropdown-content').classed('show', false);
@@ -348,7 +350,6 @@ function transitionUIWindows(state=null, pID=null){
 		var hdrop = 0;
 		var pheight = 0;
 		GUIParams.partsKeys.forEach(function(k){
-			if (!GUIParams.UIparticle[k]) return;
 			var ddiv = d3.select('#' + k + 'DropdownDiv');
 			var pdiv = d3.select('#' + k + 'Div');
 
