@@ -55,17 +55,9 @@ class Settings(object):
                     if key in obj.keys():
                         return attr
 
-        min_dist = 1e10
-        closest_key = ''
-        for real_key in self.keys():
-            rkset = set([char for char in real_key.lower()])
-            kset = set([char for char in key.lower()])
-            dist = max(len(rkset-kset),len(kset-rkset))
-            if dist < min_dist: 
-                closest_key = real_key
-                min_dist = dist
+        closest_key,_ = find_closest_string(key,self.keys()) 
         
-        raise KeyError("Invalid settings key %s (did you mean %s?)"%(key,closest_key))
+        raise KeyError("Invalid settings key: '%s' (did you mean '%s'?)"%(key,closest_key))
         
     def printKeys(
         self,
@@ -604,7 +596,23 @@ class Settings(object):
                     ## copy the keys over
                     all_settings_dict.update(obj)
 
+        if len(all_settings_dict['GUIExcludeList']) > 0: self.validateGUIExcludeList(all_settings_dict['GUIExcludeList'])
+
         return all_settings_dict
+    
+    def validateGUIExcludeList(self,GUIExcludeList):
+        pkey_particleGUIurlss = []
+        for pkey in self['sizeMult'].keys():
+            pkey_particleGUIurls = [url.replace('main/particles',pkey).lower() for url in particle_GUIurls]+[pkey]
+        pkey_particleGUIurlss += pkey_particleGUIurls
+
+        for url in GUIExcludeList:
+            if url.lower() in GUIurls: continue
+            elif url.lower() in pkey_particleGUIurlss: continue
+            else: 
+                closest_url,_ = find_closest_string(url.lower(),GUIurls+pkey_particleGUIurlss)
+                raise KeyError(f"Invalid GUIurl: '{url}' (did you mean '{closest_url}'?)")
+            
 
     def outputToJSON(
         self,
@@ -684,3 +692,70 @@ class Settings(object):
                     print(self[key],'-->',settings_dict[key])
 
             self[key]=settings_dict[key]
+
+def find_closest_string(string,string_list):
+    min_dist = 1e10
+    closest_key = ''
+    for real_string in string_list:
+        rkset = set([char for char in real_string.lower()])
+        kset = set([char for char in string.lower()])
+        dist = max(len(rkset-kset),len(kset-rkset))
+        if dist < min_dist: 
+            closest_key = real_string
+            min_dist = dist
+    return closest_key,dist
+
+GUIurls = [
+    'main',
+    'main/general',
+    'main/general/data',
+    'main/general/data/decimation',
+    'main/general/data/savePreset',
+    'main/general/data/reset',
+    'main/general/data/loadNewData',
+    'main/general/camera',
+    'main/general/camera/centerTextBoxes',
+    'main/general/camera/cameraTextBoxes',
+    'main/general/camera/rotationTextBoxes',
+    'main/general/camera/cameraButtons',
+    'main/general/camera/fullScreen',
+    'main/general/camera/snapshot',
+    'main/general/camera/cameraFriction',
+    'main/general/camera/stereoSep',
+    'main/general/projection',
+    'main/general/projection/columnDensityCheckBox',
+    'main/general/projection/columnDensityLogCheckBox',
+    'main/general/projection/columnDensitySelectCmap',
+    'main/general/projection/columnDensitySliders',
+    'colorbarContainer',
+    'FPSContainer',
+    'octreeLoadingBarContainer',
+    'main/particles']
+GUIurls = [url.lower() for url in GUIurls]
+
+particle_GUIurls = [
+    'main/particles/onoff', 
+    'main/particles/sizeSlider',
+    'main/particles/colorPicker',
+    'main/particles/dropdown',
+    'main/particles/dropdown/general',
+    'main/particles/dropdown/general/octreeClearMemory',
+    'main/particles/dropdown/general/blendingModeSelectors',
+    'main/particles/dropdown/general/maxSlider',
+    'main/particles/dropdown/general/octreeCameraNorm',
+    'main/particles/dropdown/general/radiusVariableSelector',
+    'main/particles/dropdown/velocities',
+    'main/particles/dropdown/velocities/velocityCheckBox',
+    'main/particles/dropdown/velocities/velocityWidthSlider',
+    'main/particles/dropdown/velocities/velocityGradientCheckBox',
+    'main/particles/dropdown/velocities/velocityAnimatorCheckBox',
+    'main/particles/dropdown/velocities/velocityAnimatorTextBoxes',
+    'main/particles/dropdown/colormap',
+    'main/particles/dropdown/colormap/colormapCheckBox',
+    'main/particles/dropdown/colormap/colormapSliders',
+    'main/particles/dropdown/filters',
+    'main/particles/dropdown/filters/filterSliders',
+    'main/particles/dropdown/filters/filterPlayback',
+]
+
+particle_GUIurls = [url.lower() for url in particle_GUIurls]
