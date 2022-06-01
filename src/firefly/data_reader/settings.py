@@ -213,6 +213,7 @@ class Settings(object):
         showFPS=True,
         showMemoryUsage=True,
         memoryLimit=2e9,
+        GUIExcludeList=None,
         **extra):
         """Settings that affect the browser window
 
@@ -234,6 +235,9 @@ class Settings(object):
             the memory usage directly, otherwise memory usage is only estimated, 
             defaults to 2e9 
         :type memoryLimit: float, optional
+        :param GUIExcludeList: list of string GUI element URLs (e.g. 'main/general/data/decimation') 
+            to exclude from the GUI. Case insensitive. If None then an empty list, defaults to None
+        :type GUIExcludeList: list, optional
         """
 
         self.__window_settings = {
@@ -245,6 +249,7 @@ class Settings(object):
             'showFPS':showFPS,
             'showMemoryUsage':showMemoryUsage,
             'memoryLimit':memoryLimit,
+            'GUIExcludeList':GUIExcludeList
         }
 
     def camera_settings(
@@ -554,7 +559,6 @@ class Settings(object):
 
         ## transfer keys from particle group
         for key in [
-            'UIparticle','UIdropdown','UIcolorPicker',
             'color','sizeMult','showParts','plotNmax','radiusVariable',
             'filterVals','filterLims','invertFilter',
             'colormapVals','colormapLims',
