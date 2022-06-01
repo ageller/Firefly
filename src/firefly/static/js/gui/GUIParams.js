@@ -35,6 +35,7 @@ function defineGUIParams(){
 		//for show/hide UI
 		this.movingUI = false;
 		this.UIhidden = false;
+		this.collapseGUIAtStart = true;
 
 		//for sockets
 		this.usingSocket = true;

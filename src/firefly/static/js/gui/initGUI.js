@@ -123,10 +123,12 @@ function finalizeGUIInitialization(){
 	// collapse the UI initially
 	setTimeout(function(){
 		var hamb = document.getElementById('Hamburger');
-		hamb.classList.toggle("change");
-		GUIParams.UIhidden = false;
-		hideUI.call(hamb);
-	}, 100);
+			hamb.classList.toggle("change");
+			if (GUIParams.collapseGUIAtStart){
+				GUIParams.UIhidden = false;
+				hideUI.call(hamb);
+			}
+		}, 100);
 
 	// and now reveal the result
 	//d3.select('#UIcontainer').classed('hidden', false)
