@@ -55,7 +55,17 @@ class Settings(object):
                     if key in obj.keys():
                         return attr
 
-        raise KeyError("Invalid settings key %s"%key)
+        min_dist = 1e10
+        closest_key = ''
+        for real_key in self.keys():
+            rkset = set([char for char in real_key.lower()])
+            kset = set([char for char in key.lower()])
+            dist = max(len(rkset-kset),len(kset-rkset))
+            if dist < min_dist: 
+                closest_key = real_key
+                min_dist = dist
+        
+        raise KeyError("Invalid settings key %s (did you mean %s?)"%(key,closest_key))
         
     def printKeys(
         self,
