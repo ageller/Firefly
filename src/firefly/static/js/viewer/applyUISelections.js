@@ -479,6 +479,7 @@ function createPreset(){
 
 	//for the UI
 	preset.GUIExcludeList = copyValue(viewerParams.GUIExcludeList)
+	preset.collapseGUIAtStart = copyValue(viewerParams.collapseGUIAtStart)
 
 
 	//particle specific options

@@ -660,6 +660,12 @@ function applyOptions(){
 		}
 	}
 
+	if (viewerParams.parts.options.hasOwnProperty('collapseGUIAtStart')){
+		if (viewerParams.parts.options.collapseGUIAtStart != null){
+			viewerParams.collapseGUIAtStart = viewerParams.parts.options.collapseGUIAtStart;
+		}
+	}
+
 	//particle specific options
 	for (var i=0; i<viewerParams.partsKeys.length; i++){
 		var p = viewerParams.partsKeys[i];
@@ -1134,8 +1140,8 @@ function sendInitGUI(prepend=[], append=[]){
 	forGUI.push({'setGUIParamByKey':[viewerParams.haveTween,"haveTween"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.inTween,"inTween"]});
 
-	console.log(viewerParams.GUIExcludeList,'here')
 	forGUI.push({'setGUIParamByKey':[viewerParams.GUIExcludeList,"GUIExcludeList"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.collapseGUIAtStart,"collapseGUIAtStart"]});
 
 	// add any extra commands
 	append.forEach(function(x,i){

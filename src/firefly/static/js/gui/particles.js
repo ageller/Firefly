@@ -470,7 +470,6 @@ function createColorPicker(p){
 	});
 
 	// special URL to disable the colorpicker
-	console.log(p+'/colorPicker/onclick',excluded(p+'/colorPicker/onclick'))
 	if (excluded(p+'/colorPicker/onclick')){
 		$("#"+p+"ColorPicker").spectrum({
 			color: "rgba("+(GUIParams.Pcolors[p][0]*255)+","+(GUIParams.Pcolors[p][1]*255)+","+(GUIParams.Pcolors[p][2]*255)+","+GUIParams.Pcolors[p][3]+")",
