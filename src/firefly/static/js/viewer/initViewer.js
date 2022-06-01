@@ -513,6 +513,8 @@ function applyOptions(){
 
 	var options = viewerParams.parts.options;
 
+	var forGUI = [];
+
 	//modify the minimum z to show particles at (avoid having particles up in your face)
 	if (options.hasOwnProperty('zmin') && options.zmin != null) viewerParams.zmin = options.zmin;
 
@@ -573,7 +575,7 @@ function applyOptions(){
 		viewerParams.useStereo = true;
 		if (viewerParams.haveUI){
 			var evalString = 'elm = document.getElementById("StereoCheckBox"); elm.checked = true; elm.value = true;'
-			sendToGUI([{'evalCommand':[evalString]}]);
+			forGUI.push({'evalCommand':[evalString]})
 	} 	}
 
 	//modify the initial stereo separation
@@ -703,7 +705,7 @@ function applyOptions(){
 			viewerParams.showVel[p] = true;
 			if (viewerParams.haveUI){
 				var evalString = 'elm = document.getElementById("'+p+'velCheckBox"); elm.checked = true; elm.value = true;'
-				sendToGUI([{'evalCommand':[evalString]}]);
+				forGUI.push({'evalCommand':[evalString]})
 		} 	}
 
 		//type of velocity vectors
@@ -737,7 +739,7 @@ function applyOptions(){
 			viewerParams.animateVel[p] = true;
 			if (viewerParams.haveUI){
 				var evalString = 'elm = document.getElementById("'+p+'velAnimateCheckBox"); elm.checked = true; elm.value = true;'
-				sendToGUI([{'evalCommand':[evalString]}]);
+				forGUI.push({'evalCommand':[evalString]})
 		} 	}
 
 		//animate velocity dt
@@ -834,7 +836,7 @@ function applyOptions(){
 			if (viewerParams.haveUI){
 				console.log(p+'colorCheckBox')
 				var evalString = 'elm = document.getElementById("'+p+'colorCheckBox"); elm.checked = true; elm.value = true;'
-				sendToGUI([{'evalCommand':[evalString]}]);
+				forGUI.push({'evalCommand':[evalString]})
 		} 	}
 
 		//choose which colormap to use
@@ -871,6 +873,8 @@ function applyOptions(){
 	viewerParams.colormapVariable[viewerParams.CDkey] = 0;
 	viewerParams.showColormap[viewerParams.CDkey] = false;
 	viewerParams.updateColormapVariable[viewerParams.CDkey] = false;
+
+	sendToGUI(forGUI);
 }
 
 // connect fly/trackball controls
