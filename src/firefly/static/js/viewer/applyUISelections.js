@@ -514,10 +514,6 @@ function createPreset(){
 	for (var i=0; i<viewerParams.partsKeys.length; i++){
 		var p = copyValue(viewerParams.partsKeys[i]);
 
-		preset.UIparticle[p] = copyValue(viewerParams.parts.options.UIparticle[p]);
-		preset.UIdropdown[p] = copyValue(viewerParams.parts.options.UIdropdown[p]);
-		preset.UIcolorPicker[p] = copyValue(viewerParams.parts.options.UIcolorPicker[p]);
-
 		preset.showParts[p] = copyValue(viewerParams.showParts[p]);
 		preset.sizeMult[p] = copyValue(viewerParams.PsizeMult[p]);
 		preset.color[p] = copyValue(viewerParams.Pcolors[p]);
