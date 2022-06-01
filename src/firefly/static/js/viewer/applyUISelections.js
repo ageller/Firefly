@@ -70,7 +70,7 @@ function loadNewData(){
 	d3.select('#stateContainer').html("");
 	d3.select('.UIcontainer').html("");
 	d3.select("#splashdivLoader").selectAll('svg').remove();
-	d3.select("#splashdiv5").text("Loading...");
+	d3.select("#splashdiv5").text("Loading particle data...");
 	if (Object.keys(viewerParams.dir).length > 1){
 		forGUI.push({'showLoadingButton':'#selectStartupButton'});
 	} else {
@@ -365,65 +365,6 @@ function updateVelocityVectorWidth(args){
 	viewerParams.velVectorWidth[p] = parseFloat(value);
 }
 
-//apply the options file to the UI
-function applyUIoptions(){
-	if (viewerParams.parts){
-
-	// now check if we need to hide any of this
-		if (viewerParams.parts.options.hasOwnProperty('UI')){
-			if (!viewerParams.parts.options.UI){
-				d3.select('.UIcontainer').style('display','none');
-			}
-		}
-		if (viewerParams.parts.options.hasOwnProperty('UIfullscreen')){
-			if (!viewerParams.parts.options.UIfullscreen){
-				d3.select('#fullScreenDiv').style('display','none');
-			}
-		}
-		if (viewerParams.parts.options.hasOwnProperty('UIsnapshot')){
-			if (!viewerParams.parts.options.UIsnapshot){
-				d3.select('#snapshotDiv').style('display','none');
-			}
-		}
-		if (viewerParams.parts.options.hasOwnProperty('UIreset')){
-			if (!viewerParams.parts.options.UIreset){
-				d3.select('#resetDiv').style('display','none');
-			}
-		}
-		if (viewerParams.parts.options.hasOwnProperty('UIsavePreset')){
-			if (!viewerParams.parts.options.UIsavePreset){
-				d3.select('#savePresetDiv').style('display','none');
-			}
-		}
-		if (viewerParams.parts.options.hasOwnProperty('UIloadNewData')){
-			if (!viewerParams.parts.options.UIloadNewData){
-				d3.select('#loadNewDataDiv').style('display','none');
-			}
-		}
-		if (viewerParams.parts.options.hasOwnProperty('UIcameraControls')){
-			if (!viewerParams.parts.options.UIcameraControls){
-				d3.select('#cameraControlsDiv').style('display','none');
-			}
-		}
-		if (viewerParams.parts.options.hasOwnProperty('UIdecimation')){
-			if (!viewerParams.parts.options.UIdecimation){
-				d3.select('#decimationDiv').style('display','none');
-			}
-		}	
-		if (viewerParams.parts.options.hasOwnProperty('UIparticle')){
-			for (i=0; i<viewerParams.partsKeys.length; i++){
-				d = viewerParams.partsKeys[i];    	
-				if (viewerParams.parts.options.UIparticle.hasOwnProperty(d)){
-					if (!viewerParams.parts.options.UIparticle[d]){
-						d3.selectAll('div.'+d+'Div').style('display','none');
-					}
-				}
-			}
-		}
-
-	}
-}
-
 //save the image to a file
 function saveFile(strData, filename) {
 	var link = document.createElement('a');
@@ -537,14 +478,8 @@ function createPreset(){
 	preset.memoryLimit = copyValue(viewerParams.memoryLimit);
 
 	//for the UI
-	preset.UI = copyValue(viewerParams.parts.options.UI);
-	preset.UIfullscreen = copyValue(viewerParams.parts.options.UIfullscreen);
-	preset.UIsnapshot = copyValue(viewerParams.parts.options.UIsnapshot);
-	preset.UIreset = copyValue(viewerParams.parts.options.UIreset);
-	preset.UIsavePreset = copyValue(viewerParams.parts.options.UIsavePreset);
-	preset.UIloadNewData = copyValue(viewerParams.parts.options.UIloadNewData);
-	preset.UIcameraControls = copyValue(viewerParams.parts.options.UIcameraControls);
-	preset.UIdecimation = copyValue(viewerParams.parts.options.UIdecimation);
+	preset.GUIExcludeList = copyValue(viewerParams.GUIExcludeList)
+	preset.collapseGUIAtStart = copyValue(viewerParams.collapseGUIAtStart)
 
 
 	//particle specific options
@@ -579,10 +514,6 @@ function createPreset(){
 
 	for (var i=0; i<viewerParams.partsKeys.length; i++){
 		var p = copyValue(viewerParams.partsKeys[i]);
-
-		preset.UIparticle[p] = copyValue(viewerParams.parts.options.UIparticle[p]);
-		preset.UIdropdown[p] = copyValue(viewerParams.parts.options.UIdropdown[p]);
-		preset.UIcolorPicker[p] = copyValue(viewerParams.parts.options.UIcolorPicker[p]);
 
 		preset.showParts[p] = copyValue(viewerParams.showParts[p]);
 		preset.sizeMult[p] = copyValue(viewerParams.PsizeMult[p]);

@@ -260,9 +260,6 @@ class ParticleGroup(object):
 
         ## start with the default
         self.settings_default = {
-            'UIparticle':True,
-            'UIdropdown':True,
-            'UIcolorPicker':True,
             'color': np.append(np.random.random(3),[1]),
             'sizeMult':.1,
             'showParts':True,

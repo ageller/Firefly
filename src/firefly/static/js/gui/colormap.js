@@ -75,14 +75,14 @@ function checkColormapBox(p, checked){
 function removeColorbar(p){
 	var w = 76; //I think this is the width of the colormap, but how do I get this from the DOM?
 	var w0 = parseFloat(d3.select('#colormap_container').style('height'));
-	d3.select('#' + p + 'colormap').remove();
+	d3.select('#' + p + 'colormapDiv').remove();
 	d3.select('#colormap_container').style('height',(w0 - w) + 'px')
 	//var trans = parseTranslateStyle(d3.select('#colormap_outer_container'));
 	var m0 = parseFloat(d3.select('#colormap_outer_container').style('margin-left'));
 	d3.select('#colormap_outer_container').style('margin-left', (m0 - w) + 'px');
 	//also subtract 16 off the tranlateY styles for all the other colormaps (again I wish I could get 16 from the DOM)
 	Object.keys(GUIParams.showColormap).forEach(function(k){
-		var elem = d3.select('#' + k + 'colormap');
+		var elem = d3.select('#' + k + 'colormapDiv');
 		if (elem.node()) {
 			var trans = parseTranslateStyle(elem);
 			console.log('checking', k, trans)
@@ -112,7 +112,7 @@ function createColormapSVG(particle_group_UIname){
 	//d3.select('#' + particle_group_UIname + 'colormap').remove();
 
 	//check if the colormap for this particle already exists, if not then a new one will be created, otherwise this contianer will be used
-	var cbar = d3.select('#' + particle_group_UIname + 'colormap');
+	var cbar = d3.select('#' + particle_group_UIname + 'colormapDiv');
 
 	var n = GUIParams.colormapList.length;
 	//could set actual cbar dimensions in params
@@ -133,7 +133,7 @@ function createColormapSVG(particle_group_UIname){
 	//create a container that can be scaled and translated
 	if (!cbar.node()) {
 		cbar = d3.select('#colormap_container').append('div')
-			.attr('id',particle_group_UIname + 'colormap')
+			.attr('id',particle_group_UIname + 'colormapDiv')
 			.attr('class','colormap')
 			.style('width', actualCbarHeight + 'px') //since it's rotated, this is actually the height
 			.style('height', actualCbarWidth + 50 + 'px') //to allow for the labels
@@ -298,13 +298,17 @@ function initialColormap(p){
 
 	//check the box
 	var elm = document.getElementById(p+'colorCheckBox');
-	elm.checked = true;
-	elm.value = true;
+	if (elm){
+		elm.checked = true;
+		elm.value = true;
+	}
 
 	//set the initial colormap
 	var idx = parseInt(Math.round(GUIParams.colormap[p]*256/8 - 0.5));
-	document.getElementById(p+'_SelectCMap').value = idx.toString();
-	document.getElementById(p+'_SelectCMapVar').value = GUIParams.colormapVariable[p].toString();
+	elm = document.getElementById(p+'_SelectCMap')
+	if (elm) elm.value = idx.toString();
+	elm = document.getElementById(p+'_SelectCMapVar')
+	if (elm) elm.value = GUIParams.colormapVariable[p].toString();
 
 	//create and extend the colormap SVG
 	createColormapSVG(p);
@@ -314,13 +318,15 @@ function initialColormap(p){
 	GUIParams.blendingMode[p] = 'normal';
 	forViewer.push({'setViewerParamByKey':[GUIParams.blendingMode[p], "blendingMode", p]});
 	elm = document.getElementById(p+'_selectBlendingMode');
-	elm.value = GUIParams.blendingMode[p];
+	if (elm) elm.value = GUIParams.blendingMode[p];
 	forViewer.push({'setBlendingMode':[GUIParams.blendingMode[p], p]});
 
 	//set the depth mode to True
 	elm = document.getElementById(p+'_depthCheckBox');
-	elm.checked = true;
-	elm.value = true;
+	if (elm){
+		elm.checked = true;
+		elm.value = true;
+	}
 	forViewer.push({'setDepthMode':[p, true]})
 
 	sendToViewer(forViewer);

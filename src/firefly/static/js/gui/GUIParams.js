@@ -35,6 +35,7 @@ function defineGUIParams(){
 		//for show/hide UI
 		this.movingUI = false;
 		this.UIhidden = false;
+		this.collapseGUIAtStart = true;
 
 		//for sockets
 		this.usingSocket = true;
@@ -179,36 +180,113 @@ function defineGUIParams(){
 		this.memoryUsage = 0;
 		
 
+		this.GUIState_variables = [
+			'built','current','id','name','builder','parent','children','url','button','segments','d3Element'
+		]
 		//object to hold the current visible window in the GUI
 		//current will hold the key that defines the currently visible window
 		//the rest of the keys will point to the IDs for the DOM elements that hold those windows
 		//the particles state will be populated in createUI
+		this.GUIExcludeList = [
+		];
 		this.GUIState = {
 			'current':'main',
 			'main':{
-				'id':'GUIMain',
-				'name':'Main',
+				'id':'main',
 				'general' : {
-					'id':'GUIGeneral',
-					'name':'General',
+					'id':'general',
+					'name':'general',
 					'data':{
-						'id':'GUIData',
-						'name':'Data'
+						'id':'data',
+						'builder':createControlsBox,
+						'decimation':{
+							'id':'decimation',
+							'builder':createDecimationSegment
+						},
+						'savePreset':{
+							'id':'savePreset',
+							'builder':createPresetSegment
+						},
+						'reset':{
+							'id':'reset',
+							'builder':createResetSegment
+						},
+						'loadNewData':{
+							'id':'loadNewData',
+							'builder':createLoadNewDataSegment
+						}
 					},
 					'camera':{
-						'id':'GUICamera',
-						'name':'Camera'
+						'id':'camera',
+						'builder':createControlsBox,
+						'centerTextBoxes':{
+							'id':'centerTextBoxes',
+							'builder':createCenterTextBoxesSegment
+						},
+						'cameraTextBoxes':{
+							'id':'cameraTextBoxes',
+							'builder':createCameraTextBoxesSegment
+						},
+						'rotationTextBoxes':{
+							'id':'rotationTextBoxes',
+							'builder':createRotationTextBoxesSegment
+						},
+						'cameraButtons':{
+						 	'id':'cameraButtons',
+							'builder':createCameraButtonsSegment
+						},
+						'fullScreen':{
+							'id':'fullScreen',
+							'builder':createFullScreenSegment
+						},
+						'snapshot':{
+							'id':'snapshot',
+							'builder':createSnapshotSegment
+						},
+						'cameraFriction':{
+							'id':'cameraFriction',
+							'builder':createCameraFrictionSegment
+						},
+						'stereoSep':{
+							'id':'stereoSep',
+							'builder':createStereoSepSegment
+						}
 					},
 					'projection':{
-						'id':'GUIProjection',
-						'name':'Projection'
+						'id':'projection',
+						'builder':createControlsBox,
+						'columnDensityCheckBox':{
+							'id':'columnDensityCheckBox',
+							'builder':createColumnDensityCheckBoxSegment
+						},
+						'columnDensityLogCheckBox':{
+							'id':'columnDensityLogCheckBox',
+							'builder':createColumnDensityLogCheckBoxSegment
+						},
+						'columnDensitySelectCmap':{
+							'id':'columnDensitySelectCmap',
+							'builder':createColumnDensitySelectCmapSegment
+						},
+						'columnDensitySliders':{
+							'id':'columnDensitySliders',
+							'builder':createColumnDensitySlidersSegment
+						}
 					},
 				},
-				'particles':{
-					'id':'GUIParticlesBase',
-					'name':'Particles'
-				}
+			'particles':{'id':'particles'}
 			},
+			'colorbarContainer':{
+				'id':'colorbarContainer',
+				'builder':createColormapContainer
+			},
+			'FPSContainer':{
+				'id':'FPSContainer',
+				'builder':createFPSContainer
+			},
+			'octreeLoadingBarContainer':{
+				'id':'octreeLoadingBarContainer',
+				'builder':createOctreeLoadingBar
+			}
 	
 		}
 

@@ -27,7 +27,7 @@ function connectViewerSocket(){
 
 		socketParams.socket.on('show_loader', function(msg) {
 			d3.select("#splashdivLoader").selectAll('svg').remove();
-			d3.select("#splashdiv5").text("Loading...");
+			d3.select("#splashdiv5").text("Loading particle data...");
 			d3.select("#loader").style("display","visible");
 			viewerParams.loaded = false;
 			viewerParams.pauseAnimation = true;
@@ -115,6 +115,7 @@ function initInputData(){
 //so that it can run locally also without using Flask
 // note that if allowVRControls == true, then you do not want to start in stereo (the VR button will do the work)
 function runLocal(useSockets=true, showGUI=true, allowVRControls=false, startStereo=false, pSize=null){
+	d3.select("#splashdiv5").text("Loading particle data...");
 	viewerParams.local = true;
 	viewerParams.usingSocket = useSockets;
 	forGUI = [];
@@ -652,6 +653,19 @@ function applyOptions(){
 		}
 	}	
 
+	// disable GUI elements
+	if (viewerParams.parts.options.hasOwnProperty('GUIExcludeList')){
+		if (viewerParams.parts.options.GUIExcludeList != null){
+			viewerParams.GUIExcludeList = viewerParams.parts.options.GUIExcludeList;
+		}
+	}
+
+	if (viewerParams.parts.options.hasOwnProperty('collapseGUIAtStart')){
+		if (viewerParams.parts.options.collapseGUIAtStart != null){
+			viewerParams.collapseGUIAtStart = viewerParams.parts.options.collapseGUIAtStart;
+		}
+	}
+
 	//particle specific options
 	for (var i=0; i<viewerParams.partsKeys.length; i++){
 		var p = viewerParams.partsKeys[i];
@@ -1113,10 +1127,6 @@ function sendInitGUI(prepend=[], append=[]){
 	forGUI.push({'setGUIParamByKey':[viewerParams.showFPS,"showFPS"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.showMemoryUsage,"showMemoryUsage"]});
 
-	forGUI.push({'setGUIParamByKey':[viewerParams.parts.options.UIparticle,"UIparticle"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.parts.options.UIdropdown,"UIdropdown"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.parts.options.UIcolorPicker,"UIcolorPicker"]});
-
 	forGUI.push({'setGUIParamByKey':[viewerParams.columnDensity,"columnDensity"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.CDmin,"CDmin"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.CDmax,"CDmax"]});
@@ -1130,6 +1140,8 @@ function sendInitGUI(prepend=[], append=[]){
 	forGUI.push({'setGUIParamByKey':[viewerParams.haveTween,"haveTween"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.inTween,"inTween"]});
 
+	forGUI.push({'setGUIParamByKey':[viewerParams.GUIExcludeList,"GUIExcludeList"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.collapseGUIAtStart,"collapseGUIAtStart"]});
 
 	// add any extra commands
 	append.forEach(function(x,i){
@@ -1557,7 +1569,12 @@ document.addEventListener("keydown", sendCameraInfoToGUI);
 
 // called numerous times outside this file
 //check if the data is loaded
-function clearloading(){
+function clearloading(gui_done=false){
+	if (!gui_done){
+		d3.select("#splashdiv5").text("Building GUI...");
+		return;
+	}
+
 	viewerParams.loaded = true;
 	viewerParams.reset = false;
 
