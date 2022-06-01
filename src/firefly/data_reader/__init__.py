@@ -4,7 +4,7 @@ from .settings import Settings
 
 from .particlegroup import ParticleGroup
 
-from .tween import TweenParams
+from .tween import TweenParams,tweenOrbiter
 
 from .FIREreader import FIREreader,SimpleFIREreader,STARFORGEreader
 
