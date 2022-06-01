@@ -492,7 +492,7 @@ class Octree(object):
                     offset+=byte_size        
         return filenames,counts
     
-    def split_chunks(self,max_npart_per_file=1e5) -> tuple[list[list[OctNode]],list[int]]:
+    def split_chunks(self,max_npart_per_file=1e5):
         split_indices = []
         counts = []
         count = 0
