@@ -214,6 +214,7 @@ class Settings(object):
         showMemoryUsage=True,
         memoryLimit=2e9,
         GUIExcludeList=None,
+        collapseGUIAtStart=None,
         **extra):
         """Settings that affect the browser window
 
@@ -238,6 +239,8 @@ class Settings(object):
         :param GUIExcludeList: list of string GUI element URLs (e.g. 'main/general/data/decimation') 
             to exclude from the GUI. Case insensitive. If None then an empty list, defaults to None
         :type GUIExcludeList: list, optional
+        :param collapseGUIAtStart: flag to collapse the GUI when the app starts up, defaults to True
+        :type collapseGUIAtStart: bool, optional
         """
 
         self.__window_settings = {
@@ -249,7 +252,8 @@ class Settings(object):
             'showFPS':showFPS,
             'showMemoryUsage':showMemoryUsage,
             'memoryLimit':memoryLimit,
-            'GUIExcludeList':GUIExcludeList
+            'GUIExcludeList':GUIExcludeList,
+            'collapseGUIAtStart':collapseGUIAtStart
         }
 
     def camera_settings(
