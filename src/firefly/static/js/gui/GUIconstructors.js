@@ -1,8 +1,5 @@
 function excluded(url){
-	if (!GUIParams.GUIExcludeList_lower){
-		GUIParams.GUIExcludeList_lower = GUIParams.GUIExcludeList.map((element)=>element.toLowerCase())
-	}
-	return (url && GUIParams.GUIExcludeList_lower.includes(url.toLowerCase()))
+	return (url && GUIParams.GUIExcludeList.map((element)=>element.toLowerCase()).includes(url.toLowerCase()))
 }
 
 function createSegment(container,parent,name){
