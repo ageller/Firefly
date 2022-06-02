@@ -3,6 +3,7 @@ from __future__ import print_function
 import numpy as np
 
 import os 
+import inspect
 
 from .json_utils import write_to_json,load_from_json
 
@@ -86,10 +87,7 @@ class Settings(object):
 
     def keys(self):
         """ Returns a list of keys for all the different settings sub-dictionaries """
-        this_keys = [] 
-        for attr in self.__dict__.keys():
-            if '_settings' in attr:
-                this_keys += list(getattr(self,attr).keys())
+        this_keys = list(valid_settings)
         return this_keys
 
     def __init__(self,
@@ -596,7 +594,9 @@ class Settings(object):
                     ## copy the keys over
                     all_settings_dict.update(obj)
 
-        if len(all_settings_dict['GUIExcludeList']) > 0: self.validateGUIExcludeList(all_settings_dict['GUIExcludeList'])
+        if ( all_settings_dict['GUIExcludeList'] is not None and 
+            len(all_settings_dict['GUIExcludeList']) > 0): 
+            self.validateGUIExcludeList(all_settings_dict['GUIExcludeList'])
 
         return all_settings_dict
     
@@ -759,3 +759,9 @@ particle_GUIurls = [
 ]
 
 particle_GUIurls = [url.lower() for url in particle_GUIurls]
+
+valid_settings = set([])
+for func in Settings.__dict__.keys():
+    if 'settings' in func: 
+        valid_settings.update(inspect.signature(Settings.__dict__[func]).parameters.keys())
+valid_settings-= set(['self'])

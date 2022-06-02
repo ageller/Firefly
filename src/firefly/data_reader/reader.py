@@ -6,7 +6,7 @@ import pandas as pd
 import requests
 import numpy as np
 
-from .settings import Settings
+from .settings import Settings,valid_settings
 from .tween import TweenParams
 from .particlegroup import ParticleGroup
 from .json_utils import write_to_json,load_from_json
@@ -40,7 +40,8 @@ class Reader(object):
         write_startup='append',
         write_only_data=False,
         settings:Settings=None,
-        tweenParams:TweenParams=None):
+        tweenParams:TweenParams=None,
+        **kwargs):
         """Base initialization method for Reader instances. A Reader will read data and produce
             firefly compatible :code:`.json` files. 
 
@@ -128,13 +129,15 @@ class Reader(object):
         ## array of particle groups
         self.particleGroups: list[ParticleGroup] = []
 
+        settings_kwargs,self.particlegroup_kwargs = split_kwargs(kwargs)
+
         if settings is not None:
             if settings.__class__.__name__ != 'Settings':
                 ## fun fact, assert isinstance(settings,Settings) won't work with jupyter notebooks
                 ##  that use %load_ext autoreload
                 raise TypeError("Make sure you use a Settings instance to specify firefly settings.")
         ## we'll use the default ones then
-        else: settings = Settings()
+        else: settings = Settings(**settings_kwargs)
 
         self.settings_path = os.path.join(
             self.static_data_dir,
@@ -145,6 +148,9 @@ class Reader(object):
             settings.loadFromJSON(self.settings_path,loud=False)
 
         self.settings = settings
+
+        ## and apply the settings that were passed as keyword arguments
+        for key,value in settings_kwargs.items(): self.settings[key] = value
 
         if tweenParams is not None:
             if tweenParams.__class__.__name__ != 'TweenParams':
@@ -185,7 +191,7 @@ class Reader(object):
                         "is not a sub-directory of firefly/static/data. "+
                         "\nThis may produce confusing or inoperable results. "+
                         "As such, we will create a symlink for you when you "+
-                        " dumpToJSON.")
+                        "writeToDisk.")
 
                 self.needs_soft_link = True
                 break
@@ -808,7 +814,8 @@ class ArrayReader(Reader):
                 velocities[i],
                 decimation_factor=decimation_factor,
                 field_arrays=None if fields is None else fields[i],
-                field_names=None if field_names is None else field_names[i])
+                field_names=None if field_names is None else field_names[i],
+                **self.particlegroup_kwargs)
 
             ## attach the instance to the reader
             self.addParticleGroup(firefly_particleGroup)
@@ -1069,3 +1076,9 @@ class SimpleReader(ArrayReader):
                     ## initialize it otherwise
                     else: fieldss[field_name] = this_group[field_name]
         return fieldss
+
+def split_kwargs(kwargs):
+    kwargs_keys = kwargs.keys()
+    settings_keys = kwargs_keys & valid_settings
+    particlegroup_keys = kwargs_keys - valid_settings
+    return {key:kwargs[key] for key in settings_keys},{key:kwargs[key] for key in particlegroup_keys}
