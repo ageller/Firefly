@@ -509,6 +509,8 @@ function createPreset(){
 	preset.showColormap = {};
 	preset.colormap = {};
 	preset.colormapVariable = {};
+	preset.blendingMode = {};
+	preset.depthTest = {};
 
 	preset.radiusVariable = {};
 
@@ -549,7 +551,10 @@ function createPreset(){
 		preset.colormap[p] = copyValue(viewerParams.colormap[p]);
 		preset.colormapVariable[p] = copyValue(viewerParams.colormapVariable[p]);	
 
-		preset.radiusVariable[p] = viewerParams.radiusVariable[p];
+		preset.blendingMode[p] = copyValue(viewerParams.blendingMode[p]);	
+		preset.depthTest[p] = copyValue(viewerParams.depthTest[p]);	
+
+		preset.radiusVariable[p] = copyValue(viewerParams.radiusVariable[p]);
 	}// per particle options
 
 	preset.loaded = true;
