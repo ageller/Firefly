@@ -315,7 +315,6 @@ function initialColormap(p){
 	d3.select('#colormap_outer_container').style('visibility','visible');
 
 	//set the blending mode
-	GUIParams.blendingMode[p] = 'normal';
 	forViewer.push({'setViewerParamByKey':[GUIParams.blendingMode[p], "blendingMode", p]});
 	elm = document.getElementById(p+'_selectBlendingMode');
 	if (elm) elm.value = GUIParams.blendingMode[p];
@@ -324,10 +323,10 @@ function initialColormap(p){
 	//set the depth mode to True
 	elm = document.getElementById(p+'_depthCheckBox');
 	if (elm){
-		elm.checked = true;
-		elm.value = true;
+		elm.checked = GUIParams.depthTest[p];
+		elm.value = GUIParams.depthTest[p];
 	}
-	forViewer.push({'setDepthMode':[p, true]})
+	forViewer.push({'setDepthMode':[p, GUIParams.depthTest[p]]})
 
 	sendToViewer(forViewer);
 }

@@ -506,6 +506,8 @@ class Settings(object):
         colormap=None,
         colormapVariable=None,
         showColormap=None,
+        depthTest=None,
+        blendingMode=None,
         **extra):
         """Settings that will define the initial values of the colormaps in the particle UI panes.
 
@@ -537,6 +539,16 @@ class Settings(object):
             This is a dict with keys of the particle UInames mapped to bools,
             (e.g. {'Gas':False, 'Stars':False}), defaults to False
         :type showColormap: dict of UIname:bool, optional
+        :param blendingMode: blending mode for each particle group,
+            options are: 'additive','normal','subtractive','multiplicative','none'.
+            This is a dict with keys of the particle UInames mapped to strs,
+            (e.g. {'Gas':'additive', 'Stars':'additive'}), defaults to 'additive'
+        :type blendingMode: dict of UIname:str, optional
+        :param depthTest: flags for whether the depth checkbox should 
+            be checked at startup. 
+            This is a dict with keys of the particle UInames mapped to bools,
+            (e.g. {'Gas':False, 'Stars':False}), defaults to False
+        :type depthTest: dict of UIname:bool, optional
         """
 
         ## settings that will define the initial values of the /colormap/ in the particle UI panes
@@ -547,6 +559,8 @@ class Settings(object):
             'colormap':dict() if colormap is None else colormap, 
             'colormapVariable':dict() if colormapVariable is None else colormapVariable,  
             'showColormap':dict() if showColormap is None else showColormap, 
+            'blendingMode':dict() if blendingMode is None else blendingMode, 
+            'depthTest':dict() if depthTest is None else depthTest, 
         }
 
 

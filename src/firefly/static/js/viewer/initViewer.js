@@ -857,6 +857,25 @@ function applyOptions(){
 			options.radiusVariable.hasOwnProperty(p) && 
 			options.radiusVariable[p] != null) viewerParams.radiusVariable[p] = copyValue(options.radiusVariable[p]);
 
+		if (options.hasOwnProperty("blendingMode") && 
+			options.blendingMode != null &&
+			options.blendingMode.hasOwnProperty(p) && 
+			options.blendingMode[p] != null) viewerParams.blendingMode[p] = copyValue(options.blendingMode[p]);
+			
+		if (options.hasOwnProperty("depthTest") && 
+			options.depthTest != null &&
+			options.depthTest.hasOwnProperty(p) && 
+			options.depthTest[p] != null){
+				viewerParams.depthTest[p] = copyValue(options.depthTest[p]);
+				viewerParams.depthWrite[p] = copyValue(options.depthTest[p]);
+				/*
+				var evalString =( 'elm = document.getElementById(' + p + '_depthCheckBox);'+
+					'elm.checked = ' + options.depthTest[p] + ';'+
+					'elm.value = ' + options.depthTest[p]+';')
+				forGUI.push({'evalCommand':evalString});
+				*/
+			}
+			
 	}// particle specific options
 
 	// initialize all the colormap stuff that columnDensity will need. Because it's
@@ -1034,6 +1053,7 @@ function sendInitGUI(prepend=[], append=[]){
 	forGUI.push({'setGUIParamByKey':[viewerParams.animateVelTmax, "animateVelTmax"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.blendingOpts, "blendingOpts"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.blendingMode, "blendingMode"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.depthTest, "depthTest"]});
 	var haveVelocities = {};
 	viewerParams.partsKeys.forEach(function(p){
 		haveVelocities[p] = false;
@@ -1089,7 +1109,6 @@ function sendInitGUI(prepend=[], append=[]){
 	forGUI.push({'setGUIParamByKey':[haveFilterSlider,"haveFilterSlider"]});
 
 
-	//TO DO: need a check for radii values.  For now, I'm just setting it to false
 	forGUI.push({'setGUIParamByKey':[viewerParams.rkeys,"rkeys"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.radiusVariable,"radiusVariable"]});
 

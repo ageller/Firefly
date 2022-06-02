@@ -782,7 +782,8 @@ function createParticleBlendingModeSelectorsSegment(container,parent,name,p){
 
 	depthCheck.append('input')
 		.attr('id',p+'_depthCheckBox')
-		.attr('value','false')
+		.attr('value',GUIParams.depthTest[p])
+		.attr('checked',GUIParams.depthTest[p])
 		.attr('type','checkbox')
 		.attr('autocomplete','off')
 		.on('change',function(){
