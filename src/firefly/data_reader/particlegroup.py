@@ -132,7 +132,7 @@ class ParticleGroup(object):
             where where the sum of :code:`nparts_this_file%d` is exactly :code:`nparts`. These files
             will automatically be added to :code:`filenames.json` if you use
             an attached :class:`firefly.data_reader.Reader` and 
-            its :class:`~firefly.data_reader.Reader.dumpToJSON` method, defaults to None
+            its :class:`~firefly.data_reader.Reader.writeToDisk` method, defaults to None
         :type filenames_and_nparts: list of tuple of (str,int), optional
         :param attached_settings: :class:`~firefly.data_reader.Settings` instance that should be linked
             to this particle group such that GUI elements are connected correctly. If not provided here
@@ -153,16 +153,9 @@ class ParticleGroup(object):
         self.octree: Octree = None
 
         ## handle default values for iterables
-        field_names = [] if field_names is None else field_names
         field_filter_flags = [] if field_filter_flags is None else field_filter_flags
         field_colormap_flags = [] if field_colormap_flags is None else field_colormap_flags
         field_radius_flags = [] if field_radius_flags is None else field_radius_flags
-
-        if 'Velocities' in field_names:
-            raise SyntaxError(
-                "Velocities should not be included in field array names,"+
-                " pass them directly to ParticleGroup using keyword argument `velocities=`."+
-                " This is new behavior as of 1/27/22.")
 
         ## bind input that will not be validated
         self.UIname = UIname
@@ -182,8 +175,11 @@ class ParticleGroup(object):
         ## allow users to pass in field data as a dictionary rather than a list
         ##  and use keys as field names
         if type(field_arrays) == dict:
-            field_names = list(field_arrays.keys())
+            if field_names is None: 
+                field_names = list(field_arrays.keys())
+                print('filter/colormap/radius flags correspond to:',field_names)
             field_arrays = [field_arrays[key] for key in field_names]
+        else: field_names = [] if field_names is None else field_names
 
         ## check if each field is named
         if len(field_names) != len(field_arrays):
@@ -510,7 +506,7 @@ class ParticleGroup(object):
         not_reader=True):
         """Outputs this ParticleGroup instance's data to JSON format, splitting it up into 
             multiple sub-JSON files. Best used when coupled with a :class:`firefly.data_reader.Reader`'s
-            :func:`~firefly.data_reader.Reader.dumpToJSON` method.
+            :func:`~firefly.data_reader.Reader.writeToDisk` method.
 
         :param short_data_path: the sub-directory you want to put these files into
         :type short_data_path: str

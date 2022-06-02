@@ -728,6 +728,8 @@ class ArrayReader(Reader):
             ## passed a single list of coordinates, prepend an axis for the single group
             coordinates = [coordinates]
             velocities = [velocities]
+            if UInames is not None: UInames = [UInames]
+            if fields is not None: fields = [fields]
         elif len(np.shape(coordinates[0]))==2 and np.shape(coordinates[0])[-1]==3:
             ## passed a jagged array of different coordinates
             pass
