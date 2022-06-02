@@ -528,7 +528,7 @@ class Reader(object):
         :param dump_data: flag for whether the data stored in this reader should also be saved
             to this new stand-alone firefly directory (vs. only the firefly source files), defaults to True
         :type dump_data: bool, optional
-        :param overwrite: flag for whether the existing target directory should be purged
+        :param overwrite: flag for whether the existing target static directory should be purged
             before anything is copied over or written to disk, defaults to True
         :type overwrite: bool, optional
         :param init_gh_pages: flag to run :code:`firefly/bin/make_new_repo.sh` in an attempt to initialize
@@ -558,10 +558,8 @@ class Reader(object):
             ## create the directory because it doesn't exist
             os.makedirs(target)
         elif overwrite:
-            ## purge the old
-            shutil.rmtree(target)
-            ## replace with the new
-            os.makedirs(target)
+            ## purge the old static directory
+            shutil.rmtree(os.path.join(target,'static'))
 
         ## identify source directory
         src = os.path.abspath(os.path.join(
@@ -605,8 +603,7 @@ class Reader(object):
 
                 if not os.path.isdir(self.static_data_dir): os.makedirs(self.static_data_dir)
                 self.writeToDisk(symlink=False)
-            except:
-                raise
+            except: raise
             finally:
                 ## replace the old stat_data_dir
                 self.static_data_dir = old
