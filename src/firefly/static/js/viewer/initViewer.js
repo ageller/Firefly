@@ -1021,8 +1021,6 @@ function sendInitGUI(prepend=[], append=[]){
 	forGUI.push({'setGUIParamByKey':[viewerParams.decimate, "decimate"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.Pcolors, "Pcolors"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.showParts, "showParts"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.parts.options.UIdropdown, "useDropdown"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.parts.options.UIcolorPicker, "useColorPicker"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.boxSize, "boxSize"]});
 
 	//for velocities
