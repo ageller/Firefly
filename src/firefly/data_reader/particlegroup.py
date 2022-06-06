@@ -456,6 +456,13 @@ class ParticleGroup(object):
     
     def createOctree(self,npart_min_node=2e2,npart_max_node=1e3):
 
+        shuffle_indices = np.arange(self.coordinates.shape[0])
+        ## shuffles in-place
+        np.random.default_rng().shuffle(shuffle_indices)
+        self.coordinates = self.coordinates[shuffle_indices]
+        if self.velocities is not None: self.velocities = self.velocities[shuffle_indices]
+        if len(self.field_names) > 0:  self.field_arrays = self.field_arrays[...,shuffle_indices]
+
         ## initialize the octree
         self.octree = Octree(self,npart_max_node)
 
@@ -617,19 +624,22 @@ class ParticleGroup(object):
                 self.UIname,
                 max_npart_per_file)
             ## mimic return signature: file_array, filenames_and_nparts
-            file_array = [tree_filename]
-            filenames_and_nparts = [(tree_filename,num_nodes)]
+            octree_file_array = [tree_filename]
 
             ## output the lowest level of detail using code below
-            if np.sum(self.octree.lod_masks[0]) > 0: self.dec_inds = self.octree.lod_masks[0]
+            if np.sum(self.octree.lod_masks[0]) > 0: 
+                octree_filenames_and_nparts = [(tree_filename,0)]
+                self.dec_inds = self.octree.lod_masks[0]
             ## don't need to output the lowest level of detail
-            else: return file_array,filenames_and_nparts
+            else: 
+                octree_filenames_and_nparts = [(tree_filename,num_nodes)]
+                return file_array,octree_filenames_and_nparts
         else:
             ## shuffle particles and decimate as necessary, save the output in dec_inds
             self.getDecimationIndexArray()
 
-            filenames_and_nparts = []
-            file_array = []
+            octree_filenames_and_nparts = []
+            octree_file_array = []
 
         ## determine if we were passed a boolean mask or a index array
         if self.dec_inds.dtype == bool:
@@ -644,7 +654,8 @@ class ParticleGroup(object):
         filenames = [os.path.join(short_data_path,"%s%s%03d.ffly"%(file_prefix,self.UIname,i_file)) for i_file in range(nfiles)]
         nparts = [min(max_npart_per_file,nparts-(i_file)*(max_npart_per_file)) for i_file in range(nfiles)]
 
-        filenames_and_nparts += list(zip(filenames,nparts))
+        filenames_and_nparts = list(zip(filenames,nparts))
+        file_array = []
         
         ## loop through the sub-files
         cur_index = 0
@@ -680,4 +691,4 @@ class ParticleGroup(object):
             ## move onto the next file
             cur_index += nparts_this_file
         
-        return file_array,filenames_and_nparts
+        return file_array+octree_file_array,filenames_and_nparts+octree_filenames_and_nparts
