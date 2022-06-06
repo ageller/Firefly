@@ -2,22 +2,10 @@
 from operator import attrgetter
 import os
 import numpy as np
+from .json_utils import write_to_json
 
-import json
 
 from .binary_writer import OctBinaryWriter
-
-#https://stackoverflow.com/questions/56250514/how-to-tackle-with-error-object-of-type-int32-is-not-json-serializable
-#to help with dumping to json
-class npEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj,np.ndarray):
-            return obj.tolist()
-        if isinstance(obj, np.int32):
-            return int(obj)
-        if isinstance(obj, np.float32):
-            return float(obj)
-        return json.JSONEncoder.default(self, obj)
 
 octant_offsets = 0.25 * np.array([
     [-1,-1,-1], ## x < 0, y < 0, z < 0 -> 000
@@ -659,8 +647,7 @@ class Octree(object):
 
         print('done!',flush=True)
 
-        with open(octree_fname, 'w') as f:
-            json.dump(json_dict, f, cls=npEncoder)
+        write_to_json(json_dict, octree_fname)
 
         octree_fname = octree_fname.split(os.path.join('static','data',''))[1]
         return octree_fname,num_nodes
