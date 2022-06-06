@@ -109,7 +109,7 @@ function compileFFTREEData(kaitai_format,node,callback){
 		node.particles.rgbaColors_flat = kaitai_format.node.rgbaColorsFlat.flatVector4Data.data.values;
 	}
 
-	field_names = viewerParams.parts[node.pkey].field_names;
+	field_names = viewerParams.parts[node.pkey].octree_field_names;
 	// and now load the scalar field data
 	for (i=0; i < kaitai_format.octnodeHeader.nfields; i++){
 		node.particles[field_names[i]] = kaitai_format.node.scalarFields[i].fieldData.data.values;

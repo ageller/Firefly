@@ -1238,7 +1238,6 @@ function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
 					//  which reference .fftree files. Those are loaded
 					//  separately on demand.)
 					if (readf.toLowerCase().includes('.json')){
-						console.log(prefix+readf)
 						d3.json(prefix+readf, function(foo) {
 							compileJSONData(foo, p, callback, initialLoadFrac);
 						});
@@ -1259,7 +1258,12 @@ function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
 function compileJSONData(data, p, callback, initialLoadFrac=0){
 
 	// did we just load an octree.json file? let's initialize the octree then.
-	if (data.hasOwnProperty('use_lod') && data.use_lod) initOctree(p,data);
+	if (data.hasOwnProperty('use_lod') && data.use_lod){
+		initOctree(p,data);
+		viewerParams.parts[p].octree = data.octree;
+		viewerParams.parts[p].octree_use_lod = data.use_lod;
+		viewerParams.parts[p].octree_field_names = data.field_names;
+	}
 	else {
 
 		// handle backwards compatability, multi dimensional arrays were flattened in later
