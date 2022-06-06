@@ -195,7 +195,8 @@ class Octree(object):
     def __init__(
         self,
         particle_group,
-        max_npart_per_node=1000):
+        max_npart_per_node=1000,
+        use_lod=True):
         '''
             inputFile : path to the file. For now only text files.
             NMemoryMax : the maximum number of particles to save in the memory before writing to a file
@@ -316,6 +317,17 @@ class Octree(object):
             max_npart_per_node=max_npart_per_node)
         }
 
+        ## LoD masks should be boolean type, not indices
+        if use_lod:
+            self.lod_masks = []
+            for lod_dec in [100]:
+                inds = np.arange(self.coordinates.shape[0])
+                np.random.default_rng().shuffle(inds)
+                mask = np.zeros(self.coordinates.shape[0])
+                mask[inds[::lod_dec]] = 1
+                self.lod_masks += [mask.astype(bool)]
+        else: self.lod_masks = [np.zeros(self.coordinates.shape[0],dtype=bool)]
+
     def buildOctree(self,start_octant=''):
 
         node = self.nodes[start_octant]
@@ -323,7 +335,10 @@ class Octree(object):
         velocity = None
         rgba_color = None
         print(f"Bulding octree of {end:d} points")
-        for i,(point,fields) in enumerate(zip(self.coordinates,self.fieldss)):
+        for i,(point,fields) in enumerate(zip(
+            self.coordinates[~self.lod_masks[0]],
+            self.fieldss[~self.lod_masks[0]])):
+
             if not (i % 10000): print("%.2f"%(i/end*100)+"%",end='\t') 
 
             if self.velocities is not None: velocity = self.velocities[i]
@@ -334,6 +349,10 @@ class Octree(object):
         print("...done!")
         ## if there are any outliers, let's stuff them in the root node
         self.__store_outliers_in_root()
+
+
+        ## handle level of detail insertion
+        if len(self.lod_masks) > 1: raise NotImplementedError("Only base LoD is implemented.")
 
         ## we want the nodelist to be sorted s.t. the highest refinement levels are first
         ##  so that if we decide to prune the tree all children will get added to their parent before
@@ -553,7 +572,8 @@ class Octree(object):
             #'header':flag_dict,
             ##'node_arrays':node_arrays,
             'octree':{},
-            'Coordinates_flat':np.zeros(3*num_nodes)
+            'Coordinates_flat':np.zeros(3*num_nodes),
+            'use_lod':bool(np.sum(self.lod_masks[0])>0)
             }
 
         if self.velocities is not None: json_dict['Velocities_flat'] = np.zeros(3*num_nodes)

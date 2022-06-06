@@ -28,13 +28,16 @@ function initOctree(pkey,data){
 	//  when the octree has "filtered" them out).
 	viewerParams.parts[pkey].IsDrawn = Array(viewerParams.parts[pkey].Coordinates_flat.length/3)
 
+	if (data.hasOwnProperty('use_lod') && data.use_lod != null) var use_lod = data.use_lod;
+	else var use_lod = false;
+
 
 	function initializeNode(node){
 		// name of this node's mesh, if it's not the the root we'll use
 		//  it's octant indices otherwise we'll use the string 'root'
 		node.obj_name = pkey + '-' +(node.name.length != 0 ? node.name : 'root' )
 		node.current_state = 'draw'
-		node.com_shown = true;
+		node.com_shown = !use_lod;
 		node.mesh = null;
 		node.queue = null;
 		//node.buffer_size = 0;

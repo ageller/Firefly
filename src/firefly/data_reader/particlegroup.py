@@ -83,7 +83,6 @@ class ParticleGroup(object):
         field_colormap_flags=None,
         field_radius_flags=None,
         decimation_factor=1,
-        filenames_and_nparts=None,
         attached_settings=None,
         loud=True,
         **settings_kwargs):
@@ -121,19 +120,6 @@ class ParticleGroup(object):
         :param decimation_factor: factor by which to reduce the data randomly 
                 i.e. :code:`data=data[::decimation_factor]`, defaults to 1
         :type decimation_factor: int, optional
-        :param filenames_and_nparts: Allows you to manually control how the particles
-            are distributed among the sub-JSON files, it is
-            **highly recommended that you leave this to** None such that particles are equally
-            distributed among the :code:`.jsons` but if for whatever reason you need fine-tuning
-            you should pass a list of tuples in the form 
-
-            :code:`[("json_name0.json",nparts_this_file0),("json_name1.json",nparts_this_file1) ... ]`
-
-            where where the sum of :code:`nparts_this_file%d` is exactly :code:`nparts`. These files
-            will automatically be added to :code:`filenames.json` if you use
-            an attached :class:`firefly.data_reader.Reader` and 
-            its :class:`~firefly.data_reader.Reader.writeToDisk` method, defaults to None
-        :type filenames_and_nparts: list of tuple of (str,int), optional
         :param attached_settings: :class:`~firefly.data_reader.Settings` instance that should be linked
             to this particle group such that GUI elements are connected correctly. If not provided here
             can be attached after-the-fact using the
@@ -234,19 +220,6 @@ class ParticleGroup(object):
         self.field_filter_flags = np.array(field_filter_flags)
         self.field_colormap_flags = np.array(field_colormap_flags)
         self.field_radius_flags = np.array(field_radius_flags)
-
-        ## validate filenames and nparts if anyone was so foolhardy to
-        ##  send it in themselves
-        if filenames_and_nparts is not None:
-            try:
-                assert type(filenames_and_nparts[0]) == tuple
-                assert type(filenames_and_nparts[0][0]) == str
-                assert type(filenames_and_nparts[0][1]) == int
-            except AssertionError:
-                ValueError("filenames_and_nparts should be a list of tuples of strings and ints")
-
-        self.filenames_and_nparts = filenames_and_nparts
-        
 
         ## TODO how do these interface with javascript code?
         self.radiusFunction = None
@@ -561,7 +534,7 @@ class ParticleGroup(object):
                 if "json" in fname:
                     os.remove(os.path.join(full_path,fname))
 
-        filenames_and_nparts = self.filenames_and_nparts
+        filenames_and_nparts = []
         ## if the user did not specify how we should partition the data between
         ##  sub-JSON files then we'll just do it equally
         if filenames_and_nparts is None:
@@ -644,31 +617,35 @@ class ParticleGroup(object):
                 self.UIname,
                 max_npart_per_file)
             ## mimic return signature: file_array, filenames_and_nparts
-            return [tree_filename],[(tree_filename,num_nodes)]
+            file_array = [tree_filename]
+            filenames_and_nparts = [(tree_filename,num_nodes)]
 
-        ## shuffle particles and decimate as necessary, save the output in dec_inds
-        self.getDecimationIndexArray()
+            ## output the lowest level of detail using code below
+            if np.sum(self.octree.lod_masks[0]) > 0: self.dec_inds = self.octree.lod_masks[0]
+            ## don't need to output the lowest level of detail
+            else: return file_array,filenames_and_nparts
+        else:
+            ## shuffle particles and decimate as necessary, save the output in dec_inds
+            self.getDecimationIndexArray()
 
-        filenames_and_nparts = self.filenames_and_nparts
-        ## if the user did not specify how we should partition the data between
-        ##  sub-JSON files then we'll just do it equally
-        if filenames_and_nparts is None:
-            ## determine if we were passed a boolean mask or a index array
-            if self.dec_inds.dtype == bool:
-                nparts = np.sum(self.dec_inds)
-                self.dec_inds = np.argwhere(self.dec_inds) ## convert to an index array
-            else: nparts = self.dec_inds.shape[0]
+            filenames_and_nparts = []
+            file_array = []
 
-            ## how many sub-files are we going to need?
-            nfiles = int(nparts/max_npart_per_file + ((nparts%max_npart_per_file)!=0))
+        ## determine if we were passed a boolean mask or a index array
+        if self.dec_inds.dtype == bool:
+            nparts = np.sum(self.dec_inds)
+            self.dec_inds = np.argwhere(self.dec_inds) ## convert to an index array
+        else: nparts = self.dec_inds.shape[0]
 
-            ## how many particles will each file have and what are they named?
-            filenames = [os.path.join(short_data_path,"%s%s%03d.ffly"%(file_prefix,self.UIname,i_file)) for i_file in range(nfiles)]
-            nparts = [min(max_npart_per_file,nparts-(i_file)*(max_npart_per_file)) for i_file in range(nfiles)]
+        ## how many sub-files are we going to need?
+        nfiles = int(nparts/max_npart_per_file + ((nparts%max_npart_per_file)!=0))
 
-            filenames_and_nparts = list(zip(filenames,nparts))
+        ## how many particles will each file have and what are they named?
+        filenames = [os.path.join(short_data_path,"%s%s%03d.ffly"%(file_prefix,self.UIname,i_file)) for i_file in range(nfiles)]
+        nparts = [min(max_npart_per_file,nparts-(i_file)*(max_npart_per_file)) for i_file in range(nfiles)]
+
+        filenames_and_nparts += list(zip(filenames,nparts))
         
-        file_array = []
         ## loop through the sub-files
         cur_index = 0
 

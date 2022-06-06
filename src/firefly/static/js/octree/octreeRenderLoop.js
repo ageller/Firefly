@@ -192,7 +192,7 @@ function checkTooBig(node_angle_deg,threshold=1){
 }
 
 function hideCoM(node){
-	if (!node.com_shown) return;
+	if (!node.com_shown || viewerParams.parts[node.pkey].octree.use_lod) return;
 	node.com_shown = false;
 	mesh = viewerParams.partsMesh[node.pkey][0];
 	if (node.octbox) node.octbox.visible = false;
@@ -205,7 +205,7 @@ function hideCoM(node){
 }
 
 function showCoM(node){
-	if (node.com_shown) return;
+	if (node.com_shown || viewerParams.parts[node.pkey].octree.use_lod) return;
 	node.com_shown = true;
 	mesh = viewerParams.partsMesh[node.pkey][0];
 	if (node.octbox) node.octbox.visible = true;
