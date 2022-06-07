@@ -311,7 +311,7 @@ function update_particle_mesh_UI_values(p,m){
 	m.geometry.setDrawRange( 0, viewerParams.plotNmax[p]*Nfac);
 
 	// apply particle size scale factor to meshes that aren't octree CoM meshes
-	if (!m.geometry.userData.octree) m.material.uniforms.uVertexScale.value = viewerParams.PsizeMult[p];
+	if (!m.geometry.userData.octree || m.geometry.userData.octree_use_lod) m.material.uniforms.uVertexScale.value = viewerParams.PsizeMult[p];
 	else m.material.uniforms.uVertexScale.value = 1;
 
 	// apply colormap limits and flag for colormapping at all
