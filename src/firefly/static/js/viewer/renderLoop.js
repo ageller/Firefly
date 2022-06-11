@@ -21,16 +21,18 @@ function animate(time) {
 		update_memory_usage();
 
 		if (viewerParams.initialize_time){
-			console.log(seconds-viewerParams.initialize_time + ' seconds to initialize');
-			console.log(viewerParams.memoryUsage/1e9 + ' GB allocated');
+			//console.log(seconds-viewerParams.initialize_time + ' seconds to initialize');
+			//console.log(viewerParams.memoryUsage/1e9 + ' GB allocated');
 			var numtot = 0;
 			viewerParams.partsKeys.forEach(function (pkey){
 				numtot = numtot + viewerParams.parts.count[pkey];
 				});
-			console.log(numtot + ',' + (seconds-viewerParams.initialize_time) + ',' + viewerParams.memoryUsage/1e9 );
 
-			viewerParams.initialize_time = null;
+			viewerParams.mem_profile = [numtot,(seconds-viewerParams.initialize_time),viewerParams.memoryUsage/1e9]
+
+			// initialize the FPS_profile array
 			viewerParams.FPS_profile = [];
+			viewerParams.initialize_time = null;
 		}
 
 		// velocity animation
@@ -51,7 +53,16 @@ function animate(time) {
 				numtot = numtot + viewerParams.parts.count[pkey];
 				});
 			profiled_FPS = viewerParams.FPS_profile.reduce((a, b) => a + b, 0)/viewerParams.FPS_profile.length;
-			console.log(numtot + ',' +  viewerParams.PsizeMult[viewerParams.partsKeys[0]] + ',' + profiled_FPS);
+
+			console.log(
+				'(PROFILE): ',
+				viewerParams.mem_profile[0],
+				viewerParams.mem_profile[1],
+				viewerParams.mem_profile[2],
+				viewerParams.PsizeMult[viewerParams.partsKeys[0]],
+				profiled_FPS)
+
+			viewerParams.profiled = true;
 		}
 		//console.log(viewerParams.camera.position)
 
@@ -539,7 +550,7 @@ function update_memory_usage(){
 
 function update_framerate(seconds,time){
 	// if we spent more than 1.5 seconds drawing the last frame, send the app to sleep
-	if ( (seconds-viewerParams.currentTime) > 1.5){
+	if ( viewerParams.sleepTimeout != null && (seconds-viewerParams.currentTime) > viewerParams.sleepTimeout){
 		console.log("Putting the app to sleep, taking too long!",(seconds-viewerParams.currentTime));
 		viewerParams.pauseAnimation=true;
 		showSleep();
