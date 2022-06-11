@@ -97,7 +97,7 @@ class NParticlesSetup(ProfilingSetup):
 
         super().__init__(**kwargs)
 
-        default_dec_factors = [1e5,1e4]#,1e3,1e2,1e1,1]
+        default_dec_factors = [1e6,1e5,1e4,1e3,1e2,1e1]
 
         self.dec_factors = default_dec_factors if dec_factors is None else dec_factors
         self.extension = extension
@@ -122,22 +122,24 @@ class NParticlesSetup(ProfilingSetup):
         return reader
 
 
-def run_all(dataset='m12b_res57000'): 
+def run_all(dataset='m12b_res7100'): 
     init_time = time.time()
 
-    ## run .ffly for different decimation factors
-    ffly_startup_memory = NParticlesSetup(
-        '.ffly',
-        filename='ffly_startup_memory.csv',
-        dataset=dataset)
-    reader = ffly_startup_memory.run()
+    reader = None
 
     ## run .json for different decimation factors
     json_startup_memory = NParticlesSetup(
         '.json',
         filename='json_startup_memory.csv',
         dataset=dataset)
-    json_startup_memory.run(reader=reader)
+    reader = json_startup_memory.run(reader=reader)
+
+    ## run .ffly for different decimation factors
+    ffly_startup_memory = NParticlesSetup(
+        '.ffly',
+        filename='ffly_startup_memory.csv',
+        dataset=dataset)
+    reader = ffly_startup_memory.run(reader=reader)
 
     #run_FPS_profiling()
 
