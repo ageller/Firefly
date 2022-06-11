@@ -558,7 +558,9 @@ class ParticleGroup(object):
         if clean_JSONdir:
             #print("Removing old JSON files from %s"%full_path)
             for fname in os.listdir(full_path):
-                if "json" in fname:
+                if ("ffly" in fname or
+                    "json" in fname or 
+                    "fftree" in fname):
                     os.remove(os.path.join(full_path,fname))
 
         filenames_and_nparts = self.filenames_and_nparts
