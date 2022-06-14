@@ -41,15 +41,29 @@ void main(void) {
 	if (vID <= -1.){
 		discard;
 	} else {
-		gl_FragColor = color;
-
+		// hijack color for making a projection
+		if (columnDensity){
+			gl_FragColor.r = 1.;
+			gl_FragColor.g = 0.;
+			gl_FragColor.b = 0.;
+			gl_FragColor.a = 1.;
+		}
 		// if colormap is requested, apply appropriate colormap to appropriate variable
-		if (showColormap){
+		//  this should have priority over everything else (so long)
+		else if (showColormap){
+			// if you want to reverse colormap: vec2 pos = vec2(1.-vColormapMag, colormap);
 			vec2 pos = vec2(vColormapMag, colormap);
 			vec3 c = texture2D(colormapTexture, pos).rgb;
 			gl_FragColor.rgb = c;
-
+			gl_FragColor.a = 1.;
 		}
+		// use passed RGBA color
+		else if (vColor[3] >= 0.) { 
+			gl_FragColor.rgb = vColor.rgb;
+			gl_FragColor.a = vColor[3];
+		}
+		// use fixed color as a last resort
+		else gl_FragColor = color;
 
 		float dist = 0.;
 		if (vID < 0.5){ //normal mode, plotting points (should be vID == 0, but this may be safer)
@@ -121,13 +135,10 @@ void main(void) {
 			//gl_FragColor.a = posRot.x/vSize;
 		}
 
+		// need some factor here so that it adds up progressively
+		//  it will be divided out in the second pass so long as it doesn't saturate.
 		if (columnDensity){
-			gl_FragColor.rgb *= scaleCD; //need some factor here so that it adds up progressively
-		}
-
-		if (vColor[3] >= 0.) { 
-			gl_FragColor.rgb = vColor.rgb;
-			gl_FragColor.a *= vColor[3];
+			gl_FragColor.rgb *= scaleCD; 
 		}
 
 		gl_FragColor.a *= vAlpha;

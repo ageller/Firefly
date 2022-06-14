@@ -183,8 +183,8 @@ function defineViewerParams(){
 		this.cameraCD = null;
 		this.scaleCD = 0.1; //scaling factor for the shader so that it adds up to one at highest density
 
-		this.CDmin = 0;
-		this.CDmax = 1;
+		this.CDmin = 1;
+		this.CDmax = 10;
 		this.CDlognorm = 0;
 		this.CDckey = 'ColumnDensity' // the name of the ckey, shows up in the colorbar label
 		this.CDkey = '__column__density__foo__abg' // the name of the pseudo particle group, salted so that no one overwrites it

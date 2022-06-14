@@ -294,15 +294,15 @@ class Settings(object):
         self,
         maxVrange=2000.,
         startFly=False,
-        friction=0.1,
+        friction=None,
         stereo=False,
-        stereoSep=0.06,
+        stereoSep=None,
         decimate=None,
         start_tween=False,
-        CDmin=0,
-        CDmax=1,
-        CDlognorm=0,
-        columnDensity=0,
+        CDmin=None,
+        CDmax=None,
+        CDlognorm=None,
+        columnDensity=None,
         **extra):
         """General settings that affect the state app state
 
