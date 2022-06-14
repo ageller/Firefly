@@ -119,7 +119,7 @@ function drawOctreeNode(node, callback){
 		*/
 
 		// spawn in new mesh with any filters, UI values, etc...
-		update_particle_mesh(node.pkey,node.mesh,true,true,true,true,true);
+		update_particle_mesh(node.pkey,node.mesh,true,true,true,true);
 
 		viewerParams.octree.loadingCount[node.pkey]+=1
 		viewerParams.octree.waitingToDraw = false;

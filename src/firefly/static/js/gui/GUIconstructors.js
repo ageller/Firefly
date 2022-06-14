@@ -590,10 +590,7 @@ function createColumnDensityCheckBoxSegment(container,parent,name){
 		.attr('autocomplete','off')
 		.on('change',function(){
 			checkColormapBox(GUIParams.CDkey,this.checked)
-			var forViewer = [{'setViewerParamByKey':[this.checked, "columnDensity"]}];
-			GUIParams.partsKeys.forEach(function (pkey){
-				forViewer.push({'setViewerParamByKey':[true, "updateProjection",pkey]})});
-			sendToViewer(forViewer);
+			sendToViewer([{'setViewerParamByKey':[this.checked, "columnDensity"]}]);
 			GUIParams.columnDensity = this.checked;
 		})
 		.style('margin','8px 0px 0px 0px')
