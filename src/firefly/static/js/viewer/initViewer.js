@@ -983,6 +983,7 @@ function initColumnDensity(){
 			CDmin: {value: viewerParams.colormapVals[viewerParams.CDkey][viewerParams.ckeys[viewerParams.CDkey][0]][0]}, // bottom of CD renormalization
 			CDmax: {value: viewerParams.colormapVals[viewerParams.CDkey][viewerParams.ckeys[viewerParams.CDkey][0]][1]}, // top of CD renormalization
 			lognorm: {value: viewerParams.CDlognorm}, // flag to normalize column densities in log space
+			scaleCD: {value: viewerParams.scaleCD},
 		},
 		vertexShader: myVertexShader,
 		fragmentShader: myFragmentShader_pass2,
