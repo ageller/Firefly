@@ -185,7 +185,10 @@ function update_particle_groups(time){
 		viewerParams.updateOnOff[p] = false;
 
 		// hide all octree com nodes at the start
-		if ( viewerParams.parts[p].hasOwnProperty('octree') &&
+		if (viewerParams.parts[p].hasOwnProperty('octree') &&
+			viewerParams.parts[p].octree != null &&
+			viewerParams.parts[p].hasOwnProperty('octree_use_lod') &&
+			!viewerParams.parts[p].octree_use_lod &&
 			(!viewerParams.parts[p].hasOwnProperty('octree_init') || !viewerParams.parts[p].octree_init)){
 			evaluateFunctionOnOctreeNodes(
 			hideCoM,
@@ -319,7 +322,7 @@ function update_particle_mesh_UI_values(p,m){
 	m.geometry.setDrawRange( 0, viewerParams.plotNmax[p]*Nfac);
 
 	// apply particle size scale factor to meshes that aren't octree CoM meshes
-	if (!m.geometry.userData.octree) m.material.uniforms.uVertexScale.value = viewerParams.PsizeMult[p];
+	if (!m.geometry.userData.octree || m.geometry.userData.octree_use_lod) m.material.uniforms.uVertexScale.value = viewerParams.PsizeMult[p];
 	else m.material.uniforms.uVertexScale.value = 1;
 
 	// apply colormap limits and flag for colormapping at all

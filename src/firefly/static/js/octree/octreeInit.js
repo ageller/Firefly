@@ -20,21 +20,22 @@ function initOctree(pkey,data){
 	//this will be used as a percentage value in the GUI
 	viewerParams.plotNmax[pkey] = 100;
 
+	if (data.hasOwnProperty('use_lod') && data.use_lod != null) var use_lod = data.use_lod;
+	else var use_lod = false;
 	// enable radius rescaling to scale the center of mass particles differentially
 	//viewerParams.parts[pkey].doSPH = true
-	viewerParams.parts[pkey].OctreeRadii = Array(viewerParams.parts[pkey].Coordinates_flat.length/3)
+	if (!use_lod) viewerParams.parts[pkey].OctreeRadii = Array(viewerParams.parts[pkey].Coordinates_flat.length/3)
 
 	// array that prevents filtering from changing the size of nodes that aren't drawn (i.e. showing them
 	//  when the octree has "filtered" them out).
-	viewerParams.parts[pkey].IsDrawn = Array(viewerParams.parts[pkey].Coordinates_flat.length/3)
-
+	if (!use_lod) viewerParams.parts[pkey].IsDrawn = Array(viewerParams.parts[pkey].Coordinates_flat.length/3)
 
 	function initializeNode(node){
 		// name of this node's mesh, if it's not the the root we'll use
 		//  it's octant indices otherwise we'll use the string 'root'
 		node.obj_name = pkey + '-' +(node.name.length != 0 ? node.name : 'root' )
 		node.current_state = 'draw'
-		node.com_shown = true;
+		node.com_shown = !use_lod;
 		node.mesh = null;
 		node.queue = null;
 		//node.buffer_size = 0;
@@ -48,7 +49,7 @@ function initOctree(pkey,data){
 		node.pkey = pkey;
 		node.radius = node.radius;
 
-		viewerParams.parts[pkey].OctreeRadii[node.node_index] = node.radius;
+		if (!use_lod) viewerParams.parts[pkey].OctreeRadii[node.node_index] = node.radius;
 
 		// TODO not sure if these are still necessary post-octree-refactor
 		node.NparticlesToRender = node.buffer_size;
@@ -108,7 +109,7 @@ function compileFFTREEData(kaitai_format,node,callback){
 		node.particles.rgbaColors_flat = kaitai_format.node.rgbaColorsFlat.flatVector4Data.data.values;
 	}
 
-	field_names = viewerParams.parts[node.pkey].field_names;
+	field_names = viewerParams.parts[node.pkey].octree_field_names;
 	// and now load the scalar field data
 	for (i=0; i < kaitai_format.octnodeHeader.nfields; i++){
 		node.particles[field_names[i]] = kaitai_format.node.scalarFields[i].fieldData.data.values;

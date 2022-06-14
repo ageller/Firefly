@@ -1239,7 +1239,6 @@ function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
 					//  which reference .fftree files. Those are loaded
 					//  separately on demand.)
 					if (readf.toLowerCase().includes('.json')){
-						//console.log(prefix+readf)
 						d3.json(prefix+readf, function(foo) {
 							compileJSONData(foo, p, callback, initialLoadFrac);
 						});
@@ -1258,46 +1257,57 @@ function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
 
 // callCompileData ->
 function compileJSONData(data, p, callback, initialLoadFrac=0){
-	// handle backwards compatability, multi dimensional arrays were flattened in later
-	//  versions of firefly
-	['Coordinates','Velocities'].forEach(function (key){
-		if (data.hasOwnProperty(key) && !data.hasOwnProperty(key+'_flat')){
+
+	// did we just load an octree.json file? let's initialize the octree then.
+	if (data.hasOwnProperty('use_lod') && data.use_lod){
+		initOctree(p,data);
+		viewerParams.parts[p].octree = data.octree;
+		viewerParams.parts[p].octree_use_lod = data.use_lod;
+		viewerParams.parts[p].octree_field_names = data.field_names;
+	}
+	else {
+
+		// handle backwards compatability, multi dimensional arrays were flattened in later
+		//  versions of firefly
+		['Coordinates','Velocities'].forEach(function (key){
+			if (data.hasOwnProperty(key) && !data.hasOwnProperty(key+'_flat')){
+				data[key+'_flat'] = Array(3*data[key].length);
+				for (var i=0; i<data[key].length; i++){
+					data[key+'_flat'][3*i] = data[key][i][0];
+					data[key+'_flat'][3*i+1] = data[key][i][1];
+					data[key+'_flat'][3*i+2] = data[key][i][2];
+				}
+				data.removeProperty(key);
+			}
+		})
+
+		key = 'colorArray'
+		if (data.hasOwnProperty(key) && !data.hasOwnProperty('rgbaColors_flat')){
 			data[key+'_flat'] = Array(3*data[key].length);
 			for (var i=0; i<data[key].length; i++){
-				data[key+'_flat'][3*i] = data[key][i][0];
-				data[key+'_flat'][3*i+1] = data[key][i][1];
-				data[key+'_flat'][3*i+2] = data[key][i][2];
+				data['rgbaColors_flat'][4*i] = data[key][i][0];
+				data['rgbaColors_flat'][4*i+1] = data[key][i][1];
+				data['rgbaColors_flat'][4*i+2] = data[key][i][2];
+				data['rgbaColors_flat'][4*i+3] = data[key][i][3];
 			}
 			data.removeProperty(key);
 		}
-	})
 
-	key = 'colorArray'
-	if (data.hasOwnProperty(key) && !data.hasOwnProperty('rgbaColors_flat')){
-		data[key+'_flat'] = Array(3*data[key].length);
-		for (var i=0; i<data[key].length; i++){
-			data['rgbaColors_flat'][4*i] = data[key][i][0];
-			data['rgbaColors_flat'][4*i+1] = data[key][i][1];
-			data['rgbaColors_flat'][4*i+2] = data[key][i][2];
-			data['rgbaColors_flat'][4*i+3] = data[key][i][3];
-		}
-		data.removeProperty(key);
+		Object.keys(data).forEach(function(k, jj) {
+			//console.log("k = ", k, jj)
+			if (viewerParams.parts[p].hasOwnProperty(k)){
+				viewerParams.parts[p][k] = viewerParams.parts[p][k].concat(data[k]);
+				//console.log('appending', k, p, viewerParams.parts[p])
+
+			} else {
+				viewerParams.parts[p][k] = data[k];
+				//console.log('creating', k, p, viewerParams.parts[p], data[k])
+			}
+		});	
+
+		// did we just load an octree.json file? let's initialize the octree then.
+		if (data.hasOwnProperty('octree')) initOctree(p,data);
 	}
-
-	Object.keys(data).forEach(function(k, jj) {
-		//console.log("k = ", k, jj)
-		if (viewerParams.parts[p].hasOwnProperty(k)){
-			viewerParams.parts[p][k] = viewerParams.parts[p][k].concat(data[k]);
-			//console.log('appending', k, p, viewerParams.parts[p])
-
-		} else {
-			viewerParams.parts[p][k] = data[k];
-			//console.log('creating', k, p, viewerParams.parts[p], data[k])
-		}
-	});	
-
-	// did we just load an octree.json file? let's initialize the octree then.
-	if (data.hasOwnProperty('octree')) initOctree(p,data);
 
 	countPartsForLoadingBar(initialLoadFrac);
 
