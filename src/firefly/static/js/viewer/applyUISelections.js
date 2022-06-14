@@ -117,9 +117,14 @@ function checkCenterLock(checked){
 //reset the camera position to whatever is saved in the options parameters
 function resetCamera() {
 
+	// if user hasn't clicked the 'Save' camera button then 'Reset' should not
+	//  do anything IMO
+	//if (!viewerParams.parts.options.hasOwnProperty('savedCameraSetup')) return;
+
 	var screenWidth = window.innerWidth;
 	var screenHeight = window.innerHeight;
 	var aspect = screenWidth / screenHeight;
+
 	viewerParams.camera = new THREE.PerspectiveCamera( viewerParams.fov, aspect, viewerParams.zmin, viewerParams.zmax);
 	viewerParams.camera.up.set(0, -1, 0);
 	viewerParams.scene.add(viewerParams.camera); 
@@ -150,7 +155,6 @@ function resetCamera() {
 		}
 	}
 
-
 	//change the rotation of the camera (which requires Fly controls)
 	if (viewerParams.parts.options.hasOwnProperty('cameraUp')){
 		if (viewerParams.parts.options.cameraUp != null){
@@ -158,57 +162,70 @@ function resetCamera() {
 		}
 	}
 
+	if (viewerParams.parts.options.hasOwnProperty('useTrackball')){
+		if (viewerParams.parts.options.useTrackball != null){
+			viewerParams.useTrackball = viewerParams.parts.options.useTrackball
+		}
+	}
+
 	viewerParams.controls.dispose();
 	initControls();
 	sendCameraInfoToGUI(null, true);
-
 
 }
 
 //reset the camera center.  Can be useful when switching back and forth between trackball and fly controls
 function recenterCamera() {
-	initControls();
+	var old_up = [
+		viewerParams.camera.up.x,
+		viewerParams.camera.up.y,
+		viewerParams.camera.up.z,
+	];
+	if (viewerParams.useTrackball) initControls();
+	// handle fly controls-- just want to look at the center
+	else viewerParams.camera.lookAt(viewerParams.center);
+	// maintain orientation as best we can
+	viewerParams.camera.up.set(old_up[0],old_up[1],old_up[2]);
 	sendCameraInfoToGUI(null, true);
 }
 
 
-//replace the current camera settings in options with the current camera position and rotation (to return here upon clicking reset)
-//NOTE: with a reset, this will set the controls to fly controls
+//replace camera settings in options (if any) with the current camera position and rotation (to return here upon clicking reset)
 function saveCamera() {
 
-	if (viewerParams.parts.options.hasOwnProperty('camera')){
-		if (viewerParams.parts.options.camera == null){
-			viewerParams.parts.options.camera = [0,0,0];
-		}
-	} else {
-		viewerParams.parts.options.camera = [0,0,0];
-	}
+	// tell resetCamera() that we've been through saveCamera once
+	//  at least. in principle could restrict resetCamera()
+	//  to only work if savedCameraSetup = true
+	viewerParams.parts.options.savedCameraSetup = true;
+
+	// store the current camera's position
+	viewerParams.parts.options.camera = [0,0,0]
 	viewerParams.parts.options.camera[0] = viewerParams.camera.position.x;
 	viewerParams.parts.options.camera[1] = viewerParams.camera.position.y;
 	viewerParams.parts.options.camera[2] = viewerParams.camera.position.z;
 
-
-	if (viewerParams.parts.options.hasOwnProperty('center')){
-		if (viewerParams.parts.options.center == null){
-			viewerParams.parts.options.center = [0,0,0];
-		}
-	} else {
-		viewerParams.parts.options.center = [0,0,0];
-	}
-
+	// store the current camera focus
 	if (viewerParams.useTrackball){
+		viewerParams.parts.options.center = [0,0,0]
 		viewerParams.parts.options.center[0] = viewerParams.controls.target.x;
 		viewerParams.parts.options.center[1] = viewerParams.controls.target.y;
 		viewerParams.parts.options.center[2] = viewerParams.controls.target.z;
-	} 
+	} 	
 
-	if (viewerParams.parts.options.hasOwnProperty('cameraRotation')){
-		if (viewerParams.parts.options.cameraRotation != null){
-			viewerParams.parts.options.cameraRotation[0] = viewerParams.camera.rotation.x;
-			viewerParams.parts.options.cameraRotation[1] = viewerParams.camera.rotation.y;
-			viewerParams.parts.options.cameraRotation[2] = viewerParams.camera.rotation.z;
-		}
-	}
+	// store the current camera rotation
+	viewerParams.parts.options.cameraRotation = [0,0,0]
+	viewerParams.parts.options.cameraRotation[0] = viewerParams.camera.rotation.x;
+	viewerParams.parts.options.cameraRotation[1] = viewerParams.camera.rotation.y;
+	viewerParams.parts.options.cameraRotation[2] = viewerParams.camera.rotation.z;
+
+	// store the current camera up vector
+	viewerParams.parts.options.cameraUp = [0,0,0]
+	viewerParams.parts.options.cameraUp[0] = viewerParams.camera.up.x;
+	viewerParams.parts.options.cameraUp[1] = viewerParams.camera.up.y;
+	viewerParams.parts.options.cameraUp[2] = viewerParams.camera.up.z;
+
+	viewerParams.parts.options.useTrackball = viewerParams.useTrackball;
+
 }
 
 //turn on/off velocity vectors
