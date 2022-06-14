@@ -51,6 +51,7 @@ void main(void) {
 		// if colormap is requested, apply appropriate colormap to appropriate variable
 		//  this should have priority over everything else (so long)
 		else if (showColormap){
+			// if you want to reverse colormap: vec2 pos = vec2(1.-vColormapMag, colormap);
 			vec2 pos = vec2(vColormapMag, colormap);
 			vec3 c = texture2D(colormapTexture, pos).rgb;
 			gl_FragColor.rgb = c;
