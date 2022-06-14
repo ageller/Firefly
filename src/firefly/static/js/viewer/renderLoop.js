@@ -163,17 +163,20 @@ function update_particle_groups(time){
 		//check on all the UI inputs for each particle type
 		viewerParams.partsMesh[p].forEach( 
 			function( m, j ) {
-				update_particle_mesh(p, m,
-				viewerParams.updateFilter[p],
-				viewerParams.updateColormapVariable[p],
-				viewerParams.updateRadiusVariable[p],
-				viewerParams.updateOnOff[p]
+				update_particle_mesh(
+					p, m,
+					viewerParams.updateFilter[p],
+					viewerParams.updateColormapVariable[p],
+					viewerParams.updateRadiusVariable[p],
+					viewerParams.updateOnOff[p],
+					viewerParams.updateProjection[p]
 			)});
 
 		// update flags for looping through particles for this particle type.
 		// the update_particle_mesh call above will have done the work
 		// iff parts are shown
 		if (viewerParams.showParts[p]) {
+			viewerParams.updateProjection[p] = false;
 			viewerParams.updateFilter[p] = false;
 			// we'd have only updated the colormap variable if we're actually showing it
 			if (viewerParams.showColormap[p]) viewerParams.updateColormapVariable[p] = false;
@@ -270,7 +273,8 @@ function update_particle_playback(p,time){
 	update_filter=false,
 	update_colormap_variable=false,
 	update_radius_variable=false,
-	update_onoff=false){
+	update_onoff=false,
+	update_projection=false){
 	// send velocity vector type (line/arrow/cone) to material buffer
 	m.material.uniforms.velType.value = viewerParams.velopts[viewerParams.velType[p]];
 
@@ -284,6 +288,8 @@ function update_particle_playback(p,time){
 
 		// handle velocity vectors
 		update_particle_mesh_velocity_vectors(p,m);
+
+		if (update_projection) update_particle_mesh_projection_color(p,m);
 		
 		// apply particle radii and alpha values 
 		// according to current filter handle settings
@@ -428,6 +434,31 @@ function update_particle_mesh_filter(p,m){
 
 	m.geometry.attributes.radiusScale.needsUpdate = true;
 	m.geometry.attributes.alpha.needsUpdate = true;					
+}
+
+function update_particle_mesh_projection_color(p,m,columnDensity){
+	// unpack the particle group associated with this mesh
+	var this_parts = m.geometry.userData;
+
+	var rgba_buffer = m.geometry.attributes.rgbaColor.array;
+
+	// we're setting the colors to be red with opacity 1
+	if (viewerParams.columnDensity){
+		rgba_buffer.fill(1);
+		for(var ii = 0; ii < rgba_buffer.length/4; ii ++ ){
+			rgba_buffer[4*ii+1]=0; // set g = 0
+			rgba_buffer[4*ii+2]=0; // set b = 0
+		}
+	}
+	// we're putting it back
+	else{
+		if (this_parts.hasOwnProperty("rgbaColors_flat")) 
+		for( var ii = 0; ii < rgba_buffer.length; ii ++ ){
+			rgba_buffer[ii]=this_parts.rgbaColors_flat[ii];
+		}
+		else rgba_buffer.fill(-1); // no rgba colors to replace with
+	}
+	rgba_buffer.needsUpdate = true;
 }
 
 function update_particle_mesh_colormap_variable(p,m){

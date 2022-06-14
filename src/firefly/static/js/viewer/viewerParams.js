@@ -166,6 +166,9 @@ function defineViewerParams(){
 		//check if we need to update the colormap when rendering
 		this.updateRadiusVariable = {};
 
+		// check if we need to update the RGBA colors for projection while rendering
+		this.updateProjection = {};
+
 		//tweening
 		this.inTween = false;
 		this.updateTween = false;

@@ -276,10 +276,13 @@ function initPVals(){
 		if (!viewerParams.haveOctree[p]) viewerParams.plotNmax[p] = viewerParams.parts.count[p];
 		viewerParams.PsizeMult[p] = 1.;
 		viewerParams.showParts[p] = true;
-		viewerParams.updateOnOff[p] = false;
+		viewerParams.updateOnOff[p] = true;
+
+		// RGBA colors for column density projection
+		viewerParams.updateProjection[p] = true;
 
 		//filter
-		viewerParams.updateFilter[p] = false;
+		viewerParams.updateFilter[p] = true;
 		viewerParams.filterLims[p] = {};
 		viewerParams.filterVals[p] = {};
 		viewerParams.invertFilter[p] = {};
@@ -290,13 +293,13 @@ function initPVals(){
 		viewerParams.colormapVariable[p] = 0;
 		viewerParams.colormap[p] = 4/256;
 		viewerParams.showColormap[p] = false;
-		viewerParams.updateColormapVariable[p] = false;
+		viewerParams.updateColormapVariable[p] = true;
 		viewerParams.colormapVals[p] = {};
 		viewerParams.colormapLims[p] = {};
 
 		// radius scaling
 		viewerParams.radiusVariable[p] = 0; // corresponds to "None"
-		viewerParams.updateRadiusVariable[p] = false;
+		viewerParams.updateRadiusVariable[p] = true;
 		viewerParams.rkeys[p] = [];
 
 		//blending
