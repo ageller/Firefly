@@ -5,7 +5,7 @@ import numpy as np
 
 import json
 
-from .binary_writer import OctBinaryWriter
+from .binary_writer import OctBinaryWriter,RawBinaryWriter
 
 #https://stackoverflow.com/questions/56250514/how-to-tackle-with-error-object-of-type-int32-is-not-json-serializable
 #to help with dumping to json
@@ -113,25 +113,13 @@ class OctNode(object):
             ## need to cascade, split this node
             if hasattr(self,'buffer_coordss'): 
 
-                buffer_coordss = self.buffer_coordss + [point]
-                if velocity is not None: buffer_velss = self.buffer_velss + [velocity]
-                if rgba_color is not None: buffer_rgba_colors = self.buffer_rgba_colors+[rgba_color]
-                buffer_fieldss = self.buffer_fieldss + [fields]
-
-                ## clear the buffers for this node
-                del self.buffer_coordss,self.buffer_fieldss,self.buffer_velss,self.buffer_rgba_colors
-                self.buffer_size = 0
-
-                ## loop back through each point and end up in the other branch of the conditional
-                ##  now that we have deleted the buffers
-                for i,(point,fields) in enumerate(
-                    zip(buffer_coordss,buffer_fieldss)): 
-                    self.addPointToOctree(
-                        point,
-                        fields,
-                        nodes,
-                        buffer_velss[i] if velocity is not None else None,
-                        buffer_rgba_colors[i] if rgba_color is not None else None)
+                self.buffer_coordss += [point]
+                if velocity is not None: self.buffer_velss += [velocity]
+                if rgba_color is not None: self.buffer_rgba_colors += [rgba_color]
+                self.buffer_fieldss += [fields]
+                
+                ## split this node into children
+                self.cascade(nodes) 
             else: 
 
                 ## accumulate the point
@@ -163,6 +151,31 @@ class OctNode(object):
 
                 child.addPointToOctree(point,fields,nodes,velocity,rgba_color)
 
+    def cascade(self,nodes:dict):
+
+        buffer_coordss = self.buffer_coordss
+        buffer_fieldss = self.buffer_fieldss
+        buffer_velss = self.buffer_velss
+        buffer_rgba_colors = self.buffer_rgba_colors
+
+        has_vels = len(buffer_velss) > 0
+        has_colors = len(buffer_rgba_colors) > 0
+
+        ## clear the buffers for this node
+        del self.buffer_coordss,self.buffer_fieldss,self.buffer_velss,self.buffer_rgba_colors
+        self.buffer_size = 0
+
+        ## loop back through each point and end up in the other branch of the conditional
+        ##  now that we have deleted the buffers
+        for i,(point,fields) in enumerate(
+            zip(buffer_coordss,buffer_fieldss)): 
+            self.addPointToOctree(
+                point,
+                fields,
+                nodes,
+                buffer_velss[i] if has_vels else None,
+                buffer_rgba_colors[i] if has_colors else None)
+
     def merge_to_parent(self,nodes):
         parent:OctNode = nodes[self.name[:-1]]
 
@@ -184,6 +197,47 @@ class OctNode(object):
             ## clear this buffer so as to avoid duplicating data
             ##  as much as possible
             del self.buffer_coordss,self.buffer_fieldss,self.buffer_velss,self.buffer_rgba_colors
+
+    def write(self,top_level_directory):
+
+        this_dir = os.path.join(top_level_directory,self.name)
+        os.makedirs(this_dir)
+
+        ## write coordinates
+        coordss = np.array(self.buffer_coordss).reshape(self.buffer_size,3)
+        for axis in range(3):
+            this_file = RawBinaryWriter(
+                os.path.join(this_dir,f"{self.name}_coord_{axis}"),
+                coordss[:,axis])
+            this_file.write()
+        
+        ## write velocities
+        velss = np.array(self.buffer_velss).reshape(-1,3)
+        if velss.shape[0] > 0:
+            for axis in range(3):
+                this_file = RawBinaryWriter(
+                    os.path.join(this_dir,f"{self.name}_vel_{axis}"),
+                    velss[:,axis])
+                this_file.write()
+
+        ## write rgbas
+        rgba_colorss = np.array(self.buffer_rgba_colors).reshape(-1,4)
+        if rgba_colorss.shape[0] > 0:
+            for axis in range(3):
+                this_file = RawBinaryWriter(
+                    os.path.join(this_dir,f"{self.name}_rgba_color_{axis}"),
+                    rgba_colorss[:,axis])
+                this_file.write()
+
+        ## ignore com and com_sq fields
+        fieldss = np.array(self.buffer_fieldss).reshape(self.buffer_size,-1)[:,:-6]
+        if fieldss.shape[1] > 0:
+            for ifield in range(fieldss.shape[1]):
+                this_file = RawBinaryWriter(
+                    os.path.join(this_dir,f"{self.name}_field_{ifield}"),
+                    fieldss[:,ifield])
+                this_file.write()
+
 class Octree(object):
 
     def __repr__(self):
@@ -644,3 +698,8 @@ class Octree(object):
 
         octree_fname = octree_fname.split(os.path.join('static','data',''))[1]
         return octree_fname,num_nodes
+
+    class MultiOctree(Octree):
+
+        def dispatch(self):
+            pass

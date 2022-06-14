@@ -147,6 +147,31 @@ class BinaryWriter(object):
         self.filter_flags+=[filter_flag]
         self.colormap_flags+=[colormap_flag]
         self.radius_flags+=[radius_flag]
+
+class RawBinaryWriter(BinaryWriter):
+
+    def write(self,handle=None):
+        if handle is None:
+            with open(self.fname,'wb') as handle:
+                byte_size = 0
+                byte_size += self.write_header(handle)
+                byte_size += self.write_field(handle,self.data)
+        else:
+            byte_size = 0
+            byte_size += self.write_header(handle)
+            byte_size += self.write_field(handle,self.data)
+        return byte_size
+
+    def write_header(self,handle):
+        byte_size = 0
+        byte_size += self.write_int(handle,self.nparts)
+
+    def __init__(self,fname,data):
+
+        self.fname = fname
+        self.data = data
+        self.shuffle_indices = None
+
         
 class OctBinaryWriter(BinaryWriter):
     ## assumes we have already opened a handle-- we're
