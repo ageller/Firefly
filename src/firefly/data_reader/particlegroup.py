@@ -182,7 +182,7 @@ class ParticleGroup(object):
         else: field_names = [] if field_names is None else field_names
 
         ## check if each field is named
-        if len(field_names) != len(field_arrays):
+        if (len(field_names) != len(field_arrays)) and np.size(field_arrays) > 0:
             raise ValueError("Make sure each field_array (%d) has a field_name (%d)"%(
                 len(field_arrays),len(field_names)))
 
@@ -558,7 +558,9 @@ class ParticleGroup(object):
         if clean_JSONdir:
             #print("Removing old JSON files from %s"%full_path)
             for fname in os.listdir(full_path):
-                if "json" in fname:
+                if ("ffly" in fname or
+                    "json" in fname or 
+                    "fftree" in fname):
                     os.remove(os.path.join(full_path,fname))
 
         filenames_and_nparts = self.filenames_and_nparts

@@ -41,3 +41,4 @@ dist/*.whl
 dist/*.tar.gz
 *.ffly
 *.fftree
+*/node_modules/*

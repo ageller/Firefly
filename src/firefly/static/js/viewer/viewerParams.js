@@ -7,6 +7,10 @@ function defineViewerParams(){
 		var currentTime = new Date();
 		// in seconds
 		this.initialize_time = currentTime.getTime()/1000;
+		//this.sleepTimeout = 1.5 // seconds
+		// no timeout
+		this.sleepTimeout = null // seconds
+		this.showSplashAtStartup = false;
 
 		this.container = null;
 		this.scene = null;

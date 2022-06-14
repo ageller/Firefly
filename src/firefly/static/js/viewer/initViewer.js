@@ -1606,6 +1606,7 @@ function clearloading(gui_done=false){
 	d3.select("#loader").style("display","none")
 	if (viewerParams.local){
 		d3.select("#splashdiv5").text("Click to begin.");
+		if (!viewerParams.showSplashAtStartup) showSplash(false);
 	} else {
 		showSplash(false);
 	}
