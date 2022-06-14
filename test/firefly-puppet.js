@@ -2,7 +2,11 @@ const puppeteer = require('puppeteer');
 
 (async () => {
   //executablePath:"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-  const browser = await puppeteer.launch({headless:false,args:['--use-angle=metal',]});
+  const browser = await puppeteer.launch(
+    {headless:false,
+      args:[
+        '--use-angle=metal',
+      ]});
   const page = await browser.newPage();
   page.on('console', message =>
       console.log(`${message.type().substr(0, 3).toUpperCase()} ${message.text()}`))
