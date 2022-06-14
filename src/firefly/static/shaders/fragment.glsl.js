@@ -41,7 +41,14 @@ void main(void) {
 	if (vID <= -1.){
 		discard;
 	} else {
-		if (!columnDensity) gl_FragColor = color;
+		// use passed RGBA color
+		if (vColor[3] >= 0.) { 
+			gl_FragColor.rgb = vColor.rgb;
+			gl_FragColor.a = vColor[3];
+		}
+		// use fixed color
+		else if (!columnDensity) gl_FragColor = color;
+		// hijack color for making a projection
 		else{
 			gl_FragColor.r = 1.;
 			gl_FragColor.g = 0.;
@@ -127,13 +134,10 @@ void main(void) {
 			//gl_FragColor.a = posRot.x/vSize;
 		}
 
+		// need some factor here so that it adds up progressively
+		//  it will be divided out in the second pass so long as it doesn't saturate.
 		if (columnDensity){
-			gl_FragColor.rgb *= scaleCD; //need some factor here so that it adds up progressively
-		}
-
-		if (vColor[3] >= 0.) { 
-			gl_FragColor.rgb = vColor.rgb;
-			gl_FragColor.a = vColor[3];
+			gl_FragColor.rgb *= scaleCD; 
 		}
 
 		gl_FragColor.a *= vAlpha;
