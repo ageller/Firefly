@@ -41,10 +41,16 @@ void main(void) {
 	if (vID <= -1.){
 		discard;
 	} else {
-		gl_FragColor = color;
+		if (!columnDensity) gl_FragColor = color;
+		else{
+			gl_FragColor.r = 1.;
+			gl_FragColor.g = 0.;
+			gl_FragColor.b = 0.;
+			gl_FragColor.a = 1.;
+		}
 
 		// if colormap is requested, apply appropriate colormap to appropriate variable
-		if (showColormap){
+		if (showColormap && !columnDensity){
 			vec2 pos = vec2(vColormapMag, colormap);
 			vec3 c = texture2D(colormapTexture, pos).rgb;
 			gl_FragColor.rgb = c;
@@ -127,7 +133,7 @@ void main(void) {
 
 		if (vColor[3] >= 0.) { 
 			gl_FragColor.rgb = vColor.rgb;
-			gl_FragColor.a *= vColor[3];
+			gl_FragColor.a = vColor[3];
 		}
 
 		gl_FragColor.a *= vAlpha;
