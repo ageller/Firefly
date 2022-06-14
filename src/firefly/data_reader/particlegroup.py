@@ -182,7 +182,7 @@ class ParticleGroup(object):
         else: field_names = [] if field_names is None else field_names
 
         ## check if each field is named
-        if len(field_names) != len(field_arrays):
+        if (len(field_names) != len(field_arrays)) and np.size(field_arrays) > 0:
             raise ValueError("Make sure each field_array (%d) has a field_name (%d)"%(
                 len(field_arrays),len(field_names)))
 
