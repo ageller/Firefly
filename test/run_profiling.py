@@ -153,7 +153,8 @@ class ProfilingSetup():
         self,
         filename,
         JSONdir='FIRE_profiling',
-        dataset='m12b_res57000'):
+        dataset='m12b_res57000',
+        overwrite=True):
 
         self.stdout = None
         self.filename = filename
@@ -161,7 +162,9 @@ class ProfilingSetup():
         self.dataset = dataset
 
         ## append vals to csv file
-        with open(self.filename,'w+') as handle: handle.write(dataset+'\n')
+        if overwrite:
+            with open(self.filename,'w+') as handle:
+                handle.write(dataset+'\n')
 
     def run_profile(self):
 
@@ -208,7 +211,7 @@ class ProfilingSetup():
             600,
             [0],
             ['Gas'],None,
-            fields=['Log10Temperature','Log10Density','GCRadius'],
+            #fields=['Log10Temperature','Log10Density','GCRadius'],
             JSONdir=self.JSONdir,
             ## overwrite the existing startup.json file
             write_startup=True,
@@ -242,7 +245,7 @@ class NParticlesSetup(ProfilingSetup):
         self.dec_factors = default_dec_factors if dec_factors is None else dec_factors
         self.extension = extension
     
-    def run(self,reader:FIREreader=None):
+    def run(self,reader:FIREreader=None,do_run=True):
 
         init_time = time.time()
 
@@ -256,30 +259,39 @@ class NParticlesSetup(ProfilingSetup):
             reader.writeToDisk(extension=self.extension,loud=False)
 
             ## append this setup to the filenames.csv file
-            self.run_profile()
+            if do_run: self.run_profile()
 
         print("%.2f"%((time.time()-init_time)/60),'min elapsed')
         return reader
 
+def run_plots():
 
-def run_all(dataset='m12b_res7100'): 
+    plotter = ProfilingPlotter('ffly_startup_memory.csv','json_startup_memory.csv')
+    plotter.make_plots()
+
+def run_all(dataset='m12b_res7100',clear_memory=False): 
     init_time = time.time()
 
     reader = None
 
-    ## run .json for different decimation factors
-    json_startup_memory = NParticlesSetup(
-        '.json',
-        filename='json_startup_memory.csv',
-        dataset=dataset)
-    reader = json_startup_memory.run(reader=reader)
-
-    ## run .ffly for different decimation factors
-    ffly_startup_memory = NParticlesSetup(
-        '.ffly',
-        filename='ffly_startup_memory.csv',
-        dataset=dataset)
-    reader = ffly_startup_memory.run(reader=reader)
+    ## run different decimation factors in both formats
+    for fmt in ['ffly']: #,'json'
+        if clear_memory:
+            for dec_factor in [5]:
+                foo = NParticlesSetup(
+                    f'.{fmt}',
+                    filename=f'{fmt}_startup_memory_nofields.csv',
+                    dataset=dataset,
+                    dec_factors=[dec_factor],
+                    overwrite=False)
+                foo.run(do_run=False)
+                foo.run_profile()
+        else:
+            reader = NParticlesSetup(
+                f'.{fmt}',
+                filename=f'{fmt}_startup_memory_nofields.csv',
+                dataset=dataset,
+                overwrite=True).run(reader=reader)
 
     #run_FPS_profiling()
 
