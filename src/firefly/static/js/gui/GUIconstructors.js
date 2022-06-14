@@ -1056,10 +1056,8 @@ function createParticleColormapCheckBoxSegment(container,parent,name,p){
 		.attr('type','checkbox')
 		.attr('autocomplete','off')
 		.on('change',function(){
-			if (!GUIParams.columnDensity){
-				if (GUIParams.showParts[p]) checkColormapBox(p, this.checked);
-				else this.checked = GUIParams.showColormap[p];
-			}
+			if (GUIParams.showParts[p]) checkColormapBox(p, this.checked);
+			else this.checked = GUIParams.showColormap[p];
 		})
 	this_container.append('label')
 		.attr('for',p+'colorCheckBox')
