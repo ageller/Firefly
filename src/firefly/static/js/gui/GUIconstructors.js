@@ -428,7 +428,7 @@ function createCameraButtonsSegment(container,parent,name){
 			sendToViewer([{'recenterCamera':null}]);
 		})
 		.append('span')
-			.text('Recenter');
+			.text('Refocus');
 	return segment_height;
 }
 
