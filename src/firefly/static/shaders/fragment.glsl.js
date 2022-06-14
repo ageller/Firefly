@@ -41,28 +41,28 @@ void main(void) {
 	if (vID <= -1.){
 		discard;
 	} else {
-		// use passed RGBA color
-		if (vColor[3] >= 0.) { 
-			gl_FragColor.rgb = vColor.rgb;
-			gl_FragColor.a = vColor[3];
-		}
-		// use fixed color
-		else if (!columnDensity) gl_FragColor = color;
 		// hijack color for making a projection
-		else{
+		if (columnDensity){
 			gl_FragColor.r = 1.;
 			gl_FragColor.g = 0.;
 			gl_FragColor.b = 0.;
 			gl_FragColor.a = 1.;
 		}
-
 		// if colormap is requested, apply appropriate colormap to appropriate variable
-		if (showColormap && !columnDensity){
+		//  this should have priority over everything else (so long)
+		else if (showColormap){
 			vec2 pos = vec2(vColormapMag, colormap);
 			vec3 c = texture2D(colormapTexture, pos).rgb;
 			gl_FragColor.rgb = c;
-
+			gl_FragColor.a = 1.;
 		}
+		// use passed RGBA color
+		else if (vColor[3] >= 0.) { 
+			gl_FragColor.rgb = vColor.rgb;
+			gl_FragColor.a = vColor[3];
+		}
+		// use fixed color as a last resort
+		else gl_FragColor = color;
 
 		float dist = 0.;
 		if (vID < 0.5){ //normal mode, plotting points (should be vID == 0, but this may be safer)
