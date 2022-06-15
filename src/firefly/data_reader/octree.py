@@ -425,9 +425,18 @@ class Octree(object):
             max_npart_per_node=max_npart_per_node)
         }
 
-    def buildOctree(self,start_octant=''):
+    def buildOctree(self,start_octant='',name_prefix=None):
 
         node = self.nodes[start_octant]
+
+        ## for when a node of an existing octree is being refined. the root node
+        ##  will be '' but really that's w.r.t. the node we're refining.
+        if name_prefix is not None:
+            node.name = name_prefix+node.name
+            self.nodes[node.name] = self.nodes.pop(start_octant)
+            if len(self.nodes) != 1: raise ValueError(
+                "Can only have a single initial node if we're refining.")
+
         end = self.coordinates.shape[0]
         velocity = None
         rgba_color = None
