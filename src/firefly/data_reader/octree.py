@@ -6,6 +6,7 @@ import numpy as np
 import json
 
 from .binary_writer import OctBinaryWriter,RawBinaryWriter
+from .json_utils import write_to_json,load_from_json
 
 #https://stackoverflow.com/questions/56250514/how-to-tackle-with-error-object-of-type-int32-is-not-json-serializable
 #to help with dumping to json
@@ -706,7 +707,68 @@ class Octree(object):
         octree_fname = octree_fname.split(os.path.join('static','data',''))[1]
         return octree_fname,num_nodes
 
-    class MultiOctree(Octree):
 
-        def dispatch(self):
-            pass
+def refineOctreeFromRaw(pathh,max_npart_per_node=10**6,min_npart_per_node=10**5,target=None):
+
+    ## gotsta point us to an octree my friend
+    if not os.path.isdir(pathh): raise IOError(pathh)
+
+    ## assume the parent directory is the directory where
+    ##  node directories are saved... because this one is
+    if target is None: target = os.path.dirname(pathh)
+
+    ## read octree summary file
+    root = load_from_json(os.path.join(pathh,'octree.json'))
+
+    ## initialize data buffers
+    nparts = root['nparts']
+    coordinates = np.empty((nparts,3))
+    velocities = np.empty((nparts,3)) if root['has_velocity'] else None
+    rgba_colors = np.empty((nparts,4)) if root['has_color'] else None
+    fieldss = {field_name:np.empty(nparts) for field_name in root['field_names']}
+
+    for i,axis in enumerate(['x','y','z']):
+        ## fill coordinate buffers
+        RawBinaryWriter(os.path.join(pathh,f'{axis}.ffraw'),coordinates[:,i]).read()
+        if velocities is not None:
+            ## fill velocity buffers
+            RawBinaryWriter(os.path.join(pathh,f'v{axis}.ffraw'),velocities[:,i]).read()
+
+    if rgba_colors is not None:
+        for i,color in enumerate(['r','g','b','a']):
+            ## fill rgba color buffers
+            RawBinaryWriter(os.path.join(pathh,f'rgba_{color}.ffraw'),rgba_colors[:,i]).read()
+
+    for field_name in fieldss:
+        ## fill each field buffer
+        RawBinaryWriter(os.path.join(pathh,f'{field_name}.ffraw'),fieldss[field_name]).read()
+
+    ## pass the field names to the global scope so that nodes can write
+    ##  files with the correct names.
+    global field_names
+    field_names = root['field_names']
+
+    ## create an octree starting at this node
+    tree = Octree(
+        None,
+        coordinates=coordinates,
+        velocities=velocities,
+        fields=fieldss,
+        rgba_colors=rgba_colors,
+        max_npart_per_node=max_npart_per_node,
+        root_center=root['center'],
+        root_width=root['width'])
+
+    ## TODO: should prepend node.name
+    ##  for when I'm not just refining from 52 copies of the root node
+    tree.buildOctree()
+    
+    ## merge nodes below threshold
+    tree.pruneOctree(min_npart_per_node)
+
+    ## write out nodes with buffer data to their own directories
+    ##  with .ffraw files and their own octree.json.
+    for node in tree.node_list: 
+         if node.buffer_size > 0: node.write(target)
+    
+    return tree
