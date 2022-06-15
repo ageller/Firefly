@@ -201,40 +201,42 @@ class OctNode(object):
     def write(self,top_level_directory):
 
         this_dir = os.path.join(top_level_directory,self.name)
-        os.makedirs(this_dir)
+        if not os.path.isdir(this_dir): os.makedirs(this_dir)
 
         ## write coordinates
         coordss = np.array(self.buffer_coordss).reshape(self.buffer_size,3)
-        for axis in range(3):
+        for i,axis in enumerate(['x','y','z']):
             this_file = RawBinaryWriter(
-                os.path.join(this_dir,f"{self.name}_coord_{axis}"),
-                coordss[:,axis])
+                os.path.join(this_dir,f"{axis}.ffraw"),
+                coordss[:,i])
             this_file.write()
         
         ## write velocities
         velss = np.array(self.buffer_velss).reshape(-1,3)
         if velss.shape[0] > 0:
-            for axis in range(3):
+            for i,axis in enumerate(['x','y','z']):
                 this_file = RawBinaryWriter(
-                    os.path.join(this_dir,f"{self.name}_vel_{axis}"),
-                    velss[:,axis])
+                    os.path.join(this_dir,f"v{axis}.ffraw"),
+                    velss[:,i])
                 this_file.write()
 
         ## write rgbas
         rgba_colorss = np.array(self.buffer_rgba_colors).reshape(-1,4)
         if rgba_colorss.shape[0] > 0:
-            for axis in range(3):
+            colors = ['r','g','b','a']
+            for axis,color in enumerate(colors):
                 this_file = RawBinaryWriter(
-                    os.path.join(this_dir,f"{self.name}_rgba_color_{axis}"),
+                    os.path.join(this_dir,f"rgba_{color}.ffraw"),
                     rgba_colorss[:,axis])
                 this_file.write()
 
+        global field_names
         ## ignore com and com_sq fields
         fieldss = np.array(self.buffer_fieldss).reshape(self.buffer_size,-1)[:,:-6]
         if fieldss.shape[1] > 0:
-            for ifield in range(fieldss.shape[1]):
+            for ifield,field_name in enumerate(field_names):
                 this_file = RawBinaryWriter(
-                    os.path.join(this_dir,f"{self.name}_field_{ifield}"),
+                    os.path.join(this_dir,f"{field_name}.ffraw"),
                     fieldss[:,ifield])
                 this_file.write()
 
