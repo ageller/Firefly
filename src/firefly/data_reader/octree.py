@@ -240,6 +240,15 @@ class OctNode(object):
                     fieldss[:,ifield])
                 this_file.write()
 
+        write_to_json({
+            'width':self.width,
+            'field_names':field_names,
+            'has_velocity':velss.shape[0] > 0,
+            'has_color':rgba_colorss.shape[0] > 0,
+            'center':self.center,
+            'nparts':self.buffer_size},
+            os.path.join(top_level_directory,self.name,'octree.json'))
+
 class Octree(object):
 
     def __repr__(self):
