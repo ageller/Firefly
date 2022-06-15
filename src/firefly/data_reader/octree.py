@@ -255,45 +255,16 @@ class Octree(object):
         return 'Octree: %d nodes - %d points - %d fields'%(
             len(self.node_list),
             self.nodes[''].npoints,
-            self.nodes[''].nfields-3)
+            self.nodes[''].nfields-6)
+    
+    def parse_particle_group(self,particle_group):
 
-    def __init__(
-        self,
-        particle_group,
-        max_npart_per_node=1000):
-        '''
-            inputFile : path to the file. For now only text files.
-            NMemoryMax : the maximum number of particles to save in the memory before writing to a file
-            NNodeMax : the maximum number of particles to store in a node before splitting it
-            header : the line number of the header (file starts at line 1, 
-                set header=0 for no header, and in that case x,y,z are assumed to be the first three columns)
-            delim : the delimiter between columns, if set to None, then hdf5 file is assumed
-            colIndices : dict with the column numbers for each value in keyList (only necessary for csv files)
-            baseDir : the directory to store the octree files
-            Nmax : maximum number of particles to include
-            verbose : controls how much output to write to the console
-            path : the path to the output file
-            minWidth : the minimum width that a node can have
-            h5PartKey : if needed, can be used to specify which particle type to use, e.g. 'PartType0'
-            keyList : Any additional keys that are desired; MUST contain the key to Coordinates first.  If blank, then assume that x,y,z is the first 3 columns in file
-            logList : a list of true/false values indicating if a key from keyListshould be treated as the log (not Coordinates or Velocities)
-            center : options for the user to provide the octree center (can save time)
-            cleanDir : if true this will erase the files within that directory before beginning
-        '''
-        self.count = 0
-
-        ## want the true mean, not the com-- we'll calculate the com at the end
-        root_center = np.zeros(3)#np.mean(particle_group.coordinates,axis=0)
-
-        self.coordinates = particle_group.coordinates - root_center
+        self.coordinates = particle_group.coordinates 
         self.velocities = particle_group.velocities
         self.rgba_colors = particle_group.rgba_colors
  
         ## find the maximum extent in any coordinate direction and set the 
         ##  octree root bounding box to that size
-        #coords = np.abs(self.coordinates.flatten())
-        #np.percentile(coords,[99.99])
-
         
         ## easier to convert this to a dictionary for the next couple of lines
         fields = dict(zip(particle_group.field_names,particle_group.field_arrays))
@@ -302,6 +273,30 @@ class Octree(object):
             if self.velocities is not None: self.velocities = self.velocities[::particle_group.decimation_factor]
             if self.rgba_colors is not None: self.rgba_colors = self.rgba_colors[::particle_group.decimation_factor]
             for key in fields.keys(): fields[key] = fields[key][::particle_group.decimation_factor]
+
+    def __init__(
+        self,
+        particle_group,
+        coordinates=None,
+        velocities=None,
+        fields=None,
+        rgba_colors=None,
+        max_npart_per_node=1000,
+        root_center=None,
+        root_width=None):
+        self.count = 0
+        self.node_list = []
+
+        if particle_group is not None: self.parse_particle_group(particle_group)
+        else: 
+            self.coordinates = coordinates
+            self.velocities = velocities
+            self.rgba_colors = rgba_colors
+            self.fields = fields
+
+        ## want the true mean, not the com-- we'll calculate the com at the end
+        if root_center is None: root_center = np.zeros(3)#np.mean(self.coordinates,axis=0)
+        self.coordinates = self.coordinates - root_center
 
         ## prepare field accumulators
         ##  add com calculators to fields
@@ -334,19 +329,20 @@ class Octree(object):
         ## fill up the settings with appropriate limits
         ##  so that filters and colormaps are appropriate accounting
         ##  for unloaded particles
-        settings = particle_group.attached_settings
-        ## find the minimum and maximum value of each field
-        ##  for initializing the filter if user values aren't passed.
-        for i,key in enumerate(self.field_names[:-6]):
-            if key in ['Masses']: vals = [0,fields[key].sum()*1.1]
-            else: vals = [fields[key].min()*0.9, fields[key].max()*1.1]
-            for setting_key in ['filterLims','filterVals','colormapLims','colormapVals']:
-                if settings[setting_key][particle_group.UIname][key] is None:
-                    settings[setting_key][particle_group.UIname][key]=vals
+        if particle_group is not None:
+            settings = particle_group.attached_settings
+            ## find the minimum and maximum value of each field
+            ##  for initializing the filter if user values aren't passed.
+            for i,key in enumerate(self.field_names[:-6]):
+                if key in ['Masses']: vals = [0,fields[key].sum()*1.1]
+                else: vals = [fields[key].min()*0.9, fields[key].max()*1.1]
+                for setting_key in ['filterLims','filterVals','colormapLims','colormapVals']:
+                    if settings[setting_key][particle_group.UIname][key] is None:
+                        settings[setting_key][particle_group.UIname][key]=vals
 
-        self.filter_flags = particle_group.field_filter_flags
-        self.colormap_flags = particle_group.field_colormap_flags
-        self.radius_flags= particle_group.field_radius_flags
+            self.filter_flags = particle_group.field_filter_flags
+            self.colormap_flags = particle_group.field_colormap_flags
+            self.radius_flags= particle_group.field_radius_flags
 
         ## initialize the octree node dictionary
         ##  find the maximum extent in any coordinate direction and set the 
@@ -355,7 +351,7 @@ class Octree(object):
         #root_width = 2.*np.max([maxPos,minPos])
         ## find the extent which contains 99.99% of the particles 
         ##  (to avoid weird outliers stretching your octree)
-        root_width = 2*np.percentile(coords,[99.99]) ## 2* for +/-
+        if root_width is None: root_width = 2*np.percentile(coords,[99.99]) ## 2* for +/-
 
         ## select those particles that are outside the root node's bounding box.
         outlier_mask = np.max(np.abs(self.coordinates),axis=1) > root_width/2
