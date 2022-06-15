@@ -165,13 +165,22 @@ class RawBinaryWriter(BinaryWriter):
     def write_header(self,handle):
         byte_size = 0
         byte_size += self.write_int(handle,self.nparts)
+        return byte_size
 
     def __init__(self,fname,data):
 
         self.fname = fname
         self.data = data
+        self.nparts = data.shape[0]
         self.shuffle_indices = None
+    
+    def read(self):
 
+        with open(self.fname,'rb') as handle:
+            binary_string = handle.read()
+            nparts = int.from_bytes(binary_string[:4],byteorder='little', signed=False)
+            arr = np.frombuffer(binary_string[4:], dtype=np.float32, count=nparts)
+        self.data[...] = arr
         
 class OctBinaryWriter(BinaryWriter):
     ## assumes we have already opened a handle-- we're
