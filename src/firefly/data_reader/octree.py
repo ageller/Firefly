@@ -245,10 +245,57 @@ class OctNode(object):
             'width':self.width,
             'field_names':field_names,
             'has_velocity':velss.shape[0] > 0,
-            'has_color':rgba_colorss.shape[0] > 0,
-            'center':self.center,
-            'nparts':self.buffer_size},
-            os.path.join(top_level_directory,self.name,'octree.json'))
+    def format_node_dictionary(self,loud):
+        node_dict = {}
+
+        node_dict['children'] = node.children
+        node_dict['center'] = node.center.tolist()
+        ## set basic keys
+        for key in ['width','name','refinement','npoints']:
+            node_dict[key] = getattr(node,key)
+
+        ## calculate center of mass
+        com = node.fields[-6:-3] ## last 3 fields will always be xcom, ycom, zcom
+        com_sq = node.fields[-3:] ## last 3 fields will always be xcom, ycom, zcom
+        if 'Masses' in self.field_names:
+            weights = node.fields[self.field_names.index('Masses')]
+        else: weights = node.npoints
+
+        com = com/weights
+        com_sq = com_sq/weights
+        ## sigma_x = <x^2>_m - <x>_m^2, take average over 3 axes to get 1d
+        ##  sigma to represent 1-sigma extent of particles in node
+        node_dict['radius'] = np.sqrt(np.mean(com_sq-com**2))
+        node_dict['center_of_mass'] = com.tolist()
+
+        ## set other accumulated field values, use the same weights
+        for i,field_key in enumerate(self.field_names[:-3]):
+            node_dict[field_key] = node.fields[i]
+            if field_key != 'Masses': 
+                node_dict[field_key]/=weights
+
+        if 'static' in path: path = path.split('static')[1][1:]
+        if hasattr(node,'buffer_filename'):
+            node_dict['buffer_filename'] = os.path.join(
+                path,
+                node.buffer_filename)
+            node_dict['buffer_size'] = node.buffer_size
+            node_dict['byte_offset'] = node.byte_offset
+            node_dict['byte_size'] = node.byte_size
+            ##  I don't know if we want this so I'll comment it out 
+            ##  but if it turns out we need it on the JSON side 
+            ##  it'll be easy to add.
+            #node_dict['npart_buffer_file'] = node.npart_buffer_file
+
+        if self.velocities is not None: 
+            vcom = node.velocity/weights
+            node_dict['com_velocity'] = vcom
+        
+        if self.rgba_colors is not None:
+            rgba_color = node.rgba_color/weights
+            node_dict['rgba_color'] = rgba_color
+
+        return node_dict
 
 class Octree(object):
 
@@ -639,64 +686,23 @@ class Octree(object):
             if loud and (not node_index%(int(num_nodes/100)+1)): print(
                 "%.2f"%(100*node_index/num_nodes)+'%',
                 '<'+node.name+'>',end='\t',flush=True)
-            node_dict = {}
 
-            node_dict['children'] = node.children
+            node_dict = node.format_node_dictionary()
+            node_dict['node_index'] = node_index
 
-            node_dict['center'] = node.center.tolist()
-            ## set basic keys
-            for key in ['width','name','refinement','npoints']:
-                node_dict[key] = getattr(node,key)
+            ## store node dictionary in json
+            json_dict['octree'][node.name] = node_dict
 
-            ## calculate center of mass
-            com = node.fields[-6:-3] ## last 3 fields will always be xcom, ycom, zcom
-            com_sq = node.fields[-3:] ## last 3 fields will always be xcom, ycom, zcom
-            if 'Masses' in self.field_names:
-                weights = node.fields[self.field_names.index('Masses')]
-            else: weights = node.npoints
-
-            com = com/weights
-            com_sq = com_sq/weights
-            ## sigma_x = <x^2>_m - <x>_m^2, take average over 3 axes to get 1d
-            ##  sigma to represent 1-sigma extent of particles in node
-            node_dict['radius'] = np.sqrt(np.mean(com_sq-com**2))
-
-            node_dict['center_of_mass'] = com.tolist()
-
-            ## set other accumulated field values, use the same weights
-            for i,field_key in enumerate(self.field_names[:-3]):
-                node_dict[field_key] = node.fields[i]
-                if field_key != 'Masses': 
-                    node_dict[field_key]/=weights
+            ## fill the json_dictionary with aggregate data
+            for field_key in self.field_names[:-6]:
                 json_dict[field_key][node_index] = node_dict[field_key]
 
-            if 'static' in path: path = path.split('static')[1][1:]
-            if hasattr(node,'buffer_filename'):
-                node_dict['buffer_filename'] = os.path.join(
-                    path,
-                    node.buffer_filename)
-                node_dict['buffer_size'] = node.buffer_size
-                node_dict['byte_offset'] = node.byte_offset
-                node_dict['byte_size'] = node.byte_size
-                ##  I don't know if we want this so I'll comment it out 
-                ##  but if it turns out we need it on the JSON side 
-                ##  it'll be easy to add.
-                #node_dict['npart_buffer_file'] = node.npart_buffer_file
-
-            ## set center = 
-            json_dict['Coordinates_flat'][3*node_index:3*(node_index+1)] = com
-            #json_dict['Coordinates_flat'][3*node_index:3*(node_index+1)] = node.center.tolist()
-
-            if self.velocities is not None: 
-                vcom = node.velocity/weights
-                json_dict['Velocities_flat'][3*node_index:3*(node_index+1)] = vcom
-            
+            json_dict['Coordinates_flat'][3*node_index:3*(node_index+1)] = node_dict['center_of_mass']
+            if self.velocities is not None:
+                json_dict['Velocities_flat'][3*node_index:3*(node_index+1)] = node_dict['com_velocity']
             if self.rgba_colors is not None:
-                rgba_color = node.rgba_color/weights
                 json_dict['rgbaColors_flat'][4*node_index:4*(node_index+1)] = rgba_color
 
-            node_dict['node_index'] = node_index
-            json_dict['octree'][node.name] = node_dict
             node_index+=1
 
         print('done!',flush=True)
