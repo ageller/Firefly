@@ -208,7 +208,7 @@ class OctNode(object):
         coordss = np.array(self.buffer_coordss).reshape(self.buffer_size,3)
         for i,axis in enumerate(['x','y','z']):
             this_file = RawBinaryWriter(
-                os.path.join(this_dir,f"{axis}.ffraw"),
+                os.path.join(this_dir,f"{axis}{partition_str}.ffraw"),
                 coordss[:,i])
             this_file.write()
         
@@ -217,7 +217,7 @@ class OctNode(object):
         if velss.shape[0] > 0:
             for i,axis in enumerate(['x','y','z']):
                 this_file = RawBinaryWriter(
-                    os.path.join(this_dir,f"v{axis}.ffraw"),
+                    os.path.join(this_dir,f"v{axis}{partition_str}.ffraw"),
                     velss[:,i])
                 this_file.write()
 
@@ -227,7 +227,7 @@ class OctNode(object):
             colors = ['r','g','b','a']
             for axis,color in enumerate(colors):
                 this_file = RawBinaryWriter(
-                    os.path.join(this_dir,f"rgba_{color}.ffraw"),
+                    os.path.join(this_dir,f"rgba_{color}{partition_str}.ffraw"),
                     rgba_colorss[:,axis])
                 this_file.write()
 
@@ -237,14 +237,22 @@ class OctNode(object):
         if fieldss.shape[1] > 0:
             for ifield,field_name in enumerate(field_names):
                 this_file = RawBinaryWriter(
-                    os.path.join(this_dir,f"{field_name}.ffraw"),
+                    os.path.join(this_dir,f"{field_name}{partition_str}.ffraw"),
                     fieldss[:,ifield])
                 this_file.write()
 
-        write_to_json({
-            'width':self.width,
+        node_dict = self.format_node_dictionary()
+
+        ## add some extra flags that are typically in the json_dict
+        ##  if Octree.write_octree_json is called below
+        node_dict.update({
             'field_names':field_names,
             'has_velocity':velss.shape[0] > 0,
+            'has_color':rgba_colorss.shape[0] > 0 })
+
+        write_to_json(node_dict,
+            os.path.join(top_level_directory,self.name,f'octree{partition_str}.json'))
+
     def format_node_dictionary(self,loud):
         node_dict = {}
 
@@ -731,6 +739,13 @@ def refineOctreeFromRaw(pathh,max_npart_per_node=10**6,min_npart_per_node=10**5,
     ## assume the parent directory is the directory where
     ##  node directories are saved... because this one is
     if target is None: target = os.path.dirname(pathh)
+
+    ## for particles in separate partitions that are in the same node
+    global partition_str
+    if 'partition' in os.basename(pathh): 
+        partition_str = '.'+os.basename(pathh).split('_')[1]
+    else:
+        partition_str = ''
 
     ## read octree summary file
     root = load_from_json(os.path.join(pathh,'octree.json'))
