@@ -374,7 +374,7 @@ class OctreeStream(object):
             new_node,children = new_nodes[0],new_nodes[1:]
 
             self.root['nodes'][old_node['name']] = new_node
-            for child in children: self.root['nodes'][child['name']] = child
+            for child in children: self.register_child(child)
 
             ## delete the old files now that nothing is pointing to them
             for fname in old_node['files']: os.remove(fname[0])
@@ -385,6 +385,57 @@ class OctreeStream(object):
         self.expand_nodes = [node for node in self.root['nodes'].values() if 'files' in node.keys() and node['nparts'] > self.min_to_refine]
         print([expand_node['name'] for expand_node in self.expand_nodes],'still need to be refined')
     
+    def register_child(self,new_child):
+
+        child_name = new_child['name']
+        ## easy, we've never seen this child before
+        if child_name not in nodes: self.root['nodes'][child_name] = new_child
+        ## annoying, need to append...
+        else:
+            nodes = self.root['nodes']
+            old_child = nodes[child_name]
+
+            field_names = nodes['field_names']
+            
+            ## update the accumulated values
+            if old_child['weight_index'] is not None:
+                old_weight = old_child[field_names[old_child['weight_index']]]
+                new_weight = new_child[field_names[new_child['weight_index']]]
+            else: 
+                old_weight = old_child['nparts']
+                new_weight = new_child['nparts']
+
+            for i,field_name in enumerate(
+                field_names+['center_of_mass','com_velocity','rgba_color']):
+
+                ## if don't have velocity or rgba_color, for example
+                if old_child[field_name] is None: continue
+
+                if weight_index is None or i!= weight_index:
+                    old_this_weight = old_weight
+                    new_this_weight = new_weight
+                else: old_this_weight = new_this_weight = 1
+
+                old_child[field_name] = (
+                    (old_child[field_name]*old_this_weight + 
+                        new_child[field_name]*new_this_weight) / 
+                    (old_weight + new_weight))
+
+            ## handle radius separately because have to do rms
+            old_child['radius'] = np.sqrt((
+                old_child['radius']**2*old_weight + 
+                new_child['radius']**2*new_weight)/
+                (old_weight+new_weight))
+
+            ## add the number of particles
+            old_child['nparts']+=new_child['nparts']
+            ## append the files
+            old_child['files']+=new_child['files']   
+
+            ## shouldn't need to do this b.c. aliasing
+            ##  but you know one can never be too careful
+            self.root['nodes'][child_name] = old_child
+
     def full_refine(self):
 
         while len(self.expand_nodes) >0:
