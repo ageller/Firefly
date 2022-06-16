@@ -337,36 +337,59 @@ class OctNodeStream(object):
         child.accumulate(point,fields,velocity,rgba_color)
 
 class OctreeStream(object):
-    def __init__(self,pathh,use_mps=False):
+
+    def __repr__(self):
+        return f"OctreeStream({len(self.expand_nodes)}/{len(self.root['nodes'])})"
+
+    def __init__(self,pathh,min_to_refine=1e6):
         """ pathh is path to data that has already been saved to .ffraw format and has an acompanying octree.json """
         ## gotsta point us to an octree my friend
         if not os.path.isdir(pathh): raise IOError(pathh)
 
-        ## read octree summary file
-        root = load_from_json(os.path.join(pathh,'octree.json'))
+        self.pathh = pathh
+        self.min_to_refine = min_to_refine
 
-        nodes = root['nodes']
+        ## read octree summary file
+        self.root = load_from_json(os.path.join(pathh,'octree.json'))
+
+        nodes = self.root['nodes']
 
         global prefixes
         prefixes = (['x','y','z'] + 
-            ['vx','vy','vz']*root['has_velocity'] + 
-            ['rgba_r','rgba_g','rgba_b','rgba_a']*root['has_color'] + 
-            root['field_names'])
+            ['vx','vy','vz']*self.root['has_velocity'] + 
+            ['rgba_r','rgba_g','rgba_b','rgba_a']*self.root['has_color'] + 
+            self.root['field_names'])
 
-        expand_nodes = [node for node in nodes.values() if 'files' in node.keys()]
+        self.expand_nodes = [node for node in nodes.values() if 'files' in node.keys() and node['nparts'] > self.min_to_refine]
+        print([expand_node['name'] for expand_node in self.expand_nodes],'need to be refined')
+
+    def refine(self,use_mps=False):
 
         if not use_mps:
-            new_dicts = [refineNode(node,pathh,root['weight_index']) for node in expand_nodes]
+            new_dicts = [refineNode(node,self.pathh,self.root['weight_index']) for node in self.expand_nodes]
         else: raise NotImplementedError()
 
-        for old_node,new_nodes in zip(list(nodes.values()),new_dicts):
+        for old_node,new_nodes in zip(self.expand_nodes,new_dicts):
             print('replacing:',old_node['name'])
             new_node,children = new_nodes[0],new_nodes[1:]
 
-            root['nodes'][old_node['name']] = new_node
-            for child in children: root['nodes'][child['name']] = child
+            self.root['nodes'][old_node['name']] = new_node
+            for child in children: self.root['nodes'][child['name']] = child
 
-        write_to_json(root,os.path.join(pathh,'octree.json'))
+            ## delete the old files now that nothing is pointing to them
+            for fname in old_node['files']: os.remove(fname[0])
+
+        write_to_json(self.root,os.path.join(self.pathh,'octree.json'))
+
+        ## update nodes which need to be refined
+        self.expand_nodes = [node for node in self.root['nodes'].values() if 'files' in node.keys() and node['nparts'] > self.min_to_refine]
+        print([expand_node['name'] for expand_node in self.expand_nodes],'still need to be refined')
+    
+    def full_refine(self):
+
+        while len(self.expand_nodes) >0:
+            print(self)
+            self.refine()
 
 def refineNode(node_dict,target_directory,weight_index):
 
