@@ -1,5 +1,6 @@
 import os
 import itertools
+import copy
 
 import numpy as np
 
@@ -202,7 +203,7 @@ class OctNodeStream(object):
         namestr = f'{self.name}_' if self.name != '' else ''
 
         ## determine how many files we'll need to split this dataset into
-        nsub_files = int(4*self.buffer_size/bytes_per_file)+1
+        nsub_files = int(4*self.buffer_size//bytes_per_file + (4*self.buffer_size != bytes_per_file))
         try: counts = [arr.shape[0] for arr in np.array_split(np.arange(self.buffer_size),nsub_files)]
         except: 
             print(self)
@@ -266,7 +267,10 @@ class OctNodeStream(object):
         'nparts':np.sum(nparts),
         'children':[],
         'radius':radius,
-        'center_of_mass':com
+        'center_of_mass':com,
+        'weight_index':None,
+        'nchunks'
+        <field_names>
         }
         """
         node_dict = {}
@@ -340,6 +344,103 @@ class OctreeStream(object):
 
     def __repr__(self):
         return f"OctreeStream({len(self.expand_nodes)}/{len(self.root['nodes'])})"
+    
+    def get_work_units(self,nthreads=1):
+
+        work_units = []
+
+        ## first find those nodes which need to be refined
+        expand_nodes = [node for node in nodes.values() if 'files' in node.keys() and node['nparts'] > self.min_to_refine]
+
+        ## determine how many particles that represents
+        nparts_tot = np.sum([node['nparts'] for node in expand_nodes])
+
+
+        ## need to split that many particles among nthreads workers
+        nparts_per_worker = [len(arr) for arr in np.array_split(np.arange(nparts_tot),nthreads)]
+        this_node = None
+        for nparts_this_worker in nparts_per_worker:
+            work_unit = []
+            nremain = nparts_this_worker
+            while nremain > 0:
+                if this_node is None: this_node = expand_nodes.pop(0)
+                this_node['split_index'] = 0
+
+                this_node_nparts = this_node['nparts']
+
+                ## add the whole node as a work unit
+                if this_node_nparts <= nremain: 
+                    work_unit += [this_node]
+                    this_node = None
+                    nremain -= this_node_nparts
+                ## we only need part of this node to complete this worker's task queue
+                else:
+                    ## make a node that goes into the work unit
+                    copy_node = {**this_node}
+                    copy_node['nparts'] = nremain
+
+                    ## increment the split index for the copy of
+                    ##  the node with the remaining particles
+                    this_node['split_index'] +=1 
+
+                    min_chunk = 1e10
+                    ## find the earliest remaining chunk
+                    for fname in copy_node['files']:
+                        this_chunk = fname[0].split('.')[-2]
+                        if  this_chunk < min_chunk: min_chunk = this_chunk
+
+                    assigned = 0
+                    first_split_files = []
+                    ichunk = min_chunk
+                    while assigned < nremain:
+                        popped = 0
+                        this_chunk_files = []
+                        for i in range(len(this_node['files'])):
+                            fname = this_node['files'][i-popped]
+                            ## ignore any chunks that aren't the one we're looking for
+                            if int(fname[0].split('.')[-2]) != ichunk: continue
+
+                            this_chunk_files += [copy.copy(this_node['files'][i-popped])]
+                            n_this_chunk = fname[2]/4
+
+                            ## we can add the whole chunk file
+                            if n_this_chunk <= nremain: 
+                                ## get rid of the chunk file in the
+                                ##  node list
+                                this_node['files'].pop(i-popped)
+                                popped+=1
+                            ## need to take *only a portion* of this chunk file.
+                            else: 
+                                ## update the most recent list entry
+                                ##  with the bytesize it should read
+                                this_chunk_files[-1] = (
+                                    this_chunk_files[-1][0],
+                                    this_chunk_files[-1][1],
+                                    4*nremain
+                                )
+
+                                ## update the remaining files to reflect that the first part of the byte
+                                ##  string is missing
+                                this_node['files'][i-popped] = (
+                                    this_chunk_files[-1][0],
+                                    this_chunk_files[-1][1]+nremain*4,
+                                    4*(n_this_chunk-nremain)
+                                )
+
+                        first_split_files += [this_chunk_files]
+                        assigned += min(n_this_chunk,nremain)
+                        ichunk+=1
+
+                    copy_node['files'] = first_split_files
+
+                    work_unit +=[copy_node]
+                    nremain = 0
+
+            work_units += [work_unit]
+
+        self.expand_nodes = work_units
+
+        return work_units
 
     def __init__(self,pathh,min_to_refine=1e6):
         """ pathh is path to data that has already been saved to .ffraw format and has an acompanying octree.json """
@@ -360,7 +461,7 @@ class OctreeStream(object):
             ['rgba_r','rgba_g','rgba_b','rgba_a']*self.root['has_color'] + 
             self.root['field_names'])
 
-        self.expand_nodes = [node for node in nodes.values() if 'files' in node.keys() and node['nparts'] > self.min_to_refine]
+        self.get_work_units()
         print([expand_node['name'] for expand_node in self.expand_nodes],'need to be refined')
 
     def refine(self,use_mps=False):
@@ -382,7 +483,7 @@ class OctreeStream(object):
         write_to_json(self.root,os.path.join(self.pathh,'octree.json'))
 
         ## update nodes which need to be refined
-        self.expand_nodes = [node for node in self.root['nodes'].values() if 'files' in node.keys() and node['nparts'] > self.min_to_refine]
+        self.get_work_units()
         print([expand_node['name'] for expand_node in self.expand_nodes],'still need to be refined')
     
     def register_child(self,new_child):
