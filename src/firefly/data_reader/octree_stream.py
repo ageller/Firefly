@@ -202,7 +202,7 @@ class OctNodeStream(object):
         if not os.path.isdir(this_dir): os.makedirs(this_dir)
 
         global field_names
-        namestr = f'{self.name}_' if self.name != '' else ''
+        namestr = f'{self.name}-' if self.name != '' else 'root-'
 
         ## determine how many files we'll need to split this dataset into
         nsub_files = int(4*self.buffer_size//bytes_per_file + (4*self.buffer_size != bytes_per_file))
@@ -238,8 +238,9 @@ class OctNodeStream(object):
         files = []
         count_offset = 0
         for index,count in enumerate(counts):
+            splitstr = f'{index:02d}-'
             for prefix,buffer in zip(prefixes,buffers):
-                fname = os.path.join(top_level_directory,f"{namestr}_{split_index}_{prefix}.{index}.ffraw")
+                fname = os.path.join(top_level_directory,f"{namestr}{splitstr}{prefix}.{index}.ffraw")
                 RawBinaryWriter(fname,buffer[count_offset:count_offset+count]).write()
 
                 ## append to file list
@@ -384,6 +385,7 @@ class OctreeStream(object):
                     ## make a node that goes into the work unit
                     copy_node = {**this_node}
                     copy_node['nparts'] = nremain
+                    this_node['nparts'] = this_node_nparts - nremain
 
                     ## increment the split index for the copy of
                     ##  the node with the remaining particles
@@ -478,7 +480,8 @@ class OctreeStream(object):
             itertools.repeat(self.root['weight_index'])
         )
 
-        if nthreads <=1: new_dicts = [refineNode(*args) for args in argss]
+        if nthreads <=1: 
+            new_dicts = [refineNode(*args) for args in argss]
         else: 
             with multiprocessing.Pool(nthreads) as my_pool: new_dicts = my_pool.starmap(refineNode,argss)
 
@@ -518,6 +521,7 @@ class OctreeStream(object):
     
     def register_child(self,new_child):
 
+        weight_index = self.root['weight_index']
         child_name = new_child['name']
         ## easy, we've never seen this child before
         if child_name not in self.root['nodes']: self.root['nodes'][child_name] = new_child
@@ -529,9 +533,9 @@ class OctreeStream(object):
             field_names = self.root['field_names']
             
             ## update the accumulated values
-            if self.root['weight_index'] is not None:
-                old_weight = old_child[field_names[self.root['weight_index']]]
-                new_weight = new_child[field_names[self.root['weight_index']]]
+            if weight_index is not None:
+                old_weight = old_child[field_names[weight_index]]
+                new_weight = new_child[field_names[weight_index]]
             else: 
                 old_weight = old_child['nparts']
                 new_weight = new_child['nparts']
@@ -560,8 +564,9 @@ class OctreeStream(object):
 
             ## add the number of particles
             old_child['nparts']+=new_child['nparts']
-            ## append the files
-            old_child['files']+=new_child['files']   
+
+            ## child nodes don't have files (yet)
+            #old_child['files']+=new_child['files']   
 
             ## shouldn't need to do this b.c. aliasing
             ##  but you know one can never be too careful
@@ -576,7 +581,7 @@ class OctreeStream(object):
 def refineNode(node_dicts,target_directory,weight_index):
 
     nodes = {}
-    global field_names
+    global field_names,prefixes
     return_value = []
     for node_dict in node_dicts:
         print('refining:',node_dict['name'])
@@ -632,11 +637,14 @@ def refineNode(node_dicts,target_directory,weight_index):
 
 
 def loadNodeFromDisk(files,nparts):
+    global prefixes
     indices = []
     for fname in files: 
         split = os.path.basename(fname[0]).split('.')
         if len(split) != 3: raise IOError("bad .ffraw file name, must be field.<i>.ffraw")
-        if split[0] == prefixes[0] and split[2] == 'ffraw': indices += [int(split[1])]
+        if split[-1] == 'ffraw': 
+            indices += [int(split[-2])]
+    indices = np.unique(indices)
     
     non_field_names = ['x','y','z'] + ['vx','vy','vz'] + ['rgba_r','rgba_g','rgba_b','rgba_a'] 
 
@@ -666,9 +674,10 @@ def loadNodeFromDisk(files,nparts):
             buffers):
             for fname in files:
                 fname,byte_offset,byte_size = fname
-                count = int(byte_size/4) - 1 ## -1 because the header is integer=nparts
+                count = int(byte_size/4) ## -1 because the header is integer=nparts
                 short_fname = os.path.basename(fname)
-                if short_fname == f"{prefix}.{index}.ffraw":
+                match = f"{prefix}.{index}.ffraw"
+                if short_fname[-len(match):] == match:
                     RawBinaryWriter(fname,buffer[count_offset:count_offset+count]).read(byte_offset,count)
         count_offset+=count
     
