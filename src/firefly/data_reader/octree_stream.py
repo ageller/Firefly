@@ -45,8 +45,6 @@ class OctNodeStream(object):
         self.buffer_size:int = 0
 
         self.children = []
-
-        self.extra_dict = kwargs
  
     def set_buffers_from_dict(
         self,
@@ -238,7 +236,6 @@ class OctNodeStream(object):
         files = []
         count_offset = 0
         for index,count in enumerate(counts):
-            splitstr = f'{index:02d}-'
             for prefix,buffer in zip(prefixes,buffers):
                 fname = os.path.join(top_level_directory,f"{namestr}{splitstr}{prefix}.{index}.ffraw")
                 RawBinaryWriter(fname,buffer[count_offset:count_offset+count]).write()
@@ -305,6 +302,8 @@ class OctNodeStream(object):
         if 'rgba_r' in prefixes: rgba_color = self.rgba_color/weight
         else: rgba_color = None
         node_dict['rgba_color'] = rgba_color
+
+        node_dict['buffer_size'] = self.buffer_size
 
         return node_dict
 
@@ -507,28 +506,26 @@ class OctreeStream(object):
             itertools.repeat(self.min_to_refine)
         )
 
+        if np.size(self.work_units) == 0: raise IndexError("No work to be done! Celebrate!")
+
         if nthreads <=1: 
             new_dicts = [refineNode(*args) for args in argss]
         else: 
             with multiprocessing.Pool(nthreads) as my_pool: new_dicts = my_pool.starmap(refineNode,argss)
 
 
+        bad_files = set([])
         for work_unit,children in zip(self.work_units,new_dicts):
             
             for old_node in work_unit:
-                ## remove the old node which points to files, it will be 
-                ##  replaced below by children[0]
-                ## NOTE this should be fine even if I prune nodes back into
-                ##  the parent old_node because it will be identifying nodes
-                ##  which don't have accumulators a.k.a. which have never been
-                ##  refined.
+                ## remove the old nodes which points to files, it will be 
+                ##  replaced below by children[:len(work_unit)]
                 if ('processed' not in self.root['nodes'][old_node['name']].keys()
                     or not self.root['nodes'][old_node['name']]['processed']):
-                    bad_node = self.root['nodes'].pop(old_node['name'])
-                    print('replacing:', f"({bad_node['name']},{len(bad_node['files']):d})")
 
-                    ## delete the old files now that nothing is pointing to them
-                    for fname in bad_node['files']: os.remove(fname[0])
+                    self.root['nodes'].pop(old_node['name'])
+                    this_bad_files = set([fname[0] for fname in old_node['files']])
+                    bad_files = bad_files.union(this_bad_files)
                 ## else: the old_node was split between multiple workers
                 ##  was already deleted, and was added back in 
                 ##  by self.register_child below. 
@@ -537,7 +534,16 @@ class OctreeStream(object):
             ##  and each of its children.
             for child in children: self.register_child(child)
 
+        ## delete any files that are no longer being pointed to.
+        good_files = [[fname[0] for fname in node['files']] 
+            for node in self.root['nodes'].values() if 'files' in node.keys() and node['buffer_size']>0]
+        good_files = set(np.hstack(good_files))
+        bad_files -= good_files
+        for bad_file in bad_files:
+            if os.path.isfile(bad_file): os.remove(bad_file)
+        print('deleting',len(bad_files),'files')
 
+        ## write out the new octree.json
         write_to_json(self.root,os.path.join(self.pathh,'octree.json'))
 
     def print_work(self):
@@ -600,19 +606,22 @@ class OctreeStream(object):
             ##  but you know one can never be too careful
             self.root['nodes'][child_name] = old_child
 
-    def full_refine(self):
+    def full_refine(self,nthreads):
 
         while len(self.work_units) >0:
             print(self)
-            self.refine()
+            try: self.refine(nthreads)
+            except IndexError as e:
+                print(e.args[0])
+                break
 
-def refineNode(node_dicts,target_directory,weight_index):
+def refineNode(node_dicts,target_directory,weight_index,min_to_refine):
 
     nodes = {}
     global field_names,prefixes
     return_value = []
     for node_dict in node_dicts:
-        print('refining:',node_dict['name'])
+        print(f"refining: {node_dict['name']}")
         ## load the node from all the split binary files
         ##  note that fieldss will have 6 extra columns for CoM calculation
         coordinates,velocities,rgba_colors,fieldss,field_names = loadNodeFromDisk(
@@ -639,7 +648,7 @@ def refineNode(node_dicts,target_directory,weight_index):
             node_dict['name'])
     
         end = coordinates.shape[0]
-        print('building...')
+        #print('building...')
         for i,(point,fields) in enumerate(zip(coordinates,fieldss)):
             #if not (i % 10000): print("%.2f"%(i/end*100)+"%",end='\t') 
             this_node.sort_point_into_child(
@@ -649,6 +658,8 @@ def refineNode(node_dicts,target_directory,weight_index):
                 velocities[i] if velocities is not None else None,
                 rgba_colors[i] if rgba_colors is not None else None)
             this_node.nparts+=1
+        #print('done!')
+
         ## okay we made the children but... not all will
         ##  survive. the small ones will be merged back
         ##  into the parent
