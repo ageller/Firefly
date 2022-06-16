@@ -174,12 +174,13 @@ class RawBinaryWriter(BinaryWriter):
         self.nparts = data.shape[0]
         self.shuffle_indices = None
     
-    def read(self):
+    def read(self,byte_offset=0,count=None):
 
         with open(self.fname,'rb') as handle:
             binary_string = handle.read()
             nparts = int.from_bytes(binary_string[:4],byteorder='little', signed=False)
-            arr = np.frombuffer(binary_string[4:], dtype=np.float32, count=nparts)
+            if count is None: count = nparts
+            arr = np.frombuffer(binary_string[4+byte_offset:], dtype=np.float32, count=int(count))
         self.data[...] = arr
         
 class OctBinaryWriter(BinaryWriter):
