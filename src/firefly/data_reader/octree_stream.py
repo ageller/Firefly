@@ -13,7 +13,7 @@ from .binary_writer import RawBinaryWriter
 
 class OctNodeStream(object):
     def __repr__(self):
-        return f"OctNodeStream({self.name}):{self.nparts:d} points - {self.nfields:d} fields"
+        return f"OctNodeStream({self.name}):{self.buffer_size}/{self.nparts:d} points - {self.nfields-6:d} fields"
         
     def __init__(
         self,
@@ -21,8 +21,7 @@ class OctNodeStream(object):
         width,
         nfields,
         name:str='',
-        weight_index=None,
-        **kwargs):
+        weight_index=None):
 
         self.center = center
         self.width = width
@@ -203,6 +202,7 @@ class OctNodeStream(object):
 
         global field_names
         namestr = f'{self.name}-' if self.name != '' else 'root-'
+        splitstr = f'{split_index:02d}-'
 
         ## determine how many files we'll need to split this dataset into
         nsub_files = int(4*self.buffer_size//bytes_per_file + (4*self.buffer_size != bytes_per_file))
@@ -339,6 +339,30 @@ class OctNodeStream(object):
 
         child.accumulate(point,fields,velocity,rgba_color)
 
+    def prune(self,nodes,min_to_refine):
+        sort_indices = np.argsort([nodes[child_name].buffer_size for child_name in self.children])
+        sort_children = np.array(self.children)[sort_indices]
+        for child_name in sort_children:
+            child = nodes[child_name]
+            ## /8 b.c. then even if all 8 children are merged then
+            ##  you would still not end up above min_to_refine
+            ## TODO: if node is split across multiple threads we could 
+            ##  end up messing this up
+            if (child.buffer_size + self.buffer_size) < min_to_refine:
+                print(f'merging {child} into {self}')
+                self.buffer_coordss += child.buffer_coordss
+                self.buffer_velss += child.buffer_velss
+                self.buffer_rgba_colorss += child.buffer_rgba_colorss
+                self.buffer_fieldss += child.buffer_fieldss
+                self.buffer_size += child.buffer_size
+
+                ## remove you from my will
+                self.children.pop(self.children.index(child_name))
+                ## let the garbage collector come for you
+                nodes.pop(child_name) 
+            else: break ## no more room to consume children, the rest get to live on
+
+
 class OctreeStream(object):
 
     def __repr__(self):
@@ -351,11 +375,13 @@ class OctreeStream(object):
         nodes = copy.deepcopy(self.root['nodes'])
 
         ## first find those nodes which need to be refined
-        expand_nodes = [node for node in nodes.values() if 'files' in node.keys() and node['nparts'] > self.min_to_refine]
+        expand_nodes = [node for node in nodes.values() if
+            'files' in node.keys() and 
+            len(node['files']) > 0 and 
+            node['buffer_size'] > self.min_to_refine]
 
         ## determine how many particles that represents
-        nparts_tot = np.sum([node['nparts'] for node in expand_nodes])
-
+        nparts_tot = np.sum([node['buffer_size'] for node in expand_nodes])
 
         ## need to split that many particles among nthreads workers
         nparts_per_worker = [len(arr) for arr in np.array_split(np.arange(nparts_tot),nthreads)]
@@ -477,7 +503,8 @@ class OctreeStream(object):
         argss = zip(
             self.get_work_units(nthreads),
             itertools.repeat(self.pathh),
-            itertools.repeat(self.root['weight_index'])
+            itertools.repeat(self.root['weight_index']),
+            itertools.repeat(self.min_to_refine)
         )
 
         if nthreads <=1: 
@@ -564,6 +591,7 @@ class OctreeStream(object):
 
             ## add the number of particles
             old_child['nparts']+=new_child['nparts']
+            old_child['buffer_size']+=new_child['buffer_size']
 
             ## child nodes don't have files (yet)
             #old_child['files']+=new_child['files']   
@@ -591,7 +619,7 @@ def refineNode(node_dicts,target_directory,weight_index):
             ## TODO should have a loop here that only passes the number of particles
             ##  we can hold in memory
             node_dict['files'],
-            node_dict['nparts'])
+            node_dict['buffer_size'])
         
         ## for calculating the center of mass and 1 sigma extent of the node
         if weight_index is not None: weight = fieldss[:,weight_index]
@@ -621,10 +649,17 @@ def refineNode(node_dicts,target_directory,weight_index):
                 velocities[i] if velocities is not None else None,
                 rgba_colors[i] if rgba_colors is not None else None)
             this_node.nparts+=1
-        print('done!')
+        ## okay we made the children but... not all will
+        ##  survive. the small ones will be merged back
+        ##  into the parent
+        this_node.prune(nodes,min_to_refine)
 
         ## format accumulated values into a dictionary
-        this_node_dict = this_node.format_node_dictionary()
+        if this_node.buffer_size == 0:
+            this_node_dict = this_node.format_node_dictionary()
+        else:
+            this_node_dict = this_node.write(target_directory,node_dict['split_index'])
+
 
         this_node_dict['processed'] = True
         return_value += [this_node_dict]
