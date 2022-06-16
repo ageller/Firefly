@@ -438,7 +438,7 @@ class OctreeStream(object):
 
             work_units += [work_unit]
 
-        self.expand_nodes = work_units
+        self.print_work()
 
         return work_units
 
@@ -484,7 +484,13 @@ class OctreeStream(object):
 
         ## update nodes which need to be refined
         self.get_work_units()
-        print([expand_node['name'] for expand_node in self.expand_nodes],'still need to be refined')
+    
+
+    def print_work(self):
+        namess = [[expand_node['name'] for expand_node in expand_nodes] for 
+            expand_nodes in in self.work_units]
+
+        print(set(np.flatten(namess)),'still need to be refined')
     
     def register_child(self,new_child):
 
