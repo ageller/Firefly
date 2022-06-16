@@ -1,6 +1,8 @@
 import os
 import itertools
 import copy
+import multiprocessing
+import itertools
 
 import numpy as np
 
@@ -431,7 +433,7 @@ class OctreeStream(object):
                                     4*(n_this_chunk-nremain)
                                 )
 
-                        first_split_files += [this_chunk_files]
+                        first_split_files += this_chunk_files
                         assigned += min(n_this_chunk,nremain)
                         ichunk+=1
 
@@ -468,11 +470,18 @@ class OctreeStream(object):
 
         self.get_work_units()
 
-    def refine(self,use_mps=False):
+    def refine(self,nthreads=1):
 
-        if not use_mps:
-            new_dicts = [refineNode(node,self.pathh,self.root['weight_index']) for node in self.work_units]
-        else: raise NotImplementedError()
+        argss = zip(
+            self.get_work_units(nthreads),
+            itertools.repeat(self.pathh),
+            itertools.repeat(self.root['weight_index'])
+        )
+
+        if nthreads <=1: new_dicts = [refineNode(*args) for args in argss]
+        else: 
+            with multiprocessing.Pool(nthreads) as my_pool: new_dicts = my_pool.starmap(refineNode,argss)
+
 
         for work_unit,children in zip(self.work_units,new_dicts):
             
@@ -500,10 +509,6 @@ class OctreeStream(object):
 
 
         write_to_json(self.root,os.path.join(self.pathh,'octree.json'))
-
-        ## update nodes which need to be refined
-        self.get_work_units()
-    
 
     def print_work(self):
         namess = [[expand_node['name'] for expand_node in expand_nodes] for 
@@ -572,6 +577,7 @@ def refineNode(node_dicts,target_directory,weight_index):
 
     nodes = {}
     global field_names
+    return_value = []
     for node_dict in node_dicts:
         print('refining:',node_dict['name'])
         ## load the node from all the split binary files
@@ -617,8 +623,12 @@ def refineNode(node_dicts,target_directory,weight_index):
 
         this_node_dict['processed'] = True
         return_value += [this_node_dict]
+        return_value += [
+            ## NOTE `this_node_dict` does not have a split index in it...
+            nodes[child_name].write(target_directory,node_dict['split_index']) for 
+            child_name in this_node_dict['children']]
    
-    return return_value + [child.write(target_directory) for child in nodes.values()]
+    return return_value
 
 
 def loadNodeFromDisk(files,nparts):
