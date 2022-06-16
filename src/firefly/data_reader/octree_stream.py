@@ -194,7 +194,7 @@ class OctNodeStream(object):
 
         self.fields += fields
                 
-    def write(self,top_level_directory,bytes_per_file=4e7):
+    def write(self,top_level_directory,split_index=0,bytes_per_file=4e7):
 
         this_dir = os.path.join(top_level_directory)
         if not os.path.isdir(this_dir): os.makedirs(this_dir)
@@ -204,11 +204,7 @@ class OctNodeStream(object):
 
         ## determine how many files we'll need to split this dataset into
         nsub_files = int(4*self.buffer_size//bytes_per_file + (4*self.buffer_size != bytes_per_file))
-        try: counts = [arr.shape[0] for arr in np.array_split(np.arange(self.buffer_size),nsub_files)]
-        except: 
-            print(self)
-            import pdb; pdb.set_trace()
-            raise
+        counts = [arr.shape[0] for arr in np.array_split(np.arange(self.buffer_size),nsub_files)]
 
         ## ------ gather buffer arrays to be written to disk
         coordss = np.array(self.buffer_coordss).reshape(self.buffer_size,3)
@@ -241,7 +237,7 @@ class OctNodeStream(object):
         count_offset = 0
         for index,count in enumerate(counts):
             for prefix,buffer in zip(prefixes,buffers):
-                fname = os.path.join(top_level_directory,f"{namestr}{prefix}.{index}.ffraw")
+                fname = os.path.join(top_level_directory,f"{namestr}_{split_index}_{prefix}.{index}.ffraw")
                 RawBinaryWriter(fname,buffer[count_offset:count_offset+count]).write()
 
                 ## append to file list
