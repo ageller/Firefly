@@ -353,15 +353,24 @@ class OctreeStream(object):
             ['rgba_r','rgba_g','rgba_b','rgba_a']*root['has_color'] + 
             root['field_names'])
 
+        expand_nodes = [node for node in nodes.values() if 'files' in node.keys()]
+
         if not use_mps:
-            new_dicts = [refineNode(node,pathh,root['weight_index']) for node in nodes.values()]
+            new_dicts = [refineNode(node,pathh,root['weight_index']) for node in expand_nodes]
         else: raise NotImplementedError()
 
-        print(new_dicts)
-        import pdb; pdb.set_trace()
-            
+        for old_node,new_nodes in zip(list(nodes.values()),new_dicts):
+            print('replacing:',old_node['name'])
+            new_node,children = new_nodes[0],new_nodes[1:]
+
+            root['nodes'][old_node['name']] = new_node
+            for child in children: root['nodes'][child['name']] = child
+
+        write_to_json(root,os.path.join(pathh,'octree.json'))
 
 def refineNode(node_dict,target_directory,weight_index):
+
+    print('refining:',node_dict['name'])
     
     global field_names
     ## load the node from all the split binary files
@@ -391,8 +400,9 @@ def refineNode(node_dict,target_directory,weight_index):
     
     nodes = {}
     end = coordinates.shape[0]
+    print('building...')
     for i,(point,fields) in enumerate(zip(coordinates,fieldss)):
-        if not (i % 10000): print("%.2f"%(i/end*100)+"%",end='\t') 
+        #if not (i % 10000): print("%.2f"%(i/end*100)+"%",end='\t') 
         this_node.sort_point_into_child(
             nodes,
             point,
