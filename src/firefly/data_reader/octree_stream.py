@@ -478,25 +478,25 @@ class OctreeStream(object):
             new_dicts = [refineNode(node,self.pathh,self.root['weight_index']) for node in self.work_units]
         else: raise NotImplementedError()
 
-        for old_node,children in zip(self.work_units,new_dicts):
-            print(
-                'replacing:', f"({old_node['name']},{len(old_node['files']):d})", 
-                'with', f"({children[0]['name']},{len(children[0]['files']):d})")
+        for work_unit,children in zip(self.work_units,new_dicts):
+            
+            for old_node in work_unit:
+                ## remove the old node which points to files, it will be 
+                ##  replaced below by children[0]
+                ## NOTE this should be fine even if I prune nodes back into
+                ##  the parent old_node because it will be identifying nodes
+                ##  which don't have accumulators a.k.a. which have never been
+                ##  refined.
+                if ('processed' not in self.root['nodes'][old_node['name']].keys()
+                    or not self.root['nodes'][old_node['name']]['processed']):
+                    bad_node = self.root['nodes'].pop(old_node['name'])
+                    print('replacing:', f"({bad_node['name']},{len(bad_node['files']):d})")
 
-            ## remove the old node which points to files, it will be 
-            ##  replaced below by children[0]
-            ## NOTE this should be fine even if I prune nodes back into
-            ##  the parent old_node because it will be identifying nodes
-            ##  which don't have accumulators a.k.a. which have never been
-            ##  refined.
-            if ('processed' not in self.root['nodes'][old_node['name']].keys()
-                or not self.root['nodes'][old_node['name']]['processed']):
-                bad_node = self.root['nodes'].pop(old_node['name'])
-                ## delete the old files now that nothing is pointing to them
-                for fname in bad_node['files']: os.remove(fname[0])
-            ## else: the old_node was split between multiple workers
-            ##  was already deleted, and was added back in 
-            ##  by self.register_child below. 
+                    ## delete the old files now that nothing is pointing to them
+                    for fname in bad_node['files']: os.remove(fname[0])
+                ## else: the old_node was split between multiple workers
+                ##  was already deleted, and was added back in 
+                ##  by self.register_child below. 
 
             ## register the old_node (children[0])
             ##  and each of its children.
@@ -572,56 +572,57 @@ class OctreeStream(object):
             print(self)
             self.refine()
 
-def refineNode(node_dict,target_directory,weight_index):
+def refineNode(node_dicts,target_directory,weight_index):
 
-    print('refining:',node_dict['name'])
-    
-    global field_names
-    ## load the node from all the split binary files
-    ##  note that fieldss will have 6 extra columns for CoM calculation
-    coordinates,velocities,rgba_colors,fieldss,field_names = loadNodeFromDisk(
-        ## TODO should have a loop here that only passes the number of particles
-        ##  we can hold in memory
-        node_dict['files'],
-        node_dict['nparts'])
-    
-    ## for calculating the center of mass and 1 sigma extent of the node
-    if weight_index is not None: weight = fieldss[:,weight_index]
-    else: weight = 1
-
-    for i in range(3):
-        fieldss[:,-6+i] = coordinates[:,i]
-        fieldss[:,-3+i] = (coordinates[:,i]**2)
-    
-    if weight_index is not None: raise NotImplementedError(
-        "need to multiply fields, velocities, and rgba_colors by weight")
-
-    this_node = OctNodeStream(
-        node_dict['center'],
-        node_dict['width'],
-        len(field_names)+6,
-        node_dict['name'])
-    
     nodes = {}
-    end = coordinates.shape[0]
-    print('building...')
-    for i,(point,fields) in enumerate(zip(coordinates,fieldss)):
-        #if not (i % 10000): print("%.2f"%(i/end*100)+"%",end='\t') 
-        this_node.sort_point_into_child(
-            nodes,
-            point,
-            fields,
-            velocities[i] if velocities is not None else None,
-            rgba_colors[i] if rgba_colors is not None else None)
-        this_node.nparts+=1
-    print('done!')
+    global field_names
+    for node_dict in node_dicts:
+        print('refining:',node_dict['name'])
+        ## load the node from all the split binary files
+        ##  note that fieldss will have 6 extra columns for CoM calculation
+        coordinates,velocities,rgba_colors,fieldss,field_names = loadNodeFromDisk(
+            ## TODO should have a loop here that only passes the number of particles
+            ##  we can hold in memory
+            node_dict['files'],
+            node_dict['nparts'])
+        
+        ## for calculating the center of mass and 1 sigma extent of the node
+        if weight_index is not None: weight = fieldss[:,weight_index]
+        else: weight = 1
 
-    ## format accumulated values into a dictionary
-    this_node_dict = this_node.format_node_dictionary()
+        for i in range(3):
+            fieldss[:,-6+i] = coordinates[:,i]
+            fieldss[:,-3+i] = (coordinates[:,i]**2)
+        
+        if weight_index is not None: raise NotImplementedError(
+            "need to multiply fields, velocities, and rgba_colors by weight")
 
-    this_node_dict['processed'] = True
+        this_node = OctNodeStream(
+            node_dict['center'],
+            node_dict['width'],
+            len(field_names)+6,
+            node_dict['name'])
+    
+        end = coordinates.shape[0]
+        print('building...')
+        for i,(point,fields) in enumerate(zip(coordinates,fieldss)):
+            #if not (i % 10000): print("%.2f"%(i/end*100)+"%",end='\t') 
+            this_node.sort_point_into_child(
+                nodes,
+                point,
+                fields,
+                velocities[i] if velocities is not None else None,
+                rgba_colors[i] if rgba_colors is not None else None)
+            this_node.nparts+=1
+        print('done!')
+
+        ## format accumulated values into a dictionary
+        this_node_dict = this_node.format_node_dictionary()
+
+        this_node_dict['processed'] = True
+        return_value += [this_node_dict]
    
-    return [this_node_dict]+[child.write(target_directory,1e6*4) for child in nodes.values()]
+    return return_value + [child.write(target_directory) for child in nodes.values()]
 
 
 def loadNodeFromDisk(files,nparts):
