@@ -507,26 +507,26 @@ class OctreeStream(object):
 
     def print_work(self):
         namess = [[expand_node['name'] for expand_node in expand_nodes] for 
-            expand_nodes in in self.work_units]
+            expand_nodes in self.work_units]
 
-        print(set(np.flatten(namess)),'still need to be refined')
+        print(set(np.hstack(namess)),'still need to be refined')
     
     def register_child(self,new_child):
 
         child_name = new_child['name']
         ## easy, we've never seen this child before
-        if child_name not in nodes: self.root['nodes'][child_name] = new_child
+        if child_name not in self.root['nodes']: self.root['nodes'][child_name] = new_child
         ## annoying, need to append...
         else:
             nodes = self.root['nodes']
             old_child = nodes[child_name]
 
-            field_names = nodes['field_names']
+            field_names = self.root['field_names']
             
             ## update the accumulated values
-            if old_child['weight_index'] is not None:
-                old_weight = old_child[field_names[old_child['weight_index']]]
-                new_weight = new_child[field_names[new_child['weight_index']]]
+            if self.root['weight_index'] is not None:
+                old_weight = old_child[field_names[self.root['weight_index']]]
+                new_weight = new_child[field_names[self.root['weight_index']]]
             else: 
                 old_weight = old_child['nparts']
                 new_weight = new_child['nparts']
