@@ -343,11 +343,13 @@ class OctNodeStream(object):
 class OctreeStream(object):
 
     def __repr__(self):
-        return f"OctreeStream({len(self.expand_nodes)}/{len(self.root['nodes'])})"
+        return f"OctreeStream({len(self.work_units)}/{len(self.root['nodes'])})"
     
     def get_work_units(self,nthreads=1):
 
         work_units = []
+
+        nodes = copy.deepcopy(self.root['nodes'])
 
         ## first find those nodes which need to be refined
         expand_nodes = [node for node in nodes.values() if 'files' in node.keys() and node['nparts'] > self.min_to_refine]
@@ -364,7 +366,13 @@ class OctreeStream(object):
             nremain = nparts_this_worker
             while nremain > 0:
                 if this_node is None: this_node = expand_nodes.pop(0)
-                this_node['split_index'] = 0
+
+                ## use this to differentiate between nodes that should
+                ##  be deleted and those that should not
+                this_node['processed'] = False
+
+                if 'split_index' not in this_node.keys():
+                    this_node['split_index'] = 0
 
                 this_node_nparts = this_node['nparts']
 
@@ -386,7 +394,7 @@ class OctreeStream(object):
                     min_chunk = 1e10
                     ## find the earliest remaining chunk
                     for fname in copy_node['files']:
-                        this_chunk = fname[0].split('.')[-2]
+                        this_chunk = int(fname[0].split('.')[-2])
                         if  this_chunk < min_chunk: min_chunk = this_chunk
 
                     assigned = 0
@@ -438,6 +446,7 @@ class OctreeStream(object):
 
             work_units += [work_unit]
 
+        self.work_units = work_units
         self.print_work()
 
         return work_units
@@ -462,23 +471,37 @@ class OctreeStream(object):
             self.root['field_names'])
 
         self.get_work_units()
-        print([expand_node['name'] for expand_node in self.expand_nodes],'need to be refined')
 
     def refine(self,use_mps=False):
 
         if not use_mps:
-            new_dicts = [refineNode(node,self.pathh,self.root['weight_index']) for node in self.expand_nodes]
+            new_dicts = [refineNode(node,self.pathh,self.root['weight_index']) for node in self.work_units]
         else: raise NotImplementedError()
 
-        for old_node,new_nodes in zip(self.expand_nodes,new_dicts):
-            print('replacing:',old_node['name'])
-            new_node,children = new_nodes[0],new_nodes[1:]
+        for old_node,children in zip(self.work_units,new_dicts):
+            print(
+                'replacing:', f"({old_node['name']},{len(old_node['files']):d})", 
+                'with', f"({children[0]['name']},{len(children[0]['files']):d})")
 
-            self.root['nodes'][old_node['name']] = new_node
+            ## remove the old node which points to files, it will be 
+            ##  replaced below by children[0]
+            ## NOTE this should be fine even if I prune nodes back into
+            ##  the parent old_node because it will be identifying nodes
+            ##  which don't have accumulators a.k.a. which have never been
+            ##  refined.
+            if ('processed' not in self.root['nodes'][old_node['name']].keys()
+                or not self.root['nodes'][old_node['name']]['processed']):
+                bad_node = self.root['nodes'].pop(old_node['name'])
+                ## delete the old files now that nothing is pointing to them
+                for fname in bad_node['files']: os.remove(fname[0])
+            ## else: the old_node was split between multiple workers
+            ##  was already deleted, and was added back in 
+            ##  by self.register_child below. 
+
+            ## register the old_node (children[0])
+            ##  and each of its children.
             for child in children: self.register_child(child)
 
-            ## delete the old files now that nothing is pointing to them
-            for fname in old_node['files']: os.remove(fname[0])
 
         write_to_json(self.root,os.path.join(self.pathh,'octree.json'))
 
@@ -545,7 +568,7 @@ class OctreeStream(object):
 
     def full_refine(self):
 
-        while len(self.expand_nodes) >0:
+        while len(self.work_units) >0:
             print(self)
             self.refine()
 
@@ -595,6 +618,8 @@ def refineNode(node_dict,target_directory,weight_index):
 
     ## format accumulated values into a dictionary
     this_node_dict = this_node.format_node_dictionary()
+
+    this_node_dict['processed'] = True
    
     return [this_node_dict]+[child.write(target_directory,1e6*4) for child in nodes.values()]
 
