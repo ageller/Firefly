@@ -52,11 +52,6 @@ class OctNodeStream(object):
             ['rgba_r','rgba_g','rgba_b','rgba_a']*has_colors +
             field_names)
 
-        ## initialize com accumulators
-        self.velocity = np.sum(self.buffer_velss,axis=0)
-        self.rgba_color = np.sum(self.buffer_colorss,axis=0)
-        self.fields = np.sum(self.buffer_fieldss,axis=0)
-
         self.children = []
         self.child_names = []
  
@@ -71,9 +66,6 @@ class OctNodeStream(object):
         velss = None
         rgba_colorss = None
 
-        has_velocities = False
-        has_colors = False
-
         nparts = data_dict['x'].shape[0]
         coordss = np.zeros((nparts,3))
         for i,axis in enumerate(['x','y','z']):
@@ -82,21 +74,23 @@ class OctNodeStream(object):
             if key in keys: 
                 if velss is None: 
                     velss = np.zeros((nparts,3))
-                    has_velocities = True
+                    self.has_velocities = True
                 velss[:,i] = data_dict.pop(key)
 
         for i,color in enumerate(['r','g','b','a']):
             key = f'rgba_{color}'
             if key in keys: 
                 if rgba_colorss is None:
-                    has_colors = True
+                    self.has_colors = True
                     rgba_colorss = np.zeros((nparts,4))
                 rgba_colorss[:,i] = data_dict.pop(key)
 
+        ## the remaining keys are the fields
+        self.field_names = list(data_dict.keys())
+        self.nfields = len(self.field_names)
         ## determine field names from remaining keys
-        field_names = list(data_dict.keys())
-        fieldss = np.zeros((nparts,len(field_names)))
-        for i,field_name in enumerate(field_names):
+        fieldss = np.zeros((nparts,self.nfields))
+        for i,field_name in enumerate(self.field_names):
             fieldss[:,i] = data_dict.pop(field_name)
 
         width = np.max(coordss.max(axis=0) - coordss.min(axis=0))
@@ -112,9 +106,9 @@ class OctNodeStream(object):
         
         root_dict = {}
 
-        root_dict = {'field_names':field_names,
-            'has_velocities':has_velocities,
-            'has_colors':has_colors,
+        root_dict = {'field_names':self.field_names,
+            'has_velocities':self.has_velocities,
+            'has_colors':self.has_colors,
             'weight_index':self.weight_index,
             'nodes':{}}
 
@@ -139,15 +133,15 @@ class OctNodeStream(object):
         if self.has_velocities: 
             velss = np.empty((nparts,3)) 
             buffers += [velss[:,0],velss[:,1],velss[:,2]]
-        else velss = None
+        else: velss = None
 
         if self.has_colors:
             rgba_colorss = np.empty((nparts,4)) 
             buffers += [rgba_colorss[:,0],rgba_colorss[:,1],rgba_colorss[:,2],rgba_colorss[:,2]]
         else: rgba_colorss = None
 
-        fieldss = np.empty((nparts,len(field_names)+6)) 
-        for i in range(len(field_names)+6):
+        fieldss = np.empty((nparts,self.nfields+6)) 
+        for i in range(self.nfields+6):
             buffers += [fieldss[:,i]]
 
         count_offset = 0
@@ -182,14 +176,14 @@ class OctNodeStream(object):
         self.buffer_coordss = coordss
         self.buffer_coordss = self.buffer_coordss.tolist()
 
-        self.buffer_size = coords.shape[0]
-        self.nparts = coords.shape[0]
+        self.buffer_size = coordss.shape[0]
+        self.nparts = coordss.shape[0]
 
         ## initialize the field buffers
         if fieldss is not None:
-            if fieldss.shape[1] != self.buffer_size:
+            if fieldss.shape[1] != self.nfields:
                 raise IndexError(
-                    f"Size of fieldss ({fieldss.shape[1]})"+
+                    f"Size of fieldss ({fieldss.shape[1]}) "+
                     f"does not match number of fields ({self.nfields})")
 
             ## +6 to hold the com and com^2 fields
@@ -238,6 +232,11 @@ class OctNodeStream(object):
 
         else: self.buffer_rgba_colorss = np.zeros((0,4))
         self.buffer_rgba_colorss = self.buffer_rgba_colorss.tolist()  
+
+        ## initialize com accumulators
+        self.velocity = np.sum(self.buffer_velss,axis=0)
+        self.rgba_color = np.sum(self.buffer_rgba_colorss,axis=0)
+        self.fields = np.sum(self.buffer_fieldss,axis=0)
  
     def cascade(self,min_to_refine,Nrecurse=0):
 
@@ -287,10 +286,12 @@ class OctNodeStream(object):
         if child_name not in self.child_names: 
             ## create a new node! welcome to the party, happy birthday, etc.
             child = OctNodeStream(
-                center=self.center + self.width*octant_offsets[octant_index],
-                width=self.width/2,
-                nfields=self.nfields,
-                name=child_name)
+                self.center + self.width*octant_offsets[octant_index],
+                self.width/2,
+                self.field_names,
+                name=child_name,
+                has_velocities=self.has_velocities,
+                has_colors=self.has_colors)
             self.children += [child]
             self.child_names += [child_name]
         else: child:OctNodeStream = self.children[self.child_names.index(child_name)]
@@ -397,7 +398,7 @@ class OctNodeStream(object):
         else: weight = self.nparts
 
         ## set other accumulated field values, use the same weight
-        for i,field_key in enumerate(field_names):
+        for i,field_key in enumerate(self.field_names):
             if self.weight_index is None or i != self.weight_index: 
                 self.fields[i]/=weight
             node_dict[field_key] = self.fields[i]
@@ -467,11 +468,11 @@ class OctNodeStream(object):
 
         if self.buffer_fieldss.shape[0] > 0:
             ## undo the weighting to write to disk
-            for i in range(len(field_names)): 
+            for i in range(len(self.field_names)): 
                 if self.weight_index is None or i == self.weight_index:
                     weight = 1
-                else: weight = fieldss[:,self.weight_index]
-                buffers += [fieldss[:,i]/weight]
+                else: weight = self.buffer_fieldss[:,self.weight_index]
+                buffers += [self.buffer_fieldss[:,i]/weight]
         ## --------------------------------------------------
 
         ## write each buffer to however many subfiles we need to 
@@ -624,12 +625,6 @@ class OctreeStream(object):
 
         nodes = self.root['nodes']
 
-        global prefixes
-        prefixes = (['x','y','z'] + 
-            ['vx','vy','vz']*self.root['has_velocities'] + 
-            ['rgba_r','rgba_g','rgba_b','rgba_a']*self.root['has_colors'] + 
-            self.root['field_names'])
-
         self.get_work_units()
 
     def refine(self,nthreads=1):
@@ -765,12 +760,18 @@ def refineNode(
             node_dict['center'],
             node_dict['width'],
             len(field_names)+6,
-            node_dict['name'])
+            node_dict['name'],
+            has_velocities=False,
+            has_colors=False)
         
+        ## load the particle data for this node from disk
         this_node.set_buffers_from_disk(node_dict['files'],node_dict['buffer_size'])
  
         ## sort these points directly into the children
-        this_node.cascade(min_to_refine,Nrecurse)
+        this_node.cascade(
+            min_to_refine,
+            ## only cascade children if they aren't split across threads
+            Nrecurse if node_dict['split_index'] is None else 0)
 
         ## walk the sub-tree we just created and write node files to disk
         ##  returns a list of dictionaries summarizing the node files that were written to disk
