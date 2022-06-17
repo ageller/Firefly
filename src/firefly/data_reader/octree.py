@@ -159,7 +159,7 @@ class OctNode(object):
         buffer_velss = self.buffer_velss
         buffer_rgba_colors = self.buffer_rgba_colors
 
-        has_vels = len(buffer_velss) > 0
+        has_velocities = len(buffer_velss) > 0
         has_colors = len(buffer_rgba_colors) > 0
 
         ## clear the buffers for this node
@@ -174,7 +174,7 @@ class OctNode(object):
                 point,
                 fields,
                 nodes,
-                buffer_velss[i] if has_vels else None,
+                buffer_velss[i] if has_velocities else None,
                 buffer_rgba_colors[i] if has_colors else None)
 
     def merge_to_parent(self,nodes):
@@ -247,8 +247,8 @@ class OctNode(object):
         ##  if Octree.write_octree_json is called below
         node_dict.update({
             'field_names':field_names,
-            'has_velocity':velss.shape[0] > 0,
-            'has_color':rgba_colorss.shape[0] > 0 })
+            'has_velocities':velss.shape[0] > 0,
+            'has_colors':rgba_colorss.shape[0] > 0 })
 
         write_to_json(node_dict,
             os.path.join(top_level_directory,self.name,f'octree{partition_str}.json'))
