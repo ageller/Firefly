@@ -19,32 +19,46 @@ class OctNodeStream(object):
         self,
         center,
         width,
-        nfields,
+        field_names,
         name:str='',
-        weight_index=None):
+        weight_index=None,
+        coordss=None,
+        fieldss=None,
+        velss=None,
+        rgba_colorss=None,
+        has_velocities=False,
+        has_colors=False,
+        ):
 
+        ## bind input
         self.center = center
         self.width = width
-        self.nfields = nfields
-
+        self.field_names,self.nfields = field_names,len(field_names)
         self.name = name
-
         self.weight_index = weight_index
 
-        ## accumulator attributes
-        self.nparts:int = 0
-        self.velocity = np.zeros(3)
-        self.rgba_color = np.zeros(4)
-        self.fields = np.zeros(nfields)
+        ## initialize the buffers (and fill with any data we were passed)
+        self.set_buffers_from_arrays(
+            coordss,
+            fieldss,
+            velss,
+            rgba_colorss)
 
-        ## buffers which will be flushed if max_npart_per_node is crossed
-        self.buffer_coordss:list = []
-        self.buffer_velss:list = []
-        self.buffer_rgba_colorss:list = []
-        self.buffer_fieldss:list = []
-        self.buffer_size:int = 0
+        self.has_velocities = has_velocities
+        self.has_colors = has_colors
+        self.prefixes = (
+            ['x','y','z'] +
+            ['vx','vy','vz']*has_velocities + 
+            ['rgba_r','rgba_g','rgba_b','rgba_a']*has_colors +
+            field_names)
+
+        ## initialize com accumulators
+        self.velocity = np.sum(self.buffer_velss,axis=0)
+        self.rgba_color = np.sum(self.buffer_colorss,axis=0)
+        self.fields = np.sum(self.buffer_fieldss,axis=0)
 
         self.children = []
+        self.child_names = []
  
     def set_buffers_from_dict(
         self,
@@ -57,8 +71,8 @@ class OctNodeStream(object):
         velss = None
         rgba_colorss = None
 
-        has_velocity = False
-        has_color = False
+        has_velocities = False
+        has_colors = False
 
         nparts = data_dict['x'].shape[0]
         coordss = np.zeros((nparts,3))
@@ -68,14 +82,14 @@ class OctNodeStream(object):
             if key in keys: 
                 if velss is None: 
                     velss = np.zeros((nparts,3))
-                    has_velocity = True
+                    has_velocities = True
                 velss[:,i] = data_dict.pop(key)
 
         for i,color in enumerate(['r','g','b','a']):
             key = f'rgba_{color}'
             if key in keys: 
                 if rgba_colorss is None:
-                    has_color = True
+                    has_colors = True
                     rgba_colorss = np.zeros((nparts,4))
                 rgba_colorss[:,i] = data_dict.pop(key)
 
@@ -86,21 +100,21 @@ class OctNodeStream(object):
             fieldss[:,i] = data_dict.pop(field_name)
 
         width = np.max(coordss.max(axis=0) - coordss.min(axis=0))
+
+        self.width = width
+        self.center = np.zeros(3)
  
         self.set_buffers_from_arrays(
-            np.zeros(3),#center,
-            width,
             coordss,
             fieldss,
-            field_names,
             velss,
             rgba_colorss)
         
         root_dict = {}
 
         root_dict = {'field_names':field_names,
-            'has_velocity':has_velocity,
-            'has_color':has_color,
+            'has_velocities':has_velocities,
+            'has_colors':has_colors,
             'weight_index':self.weight_index,
             'nodes':{}}
 
@@ -109,149 +123,249 @@ class OctNodeStream(object):
             write_to_json(root_dict,os.path.join(target_directory,'octree.json'))
         
         return root_dict
-    
+
+    def set_buffers_from_disk(self,files,nparts):
+
+        indices = []
+        for fname in files: 
+            split = os.path.basename(fname[0]).split('.')
+            if len(split) != 3: raise IOError("bad .ffraw file name, must be field.<i>.ffraw")
+            if split[-1] == 'ffraw': 
+                indices += [int(split[-2])]
+        indices = np.unique(indices)
+        
+        coordss = np.empty((nparts,3))
+        buffers = [coordss[:,0],coordss[:,1],coordss[:,2]]
+        if self.has_velocities: 
+            velss = np.empty((nparts,3)) 
+            buffers += [velss[:,0],velss[:,1],velss[:,2]]
+        else velss = None
+
+        if self.has_colors:
+            rgba_colorss = np.empty((nparts,4)) 
+            buffers += [rgba_colorss[:,0],rgba_colorss[:,1],rgba_colorss[:,2],rgba_colorss[:,2]]
+        else: rgba_colorss = None
+
+        fieldss = np.empty((nparts,len(field_names)+6)) 
+        for i in range(len(field_names)+6):
+            buffers += [fieldss[:,i]]
+
+        count_offset = 0
+        for index in indices:
+            for prefix,buffer in zip(
+                self.prefixes,
+                buffers):
+                for fname in files:
+                    fname,byte_offset,byte_size = fname
+                    count = int(byte_size/4) ## -1 because the header is integer=nparts
+                    short_fname = os.path.basename(fname)
+                    match = f"{prefix}.{index}.ffraw"
+                    if short_fname[-len(match):] == match:
+                        RawBinaryWriter(fname,buffer[count_offset:count_offset+count]).read(byte_offset,count)
+            count_offset+=count
+
+        self.set_buffers_from_arrays(
+            coordss,
+            fieldss,
+            velss,
+            rgba_colorss)
+        
     def set_buffers_from_arrays(
         self,
-        center,
-        width,
-        coordss,
-        fieldss,
-        these_field_names,
-        velss=None,
-        rgba_colorss=None):
+        coordss:np.ndarray,
+        fieldss:np.ndarray,
+        velss:np.ndarray=None,
+        rgba_colorss:np.ndarray=None):
 
-        global field_names
-        field_names = these_field_names
-
-        global prefixes
-        prefixes = ['x','y','z'] 
-
-        self.nfields = fieldss.shape[1]+6
+        if coordss is None: coordss = np.zeros((0,3))
 
         self.buffer_coordss = coordss
-        self.buffer_fieldss = np.zeros((coordss.shape[0],self.nfields))
-        self.buffer_fieldss[:,:-6] = fieldss
+        self.buffer_coordss = self.buffer_coordss.tolist()
 
-        self.center = center
-        self.width = width
+        self.buffer_size = coords.shape[0]
+        self.nparts = coords.shape[0]
 
-        self.fields = np.zeros(self.nfields)
+        ## initialize the field buffers
+        if fieldss is not None:
+            if fieldss.shape[1] != self.buffer_size:
+                raise IndexError(
+                    f"Size of fieldss ({fieldss.shape[1]})"+
+                    f"does not match number of fields ({self.nfields})")
 
-        self.nparts = coordss.shape[0]
-        self.buffer_size = coordss.shape[0]
+            ## +6 to hold the com and com^2 fields
+            self.buffer_fieldss = np.zeros((coordss.shape[0],self.nfields+6))
+            self.buffer_fieldss[:,:-6] = fieldss
 
-        for i in range(3):
-            self.buffer_fieldss[:,-6+i] = coordss[:,i]
-            self.buffer_fieldss[:,-3+i] = (coordss[:,i]**2)
+            for i in range(3):
+                self.buffer_fieldss[:,-6+i] = coordss[:,i]
+                self.buffer_fieldss[:,-3+i] = (coordss[:,i]**2)
+
+        else: self.buffer_fieldss = np.zeros((0,self.nfields))
+        self.buffer_fieldss = self.buffer_fieldss.tolist()
  
+        ## determine if we're taking a weighted average
         if self.weight_index is not None:
             weights = self.buffer_fieldss[:,self.weight_index]
+
+            ## need to weight the fieldss now that we know we're weighted
             for i in range(self.nfields):
                 if i != self.weight_index:
                     self.buffer_fieldss[:,i]*=weights
 
-            weights = weights[:,None] ## for broadcasting below
+            ## change shape of weights for broadcasting below
+            weights = weights[:,None] 
+
         else: weights = 1
 
+        ## initialize the velocities buffer
         if velss is not None:
+            if velss.shape[0] != self.buffer_size:
+                raise IndexError(
+                    f"Size of velss ({velss.shape[0]})"+
+                    f"does not match size of buffer ({self.buffer_size})")
             self.buffer_velss = velss * weights
-            self.velocity = np.sum(self.buffer_velss,axis=0)
 
-            prefixes+=['vx','vy','vz']
+        else: self.buffer_velss = np.zeros((0,3))
+        self.buffer_velss = self.buffer_velss.tolist()
 
+        ## initialize the rgba_colors buffer
         if rgba_colorss is not None:
+            if rgba_colorss.shape[0] != self.buffer_size:
+                raise IndexError(
+                    f"Size of rgba_colorss ({rgba_colorss.shape[0]})"+
+                    f"does not match size of buffer ({self.buffer_size})")
             self.buffer_rgba_colorss = rgba_colorss * weights
-            self.rgba_color = np.sum(self.buffer_rgba_colorss,axis=0)
-            prefixes+=['rgba_r','rgba_g','rgba_b','rgba_a']
-        
-        prefixes+=field_names 
+
+        else: self.buffer_rgba_colorss = np.zeros((0,4))
+        self.buffer_rgba_colorss = self.buffer_rgba_colorss.tolist()  
+ 
+    def cascade(self,min_to_refine,Nrecurse=0):
+
+        #end = self.buffer_size
+        ## flush the buffer into its children
+        while len(self.buffer_coordss) > 0:
+            #if not (i % 10000): print("%.2f"%(i/end*100)+"%",end='\t') 
+            self.sort_point_into_child(
+                ## numpy doesn't offer an in-place pop
+                ## so _must_ be a list
+                self.buffer_coordss.pop(0), 
+                self.buffer_fieldss.pop(0),
+                velocities.pop(0) if self.has_velocities else None,
+                rgba_colors.pop(0) if self.has_colors else None)
+            self.buffer_size -= 1
+        #print('done!')
+
+        ## okay we made the children but... not all will
+        ##  survive. the small ones will be merged back
+        ##  into the parent
+        this_node.prune(min_to_refine)
+
+        return_value = [(self.name,self.buffer_size)]
+
+        if Nrecurse>0: 
+            for child in self.children:
+                return_value += child.cascade(Nrecurse-1)
+        return return_value
+
+    def sort_point_into_child(
+        self,
+        coords,
+        fields,
+        vels,
+        rgba_colors):
+
+        ## use 3 bit binary number to index
+        ##  the octants-- for each element of the array 
+        ##  it is either to the left or right of the center.
+        ##  this determines which octant it lives in
+        ##  thanks Mike Grudic for this idea!
+        octant_index = 0
+        for axis in range(3): 
+            if point[axis] > self.center[axis]: octant_index+= (1 << axis)
+        child_name = self.name+'%d'%(octant_index)
+
+        if child_name not in self.child_names: 
+            ## create a new node! welcome to the party, happy birthday, etc.
+            child = OctNodeStream(
+                center=self.center + self.width*octant_offsets[octant_index],
+                width=self.width/2,
+                nfields=self.nfields,
+                name=child_name)
+            self.children += [child]
+            self.child_names += [child_name]
+        else: child:OctNodeStream = self.children[self.child_names.index(child_name)]
+
+        child.accumulate(coords,fields,vels,rgba_colors)
+
+    def prune(self,min_to_refine):
+        sort_indices = np.argsort([child.buffer_size for child in self.children])
+        sort_children = np.array(self.children)[sort_indices]
+        for child in sort_children:
+            ## /8 b.c. then even if all 8 children are merged then
+            ##  you would still not end up above min_to_refine
+            ## TODO: if node is split across multiple threads we could 
+            ##  end up messing this up
+            if (child.buffer_size + self.buffer_size) < min_to_refine:
+                print(f'merging {child} into {self}')
+                self.buffer_coordss += child.buffer_coordss
+                self.buffer_velss += child.buffer_velss
+                self.buffer_rgba_colorss += child.buffer_rgba_colorss
+                self.buffer_fieldss += child.buffer_fieldss
+                self.buffer_size += child.buffer_size
+
+                ## evict you
+                self.children.pop(self.child_names.index(child.name))
+                ## remove you from my will
+                self.child_names.pop(self.child_names.index(child.name))
+            else: break ## no more room to consume children, the rest get to live on
 
     def accumulate(
         self,
-        point:np.ndarray,
-        fields:np.ndarray,
-        velocity:np.ndarray=None,
-        rgba_color:np.ndarray=None,
+        coords:list,
+        fields:list,
+        vels:list=None,
+        rgba_colors:list=None,
         ):
-
-        ## okay we're allowed to hold the raw data here
-        ##  store coordinate data in the buffer
-        self.buffer_coordss += [point]
-
-        if velocity is not None: self.buffer_velss += [velocity]
-        if rgba_color is not None: self.buffer_rgba_colorss += [rgba_color]
-
-        ## store field data in the buffer
-        self.buffer_fieldss += [fields]
 
         ## accumulate the point
         self.nparts += 1
         self.buffer_size += 1
 
-        if velocity is not None: self.velocity += velocity
-        if rgba_color is not None: self.rgba_color += rgba_color
+        ## store coordinate data in its buffer
+        self.buffer_coordss.append(coords)
 
+        ## store velocity data in its buffer
+        ##  and increment the com velocity accumulator
+        if self.has_velocities: 
+            self.buffer_velss.append(vels)
+            self.velocity += vels
+
+        ## store rgba_color data in its buffer
+        ##  and increment the com rgba_color accumulator
+        if self.has_colors: 
+            self.buffer_rgba_colorss.append(rgba_colors)
+            self.rgba_color += rgba_color
+
+        ## store field data in the buffer
+        ##  and increment the com field accumulator
+        ##  (which includes the com and com^2 as the last 6 entries)
+        self.buffer_fieldss.append(fields)
         self.fields += fields
-                
-    def write(self,top_level_directory,split_index=0,bytes_per_file=4e7):
 
-        this_dir = os.path.join(top_level_directory)
-        if not os.path.isdir(this_dir): os.makedirs(this_dir)
+    def write_tree(self,target_directory,split_index):
 
-        global field_names
-        namestr = f'{self.name}-' if self.name != '' else 'root-'
-        splitstr = f'{split_index:02d}-'
+        ## format accumulated values into a dictionary
+        if self.buffer_size == 0:
+            this_node_dict = self.format_node_dictionary()
+        ## some children were merged back into the parent, write them to disk
+        else: this_node_dict = self.write(target_directory,split_index)
 
-        ## determine how many files we'll need to split this dataset into
-        nsub_files = int(4*self.buffer_size//bytes_per_file + (4*self.buffer_size != bytes_per_file))
-        counts = [arr.shape[0] for arr in np.array_split(np.arange(self.buffer_size),nsub_files)]
+        this_node_dict['processed'] = True
 
-        ## ------ gather buffer arrays to be written to disk
-        coordss = np.array(self.buffer_coordss).reshape(self.buffer_size,3)
-        del self.buffer_coordss
-        buffers = [coordss[:,0],coordss[:,1],coordss[:,2]]
-
-        velss = np.array(self.buffer_velss).reshape(-1,3)
-        del self.buffer_velss
-        if velss.shape[0] > 0:
-            buffers += [velss[:,0],velss[:,1],velss[:,2]]
-
-        rgba_colorss = np.array(self.buffer_rgba_colorss).reshape(-1,4)
-        del self.buffer_rgba_colorss
-        if rgba_colorss.shape[0] > 0:
-            buffers += [rgba_colorss[:,0],rgba_colorss[:,1],rgba_colorss[:,2],rgba_colorss[:,2]]
-
-        fieldss = np.array(self.buffer_fieldss).reshape(self.buffer_size,-1)[:,:-6]
-        del self.buffer_fieldss
-        if fieldss.shape[0] > 0:
-            for i in range(len(field_names)): 
-                if self.weight_index is None or i == self.weight_index:
-                    weight = 1
-                else: weight = fieldss[:,self.weight_index]
-                buffers += [fieldss[:,i]/weight]
-        ## --------------------------------------------------
-
-        ## write each buffer to however many subfiles we need to 
-        ##  ensure a maximum file-size on disk
-        files = []
-        count_offset = 0
-        for index,count in enumerate(counts):
-            for prefix,buffer in zip(prefixes,buffers):
-                fname = os.path.join(top_level_directory,f"{namestr}{splitstr}{prefix}.{index}.ffraw")
-                RawBinaryWriter(fname,buffer[count_offset:count_offset+count]).write()
-
-                ## append to file list
-                files += [(fname,0,count*4)]
-
-            count_offset+=count
-
-        ## format aggregate data into a dictionary
-        node_dict = self.format_node_dictionary()
-
-        ## append buffer files
-        node_dict['files'] = files
-
-        return node_dict
+        return_value = [this_node_dict] 
+        for child in self.children:
+            return_value += child.write_tree(target_directory,split_index)
+        return return_value
 
     def format_node_dictionary(self):
         """
@@ -265,18 +379,19 @@ class OctNodeStream(object):
         'radius':radius,
         'center_of_mass':com,
         'weight_index':None,
-        'nchunks'
         <field_names>
         }
         """
+
         node_dict = {}
 
-        node_dict['center'] = self.center
         ## set basic keys
-        for key in ['width','name','nparts','children']: node_dict[key] = getattr(self,key)
+        for key in ['center','width','name','nparts','buffer_size']: 
+            node_dict[key] = getattr(self,key)
+        
+        node_dict['children'] = [child.name for child in self.children]
 
-
-        ## divide out weight for accumulated fields
+        ## determine weight for accumulated fields
         if self.weight_index is not None: 
             weight = self.fields[self.weight_index]
         else: weight = self.nparts
@@ -295,72 +410,91 @@ class OctNodeStream(object):
         node_dict['radius'] = np.sqrt(np.mean(com_sq-com**2))
         node_dict['center_of_mass'] = com
 
-        if 'vx' in prefixes: vcom = self.velocity/weight
+        if self.has_velocities: vcom = self.velocity/weight
         else: vcom = None
         node_dict['com_velocity'] = vcom
         
-        if 'rgba_r' in prefixes: rgba_color = self.rgba_color/weight
+        if self.has_colors: rgba_color = self.rgba_color/weight
         else: rgba_color = None
         node_dict['rgba_color'] = rgba_color
 
-        node_dict['buffer_size'] = self.buffer_size
-
         return node_dict
 
-    def sort_point_into_child(
-        self,
-        nodes,
-        point,
-        fields,
-        velocity,
-        rgba_color):
+    def write(self,top_level_directory,split_index=0,bytes_per_file=4e7):
 
-        ## use 3 bit binary number to index
-        ##  the octants-- for each element of the array 
-        ##  it is either to the left or right of the center.
-        ##  this determines which octant it lives in
-        ##  thanks Mike Grudic for this idea!
-        octant_index = 0
-        for axis in range(3): 
-            if point[axis] > self.center[axis]: octant_index+= (1 << axis)
-        child_name = self.name+'%d'%(octant_index)
+        ## convert buffers to numpy arrays
+        self.buffer_coordss = np.array(self.buffer_coordss)
+        self.buffer_fieldss = np.array(self.buffer_fieldss)
+        self.buffer_velss = np.array(self.buffer_velss)
+        self.buffer_rgba_colorss = np.array(self.buffer_rgba_colorss)
 
-        if child_name not in nodes: 
-            ## create a new node! welcome to the party, happy birthday, etc.
-            child = OctNodeStream(
-                center=self.center + self.width*octant_offsets[octant_index],
-                width=self.width/2,
-                nfields=self.nfields,
-                name=child_name)
-            nodes[child_name] = child
-            self.children += [child_name]
-        else: child:OctNodeStream = nodes[child_name]
+        this_dir = os.path.join(top_level_directory)
+        if not os.path.isdir(this_dir): os.makedirs(this_dir)
 
-        child.accumulate(point,fields,velocity,rgba_color)
+        namestr = f'{self.name}-' if self.name != '' else 'root-'
+        splitstr = f'{split_index:02d}-' if split_index is not None else ''
 
-    def prune(self,nodes,min_to_refine):
-        sort_indices = np.argsort([nodes[child_name].buffer_size for child_name in self.children])
-        sort_children = np.array(self.children)[sort_indices]
-        for child_name in sort_children:
-            child = nodes[child_name]
-            ## /8 b.c. then even if all 8 children are merged then
-            ##  you would still not end up above min_to_refine
-            ## TODO: if node is split across multiple threads we could 
-            ##  end up messing this up
-            if (child.buffer_size + self.buffer_size) < min_to_refine:
-                print(f'merging {child} into {self}')
-                self.buffer_coordss += child.buffer_coordss
-                self.buffer_velss += child.buffer_velss
-                self.buffer_rgba_colorss += child.buffer_rgba_colorss
-                self.buffer_fieldss += child.buffer_fieldss
-                self.buffer_size += child.buffer_size
+        ## determine how many files we'll need to split this dataset into
+        nsub_files = int(4*self.buffer_size//bytes_per_file + (4*self.buffer_size != bytes_per_file))
+        counts = [arr.shape[0] for arr in np.array_split(np.arange(self.buffer_size),nsub_files)]
 
-                ## remove you from my will
-                self.children.pop(self.children.index(child_name))
-                ## let the garbage collector come for you
-                nodes.pop(child_name) 
-            else: break ## no more room to consume children, the rest get to live on
+        ## ------ gather buffer array aliases to be written to disk
+        buffers = [self.buffer_coordss[:,0],self.buffer_coordss[:,1],self.buffer_coordss[:,2]]
 
+        if self.has_velocities:
+            if self.buffer_velss.shape[0] > 0:
+                raise IndexError("has_velocities but buffer_velss is empty")
+
+            ## undo the weighting to write to disk
+            if self.weight_index is not None: 
+                self.buffer_velss /= self.buffer_fieldss[:,self.weight_index,None]
+
+            buffers += [self.buffer_velss[:,0],self.buffer_velss[:,1],self.buffer_velss[:,2]]
+
+        if self.has_colors:
+            if self.buffer_rgba_colorss.shape[0] == 0:
+                raise IndexError("self.has_colors but buffer_rgba_colorss is empty")
+
+            ## undo the weighting to write to disk
+            if self.weight_index is not None: 
+                self.buffer_rgba_colorss /= self.buffer_fieldss[:,self.weight_index,None]
+
+            buffers += [
+                self.buffer_rgba_colorss[:,0],
+                self.buffer_rgba_colorss[:,1],
+                self.buffer_rgba_colorss[:,2],
+                self.buffer_rgba_colorss[:,2]]
+
+        if self.buffer_fieldss.shape[0] > 0:
+            ## undo the weighting to write to disk
+            for i in range(len(field_names)): 
+                if self.weight_index is None or i == self.weight_index:
+                    weight = 1
+                else: weight = fieldss[:,self.weight_index]
+                buffers += [fieldss[:,i]/weight]
+        ## --------------------------------------------------
+
+        ## write each buffer to however many subfiles we need to 
+        ##  enforce a maximum file-size on disk
+        files = []
+        count_offset = 0
+        for index,count in enumerate(counts):
+            for prefix,buffer in zip(self.prefixes,buffers):
+                fname = os.path.join(top_level_directory,f"{namestr}{splitstr}{prefix}.{index}.ffraw")
+                RawBinaryWriter(fname,buffer[count_offset:count_offset+count]).write()
+
+                ## append to file list
+                files += [(fname,0,count*4)]
+
+            count_offset+=count
+
+        ## format aggregate data into a dictionary
+        node_dict = self.format_node_dictionary()
+
+        ## append buffer files
+        node_dict['files'] = files
+
+        return node_dict
 
 class OctreeStream(object):
 
@@ -396,7 +530,7 @@ class OctreeStream(object):
                 this_node['processed'] = False
 
                 if 'split_index' not in this_node.keys():
-                    this_node['split_index'] = 0
+                    this_node['split_index'] = None
 
                 this_node_nparts = this_node['nparts']
 
@@ -407,6 +541,7 @@ class OctreeStream(object):
                     nremain -= this_node_nparts
                 ## we only need part of this node to complete this worker's task queue
                 else:
+                    if this_node['split_index'] is None: this_node['split_index'] = 0
                     ## make a node that goes into the work unit
                     copy_node = {**this_node}
                     copy_node['nparts'] = nremain
@@ -491,8 +626,8 @@ class OctreeStream(object):
 
         global prefixes
         prefixes = (['x','y','z'] + 
-            ['vx','vy','vz']*self.root['has_velocity'] + 
-            ['rgba_r','rgba_g','rgba_b','rgba_a']*self.root['has_color'] + 
+            ['vx','vy','vz']*self.root['has_velocities'] + 
+            ['rgba_r','rgba_g','rgba_b','rgba_a']*self.root['has_colors'] + 
             self.root['field_names'])
 
         self.get_work_units()
@@ -615,116 +750,30 @@ class OctreeStream(object):
                 print(e.args[0])
                 break
 
-def refineNode(node_dicts,target_directory,weight_index,min_to_refine):
+## what gets passed to the multiprocessing.Pool
+def refineNode(
+    node_dicts,
+    target_directory,
+    weight_index,
+    min_to_refine,
+    Nrecurse=0):
 
-    nodes = {}
-    global field_names,prefixes
-    return_value = []
     for node_dict in node_dicts:
         print(f"refining: {node_dict['name']}")
-        ## load the node from all the split binary files
-        ##  note that fieldss will have 6 extra columns for CoM calculation
-        coordinates,velocities,rgba_colors,fieldss,field_names = loadNodeFromDisk(
-            ## TODO should have a loop here that only passes the number of particles
-            ##  we can hold in memory
-            node_dict['files'],
-            node_dict['buffer_size'])
         
-        ## for calculating the center of mass and 1 sigma extent of the node
-        if weight_index is not None: weight = fieldss[:,weight_index]
-        else: weight = 1
-
-        for i in range(3):
-            fieldss[:,-6+i] = coordinates[:,i]
-            fieldss[:,-3+i] = (coordinates[:,i]**2)
-        
-        if weight_index is not None: raise NotImplementedError(
-            "need to multiply fields, velocities, and rgba_colors by weight")
-
         this_node = OctNodeStream(
             node_dict['center'],
             node_dict['width'],
             len(field_names)+6,
             node_dict['name'])
-    
-        end = coordinates.shape[0]
-        #print('building...')
-        for i,(point,fields) in enumerate(zip(coordinates,fieldss)):
-            #if not (i % 10000): print("%.2f"%(i/end*100)+"%",end='\t') 
-            this_node.sort_point_into_child(
-                nodes,
-                point,
-                fields,
-                velocities[i] if velocities is not None else None,
-                rgba_colors[i] if rgba_colors is not None else None)
-            this_node.nparts+=1
-        #print('done!')
+        
+        this_node.set_buffers_from_disk(node_dict['files'],node_dict['buffer_size'])
+ 
+        ## sort these points directly into the children
+        this_node.cascade(min_to_refine,Nrecurse)
 
-        ## okay we made the children but... not all will
-        ##  survive. the small ones will be merged back
-        ##  into the parent
-        this_node.prune(nodes,min_to_refine)
-
-        ## format accumulated values into a dictionary
-        if this_node.buffer_size == 0:
-            this_node_dict = this_node.format_node_dictionary()
-        else:
-            this_node_dict = this_node.write(target_directory,node_dict['split_index'])
-
-
-        this_node_dict['processed'] = True
-        return_value += [this_node_dict]
-        return_value += [
-            ## NOTE `this_node_dict` does not have a split index in it...
-            nodes[child_name].write(target_directory,node_dict['split_index']) for 
-            child_name in this_node_dict['children']]
+        ## walk the sub-tree we just created and write node files to disk
+        ##  returns a list of dictionaries summarizing the node files that were written to disk
+        return_value += this_node.write_tree(target_directory,node_dict['split_index'])
    
-    return return_value
-
-
-def loadNodeFromDisk(files,nparts):
-    global prefixes
-    indices = []
-    for fname in files: 
-        split = os.path.basename(fname[0]).split('.')
-        if len(split) != 3: raise IOError("bad .ffraw file name, must be field.<i>.ffraw")
-        if split[-1] == 'ffraw': 
-            indices += [int(split[-2])]
-    indices = np.unique(indices)
-    
-    non_field_names = ['x','y','z'] + ['vx','vy','vz'] + ['rgba_r','rgba_g','rgba_b','rgba_a'] 
-
-    has_velocity = 'vx' in prefixes
-    has_color = 'rgba_r' in prefixes
-    field_names = [prefix for prefix in prefixes if prefix not in non_field_names]
-
-    coordinates = np.empty((nparts,3))
-    buffers = [coordinates[:,0],coordinates[:,1],coordinates[:,2]]
-    velocities = None
-    if has_velocity: 
-        velocities = np.empty((nparts,3)) 
-        buffers += [velocities[:,0],velocities[:,1],velocities[:,2]]
-    rgba_colors = None
-    if has_color:
-        rgba_colors = np.empty((nparts,4)) 
-        buffers += [rgba_colors[:,0],rgba_colors[:,1],rgba_colors[:,2],rgba_colors[:,2]]
-
-    fieldss = np.empty((nparts,len(field_names)+6)) 
-    for i in range(len(field_names)+6):
-        buffers += [fieldss[:,i]]
-
-    count_offset = 0
-    for index in indices:
-        for prefix,buffer in zip(
-            prefixes,
-            buffers):
-            for fname in files:
-                fname,byte_offset,byte_size = fname
-                count = int(byte_size/4) ## -1 because the header is integer=nparts
-                short_fname = os.path.basename(fname)
-                match = f"{prefix}.{index}.ffraw"
-                if short_fname[-len(match):] == match:
-                    RawBinaryWriter(fname,buffer[count_offset:count_offset+count]).read(byte_offset,count)
-        count_offset+=count
-    
-    return coordinates,velocities,rgba_colors,fieldss,field_names
+    return return_value 
