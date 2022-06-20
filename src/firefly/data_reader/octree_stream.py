@@ -267,13 +267,19 @@ class OctNodeStream(object):
         ## okay we made the children but... not all will
         ##  survive. the small ones will be merged back
         ##  into the parent
+        self.prune(min_to_refine)
+
         print('New children:',self.child_names)
 
         return_value = [(self.name,self.buffer_size)]
 
-        if Nrecurse>0: 
+
+        if nrecurse>0: 
             for child in self.children:
-                return_value += child.cascade(Nrecurse-1)
+                return_value += child.cascade(nrecurse-1)
+
+        self.processed = True
+
         return return_value
 
     def sort_point_into_child(
@@ -290,7 +296,7 @@ class OctNodeStream(object):
         ##  thanks Mike Grudic for this idea!
         octant_index = 0
         for axis in range(3): 
-            if point[axis] > self.center[axis]: octant_index+= (1 << axis)
+            if coords[axis] > self.center[axis]: octant_index+= (1 << axis)
         child_name = self.name+'%d'%(octant_index)
 
         if child_name not in self.child_names: 
@@ -372,7 +378,7 @@ class OctNodeStream(object):
         ## some children were merged back into the parent, write them to disk
         else: this_node_dict = self.write(target_directory,split_index)
 
-        this_node_dict['processed'] = True
+        if hasattr(self,'processed'): this_node_dict['processed'] = self.processed
 
         return_value = [this_node_dict] 
         for child in self.children:
@@ -432,7 +438,7 @@ class OctNodeStream(object):
 
         return node_dict
 
-    def write(self,top_level_directory,split_index=0,bytes_per_file=4e7):
+    def write(self,top_level_directory,split_index=None,bytes_per_file=4e7):
 
         ## convert buffers to numpy arrays
         self.buffer_coordss = np.array(self.buffer_coordss)
@@ -683,12 +689,12 @@ class OctreeStream(object):
 
         ## delete any files that are no longer being pointed to.
         good_files = [[fname[0] for fname in node['files']] 
-            for node in self.root['nodes'].values() if 'files' in node.keys() and node['buffer_size']>0]
+            for node in children if 'files' in node.keys() and node['buffer_size']>0]
         good_files = set(np.hstack(good_files))
         bad_files -= good_files
         for bad_file in bad_files:
             if os.path.isfile(bad_file): os.remove(bad_file)
-        print('deleting',len(bad_files),'files')
+        if len(bad_files) > 0: print('deleting',len(bad_files),'unreferenced files')
 
         ## write out the new octree.json
         write_to_json(self.root,os.path.join(self.pathh,'octree.json'))
