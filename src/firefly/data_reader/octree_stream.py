@@ -121,7 +121,8 @@ class OctNodeStream(object):
             'nodes':{}}
 
         if target_directory is not None:
-            root_dict['nodes'][self.name] = self.write(target_directory)
+            output_dir = os.path.join(target_directory,f"output_0.0")
+            root_dict['nodes'][self.name] = self.write(output_dir)
             write_to_json(root_dict,os.path.join(target_directory,'octree.json'))
         
         return root_dict
@@ -648,6 +649,7 @@ class OctreeStream(object):
 
         argss = zip(
             self.get_work_units(nthreads),
+            np.arange(nthreads,dtype=int),
             itertools.repeat(self.pathh),
             itertools.repeat(self.min_to_refine),
             itertools.repeat(self.root['field_names']),
@@ -759,11 +761,11 @@ class OctreeStream(object):
             ##  but you know one can never be too careful
             self.root['nodes'][child_name] = old_child
 
-    def full_refine(self,nthreads):
+    def full_refine(self,nthreads,nrecurse=0):
 
         while len(self.work_units) >0:
             print(self)
-            try: self.refine(nthreads)
+            try: self.refine(nthreads,nrecurse)
             except IndexError as e:
                 print(e.args[0])
                 break
@@ -771,10 +773,13 @@ class OctreeStream(object):
 ## what gets passed to the multiprocessing.Pool
 def refineNode(
     node_dicts,
+    thread_id,
     target_directory,
     min_to_refine,
     field_names,
     nrecurse=0):
+
+    output_dir = os.path.join(target_directory,f"output_{thread_id:d}.0")
 
     return_value = []
     for node_dict in node_dicts:
@@ -796,8 +801,19 @@ def refineNode(
             ## only cascade children if they aren't split across threads
             nrecurse if node_dict['split_index'] is None else 0)
 
+        if not os.path.isdir(output_dir): os.makedirs(output_dir)
+        this_length = len(os.listdir(output_dir))
+
+        ## find an output directory that has room for our files
+        while this_length >= 1e4:
+            base,count = output_dir.split(output_dir)
+            output_dir = f"{base}.{int(count)+1}"
+
+            if not os.path.isdir(output_dir): os.makedirs(output_dir)
+            this_length = len(os.listdir(output_dir))
+
         ## walk the sub-tree we just created and write node files to disk
         ##  returns a list of dictionaries summarizing the node files that were written to disk
-        return_value += this_node.write_tree(target_directory,node_dict['split_index'])
+        return_value += this_node.write_tree(output_dir,node_dict['split_index'])
    
     return return_value 
