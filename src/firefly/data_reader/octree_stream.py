@@ -9,11 +9,12 @@ import numpy as np
 from .octree import octant_offsets
 from .json_utils import load_from_json,write_to_json
 from .binary_writer import RawBinaryWriter
+from abg_python.system_utils import printProgressBar
 
 
 class OctNodeStream(object):
     def __repr__(self):
-        return f"OctNodeStream({self.name}):{self.buffer_size}/{self.nparts:d} points - {self.nfields-6:d} fields"
+        return f"OctNodeStream({self.name}):{self.buffer_size}/{self.nparts:d} points - {self.nfields:d} fields"
         
     def __init__(
         self,
@@ -240,24 +241,17 @@ class OctNodeStream(object):
  
     def cascade(self,min_to_refine,Nrecurse=0):
 
-        #end = self.buffer_size
+        print('Refining:',self)
         ## flush the buffer into its children
-        while len(self.buffer_coordss) > 0:
-            #if not (i % 10000): print("%.2f"%(i/end*100)+"%",end='\t') 
+        printProgressBar(0,self.buffer_size,prefix = 'Progress:',suffix='complete',length=50)
             self.sort_point_into_child(
-                ## numpy doesn't offer an in-place pop
-                ## so _must_ be a list
-                self.buffer_coordss.pop(0), 
-                self.buffer_fieldss.pop(0),
-                velocities.pop(0) if self.has_velocities else None,
-                rgba_colors.pop(0) if self.has_colors else None)
-            self.buffer_size -= 1
-        #print('done!')
+            if not i%100: printProgressBar(i+1,self.buffer_size,prefix = 'Progress:',suffix='complete',length=50)
+        printProgressBar(i+1,self.buffer_size,prefix = 'Progress:',suffix='complete',length=50)
 
         ## okay we made the children but... not all will
         ##  survive. the small ones will be merged back
         ##  into the parent
-        this_node.prune(min_to_refine)
+        print('New children:',self.child_names)
 
         return_value = [(self.name,self.buffer_size)]
 
@@ -319,6 +313,7 @@ class OctNodeStream(object):
                 ## remove you from my will
                 self.child_names.pop(self.child_names.index(child.name))
             else: break ## no more room to consume children, the rest get to live on
+        if self.buffer_size > 0: print(f"Merged {self.buffer_size} particles back into parent.")
 
     def accumulate(
         self,
