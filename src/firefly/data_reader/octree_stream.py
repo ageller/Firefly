@@ -566,6 +566,8 @@ class OctreeStream(object):
                     copy_node = {**this_node}
                     copy_node['nparts'] = nremain
                     this_node['nparts'] = this_node_nparts - nremain
+                    copy_node['buffer_size'] = nremain
+                    this_node['buffer_size'] = (this_node_nparts - nremain)
 
                     ## increment the split index for the copy of
                     ##  the node with the remaining particles
@@ -588,7 +590,7 @@ class OctreeStream(object):
                             ## ignore any chunks that aren't the one we're looking for
                             if int(fname[0].split('.')[-2]) != ichunk: continue
 
-                            this_chunk_files += [copy.copy(this_node['files'][i-popped])]
+                            this_chunk_files += [copy.deepcopy(this_node['files'][i-popped])]
                             n_this_chunk = fname[2]/4
 
                             ## we can add the whole chunk file
@@ -671,33 +673,32 @@ class OctreeStream(object):
 
 
         bad_files = set([])
+        popped = []
         for work_unit,children in zip(self.work_units,new_dicts):
             
             for old_node in work_unit:
-                ## remove the old nodes which points to files, it will be 
-                ##  replaced below by children[:len(work_unit)]
-                if ('processed' not in self.root['nodes'][old_node['name']].keys()
-                    or not self.root['nodes'][old_node['name']]['processed']):
+                old_name = old_node['name']
 
-                    self.root['nodes'].pop(old_node['name'])
-                    this_bad_files = set([fname[0] for fname in old_node['files']])
-                    bad_files = bad_files.union(this_bad_files)
-                ## else: the old_node was split between multiple workers
-                ##  was already deleted, and was added back in 
-                ##  by self.register_child below. 
+                ## only remove it if it hasn't already been removed
+                if old_name not in popped:
+                    self.root['nodes'].pop(old_name)
+                    popped+=[old_name]
 
-            ## register the old_node (children[0])
-            ##  and each of its children.
+                ## do want to accumulate the bad files though
+                this_bad_files = [fname[0] for fname in old_node['files']]
+                bad_files = bad_files.union(set(this_bad_files))
+
+            ## register the old_node (children[0]) and each of its children.
             for child in children: self.register_child(child)
 
         ## delete any files that are no longer being pointed to.
-        good_files = [[fname[0] for fname in node['files']] 
-            for node in children if 'files' in node.keys() and node['buffer_size']>0]
+        good_files = [[ fname[0] for fname in node['files'] ] for node in children 
+            if 'files' in node.keys() and node['buffer_size']>0]
         good_files = set(np.hstack(good_files))
         bad_files -= good_files
         for bad_file in bad_files:
             if os.path.isfile(bad_file): os.remove(bad_file)
-        if len(bad_files) > 0: print('deleting',len(bad_files),'unreferenced files')
+        if len(bad_files) > 0: print('deleting',len(bad_files),'unreferenced files.')#,bad_files)
 
         ## write out the new octree.json
         write_to_json(self.root,os.path.join(self.pathh,'octree.json'))
@@ -754,13 +755,15 @@ class OctreeStream(object):
             ## add the number of particles
             old_child['nparts']+=new_child['nparts']
             old_child['buffer_size']+=new_child['buffer_size']
-
-            ## child nodes don't have files (yet)
-            #old_child['files']+=new_child['files']   
+            if 'files' in new_child.keys():
+                if 'files' not in old_child.keys(): old_child['files'] = []
+                old_child['files'] += new_child['files']
 
             ## shouldn't need to do this b.c. aliasing
             ##  but you know one can never be too careful
             self.root['nodes'][child_name] = old_child
+
+        print(child_name,'registered:',new_child['buffer_size'],'/',self.root['nodes'][child_name]['buffer_size'],'particles')
 
     def full_refine(self,nthreads,nrecurse=0):
 
