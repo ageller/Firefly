@@ -239,14 +239,26 @@ class OctNodeStream(object):
         self.rgba_color = np.sum(self.buffer_rgba_colorss,axis=0)
         self.fields = np.sum(self.buffer_fieldss,axis=0)
  
-    def cascade(self,min_to_refine,Nrecurse=0):
+    def cascade(self,min_to_refine,nrecurse=0):
 
         print('Refining:',self)
         ## flush the buffer into its children
         printProgressBar(0,self.buffer_size,prefix = 'Progress:',suffix='complete',length=50)
+        for i in range(self.buffer_size):
             self.sort_point_into_child(
+                self.buffer_coordss[i], 
+                self.buffer_fieldss[i],
+                self.buffer_velss[i] if self.has_velocities else None,
+                self.buffer_rgba_colorss[i] if self.has_colors else None)
             if not i%100: printProgressBar(i+1,self.buffer_size,prefix = 'Progress:',suffix='complete',length=50)
         printProgressBar(i+1,self.buffer_size,prefix = 'Progress:',suffix='complete',length=50)
+
+        ## probably just [] tbh ??
+        self.buffer_coordss = np.zeros((0,3)).tolist()
+        self.buffer_fieldss = np.zeros((0,self.nfields)).tolist()
+        self.buffer_velss = np.zeros((0,3)).tolist()
+        self.buffer_rgba_colorss = np.zeros((0,4)).tolist()
+        self.buffer_size = 0
 
         ## okay we made the children but... not all will
         ##  survive. the small ones will be merged back
