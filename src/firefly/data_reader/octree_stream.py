@@ -246,6 +246,8 @@ class OctNodeStream(object):
  
     def cascade(self,min_to_refine,nrecurse=0):
 
+        if self.buffer_size < min_to_refine: return [(self.name,self.buffer_size)]
+
         print('Refining:',self)
         ## flush the buffer into its children
         printProgressBar(0,self.buffer_size,prefix = 'Progress:',suffix='complete',length=50)
@@ -276,8 +278,7 @@ class OctNodeStream(object):
 
 
         if nrecurse>0: 
-            for child in self.children:
-                return_value += child.cascade(nrecurse-1)
+            for child in self.children: return_value += child.cascade(min_to_refine,nrecurse-1)
 
         self.processed = True
 
@@ -799,6 +800,7 @@ def refineNode(
         this_node.cascade(
             min_to_refine,
             ## only cascade children if they aren't split across threads
+            ##  otherwise we need to synchronize after each refinement
             nrecurse if node_dict['split_index'] is None else 0)
 
         if not os.path.isdir(output_dir): os.makedirs(output_dir)
