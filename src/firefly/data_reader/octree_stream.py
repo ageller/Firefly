@@ -85,10 +85,17 @@ class OctNodeStream(object):
                     self.has_colors = True
                     rgba_colorss = np.zeros((nparts,4))
                 rgba_colorss[:,i] = data_dict.pop(key)
-
+        
         ## the remaining keys are the fields
         self.field_names = list(data_dict.keys())
         self.nfields = len(self.field_names)
+
+        self.prefixes = (
+            ['x','y','z'] +
+            ['vx','vy','vz']*self.has_velocities + 
+            ['rgba_r','rgba_g','rgba_b','rgba_a']*self.has_colors +
+            self.field_names)
+
         ## determine field names from remaining keys
         fieldss = np.zeros((nparts,self.nfields))
         for i,field_name in enumerate(self.field_names):
@@ -141,8 +148,8 @@ class OctNodeStream(object):
             buffers += [rgba_colorss[:,0],rgba_colorss[:,1],rgba_colorss[:,2],rgba_colorss[:,2]]
         else: rgba_colorss = None
 
-        fieldss = np.empty((nparts,self.nfields+6)) 
-        for i in range(self.nfields+6):
+        fieldss = np.empty((nparts,self.nfields)) 
+        for i in range(self.nfields):
             buffers += [fieldss[:,i]]
 
         count_offset = 0
@@ -182,10 +189,7 @@ class OctNodeStream(object):
 
         ## initialize the field buffers
         if fieldss is not None:
-            if fieldss.shape[1] != self.nfields:
-                raise IndexError(
-                    f"Size of fieldss ({fieldss.shape[1]}) "+
-                    f"does not match number of fields ({self.nfields})")
+            self.nfields = fieldss.shape[1]
 
             ## +6 to hold the com and com^2 fields
             self.buffer_fieldss = np.zeros((coordss.shape[0],self.nfields+6))
@@ -311,9 +315,9 @@ class OctNodeStream(object):
             ## /8 b.c. then even if all 8 children are merged then
             ##  you would still not end up above min_to_refine
             ## TODO: if node is split across multiple threads we could 
-            ##  end up messing this up
+            ##  end up putting too many particles into the parent node
             if (child.buffer_size + self.buffer_size) < min_to_refine:
-                print(f'merging {child} into {self}')
+                #print(f'Merging {child} into {self}')
                 self.buffer_coordss += child.buffer_coordss
                 self.buffer_velss += child.buffer_velss
                 self.buffer_rgba_colorss += child.buffer_rgba_colorss
