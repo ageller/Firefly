@@ -29,6 +29,7 @@ class OctNodeStream(object):
         rgba_colorss=None,
         has_velocities=False,
         has_colors=False,
+        nthreads=1
         ):
 
         ## bind input
@@ -37,6 +38,7 @@ class OctNodeStream(object):
         self.field_names,self.nfields = field_names,len(field_names)
         self.name = name
         self.weight_index = weight_index
+        self.nthreads = nthreads
 
         ## initialize the buffers (and fill with any data we were passed)
         self.set_buffers_from_arrays(
@@ -310,6 +312,10 @@ class OctNodeStream(object):
                 name=child_name,
                 has_velocities=self.has_velocities,
                 has_colors=self.has_colors)
+                #nthreads=self.nthreads) ## <-- unnecessary b.c. if nthreads > 0 then
+                # we won't be recursively pruning so the child will have this set
+                # when it's re-initialized in refineNode after it becomes a work_unit
+
             self.children += [child]
             self.child_names += [child_name]
         else: child:OctNodeStream = self.children[self.child_names.index(child_name)]
@@ -320,11 +326,7 @@ class OctNodeStream(object):
         sort_indices = np.argsort([child.buffer_size for child in self.children])
         sort_children = np.array(self.children)[sort_indices]
         for child in sort_children:
-            ## /8 b.c. then even if all 8 children are merged then
-            ##  you would still not end up above min_to_refine
-            ## TODO: if node is split across multiple threads we could 
-            ##  end up putting too many particles into the parent node
-            if (child.buffer_size + self.buffer_size) < min_to_refine:
+            if (child.buffer_size + self.buffer_size) < min_to_refine/self.nthreads:
                 #print(f'Merging {child} into {self}')
                 self.buffer_coordss += child.buffer_coordss
                 self.buffer_velss += child.buffer_velss
