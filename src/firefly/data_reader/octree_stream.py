@@ -622,14 +622,20 @@ class OctreeStream(object):
 
         self.get_work_units()
 
-    def refine(self,nthreads=1):
+    def refine(self,nthreads=1,nrecurse=0):
 
         argss = zip(
             self.get_work_units(nthreads),
             itertools.repeat(self.pathh),
-            itertools.repeat(self.root['weight_index']),
-            itertools.repeat(self.min_to_refine)
+            itertools.repeat(self.min_to_refine),
+            itertools.repeat(self.root['field_names']),
+            itertools.repeat(nrecurse)
         )
+            #node_dicts,
+            #target_directory,
+            #min_to_refine,
+            #field_names
+            #nrecurse=0
 
         if np.size(self.work_units) == 0: raise IndexError("No work to be done! Celebrate!")
 
@@ -744,29 +750,29 @@ class OctreeStream(object):
 def refineNode(
     node_dicts,
     target_directory,
-    weight_index,
     min_to_refine,
-    Nrecurse=0):
+    field_names,
+    nrecurse=0):
 
+    return_value = []
     for node_dict in node_dicts:
-        print(f"refining: {node_dict['name']}")
         
         this_node = OctNodeStream(
             node_dict['center'],
             node_dict['width'],
-            len(field_names)+6,
+            field_names,
             node_dict['name'],
             has_velocities=False,
             has_colors=False)
         
         ## load the particle data for this node from disk
         this_node.set_buffers_from_disk(node_dict['files'],node_dict['buffer_size'])
- 
+
         ## sort these points directly into the children
         this_node.cascade(
             min_to_refine,
             ## only cascade children if they aren't split across threads
-            Nrecurse if node_dict['split_index'] is None else 0)
+            nrecurse if node_dict['split_index'] is None else 0)
 
         ## walk the sub-tree we just created and write node files to disk
         ##  returns a list of dictionaries summarizing the node files that were written to disk
