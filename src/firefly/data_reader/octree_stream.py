@@ -656,6 +656,7 @@ class OctreeStream(object):
             itertools.repeat(self.pathh),
             itertools.repeat(self.min_to_refine),
             itertools.repeat(self.root['field_names']),
+            itertools.repeat(nthreads),
             itertools.repeat(nrecurse)
         )
             #node_dicts,
@@ -781,6 +782,7 @@ def refineNode(
     target_directory,
     min_to_refine,
     field_names,
+    nthreads,
     nrecurse=0):
 
     output_dir = os.path.join(target_directory,f"output_{thread_id:d}.0")
@@ -794,7 +796,12 @@ def refineNode(
             field_names,
             node_dict['name'],
             has_velocities=False,
-            has_colors=False)
+            has_colors=False,
+            ## nthreads will reduce the minimum number of particles to be
+            ##  merged back into a parent b.c. multiple threads may have child
+            ##  particles and that could push the parent back over the maximum
+            ##  in an infinite loop.
+            nthreads=nthreads)  
         
         ## load the particle data for this node from disk
         this_node.set_buffers_from_disk(node_dict['files'],node_dict['buffer_size'])
