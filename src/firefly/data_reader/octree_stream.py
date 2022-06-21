@@ -508,16 +508,15 @@ class OctNodeStream(object):
         ## write each buffer to however many subfiles we need to 
         ##  enforce a maximum file-size on disk
         files = []
-        count_offset = 0
-        for index,count in enumerate(counts):
-            for prefix,buffer in zip(self.prefixes,buffers):
+        for prefix,buffer in zip(self.prefixes,buffers):
+            count_offset = 0
+            for index,count in enumerate(counts):
                 fname = os.path.join(top_level_directory,f"{namestr}{splitstr}{prefix}.{index}.ffraw")
                 RawBinaryWriter(fname,buffer[count_offset:count_offset+count]).write()
 
                 ## append to file list
-                files += [(fname,0,count*4)]
-
-            count_offset+=count
+                files += [[fname,0,int(count)]]
+                count_offset+=count
 
         ## format aggregate data into a dictionary
         node_dict = self.format_node_dictionary()
