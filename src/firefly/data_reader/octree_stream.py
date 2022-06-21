@@ -123,7 +123,7 @@ class OctNodeStream(object):
             'nodes':{}}
 
         if target_directory is not None:
-            output_dir = os.path.join(target_directory,f"output_0.0")
+            output_dir = os.path.join(target_directory,f"output_00.0")
             root_dict['nodes'][self.name] = self.write(output_dir)
             write_to_json(root_dict,os.path.join(target_directory,'octree.json'))
         
@@ -283,7 +283,7 @@ class OctNodeStream(object):
         ##  into the parent
         self.prune(min_to_refine)
 
-        print('New children:',self.child_names)
+        if self.nthreads < 5: print('New children:',self.child_names)
 
         return_value = [(self.name,self.buffer_size)]
 
@@ -462,7 +462,7 @@ class OctNodeStream(object):
         if not os.path.isdir(this_dir): os.makedirs(this_dir)
 
         namestr = f'{self.name}-' if self.name != '' else 'root-'
-        splitstr = f'{split_index:02d}-' if split_index is not None else ''
+        splitstr = ''#f'{split_index:02d}-' if split_index is not None else ''
 
         ## determine how many files we'll need to split this dataset into
         nsub_files = int(4*self.buffer_size//bytes_per_file + (4*self.buffer_size != bytes_per_file))
@@ -516,6 +516,9 @@ class OctNodeStream(object):
                 ## append to file list
                 files += [[fname,0,int(count)]]
                 count_offset+=count
+                fsize = os.path.getsize(fname)
+                if fsize != 4*(count+1):
+                    raise IOError(f"file was not saved correctly actual:{fsize} vs. expected:{4*count+1}")
 
         ## format aggregate data into a dictionary
         node_dict = self.format_node_dictionary()
@@ -662,7 +665,7 @@ class OctreeStream(object):
 
         self.get_work_units()
 
-    def refine(self,nthreads=1,nrecurse=0):
+    def refine(self,nthreads=1,nrecurse=0,use_mps=True):
 
         argss = zip(
             self.get_work_units(nthreads),
@@ -681,7 +684,7 @@ class OctreeStream(object):
 
         if np.size(self.work_units) == 0: raise IndexError("No work to be done! Celebrate!")
 
-        if nthreads <=1: 
+        if not use_mps or nthreads <= 1: 
             new_dicts = [refineNode(*args) for args in argss]
         else: 
             with multiprocessing.Pool(nthreads) as my_pool: new_dicts = my_pool.starmap(refineNode,argss)
@@ -724,7 +727,7 @@ class OctreeStream(object):
 
         print(set(np.hstack(namess)),'still need to be refined')
     
-    def register_child(self,new_child):
+    def register_child(self,new_child,debug=False):
 
         weight_index = self.root['weight_index']
         child_name = new_child['name']
@@ -778,13 +781,13 @@ class OctreeStream(object):
             ##  but you know one can never be too careful
             self.root['nodes'][child_name] = old_child
 
-        print(child_name,'registered:',new_child['buffer_size'],'/',self.root['nodes'][child_name]['buffer_size'],'particles')
+        if debug: print(child_name,'registered:',new_child['buffer_size'],'/',self.root['nodes'][child_name]['buffer_size'],'particles')
 
-    def full_refine(self,nthreads,nrecurse=0):
+    def full_refine(self,nthreads,nrecurse=0,use_mps=True):
 
         while len(self.work_units) >0:
             print(self)
-            try: self.refine(nthreads,nrecurse)
+            try: self.refine(nthreads,nrecurse,use_mps)
             except IndexError as e:
                 print(e.args[0])
                 break
@@ -799,11 +802,10 @@ def refineNode(
     nthreads,
     nrecurse=0):
 
-    output_dir = os.path.join(target_directory,f"output_{thread_id:d}.0")
+    output_dir = os.path.join(target_directory,f"output_{thread_id:02d}.0")
 
     return_value = []
     for node_dict in node_dicts:
-        
         this_node = OctNodeStream(
             node_dict['center'],
             node_dict['width'],
@@ -848,9 +850,23 @@ def group_files(prefixes,files):
     ## group files by prefix with arbitrary number of files for each prefix
     ##  without having to check if `prefix in fname` b.c. that would mess up 
     ##  fields that include vx, x, etc...
-    files = np.transpose(np.array(sorted(files)).reshape(-1,len(prefixes),3),axes=(1,0,2))
+    #files = np.transpose(np.array(sorted(files)).reshape(-1,len(prefixes),3),axes=(1,0,2))
+    filenames_expand = np.array([
+        fname[0].split(os.path.sep) + list(fname[1:])
+        for fname in sorted(files)])
+    new_files = sorted(filenames_expand,key=lambda x: x[-3])
+    new_files = [[os.path.sep+os.path.join(*fline[:-2]),fline[-2],fline[-1]] for fline in new_files]
+    new_files = np.array(np.array_split(new_files,len(prefixes)))#np.transpose(np.array(sorted(files)).reshape(-1,len(prefixes),3),axes=(1,0,2))
 
     ## now rearrange them to match the prefix order. don't ask
     ##  for whom the hack tolls for it tolls for thee
-    files = files[np.argsort(np.argsort(prefixes))]
-    return files
+    new_files = new_files[np.argsort(np.argsort(prefixes))]
+
+    for i,prefix in enumerate(prefixes):
+        for isubfile,ftuple in enumerate(new_files[i]):
+            if os.path.basename(ftuple[0]).split('.')[0][-len(prefix):] != prefix: 
+                print(os.path.basename(ftuple[0]).split('.')[0][-len(prefix):],prefix)
+                print(new_files)
+                import pdb; pdb.set_trace()
+
+    return new_files
