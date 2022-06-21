@@ -259,17 +259,17 @@ class OctNodeStream(object):
  
     def cascade(self,min_to_refine,nrecurse=0):
 
-        print('Refining:',self)
+        if self.nthreads < 5: print('Refining:',self)
         ## flush the buffer into its children
-        printProgressBar(0,self.buffer_size,prefix = 'Progress:',suffix='complete',length=50,decimals=0)
+        if self.nthreads < 5: printProgressBar(0,self.buffer_size,prefix = 'Progress:',suffix='complete',length=50,decimals=0)
         for i in range(self.buffer_size):
             self.sort_point_into_child(
                 self.buffer_coordss[i], 
                 self.buffer_fieldss[i],
                 self.buffer_velss[i] if self.has_velocities else None,
                 self.buffer_rgba_colorss[i] if self.has_colors else None)
-            printProgressBar(i+1,self.buffer_size,prefix = 'Progress:',suffix='complete',length=50,decimals=0)
-        printProgressBar(i+1,self.buffer_size,prefix = 'Progress:',suffix='complete',length=50,decimals=0)
+            if self.nthreads < 5: printProgressBar(i+1,self.buffer_size,prefix = 'Progress:',suffix='complete',length=50,decimals=0)
+        if self.nthreads < 5: printProgressBar(i+1,self.buffer_size,prefix = 'Progress:',suffix='complete',length=50,decimals=0)
 
         ## probably just [] tbh ??
         self.buffer_coordss = np.zeros((0,3)).tolist()
@@ -336,7 +336,6 @@ class OctNodeStream(object):
         sort_children = np.array(self.children)[sort_indices]
         for child in sort_children:
             if (child.buffer_size + self.buffer_size) < min_to_refine/self.nthreads:
-                #print(f'Merging {child} into {self}')
                 self.buffer_coordss += child.buffer_coordss
                 self.buffer_velss += child.buffer_velss
                 self.buffer_rgba_colorss += child.buffer_rgba_colorss
@@ -348,7 +347,7 @@ class OctNodeStream(object):
                 ## remove you from my will
                 self.child_names.pop(self.child_names.index(child.name))
             else: break ## no more room to consume children, the rest get to live on
-        if self.buffer_size > 0: print(f"Merged {self.buffer_size} particles back into parent.")
+        if self.buffer_size > 0 and self.nthreads < 5: print(f"Merged {self.buffer_size} particles back into parent.")
 
     def accumulate(
         self,
@@ -631,7 +630,6 @@ class OctreeStream(object):
                                 )
                             nremain = 0
                             break ## we've filled up the node
-                        #print(len(work_unit),ftuple[0],nremain,npart_this_sub_file)
 
                     copy_node['files'] = np.array(first_split_files).reshape(-1,3).tolist()
                     this_node['files'] = np.array(this_node['files']).tolist()
