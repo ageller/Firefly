@@ -131,13 +131,9 @@ class OctNodeStream(object):
 
     def set_buffers_from_disk(self,files,nparts):
 
-        indices = []
         for fname in files: 
             split = os.path.basename(fname[0]).split('.')
-            if len(split) != 3: raise IOError("bad .ffraw file name, must be field.<i>.ffraw")
-            if split[-1] == 'ffraw': 
-                indices += [int(split[-2])]
-        indices = np.unique(indices)
+            if len(split) != 3: raise IOError(f"bad .ffraw file name [{fname}] must be field.<i>.ffraw")
         
         coordss = np.empty((nparts,3))
         buffers = [coordss[:,0],coordss[:,1],coordss[:,2]]
@@ -155,19 +151,34 @@ class OctNodeStream(object):
         for i in range(self.nfields):
             buffers += [fieldss[:,i]]
 
-        count_offset = 0
-        for index in indices:
-            for prefix,buffer in zip(
-                self.prefixes,
-                buffers):
-                for fname in files:
-                    fname,byte_offset,byte_size = fname
-                    count = int(byte_size/4) ## -1 because the header is integer=nparts
-                    short_fname = os.path.basename(fname)
-                    match = f"{prefix}.{index}.ffraw"
-                    if short_fname[-len(match):] == match:
-                        RawBinaryWriter(fname,buffer[count_offset:count_offset+count]).read(byte_offset,count)
-            count_offset+=count
+        ## sort files and group them into a numpy array
+        files = group_files(self.prefixes,files)
+
+        for prefix,buffer,these_files in zip(
+            self.prefixes,
+            buffers,
+            files):
+            count_offset = 0
+            for fname,byte_offset,count in these_files:
+                ## convert from numpy string to ints
+                byte_offset = byte_offset.astype(int) 
+                count = count.astype(int)
+                if os.path.basename(fname).split('.')[0][-len(prefix):] != prefix:
+                    raise IOError(
+                        "The file grouping didn't work. God save us. Report this to agurvich@u.northwestern.edu immediately.")
+                RawBinaryWriter(fname,buffer[count_offset:count_offset+count]).read(byte_offset,count)
+                count_offset+=count
+
+        """
+        frac_zeros = np.sum(np.all(coordss==0,axis=1))/coordss.shape[0]
+        if frac_zeros > 0:
+            print(
+                self,
+                coordss.shape[0],nparts,
+                frac_zeros,'zeroes')
+            import pdb; pdb.set_trace()
+            raise Exception("STOP")
+        """
 
         self.set_buffers_from_arrays(
             coordss,
@@ -573,55 +584,58 @@ class OctreeStream(object):
                     ##  the node with the remaining particles
                     this_node['split_index'] +=1 
 
-                    min_chunk = 1e10
-                    ## find the earliest remaining chunk
-                    for fname in copy_node['files']:
-                        this_chunk = int(fname[0].split('.')[-2])
-                        if  this_chunk < min_chunk: min_chunk = this_chunk
+                    ## need to find the files that contain the subset we need
+                    files = group_files(self.prefixes,this_node['files'])
 
-                    assigned = 0
                     first_split_files = []
-                    ichunk = min_chunk
-                    while assigned < nremain:
-                        popped = 0
-                        this_chunk_files = []
-                        for i in range(len(this_node['files'])):
-                            fname = this_node['files'][i-popped]
-                            ## ignore any chunks that aren't the one we're looking for
-                            if int(fname[0].split('.')[-2]) != ichunk: continue
 
-                            this_chunk_files += [copy.deepcopy(this_node['files'][i-popped])]
-                            n_this_chunk = fname[2]/4
+                    for subfile_i in range(files.shape[1]):
+                        npart_this_sub_file = files[0,0,-1].astype(int)
 
-                            ## we can add the whole chunk file
-                            if n_this_chunk <= nremain: 
-                                ## get rid of the chunk file in the
-                                ##  node list
-                                this_node['files'].pop(i-popped)
-                                popped+=1
-                            ## need to take *only a portion* of this chunk file.
-                            else: 
-                                ## update the most recent list entry
-                                ##  with the bytesize it should read
-                                this_chunk_files[-1] = (
-                                    this_chunk_files[-1][0],
-                                    this_chunk_files[-1][1],
-                                    4*nremain
+                        ## add the first subfile in
+                        first_split_files += [files[:,0]]
+
+                        ## we can add the entire sub-file
+                        ##  and still have room for more, 
+                        ##  don't need to adjust the sizes of any files
+                        if npart_this_sub_file <= nremain: 
+                            ## get rid of the chunk file in the files array
+                            files = np.delete(files,0,axis=1)
+                            ## also have to get rid of it in the actual node dictionary
+                            
+                            for ftuple in first_split_files[-1]:
+                                for this_index,ftuple_dict in enumerate(this_node['files']):
+                                    if (ftuple[0] == ftuple_dict[0]): break
+                                this_node['files'].pop(this_index)
+                            nremain -= npart_this_sub_file
+                        ## need to take *only a portion* of this chunk file.
+                        ##  so we need to update the size inside first_split_files
+                        ##  and inside the node
+                        else: 
+                            ## get rid of the chunk file in the files array
+                            ## update the most recent list entry
+                            ##  with the bytesize it should read
+                            first_split_files[-1][...,-1] = int(nremain)
+
+                            ## update the remaining files in the dictionary
+                            ##  to reflect that the first part of the byte
+                            ##  string is missing
+                            for ftuple in first_split_files[-1]:
+                                for this_index,ftuple_dict in enumerate(this_node['files']):
+                                    if (ftuple[0] == ftuple_dict[0]): break
+                                
+                                this_node['files'][this_index] = (
+                                    this_node['files'][this_index][0],
+                                    ## whatever byte offset this sub file might've had
+                                    int(first_split_files[-1][0,1]) + nremain*4,
+                                    int(npart_this_sub_file-nremain)
                                 )
+                            nremain = 0
+                            break ## we've filled up the node
+                        #print(len(work_unit),ftuple[0],nremain,npart_this_sub_file)
 
-                                ## update the remaining files to reflect that the first part of the byte
-                                ##  string is missing
-                                this_node['files'][i-popped] = (
-                                    this_chunk_files[-1][0],
-                                    this_chunk_files[-1][1]+nremain*4,
-                                    4*(n_this_chunk-nremain)
-                                )
-
-                        first_split_files += this_chunk_files
-                        assigned += min(n_this_chunk,nremain)
-                        ichunk+=1
-
-                    copy_node['files'] = first_split_files
+                    copy_node['files'] = np.array(first_split_files).reshape(-1,3).tolist()
+                    this_node['files'] = np.array(this_node['files']).tolist()
 
                     work_unit +=[copy_node]
                     nremain = 0
@@ -644,7 +658,10 @@ class OctreeStream(object):
         ## read octree summary file
         self.root = load_from_json(os.path.join(pathh,'octree.json'))
 
-        nodes = self.root['nodes']
+        self.prefixes = (['x','y','z'] +
+            ['vx','vy','vz']*self.root['has_velocities'] + 
+            ['rgba_r','rgba_g','rgba_b','rgba_a']*self.root['has_colors'] + 
+            self.root['field_names'])
 
         self.get_work_units()
 
@@ -829,3 +846,14 @@ def refineNode(
         return_value += this_node.write_tree(output_dir,node_dict['split_index'])
    
     return return_value 
+
+def group_files(prefixes,files):
+    ## group files by prefix with arbitrary number of files for each prefix
+    ##  without having to check if `prefix in fname` b.c. that would mess up 
+    ##  fields that include vx, x, etc...
+    files = np.transpose(np.array(sorted(files)).reshape(-1,len(prefixes),3),axes=(1,0,2))
+
+    ## now rearrange them to match the prefix order. don't ask
+    ##  for whom the hack tolls for it tolls for thee
+    files = files[np.argsort(np.argsort(prefixes))]
+    return files
