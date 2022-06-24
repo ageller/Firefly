@@ -3,6 +3,7 @@ import itertools
 import copy
 import multiprocessing
 import itertools
+import time
 
 import numpy as np
 
@@ -121,12 +122,6 @@ class OctNodeStream(object):
             'has_colors':self.has_colors,
             'weight_index':self.weight_index,
             'nodes':{}}
-
-        if target_directory is not None:
-            output_dir = os.path.join(target_directory,f"output_00.0")
-            root_dict['nodes'][self.name] = self.write(output_dir)
-            write_to_json(root_dict,os.path.join(target_directory,'octree.json'))
-        
         return root_dict
 
     def set_buffers_from_disk(self,files,nparts):
@@ -806,6 +801,7 @@ class OctreeStream(object):
         if debug: print(child_name,'registered:',new_child['buffer_size'],'/',self.root['nodes'][child_name]['buffer_size'],'particles')
 
     def full_refine(self,nthreads,nrecurse=0,use_mps=True):
+        init_time = time.time()
 
         while len(self.work_units) >0:
             print(self)
@@ -813,6 +809,8 @@ class OctreeStream(object):
             except IndexError as e:
                 print(e.args[0])
                 break
+
+        print(((time.time()-init_time)/60),'min elapsed')
 
 ## what gets passed to the multiprocessing.Pool
 def refineNode(
