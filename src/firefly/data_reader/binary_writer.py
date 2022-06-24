@@ -180,7 +180,13 @@ class RawBinaryWriter(BinaryWriter):
             binary_string = handle.read()
             nparts = int.from_bytes(binary_string[:4],byteorder='little', signed=False)
             if count is None: count = nparts
-            arr = np.frombuffer(binary_string[4+byte_offset:], dtype=np.float32, count=int(count))
+            try: arr = np.frombuffer(binary_string[4+byte_offset:], dtype=np.float32, count=int(count))
+            except: 
+                print(f'{self.fname}: {len(binary_string)} bytes.',
+                '\nheader:',nparts,
+                'requesting:',count,
+                "at offset:",byte_offset)
+                raise
         self.data[...] = arr
         
 class OctBinaryWriter(BinaryWriter):
