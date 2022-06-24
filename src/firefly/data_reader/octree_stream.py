@@ -527,13 +527,16 @@ class OctNodeStream(object):
                 count_offset+=count
                 fsize = os.path.getsize(fname)
                 if fsize != 4*(count+1):
-                    raise IOError(f"file was not saved correctly actual:{fsize} vs. expected:{4*count+1}")
+                    raise IOError(f"file was not saved correctly, actual bytes:{int(fsize)} vs. expected:{int(4*count+1)}")
 
         ## format aggregate data into a dictionary
         node_dict = self.format_node_dictionary()
 
         ## append buffer files
         node_dict['files'] = files
+
+        ## validate one more time...
+        validate_files(node_dict)
 
         return node_dict
 
@@ -691,6 +694,9 @@ class OctreeStream(object):
             #field_names
             #nrecurse=0
 
+        ## validate all the files
+        validate_files(self.root)
+
         if np.size(self.work_units) == 0: raise IndexError("No work to be done! Celebrate!")
 
         if not use_mps or nthreads <= 1: 
@@ -700,6 +706,7 @@ class OctreeStream(object):
 
 
         bad_files = set([])
+        good_files = []
         popped = []
         for work_unit,children in zip(self.work_units,new_dicts):
             
@@ -711,16 +718,19 @@ class OctreeStream(object):
                     self.root['nodes'].pop(old_name)
                     popped+=[old_name]
 
-                ## do want to accumulate the bad files though
+                ## accumulate the bad files though. don't do this outside the loop
+                ##  because there are nodes that don't need to be refined anymore
+                ##  that aren't referenced in the new children
                 this_bad_files = [fname[0] for fname in old_node['files']]
                 bad_files = bad_files.union(set(this_bad_files))
 
             ## register the old_node (children[0]) and each of its children.
             for child in children: self.register_child(child)
 
-        ## delete any files that are no longer being pointed to.
-        good_files = [[ fname[0] for fname in node['files'] ] for node in children 
-            if 'files' in node.keys() and node['buffer_size']>0]
+            ## delete any files that are no longer being pointed to.
+            good_files += [[ fname[0] for fname in node['files'] ] for node in children 
+                if 'files' in node.keys() and node['buffer_size']>0]
+
         good_files = set(np.hstack(good_files))
         bad_files -= good_files
         for bad_file in bad_files:
@@ -729,6 +739,9 @@ class OctreeStream(object):
 
         ## write out the new octree.json
         write_to_json(self.root,os.path.join(self.pathh,'octree.json'))
+
+        ## and validate once more...
+        validate_files(self.root)
 
     def print_work(self):
         namess = [[expand_node['name'] for expand_node in expand_nodes] for 
@@ -879,3 +892,33 @@ def group_files(prefixes,files):
                 import pdb; pdb.set_trace()
 
     return new_files
+
+def validate_files(dictionary):
+
+    ## pass a dictionary of dictionaries
+    if 'nodes' in dictionary.keys():
+        for node_name in dictionary['nodes'].keys():
+            ## recursively validate
+            validate_files(dictionary['nodes'][node_name])
+        return True
+    ## passed a single dictionary
+    elif 'files' in dictionary.keys(): ftuples = dictionary['files']
+    else: return True#raise KeyError(f"No files to validate in {dictionary.keys()}")
+
+    validate_dict = {}
+    for fname,byte_offset,count in ftuples:
+        fsize = os.path.getsize(fname)
+        filekey = os.path.basename(fname)
+        if filekey not in validate_dict.keys():
+            validate_dict[filekey] = [int(fsize/4-1),count]
+        else: 
+            validate_dict[filekey][0] += int(fsize/4-1) ## -1 b.c. ignore header bytes
+            validate_dict[filekey][1] += count
+    
+    for key,(fcount,count) in validate_dict.items():
+        if fcount != count: 
+            raise IOError(
+            f"{key} : {fcount:.0f} particles on disk but {count} in metadata.")
+        #print(key,end='\t')
+    #print()
+    return True
