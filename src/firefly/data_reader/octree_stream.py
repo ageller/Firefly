@@ -382,13 +382,13 @@ class OctNodeStream(object):
         self.buffer_fieldss.append(fields)
         self.fields += fields
 
-    def write_tree(self,target_directory,split_index):
+    def write_tree(self,target_directory,split_index,write_protect=False):
 
         ## format accumulated values into a dictionary
         if self.buffer_size == 0:
             this_node_dict = self.format_node_dictionary()
         ## some children were merged back into the parent, write them to disk
-        else: this_node_dict = self.write(target_directory,split_index)
+        else: this_node_dict = self.write(target_directory,split_index,write_protect=write_protect)
 
         if hasattr(self,'processed'): this_node_dict['processed'] = self.processed
 
@@ -450,7 +450,7 @@ class OctNodeStream(object):
 
         return node_dict
 
-    def write(self,top_level_directory,split_index=None,bytes_per_file=4e7):
+    def write(self,top_level_directory,split_index=None,bytes_per_file=4e7,write_protect=False):
 
         ## convert buffers to numpy arrays
         self.buffer_coordss = np.array(self.buffer_coordss)
@@ -510,7 +510,16 @@ class OctNodeStream(object):
         for prefix,buffer in zip(self.prefixes,buffers):
             count_offset = 0
             for index,count in enumerate(counts):
-                fname = os.path.join(top_level_directory,f"{namestr}{splitstr}{prefix}.{index}.ffraw")
+                ## if a child created in this thread or 
+                ##  the parent node was not split between threads
+                if not write_protect or split_index is None:
+                    fname = os.path.join(top_level_directory,f"{namestr}{splitstr}{prefix}.{index}.ffraw")
+                else:
+                    ## don't overwrite a file before another thread can read particles from it
+                    ##  this will only happen for a node that is split between multiple threads
+                    ##  children won't be written with references to files that already exist. only
+                    ##  pruned children are written on top of old particle data.
+                    fname = os.path.join(top_level_directory,f"{namestr}pruned-{splitstr}{prefix}.{index}.ffraw")
                 RawBinaryWriter(fname,buffer[count_offset:count_offset+count]).write()
 
                 ## append to file list
@@ -842,7 +851,7 @@ def refineNode(
 
         ## walk the sub-tree we just created and write node files to disk
         ##  returns a list of dictionaries summarizing the node files that were written to disk
-        return_value += this_node.write_tree(output_dir,node_dict['split_index'])
+        return_value += this_node.write_tree(output_dir,node_dict['split_index'],write_protect=True)
    
     return return_value 
 
