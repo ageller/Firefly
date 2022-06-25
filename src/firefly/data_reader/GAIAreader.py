@@ -57,7 +57,13 @@ class GaiaReader(Reader):
             target_directory,
             nthreads=nthreads,
             min_to_refine=1e6,
-            nrecurse=nrecurse)
+            nrecurse=nrecurse,
+            ## set startup settings
+            color=(120/256, 41/256, 173/256,1),
+            showColormap=True,
+            colormap=31.5/32,
+            sizeMult=50
+            )
 
         ## load the RV data
         target_directory = os.path.join(os.path.dirname(gaiadir),os.path.dirname(gaiadir),'DR3-RV')
@@ -78,7 +84,14 @@ class GaiaReader(Reader):
             target_directory,
             nthreads=nthreads,
             min_to_refine=min_to_refine,
-            nrecurse=nrecurse)
+            ## set startup settings
+            nrecurse=nrecurse,
+            color=(61/256, 248/256, 116/256,1),
+            colormapVariable=2,
+            showColormap=True,
+            colormap=31.5/32,
+            sizeMult=50
+            )
 
         super().__init__(
             datadir=os.path.dirname(gaiadir), 
