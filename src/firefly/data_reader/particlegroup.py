@@ -3,10 +3,10 @@ import numpy as np
 
 import os 
 
-from .json_utils import write_to_json
+from .json_utils import write_to_json,load_from_json
 from .binary_writer import BinaryWriter
 
-from .octree import Octree
+from .octree_stream import Octree
 
 class ParticleGroup(object):
     """
@@ -466,99 +466,104 @@ class ParticleGroup(object):
 
         return self.octree
 
-    def outputToJSON(
+    def writeToDisk(
         self,
-        short_data_path,
-        hard_data_path,
-        JSON_prefix='',
+        target_directory,
+        file_prefix='',
+        file_extension='.ffly',
         loud=True,
-        max_npart_per_file=10**4,
-        clean_JSONdir=False,
-        write_to_disk=True,
-        not_reader=True):
-        """Outputs this ParticleGroup instance's data to JSON format, splitting it up into 
-            multiple sub-JSON files. Best used when coupled with a :class:`firefly.data_reader.Reader`'s
+        max_npart_per_file=10**5,
+        clean_datadir=False,
+        not_reader=True,
+        write_to_disk=True):
+        """Outputs this ParticleGroup instance's data to a compatible Firefly format,
+            either `.ffly` or `.json`. Data is partitioned into 
+            multiple sub-files. This is best used when coupled with a :class:`firefly.data_reader.Reader`'s
             :func:`~firefly.data_reader.Reader.writeToDisk` method.
 
-        :param short_data_path: the sub-directory you want to put these files into
-        :type short_data_path: str
-        :param hard_data_path: the path to the directory containing different datasets'
-            JSON sub-directories (often :code:`/path/to/firefly/static/data`)
-        :type hard_data_path: str
-        :param JSON_prefix: Prefix for any :code:`.json` files created, :code:`.json` files will be of the format:
-            :code:`<JSON_prefix><parttype>_%d.json`, defaults to ''
-        :type JSON_prefix: str, optional
+        :param target_directory: the path to the directory where data should be saved
+        :type target_directory: str
+        :param file_extension: File extension for data files created, one of `.ffly` (binary)
+            or `.json` (ASCII).
+        :type file_extension: str, optional
+        :param file_prefix: Prefix for any files created, filenames will look like:
+            `f"{file_prefix}{self.UIname}{i_file:03d}{file_extension}"` 
+        :type file_prefix: str, optional
         :param loud: flag to print status information to the console, defaults to True
         :type loud: bool, optional
         :param max_npart_per_file: the maximum number of particles saved per :code:`.json` file,
             don't use too large a number or you will have trouble loading
             the individual files in., defaults to 10**4
         :type max_npart_per_file: int, optional
-        :param clean_JSONdir: flag to delete all :code:`.json` files in
+        :param clean_datadir: flag to delete all :code:`.json` files in
             the :code:`JSONdir`. Strictly not necessary (since :code:`filenames.json` 
             will be updated) but it is good to clean up after yourself., defaults to False
-        :type clean_JSONdir: bool, optional
+        :type clean_datadir: bool, optional
         :param write_to_disk: flag that controls whether data is saved to disk (:code:`True`)
             or only converted to a string and returned (:code:`False`), defaults to True
         :type write_to_disk: bool, optional
         :param not_reader: flag for whether to print the Reader :code:`filenames.json` warning, defaults to True
-        :type write_to_disk: bool, optional
-        :return: filename, JSON_array (either a list full of filenames if
+        :type not_reader: bool, optional
+        :return: filename, file_list (either a list full of filenames if
             written to disk or a list of JSON strs)
         :rtype: str, list of str
         """
 
-        if self.octree is not None:
-            raise AssertionError(
-                "Octrees can only be output to binary format."+
-                " Use outputToFFLY instead to produce the necessary .fftree files.")
+        extensions = ['.json','.ffly']
+        if file_extension not in extensions: raise ValueError(
+            f"Invalid extension {file_extension} must be one of {extensions}")
+        
+        ## can't pass raw binary data to the app while it's running (yet?)
+        if not write_to_disk: file_extension = '.json'
+
+        ## where are we saving this json to?
+
+        if not os.path.isdir(target_directory): os.makedirs(target_directory)
+
+        if loud and not_reader:
+            print("You will need to add the sub-filenames to"+
+                " filenames.json if this was not called by a Reader instance.")
+            print("Writing:",self,"files to %s"%target_directory)
+
+        ## do we want to delete any existing files here?
+        if clean_datadir:
+            #print("Removing old ffly files from %s"%target_directory)
+            for fname in os.listdir(target_directory):
+                if ("ffly" in fname or
+                    "json" in fname or 
+                    "fftree" in fname):
+                    os.remove(os.path.join(target_directory,fname))
 
         ## shuffle particles and decimate as necessary, save the output in dec_inds
         self.getDecimationIndexArray()
 
-        ## where are we saving this json to?
-        full_path = os.path.join(hard_data_path, short_data_path)
+        ## determine if we were passed a boolean mask or a index array
+        if self.dec_inds.dtype == bool:
+            nparts = np.sum(self.dec_inds)
+            self.dec_inds = np.argwhere(self.dec_inds) ## convert to an index array
+        else: nparts = self.dec_inds.shape[0]
 
-        if not os.path.isdir(full_path):
-            os.makedirs(full_path)
-        if loud and not_reader:
-            print("You will need to add the sub-filenames to"+
-                " filenames.json if this was not called by a Reader instance.")
-            print("Writing:",self,"to %s"%full_path)
+        ## how many sub-files are we going to need?
+        nfiles = int(nparts/max_npart_per_file + ((nparts%max_npart_per_file)!=0))
 
-        ## do we want to delete any existing jsons here?
-        if clean_JSONdir:
-            #print("Removing old JSON files from %s"%full_path)
-            for fname in os.listdir(full_path):
-                if ("ffly" in fname or
-                    "json" in fname or 
-                    "fftree" in fname):
-                    os.remove(os.path.join(full_path,fname))
+        ## how many particles will each file have and what are they named?
+        filenames = [
+            os.path.join(
+                os.path.basename(target_directory),
+                f"{file_prefix}{self.UIname}{i_file:03d}{file_extension}") 
+                for i_file in range(nfiles)]
+        nparts = [min(max_npart_per_file,nparts-(i_file)*(max_npart_per_file)) for i_file in range(nfiles)]
 
-        filenames_and_nparts = self.filenames_and_nparts
-        ## if the user did not specify how we should partition the data between
-        ##  sub-JSON files then we'll just do it equally
-        if filenames_and_nparts is None:
-            ## determine if we were passed a boolean mask or a index array
-            if self.dec_inds.dtype == bool:
-                nparts = np.sum(self.dec_inds)
-                self.dec_inds = np.argwhere(self.dec_inds) ## convert to an index array
-            else:
-                nparts = self.dec_inds.shape[0]
-
-            ## how many sub-files are we going to need?
-            nfiles = int(nparts/max_npart_per_file + ((nparts%max_npart_per_file)!=0))
-
-            ## how many particles will each file have and what are they named?
-            filenames = [os.path.join(short_data_path,"%s%s%03d.json"%(JSON_prefix,self.UIname,i_file)) for i_file in range(nfiles)]
-            nparts = [min(max_npart_per_file,nparts-(i_file)*(max_npart_per_file)) for i_file in range(nfiles)]
-
-            filenames_and_nparts = list(zip(filenames,nparts))
+        filenames_and_nparts = list(zip(filenames,nparts))
         
-        JSON_array = []
+        file_list = []
         ## loop through the sub-files
         cur_index = 0
+
         for i_file,(fname,nparts_this_file) in enumerate(filenames_and_nparts):
+            nparts_this_file=np.ceil(nparts_this_file).astype(int)
+
+            abs_fname = os.path.join(os.path.dirname(target_directory),fname)
             ## pick out the indices for this file
             if self.decimation_factor > 1:
                 these_dec_inds = self.dec_inds[cur_index:cur_index+nparts_this_file]
@@ -566,22 +571,44 @@ class ParticleGroup(object):
                 ## create a dummy index array that takes everything
                 these_dec_inds = np.arange(cur_index,cur_index+nparts_this_file,dtype=int)
         
-            ## format an output dictionary
-            outDict = self.outputToDict(
-                these_dec_inds,
-                i_file==0)
+            if file_extension=='.ffly':
+                ## prepare writer class
+                binary_writer = BinaryWriter(
+                    abs_fname,
+                    self.coordinates[these_dec_inds],
+                    self.velocities[these_dec_inds] if self.velocities is not None else None,
+                    self.rgba_colors[these_dec_inds] if self.rgba_colors is not None else None)
 
-            fname = os.path.join(hard_data_path,fname)
+                ## fill necessary attributes
+                binary_writer.nfields = len(self.field_names)
+                binary_writer.field_names = self.field_names
+                if len(self.field_names): binary_writer.fields = np.array(self.field_arrays)[:,these_dec_inds]
+                else: binary_writer.fields = []
+                binary_writer.filter_flags = self.field_filter_flags
+                binary_writer.colormap_flags = self.field_colormap_flags
+                binary_writer.radius_flags = self.field_radius_flags
 
-            JSON_array += [(
-                fname,
-                write_to_json(outDict,
-                    fname if write_to_disk else None))] ## path=None -> returns a string
+                file_list += [(
+                    ## need to replace w/ relative path from static/data
+                    ##  in reader
+                    abs_fname,
+                    binary_writer.write())] 
+            elif file_extension == '.json': 
+                ## format an output dictionary
+                outDict = self.outputToDict(
+                    these_dec_inds,
+                    i_file==0)
+
+                file_list += [
+                    (abs_fname,
+                    write_to_json(outDict,
+                        abs_fname if write_to_disk else None))]
+            # else: <-- unnecessary b.c. we do validation above
 
             ## move onto the next file
             cur_index += nparts_this_file
         
-        return JSON_array,filenames_and_nparts
+        return file_list,filenames_and_nparts
 
 ## Octree's methods will be called before ParticleGroup's
 class OctreeParticleGroup(Octree,ParticleGroup):
