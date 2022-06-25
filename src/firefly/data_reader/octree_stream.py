@@ -59,10 +59,7 @@ class OctNodeStream(object):
         self.children = []
         self.child_names = []
  
-    def set_buffers_from_dict(
-        self,
-        data_dict,
-        target_directory=None):
+    def set_buffers_from_dict(self,data_dict,width=None):
  
         keys = list(data_dict.keys())
         if 'x' not in keys: raise KeyError(f"Data dict missing coordinates {keys}")
@@ -104,8 +101,7 @@ class OctNodeStream(object):
         for i,field_name in enumerate(self.field_names):
             fieldss[:,i] = data_dict.pop(field_name)
 
-        width = np.max(coordss.max(axis=0) - coordss.min(axis=0))
-
+        if width is None: width = np.max(coordss.max(axis=0) - coordss.min(axis=0))
         self.width = width
         self.center = np.zeros(3)
  
@@ -156,24 +152,13 @@ class OctNodeStream(object):
             count_offset = 0
             for fname,byte_offset,count in these_files:
                 ## convert from numpy string to ints
-                byte_offset = byte_offset.astype(int) 
-                count = count.astype(int)
+                byte_offset = int(eval(byte_offset))
+                count = int(eval(count))
                 if os.path.basename(fname).split('.')[0][-len(prefix):] != prefix:
                     raise IOError(
                         "The file grouping didn't work. God save us. Report this to agurvich@u.northwestern.edu immediately.")
                 RawBinaryWriter(fname,buffer[count_offset:count_offset+count]).read(byte_offset,count)
                 count_offset+=count
-
-        """
-        frac_zeros = np.sum(np.all(coordss==0,axis=1))/coordss.shape[0]
-        if frac_zeros > 0:
-            print(
-                self,
-                coordss.shape[0],nparts,
-                frac_zeros,'zeroes')
-            import pdb; pdb.set_trace()
-            raise Exception("STOP")
-        """
 
         self.set_buffers_from_arrays(
             coordss,
@@ -467,7 +452,7 @@ class OctNodeStream(object):
         buffers = [self.buffer_coordss[:,0],self.buffer_coordss[:,1],self.buffer_coordss[:,2]]
 
         if self.has_velocities:
-            if self.buffer_velss.shape[0] > 0:
+            if self.buffer_velss.shape[0] > 0 and np.sum(self.velocity) == 0:
                 raise IndexError("has_velocities but buffer_velss is empty")
 
             ## undo the weighting to write to disk
@@ -535,10 +520,9 @@ class OctNodeStream(object):
 
         return node_dict
 
-class OctreeStream(object):
-
+class Octree(object):
     def __repr__(self):
-        return f"OctreeStream({len(self.work_units)}/{len(self.root['nodes'])})"
+        return f"{self.UIname} - {len(self.root['nodes'])} nodes - {len(self.root['field_names'])} tracked fields"
     
     def get_work_units(self,nthreads=1):
 
@@ -598,7 +582,7 @@ class OctreeStream(object):
                     first_split_files = []
 
                     for subfile_i in range(files.shape[1]):
-                        npart_this_sub_file = files[0,0,-1].astype(int)
+                        npart_this_sub_file = int(eval(files[0,0,-1]))
 
                         ## add the first subfile in
                         first_split_files += [files[:,0]]
@@ -650,11 +634,22 @@ class OctreeStream(object):
             work_units += [work_unit]
 
         self.work_units = work_units
-        self.print_work()
 
         return work_units
 
-    def __init__(self,pathh,min_to_refine=1e6):
+    def print_work(self):
+        namess = [[expand_node['name'] for expand_node in expand_nodes] for 
+            expand_nodes in self.work_units]
+        to_do = set(np.hstack(namess))
+        if len(to_do) > 0: print(to_do,'still need to be refined')
+
+    def __init__(
+        self,
+        UIname,
+        pathh,
+        min_to_refine=1e6):
+
+        self.UIname = UIname
         """ pathh is path to data that has already been saved to .ffraw format and has an acompanying octree.json """
         ## gotsta point us to an octree my friend
         if not os.path.isdir(pathh): raise IOError(pathh)
@@ -672,7 +667,19 @@ class OctreeStream(object):
 
         self.get_work_units()
 
-    def refine(self,nthreads=1,nrecurse=0,use_mps=True):
+    def full_refine(self,nthreads,nrecurse=0,use_mps=True,loud=True):
+        init_time = time.time()
+
+        while len(self.work_units) >0:
+            if loud: print(self)
+            try: self.refine(nthreads,nrecurse,use_mps,loud)
+            except IndexError as e:
+                print(e.args[0])
+                break
+
+        if loud: print(((time.time()-init_time)/60),'min elapsed')
+
+    def refine(self,nthreads=1,nrecurse=0,use_mps=True,loud=True):
 
         argss = zip(
             self.get_work_units(nthreads),
@@ -688,6 +695,10 @@ class OctreeStream(object):
             #min_to_refine,
             #field_names
             #nrecurse=0
+
+
+        ## print which nodes need to be refined to the console
+        if loud: self.print_work()
 
         ## validate all the files
         validate_files(self.root)
@@ -737,13 +748,7 @@ class OctreeStream(object):
 
         ## and validate once more...
         validate_files(self.root)
-
-    def print_work(self):
-        namess = [[expand_node['name'] for expand_node in expand_nodes] for 
-            expand_nodes in self.work_units]
-
-        print(set(np.hstack(namess)),'still need to be refined')
-    
+ 
     def register_child(self,new_child,debug=False):
 
         weight_index = self.root['weight_index']
@@ -800,18 +805,6 @@ class OctreeStream(object):
 
         if debug: print(child_name,'registered:',new_child['buffer_size'],'/',self.root['nodes'][child_name]['buffer_size'],'particles')
 
-    def full_refine(self,nthreads,nrecurse=0,use_mps=True):
-        init_time = time.time()
-
-        while len(self.work_units) >0:
-            print(self)
-            try: self.refine(nthreads,nrecurse,use_mps)
-            except IndexError as e:
-                print(e.args[0])
-                break
-
-        print(((time.time()-init_time)/60),'min elapsed')
-
 ## what gets passed to the multiprocessing.Pool
 def refineNode(
     node_dicts,
@@ -831,8 +824,8 @@ def refineNode(
             node_dict['width'],
             field_names,
             node_dict['name'],
-            has_velocities=False,
-            has_colors=False,
+            has_velocities=node_dict['com_velocity'] is not None,
+            has_colors=node_dict['rgba_color'] is not None,
             ## nthreads will reduce the minimum number of particles to be
             ##  merged back into a parent b.c. multiple threads may have child
             ##  particles and that could push the parent back over the maximum
@@ -876,7 +869,7 @@ def group_files(prefixes,files):
         for fname in sorted(files)])
     new_files = sorted(filenames_expand,key=lambda x: x[-3])
     new_files = [[os.path.sep+os.path.join(*fline[:-2]),fline[-2],fline[-1]] for fline in new_files]
-    new_files = np.array(np.array_split(new_files,len(prefixes)))#np.transpose(np.array(sorted(files)).reshape(-1,len(prefixes),3),axes=(1,0,2))
+    new_files = np.array(np.array_split(new_files,len(prefixes)),dtype=object)#np.transpose(np.array(sorted(files)).reshape(-1,len(prefixes),3),axes=(1,0,2))
 
     ## now rearrange them to match the prefix order. don't ask
     ##  for whom the hack tolls for it tolls for thee
@@ -888,6 +881,7 @@ def group_files(prefixes,files):
                 print(os.path.basename(ftuple[0]).split('.')[0][-len(prefix):],prefix)
                 print(new_files)
                 import pdb; pdb.set_trace()
+                raise IOError('File grouping failed. Alert Alex immediately!!')
 
     return new_files
 
