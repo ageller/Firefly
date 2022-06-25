@@ -914,3 +914,32 @@ def validate_files(dictionary):
         #print(key,end='\t')
     #print()
     return True
+
+def init_octree_root_node(dictionary,top_level_directory=None,thread_id=0):
+    """
+    root_dict = {'field_names':self.field_names,
+            'has_velocities':self.has_velocities,
+            'has_colors':self.has_colors,
+            'weight_index':self.weight_index,
+            'nodes':{}}
+    """
+
+
+    axis_mins = np.zeros(3)
+    axis_maxs = np.zeros(3)
+    for i,axis in enumerate([ 'x', 'y', 'z']):
+        axis_mins[i] = np.min(dictionary[axis])
+        axis_maxs[i] = np.max(dictionary[axis])
+
+    root = OctNodeStream(None,None,[]) 
+    root_dict = root.set_buffers_from_dict(dictionary)
+
+
+    if top_level_directory is not None:
+        root_dict['axis_mins'] = axis_mins
+        root_dict['axis_maxs'] = axis_maxs
+        output_dir = os.path.join(top_level_directory,f'output_{thread_id:02d}.0')
+        root_dict['nodes'][root.name] = root.write(output_dir)
+        write_to_json(root_dict,os.path.join(top_level_directory,'octree.json'))
+
+    return root_dict
