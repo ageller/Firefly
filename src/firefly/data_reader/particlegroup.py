@@ -83,7 +83,6 @@ class ParticleGroup(object):
         field_colormap_flags=None,
         field_radius_flags=None,
         decimation_factor=1,
-        filenames_and_nparts=None,
         attached_settings=None,
         loud=True,
         **settings_kwargs):
@@ -121,19 +120,6 @@ class ParticleGroup(object):
         :param decimation_factor: factor by which to reduce the data randomly 
                 i.e. :code:`data=data[::decimation_factor]`, defaults to 1
         :type decimation_factor: int, optional
-        :param filenames_and_nparts: Allows you to manually control how the particles
-            are distributed among the sub-JSON files, it is
-            **highly recommended that you leave this to** None such that particles are equally
-            distributed among the :code:`.jsons` but if for whatever reason you need fine-tuning
-            you should pass a list of tuples in the form 
-
-            :code:`[("json_name0.json",nparts_this_file0),("json_name1.json",nparts_this_file1) ... ]`
-
-            where where the sum of :code:`nparts_this_file%d` is exactly :code:`nparts`. These files
-            will automatically be added to :code:`filenames.json` if you use
-            an attached :class:`firefly.data_reader.Reader` and 
-            its :class:`~firefly.data_reader.Reader.writeToDisk` method, defaults to None
-        :type filenames_and_nparts: list of tuple of (str,int), optional
         :param attached_settings: :class:`~firefly.data_reader.Settings` instance that should be linked
             to this particle group such that GUI elements are connected correctly. If not provided here
             can be attached after-the-fact using the
@@ -143,7 +129,6 @@ class ParticleGroup(object):
         :type loud: bool, optional
         :raises ValueError: if len(field_names) != len(field arrays)
         :raises ValueError: if a field_array has length other than len(coordinates)
-        :raises ValueError: if filenames_and_nparts is not a list of tuples and strs
         :raises ValueError: if :code:`color` is passed as an option kwarg but the value is 
             not an RGBA iterable
         :raises KeyError: if passed an invalid option_kwarg
@@ -234,19 +219,6 @@ class ParticleGroup(object):
         self.field_filter_flags = np.array(field_filter_flags)
         self.field_colormap_flags = np.array(field_colormap_flags)
         self.field_radius_flags = np.array(field_radius_flags)
-
-        ## validate filenames and nparts if anyone was so foolhardy to
-        ##  send it in themselves
-        if filenames_and_nparts is not None:
-            try:
-                assert type(filenames_and_nparts[0]) == tuple
-                assert type(filenames_and_nparts[0][0]) == str
-                assert type(filenames_and_nparts[0][1]) == int
-            except AssertionError:
-                ValueError("filenames_and_nparts should be a list of tuples of strings and ints")
-
-        self.filenames_and_nparts = filenames_and_nparts
-        
 
         ## TODO how do these interface with javascript code?
         self.radiusFunction = None
