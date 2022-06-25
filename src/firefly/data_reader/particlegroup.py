@@ -583,98 +583,96 @@ class ParticleGroup(object):
         
         return JSON_array,filenames_and_nparts
 
-    def outputToFFLY(
+## Octree's methods will be called before ParticleGroup's
+class OctreeParticleGroup(Octree,ParticleGroup):
+
+    def __init__(
         self,
-        short_data_path,
-        hard_data_path,
-        file_prefix='',
+        UIname,
+        pathh,
+        min_to_refine=1e6,
+        nthreads=1,
+        nrecurse=0,
+        use_mps=True,
         loud=True,
-        max_npart_per_file=10**5,
-        clean_FFLYdir=False,
-        not_reader=True):
+        **kwargs):
 
-        ## where are we saving this json to?
-        full_path = os.path.join(hard_data_path, short_data_path)
+        ## initialize the octree portion of the OctreeParticleGroup
+        Octree.__init__(self,UIname,pathh,min_to_refine)
 
-        if not os.path.isdir(full_path):
-            os.makedirs(full_path)
-        if loud and not_reader:
-            print("You will need to add the sub-filenames to"+
-                " filenames.json if this was not called by a Reader instance.")
-            print("Writing:",self,"files to %s"%full_path)
+        ## do the actual work of building the octree,
+        ##  might take a while...
+        self.full_refine(nthreads,nrecurse,use_mps,loud=loud)
 
-        ## do we want to delete any existing files here?
-        if clean_FFLYdir:
-            #print("Removing old ffly files from %s"%full_path)
-            for fname in os.listdir(full_path):
-                if ("ffly" in fname or
-                    "json" in fname or 
-                    "fftree" in fname):
-                    os.remove(os.path.join(full_path,fname))
+        ## unpack the center coordinates and field values
+        (coordinates,
+            velocities,
+            rgba_colors,
+            field_arrays) = self.unpack_tree_nodes()
 
-        if self.octree is not None:
-            tree_filename,num_nodes,node_filenames = self.octree.writeOctree(
-                full_path,
-                self.UIname,
-                max_npart_per_file)
-            ## mimic return signature: file_array, filenames_and_nparts
-            return [tree_filename],[(tree_filename,num_nodes)]
+        ## initialize the particlegroup portion of the OctreeParticleGroup
+        ParticleGroup.__init__(
+            self,
+            self.UIname,
+            coordinates,
+            velocities,
+            rgba_colors,
+            field_arrays,
+            field_names=self.root['field_names'],
+            loud=loud,
+            **kwargs)
+ 
+    def unpack_tree_nodes(self):
 
-        ## shuffle particles and decimate as necessary, save the output in dec_inds
-        self.getDecimationIndexArray()
+        nodes = self.root['nodes']
+        field_names = self.root['field_names']
 
-        filenames_and_nparts = self.filenames_and_nparts
-        ## if the user did not specify how we should partition the data between
-        ##  sub-JSON files then we'll just do it equally
-        if filenames_and_nparts is None:
-            ## determine if we were passed a boolean mask or a index array
-            if self.dec_inds.dtype == bool:
-                nparts = np.sum(self.dec_inds)
-                self.dec_inds = np.argwhere(self.dec_inds) ## convert to an index array
-            else: nparts = self.dec_inds.shape[0]
+        numnodes = len(nodes.keys())
 
-            ## how many sub-files are we going to need?
-            nfiles = int(nparts/max_npart_per_file + ((nparts%max_npart_per_file)!=0))
+        coordinates = np.empty((numnodes,3))
 
-            ## how many particles will each file have and what are they named?
-            filenames = [os.path.join(short_data_path,"%s%s%03d.ffly"%(file_prefix,self.UIname,i_file)) for i_file in range(nfiles)]
-            nparts = [min(max_npart_per_file,nparts-(i_file)*(max_npart_per_file)) for i_file in range(nfiles)]
+        if self.root['has_velocities']: 
+            velocities = np.empty((numnodes,3))
+        else: velocities = None
 
-            filenames_and_nparts = list(zip(filenames,nparts))
-        
-        file_array = []
-        ## loop through the sub-files
-        cur_index = 0
+        if self.root['has_colors']: 
+            rgba_colors = np.empty((numnodes,4))
+        else: rgba_colors = None
+        fields = np.empty((len(field_names),numnodes))
 
-        for i_file,(fname,nparts_this_file) in enumerate(filenames_and_nparts):
-            nparts_this_file=np.ceil(nparts_this_file).astype(int)
-            ## pick out the indices for this file
-            if self.decimation_factor > 1:
-                these_dec_inds = self.dec_inds[cur_index:cur_index+nparts_this_file]
-            else:
-                ## create a dummy index array that takes everything
-                these_dec_inds = np.arange(cur_index,cur_index+nparts_this_file,dtype=int)
-        
-            ## prepare writer class
-            fname = os.path.join(hard_data_path,fname)
-            binary_writer = BinaryWriter(
-                fname,
-                self.coordinates[these_dec_inds],
-                self.velocities[these_dec_inds] if self.velocities is not None else None,
-                self.rgba_colors[these_dec_inds] if self.rgba_colors is not None else None)
+        for inode,node_dict in enumerate(nodes.values()):
+            coordinates[inode,:] = node_dict['center_of_mass']
+            if velocities is not None: velocities[inode,:] = node_dict['com_velocity']
+            if rgba_colors is not None: rgba_colors[inode,:] = node_dict['rgba_color']
+            for ifield,field_name in enumerate(field_names):
+                fields[ifield,inode] = node_dict[field_name]
 
-            ## fill necessary attributes
-            binary_writer.nfields = len(self.field_names)
-            binary_writer.field_names = self.field_names
-            if len(self.field_names): binary_writer.fields = np.array(self.field_arrays)[:,these_dec_inds]
-            else: binary_writer.fields = []
-            binary_writer.filter_flags = self.field_filter_flags
-            binary_writer.colormap_flags = self.field_colormap_flags
-            binary_writer.radius_flags = self.field_radius_flags
+        return coordinates,velocities,rgba_colors,fields
 
-            file_array += [(fname,binary_writer.write())] 
+    def writeToDisk(
+        self,
+        target_directory,
+        file_extension='.json',
+        **kwargs):
 
-            ## move onto the next file
-            cur_index += nparts_this_file
-        
-        return file_array,filenames_and_nparts
+        ## call super to write "normal" particle data
+        file_list,filenames_and_nparts = super().writeToDisk(
+            target_directory,
+            file_extension='.json',
+            **kwargs)
+
+        ## append the octree metadata to the coordinates_flat, etc...
+        data_dict = load_from_json(file_list[0][0])
+        for key,value in self.root.items(): data_dict[key] = value
+
+        for node_dict in data_dict['nodes'].values():
+            if 'files' in node_dict:
+                for i,ftuple in enumerate(node_dict['files']):
+                    relative_fname = os.path.join(*ftuple[0].split(os.path.sep)[-3:])
+                    node_dict['files'][i] = (
+                        relative_fname,
+                        ftuple[1],
+                        ftuple[2])
+        write_to_json(data_dict,file_list[0][0])
+
+        return file_list,filenames_and_nparts
