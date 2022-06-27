@@ -167,7 +167,7 @@ function openCloseNodes(node,octree){
 	// I don't think it is actually possible to get into here but if we do
 	//  I want to know about it
 	else {
-		console.log(onscreen,inside,too_small,too_big)
+		console.log(node.name,node_angle_deg,'onscreen:',onscreen,'inside',inside,'too_small',too_small,'too_big',too_big)
 		debugger
 	}
 }
