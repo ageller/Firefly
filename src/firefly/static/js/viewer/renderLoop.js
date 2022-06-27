@@ -188,9 +188,9 @@ function update_particle_groups(time){
 		if ( viewerParams.parts[p].hasOwnProperty('octree') &&
 			(!viewerParams.parts[p].hasOwnProperty('octree_init') || !viewerParams.parts[p].octree_init)){
 			evaluateFunctionOnOctreeNodes(
-			hideCoM,
-			viewerParams.parts[p].octree[''],
-			viewerParams.parts[p].octree);
+				hideCoM,
+				viewerParams.parts[p].octree[''],
+				viewerParams.parts[p].octree);
 			viewerParams.parts[p].octree_init = true;
 		}
 
