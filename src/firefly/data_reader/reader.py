@@ -481,7 +481,7 @@ class Reader(object):
             self.writeToDisk(
                 loud=False,
                 write_to_disk=False,
-                extension='json')
+                extension='.json')
 
         ## post the json to the listening url data_input
         ##  defined in server.py
