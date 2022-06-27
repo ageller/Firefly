@@ -117,7 +117,7 @@ function compileFFTREEData(kaitai_format,node,callback){
 
 
 function createOctBox(node){
-	if (viewerParams.debug && node.pkey == 'PartType4') {
+	if (viewerParams.debug && node.pkey == 'DR3-RV') {
 		const geometry = new THREE.BufferGeometry();
 		// create a simple square shape. We duplicate the top left and bottom right
 		// vertices because each vertex needs to appear once per triangle.
