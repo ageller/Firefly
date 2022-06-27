@@ -101,7 +101,12 @@ class OctNodeStream(object):
         for i,field_name in enumerate(self.field_names):
             fieldss[:,i] = data_dict.pop(field_name)
 
-        if width is None: width = np.max(coordss.max(axis=0) - coordss.min(axis=0))
+        #if width is None: width = np.max(coordss.max(axis=0) - coordss.min(axis=0))
+        if width is None: 
+            width = np.percentile(
+                np.sqrt(np.sum(coordss**2,axis=1)),
+                99)
+
         self.width = width
         self.center = np.zeros(3)
  
@@ -925,19 +930,11 @@ def init_octree_root_node(dictionary,top_level_directory=None,thread_id=0):
     """
 
 
-    axis_mins = np.zeros(3)
-    axis_maxs = np.zeros(3)
-    for i,axis in enumerate([ 'x', 'y', 'z']):
-        axis_mins[i] = np.min(dictionary[axis])
-        axis_maxs[i] = np.max(dictionary[axis])
-
     root = OctNodeStream(None,None,[]) 
     root_dict = root.set_buffers_from_dict(dictionary)
 
 
     if top_level_directory is not None:
-        root_dict['axis_mins'] = axis_mins
-        root_dict['axis_maxs'] = axis_maxs
         output_dir = os.path.join(top_level_directory,f'output_{thread_id:02d}.0')
         root_dict['nodes'][root.name] = root.write(output_dir)
         write_to_json(root_dict,os.path.join(top_level_directory,'octree.json'))

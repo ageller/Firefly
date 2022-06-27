@@ -37,6 +37,8 @@ class GaiaReader(Reader):
         nrecurse=0,
         **kwargs):
 
+        self.particleGroups = []
+
         if gaiadir is None: gaiadir = os.path.join(os.environ['HOME'],'projects','gaia','GaiaSource')
 
         ## load the no RV data
@@ -111,6 +113,7 @@ class GaiaReader(Reader):
         nthreads=1,
         use_mps=False):
 
+        print(f"Initializing octree... for {self}")
         init_time = time.time()
         
         fnames = os.listdir(gaiadir)
@@ -133,14 +136,8 @@ class GaiaReader(Reader):
                 octree_dicts = my_pool.starmap(MPSwrapper,argss)
         
 
-        axis_mins = np.zeros((len(octree_dicts),3))
-        axis_maxs = np.zeros((len(octree_dicts),3))
-
         ## undo averaging in first chunk
         root_node_dict = octree_dicts[0]['nodes']['']
-
-        axis_mins[0] = octree_dicts[0]['axis_mins']
-        axis_maxs[0] = octree_dicts[0]['axis_maxs']
 
         ## determine which keys were averaged
         accumulator_keys = (['center_of_mass'] +
@@ -157,16 +154,16 @@ class GaiaReader(Reader):
         ## undo averaging for radius
         root_node_dict['radius'] = root_node_dict['radius']**2*root_node_dict[weight_key]
 
+        widths = np.zeros(nthreads)
+        widths[0] = root_node_dict['width']
+
         ## merge chunks that follow the first
         printProgressBar(0,nthreads-1)
         for i,sub_root_dict in enumerate(octree_dicts[1:]):
             printProgressBar(i+1,nthreads-1)
 
-            ## fill this entry in the min/max arrays to calculate width below
-            axis_mins[i+1] = sub_root_dict['axis_mins']
-            axis_maxs[i+1] = sub_root_dict['axis_maxs']
-
             this_node_dict = sub_root_dict['nodes']['']
+            widths[i+1] = this_node_dict['width']
 
             ## straight addition only
             for key in ['files','nparts','buffer_size']:
@@ -185,8 +182,10 @@ class GaiaReader(Reader):
         for key in accumulator_keys: root_node_dict[key] /= root_node_dict[weight_key]
         root_node_dict['radius'] = np.sqrt(root_node_dict['radius']/this_node_dict[weight_key])
 
-        ## overwrite the width to be the maximum separation including all chunks
-        root_node_dict['width'] = axis_maxs.max()-axis_mins.min()
+        ## overwrite the width to be the average of all chunks
+        root_node_dict['width'] = np.mean(widths)
+        
+        print(f"Final width: {root_node_dict['width']:0.2f}")
 
         ## overwrite the octree.json file
         write_to_json(octree_dicts[0],os.path.join(target_directory,'octree.json'))
