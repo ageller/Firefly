@@ -673,6 +673,7 @@ class OctreeParticleGroup(Octree,ParticleGroup):
             if rgba_colors is not None: rgba_colors[inode,:] = node_dict['rgba_color']
             for ifield,field_name in enumerate(field_names):
                 fields[ifield,inode] = node_dict[field_name]
+            node_dict['node_index'] = inode
 
         return coordinates,velocities,rgba_colors,fields
 
@@ -690,9 +691,11 @@ class OctreeParticleGroup(Octree,ParticleGroup):
 
         ## append the octree metadata to the coordinates_flat, etc...
         data_dict = load_from_json(file_list[0][0])
-        for key,value in self.root.items(): data_dict[key] = value
+        for key,value in self.root.items(): 
+            if key == 'nodes': key = 'octree'
+            data_dict[key] = value
 
-        for node_dict in data_dict['nodes'].values():
+        for node_dict in data_dict['octree'].values():
             if 'files' in node_dict:
                 for i,ftuple in enumerate(node_dict['files']):
                     relative_fname = os.path.join(*ftuple[0].split(os.path.sep)[-3:])
