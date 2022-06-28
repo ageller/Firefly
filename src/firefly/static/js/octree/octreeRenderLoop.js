@@ -107,7 +107,6 @@ function openCloseNodes(node,octree){
 	obj.geometry.setDrawRange( 0, nparts); //is this giving me an error sometimes?
 
 	*/
-
 	// find the node size in pixels and then compare to the 
 	//  size of the window
 	var node_angle_deg = getScreenSize(node);

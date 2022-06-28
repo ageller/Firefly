@@ -680,20 +680,40 @@ class OctreeParticleGroup(Octree,ParticleGroup):
     def writeToDisk(
         self,
         target_directory,
+        file_prefix='',
         file_extension='.json',
+        octree_format='.fftree',
         **kwargs):
+
+        octree_formats = ['.fftree','.ffraw']
+
+        if '.' not in octree_format: octree_format = '.' + octree_format
+
+        if octree_format not in octree_formats: raise ValueError(
+            f"Invalid extension {octree_format} must be one of {octree_formats}")
 
         ## call super to write "normal" particle data
         file_list,filenames_and_nparts = super().writeToDisk(
             target_directory,
+            file_prefix=file_prefix,
             file_extension='.json',
             **kwargs)
 
-        ## append the octree metadata to the coordinates_flat, etc...
+        ## need to convert from .ffraw to .fftree, save .fftree files in target_directory
+        if octree_format == '.fftree': self.convert_ffraw_to_fftree(
+            os.path.join(target_directory,self.UIname+'fftree'),
+            f"{file_prefix}{self.UIname}%04d.fftree") 
+        elif octree_format == '.ffraw': raise NotImplementedError(
+            "Javascript can't read .ffraw yet... must convert to .fftree")
+
+        ## load the first .json particle file for the centers
+        ##  and append the octree metadata 
         data_dict = load_from_json(file_list[0][0])
+        
         for key,value in self.root.items(): 
             if key == 'nodes': key = 'octree'
             data_dict[key] = value
+        data_dict['prefixes'] = self.prefixes
 
         for node_dict in data_dict['octree'].values():
             if 'files' in node_dict:

@@ -66,12 +66,44 @@ function initOctree(pkey,data){
 		data.octree);
 }
 
+function loadFFRAW(node,callback){
+	// TODO: doesn't actually work. gave up and converted
+	//  ffraw to fftree instead.
+	var this_file;
+	var offset;
+	var binary_reader = new FileReader;
+	var Coordinates_flat = new Float32Array(node.buffer_size*3);
+	var Velocities_flat = new Float32Array(node.buffer_size*3);
+
+	viewerParams.parts[node.pkey].prefixes.forEach(function (prefix,index){
+		offset=0;
+		node.files.forEach(function (ftuple){
+			this_file = ftuple[0].replace('<prefix>',prefix);
+			console.log(this_file)
+			fetch('static/data/gaia/'+this_file).then(res => {
+				res.blob().then(blob =>{ 
+					blob = blob.slice(
+						ftuple[1],
+						ftuple[1]+ftuple[2]*4)
+					binary_reader.readAsArrayBuffer(blob)
+					binary_reader.onloadend = function () {
+						// convert ArrayBuffer to FireflyFormat
+						// call compileFFLYData as a callback
+						console.log(binary_reader.result)
+						debugger;
+					}
+				});
+			});
+		});
+	});
+}
+
 function loadFFTREEKaitai(node,callback){
 
 	// initialize a FileReader object
 	var binary_reader = new FileReader;
 	// get local file
-	fetch('static/'+node.buffer_filename).then(res => {
+	fetch('static/data/'+node.buffer_filename).then(res => {
 		res.blob().then(blob =>{ 
 			blob = blob.slice(
 				node.byte_offset,
