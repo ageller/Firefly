@@ -509,6 +509,9 @@ class ParticleGroup(object):
         :rtype: str, list of str
         """
 
+        ## prepend a . if there isn't one in the string
+        if '.' not in file_extension: file_extension='.'+file_extension
+        
         extensions = ['.json','.ffly']
         if file_extension not in extensions: raise ValueError(
             f"Invalid extension {file_extension} must be one of {extensions}")
@@ -529,9 +532,9 @@ class ParticleGroup(object):
         if clean_datadir:
             #print("Removing old ffly files from %s"%target_directory)
             for fname in os.listdir(target_directory):
-                if ("ffly" in fname or
-                    "json" in fname or 
-                    "fftree" in fname):
+                if (".ffly" in fname or
+                    ".json" in fname or 
+                    ".fftree" in fname):
                     os.remove(os.path.join(target_directory,fname))
 
         ## shuffle particles and decimate as necessary, save the output in dec_inds
