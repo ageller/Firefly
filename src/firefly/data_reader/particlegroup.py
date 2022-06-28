@@ -715,14 +715,20 @@ class OctreeParticleGroup(Octree,ParticleGroup):
             data_dict[key] = value
         data_dict['prefixes'] = self.prefixes
 
-        for node_dict in data_dict['octree'].values():
-            if 'files' in node_dict:
-                for i,ftuple in enumerate(node_dict['files']):
-                    relative_fname = os.path.join(*ftuple[0].split(os.path.sep)[-3:])
-                    node_dict['files'][i] = (
-                        relative_fname,
-                        ftuple[1],
-                        ftuple[2])
+        ## change absolute paths to relative paths
+        if octree_format == 'ffraw':
+            for node_dict in data_dict['octree'].values():
+                if 'files' in node_dict:
+                    for i,ftuple in enumerate(node_dict['files']):
+                        relative_fname = os.path.join(*ftuple[0].split(os.path.sep)[-3:])
+                        new_name =relative_fname.split('-')
+                        new_name = '-'.join(new_name[:-1]) +'-<prefix>.'+'.'.join(new_name[-1].split('.')[-2:])
+                        node_dict['files'][i] = (
+                            new_name,
+                            ftuple[1],
+                            ftuple[2])
+                    node_dict['files'] = set(node_dict['files'])
+
         write_to_json(data_dict,file_list[0][0])
 
         return file_list,filenames_and_nparts
