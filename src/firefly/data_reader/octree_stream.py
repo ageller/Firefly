@@ -9,7 +9,7 @@ import numpy as np
 
 from .octree import octant_offsets
 from .json_utils import load_from_json,write_to_json
-from .binary_writer import RawBinaryWriter
+from .binary_writer import RawBinaryWriter,OctBinaryWriter
 from abg_python.system_utils import printProgressBar
 
 
@@ -524,6 +524,56 @@ class OctNodeStream(object):
         validate_files(node_dict)
 
         return node_dict
+    
+    def write_fftree(
+        self,
+        filename=None,
+        handle=None,
+        offset=0):
+
+        ## we /were/ accumulating a weighted quantity for the CoM particles
+        ##  but /now/ we have to divide that weight back out
+        if self.weight_index is not None: weights = self.buffer_fieldss[self.weight_index]
+        else: weights = np.ones(self.buffer_size)
+
+        ## initialize the writer object that will 
+        ##  convert the data to binary and write it in the
+        ##  correct .fftree order
+        binary_writer = OctBinaryWriter(
+            filename,
+            self.buffer_coordss,
+            None if not self.has_velocities else
+                np.array(self.buffer_velss)/weights[:,None],
+            None if not self.has_colors else
+                np.array(self.buffer_rgba_colorss)/weights[:,None])
+
+        binary_writer.nparts = self.buffer_size
+        binary_writer.nfields = self.nfields
+        binary_writer.fields = np.array(self.buffer_fieldss)[:,:binary_writer.nfields]
+
+        ## renormalize every field except Masses
+        for i,field in enumerate(self.field_names[:binary_writer.nfields]):
+            if i != self.weight_index: binary_writer.fields[:,i]/=weights
+
+        ## take the transpose because binary_writer wants Nfields x Nparts
+        ##  but make sure numpy doesn't do anything funny like give you a view 
+        ##  of the transpose. change it in memory numpy!!
+        binary_writer.fields = np.array(binary_writer.fields.T,order='C')
+
+        ## write the data to the open binary file and in so doing
+        ##  count the length in bytes of this node
+        byte_size = binary_writer.write(handle=handle) ## create a new file
+
+        ## format aggregate data into a dictionary
+        node_dict = self.format_node_dictionary()
+
+        ## store the length in bytes for this node
+        node_dict['byte_offset'] = 0 if handle is None else offset
+        node_dict['buffer_filename'] = os.path.sep.join(filename.split(os.path.sep)[-3:])
+        node_dict['byte_size'] = byte_size
+
+        return node_dict
+
 
 class Octree(object):
     def __repr__(self):
@@ -809,6 +859,37 @@ class Octree(object):
             self.root['nodes'][child_name] = old_child
 
         if debug: print(child_name,'registered:',new_child['buffer_size'],'/',self.root['nodes'][child_name]['buffer_size'],'particles')
+
+    def convert_ffraw_to_fftree(self,target_directory,fname_pattern):
+
+        ## sanitize input
+        if not os.path.isdir(target_directory): os.makedirs(target_directory)
+        if '%' not in fname_pattern: raise ValueError(
+            f"fname_pattern must be a format string with % not {fname_pattern}")
+
+        num_nodes = len(self.root['nodes'].keys())
+        printProgressBar(0,num_nodes,prefix='Converting .ffraw to .fftree')
+        for i,node_dict in enumerate(self.root['nodes'].values()):
+            if 'files' not in node_dict.keys(): continue
+
+            ## create a new octnode object to translate the data with
+            node = OctNodeStream(
+                node_dict['center'],
+                node_dict['width'],
+                self.root['field_names'],
+                node_dict['name'],
+                has_velocities=node_dict['com_velocity'] is not None,
+                has_colors=node_dict['rgba_color'] is not None) 
+
+            children = self.root['nodes'][node.name]['children']
+            ## load the node's particles from the .ffraw files
+            node.set_buffers_from_disk(node_dict['files'],node_dict['buffer_size'])
+            ## write the particles to a new .fftree file and replace the dictionary in self.root['nodes']
+            self.root['nodes'][node.name] = node.write_fftree(
+                os.path.join(target_directory,fname_pattern%i))
+            self.root['nodes'][node.name]['children'] = children
+
+            printProgressBar(i+1,num_nodes,prefix='Converting .ffraw to .fftree')
 
 ## what gets passed to the multiprocessing.Pool
 def refineNode(
