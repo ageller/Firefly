@@ -64,13 +64,12 @@ class GaiaReader(Reader):
             color=(120/256, 41/256, 173/256,1),
             showColormap=True,
             colormap=31.5/32,
-            sizeMult=50
+            sizeMult=1
             )
 
         ## load the RV data
         target_directory = os.path.join(os.path.dirname(gaiadir),os.path.dirname(gaiadir),'DR3-RV')
         if not os.path.isfile(os.path.join(target_directory,'octree.json')):
-            print("no octree file detected, initializing...")
             self.initOctree(
                 gaiadir,
                 target_directory,
@@ -78,7 +77,6 @@ class GaiaReader(Reader):
                 limiting_mag=limiting_mag,
                 nthreads=nthreads,
                 use_mps=use_mps)
-            print('done!')
         ## creating the pg will trigger the octree build (which will pick up where 
         ##  it left off if it didn't finish)
         rv_pg = OctreeParticleGroup(
@@ -92,7 +90,7 @@ class GaiaReader(Reader):
             colormapVariable=2,
             showColormap=True,
             colormap=31.5/32,
-            sizeMult=50
+            sizeMult=1
             )
 
         super().__init__(
@@ -111,14 +109,21 @@ class GaiaReader(Reader):
         radial_velocity=True,
         limiting_mag=None,
         nthreads=1,
-        use_mps=False):
+        use_mps=False,
+        max_radial_percentile=99,
+        max_fnames=None
+        ):
 
         print(f"Initializing octree... for {self}")
         init_time = time.time()
         
         fnames = os.listdir(gaiadir)
+        if max_fnames is not None: fnames = fnames[:max_fnames]
+
         ## prepend the full path to the gaia files
         fnames = [f'{gaiadir}/%s'%fname for fname in fnames]
+
+        nthreads = min(len(fnames),nthreads)
 
         argss = zip(
             np.array_split(fnames,nthreads),
@@ -127,6 +132,7 @@ class GaiaReader(Reader):
             itertools.repeat(limiting_mag),
             itertools.repeat(nthreads),
             np.arange(nthreads,dtype=int),
+            itertools.repeat(max_radial_percentile)
         )
 
         ## initialize each chunk of the root node
@@ -199,6 +205,7 @@ def MPSwrapper(
     limiting_mag=None,
     nthreads=1,
     thread_id=0,
+    percentile=99
     ):
 
     all_arrays = np.concatenate(
@@ -207,6 +214,13 @@ def MPSwrapper(
             limiting_mag=limiting_mag,
             has_RV=radial_velocity) for fname in filenames],
         axis=1)
+
+    coord_index = 3 if radial_velocity else 0
+    rs = np.sqrt(np.sum(all_arrays[coord_index:coord_index+3]**2,axis=0))
+    if percentile is not None: 
+        rmask = rs <= np.percentile(rs,percentile)
+        all_arrays = all_arrays[:,rmask]
+        #print(f' {np.sum(~rmask)} excluded on r %ile {float(percentile):0.2f}')
 
     ## take the arrays and put them into a dictionary
     keys = ['vx','vy','vz','x','y','z','bp_rp','phot_g_mean_mag']
