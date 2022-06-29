@@ -243,7 +243,7 @@ class Reader(object):
         loud=False,
         write_to_disk=True,
         symlink=True,
-        file_extension='.ffly'):
+        **kwargs):
         """Creates all the necessary JSON files to run firefly and ensures they are
         properly linked and cross-referenced correctly using the
         :func:`firefly.data_reader.Settings.outputToJSON` and
@@ -322,17 +322,16 @@ class Reader(object):
         else: filenamesDict = {}
         for particleGroup in self.particleGroups:
             print(particleGroup)
-            if loud:
-                print("Outputting:",particleGroup)
+            if loud: print("Outputting:",particleGroup)
 
             this_file_array,filenames_and_nparts = particleGroup.writeToDisk(
                 datadir,
                 file_prefix=self.file_prefix,
-                file_extension=file_extension,
                 loud=loud,
                 max_npart_per_file=self.max_npart_per_file,
                 clean_datadir=self.clean_datadir if particleGroup is self.particleGroups[0] else False,
-                not_reader=False)
+                not_reader=False,
+                **kwargs)
 
             ## append the JSON arrays for this particle group
             file_array += this_file_array

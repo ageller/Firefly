@@ -684,8 +684,8 @@ class OctreeParticleGroup(Octree,ParticleGroup):
         self,
         target_directory,
         file_prefix='',
-        file_extension='.json',
         octree_format='.fftree',
+        nthreads=1,
         **kwargs):
 
         octree_formats = ['.fftree','.ffraw']
@@ -705,7 +705,8 @@ class OctreeParticleGroup(Octree,ParticleGroup):
         ## need to convert from .ffraw to .fftree, save .fftree files in target_directory
         if octree_format == '.fftree': self.convert_ffraw_to_fftree(
             os.path.join(target_directory,self.UIname+'fftree'),
-            f"{file_prefix}{self.UIname}%04d.fftree") 
+            f"{file_prefix}{self.UIname}%04d.fftree",
+            nthreads=nthreads) 
         elif octree_format == '.ffraw': raise NotImplementedError(
             "Javascript can't read .ffraw yet... must convert to .fftree")
 

@@ -860,36 +860,40 @@ class Octree(object):
 
         if debug: print(child_name,'registered:',new_child['buffer_size'],'/',self.root['nodes'][child_name]['buffer_size'],'particles')
 
-    def convert_ffraw_to_fftree(self,target_directory,fname_pattern):
-
+    def convert_ffraw_to_fftree(self,target_directory,fname_pattern,nthreads=1):
         ## sanitize input
         if not os.path.isdir(target_directory): os.makedirs(target_directory)
         if '%' not in fname_pattern: raise ValueError(
             f"fname_pattern must be a format string with % not {fname_pattern}")
 
+        ## setup the work array, each node is indpt so we can multi-thread if desired
         num_nodes = len(self.root['nodes'].keys())
-        printProgressBar(0,num_nodes,prefix='Converting .ffraw to .fftree')
-        for i,node_dict in enumerate(self.root['nodes'].values()):
-            if 'files' not in node_dict.keys(): continue
+        argss = zip(
+            self.root['nodes'].values(),
+            [os.path.join(target_directory,fname_pattern%i) for i in range(num_nodes)],
+            itertools.repeat(self.root['field_names'])
+        )
 
-            ## create a new octnode object to translate the data with
-            node = OctNodeStream(
-                node_dict['center'],
-                node_dict['width'],
-                self.root['field_names'],
-                node_dict['name'],
-                has_velocities=node_dict['com_velocity'] is not None,
-                has_colors=node_dict['rgba_color'] is not None) 
+        if nthreads <=1:
+            ## single threaded, print a progress bar
+            new_node_dicts = []
+            printProgressBar(0,num_nodes,prefix='Converting .ffraw to .fftree')
+            for i,args in enumerate(argss):
+                new_node_dicts += [convertNodeFFRawFFTree(*args)]
+                printProgressBar(i+1,num_nodes,prefix='Converting .ffraw to .fftree')
+        else:
+            with multiprocessing.Pool(min(num_nodes,multiprocessing.cpu_count())) as my_pool:
+                new_node_dicts = my_pool.starmap(convertNodeFFRawFFTree,argss)
 
-            children = self.root['nodes'][node.name]['children']
-            ## load the node's particles from the .ffraw files
-            node.set_buffers_from_disk(node_dict['files'],node_dict['buffer_size'])
-            ## write the particles to a new .fftree file and replace the dictionary in self.root['nodes']
-            self.root['nodes'][node.name] = node.write_fftree(
-                os.path.join(target_directory,fname_pattern%i))
-            self.root['nodes'][node.name]['children'] = children
+        ## now update the self.root dictionary
+        for i,new_node_dict in enumerate(new_node_dicts):
+            ## the children are lost in translation so the new node dict has to inherit them manually
+            children = self.root['nodes'][new_node_dict['name']]['children']
+            ## replace the dictionary
+            self.root['nodes'][new_node_dict['name']] = new_node_dict
+            ## inherit the children
+            self.root['nodes'][new_node_dict['name']]['children'] = children
 
-            printProgressBar(i+1,num_nodes,prefix='Converting .ffraw to .fftree')
 
 ## what gets passed to the multiprocessing.Pool
 def refineNode(
@@ -1021,3 +1025,22 @@ def init_octree_root_node(dictionary,top_level_directory=None,thread_id=0):
         write_to_json(root_dict,os.path.join(top_level_directory,'octree.json'))
 
     return root_dict
+
+def convertNodeFFRawFFTree(
+    node_dict,
+    fname,
+    field_names):
+
+    if 'files' not in node_dict.keys(): return node_dict
+
+    ## create a new octnode object to translate the data with
+    node = OctNodeStream(
+        node_dict['center'],
+        node_dict['width'],
+        field_names,
+        node_dict['name'],
+        has_velocities=node_dict['com_velocity'] is not None,
+        has_colors=node_dict['rgba_color'] is not None) 
+    ## load the node's particles from the .ffraw files
+    node.set_buffers_from_disk(node_dict['files'],node_dict['buffer_size'])
+    return node.write_fftree(fname)
