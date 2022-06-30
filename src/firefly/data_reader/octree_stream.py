@@ -114,7 +114,8 @@ class OctNodeStream(object):
             coordss,
             fieldss,
             velss,
-            rgba_colorss)
+            rgba_colorss,
+            check_boundaries=True) ## eject the particles outside the 99th %ile
         
         root_dict = {}
 
@@ -170,21 +171,29 @@ class OctNodeStream(object):
             fieldss,
             velss,
             rgba_colorss)
-        
+
     def set_buffers_from_arrays(
         self,
         coordss:np.ndarray,
         fieldss:np.ndarray,
         velss:np.ndarray=None,
-        rgba_colorss:np.ndarray=None):
+        rgba_colorss:np.ndarray=None,
+        check_boundaries:bool=False):
 
         if coordss is None: coordss = np.zeros((0,3))
 
         self.buffer_coordss = coordss
-        self.buffer_coordss = self.buffer_coordss.tolist()
+        mask = np.ones(coordss.shape[0],dtype=bool)
+        if check_boundaries:
+            for axis in range(3):
+                mask = np.logical_and(
+                    mask,
+                    np.abs(coordss[:,axis]) <= (self.center[axis]+self.width/2) )
 
-        self.buffer_size = coordss.shape[0]
-        self.nparts = coordss.shape[0]
+            if self.nthreads == 1 and np.sum(mask) != mask.size: 
+                print(f'ejecting {np.sum(~mask)} particles that are outside this node')
+
+        self.buffer_coordss = self.buffer_coordss[mask].tolist()
 
         ## initialize the field buffers
         if fieldss is not None:
@@ -197,6 +206,8 @@ class OctNodeStream(object):
             for i in range(3):
                 self.buffer_fieldss[:,-6+i] = coordss[:,i]
                 self.buffer_fieldss[:,-3+i] = (coordss[:,i]**2)
+            
+            self.buffer_fieldss = self.buffer_fieldss[mask]
 
         else: self.buffer_fieldss = np.zeros((0,self.nfields))
         self.buffer_fieldss = self.buffer_fieldss.tolist()
@@ -217,22 +228,22 @@ class OctNodeStream(object):
 
         ## initialize the velocities buffer
         if velss is not None:
-            if velss.shape[0] != self.buffer_size:
+            if velss.shape[0] != coordss.shape[0]:
                 raise IndexError(
                     f"Size of velss ({velss.shape[0]})"+
-                    f"does not match size of buffer ({self.buffer_size})")
-            self.buffer_velss = velss * weights
+                    f"does not match size of buffer ({coordss.shape[0]})")
+            self.buffer_velss = (velss * weights)[mask]
 
         else: self.buffer_velss = np.zeros((0,3))
         self.buffer_velss = self.buffer_velss.tolist()
 
         ## initialize the rgba_colors buffer
         if rgba_colorss is not None:
-            if rgba_colorss.shape[0] != self.buffer_size:
+            if rgba_colorss.shape[0] != coordss.shape[0]:
                 raise IndexError(
                     f"Size of rgba_colorss ({rgba_colorss.shape[0]})"+
-                    f"does not match size of buffer ({self.buffer_size})")
-            self.buffer_rgba_colorss = rgba_colorss * weights
+                    f"does not match size of buffer ({coordss.shape[0]})")
+            self.buffer_rgba_colorss = (rgba_colorss * weights)[mask]
 
         else: self.buffer_rgba_colorss = np.zeros((0,4))
         self.buffer_rgba_colorss = self.buffer_rgba_colorss.tolist()  
@@ -241,20 +252,23 @@ class OctNodeStream(object):
         self.velocity = np.sum(self.buffer_velss,axis=0)
         self.rgba_color = np.sum(self.buffer_rgba_colorss,axis=0)
         self.fields = np.sum(self.buffer_fieldss,axis=0)
+
+        self.buffer_size = np.sum(mask)
+        self.nparts = np.sum(mask)
  
     def cascade(self,min_to_refine,nrecurse=0):
 
-        if self.nthreads < 5: print('Refining:',self)
+        #if self.nthreads < 5: print('Refining:',self)
         ## flush the buffer into its children
-        if self.nthreads < 5: printProgressBar(0,self.buffer_size,prefix = 'Progress:',suffix='complete',length=50,decimals=0)
+        #if self.nthreads < 5: printProgressBar(0,self.buffer_size,prefix = 'Progress:',suffix='complete',length=50,decimals=0)
         for i in range(self.buffer_size):
             self.sort_point_into_child(
                 self.buffer_coordss[i], 
                 self.buffer_fieldss[i],
                 self.buffer_velss[i] if self.has_velocities else None,
                 self.buffer_rgba_colorss[i] if self.has_colors else None)
-            if self.nthreads < 5: printProgressBar(i+1,self.buffer_size,prefix = 'Progress:',suffix='complete',length=50,decimals=0)
-        if self.nthreads < 5: printProgressBar(i+1,self.buffer_size,prefix = 'Progress:',suffix='complete',length=50,decimals=0)
+            #if self.nthreads < 5: printProgressBar(i+1,self.buffer_size,prefix = 'Progress:',suffix='complete',length=50,decimals=0)
+        #if self.nthreads < 5: printProgressBar(i+1,self.buffer_size,prefix = 'Progress:',suffix='complete',length=50,decimals=0)
 
         ## probably just [] tbh ??
         self.buffer_coordss = np.zeros((0,3)).tolist()
@@ -268,7 +282,7 @@ class OctNodeStream(object):
         ##  into the parent
         self.prune(min_to_refine)
 
-        if self.nthreads < 5: print('New children:',self.child_names)
+        #if self.nthreads < 5: print('New children:',self.child_names)
 
         return_value = [(self.name,self.buffer_size)]
 
@@ -332,7 +346,7 @@ class OctNodeStream(object):
                 ## remove you from my will
                 self.child_names.pop(self.child_names.index(child.name))
             else: break ## no more room to consume children, the rest get to live on
-        if self.buffer_size > 0 and self.nthreads < 5: print(f"Merged {self.buffer_size} particles back into parent.")
+        #if self.buffer_size > 0 and self.nthreads < 5: print(f"Merged {self.buffer_size} particles back into parent.")
 
     def accumulate(
         self,
@@ -577,7 +591,8 @@ class OctNodeStream(object):
 
 class Octree(object):
     def __repr__(self):
-        return f"{self.UIname} - {len(self.root['nodes'])} nodes - {len(self.root['field_names'])} tracked fields"
+        my_str = f"{self.UIname} - {self.nparts_tot:,} parts ({len(self.root['nodes']):,} nodes) - {len(self.root['field_names'])} fields"
+        return my_str
     
     def get_work_units(self,nthreads=1):
 
@@ -695,8 +710,10 @@ class Octree(object):
     def print_work(self):
         namess = [[expand_node['name'] for expand_node in expand_nodes] for 
             expand_nodes in self.work_units]
-        to_do = set(np.hstack(namess))
-        if len(to_do) > 0: print(to_do,'still need to be refined')
+        
+        to_do = list(set(np.hstack(namess)))
+        nparts = [self.root['nodes'][name]['buffer_size'] for name in to_do]
+        if len(to_do) > 0: print(f"{self} ({100*(1-np.sum(nparts)/self.nparts_tot):0.1f}%) {to_do}")
 
     def __init__(
         self,
@@ -715,6 +732,10 @@ class Octree(object):
         ## read octree summary file
         self.root = load_from_json(os.path.join(pathh,'octree.json'))
 
+        self.nparts = np.array([node_dict['buffer_size'] for node_dict in self.root['nodes'].values()])
+        self.nparts_tot = np.sum(self.nparts)
+        self.node_names = np.array(list(self.root['nodes'].keys()))
+
         self.prefixes = (['x','y','z'] +
             ['vx','vy','vz']*self.root['has_velocities'] + 
             ['rgba_r','rgba_g','rgba_b','rgba_a']*self.root['has_colors'] + 
@@ -726,13 +747,14 @@ class Octree(object):
         init_time = time.time()
 
         while len(self.work_units) >0:
-            if loud: print(self)
             try: self.refine(nthreads,nrecurse,use_mps,loud)
             except IndexError as e:
                 print(e.args[0])
                 break
 
-        if loud: print(((time.time()-init_time)/60),'min elapsed')
+        if loud: 
+            print()
+            print(((time.time()-init_time)/60),'min elapsed')
 
     def refine(self,nthreads=1,nrecurse=0,use_mps=True,loud=True):
 
@@ -906,6 +928,16 @@ def refineNode(
     nrecurse=0):
 
     output_dir = os.path.join(target_directory,f"output_{thread_id:02d}.0")
+    if not os.path.isdir(output_dir): os.makedirs(output_dir)
+    this_length = len(os.listdir(output_dir))
+
+    ## find an output directory that has room for our files
+    while this_length >= 1e4:
+        base,count = os.path.basename(output_dir).split('.')
+        output_dir = os.path.join(target_directory,f"{base}.{int(count)+1}")
+
+        if not os.path.isdir(output_dir): os.makedirs(output_dir)
+        this_length = len(os.listdir(output_dir))
 
     return_value = []
     for node_dict in node_dicts:
@@ -931,17 +963,6 @@ def refineNode(
             ## only cascade children if they aren't split across threads
             ##  otherwise we need to synchronize after each refinement
             nrecurse if node_dict['split_index'] is None else 0)
-
-        if not os.path.isdir(output_dir): os.makedirs(output_dir)
-        this_length = len(os.listdir(output_dir))
-
-        ## find an output directory that has room for our files
-        while this_length >= 1e4:
-            base,count = output_dir.split(output_dir)
-            output_dir = f"{base}.{int(count)+1}"
-
-            if not os.path.isdir(output_dir): os.makedirs(output_dir)
-            this_length = len(os.listdir(output_dir))
 
         ## walk the sub-tree we just created and write node files to disk
         ##  returns a list of dictionaries summarizing the node files that were written to disk
