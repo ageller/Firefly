@@ -204,7 +204,7 @@ function hideCoM(node){
 }
 
 function showCoM(node){
-	if (node.com_shown) return;
+	if (node.com_shown || !viewerParams.showCoMParticles) return;
 	node.com_shown = true;
 	mesh = viewerParams.partsMesh[node.pkey][0];
 	if (node.octbox) node.octbox.visible = true;
