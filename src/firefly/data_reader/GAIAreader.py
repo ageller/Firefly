@@ -58,14 +58,14 @@ class GaiaReader(Reader):
             'DR3-noRV',
             target_directory,
             nthreads=nthreads,
-            min_to_refine=1e6,
+            min_to_refine=min_to_refine*10,
             nrecurse=nrecurse,
             ## set startup settings
             color=(120/256, 41/256, 173/256,1),
             showColormap=True,
             colormap=31.5/32,
-            sizeMult=1
-            )
+            sizeMult=1,
+            use_mps=use_mps)
 
         ## load the RV data
         target_directory = os.path.join(os.path.dirname(gaiadir),os.path.dirname(gaiadir),'DR3-RV')
@@ -90,7 +90,8 @@ class GaiaReader(Reader):
             colormapVariable=2,
             showColormap=True,
             colormap=31.5/32,
-            sizeMult=1
+            sizeMult=1,
+            use_mps=use_mps
             )
 
         super().__init__(
@@ -188,8 +189,8 @@ class GaiaReader(Reader):
         for key in accumulator_keys: root_node_dict[key] /= root_node_dict[weight_key]
         root_node_dict['radius'] = np.sqrt(root_node_dict['radius']/this_node_dict[weight_key])
 
-        ## overwrite the width to be the average of all chunks
-        root_node_dict['width'] = np.mean(widths)
+        ## overwrite the width to be the max of the chunks
+        root_node_dict['width'] = np.max(widths)
         
         print(f"Final width: {root_node_dict['width']:0.2f}")
 
