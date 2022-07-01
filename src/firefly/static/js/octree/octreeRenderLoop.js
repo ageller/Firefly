@@ -30,7 +30,7 @@ function updateOctree(treewalk=false){
 			if (!(node_name.includes('root') || node_name.includes('Standard'))){
 				node = octree[node_name.slice(prefix_length)];
 				node_dist = viewerParams.camera.position.distanceTo(node.center);
-				if ((node_dist > max_node_dist ) && !checkOnScreen(node)){
+				if ((node_dist > max_node_dist ) || !checkOnScreen(node)){
 					max_node_dist = node_dist;
 					max_node = node;
 				}
