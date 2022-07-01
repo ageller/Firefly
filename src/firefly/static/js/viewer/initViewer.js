@@ -1634,17 +1634,22 @@ function updateOctreeLoadingBar(){
 	var forGUI = [];
 	viewerParams.partsKeys.forEach(function(p){
 		if (viewerParams.haveOctree[p]) {
-			var numerator = viewerParams.octree.loadingCount[p];
-			/*
+			var numerator = viewerParams.octree.loadingCount[p][0];
+			var parts_numerator = viewerParams.octree.loadingCount[p][1];
 			var remaining_count = 0;
 			viewerParams.octree.toDraw[p].forEach( function (tuple){
 				node = tuple[0];
 				remaining_count+=node.buffer_size;
 			});
-			var denominator = numerator + remaining count;
-			*/
+
+			var parts_denominator = parts_numerator + remaining_count;
 			var denominator = numerator + viewerParams.octree.toDraw[p].length;
-			var out = {'p':p, 'numerator':numerator,'denominator':denominator};
+			var out = {
+				'p':p,
+				'numerator':numerator,
+				'denominator':denominator,
+				'parts_numerator':parts_numerator,
+				'parts_denominator':parts_denominator};
 			forGUI.push({'updateOctreeLoadingBarUI':out});
 		}
 	})

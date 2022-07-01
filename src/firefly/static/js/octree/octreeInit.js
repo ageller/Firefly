@@ -15,7 +15,7 @@ function initOctree(pkey,data){
 	viewerParams.octree.normCameraDistance[pkey] = viewerParams.octree.normCameraDistance.default;
 
 	//for loading bar
-	viewerParams.octree.loadingCount[pkey] = 0;
+	viewerParams.octree.loadingCount[pkey] = [0,0];
 
 	//this will be used as a percentage value in the GUI
 	viewerParams.plotNmax[pkey] = 100;
