@@ -43,8 +43,8 @@ function updateOctree(){
 	//  check if we can draw a new node
 	if (!viewerParams.octree.waitingToDraw && viewerParams.octree.toDraw[pkey].length > 0 ) drawNextOctreeNode();
 
-	// check if we can remove  a node
-	if (!viewerParams.octree.waitingToRemove && viewerParams.octree.toRemove.length > 0) removeNextOctreeNode();
+	// check if we can remove a node
+	while (!viewerParams.octree.waitingToRemove && viewerParams.octree.toRemove.length > 0) removeNextOctreeNode();
 
 	//check and remove duplicates from scene (I don't know why this happens)
 	//also perform a few other updates
