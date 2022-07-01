@@ -156,7 +156,7 @@ function openCloseNodes(node,octree,treewalk=false){
 	var too_small = checkTooSmall(node_angle_deg);
 
 	// this node is too small. we should hide each of its children *and* its CoM
-	if (too_small){
+	if (too_small || !onscreen){
 		node.state = 'too small';
 		node.current_state = 'remove';
 		// if we haven't already, let's hide the CoM
