@@ -8,7 +8,7 @@ function initOctree(pkey,data){
 	// flag to  draw the yellow octree boxes around the nodes
 	//viewerParams.debug = true;
 	viewerParams.debug = false;
-	viewerParams.boxSize = 25*data.octree[''].width
+	if (viewerParams.showCoMParticles) viewerParams.boxSize = 25*data.octree[''].width;
 
 	// TODO not sure if these are still necessary post-octree-refactor
 	viewerParams.octree.boxSize = viewerParams.boxSize;
