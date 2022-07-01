@@ -41,7 +41,37 @@ function updateOctree(){
 	}
 
 	//  check if we can draw a new node
-	if (!viewerParams.octree.waitingToDraw && viewerParams.octree.toDraw[pkey].length > 0 ) drawNextOctreeNode();
+	if (!viewerParams.octree.waitingToDraw && viewerParams.octree.toDraw[pkey].length > 0 ){
+		/*
+		console.log('before',
+			viewerParams.octree.toDraw[pkey][0][0].name,
+			viewerParams.camera.position.distanceTo(viewerParams.octree.toDraw[pkey][0][0].center))
+			var min_dist = 1e10;
+			var min_name;
+		*/
+
+		// sort the draw list by distance to the camera
+		viewerParams.octree.toDraw[pkey].sort(function (nodetuple1,nodetuple2){
+			dist1 = viewerParams.camera.position.distanceTo(nodetuple1[0].center)
+			dist2 = viewerParams.camera.position.distanceTo(nodetuple2[0].center)
+			/*
+			if (dist1 < min_dist){
+				min_dist = dist1;
+				min_name = nodetuple1[0].name;
+			}
+			*/
+			return dist1-dist2;
+		});
+
+		/*
+		console.log('after ',
+			viewerParams.octree.toDraw[pkey][0][0].name,
+			viewerParams.camera.position.distanceTo(viewerParams.octree.toDraw[pkey][0][0].center))
+		console.log('min   ',min_name,min_dist)
+		*/
+		
+		drawNextOctreeNode();
+	}
 
 	// check if we can remove a node
 	while (!viewerParams.octree.waitingToRemove && viewerParams.octree.toRemove.length > 0) removeNextOctreeNode();
@@ -323,7 +353,7 @@ function drawNextOctreeNode(){
 
 	//work from the back of the array
 	var pkey = viewerParams.partsKeys[viewerParams.octree.pIndex];
-	var tuple = viewerParams.octree.toDraw[pkey].pop(); // shift takes the first element, pop does the last
+	var tuple = viewerParams.octree.toDraw[pkey].shift(); // shift takes the first element, pop does the last
 
 	// not sure why you might end up in here if the list is empty
 	//  but it happened while i was testing toggling
