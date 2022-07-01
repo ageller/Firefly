@@ -499,7 +499,8 @@ class Reader(object):
         init_gh_pages=False,
         GHREPONAME=None,
         GHUSER=None,
-        GHOAUTHTOKENPATH=None):
+        GHOAUTHTOKENPATH=None,
+        **kwargs):
         """ Copies the necessary source files to run a stand-alone instance of firefly
             on the web. Optionally, will also initialize a new GitHub repository with 
             GitHub pages, a free web-hosting service, so that this stand-alone instance 
@@ -590,7 +591,7 @@ class Reader(object):
                 self.static_data_dir = os.path.join(target,'static','data')
 
                 if not os.path.isdir(self.static_data_dir): os.makedirs(self.static_data_dir)
-                self.writeToDisk(symlink=False)
+                self.writeToDisk(symlink=False,**kwargs)
             except: raise
             finally:
                 ## replace the old stat_data_dir
