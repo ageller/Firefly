@@ -52,15 +52,15 @@ class BinaryWriter(object):
             ## modifies in-place
             np.random.shuffle(self.shuffle_indices)
         
-    def write(self,handle=None,extended_header=True):
+    def write(self,handle=None):
         if handle is None:
             with open(self.fname,'wb') as handle:
                 byte_size = 0
-                byte_size += self.write_header(handle,extended_header)
+                byte_size += self.write_header(handle)
                 byte_size += self.write_particle_data(handle)
         else:
             byte_size = 0
-            byte_size += self.write_header(handle,extended_header)
+            byte_size += self.write_header(handle)
             byte_size += self.write_particle_data(handle)
 
         return byte_size
