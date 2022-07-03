@@ -12,7 +12,7 @@ seq:
 types:
   header:
     seq:
-      - id: node_size
+      - id: header_size 
         type: u4
       - id: has_velocities
         type: u1
@@ -23,6 +23,8 @@ types:
       - id: nfields 
         type: u4
         doc: number of scalar fields which are tracked alongside coordinates and velocities
+      - id: node_size
+        type: u4
   node_data:
     seq:
       - id: coordinates_flat
