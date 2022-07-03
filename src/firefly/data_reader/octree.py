@@ -8,7 +8,7 @@ import time
 import numpy as np
 
 from .json_utils import load_from_json,write_to_json
-from .binary_writer import RawBinaryWriter,OctBinaryWriter
+from .binary_writer import RawBinaryWriter,BinaryWriter
 from abg_python.system_utils import printProgressBar
 
 octant_offsets = 0.25 * np.array([
@@ -561,7 +561,7 @@ class OctNode(object):
         ## initialize the writer object that will 
         ##  convert the data to binary and write it in the
         ##  correct .fftree order
-        binary_writer = OctBinaryWriter(
+        binary_writer = BinaryWriter(
             filename,
             self.buffer_coordss,
             None if not self.has_velocities else
@@ -571,6 +571,9 @@ class OctNode(object):
 
         binary_writer.nparts = self.buffer_size
         binary_writer.nfields = self.nfields
+
+        ## don't set binary_writer.field_names or binary_writer.<xxxx>_flags
+        ##  because that info is stored in the octree.json file
         binary_writer.fields = np.array(self.buffer_fieldss)[:,:binary_writer.nfields]
 
         ## renormalize every field except Masses
@@ -582,9 +585,8 @@ class OctNode(object):
         ##  of the transpose. change it in memory numpy!!
         binary_writer.fields = np.array(binary_writer.fields.T,order='C')
 
-        ## write the data to the open binary file and in so doing
-        ##  count the length in bytes of this node
-        byte_size = binary_writer.write(handle=handle) ## create a new file
+        ## creates a new file if handle is None
+        byte_size = binary_writer.write(handle) 
 
         ## format aggregate data into a dictionary
         node_dict = self.format_node_dictionary()
@@ -593,6 +595,7 @@ class OctNode(object):
         node_dict['byte_offset'] = 0 if handle is None else offset
         node_dict['buffer_filename'] = os.path.sep.join(filename.split(os.path.sep)[-3:])
         node_dict['byte_size'] = byte_size
+        node_dict['ABG_byte_offsets'] = binary_writer.calculate_array_offsets()
 
         return node_dict
 

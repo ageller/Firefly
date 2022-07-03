@@ -51,32 +51,25 @@ class BinaryWriter(object):
             self.shuffle_indices = np.arange(coordinates.shape[0],dtype=int)
             ## modifies in-place
             np.random.shuffle(self.shuffle_indices)
-    
-    def write(self):
-        with open(self.fname,'wb') as handle:
+        
+    def write(self,handle=None,extended_header=True):
+        if handle is None:
+            with open(self.fname,'wb') as handle:
+                byte_size = 0
+                byte_size += self.write_header(handle,extended_header)
+                byte_size += self.write_particle_data(handle)
+        else:
             byte_size = 0
-            byte_size += self.write_header(handle)
-            byte_size += self.write_vector_field(handle,self.coordinates)
-            if self.velocities is not None: byte_size += self.write_vector_field(handle,self.velocities)
-            if self.rgba_colors is not None: byte_size += self.write_vector_field(handle,self.rgba_colors)
-            for field in self.fields: byte_size += self.write_field(handle,field)
-            return byte_size
+            byte_size += self.write_header(handle,extended_header)
+            byte_size += self.write_particle_data(handle)
+
+        return byte_size
 
     def write_header(self,handle):
+
+        header_size = self.calculate_header_size()
+
         byte_size = 0
-        header_size = 0
-
-        ## size of the header, 2 32 bit ints and a 1 bit boolean
-        header_size += 4 ## size of header
-        header_size += 1 ## velocity flag
-        header_size += 1 ## rgba_color flag
-        header_size += 4 ## nparts 
-        header_size += 4 ## nfields
-        ## length of string as an int followed by the string
-        ## each char gets 4 bytes for UTF-8 (ascii is just 1 byte tho)
-        header_size += 4*self.nfields + 4*np.sum([len(field_name) for field_name in self.field_names]) 
-        header_size += 3*self.nfields ## filter, colormap, and radius flags
-
         byte_size += self.write_int(handle,header_size) 
         ## boolean flag for whether there are velocities
         byte_size += self.write_flag(handle,self.velocities is not None)
@@ -86,30 +79,41 @@ class BinaryWriter(object):
         byte_size += self.write_int(handle,self.nparts) 
         ## number of scalar fields
         byte_size += self.write_int(handle,self.nfields)
+
         ## write each field name as a variable byte-length string
         for field_name in self.field_names: byte_size += self.write_field_name(handle,field_name)
         ## write the filter flag array
-        byte_size += self.write_flag(handle,self.filter_flags)
+        if len(self.filter_flags) > 0: byte_size += self.write_flag(handle,self.filter_flags)
         ## write the colormap flag array
-        byte_size += self.write_flag(handle,self.colormap_flags)
+        if len(self.colormap_flags) > 0: byte_size += self.write_flag(handle,self.colormap_flags)
         ## write the scale-by radius flag array
-        byte_size += self.write_flag(handle,self.radius_flags)
+        if len(self.radius_flags) > 0: byte_size += self.write_flag(handle,self.radius_flags)
 
         if header_size != byte_size: 
             raise IOError(
                 f"We did not count our bytes correctly predicted:{header_size:d} counted:{byte_size:d}")
+        return byte_size 
+
+    def write_particle_data(self,handle):
+        byte_size = 0
+
+        byte_size += self.write_vector_field(handle,self.coordinates)
+        if self.velocities is not None: byte_size += self.write_vector_field(handle,self.velocities)
+        if self.rgba_colors is not None: byte_size += self.write_vector_field(handle,self.rgba_colors)
+        for field in self.fields: byte_size+= self.write_field(handle,field)
+
         return byte_size
+ 
+    def write_int(self,handle,integer):
+        arr = np.array(integer,dtype=np.int32)
+        handle.write(arr)
+        return 4*arr.size
 
     def write_flag(self,handle,flag):
         ##allow overload-- can send in and integer and/or an array of integers
         flag = np.array(flag,dtype=bool)
         handle.write(flag)
         return flag.size
-    
-    def write_int(self,handle,integer):
-        arr = np.array(integer,dtype=np.int32)
-        handle.write(arr)
-        return 4*arr.size
                 
     def write_field_name(self,handle,field_name):
         str_len = len(field_name)
@@ -128,25 +132,40 @@ class BinaryWriter(object):
         if self.shuffle_indices is not None: field = field[self.shuffle_indices]
         handle.write(field.astype(np.float32))
         return field.size*4
-     
-    def add_field(
-        self,
-        field,
-        field_name,
-        filter_flag=True,
-        colormap_flag=True,
-        radius_flag=False):
+      
+    def calculate_header_size(self):
+        header_size = 0
+        ## size of the header, 2 32 bit ints and a 1 bit boolean
+        header_size += 4 ## size of header
+        header_size += 1 ## velocity flag
+        header_size += 1 ## rgba_color flag
+        header_size += 4 ## nparts 
+        header_size += 4 ## nfields
 
-        if field.size != self.nparts: 
-            raise ValueError("Field must have %d particles, not %d"%(self.nparts,field.size))
+        ## length of string as an int followed by the string
+        ## each char gets 4 bytes for UTF-8 
+        header_size += 4*np.sum([1+len(field_name) for field_name in self.field_names]) 
 
-        self.fields += [field]
-        self.field_names += [field_name]
-        self.nfields+=1
+        ## filter, colormap, and radius flags
+        header_size += ((
+            len(self.filter_flags)>0 + 
+            len(self.colormap_flags)>0 + 
+            len(self.radius_flags)>0) * self.nfields) 
 
-        self.filter_flags+=[filter_flag]
-        self.colormap_flags+=[colormap_flag]
-        self.radius_flags+=[radius_flag]
+        return header_size
+
+    def calculate_array_offsets(self):
+        header_size = self.calculate_header_size()
+
+        byte_lengths = np.array(
+            [header_size, 4*self.nparts * 3] + 
+            [4*self.nparts * 3]*(self.velocities is not None) +
+            [4*self.nparts * 4]*(self.rgba_colors is not None) + 
+            [4*self.nparts for i in range(len(self.fields))] )
+
+        ## don't need the last entry-- that will be the entire length
+        ##  of the byte string
+        return np.cumsum(byte_lengths)[:-1]
 
 class RawBinaryWriter(BinaryWriter):
 
@@ -188,81 +207,3 @@ class RawBinaryWriter(BinaryWriter):
                 "at offset:",byte_offset)
                 raise
         self.data[...] = arr
-        
-class OctBinaryWriter(BinaryWriter):
-    ## assumes we have already opened a handle-- we're
-    ##  actually appending to a binary file
-    ##  TODO: this could really mess up the octree streamer :\
-    def write(self,handle=None):
-        """
-seq:
-  - id: octree_header
-    type: header
-  - id: node
-    type: node_data 
-types: 
-    """
-        if handle is None:
-            with open(self.fname,'wb') as handle:
-                byte_size = 0
-                byte_size += self.write_header(handle)
-                byte_size += self.write_node(handle)
-        else:
-            byte_size = 0
-            byte_size += self.write_header(handle)
-            byte_size += self.write_node(handle)
-        return byte_size
-        
-    def write_header(self,handle):
-        """
-header:
-    seq:
-      - id: node_size
-        type: u4
-      - id: has_velocities
-        type: u1
-        doc: A flag for whether this file contains vector velocities
-      - id: nfields 
-        type: u4
-        doc: number of scalar fields which are tracked alongside coordinates and velocities
-        """
-
-        byte_size = 0
-  
-        byte_size += self.write_int(handle,self.nparts)
-        byte_size += self.write_flag(handle,self.velocities is not None)
-        byte_size += self.write_flag(handle,self.rgba_colors is not None)
-        byte_size += self.write_int(handle,self.nfields)
-
-        return byte_size
-    
-    def write_node(self,handle):
-        """
-node_data:
-    seq:
-      - id: coordinates_flat
-        type: vector_field('f4')
-      - id: velocities_flat
-        type: vector_field('f4')
-        if: _root.octree_header.has_velocities != 0
-      - id: scalar_fields
-        type: scalar_field('f4')
-        repeat: expr
-        repeat-expr: _root.octree_header.nfields
-        """
-        byte_size = 0
-
-        byte_size += self.write_vector_field(handle,self.coordinates)
-        if self.velocities is not None: byte_size += self.write_vector_field(handle,self.velocities)
-        if self.rgba_colors is not None: byte_size += self.write_vector_field(handle,self.rgba_colors)
-        for field in self.fields: byte_size+= self.write_field(handle,field)
-
-        return byte_size
-
-
-if __name__ == '__main__':
-    #print(np.arange(300).reshape(-1,3))
-    my_writer = BinaryWriter('test.b',np.arange(300).reshape(-1,3),np.arange(300).reshape(-1,3))
-    my_writer.add_field(np.arange(100,200),'my_field')
-    my_writer.add_field(np.arange(100,200),'my_other_field')
-    my_writer.write()
