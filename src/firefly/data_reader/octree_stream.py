@@ -7,11 +7,19 @@ import time
 
 import numpy as np
 
-from .octree import octant_offsets
 from .json_utils import load_from_json,write_to_json
 from .binary_writer import RawBinaryWriter,OctBinaryWriter
 from abg_python.system_utils import printProgressBar
 
+octant_offsets = 0.25 * np.array([
+    [-1,-1,-1], ## x < 0, y < 0, z < 0 -> 000
+    [ 1,-1,-1], ## x > 0, y < 0, z < 0 -> 100
+    [-1, 1,-1], ## x < 0, y > 0, z < 0 -> 010
+    [ 1, 1,-1], ## x > 0, y > 0, z < 0 -> 110
+    [-1,-1, 1], ## x < 0, y < 0, z > 0 -> 001
+    [ 1,-1, 1], ## x > 0, y < 0, z > 0 -> 101
+    [-1, 1, 1], ## x < 0, y > 0, z > 0 -> 011
+    [ 1, 1, 1]]) ## x > 0, y > 0, z > 0 -> 111
 
 class OctNodeStream(object):
     def __repr__(self):
