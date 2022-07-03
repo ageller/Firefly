@@ -21,9 +21,9 @@ octant_offsets = 0.25 * np.array([
     [-1, 1, 1], ## x < 0, y > 0, z > 0 -> 011
     [ 1, 1, 1]]) ## x > 0, y > 0, z > 0 -> 111
 
-class OctNodeStream(object):
+class OctNode(object):
     def __repr__(self):
-        return f"OctNodeStream({self.name}):{self.buffer_size}/{self.nparts:d} points - {self.nfields:d} fields"
+        return f"OctNode({self.name}):{self.buffer_size}/{self.nparts:d} points - {self.nfields:d} fields"
         
     def __init__(
         self,
@@ -321,7 +321,7 @@ class OctNodeStream(object):
 
         if child_name not in self.child_names: 
             ## create a new node! welcome to the party, happy birthday, etc.
-            child = OctNodeStream(
+            child = OctNode(
                 self.center + self.width*octant_offsets[octant_index],
                 self.width/2,
                 self.field_names,
@@ -334,7 +334,7 @@ class OctNodeStream(object):
 
             self.children += [child]
             self.child_names += [child_name]
-        else: child:OctNodeStream = self.children[self.child_names.index(child_name)]
+        else: child:OctNode = self.children[self.child_names.index(child_name)]
 
         child.accumulate(coords,fields,vels,rgba_colors)
 
@@ -949,7 +949,7 @@ def refineNode(
 
     return_value = []
     for node_dict in node_dicts:
-        this_node = OctNodeStream(
+        this_node = OctNode(
             node_dict['center'],
             node_dict['width'],
             field_names,
@@ -1044,7 +1044,7 @@ def init_octree_root_node(dictionary,top_level_directory=None,thread_id=0):
     """
 
 
-    root = OctNodeStream(None,None,[]) 
+    root = OctNode(None,None,[]) 
     root_dict = root.set_buffers_from_dict(dictionary)
 
 
@@ -1063,7 +1063,7 @@ def convertNodeFFRawFFTree(
     if 'files' not in node_dict.keys(): return node_dict
 
     ## create a new octnode object to translate the data with
-    node = OctNodeStream(
+    node = OctNode(
         node_dict['center'],
         node_dict['width'],
         field_names,
