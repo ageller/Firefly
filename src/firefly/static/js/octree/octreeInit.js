@@ -8,14 +8,14 @@ function initOctree(pkey,data){
 	// flag to  draw the yellow octree boxes around the nodes
 	//viewerParams.debug = true;
 	viewerParams.debug = false;
-	viewerParams.boxSize = 25*data.octree[''].width
+	if (viewerParams.showCoMParticles) viewerParams.boxSize = 25*data.octree[''].width;
 
 	// TODO not sure if these are still necessary post-octree-refactor
 	viewerParams.octree.boxSize = viewerParams.boxSize;
 	viewerParams.octree.normCameraDistance[pkey] = viewerParams.octree.normCameraDistance.default;
 
 	//for loading bar
-	viewerParams.octree.loadingCount[pkey] = 0;
+	viewerParams.octree.loadingCount[pkey] = [0,0];
 
 	//this will be used as a percentage value in the GUI
 	viewerParams.plotNmax[pkey] = 100;
@@ -66,12 +66,44 @@ function initOctree(pkey,data){
 		data.octree);
 }
 
+function loadFFRAW(node,callback){
+	// TODO: doesn't actually work. gave up and converted
+	//  ffraw to fftree instead.
+	var this_file;
+	var offset;
+	var binary_reader = new FileReader;
+	var Coordinates_flat = new Float32Array(node.buffer_size*3);
+	var Velocities_flat = new Float32Array(node.buffer_size*3);
+
+	viewerParams.parts[node.pkey].prefixes.forEach(function (prefix,index){
+		offset=0;
+		node.files.forEach(function (ftuple){
+			this_file = ftuple[0].replace('<prefix>',prefix);
+			console.log(this_file)
+			fetch('static/data/gaia/'+this_file).then(res => {
+				res.blob().then(blob =>{ 
+					blob = blob.slice(
+						ftuple[1],
+						ftuple[1]+ftuple[2]*4)
+					binary_reader.readAsArrayBuffer(blob)
+					binary_reader.onloadend = function () {
+						// convert ArrayBuffer to FireflyFormat
+						// call compileFFLYData as a callback
+						console.log(binary_reader.result)
+						debugger;
+					}
+				});
+			});
+		});
+	});
+}
+
 function loadFFTREEKaitai(node,callback){
 
 	// initialize a FileReader object
 	var binary_reader = new FileReader;
 	// get local file
-	fetch('static/'+node.buffer_filename).then(res => {
+	fetch('static/data/'+node.buffer_filename).then(res => {
 		res.blob().then(blob =>{ 
 			blob = blob.slice(
 				node.byte_offset,
@@ -117,7 +149,7 @@ function compileFFTREEData(kaitai_format,node,callback){
 
 
 function createOctBox(node){
-	if (viewerParams.debug && node.pkey == 'PartType4') {
+	if (viewerParams.debug && node.pkey == 'DR3-RV') {
 		const geometry = new THREE.BufferGeometry();
 		// create a simple square shape. We duplicate the top left and bottom right
 		// vertices because each vertex needs to appear once per triangle.

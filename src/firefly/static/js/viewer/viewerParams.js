@@ -258,6 +258,8 @@ function defineViewerParams(){
 
 			this.loadingCount = {}; //will contain an array for each particle type that has the total inView and the total drawn to adjust the loading bar
 
+			this.showCoMParticles = false;
+
 
 			/*
 			this.maxToRemove = 50;

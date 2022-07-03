@@ -897,14 +897,14 @@ function applyOptions(){
 }
 
 // connect fly/trackball controls
-function initControls(updateGUI = true){
+function initControls(updateGUI = true,force_fly=false){
 
 	var forGUI = []
 	forGUI.push({'setGUIParamByKey':[viewerParams.useTrackball, "useTrackball"]})
 
 	// Firefly seems to behave best when it is initialized with trackball controls.  If the user chooses a different set of controls
 	// I will still initialize it with trackball, and then change after the first render pass
-	if (viewerParams.useTrackball || viewerParams.drawPass < 1) { 
+	if (!force_fly && (viewerParams.useTrackball || viewerParams.drawPass < 1)) { 
 		//console.log('initializing TrackballControls')
 		viewerParams.controlsName = 'TrackballControls'
 		var xx = new THREE.Vector3(0,0,0);
@@ -940,6 +940,7 @@ function initControls(updateGUI = true){
 		viewerParams.controlsTarget = viewerParams.controls.target;
 		viewerParams.controls.dynamicDampingFactor = viewerParams.friction;
 		viewerParams.controls.addEventListener('change', sendCameraInfoToGUI);
+		if (!viewerParams.useTrackball) return initControls(updateGUI,true); 
 	} else {
 		console.log('initializing FlyControls')
 		viewerParams.controlsName = 'FlyControls';
@@ -1634,9 +1635,22 @@ function updateOctreeLoadingBar(){
 	var forGUI = [];
 	viewerParams.partsKeys.forEach(function(p){
 		if (viewerParams.haveOctree[p]) {
-			var numerator = viewerParams.octree.loadingCount[p];
+			var numerator = viewerParams.octree.loadingCount[p][0];
+			var parts_numerator = viewerParams.octree.loadingCount[p][1];
+			var remaining_count = 0;
+			viewerParams.octree.toDraw[p].forEach( function (tuple){
+				node = tuple[0];
+				remaining_count+=node.buffer_size;
+			});
+
+			var parts_denominator = parts_numerator + remaining_count;
 			var denominator = numerator + viewerParams.octree.toDraw[p].length;
-			var out = {'p':p, 'numerator':numerator,'denominator':denominator};
+			var out = {
+				'p':p,
+				'numerator':numerator,
+				'denominator':denominator,
+				'parts_numerator':parts_numerator,
+				'parts_denominator':parts_denominator};
 			forGUI.push({'updateOctreeLoadingBarUI':out});
 		}
 	})

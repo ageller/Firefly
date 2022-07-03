@@ -55,6 +55,7 @@ function selectColormapVariable() {
 
 //turn on/off the colormap
 function checkColormapBox(p, checked){
+	if (excluded('colorbarcontainer')) return;
 	GUIParams.showColormap[p] = checked;
 	if (GUIParams.showColormap[p]) {
 		//show the colormap div
@@ -123,12 +124,14 @@ function createColormapSVG(particle_group_UIname){
 	nCB = d3.selectAll('.colormap').size()
 	if (!cbar.node()) nCB += 1; //if we're creating a new one, add this to the count 
 
-	//extend the colormap_container
-	var bbox = d3.select('#colormap_container').node().getBoundingClientRect()
-	d3.select('#colormap_container')
-		.style('width', actualCbarHeight*GUIParams.colormapScale + 'px') //since it's rotated, this is actually the height
-		.style('height', nCB*(actualCbarWidth*GUIParams.colormapScale + 70) + 'px') //to allow for the labels
-		.style('padding','0px 10px');
+	if (!excluded('colorbarcontainer')){
+		//extend the colormap_container
+		var bbox = d3.select('#colormap_container').node().getBoundingClientRect()
+		d3.select('#colormap_container')
+			.style('width', actualCbarHeight*GUIParams.colormapScale + 'px') //since it's rotated, this is actually the height
+			.style('height', nCB*(actualCbarWidth*GUIParams.colormapScale + 70) + 'px') //to allow for the labels
+			.style('padding','0px 10px');
+	}
  
 	//create a container that can be scaled and translated
 	if (!cbar.node()) {
@@ -186,10 +189,11 @@ function createColormapSVG(particle_group_UIname){
 
 
 	// show it
-	expandColormapTab(true);
+	if (!excluded('colorbarcontainer')) expandColormapTab(true);
 }
 
 function populateColormapImage(particle_group_UIname){
+	if (excluded('colorbarcontainer')) return;
 
 	//remove any image already in there
 	var imgContainer  = d3.select('#' + particle_group_UIname + 'colormapImgContainer');

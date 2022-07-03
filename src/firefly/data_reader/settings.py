@@ -180,7 +180,7 @@ class Settings(object):
             defaults to False
         :type startFly: bool, optional
         :param startTween: flag to initialize the Firefly scene in tween mode, 
-            requires a valid tweenParams.json file to be present in the JSONdir,
+            requires a valid tweenParams.json file to be present in the datadir,
             defaults to False
         :type startTween: bool, optional
         :param startVR: flag to initialize Firefly in VR mode, defaults to False
@@ -331,7 +331,7 @@ class Settings(object):
             This is a single value (not a dict), defaults to None
         :type decimate: int, optional
         :param start_tween: flag to initialize the Firefly scene in tween mode, 
-            requires a valid tweenParams.json file to be present in the JSONdir,
+            requires a valid tweenParams.json file to be present in the datadir,
             defaults to False
         :type start_tween: bool, optional
         :param CDmin: bottom of the renormalization for the experimental column density
@@ -630,25 +630,25 @@ class Settings(object):
 
     def outputToJSON(
         self,
-        JSONdir,
-        JSON_prefix='',
+        datadir,
+        file_prefix='',
         filename=None,
         loud=True,
         write_to_disk=True,
         not_reader=True):
         """ Saves the current settings to a JSON file.
 
-        :param JSONdir: the sub-directory that will contain your JSON files, relative
-            to your :code:`$HOME directory`. , defaults to :code:`$HOME/<JSON_prefix>`
-        :type JSONdir: str, optional
-        :param JSON_prefix: Prefix for any :code:`.json` files created, :code:`.json` files will be of the format:
-            :code:`<JSON_prefix><filename>.json`, defaults to 'Data'
-        :type JSON_prefix: str, optional
+        :param datadir: the sub-directory that will contain your JSON files, relative
+            to your :code:`$HOME directory`. , defaults to :code:`$HOME/<file_prefix>`
+        :type datadir: str, optional
+        :param file_prefix: Prefix for any :code:`.json` files created, :code:`.json` files will be of the format:
+            :code:`<file_prefix><filename>.json`, defaults to 'Data'
+        :type file_prefix: str, optional
         :param filename: name of settings :code:`.json` file,
             defaults to self.settings_filename
         :type filename: str, optional
-        :param JSON_prefix: string that is prepended to filename, defaults to ''
-        :type JSON_prefix: str, optional
+        :param file_prefix: string that is prepended to filename, defaults to ''
+        :type file_prefix: str, optional
         :param loud: flag to print status information to the console, defaults to True
         :type loud: bool, optional
         :param write_to_disk: flag that controls whether data is saved to disk (:code:`True`)
@@ -663,7 +663,7 @@ class Settings(object):
         
         ## determine where we're saving the file
         filename = self.settings_filename if filename is None else filename
-        filename = os.path.join(JSONdir,JSON_prefix+filename)
+        filename = os.path.join(datadir,file_prefix+filename)
 
         ## export settings to a dictionary
         all_settings_dict = self.outputToDict()
