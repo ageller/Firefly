@@ -757,7 +757,7 @@ class Octree(object):
     def full_refine(self,nthreads,nrecurse=0,use_mps=True,loud=True):
         init_time = time.time()
 
-        while len(self.work_units) >0:
+        while len(self.work_units[0]) >0:
             try: self.refine(nthreads,nrecurse,use_mps,loud)
             except IndexError as e:
                 print(e.args[0])
