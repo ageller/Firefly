@@ -126,8 +126,8 @@ var FireflyOctnodeSubstring = (function() {
       this.headerSize = this._io.readU4le();
       this.hasVelocities = this._io.readU1();
       this.hasRgbaColors = this._io.readU1();
-      this.nfields = this._io.readU4le();
       this.nodeSize = this._io.readU4le();
+      this.nfields = this._io.readU4le();
     }
 
     /**
@@ -136,6 +136,10 @@ var FireflyOctnodeSubstring = (function() {
 
     /**
      * A flag for whether this file contains rgba_colors
+     */
+
+    /**
+     * the number of particles in this file
      */
 
     /**
