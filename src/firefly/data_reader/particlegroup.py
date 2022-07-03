@@ -6,7 +6,7 @@ import os
 from .json_utils import write_to_json,load_from_json
 from .binary_writer import BinaryWriter
 
-from .octree_stream import Octree
+from .octree import Octree
 
 class ParticleGroup(object):
     """

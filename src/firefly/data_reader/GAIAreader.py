@@ -11,7 +11,7 @@ from scipy.interpolate import interp1d
 
 from abg_python.system_utils import printProgressBar
 
-from .octree_stream import init_octree_root_node
+from .octree import init_octree_root_node
 from .json_utils import load_from_json,write_to_json
 
 from .particlegroup import OctreeParticleGroup
