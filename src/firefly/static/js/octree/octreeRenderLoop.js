@@ -478,7 +478,7 @@ function checkOnScreen(node){
 
 	var u;
 	var p = new THREE.Vector3(node.center_of_mass[0],node.center_of_mass[1],node.center_of_mass[2]);
-	var offsets = [0];//,1,-1];
+	var offsets = [0,1,-1];
 	var foo = false;
 	offsets.forEach(function (xoffset){
 		offsets.forEach(function (yoffset){
