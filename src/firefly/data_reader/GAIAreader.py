@@ -60,12 +60,15 @@ class GaiaReader(Reader):
             nthreads=nthreads,
             min_to_refine=min_to_refine*10,
             nrecurse=nrecurse,
-            ## set startup settings
+            ## purple
             color=(120/256, 41/256, 173/256,1),
+            radiusVariable='phot_g_mean_mag',
+            colormapVariable='bp_rp',
             showColormap=True,
-            colormap=31.5/32,
+            colormap='coolwarm',
             sizeMult=1,
-            use_mps=use_mps)
+            use_mps=use_mps,
+            field_radius_flags=[False,True,False])
 
         ## load the RV data
         target_directory = os.path.join(os.path.dirname(gaiadir),os.path.dirname(gaiadir),'DR3-RV')
@@ -84,14 +87,16 @@ class GaiaReader(Reader):
             target_directory,
             nthreads=nthreads,
             min_to_refine=min_to_refine,
-            ## set startup settings
             nrecurse=nrecurse,
+            ## green
             color=(61/256, 248/256, 116/256,1),
-            colormapVariable=2,
+            radiusVariable='phot_g_mean_mag',
+            colormapVariable='bp_rp',
             showColormap=True,
-            colormap=31.5/32,
+            colormap='coolwarm',
             sizeMult=1,
-            use_mps=use_mps
+            use_mps=use_mps,
+            field_radius_flags=[False,True,False]
             )
 
         super().__init__(
@@ -102,6 +107,20 @@ class GaiaReader(Reader):
         ## track the two particle groups
         self.addParticleGroup(no_rv_pg)
         self.addParticleGroup(rv_pg)
+
+        for pg in self.particleGroups:
+            self.settings['sizeMult'][pg.UIname] = 0.1
+            self.settings['depthTest'][pg.UIname] = True
+            self.settings['blendingMode'][pg.UIname] = 'normal'
+            self.settings['colormapVals'][pg.UIname]['bp_rp'] = [0.5,3.4]
+            self.settings['colormapLims'][pg.UIname]['bp_rp'] = [0.5,3.4]
+            
+        #self.settings['GUIExcludeList'] += ['colorbarcontainer']
+        #self.settings['showParts']['DR3-RV'] = False
+        self.settings['collapseGUIAtStart'] = False
+        self.settings['camera'] = [0,0,0]
+        self.settings['cameraRotation'] = [-1.5,0,-1.5]
+        self.settings['startFly'] = True
 
     def initOctree(
         self,
