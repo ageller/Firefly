@@ -46,11 +46,11 @@ from firefly.data_reader import ParticleGroup,Settings,ArrayReader
 # 
 # 
 # 
-# Specific information for each key can be found in <a href="https://ageller.github.io/Firefly/docs/build/html/data_reader/settings.html">this documentation</a>.  
+# Specific information for each key can be found in <a href="https://alexbgurvi.ch/Firefly/docs/build/html/data_reader/settings.html">this documentation</a>.  
 # 
 # To create the necessary JSON files one should use the `firefly.data_reader.Settings` class to create a `Settings` object. Once you have a `Settings` object you can manipulate the settings as you see fit and then either 
 # 1. manually save it to a file using the `outputToJSON()` method or
-# 2. connect it to a `firefly.data_reader.Reader` object in order to link it to a specific visualization (see the <a href="https://ageller.github.io/Firefly/docs/build/html/data_reader/reader.html">reader documentation</a> for details on how to use a `Reader` object).
+# 2. connect it to a `firefly.data_reader.Reader` object in order to link it to a specific visualization (see the <a href="https://alexbgurvi.ch/Firefly/docs/build/html/data_reader/reader.html">reader documentation</a> for details on how to use a `Reader` object).
 
 # In[5]:
 
@@ -64,7 +64,7 @@ settings.printKeys(values=False)
 
 
 # ## Settings can be changed the same way you would change a key in a dictionary
-# There is key validation (so you can't attempt to set a setting that doesn't exist) but there is no value validation, so be careful that you use appropriate values or your app might not work. See the <a href="https://ageller.github.io/Firefly/docs/build/html/data_reader/settings.html">settings documentation</a> for details on what values each setting can take.
+# There is key validation (so you can't attempt to set a setting that doesn't exist) but there is no value validation, so be careful that you use appropriate values or your app might not work. See the <a href="https://alexbgurvi.ch/Firefly/docs/build/html/data_reader/settings.html">settings documentation</a> for details on what values each setting can take.
 
 # In[6]:
 
@@ -101,11 +101,10 @@ fields = np.random.random(size=xs.size)
 # In[8]:
 
 
-
 settings.printKeys(pattern='particle')
 
 
-# We'll use a `firefly.data_reader.ArrayReader`, a workhorse `firefly.data_reader.Reader` sub-class with many convenient functions. See the <a href="https://ageller.github.io/Firefly/docs/build/html/data_reader/reader.html">reader documentation</a> for details that are outside the scope of this tutorial.
+# We'll use a `firefly.data_reader.ArrayReader`, a workhorse `firefly.data_reader.Reader` sub-class with many convenient functions. See the <a href="https://alexbgurvi.ch/Firefly/docs/build/html/data_reader/reader.html">reader documentation</a> for details that are outside the scope of this tutorial.
 
 # In[9]:
 
@@ -113,7 +112,7 @@ settings.printKeys(pattern='particle')
 ## initialize an ArrayReader
 reader = ArrayReader(
     coordinates=[coords[:-1],coords], ## pass in two particle groups as a demonstration (just copies of our sample data)
-    write_jsons_to_disk=False,
+    write_to_disk=False,
     settings=settings, ## the settings object to link
     fields=[[],[fields,fields]]) ## field data for each particle group, 0 fields for 1 and 2 repeated fields for the other.
 

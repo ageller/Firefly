@@ -20,6 +20,21 @@ function animate(time) {
 		// get the memory usage
 		update_memory_usage();
 
+		if (viewerParams.initialize_time){
+			//console.log(seconds-viewerParams.initialize_time + ' seconds to initialize');
+			//console.log(viewerParams.memoryUsage/1e9 + ' GB allocated');
+			var numtot = 0;
+			viewerParams.partsKeys.forEach(function (pkey){
+				numtot = numtot + viewerParams.parts.count[pkey];
+				});
+
+			viewerParams.mem_profile = [numtot,(seconds-viewerParams.initialize_time),viewerParams.memoryUsage/1e9]
+
+			// initialize the FPS_profile array
+			viewerParams.FPS_profile = [];
+			viewerParams.initialize_time = null;
+		}
+
 		// velocity animation
 		//console.log('before', viewerParams.animateVelTime, viewerParams.animateVelDt, viewerParams.animateVelTmax)
 		viewerParams.animateVelTime = (viewerParams.animateVelTime + viewerParams.animateVelDt) % viewerParams.animateVelTmax;	
@@ -28,6 +43,27 @@ function animate(time) {
 
 		viewerParams.drawPass += 1;
 
+		FPS_profile_step = 50;
+		if (!(viewerParams.drawPass % FPS_profile_step) && viewerParams.drawPass < 10*FPS_profile_step){
+			viewerParams.FPS_profile.push(viewerParams.FPS)
+		}
+		else if (viewerParams.drawPass == (10*FPS_profile_step+1)){
+			var numtot = 0;
+			viewerParams.partsKeys.forEach(function (pkey){
+				numtot = numtot + viewerParams.parts.count[pkey];
+				});
+			profiled_FPS = viewerParams.FPS_profile.reduce((a, b) => a + b, 0)/viewerParams.FPS_profile.length;
+
+			console.log(
+				'(PROFILE): ',
+				viewerParams.mem_profile[0],
+				viewerParams.mem_profile[1],
+				viewerParams.mem_profile[2],
+				viewerParams.PsizeMult[viewerParams.partsKeys[0]],
+				profiled_FPS)
+
+			viewerParams.profiled = true;
+		}
 		//console.log(viewerParams.camera.position)
 
 	}
@@ -152,9 +188,9 @@ function update_particle_groups(time){
 		if ( viewerParams.parts[p].hasOwnProperty('octree') &&
 			(!viewerParams.parts[p].hasOwnProperty('octree_init') || !viewerParams.parts[p].octree_init)){
 			evaluateFunctionOnOctreeNodes(
-			hideCoM,
-			viewerParams.parts[p].octree[''],
-			viewerParams.parts[p].octree);
+				hideCoM,
+				viewerParams.parts[p].octree[''],
+				viewerParams.parts[p].octree);
 			viewerParams.parts[p].octree_init = true;
 		}
 
@@ -514,7 +550,7 @@ function update_memory_usage(){
 
 function update_framerate(seconds,time){
 	// if we spent more than 1.5 seconds drawing the last frame, send the app to sleep
-	if ( (seconds-viewerParams.currentTime) > 1.5){
+	if ( viewerParams.sleepTimeout != null && (seconds-viewerParams.currentTime) > viewerParams.sleepTimeout){
 		console.log("Putting the app to sleep, taking too long!",(seconds-viewerParams.currentTime));
 		viewerParams.pauseAnimation=true;
 		showSleep();
@@ -530,7 +566,7 @@ function update_framerate(seconds,time){
 	//  and put in a weirdly high value (like >100 fps) that biases the mean high
 	viewerParams.FPS = viewerParams.fps_list.slice().sort(function(a, b){return a-b})[15]
 
-	if ((viewerParams.drawPass % Math.round(viewerParams.FPS)) == 0){
+	if ((viewerParams.drawPass % Math.min(Math.round(viewerParams.FPS),60)) == 0){
 		// fill FPS container div with calculated FPS and memory usage
 		var forGUI = [];
 		forGUI.push({'setGUIParamByKey':[viewerParams.FPS, "FPS"]});

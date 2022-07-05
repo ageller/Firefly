@@ -121,7 +121,8 @@ function drawOctreeNode(node, callback){
 		// spawn in new mesh with any filters, UI values, etc...
 		update_particle_mesh(node.pkey,node.mesh,true,true,true,true);
 
-		viewerParams.octree.loadingCount[node.pkey]+=1
+		viewerParams.octree.loadingCount[node.pkey][1]+=node.buffer_size;//1
+		viewerParams.octree.loadingCount[node.pkey][0]+=1
 		viewerParams.octree.waitingToDraw = false;
 
 		// finish by executing the callback
@@ -155,7 +156,8 @@ function removeOctreeNode(node,callback){
 		// unreference buffer data by deleting the .particles attribute
 		delete node.particles;
 		
-		viewerParams.octree.loadingCount[node.pkey]-=1
+		viewerParams.octree.loadingCount[node.pkey][0]-=1
+		viewerParams.octree.loadingCount[node.pkey][1]-=node.buffer_size;//1
 		viewerParams.octree.waitingToRemove = false;
 		updateOctreeLoadingBar();
 	}

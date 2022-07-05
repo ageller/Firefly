@@ -57,6 +57,16 @@ function createTweens(){
 	//first one starts at the current camera location
 	var Ntweens = viewerParams.tweenviewerParams.position.length
 
+	//clear out the tween locations
+	viewerParams.tweenRot.forEach(function(d){
+		d.stop();
+	})
+	viewerParams.tweenPos.forEach(function(d){
+		d.stop();
+	})
+	viewerParams.tweenRot = [];
+	viewerParams.tweenPos = [];
+
 	//now go through all the tweens
 	for (var i=0; i<Ntweens-1; i++){
 		var rotTween = new TWEEN.Tween(viewerParams.camera.rotation).to(viewerParams.tweenviewerParams.rotation[i+1], viewerParams.tweenviewerParams.duration[i]).easing(ease)

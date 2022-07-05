@@ -12,7 +12,7 @@ seq:
 types:
   header:
     seq:
-      - id: node_size
+      - id: header_size 
         type: u4
       - id: has_velocities
         type: u1
@@ -20,6 +20,9 @@ types:
       - id: has_rgba_colors
         type: u1
         doc: A flag for whether this file contains rgba_colors
+      - id: node_size
+        type: u4
+        doc: the number of particles in this file
       - id: nfields 
         type: u4
         doc: number of scalar fields which are tracked alongside coordinates and velocities

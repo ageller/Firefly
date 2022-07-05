@@ -1,0 +1,19 @@
+{
+  "name": "firefly-test",
+  "version": "1.0.0",
+  "description": "performance and regression tests",
+  "main": "index.test.js",
+  "scripts": {
+  "test": "jest"
+    },
+  "author": "Alex Gurvich",
+  "license": "ISC",
+  "devDependencies": {
+    "jest": "^28.1.1",
+    "jest-puppeteer": "^6.1.0",
+    "puppeteer": "^14.3.0"
+  },
+  "jest": {
+  "preset": "jest-puppeteer"
+    }
+}

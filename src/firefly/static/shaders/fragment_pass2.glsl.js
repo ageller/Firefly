@@ -8,16 +8,17 @@ uniform float colormap;
 uniform float CDmin;
 uniform float CDmax;
 uniform float lognorm;
+uniform float scaleCD;
 
 void main() {
 	vec4 color = texture2D(tex, vUv);
 
 	float density_renorm;
 	if (lognorm > 0.){
-		density_renorm = (log(length(color.rgb))/log(10.)-CDmin)/(CDmax-CDmin);
+		density_renorm = (log(color.r/scaleCD)/log(10.)-CDmin)/(CDmax-CDmin);
 	}
 	else{
-		density_renorm = (length(color.rgb)-CDmin)/(CDmax-CDmin);
+		density_renorm = (color.r/scaleCD-CDmin)/(CDmax-CDmin);
 	}
 
 	// clip renormalized values to be between 0 and 1

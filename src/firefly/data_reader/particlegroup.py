@@ -3,7 +3,7 @@ import numpy as np
 
 import os 
 
-from .json_utils import write_to_json
+from .json_utils import write_to_json,load_from_json
 from .binary_writer import BinaryWriter
 
 from .octree import Octree
@@ -83,7 +83,6 @@ class ParticleGroup(object):
         field_colormap_flags=None,
         field_radius_flags=None,
         decimation_factor=1,
-        filenames_and_nparts=None,
         attached_settings=None,
         loud=True,
         **settings_kwargs):
@@ -121,19 +120,6 @@ class ParticleGroup(object):
         :param decimation_factor: factor by which to reduce the data randomly 
                 i.e. :code:`data=data[::decimation_factor]`, defaults to 1
         :type decimation_factor: int, optional
-        :param filenames_and_nparts: Allows you to manually control how the particles
-            are distributed among the sub-JSON files, it is
-            **highly recommended that you leave this to** None such that particles are equally
-            distributed among the :code:`.jsons` but if for whatever reason you need fine-tuning
-            you should pass a list of tuples in the form 
-
-            :code:`[("json_name0.json",nparts_this_file0),("json_name1.json",nparts_this_file1) ... ]`
-
-            where where the sum of :code:`nparts_this_file%d` is exactly :code:`nparts`. These files
-            will automatically be added to :code:`filenames.json` if you use
-            an attached :class:`firefly.data_reader.Reader` and 
-            its :class:`~firefly.data_reader.Reader.dumpToJSON` method, defaults to None
-        :type filenames_and_nparts: list of tuple of (str,int), optional
         :param attached_settings: :class:`~firefly.data_reader.Settings` instance that should be linked
             to this particle group such that GUI elements are connected correctly. If not provided here
             can be attached after-the-fact using the
@@ -143,7 +129,6 @@ class ParticleGroup(object):
         :type loud: bool, optional
         :raises ValueError: if len(field_names) != len(field arrays)
         :raises ValueError: if a field_array has length other than len(coordinates)
-        :raises ValueError: if filenames_and_nparts is not a list of tuples and strs
         :raises ValueError: if :code:`color` is passed as an option kwarg but the value is 
             not an RGBA iterable
         :raises KeyError: if passed an invalid option_kwarg
@@ -153,17 +138,9 @@ class ParticleGroup(object):
         self.octree: Octree = None
 
         ## handle default values for iterables
-        field_arrays = [] if field_arrays is None else field_arrays
-        field_names = [] if field_names is None else field_names
         field_filter_flags = [] if field_filter_flags is None else field_filter_flags
         field_colormap_flags = [] if field_colormap_flags is None else field_colormap_flags
         field_radius_flags = [] if field_radius_flags is None else field_radius_flags
-
-        if 'Velocities' in field_names:
-            raise SyntaxError(
-                "Velocities should not be included in field array names,"+
-                " pass them directly to ParticleGroup using keyword argument `velocities=`."+
-                " This is new behavior as of 1/27/22.")
 
         ## bind input that will not be validated
         self.UIname = UIname
@@ -172,6 +149,7 @@ class ParticleGroup(object):
         self.velocities = np.array(velocities) if velocities is not None else None
         self.rgba_colors = np.array(rgba_colors) if rgba_colors is not None else None
         self.nparts = self.coordinates.shape[0]
+        field_arrays = np.empty((0,self.coordinates.shape[0])) if field_arrays is None else field_arrays
 
         ## reduce the decimation factor if someone has asked to skip
         ##  too many particles for the given dataset so that a single particle
@@ -182,11 +160,14 @@ class ParticleGroup(object):
         ## allow users to pass in field data as a dictionary rather than a list
         ##  and use keys as field names
         if type(field_arrays) == dict:
-            field_names = list(field_arrays.keys())
+            if field_names is None: 
+                field_names = list(field_arrays.keys())
+                print('filter/colormap/radius flags correspond to:',field_names)
             field_arrays = [field_arrays[key] for key in field_names]
+        else: field_names = [] if field_names is None else field_names
 
         ## check if each field is named
-        if len(field_names) != len(field_arrays):
+        if (len(field_names) != len(field_arrays)) and np.size(field_arrays) > 0:
             raise ValueError("Make sure each field_array (%d) has a field_name (%d)"%(
                 len(field_arrays),len(field_names)))
 
@@ -239,19 +220,6 @@ class ParticleGroup(object):
         self.field_colormap_flags = np.array(field_colormap_flags)
         self.field_radius_flags = np.array(field_radius_flags)
 
-        ## validate filenames and nparts if anyone was so foolhardy to
-        ##  send it in themselves
-        if filenames_and_nparts is not None:
-            try:
-                assert type(filenames_and_nparts[0]) == tuple
-                assert type(filenames_and_nparts[0][0]) == str
-                assert type(filenames_and_nparts[0][1]) == int
-            except AssertionError:
-                ValueError("filenames_and_nparts should be a list of tuples of strings and ints")
-
-        self.filenames_and_nparts = filenames_and_nparts
-        
-
         ## TODO how do these interface with javascript code?
         self.radiusFunction = None
         self.weightFunction = None
@@ -260,11 +228,8 @@ class ParticleGroup(object):
 
         ## start with the default
         self.settings_default = {
-            'UIparticle':True,
-            'UIdropdown':True,
-            'UIcolorPicker':True,
             'color': np.append(np.random.random(3),[1]),
-            'sizeMult':1.,
+            'sizeMult':.1,
             'showParts':True,
             'filterVals':dict(),
             'filterLims':dict(),
@@ -283,6 +248,7 @@ class ParticleGroup(object):
             'animateVelDt':None, ## use default set in javascript
             'animateVelTmax':None, ## use default set in javascript
             'radiusVariable':0, 
+            'GUIExcludeList':None
         }
         
         ## setup default values for the initial filter limits (vals/lims represent the interactive
@@ -501,186 +467,107 @@ class ParticleGroup(object):
 
         return self.octree
 
-    def outputToJSON(
+    def writeToDisk(
         self,
-        short_data_path,
-        hard_data_path,
-        JSON_prefix='',
+        target_directory,
+        file_prefix='',
+        file_extension='.ffly',
         loud=True,
-        max_npart_per_file=10**4,
-        clean_JSONdir=False,
-        write_to_disk=True,
-        not_reader=True):
-        """Outputs this ParticleGroup instance's data to JSON format, splitting it up into 
-            multiple sub-JSON files. Best used when coupled with a :class:`firefly.data_reader.Reader`'s
-            :func:`~firefly.data_reader.Reader.dumpToJSON` method.
+        max_npart_per_file=10**5,
+        clean_datadir=False,
+        not_reader=True,
+        write_to_disk=True):
+        """Outputs this ParticleGroup instance's data to a compatible Firefly format,
+            either `.ffly` or `.json`. Data is partitioned into 
+            multiple sub-files. This is best used when coupled with a :class:`firefly.data_reader.Reader`'s
+            :func:`~firefly.data_reader.Reader.writeToDisk` method.
 
-        :param short_data_path: the sub-directory you want to put these files into
-        :type short_data_path: str
-        :param hard_data_path: the path to the directory containing different datasets'
-            JSON sub-directories (often :code:`/path/to/firefly/static/data`)
-        :type hard_data_path: str
-        :param JSON_prefix: Prefix for any :code:`.json` files created, :code:`.json` files will be of the format:
-            :code:`<JSON_prefix><parttype>_%d.json`, defaults to ''
-        :type JSON_prefix: str, optional
+        :param target_directory: the path to the directory where data should be saved
+        :type target_directory: str
+        :param file_extension: File extension for data files created, one of `.ffly` (binary)
+            or `.json` (ASCII).
+        :type file_extension: str, optional
+        :param file_prefix: Prefix for any files created, filenames will look like:
+            `f"{file_prefix}{self.UIname}{i_file:03d}{file_extension}"` 
+        :type file_prefix: str, optional
         :param loud: flag to print status information to the console, defaults to True
         :type loud: bool, optional
         :param max_npart_per_file: the maximum number of particles saved per :code:`.json` file,
             don't use too large a number or you will have trouble loading
             the individual files in., defaults to 10**4
         :type max_npart_per_file: int, optional
-        :param clean_JSONdir: flag to delete all :code:`.json` files in
+        :param clean_datadir: flag to delete all :code:`.json` files in
             the :code:`JSONdir`. Strictly not necessary (since :code:`filenames.json` 
             will be updated) but it is good to clean up after yourself., defaults to False
-        :type clean_JSONdir: bool, optional
+        :type clean_datadir: bool, optional
         :param write_to_disk: flag that controls whether data is saved to disk (:code:`True`)
             or only converted to a string and returned (:code:`False`), defaults to True
         :type write_to_disk: bool, optional
         :param not_reader: flag for whether to print the Reader :code:`filenames.json` warning, defaults to True
-        :type write_to_disk: bool, optional
-        :return: filename, JSON_array (either a list full of filenames if
+        :type not_reader: bool, optional
+        :return: filename, file_list (either a list full of filenames if
             written to disk or a list of JSON strs)
         :rtype: str, list of str
         """
 
-        if self.octree is not None:
-            raise AssertionError(
-                "Octrees can only be output to binary format."+
-                " Use outputToFFLY instead to produce the necessary .fftree files.")
-
-        ## shuffle particles and decimate as necessary, save the output in dec_inds
-        self.getDecimationIndexArray()
+        ## prepend a . if there isn't one in the string
+        if '.' not in file_extension: file_extension='.'+file_extension
+        
+        extensions = ['.json','.ffly']
+        if file_extension not in extensions: raise ValueError(
+            f"Invalid extension {file_extension} must be one of {extensions}")
+        
+        ## can't pass raw binary data to the app while it's running (yet?)
+        if not write_to_disk: file_extension = '.json'
 
         ## where are we saving this json to?
-        full_path = os.path.join(hard_data_path, short_data_path)
 
-        if not os.path.isdir(full_path):
-            os.makedirs(full_path)
+        if not os.path.isdir(target_directory): os.makedirs(target_directory)
+
         if loud and not_reader:
             print("You will need to add the sub-filenames to"+
                 " filenames.json if this was not called by a Reader instance.")
-            print("Writing:",self,"to %s"%full_path)
-
-        ## do we want to delete any existing jsons here?
-        if clean_JSONdir:
-            print("Removing old JSON files from %s"%full_path)
-            for fname in os.listdir(full_path):
-                if "json" in fname:
-                    os.remove(os.path.join(full_path,fname))
-
-        filenames_and_nparts = self.filenames_and_nparts
-        ## if the user did not specify how we should partition the data between
-        ##  sub-JSON files then we'll just do it equally
-        if filenames_and_nparts is None:
-            ## determine if we were passed a boolean mask or a index array
-            if self.dec_inds.dtype == bool:
-                nparts = np.sum(self.dec_inds)
-                self.dec_inds = np.argwhere(self.dec_inds) ## convert to an index array
-            else:
-                nparts = self.dec_inds.shape[0]
-
-            ## how many sub-files are we going to need?
-            nfiles = int(nparts/max_npart_per_file + ((nparts%max_npart_per_file)!=0))
-
-            ## how many particles will each file have and what are they named?
-            filenames = [os.path.join(short_data_path,"%s%s%03d.json"%(JSON_prefix,self.UIname,i_file)) for i_file in range(nfiles)]
-            nparts = [min(max_npart_per_file,nparts-(i_file)*(max_npart_per_file)) for i_file in range(nfiles)]
-
-            filenames_and_nparts = list(zip(filenames,nparts))
-        
-        JSON_array = []
-        ## loop through the sub-files
-        cur_index = 0
-        for i_file,(fname,nparts_this_file) in enumerate(filenames_and_nparts):
-            ## pick out the indices for this file
-            if self.decimation_factor > 1:
-                these_dec_inds = self.dec_inds[cur_index:cur_index+nparts_this_file]
-            else:
-                ## create a dummy index array that takes everything
-                these_dec_inds = np.arange(cur_index,cur_index+nparts_this_file,dtype=int)
-        
-            ## format an output dictionary
-            outDict = self.outputToDict(
-                these_dec_inds,
-                i_file==0)
-
-            fname = os.path.join(hard_data_path,fname)
-
-            JSON_array += [(
-                fname,
-                write_to_json(outDict,
-                    fname if write_to_disk else None))] ## path=None -> returns a string
-
-            ## move onto the next file
-            cur_index += nparts_this_file
-        
-        return JSON_array,filenames_and_nparts
-
-    def outputToFFLY(
-        self,
-        short_data_path,
-        hard_data_path,
-        file_prefix='',
-        loud=True,
-        max_npart_per_file=10**5,
-        clean_FFLYdir=False,
-        not_reader=True):
-
-        ## where are we saving this json to?
-        full_path = os.path.join(hard_data_path, short_data_path)
-
-        if not os.path.isdir(full_path):
-            os.makedirs(full_path)
-        if loud and not_reader:
-            print("You will need to add the sub-filenames to"+
-                " filenames.json if this was not called by a Reader instance.")
-            print("Writing:",self,"files to %s"%full_path)
+            print("Writing:",self,"files to %s"%target_directory)
 
         ## do we want to delete any existing files here?
-        if clean_FFLYdir:
-            print("Removing old ffly files from %s"%full_path)
-            for fname in os.listdir(full_path):
-                if ("ffly" in fname or
-                    "json" in fname or 
-                    "fftree" in fname):
-                    os.remove(os.path.join(full_path,fname))
-
-        if self.octree is not None:
-            tree_filename,num_nodes,node_filenames = self.octree.writeOctree(
-                full_path,
-                self.UIname,
-                max_npart_per_file)
-            ## mimic return signature: file_array, filenames_and_nparts
-            return [tree_filename],[(tree_filename,num_nodes)]
+        if clean_datadir:
+            #print("Removing old ffly files from %s"%target_directory)
+            for fname in os.listdir(target_directory):
+                if (".ffly" in fname or
+                    ".json" in fname or 
+                    ".fftree" in fname):
+                    os.remove(os.path.join(target_directory,fname))
 
         ## shuffle particles and decimate as necessary, save the output in dec_inds
         self.getDecimationIndexArray()
 
-        filenames_and_nparts = self.filenames_and_nparts
-        ## if the user did not specify how we should partition the data between
-        ##  sub-JSON files then we'll just do it equally
-        if filenames_and_nparts is None:
-            ## determine if we were passed a boolean mask or a index array
-            if self.dec_inds.dtype == bool:
-                nparts = np.sum(self.dec_inds)
-                self.dec_inds = np.argwhere(self.dec_inds) ## convert to an index array
-            else: nparts = self.dec_inds.shape[0]
+        ## determine if we were passed a boolean mask or a index array
+        if self.dec_inds.dtype == bool:
+            nparts = np.sum(self.dec_inds)
+            self.dec_inds = np.argwhere(self.dec_inds) ## convert to an index array
+        else: nparts = self.dec_inds.shape[0]
 
-            ## how many sub-files are we going to need?
-            nfiles = int(nparts/max_npart_per_file + ((nparts%max_npart_per_file)!=0))
+        ## how many sub-files are we going to need?
+        nfiles = int(nparts/max_npart_per_file + ((nparts%max_npart_per_file)!=0))
 
-            ## how many particles will each file have and what are they named?
-            filenames = [os.path.join(short_data_path,"%s%s%03d.ffly"%(file_prefix,self.UIname,i_file)) for i_file in range(nfiles)]
-            nparts = [min(max_npart_per_file,nparts-(i_file)*(max_npart_per_file)) for i_file in range(nfiles)]
+        ## how many particles will each file have and what are they named?
+        filenames = [
+            os.path.join(
+                os.path.basename(target_directory),
+                f"{file_prefix}{self.UIname}{i_file:03d}{file_extension}") 
+                for i_file in range(nfiles)]
+        nparts = [min(max_npart_per_file,nparts-(i_file)*(max_npart_per_file)) for i_file in range(nfiles)]
 
-            filenames_and_nparts = list(zip(filenames,nparts))
+        filenames_and_nparts = list(zip(filenames,nparts))
         
-        file_array = []
+        file_list = []
         ## loop through the sub-files
         cur_index = 0
 
         for i_file,(fname,nparts_this_file) in enumerate(filenames_and_nparts):
             nparts_this_file=np.ceil(nparts_this_file).astype(int)
+
+            abs_fname = os.path.join(os.path.dirname(target_directory),fname)
             ## pick out the indices for this file
             if self.decimation_factor > 1:
                 these_dec_inds = self.dec_inds[cur_index:cur_index+nparts_this_file]
@@ -688,26 +575,165 @@ class ParticleGroup(object):
                 ## create a dummy index array that takes everything
                 these_dec_inds = np.arange(cur_index,cur_index+nparts_this_file,dtype=int)
         
-            ## prepare writer class
-            fname = os.path.join(hard_data_path,fname)
-            binary_writer = BinaryWriter(
-                fname,
-                self.coordinates[these_dec_inds],
-                self.velocities[these_dec_inds] if self.velocities is not None else None,
-                self.rgba_colors[these_dec_inds] if self.rgba_colors is not None else None)
+            if file_extension=='.ffly':
+                ## prepare writer class
+                binary_writer = BinaryWriter(
+                    abs_fname,
+                    self.coordinates[these_dec_inds],
+                    self.velocities[these_dec_inds] if self.velocities is not None else None,
+                    self.rgba_colors[these_dec_inds] if self.rgba_colors is not None else None)
 
-            ## fill necessary attributes
-            binary_writer.nfields = len(self.field_names)
-            binary_writer.field_names = self.field_names
-            if len(self.field_names): binary_writer.fields = self.field_arrays[:,these_dec_inds]
-            else: binary_writer.fields = []
-            binary_writer.filter_flags = self.field_filter_flags
-            binary_writer.colormap_flags = self.field_colormap_flags
-            binary_writer.radius_flags = self.field_radius_flags
+                ## fill necessary attributes
+                binary_writer.nfields = len(self.field_names)
+                binary_writer.field_names = self.field_names
+                if len(self.field_names): binary_writer.fields = np.array(self.field_arrays)[:,these_dec_inds]
+                else: binary_writer.fields = []
+                binary_writer.filter_flags = self.field_filter_flags
+                binary_writer.colormap_flags = self.field_colormap_flags
+                binary_writer.radius_flags = self.field_radius_flags
 
-            file_array += [(fname,binary_writer.write())] 
+                file_list += [(
+                    ## need to replace w/ relative path from static/data
+                    ##  in reader
+                    abs_fname,
+                    binary_writer.write())] 
+            elif file_extension == '.json': 
+                ## format an output dictionary
+                outDict = self.outputToDict(
+                    these_dec_inds,
+                    i_file==0)
+
+                file_list += [
+                    (abs_fname,
+                    write_to_json(outDict,
+                        abs_fname if write_to_disk else None))]
+            # else: <-- unnecessary b.c. we do validation above
 
             ## move onto the next file
             cur_index += nparts_this_file
         
-        return file_array,filenames_and_nparts
+        return file_list,filenames_and_nparts
+
+## Octree's methods will be called before ParticleGroup's
+class OctreeParticleGroup(Octree,ParticleGroup):
+
+    def __init__(
+        self,
+        UIname,
+        pathh,
+        min_to_refine=1e6,
+        nthreads=1,
+        nrecurse=0,
+        use_mps=True,
+        loud=True,
+        **kwargs):
+
+        ## initialize the octree portion of the OctreeParticleGroup
+        Octree.__init__(self,UIname,pathh,min_to_refine)
+
+        ## do the actual work of building the octree,
+        ##  might take a while...
+        self.full_refine(nthreads,nrecurse,use_mps,loud=loud)
+
+        ## unpack the center coordinates and field values
+        (coordinates,
+            velocities,
+            rgba_colors,
+            field_arrays) = self.unpack_tree_nodes()
+
+        ## initialize the particlegroup portion of the OctreeParticleGroup
+        ParticleGroup.__init__(
+            self,
+            self.UIname,
+            coordinates,
+            velocities,
+            rgba_colors,
+            field_arrays,
+            field_names=self.root['field_names'],
+            loud=loud,
+            **kwargs)
+ 
+    def unpack_tree_nodes(self):
+
+        nodes = self.root['nodes']
+        field_names = self.root['field_names']
+
+        numnodes = len(nodes.keys())
+
+        coordinates = np.empty((numnodes,3))
+
+        if self.root['has_velocities']: 
+            velocities = np.empty((numnodes,3))
+        else: velocities = None
+
+        if self.root['has_colors']: 
+            rgba_colors = np.empty((numnodes,4))
+        else: rgba_colors = None
+        fields = np.empty((len(field_names),numnodes))
+
+        for inode,node_dict in enumerate(nodes.values()):
+            coordinates[inode,:] = node_dict['center_of_mass']
+            if velocities is not None: velocities[inode,:] = node_dict['com_velocity']
+            if rgba_colors is not None: rgba_colors[inode,:] = node_dict['rgba_color']
+            for ifield,field_name in enumerate(field_names):
+                fields[ifield,inode] = node_dict[field_name]
+            node_dict['node_index'] = inode
+
+        return coordinates,velocities,rgba_colors,fields
+
+    def writeToDisk(
+        self,
+        target_directory,
+        file_prefix='',
+        octree_format='.fftree',
+        nthreads=1,
+        **kwargs):
+
+        octree_formats = ['.fftree','.ffraw']
+
+        if '.' not in octree_format: octree_format = '.' + octree_format
+
+        if octree_format not in octree_formats: raise ValueError(
+            f"Invalid extension {octree_format} must be one of {octree_formats}")
+
+        ## call super to write "normal" particle data
+        file_list,filenames_and_nparts = super().writeToDisk(
+            target_directory,
+            file_prefix=file_prefix,
+            file_extension='.json',
+            **kwargs)
+
+        ## need to convert from .ffraw to .fftree, save .fftree files in target_directory
+        if octree_format == '.fftree': self.convert_ffraw_to_fftree(
+            os.path.join(target_directory,self.UIname+'fftree'),
+            f"{file_prefix}{self.UIname}%04d.fftree",
+            nthreads=nthreads) 
+        elif octree_format == '.ffraw': raise NotImplementedError(
+            "Javascript can't read .ffraw yet... must convert to .fftree")
+
+        ## load the first .json particle file for the centers
+        ##  and append the octree metadata 
+        data_dict = load_from_json(file_list[0][0])
+        
+        for key,value in self.root.items(): 
+            if key == 'nodes': key = 'octree'
+            data_dict[key] = value
+        data_dict['prefixes'] = self.prefixes
+
+        ## change absolute paths to relative paths
+        if octree_format == 'ffraw':
+            for node_dict in data_dict['octree'].values():
+                if 'files' in node_dict:
+                    for i,ftuple in enumerate(node_dict['files']):
+                        relative_fname = os.path.join(*ftuple[0].split(os.path.sep)[-3:])
+                        new_name =relative_fname.split('-')
+                        new_name = '-'.join(new_name[:-1]) +'-<prefix>.'+'.'.join(new_name[-1].split('.')[-2:])
+                        node_dict['files'][i] = (
+                            new_name,
+                            ftuple[1],
+                            ftuple[2])
+                    node_dict['files'] = set(node_dict['files'])
+
+        write_to_json(data_dict,file_list[0][0])
+
+        return file_list,filenames_and_nparts

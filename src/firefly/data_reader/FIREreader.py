@@ -250,7 +250,7 @@ class FIREreader(Reader):
                     snapdict['Coordinates'],
                     snapdict['Velocities'],
                     field_names=field_names,
-                    field_arrays=np.array(field_arrays,ndmin=2),
+                    field_arrays=np.array(field_arrays).reshape(-1,snapdict['Coordinates'].shape[0]),
                     decimation_factor=dec_factor,
                     field_filter_flags=field_filter_flags,
                     field_colormap_flags=field_colormap_flags,
@@ -277,8 +277,8 @@ class SimpleFIREreader(FIREreader):
         path_to_snapshot,
         decimation_factor=10,
         JSONdir=None,
-        write_jsons_to_disk=True,
-        com_offset=False, 
+        write_to_disk=True,
+        com=False, 
         **kwargs):
         """ A wrapper to :class:`firefly.data_reader.FIREreader` that will open 
             FIRE collaboration formatted data with minimal interaction from the user 
@@ -308,12 +308,12 @@ class SimpleFIREreader(FIREreader):
         :param JSONdir: the sub-directory that will contain your JSON files, relative
             to your :code:`$HOME directory`. , defaults to :code:`$HOME/<JSON_prefix>`
         :type JSONdir: str, optional
-        :param write_jsons_to_disk: flag that controls whether data is saved to disk (:code:`True`) 
+        :param write_to_disk: flag that controls whether data is saved to disk (:code:`True`) 
             or only converted to a string and stored in :code:`self.JSON` (:code:`False`), defaults to True
-        :type write_jsons_to_disk: bool, optional
-        :param com_offset: flag to offset all coordinates by the COM of the 
+        :type write_to_disk: bool, optional
+        :param com: flag to offset all coordinates by the COM of the 
             snapshot, defaults to False 
-        :type com_offset: bool, optional
+        :type com: bool, optional
         :raises ValueError: if a snapnum cannot be inferred from the path_to_snapshot
         """
 
@@ -355,7 +355,7 @@ class SimpleFIREreader(FIREreader):
             **kwargs)
 
         ## load the data
-        self.loadData(com_offset=com_offset)
+        self.loadData(com=com)
 
         self.settings['color']['Gas'] = [1,0,0,1]
         self.settings['color']['Stars'] = [0,0,1,1]
@@ -365,8 +365,8 @@ class SimpleFIREreader(FIREreader):
 
         self.settings['camera'] = [0,0,-15]
 
-        ## dump the JSON files
-        self.dumpToJSON(loud=True,write_jsons_to_disk=write_jsons_to_disk,use_format='ffly')
+        ## dump the data files to disk
+        self.writeToDisk(loud=True,write_to_disk=write_to_disk,extension='.ffly')
 
 class STARFORGEreader(FIREreader):
     def __init__(
@@ -374,8 +374,8 @@ class STARFORGEreader(FIREreader):
         path_to_snapshot,
         decimation_factor=10,
         JSONdir=None,
-        write_jsons_to_disk=True,
-        com_offset=False, 
+        write_to_disk=True,
+        com=False, 
         **kwargs):
         """ A wrapper to :class:`firefly.data_reader.FIREreader` that will open 
             `STARFORGE collaboration <http://starforge.space>`_ formatted data with minimal interaction from the user 
@@ -405,12 +405,12 @@ class STARFORGEreader(FIREreader):
         :param JSONdir: the sub-directory that will contain your JSON files, relative
             to your :code:`$HOME directory`. , defaults to :code:`$HOME/<JSON_prefix>`
         :type JSONdir: str, optional
-        :param write_jsons_to_disk: flag that controls whether data is saved to disk (:code:`True`) 
+        :param write_to_disk: flag that controls whether data is saved to disk (:code:`True`) 
             or only converted to a string and stored in :code:`self.JSON` (:code:`False`), defaults to True
-        :type write_jsons_to_disk: bool, optional
-        :param com_offset: flag to offset all coordinates by the COM of the 
+        :type write_to_disk: bool, optional
+        :param com: flag to offset all coordinates by the COM of the 
             snapshot, defaults to False 
-        :type com_offset: bool, optional
+        :type com: bool, optional
         :raises ValueError: if a snapnum cannot be inferred from the path_to_snapshot
         """
 
@@ -443,7 +443,7 @@ class STARFORGEreader(FIREreader):
             **kwargs)
 
         ## load the data
-        self.loadData(com_offset=com_offset)
+        self.loadData(com=com)
 
         self.settings['color']['Gas'] = [1,0,0,1]
         self.settings['color']['Stars'] = [0,0,1,1]
@@ -454,4 +454,4 @@ class STARFORGEreader(FIREreader):
         self.settings['camera'] = [0,0,-15]
 
         ## dump the JSON files
-        self.dumpToJSON(loud=True,write_jsons_to_disk=write_jsons_to_disk)
+        self.writeToDisk(loud=True,write_to_disk=write_to_disk)

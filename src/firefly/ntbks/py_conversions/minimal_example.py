@@ -32,7 +32,7 @@ from firefly.data_reader import ArrayReader
 my_arrayReader = ArrayReader(
     coords,
     fields=fields,
-    write_jsons_to_disk=False)
+    write_to_disk=False)
 
 
 # # Display Inline
@@ -40,7 +40,7 @@ my_arrayReader = ArrayReader(
 # In[5]:
 
 
-from firefly.server import spawnFireflyServer
+from firefly.server import spawnFireflyServer,quitAllFireflyServers
 
 
 # In[6]:
@@ -53,11 +53,11 @@ process = spawnFireflyServer()
 
 
 from IPython.display import IFrame
-url = "http://localhost:5000"
+url = "http://localhost:5500"
 IFrame(url, width=1000, height=500)
 
 
-# In[11]:
+# In[8]:
 
 
 # Send data to the server.
@@ -68,5 +68,5 @@ my_arrayReader.sendDataViaFlask()
 # In[9]:
 
 
-# killAllFireflyServers()
+return_code = quitAllFireflyServers()
 
