@@ -1,5 +1,6 @@
 import numpy as np
 
+from matplotlib.colors import hex2color
 
 import os 
 
@@ -271,13 +272,13 @@ class ParticleGroup(object):
             if settings_kwarg in self.settings_default.keys():
                 if settings_kwarg == 'color':
                     color = settings_kwargs['color']
+                    if type(color) == str: color = list(hex2color(color))
                     if len(color) != 4:
-                        ## if passed an RGB color
-                        if len(color) == 3:
-                            ## assume alpha value of 1
-                            settings_kwarg['color'] = np.append(color,[1],axis=0)
-                        else:
-                            raise ValueError("Make sure you pass the color as an RGB(A) array")
+                        ## passed an RGB color, assume alpha value of 1
+                        if len(color) == 3: color = np.append(color,[1],axis=0)
+                        else: raise ValueError(
+                            "Make sure you pass the color as an RGB(A) array")
+                    settings_kwargs['color'] = color
                         
                 self.settings_default[settings_kwarg] = settings_kwargs[settings_kwarg]
             else:
