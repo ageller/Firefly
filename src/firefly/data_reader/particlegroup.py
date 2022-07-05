@@ -248,6 +248,7 @@ class ParticleGroup(object):
             'animateVelDt':None, ## use default set in javascript
             'animateVelTmax':None, ## use default set in javascript
             'radiusVariable':0, 
+            'GUIExcludeList':None
         }
         
         ## setup default values for the initial filter limits (vals/lims represent the interactive

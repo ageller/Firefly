@@ -252,7 +252,7 @@ class Settings(object):
             'showFPS':showFPS,
             'showMemoryUsage':showMemoryUsage,
             'memoryLimit':memoryLimit,
-            'GUIExcludeList':GUIExcludeList,
+            'GUIExcludeList':GUIExcludeList if GUIExcludeList is not None else [],
             'collapseGUIAtStart':collapseGUIAtStart
         }
 
@@ -585,6 +585,11 @@ class Settings(object):
             'colormap','colormapVariable','showColormap']:
             self[key][particleGroup.UIname]=particleGroup.settings_default[key]
         
+        if particleGroup.settings_default['GUIExcludeList'] is not None:
+            self['GUIExcludeList'] += [
+                f"{particleGroup.UIname}/{key}" for key in 
+                particleGroup.settings_default['GUIExcludeList']]
+
         ## and link the other way, this Settings instance to the particleGroup
         particleGroup.attached_settings = self
 
