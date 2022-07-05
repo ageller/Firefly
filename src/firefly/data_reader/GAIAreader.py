@@ -41,16 +41,16 @@ class GaiaReader(Reader):
 
         if gaiadir is None: gaiadir = os.path.join(os.environ['HOME'],'projects','gaia','GaiaSource')
 
+        ## bind input
+        self.gaiadir = gaiadir
+        self.limiting_mag = limiting_mag
+        self.nthreads = nthreads
+        self.use_mps = use_mps
+
         ## load the no RV data
         target_directory = os.path.join(os.path.dirname(gaiadir),os.path.dirname(gaiadir),'DR3-noRV')
         if not os.path.isfile(os.path.join(target_directory,'octree.json')):
-            self.initOctree(
-                gaiadir,
-                target_directory,
-                radial_velocity=False,
-                limiting_mag=limiting_mag,
-                nthreads=nthreads,
-                use_mps=use_mps)
+            self.initOctree(target_directory,radial_velocity=False)
 
         ## creating the pg will trigger the octree build (which will pick up where 
         ##  it left off if it didn't finish)
@@ -73,13 +73,7 @@ class GaiaReader(Reader):
         ## load the RV data
         target_directory = os.path.join(os.path.dirname(gaiadir),os.path.dirname(gaiadir),'DR3-RV')
         if not os.path.isfile(os.path.join(target_directory,'octree.json')):
-            self.initOctree(
-                gaiadir,
-                target_directory,
-                radial_velocity=True,
-                limiting_mag=limiting_mag,
-                nthreads=nthreads,
-                use_mps=use_mps)
+            self.initOctree(target_directory,radial_velocity=True)
         ## creating the pg will trigger the octree build (which will pick up where 
         ##  it left off if it didn't finish)
         rv_pg = OctreeParticleGroup(
@@ -124,44 +118,12 @@ class GaiaReader(Reader):
 
     def initOctree(
         self,
-        gaiadir,
         target_directory,
-        radial_velocity=True,
-        limiting_mag=None,
-        nthreads=1,
-        use_mps=False,
-        max_radial_percentile=99,
-        max_fnames=None
-        ):
+        radial_velocity=True):
 
         print(f"Initializing octree... for {self}")
-        init_time = time.time()
+        octree_dicts = self.retrieve_gaia_data(radial_velocity,target_directory,return_arrays=False)
         
-        fnames = os.listdir(gaiadir)
-        if max_fnames is not None: fnames = fnames[:max_fnames]
-
-        ## prepend the full path to the gaia files
-        fnames = [f'{gaiadir}/%s'%fname for fname in fnames]
-
-        nthreads = min(len(fnames),nthreads)
-
-        argss = zip(
-            np.array_split(fnames,nthreads),
-            itertools.repeat(target_directory),
-            itertools.repeat(radial_velocity),
-            itertools.repeat(limiting_mag),
-            itertools.repeat(nthreads),
-            np.arange(nthreads,dtype=int),
-            itertools.repeat(max_radial_percentile)
-        )
-
-        ## initialize each chunk of the root node
-        if not use_mps or nthreads <= 1: octree_dicts = [MPSwrapper(*args) for args in argss]
-        else: 
-            with multiprocessing.Pool(min(len(fnames),multiprocessing.cpu_count())) as my_pool:
-                octree_dicts = my_pool.starmap(MPSwrapper,argss)
-        
-
         ## undo averaging in first chunk
         root_node_dict = octree_dicts[0]['nodes']['']
 
@@ -180,13 +142,13 @@ class GaiaReader(Reader):
         ## undo averaging for radius
         root_node_dict['radius'] = root_node_dict['radius']**2*root_node_dict[weight_key]
 
-        widths = np.zeros(nthreads)
+        widths = np.zeros(self.nthreads)
         widths[0] = root_node_dict['width']
 
         ## merge chunks that follow the first
-        printProgressBar(0,nthreads-1)
+        printProgressBar(0,self.nthreads-1)
         for i,sub_root_dict in enumerate(octree_dicts[1:]):
-            printProgressBar(i+1,nthreads-1)
+            printProgressBar(i+1,self.nthreads-1)
 
             this_node_dict = sub_root_dict['nodes']['']
             widths[i+1] = this_node_dict['width']
@@ -202,7 +164,7 @@ class GaiaReader(Reader):
             ## radius needs to be squared and then have the average undone
             root_node_dict['radius'] += this_node_dict[key]**2*this_node_dict[weight_key]
 
-        printProgressBar(i+1,nthreads-1)
+        printProgressBar(i+1,self.nthreads-1)
 
         ## re-apply the averaging denominator
         for key in accumulator_keys: root_node_dict[key] /= root_node_dict[weight_key]
@@ -216,7 +178,46 @@ class GaiaReader(Reader):
         ## overwrite the octree.json file
         write_to_json(octree_dicts[0],os.path.join(target_directory,'octree.json'))
 
-        print(time.time()-init_time,'s elapsed')
+    def retrieve_gaia_data(
+        self,
+        radial_velocity=False,
+        target_directory=None,
+        return_arrays=True,
+        max_radial_percentile=99,
+        max_fnames=None):
+
+        init_time = time.time()
+        
+        fnames = os.listdir(self.gaiadir)
+        if max_fnames is not None: fnames = fnames[:max_fnames]
+
+        ## prepend the full path to the gaia files
+        fnames = [f'{self.gaiadir}/%s'%fname for fname in fnames]
+
+        nthreads = min(len(fnames),self.nthreads)
+
+        argss = zip(
+            np.array_split(fnames,nthreads),
+            itertools.repeat(target_directory),
+            itertools.repeat(radial_velocity),
+            itertools.repeat(self.limiting_mag),
+            itertools.repeat(nthreads),
+            np.arange(nthreads,dtype=int),
+            itertools.repeat(max_radial_percentile),
+            itertools.repeat(return_arrays), ## <-- signals to not write anything to disk and instead
+            itertools.repeat(eval(multiprocessing.Process().name.split('-')[1])),
+            itertools.repeat(int(len(fnames)//nthreads)+1)
+        )
+
+        ## initialize each chunk of the root node
+        if not self.use_mps or nthreads <= 1: octree_dicts = [MPSwrapper(*args) for args in argss]
+        else: 
+            with multiprocessing.Pool(min(len(fnames),multiprocessing.cpu_count())) as my_pool:
+                octree_dicts = my_pool.starmap(MPSwrapper,argss)
+        
+        print(f"\n{time.time()-init_time} s elapsed")
+    
+        return octree_dicts
  
 def MPSwrapper(
     filenames,
@@ -225,7 +226,10 @@ def MPSwrapper(
     limiting_mag=None,
     nthreads=1,
     thread_id=0,
-    percentile=99
+    percentile=99,
+    return_arrays=False,
+    parent_pid=None,
+    niters=None
     ):
 
     all_arrays = np.concatenate(
@@ -249,12 +253,22 @@ def MPSwrapper(
     ## add the effective temperature to the dictionary
     add_temperature(data_dict)
 
-    root_dict = init_octree_root_node(
-        data_dict,
-        target_directory, ## <-- this will write the root-node data
-        thread_id)
+    if parent_pid is not None:
+        name = multiprocessing.Process().name.split('-')[1].split(':')
+        if len(name) == 2:
+            name,niter=eval(name[0]),eval(name[1])
+            name = name-parent_pid-1
+            if name == 0:
+                printProgressBar(niter,niters)
 
-    return root_dict
+    if not return_arrays: 
+        root_dict = init_octree_root_node(
+            data_dict,
+            target_directory, ## <-- this will write the root-node data
+            thread_id)
+
+        return root_dict
+    else: return data_dict
    
 def fetchGaiaData(
     path,
