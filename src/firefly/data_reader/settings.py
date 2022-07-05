@@ -590,6 +590,22 @@ class Settings(object):
                 f"{particleGroup.UIname}/{key}" for key in 
                 particleGroup.settings_default['GUIExcludeList']]
 
+        ## replace colormapVariable and radiusVariable values
+        ##  with indices of field 
+        ##  (if passed as a string) 
+        for key,flags in zip(
+            ['colormapVariable','radiusVariable'],
+            [particleGroup.field_colormap_flags,particleGroup.field_radius_flags]):
+            value = particleGroup.settings_default[key]
+            if type(value) == str: 
+                value = [
+                    field_name for field_name,flag in 
+                    zip(particleGroup.field_names,flags) if flag].index(value)
+                ## offset by 1 if doing radiusVariable because
+                ##  0 corresponds to no scaling
+                if key == 'radiusVariable': value += 1
+                self[key][particleGroup.UIname] = value
+        
         ## and link the other way, this Settings instance to the particleGroup
         particleGroup.attached_settings = self
 
@@ -616,6 +632,13 @@ class Settings(object):
         if ( all_settings_dict['GUIExcludeList'] is not None and 
             len(all_settings_dict['GUIExcludeList']) > 0): 
             self.validateGUIExcludeList(all_settings_dict['GUIExcludeList'])
+        
+        ## convert colormap strings to texture index
+        ##  (if passed as a string) 
+        for key,value in all_settings_dict['colormap'].items():
+            if type(value) == str: 
+                value = (colormaps.index(value)+0.5)/len(colormaps)
+                all_settings_dict['colormap'][key] = value
 
         return all_settings_dict
     
@@ -784,3 +807,8 @@ for func in Settings.__dict__.keys():
     if 'settings' in func: 
         valid_settings.update(inspect.signature(Settings.__dict__[func]).parameters.keys())
 valid_settings-= set(['self'])
+
+colormaps = load_from_json(
+    os.path.abspath(os.path.join(
+        os.path.dirname(__file__),
+        '../static/textures/colormap_names.json')))['names']
