@@ -669,32 +669,40 @@ function applyOptions(){
 	}
 
 	//particle specific options
+	var options_keys = Object.keys(viewerParams.parts.options.showParts);
 	for (var i=0; i<viewerParams.partsKeys.length; i++){
-		var p = viewerParams.partsKeys[i];
+		var viewer_p = viewerParams.partsKeys[i];
+		var p;
+		for (j=0;j<options_keys.length;j++){
+			if (removeSpecialChars(options_keys[j]) == viewer_p){
+				p = options_keys[j];
+				break;
+			}
+		}
 
 		//on/off
 		if (options.hasOwnProperty("showParts") && 
 			options.showParts != null && 
 			options.showParts.hasOwnProperty(p) && 
-			options.showParts[p] != null) viewerParams.showParts[p] = options.showParts[p];
+			options.showParts[p] != null) viewerParams.showParts[viewer_p] = options.showParts[p];
 
 		//size
 		if (options.hasOwnProperty("sizeMult") && 
 			options.sizeMult != null && 
 			options.sizeMult.hasOwnProperty(p) && 
-			options.sizeMult[p] != null) viewerParams.PsizeMult[p] = options.sizeMult[p];
+			options.sizeMult[p] != null) viewerParams.PsizeMult[viewer_p] = options.sizeMult[p];
 
 		//color
 		if (options.hasOwnProperty("color") &&
 			options.color != null &&
 			options.color.hasOwnProperty(p) && 
-			options.color[p] != null) viewerParams.Pcolors[p] = options.color[p];
+			options.color[p] != null) viewerParams.Pcolors[viewer_p] = options.color[p];
 
 		//maximum number of particles to plot
 		if (options.hasOwnProperty("plotNmax") &&
 			options.plotNmax != null &&
 			options.plotNmax.hasOwnProperty(p) &&
-			options.plotNmax[p] != null) viewerParams.plotNmax[p] = options.plotNmax[p];
+			options.plotNmax[p] != null) viewerParams.plotNmax[viewer_p] = options.plotNmax[p];
 
 		//start plotting the velocity vectors
 		if (options.hasOwnProperty("showVel") && 
@@ -702,7 +710,7 @@ function applyOptions(){
 			options.showVel.hasOwnProperty(p) &&
 			options.showVel[p]){
 
-			viewerParams.showVel[p] = true;
+			viewerParams.showVel[viewer_p] = true;
 			if (viewerParams.haveUI){
 				var evalString = 'elm = document.getElementById("'+p+'velCheckBox"); elm.checked = true; elm.value = true;'
 				forGUI.push({'evalCommand':[evalString]})
@@ -715,20 +723,20 @@ function applyOptions(){
 			options.velType[p] != null){
 			// type guard the velocity lines, only allow valid values
 			if (options.velType[p] == 'line' || options.velType[p] == 'arrow' || options.velType[p] == 'triangle'){
-				viewerParams.velType[p] = options.velType[p];
+				viewerParams.velType[viewer_p] = options.velType[p];
 		} 	}
 
 		//velocity vector width
 		if (options.hasOwnProperty("velVectorWidth") &&
 			options.velVectorWidth != null &&
 			options.velVectorWidth.hasOwnProperty(p) &&
-			options.velVectorWidth[p] != null) viewerParams.velVectorWidth[p] = options.velVectorWidth[p]; 
+			options.velVectorWidth[p] != null) viewerParams.velVectorWidth[viewer_p] = options.velVectorWidth[p]; 
 
 		//velocity vector gradient
 		if (options.hasOwnProperty("velGradient") && 
 			options.velGradient != null && 
 			options.velGradient.hasOwnProperty(p) &&
-			options.velGradient[p] != null) viewerParams.velGradient[p] = +options.velGradient[p]; //convert from bool to int
+			options.velGradient[p] != null) viewerParams.velGradient[viewer_p] = +options.velGradient[p]; //convert from bool to int
 
 		//start showing the velocity animation
 		if (options.hasOwnProperty("animateVel") && 
@@ -736,7 +744,7 @@ function applyOptions(){
 			options.animateVel.hasOwnProperty(p) &&
 			options.animateVel[p] != null){
 
-			viewerParams.animateVel[p] = true;
+			viewerParams.animateVel[viewer_p] = true;
 			if (viewerParams.haveUI){
 				var evalString = 'elm = document.getElementById("'+p+'velAnimateCheckBox"); elm.checked = true; elm.value = true;'
 				forGUI.push({'evalCommand':[evalString]})
@@ -746,28 +754,28 @@ function applyOptions(){
 		if (options.hasOwnProperty("animateVelDt") &&
 			options.animateVelDt != null &&
 			options.animateVelDt.hasOwnProperty(p) &&
-			options.animateVelDt[p] != null) viewerParams.animateVelDt[p] = options.animateVelDt[p];
+			options.animateVelDt[p] != null) viewerParams.animateVelDt[viewer_p] = options.animateVelDt[p];
 
 		//animate velocity tmax
 		if (options.hasOwnProperty("animateVelTmax") &&
 			options.animateVelTmax != null &&
 			options.animateVelTmax.hasOwnProperty(p) &&
-			options.animateVelTmax[p] != null) viewerParams.animateVelTmax[p] = options.animateVelTmax[p];
+			options.animateVelTmax[p] != null) viewerParams.animateVelTmax[viewer_p] = options.animateVelTmax[p];
 
 		//filter limits
 		if (options.hasOwnProperty("filterLims") &&
 			options.filterLims != null &&
 			options.filterLims.hasOwnProperty(p) &&
 			options.filterLims[p] != null){
-			viewerParams.updateFilter[p] = true
+			viewerParams.updateFilter[viewer_p] = true
 
-			for (k=0; k<viewerParams.fkeys[p].length; k++){
-				var fkey = viewerParams.fkeys[p][k]
+			for (k=0; k<viewerParams.fkeys[viewer_p].length; k++){
+				var fkey = viewerParams.fkeys[viewer_p][k]
 				if (options.filterLims[p].hasOwnProperty(fkey)){
 					if (options.filterLims[p][fkey] != null){
-						viewerParams.filterLims[p][fkey] = []
-						viewerParams.filterLims[p][fkey].push(options.filterLims[p][fkey][0]);
-						viewerParams.filterLims[p][fkey].push(options.filterLims[p][fkey][1]);
+						viewerParams.filterLims[viewer_p][fkey] = []
+						viewerParams.filterLims[viewer_p][fkey].push(options.filterLims[p][fkey][0]);
+						viewerParams.filterLims[viewer_p][fkey].push(options.filterLims[p][fkey][1]);
 		} 	} 	} 	}
 
 		//filter values
@@ -775,15 +783,15 @@ function applyOptions(){
 			options.filterVals != null &&
 			options.filterVals.hasOwnProperty(p) &&
 			options.filterVals[p] != null){
-			viewerParams.updateFilter[p] = true
+			viewerParams.updateFilter[viewer_p] = true
 
-			for (k=0; k<viewerParams.fkeys[p].length; k++){
-				var fkey = viewerParams.fkeys[p][k]
+			for (k=0; k<viewerParams.fkeys[viewer_p].length; k++){
+				var fkey = viewerParams.fkeys[viewer_p][k]
 				if (options.filterVals[p].hasOwnProperty(fkey)){
 					if (options.filterVals[p][fkey] != null){
-						viewerParams.filterVals[p][fkey] = []
-						viewerParams.filterVals[p][fkey].push(options.filterVals[p][fkey][0]);
-						viewerParams.filterVals[p][fkey].push(options.filterVals[p][fkey][1]);
+						viewerParams.filterVals[viewer_p][fkey] = []
+						viewerParams.filterVals[viewer_p][fkey].push(options.filterVals[p][fkey][0]);
+						viewerParams.filterVals[viewer_p][fkey].push(options.filterVals[p][fkey][1]);
 		} 	} 	} 	}
 
 		//filter invert
@@ -791,11 +799,11 @@ function applyOptions(){
 			options.invertFilter != null &&
 			options.invertFilter.hasOwnProperty(p) &&
 			options.invertFilter[p] != null){
-			for (k=0; k<viewerParams.fkeys[p].length; k++){
-				var fkey = viewerParams.fkeys[p][k]
+			for (k=0; k<viewerParams.fkeys[viewer_p].length; k++){
+				var fkey = viewerParams.fkeys[viewer_p][k]
 				if (options.invertFilter[p].hasOwnProperty(fkey)){
 					if (options.invertFilter[p][fkey] != null){
-						viewerParams.invertFilter[p][fkey] = options.invertFilter[p][fkey];
+						viewerParams.invertFilter[viewer_p][fkey] = options.invertFilter[p][fkey];
 		} 	}	 } 	}
 
 		//colormap limits
@@ -803,13 +811,13 @@ function applyOptions(){
 			options.colormapLims != null && 
 			options.colormapLims.hasOwnProperty(p) && 
 			options.colormapLims[p] != null){
-			for (k=0; k<viewerParams.ckeys[p].length; k++){
-				var ckey = viewerParams.ckeys[p][k]
+			for (k=0; k<viewerParams.ckeys[viewer_p].length; k++){
+				var ckey = viewerParams.ckeys[viewer_p][k]
 				if (options.colormapLims[p].hasOwnProperty(ckey)){
 					if (options.colormapLims[p][ckey] != null){
-						viewerParams.colormapLims[p][ckey] = []
-						viewerParams.colormapLims[p][ckey].push(options.colormapLims[p][ckey][0]);
-						viewerParams.colormapLims[p][ckey].push(options.colormapLims[p][ckey][1]);
+						viewerParams.colormapLims[viewer_p][ckey] = []
+						viewerParams.colormapLims[viewer_p][ckey].push(options.colormapLims[p][ckey][0]);
+						viewerParams.colormapLims[viewer_p][ckey].push(options.colormapLims[p][ckey][1]);
 		} 	} 	} 	}
 
 		//colormap values
@@ -818,13 +826,13 @@ function applyOptions(){
 			options.colormapVals.hasOwnProperty(p) &&
 			options.colormapVals[p] != null){
 
-			for (k=0; k<viewerParams.ckeys[p].length; k++){
-				var ckey = viewerParams.ckeys[p][k]
+			for (k=0; k<viewerParams.ckeys[viewer_p].length; k++){
+				var ckey = viewerParams.ckeys[viewer_p][k]
 				if (options.colormapVals[p].hasOwnProperty(ckey)){
 					if (options.colormapVals[p][ckey] != null){
-						viewerParams.colormapVals[p][ckey] = []
-						viewerParams.colormapVals[p][ckey].push(options.colormapVals[p][ckey][0]);
-						viewerParams.colormapVals[p][ckey].push(options.colormapVals[p][ckey][1]);
+						viewerParams.colormapVals[viewer_p][ckey] = []
+						viewerParams.colormapVals[viewer_p][ckey].push(options.colormapVals[p][ckey][0]);
+						viewerParams.colormapVals[viewer_p][ckey].push(options.colormapVals[p][ckey][1]);
 		} 	} 	} 	}
 
 		//start plotting with a colormap
@@ -832,7 +840,7 @@ function applyOptions(){
 			options.showColormap != null &&
 			options.showColormap.hasOwnProperty(p) &&
 			options.showColormap[p] == true){
-			viewerParams.showColormap[p] = true;
+			viewerParams.showColormap[viewer_p] = true;
 			if (viewerParams.haveUI){
 				console.log(p+'colorCheckBox')
 				var evalString = 'elm = document.getElementById("'+p+'colorCheckBox"); elm.checked = true; elm.value = true;'
@@ -843,31 +851,31 @@ function applyOptions(){
 		if (options.hasOwnProperty("colormap") && 
 			options.colormap != null &&
 			options.colormap.hasOwnProperty(p) && 
-			options.colormap[p] != null) viewerParams.colormap[p] = copyValue(options.colormap[p]);
+			options.colormap[p] != null) viewerParams.colormap[viewer_p] = copyValue(options.colormap[p]);
 
 		//select the colormap variable to color by
 		if (options.hasOwnProperty("colormapVariable") && 
 			options.colormapVariable != null &&
 			options.colormapVariable.hasOwnProperty(p) && 
-			options.colormapVariable[p] != null) viewerParams.colormapVariable[p] = copyValue(options.colormapVariable[p]);
+			options.colormapVariable[p] != null) viewerParams.colormapVariable[viewer_p] = copyValue(options.colormapVariable[p]);
 
 		//select the radius variable to scale by
 		if (options.hasOwnProperty("radiusVariable") && 
 			options.radiusVariable != null &&
 			options.radiusVariable.hasOwnProperty(p) && 
-			options.radiusVariable[p] != null) viewerParams.radiusVariable[p] = copyValue(options.radiusVariable[p]);
+			options.radiusVariable[p] != null) viewerParams.radiusVariable[viewer_p] = copyValue(options.radiusVariable[p]);
 
 		if (options.hasOwnProperty("blendingMode") && 
 			options.blendingMode != null &&
 			options.blendingMode.hasOwnProperty(p) && 
-			options.blendingMode[p] != null) viewerParams.blendingMode[p] = copyValue(options.blendingMode[p]);
+			options.blendingMode[p] != null) viewerParams.blendingMode[viewer_p] = copyValue(options.blendingMode[p]);
 			
 		if (options.hasOwnProperty("depthTest") && 
 			options.depthTest != null &&
 			options.depthTest.hasOwnProperty(p) && 
 			options.depthTest[p] != null){
-				viewerParams.depthTest[p] = copyValue(options.depthTest[p]);
-				viewerParams.depthWrite[p] = copyValue(options.depthTest[p]);
+				viewerParams.depthTest[viewer_p] = copyValue(options.depthTest[p]);
+				viewerParams.depthWrite[viewer_p] = copyValue(options.depthTest[p]);
 				/*
 				var evalString =( 'elm = document.getElementById(' + p + '_depthCheckBox);'+
 					'elm.checked = ' + options.depthTest[p] + ';'+
@@ -1181,6 +1189,17 @@ function sendInitGUI(prepend=[], append=[]){
 
 }
 
+//const specialChars = /[ `!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~\t\n]/g;
+// removed _ from between ) and +
+const specialChars = /[ `!@#$%^&*()+\-=\[\]{};':"\\|,.<>\/?~\t\n]/;
+// https://bobbyhadz.com/blog/javascript-check-if-string-contains-special-characters
+function removeSpecialChars(str) {
+	while (specialChars.test(str)){
+		str = str.replace(specialChars.exec(str)[0],'_')
+	}
+	return str;
+}
+
 // callLoadData ->
 function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
 
@@ -1190,9 +1209,11 @@ function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
 
 
 	viewerParams.partsKeys = Object.keys(viewerParams.filenames);
+	// count how many particles we need to load
 	viewerParams.partsKeys.forEach( function(p, i) {
+		// replace any special characters
+		var sanitary_p = removeSpecialChars(p);
 		viewerParams.parts.count[p] = 0;
-		viewerParams.haveOctree[p] = false;
 		viewerParams.filenames[p].forEach( function(f, j) {
 			var amt = 0;
 			if (f.constructor == Array) amt = parseFloat(f[1]);
@@ -1206,11 +1227,13 @@ function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
 	});
 
 	viewerParams.partsKeys.forEach( function(p, i) {
+		// replace any special characters
+		var sanitary_p = removeSpecialChars(p);
 		// initialize this particle dictionary
-		viewerParams.parts[p] = {};
+		viewerParams.parts[sanitary_p] = {};
 
 		// default that no particle groups have an octree
-		viewerParams.haveOctree[p] = false
+		viewerParams.haveOctree[sanitary_p] = false
 
 		// loop through each of the files to open
 		viewerParams.filenames[p].forEach( function(f, j) {
@@ -1220,7 +1243,7 @@ function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
 				Object.keys(internalData).forEach(function(key,k){
 					//if I was sent a prefix, this could be simplified
 					// TODO should handle passing binary data
-					if (key.includes(f[0])) compileJSONData(internalData[key], p, callback, initialLoadFrac)
+					if (key.includes(f[0])) compileJSONData(internalData[key], sanitary_p, callback, initialLoadFrac)
 				})
 				if (internalData && i == viewerParams.partsKeys.length - 1 && j == viewerParams.filenames[p].length - 1) viewerParams.newInternalData = {};
 
@@ -1242,18 +1265,20 @@ function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
 					if (readf.toLowerCase().includes('.json')){
 						//console.log(prefix+readf)
 						d3.json(prefix+readf, function(foo) {
-							compileJSONData(foo, p, callback, initialLoadFrac);
+							compileJSONData(foo, sanitary_p, callback, initialLoadFrac);
 						});
 					}
 					// read binary .ffly files
 					else if (readf.toLowerCase().includes('.ffly' )){
 						loadFFLYKaitai(prefix+readf, function(foo){
-							compileFFLYData(foo, p, callback, initialLoadFrac)}
+							compileFFLYData(foo, sanitary_p, callback, initialLoadFrac)}
 						);
 					}
 				}
 			}
 		});
+		// replace the parts key with the sanitary_p
+		viewerParams.partsKeys[i] = sanitary_p;
 	});
 }
 
