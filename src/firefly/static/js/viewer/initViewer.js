@@ -402,6 +402,7 @@ function initPVals(){
 				viewerParams.rkeys[p] = viewerParams.rkeys[p].concat(viewerParams.parts[p].radiusKeys);
 		}
 
+		/*
 		if (viewerParams.haveOctree[p]){
 			// tell app we can scale by OctreeRadii
 			viewerParams.rkeys[p].push('OctreeRadii')
@@ -409,6 +410,7 @@ function initPVals(){
 			viewerParams.radiusVariable[p] = viewerParams.rkeys[p].length-1
 			viewerParams.updateRadiusVariable[p] = true;
 		}
+		*/
 	}
 }
 
