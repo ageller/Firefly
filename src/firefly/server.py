@@ -1,17 +1,19 @@
-from flask import Flask, render_template, request, session
-from flask_socketio import SocketIO, emit
-
-from threading import Lock
+import os
 import sys
+import json
+import time
+import subprocess
+import signal
+import socket
+import requests
+import http.server
+import socketserver
+
 import numpy as np
 
-import subprocess,signal
-import socket,requests
-
-import json
-
-import os
-import time
+from flask import Flask, render_template, request, session
+from flask_socketio import SocketIO, emit
+from threading import Lock
 
 from firefly.data_reader import SimpleReader
 
@@ -237,23 +239,29 @@ def reload():
     socketio.emit('reload_viewer', None, namespace=namespace)
 
 # Helper functions to start/stop the server
-def startFireflyServer(port=5500, frames_per_second=30, decimation_factor=1):
-    """Creates a global interpreter locked process to host a mock web-server
-		that can be accessed via localhost:<port>. 
+def startFlaskServer(
+    port=5500,
+    directory=None,
+    frames_per_second=30,
+    decimation_factor=1,
+    ):
+    """Creates a global interpreter locked process to host a Flask server
+        that can be accessed via localhost:<port>. 
 
     :param port: port number to serve the :code:`.html` files on, defaults to 5500
     :type port: int, optional
     :param frames_per_second: enforced FPS for stream quality, used only if
-		localhost:<port>/stream is accessed, defaults to 30
+        localhost:<port>/stream is accessed, defaults to 30
     :type frames_per_second: int, optional
     :param decimation_factor: factor to decimate data that is being passed through
-		localhost:<port>/data_input, defaults to 1
+        localhost:<port>/data_input, defaults to 1
     :type decimation_factor: int, optional
     """
 
+    if directory is None: directory = os.path.dirname(__file__)
     old_dir = os.getcwd()
     try:
-        os.chdir(os.path.dirname(__file__))
+        os.chdir(directory)
         global fps, dec
 
         fps = frames_per_second
@@ -261,21 +269,53 @@ def startFireflyServer(port=5500, frames_per_second=30, decimation_factor=1):
 
         print("Launching Firefly at: http://localhost:%d"%port)
         socketio.run(app, host='0.0.0.0', port=port, use_reloader=True)
-    except:
-        raise
-    finally:
-        os.chdir(old_dir)
+    except: raise
+    finally: os.chdir(old_dir)
 
-def spawnFireflyServer(port=5500,frames_per_second=30,decimation_factor=1,max_time=10):
-    """Wrapper to :func:`firefly.server.startFireflyServer` that instead starts a background process.
+def startHTTPServer(port=5500,directory=None):
+    """Creates a global interpreter locked process to host either a Flask 
+        or HTTP server that can be accessed via localhost:<port>. 
 
     :param port: port number to serve the :code:`.html` files on, defaults to 5500
     :type port: int, optional
+    :param directory: the directory of the Firefly source files to be served, 
+        if None, uses `os.dirname(__file__)` i.e. the directory of the `firefly`
+        python distribution, defaults to None
+    :type directory: str, optional
+    """
+
+    if directory is None: directory = os.path.dirname(__file__)
+    Handler = http.server.SimpleHTTPRequestHandler
+    with socketserver.TCPServer(("", port), Handler) as httpd:
+        ipaddress,port=httpd.server_address
+        os.chdir(directory)
+        print(f'Serving {os.getcwd()}/index.html at http://{ipaddress}:{port}')
+        httpd.serve_forever()
+
+def spawnFireflyServer(
+    port=5500,
+    method="flask",
+    directory=None,
+    frames_per_second=30,
+    decimation_factor=1,
+    max_time=10):
+    """ Starts a Firefly server as a background process. Close the server by calling
+        :func:`firefly.server.quitAllFireflyServers`.
+
+    :param port: port number to serve the :code:`.html` files on, defaults to 5500
+    :type port: int, optional
+    :param method: what sort of Firefly server to open, a Flask ("flask") server 
+        or an HTTP ("http"), defaults to "flask"
+    :type method: str, optional
+    :param directory: the directory of the Firefly source files to be served, 
+        if None, uses `os.dirname(__file__)` i.e. the directory of the `firefly`
+        python distribution, defaults to None
+    :type directory: str, optional
     :param frames_per_second: enforced FPS for stream quality, used only if
-		localhost:<port>/stream is accessed, defaults to 30
+        localhost:<port>/stream is accessed, defaults to 30
     :type frames_per_second: int, optional
     :param decimation_factor: factor to decimate data that is being passed through
-		localhost:<port>/data_input, defaults to 1
+        localhost:<port>/data_input, defaults to 1
     :type decimation_factor: int, optional
     :param max_time: maximum amount of time to wait for a Firefly server
         to be available. 
@@ -285,9 +325,18 @@ def spawnFireflyServer(port=5500,frames_per_second=30,decimation_factor=1,max_ti
     :raises RuntimeError: if max_time elapses without a successful Firefly server being initialized.
     """
 
-    ## wrap passed arguments into a list of strings
-    args = ["%d"%port,"%d"%frames_per_second,"%d"%decimation_factor]
+    port = int(port)
 
+    ## wrap passed arguments into a list of strings
+    args = [
+        f"--port={port:d}",
+        f"--fps={int(frames_per_second):d}",
+        f"--dec={int(decimation_factor):d}",
+        f"--method={method}",
+        f"--directory={directory}"]
+
+    ## use this run_server.py (even if the other directory has one)
+    ##  since it can be run remotely
     run_server = os.path.join(os.path.dirname(__file__),'run_server.py')
     process = subprocess.Popen([sys.executable, run_server]+args)
 
@@ -298,22 +347,15 @@ def spawnFireflyServer(port=5500,frames_per_second=30,decimation_factor=1,max_ti
             "Waiting up to %d seconds for background Firefly server to start"%max_time,
             end="")
         while True:
-            try: 
-                requests.post(f'http://localhost:{port:d}',json="test")
-                break
+            try: requests.post(f'http://localhost:{port:d}',json="test"); break
             except: 
             ## need to re-check the connection each iteration
-            #if s.connect_ex(('localhost', port)) != 0:
-                #break
-
                 if time.time()-init_time >= max_time: raise RuntimeError(
                     "Hit max wait-time of %d seconds."%max_time+
                     " A Firefly server could not be opened in the background.")
-                else: 
-                    print(".",end="")
-                    time.sleep(1)
+                else: print(".",end=""); time.sleep(1)
             
-    print("done! Your server is available at - http://localhost:%d"%port)
+    print(f"done! Your server is available at - http://localhost:{port}")
 
     return process
 
@@ -327,11 +369,9 @@ def quitAllFireflyServers(pid=None):
     """
     print("Server output:")
     print("--------------")
-    if pid is None:
-        ## kill indiscriminately
-        return_code = os.system("ps aux | grep 'run_server.py' | awk '{print $2}' | xargs kill")
-    else:
-        ## kill only the pid we were passed, ideally from the subprocess.Popen().pid but
-        ##  you know I don't judge.  
-        return_code = os.kill(pid,signal.SIGINT)
+    ## kill indiscriminately
+    if pid is None: return_code = os.system("ps aux | grep 'run_server.py' | awk '{print $2}' | xargs kill")
+    ## kill only the pid we were passed, ideally from the subprocess.Popen().pid but
+    ##  you know I don't judge.  
+    else: return_code = os.kill(pid,signal.SIGINT)
     return return_code

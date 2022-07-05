@@ -27,7 +27,7 @@ function connectViewerSocket(){
 
 		socketParams.socket.on('show_loader', function(msg) {
 			d3.select("#splashdivLoader").selectAll('svg').remove();
-			d3.select("#splashdiv5").text("Loading...");
+			d3.select("#splashdiv5").text("Loading particle data...");
 			d3.select("#loader").style("display","visible");
 			viewerParams.loaded = false;
 			viewerParams.pauseAnimation = true;
@@ -115,6 +115,7 @@ function initInputData(){
 //so that it can run locally also without using Flask
 // note that if allowVRControls == true, then you do not want to start in stereo (the VR button will do the work)
 function runLocal(useSockets=true, showGUI=true, allowVRControls=false, startStereo=false, pSize=null){
+	d3.select("#splashdiv5").text("Loading particle data...");
 	viewerParams.local = true;
 	viewerParams.usingSocket = useSockets;
 	forGUI = [];
@@ -401,6 +402,7 @@ function initPVals(){
 				viewerParams.rkeys[p] = viewerParams.rkeys[p].concat(viewerParams.parts[p].radiusKeys);
 		}
 
+		/*
 		if (viewerParams.haveOctree[p]){
 			// tell app we can scale by OctreeRadii
 			viewerParams.rkeys[p].push('OctreeRadii')
@@ -408,6 +410,7 @@ function initPVals(){
 			viewerParams.radiusVariable[p] = viewerParams.rkeys[p].length-1
 			viewerParams.updateRadiusVariable[p] = true;
 		}
+		*/
 	}
 }
 
@@ -512,6 +515,8 @@ function applyOptions(){
 
 	var options = viewerParams.parts.options;
 
+	var forGUI = [];
+
 	//modify the minimum z to show particles at (avoid having particles up in your face)
 	if (options.hasOwnProperty('zmin') && options.zmin != null) viewerParams.zmin = options.zmin;
 
@@ -572,7 +577,7 @@ function applyOptions(){
 		viewerParams.useStereo = true;
 		if (viewerParams.haveUI){
 			var evalString = 'elm = document.getElementById("StereoCheckBox"); elm.checked = true; elm.value = true;'
-			sendToGUI([{'evalCommand':[evalString]}]);
+			forGUI.push({'evalCommand':[evalString]})
 	} 	}
 
 	//modify the initial stereo separation
@@ -652,33 +657,54 @@ function applyOptions(){
 		}
 	}	
 
+	// disable GUI elements
+	if (viewerParams.parts.options.hasOwnProperty('GUIExcludeList')){
+		if (viewerParams.parts.options.GUIExcludeList != null){
+			viewerParams.GUIExcludeList = viewerParams.parts.options.GUIExcludeList;
+		}
+	}
+
+	if (viewerParams.parts.options.hasOwnProperty('collapseGUIAtStart')){
+		if (viewerParams.parts.options.collapseGUIAtStart != null){
+			viewerParams.collapseGUIAtStart = viewerParams.parts.options.collapseGUIAtStart;
+		}
+	}
+
 	//particle specific options
+	var options_keys = Object.keys(viewerParams.parts.options.showParts);
 	for (var i=0; i<viewerParams.partsKeys.length; i++){
-		var p = viewerParams.partsKeys[i];
+		var viewer_p = viewerParams.partsKeys[i];
+		var p;
+		for (j=0;j<options_keys.length;j++){
+			if (removeSpecialChars(options_keys[j]) == viewer_p){
+				p = options_keys[j];
+				break;
+			}
+		}
 
 		//on/off
 		if (options.hasOwnProperty("showParts") && 
 			options.showParts != null && 
 			options.showParts.hasOwnProperty(p) && 
-			options.showParts[p] != null) viewerParams.showParts[p] = options.showParts[p];
+			options.showParts[p] != null) viewerParams.showParts[viewer_p] = options.showParts[p];
 
 		//size
 		if (options.hasOwnProperty("sizeMult") && 
 			options.sizeMult != null && 
 			options.sizeMult.hasOwnProperty(p) && 
-			options.sizeMult[p] != null) viewerParams.PsizeMult[p] = options.sizeMult[p];
+			options.sizeMult[p] != null) viewerParams.PsizeMult[viewer_p] = options.sizeMult[p];
 
 		//color
 		if (options.hasOwnProperty("color") &&
 			options.color != null &&
 			options.color.hasOwnProperty(p) && 
-			options.color[p] != null) viewerParams.Pcolors[p] = options.color[p];
+			options.color[p] != null) viewerParams.Pcolors[viewer_p] = options.color[p];
 
 		//maximum number of particles to plot
 		if (options.hasOwnProperty("plotNmax") &&
 			options.plotNmax != null &&
 			options.plotNmax.hasOwnProperty(p) &&
-			options.plotNmax[p] != null) viewerParams.plotNmax[p] = options.plotNmax[p];
+			options.plotNmax[p] != null) viewerParams.plotNmax[viewer_p] = options.plotNmax[p];
 
 		//start plotting the velocity vectors
 		if (options.hasOwnProperty("showVel") && 
@@ -686,10 +712,10 @@ function applyOptions(){
 			options.showVel.hasOwnProperty(p) &&
 			options.showVel[p]){
 
-			viewerParams.showVel[p] = true;
+			viewerParams.showVel[viewer_p] = true;
 			if (viewerParams.haveUI){
 				var evalString = 'elm = document.getElementById("'+p+'velCheckBox"); elm.checked = true; elm.value = true;'
-				sendToGUI([{'evalCommand':[evalString]}]);
+				forGUI.push({'evalCommand':[evalString]})
 		} 	}
 
 		//type of velocity vectors
@@ -699,20 +725,20 @@ function applyOptions(){
 			options.velType[p] != null){
 			// type guard the velocity lines, only allow valid values
 			if (options.velType[p] == 'line' || options.velType[p] == 'arrow' || options.velType[p] == 'triangle'){
-				viewerParams.velType[p] = options.velType[p];
+				viewerParams.velType[viewer_p] = options.velType[p];
 		} 	}
 
 		//velocity vector width
 		if (options.hasOwnProperty("velVectorWidth") &&
 			options.velVectorWidth != null &&
 			options.velVectorWidth.hasOwnProperty(p) &&
-			options.velVectorWidth[p] != null) viewerParams.velVectorWidth[p] = options.velVectorWidth[p]; 
+			options.velVectorWidth[p] != null) viewerParams.velVectorWidth[viewer_p] = options.velVectorWidth[p]; 
 
 		//velocity vector gradient
 		if (options.hasOwnProperty("velGradient") && 
 			options.velGradient != null && 
 			options.velGradient.hasOwnProperty(p) &&
-			options.velGradient[p] != null) viewerParams.velGradient[p] = +options.velGradient[p]; //convert from bool to int
+			options.velGradient[p] != null) viewerParams.velGradient[viewer_p] = +options.velGradient[p]; //convert from bool to int
 
 		//start showing the velocity animation
 		if (options.hasOwnProperty("animateVel") && 
@@ -720,38 +746,38 @@ function applyOptions(){
 			options.animateVel.hasOwnProperty(p) &&
 			options.animateVel[p] != null){
 
-			viewerParams.animateVel[p] = true;
+			viewerParams.animateVel[viewer_p] = true;
 			if (viewerParams.haveUI){
 				var evalString = 'elm = document.getElementById("'+p+'velAnimateCheckBox"); elm.checked = true; elm.value = true;'
-				sendToGUI([{'evalCommand':[evalString]}]);
+				forGUI.push({'evalCommand':[evalString]})
 		} 	}
 
 		//animate velocity dt
 		if (options.hasOwnProperty("animateVelDt") &&
 			options.animateVelDt != null &&
 			options.animateVelDt.hasOwnProperty(p) &&
-			options.animateVelDt[p] != null) viewerParams.animateVelDt[p] = options.animateVelDt[p];
+			options.animateVelDt[p] != null) viewerParams.animateVelDt[viewer_p] = options.animateVelDt[p];
 
 		//animate velocity tmax
 		if (options.hasOwnProperty("animateVelTmax") &&
 			options.animateVelTmax != null &&
 			options.animateVelTmax.hasOwnProperty(p) &&
-			options.animateVelTmax[p] != null) viewerParams.animateVelTmax[p] = options.animateVelTmax[p];
+			options.animateVelTmax[p] != null) viewerParams.animateVelTmax[viewer_p] = options.animateVelTmax[p];
 
 		//filter limits
 		if (options.hasOwnProperty("filterLims") &&
 			options.filterLims != null &&
 			options.filterLims.hasOwnProperty(p) &&
 			options.filterLims[p] != null){
-			viewerParams.updateFilter[p] = true
+			viewerParams.updateFilter[viewer_p] = true
 
-			for (k=0; k<viewerParams.fkeys[p].length; k++){
-				var fkey = viewerParams.fkeys[p][k]
+			for (k=0; k<viewerParams.fkeys[viewer_p].length; k++){
+				var fkey = viewerParams.fkeys[viewer_p][k]
 				if (options.filterLims[p].hasOwnProperty(fkey)){
 					if (options.filterLims[p][fkey] != null){
-						viewerParams.filterLims[p][fkey] = []
-						viewerParams.filterLims[p][fkey].push(options.filterLims[p][fkey][0]);
-						viewerParams.filterLims[p][fkey].push(options.filterLims[p][fkey][1]);
+						viewerParams.filterLims[viewer_p][fkey] = []
+						viewerParams.filterLims[viewer_p][fkey].push(options.filterLims[p][fkey][0]);
+						viewerParams.filterLims[viewer_p][fkey].push(options.filterLims[p][fkey][1]);
 		} 	} 	} 	}
 
 		//filter values
@@ -759,15 +785,15 @@ function applyOptions(){
 			options.filterVals != null &&
 			options.filterVals.hasOwnProperty(p) &&
 			options.filterVals[p] != null){
-			viewerParams.updateFilter[p] = true
+			viewerParams.updateFilter[viewer_p] = true
 
-			for (k=0; k<viewerParams.fkeys[p].length; k++){
-				var fkey = viewerParams.fkeys[p][k]
+			for (k=0; k<viewerParams.fkeys[viewer_p].length; k++){
+				var fkey = viewerParams.fkeys[viewer_p][k]
 				if (options.filterVals[p].hasOwnProperty(fkey)){
 					if (options.filterVals[p][fkey] != null){
-						viewerParams.filterVals[p][fkey] = []
-						viewerParams.filterVals[p][fkey].push(options.filterVals[p][fkey][0]);
-						viewerParams.filterVals[p][fkey].push(options.filterVals[p][fkey][1]);
+						viewerParams.filterVals[viewer_p][fkey] = []
+						viewerParams.filterVals[viewer_p][fkey].push(options.filterVals[p][fkey][0]);
+						viewerParams.filterVals[viewer_p][fkey].push(options.filterVals[p][fkey][1]);
 		} 	} 	} 	}
 
 		//filter invert
@@ -775,11 +801,11 @@ function applyOptions(){
 			options.invertFilter != null &&
 			options.invertFilter.hasOwnProperty(p) &&
 			options.invertFilter[p] != null){
-			for (k=0; k<viewerParams.fkeys[p].length; k++){
-				var fkey = viewerParams.fkeys[p][k]
+			for (k=0; k<viewerParams.fkeys[viewer_p].length; k++){
+				var fkey = viewerParams.fkeys[viewer_p][k]
 				if (options.invertFilter[p].hasOwnProperty(fkey)){
 					if (options.invertFilter[p][fkey] != null){
-						viewerParams.invertFilter[p][fkey] = options.invertFilter[p][fkey];
+						viewerParams.invertFilter[viewer_p][fkey] = options.invertFilter[p][fkey];
 		} 	}	 } 	}
 
 		//colormap limits
@@ -787,13 +813,13 @@ function applyOptions(){
 			options.colormapLims != null && 
 			options.colormapLims.hasOwnProperty(p) && 
 			options.colormapLims[p] != null){
-			for (k=0; k<viewerParams.ckeys[p].length; k++){
-				var ckey = viewerParams.ckeys[p][k]
+			for (k=0; k<viewerParams.ckeys[viewer_p].length; k++){
+				var ckey = viewerParams.ckeys[viewer_p][k]
 				if (options.colormapLims[p].hasOwnProperty(ckey)){
 					if (options.colormapLims[p][ckey] != null){
-						viewerParams.colormapLims[p][ckey] = []
-						viewerParams.colormapLims[p][ckey].push(options.colormapLims[p][ckey][0]);
-						viewerParams.colormapLims[p][ckey].push(options.colormapLims[p][ckey][1]);
+						viewerParams.colormapLims[viewer_p][ckey] = []
+						viewerParams.colormapLims[viewer_p][ckey].push(options.colormapLims[p][ckey][0]);
+						viewerParams.colormapLims[viewer_p][ckey].push(options.colormapLims[p][ckey][1]);
 		} 	} 	} 	}
 
 		//colormap values
@@ -802,13 +828,13 @@ function applyOptions(){
 			options.colormapVals.hasOwnProperty(p) &&
 			options.colormapVals[p] != null){
 
-			for (k=0; k<viewerParams.ckeys[p].length; k++){
-				var ckey = viewerParams.ckeys[p][k]
+			for (k=0; k<viewerParams.ckeys[viewer_p].length; k++){
+				var ckey = viewerParams.ckeys[viewer_p][k]
 				if (options.colormapVals[p].hasOwnProperty(ckey)){
 					if (options.colormapVals[p][ckey] != null){
-						viewerParams.colormapVals[p][ckey] = []
-						viewerParams.colormapVals[p][ckey].push(options.colormapVals[p][ckey][0]);
-						viewerParams.colormapVals[p][ckey].push(options.colormapVals[p][ckey][1]);
+						viewerParams.colormapVals[viewer_p][ckey] = []
+						viewerParams.colormapVals[viewer_p][ckey].push(options.colormapVals[p][ckey][0]);
+						viewerParams.colormapVals[viewer_p][ckey].push(options.colormapVals[p][ckey][1]);
 		} 	} 	} 	}
 
 		//start plotting with a colormap
@@ -816,31 +842,50 @@ function applyOptions(){
 			options.showColormap != null &&
 			options.showColormap.hasOwnProperty(p) &&
 			options.showColormap[p] == true){
-			viewerParams.showColormap[p] = true;
+			viewerParams.showColormap[viewer_p] = true;
 			if (viewerParams.haveUI){
 				console.log(p+'colorCheckBox')
 				var evalString = 'elm = document.getElementById("'+p+'colorCheckBox"); elm.checked = true; elm.value = true;'
-				sendToGUI([{'evalCommand':[evalString]}]);
+				forGUI.push({'evalCommand':[evalString]})
 		} 	}
 
 		//choose which colormap to use
 		if (options.hasOwnProperty("colormap") && 
 			options.colormap != null &&
 			options.colormap.hasOwnProperty(p) && 
-			options.colormap[p] != null) viewerParams.colormap[p] = copyValue(options.colormap[p]);
+			options.colormap[p] != null) viewerParams.colormap[viewer_p] = copyValue(options.colormap[p]);
 
 		//select the colormap variable to color by
 		if (options.hasOwnProperty("colormapVariable") && 
 			options.colormapVariable != null &&
 			options.colormapVariable.hasOwnProperty(p) && 
-			options.colormapVariable[p] != null) viewerParams.colormapVariable[p] = copyValue(options.colormapVariable[p]);
+			options.colormapVariable[p] != null) viewerParams.colormapVariable[viewer_p] = copyValue(options.colormapVariable[p]);
 
 		//select the radius variable to scale by
 		if (options.hasOwnProperty("radiusVariable") && 
 			options.radiusVariable != null &&
 			options.radiusVariable.hasOwnProperty(p) && 
-			options.radiusVariable[p] != null) viewerParams.radiusVariable[p] = copyValue(options.radiusVariable[p]);
+			options.radiusVariable[p] != null) viewerParams.radiusVariable[viewer_p] = copyValue(options.radiusVariable[p]);
 
+		if (options.hasOwnProperty("blendingMode") && 
+			options.blendingMode != null &&
+			options.blendingMode.hasOwnProperty(p) && 
+			options.blendingMode[p] != null) viewerParams.blendingMode[viewer_p] = copyValue(options.blendingMode[p]);
+			
+		if (options.hasOwnProperty("depthTest") && 
+			options.depthTest != null &&
+			options.depthTest.hasOwnProperty(p) && 
+			options.depthTest[p] != null){
+				viewerParams.depthTest[viewer_p] = copyValue(options.depthTest[p]);
+				viewerParams.depthWrite[viewer_p] = copyValue(options.depthTest[p]);
+				/*
+				var evalString =( 'elm = document.getElementById(' + p + '_depthCheckBox);'+
+					'elm.checked = ' + options.depthTest[p] + ';'+
+					'elm.value = ' + options.depthTest[p]+';')
+				forGUI.push({'evalCommand':evalString});
+				*/
+			}
+			
 	}// particle specific options
 
 	// initialize all the colormap stuff that columnDensity will need. Because it's
@@ -857,17 +902,19 @@ function applyOptions(){
 	viewerParams.colormapVariable[viewerParams.CDkey] = 0;
 	viewerParams.showColormap[viewerParams.CDkey] = false;
 	viewerParams.updateColormapVariable[viewerParams.CDkey] = false;
+
+	sendToGUI(forGUI);
 }
 
 // connect fly/trackball controls
-function initControls(updateGUI = true){
+function initControls(updateGUI = true,force_fly=false){
 
 	var forGUI = []
 	forGUI.push({'setGUIParamByKey':[viewerParams.useTrackball, "useTrackball"]})
 
 	// Firefly seems to behave best when it is initialized with trackball controls.  If the user chooses a different set of controls
 	// I will still initialize it with trackball, and then change after the first render pass
-	if (viewerParams.useTrackball || viewerParams.drawPass < 1) { 
+	if (!force_fly && (viewerParams.useTrackball || viewerParams.drawPass < 1)) { 
 		//console.log('initializing TrackballControls')
 		viewerParams.controlsName = 'TrackballControls'
 		var xx = new THREE.Vector3(0,0,0);
@@ -903,6 +950,7 @@ function initControls(updateGUI = true){
 		viewerParams.controlsTarget = viewerParams.controls.target;
 		viewerParams.controls.dynamicDampingFactor = viewerParams.friction;
 		viewerParams.controls.addEventListener('change', sendCameraInfoToGUI);
+		if (!viewerParams.useTrackball) return initControls(updateGUI,true); 
 	} else {
 		console.log('initializing FlyControls')
 		viewerParams.controlsName = 'FlyControls';
@@ -943,6 +991,7 @@ function initColumnDensity(){
 			CDmin: {value: viewerParams.colormapVals[viewerParams.CDkey][viewerParams.ckeys[viewerParams.CDkey][0]][0]}, // bottom of CD renormalization
 			CDmax: {value: viewerParams.colormapVals[viewerParams.CDkey][viewerParams.ckeys[viewerParams.CDkey][0]][1]}, // top of CD renormalization
 			lognorm: {value: viewerParams.CDlognorm}, // flag to normalize column densities in log space
+			scaleCD: {value: viewerParams.scaleCD},
 		},
 		vertexShader: myVertexShader,
 		fragmentShader: myFragmentShader_pass2,
@@ -1003,8 +1052,6 @@ function sendInitGUI(prepend=[], append=[]){
 	forGUI.push({'setGUIParamByKey':[viewerParams.decimate, "decimate"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.Pcolors, "Pcolors"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.showParts, "showParts"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.parts.options.UIdropdown, "useDropdown"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.parts.options.UIcolorPicker, "useColorPicker"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.boxSize, "boxSize"]});
 
 	//for velocities
@@ -1018,6 +1065,7 @@ function sendInitGUI(prepend=[], append=[]){
 	forGUI.push({'setGUIParamByKey':[viewerParams.animateVelTmax, "animateVelTmax"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.blendingOpts, "blendingOpts"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.blendingMode, "blendingMode"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.depthTest, "depthTest"]});
 	var haveVelocities = {};
 	viewerParams.partsKeys.forEach(function(p){
 		haveVelocities[p] = false;
@@ -1073,7 +1121,6 @@ function sendInitGUI(prepend=[], append=[]){
 	forGUI.push({'setGUIParamByKey':[haveFilterSlider,"haveFilterSlider"]});
 
 
-	//TO DO: need a check for radii values.  For now, I'm just setting it to false
 	forGUI.push({'setGUIParamByKey':[viewerParams.rkeys,"rkeys"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.radiusVariable,"radiusVariable"]});
 
@@ -1113,10 +1160,6 @@ function sendInitGUI(prepend=[], append=[]){
 	forGUI.push({'setGUIParamByKey':[viewerParams.showFPS,"showFPS"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.showMemoryUsage,"showMemoryUsage"]});
 
-	forGUI.push({'setGUIParamByKey':[viewerParams.parts.options.UIparticle,"UIparticle"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.parts.options.UIdropdown,"UIdropdown"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.parts.options.UIcolorPicker,"UIcolorPicker"]});
-
 	forGUI.push({'setGUIParamByKey':[viewerParams.columnDensity,"columnDensity"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.CDmin,"CDmin"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.CDmax,"CDmax"]});
@@ -1124,19 +1167,39 @@ function sendInitGUI(prepend=[], append=[]){
 	forGUI.push({'setGUIParamByKey':[viewerParams.CDckey,"CDckey"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.CDlognorm,"CDlognorm"]});
 
+	//check if there is a tween file
+	viewerParams.haveTween = false;
+	if (viewerParams.filenames.hasOwnProperty('tweenParams') &&  ('tweenParams' in viewerParams.parts && viewerParams.parts.tweenParams.loaded)) viewerParams.haveTween = true;
+	forGUI.push({'setGUIParamByKey':[viewerParams.haveTween,"haveTween"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.inTween,"inTween"]});
 
+	forGUI.push({'setGUIParamByKey':[viewerParams.GUIExcludeList,"GUIExcludeList"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.collapseGUIAtStart,"collapseGUIAtStart"]});
+
+	// add any extra commands
 	append.forEach(function(x,i){
 		forGUI.push(x);
 	})
 
 	forGUI.push({'setGUIParamByKey':[true,"GUIready"]});
 
+
 	sendToGUI(forGUI);
 
 	//ready to create GUI
 	console.log("sent all inits to GUI", forGUI)
 
+}
+
+//const specialChars = /[ `!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?~\t\n]/g;
+// removed _ from between ) and +
+const specialChars = /[ `!@#$%^&*()+\-=\[\]{};':"\\|,.<>\/?~\t\n]/;
+// https://bobbyhadz.com/blog/javascript-check-if-string-contains-special-characters
+function removeSpecialChars(str) {
+	while (specialChars.test(str)){
+		str = str.replace(specialChars.exec(str)[0],'_')
+	}
+	return str;
 }
 
 // callLoadData ->
@@ -1148,9 +1211,11 @@ function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
 
 
 	viewerParams.partsKeys = Object.keys(viewerParams.filenames);
+	// count how many particles we need to load
 	viewerParams.partsKeys.forEach( function(p, i) {
+		// replace any special characters
+		var sanitary_p = removeSpecialChars(p);
 		viewerParams.parts.count[p] = 0;
-		viewerParams.haveOctree[p] = false;
 		viewerParams.filenames[p].forEach( function(f, j) {
 			var amt = 0;
 			if (f.constructor == Array) amt = parseFloat(f[1]);
@@ -1164,11 +1229,13 @@ function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
 	});
 
 	viewerParams.partsKeys.forEach( function(p, i) {
+		// replace any special characters
+		var sanitary_p = removeSpecialChars(p);
 		// initialize this particle dictionary
-		viewerParams.parts[p] = {};
+		viewerParams.parts[sanitary_p] = {};
 
 		// default that no particle groups have an octree
-		viewerParams.haveOctree[p] = false
+		viewerParams.haveOctree[sanitary_p] = false
 
 		// loop through each of the files to open
 		viewerParams.filenames[p].forEach( function(f, j) {
@@ -1178,7 +1245,7 @@ function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
 				Object.keys(internalData).forEach(function(key,k){
 					//if I was sent a prefix, this could be simplified
 					// TODO should handle passing binary data
-					if (key.includes(f[0])) compileJSONData(internalData[key], p, callback, initialLoadFrac)
+					if (key.includes(f[0])) compileJSONData(internalData[key], sanitary_p, callback, initialLoadFrac)
 				})
 				if (internalData && i == viewerParams.partsKeys.length - 1 && j == viewerParams.filenames[p].length - 1) viewerParams.newInternalData = {};
 
@@ -1200,18 +1267,20 @@ function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
 					if (readf.toLowerCase().includes('.json')){
 						//console.log(prefix+readf)
 						d3.json(prefix+readf, function(foo) {
-							compileJSONData(foo, p, callback, initialLoadFrac);
+							compileJSONData(foo, sanitary_p, callback, initialLoadFrac);
 						});
 					}
 					// read binary .ffly files
 					else if (readf.toLowerCase().includes('.ffly' )){
 						loadFFLYKaitai(prefix+readf, function(foo){
-							compileFFLYData(foo, p, callback, initialLoadFrac)}
+							compileFFLYData(foo, sanitary_p, callback, initialLoadFrac)}
 						);
 					}
 				}
 			}
 		});
+		// replace the parts key with the sanitary_p
+		viewerParams.partsKeys[i] = sanitary_p;
 	});
 }
 
@@ -1474,6 +1543,11 @@ function setCenter(coords_flat){
 	viewerParams.center = new THREE.Vector3(sum[0], sum[1], sum[2]);
 	if (coords_flat.length > 0) viewerParams.center.divideScalar(coords_flat.length/3); 
 
+	// avoid having the camera center too close to 0,0,0.  If the target is also 0,0,0, then it is hard to zoom out initially.
+	var lim = 1e-5
+	if (Math.abs(viewerParams.center.x) < lim & Math.abs(viewerParams.center.y) < lim  & Math.abs(viewerParams.center.z) < lim){
+		viewerParams.center.z = 10;
+	}
 	setBoxSize(coords_flat);
 
 }
@@ -1545,7 +1619,12 @@ document.addEventListener("keydown", sendCameraInfoToGUI);
 
 // called numerous times outside this file
 //check if the data is loaded
-function clearloading(){
+function clearloading(gui_done=false){
+	if (!gui_done){
+		d3.select("#splashdiv5").text("Building GUI...");
+		return;
+	}
+
 	viewerParams.loaded = true;
 	viewerParams.reset = false;
 
@@ -1556,6 +1635,7 @@ function clearloading(){
 	d3.select("#loader").style("display","none")
 	if (viewerParams.local){
 		d3.select("#splashdiv5").text("Click to begin.");
+		if (!viewerParams.showSplashAtStartup) showSplash(false);
 	} else {
 		showSplash(false);
 	}
@@ -1582,9 +1662,22 @@ function updateOctreeLoadingBar(){
 	var forGUI = [];
 	viewerParams.partsKeys.forEach(function(p){
 		if (viewerParams.haveOctree[p]) {
-			var numerator = viewerParams.octree.loadingCount[p];
+			var numerator = viewerParams.octree.loadingCount[p][0];
+			var parts_numerator = viewerParams.octree.loadingCount[p][1];
+			var remaining_count = 0;
+			viewerParams.octree.toDraw[p].forEach( function (tuple){
+				node = tuple[0];
+				remaining_count+=node.buffer_size;
+			});
+
+			var parts_denominator = parts_numerator + remaining_count;
 			var denominator = numerator + viewerParams.octree.toDraw[p].length;
-			var out = {'p':p, 'numerator':numerator,'denominator':denominator};
+			var out = {
+				'p':p,
+				'numerator':numerator,
+				'denominator':denominator,
+				'parts_numerator':parts_numerator,
+				'parts_denominator':parts_denominator};
 			forGUI.push({'updateOctreeLoadingBarUI':out});
 		}
 	})
