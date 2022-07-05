@@ -3,6 +3,15 @@ var viewerParams;
 
 function defineViewerParams(){
 	viewerParams = new function() {
+
+		var currentTime = new Date();
+		// in seconds
+		this.initialize_time = currentTime.getTime()/1000;
+		//this.sleepTimeout = 1.5 // seconds
+		// no timeout
+		this.sleepTimeout = null // seconds
+		this.showSplashAtStartup = false;
+
 		this.container = null;
 		this.scene = null;
 		this.camera = null;
@@ -19,6 +28,10 @@ function defineViewerParams(){
 		this.partsMesh = {};
 
 		this.loaded = false;
+
+		// for disabling GUI elements
+		this.GUIExcludeList = []
+		this.collapseGUIAtStart = true;
 
 		//positions, will be rest below ()
 		this.center;
@@ -48,7 +61,7 @@ function defineViewerParams(){
 
 		//for frustum      
 		this.zmax = 5.e10;
-		this.zmin = 1;
+		this.zmin = 0.01;
 		this.fov = 45.
 
 		//camera controls
@@ -156,6 +169,7 @@ function defineViewerParams(){
 		//tweening
 		this.inTween = false;
 		this.updateTween = false;
+		this.haveTween = false;
 		this.tweenFile = null;
 		this.tweenParams = {};
 		this.tweenPos = [];
@@ -169,8 +183,8 @@ function defineViewerParams(){
 		this.cameraCD = null;
 		this.scaleCD = 0.1; //scaling factor for the shader so that it adds up to one at highest density
 
-		this.CDmin = 0;
-		this.CDmax = 1;
+		this.CDmin = 1;
+		this.CDmax = 10;
 		this.CDlognorm = 0;
 		this.CDckey = 'ColumnDensity' // the name of the ckey, shows up in the colorbar label
 		this.CDkey = '__column__density__foo__abg' // the name of the pseudo particle group, salted so that no one overwrites it
@@ -243,6 +257,8 @@ function defineViewerParams(){
 			this.boxSize = 0; //will be set based on the root node
 
 			this.loadingCount = {}; //will contain an array for each particle type that has the total inView and the total drawn to adjust the loading bar
+
+			this.showCoMParticles = false;
 
 
 			/*

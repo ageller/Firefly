@@ -3,6 +3,7 @@ from __future__ import print_function
 import numpy as np
 
 import os 
+import inspect
 
 from .json_utils import write_to_json,load_from_json
 
@@ -55,7 +56,9 @@ class Settings(object):
                     if key in obj.keys():
                         return attr
 
-        raise KeyError("Invalid settings key %s"%key)
+        closest_key,_ = find_closest_string(key,self.keys()) 
+        
+        raise KeyError("Invalid settings key: '%s' (did you mean '%s'?)"%(key,closest_key))
         
     def printKeys(
         self,
@@ -84,10 +87,7 @@ class Settings(object):
 
     def keys(self):
         """ Returns a list of keys for all the different settings sub-dictionaries """
-        this_keys = [] 
-        for attr in self.__dict__.keys():
-            if '_settings' in attr:
-                this_keys += list(getattr(self,attr).keys())
+        this_keys = list(valid_settings)
         return this_keys
 
     def __init__(self,
@@ -99,10 +99,6 @@ class Settings(object):
             accepts passthrough kwargs from:
 
             :func:`firefly.data_reader.Settings.window_settings`
-
-            :func:`firefly.data_reader.Settings.UI_settings`
-
-            :func:`firefly.data_reader.Settings.particle_UI_settings`
 
             :func:`firefly.data_reader.Settings.camera_settings`
 
@@ -125,11 +121,9 @@ class Settings(object):
 
         ## initialize default settings and apply any passed kwargs
         self.startup_settings(**kwargs)
-        self.UI_settings(**kwargs)
         self.window_settings(**kwargs)
         self.camera_settings(**kwargs)
         self.particle_startup_settings(**kwargs)
-        self.particle_UI_settings(**kwargs)
         self.particle_velocity_settings(**kwargs)
         self.particle_filter_settings(**kwargs)
         self.particle_colormap_settings(**kwargs)
@@ -186,7 +180,7 @@ class Settings(object):
             defaults to False
         :type startFly: bool, optional
         :param startTween: flag to initialize the Firefly scene in tween mode, 
-            requires a valid tweenParams.json file to be present in the JSONdir,
+            requires a valid tweenParams.json file to be present in the datadir,
             defaults to False
         :type startTween: bool, optional
         :param startVR: flag to initialize Firefly in VR mode, defaults to False
@@ -212,48 +206,6 @@ class Settings(object):
             'maxPointScale':maxPointScale,
         }
 
-    def UI_settings(
-        self,
-        UI=True,
-        UIfullscreen=True,
-        UIsnapshot=True,
-        UIreset=True,
-        UIsavePreset=True,
-        UIloadNewData=True,
-        UIcameraControls=True,
-        UIdecimation=True,
-        **extra):
-        """Flags for enabling different elements of the UI
-
-        :param UI: flag to show the UI as a whole, defaults to True
-        :type UI: bool, optional
-        :param UIfullscreen: flag to show the fullscreen button, defaults to True
-        :type UIfullscreen: bool, optional
-        :param UIsnapshot: flag to show the screenshot button, defaults to True
-        :type UIsnapshot: bool, optional
-        :param UIreset: flag to show the "Default Settings" button, defaults to True
-        :type UIreset: bool, optional
-        :param UIsavePreset: flag to show the "Save Settings" button, defaults to True
-        :type UIsavePreset: bool, optional
-        :param UIloadNewData: flag to show the "Load Data" button, defaults to True
-        :type UIloadNewData: bool, optional
-        :param UIcameraControls: flag to show the camera controls pane, defaults to True
-        :type UIcameraControls: bool, optional
-        :param UIdecimation: flag to show the decimation slider, defaults to True
-        :type UIdecimation: bool, optional
-        """
-
-        self.__UI_settings = {
-            'UI':UI, 
-            'UIfullscreen':UIfullscreen, 
-            'UIsnapshot':UIsnapshot, 
-            'UIreset':UIreset, 
-            'UIsavePreset':UIsavePreset, 
-            'UIloadNewData':UIloadNewData, 
-            'UIcameraControls':UIcameraControls, 
-            'UIdecimation':UIdecimation, 
-        }
-
     def window_settings(
         self,
         title='Firefly',
@@ -261,6 +213,8 @@ class Settings(object):
         showFPS=True,
         showMemoryUsage=True,
         memoryLimit=2e9,
+        GUIExcludeList=None,
+        collapseGUIAtStart=None,
         **extra):
         """Settings that affect the browser window
 
@@ -282,6 +236,11 @@ class Settings(object):
             the memory usage directly, otherwise memory usage is only estimated, 
             defaults to 2e9 
         :type memoryLimit: float, optional
+        :param GUIExcludeList: list of string GUI element URLs (e.g. 'main/general/data/decimation') 
+            to exclude from the GUI. Case insensitive. If None then an empty list, defaults to None
+        :type GUIExcludeList: list, optional
+        :param collapseGUIAtStart: flag to collapse the GUI when the app starts up, defaults to True
+        :type collapseGUIAtStart: bool, optional
         """
 
         self.__window_settings = {
@@ -293,6 +252,8 @@ class Settings(object):
             'showFPS':showFPS,
             'showMemoryUsage':showMemoryUsage,
             'memoryLimit':memoryLimit,
+            'GUIExcludeList':GUIExcludeList if GUIExcludeList is not None else [],
+            'collapseGUIAtStart':collapseGUIAtStart
         }
 
     def camera_settings(
@@ -333,15 +294,15 @@ class Settings(object):
         self,
         maxVrange=2000.,
         startFly=False,
-        friction=0.1,
+        friction=None,
         stereo=False,
-        stereoSep=0.06,
+        stereoSep=None,
         decimate=None,
         start_tween=False,
-        CDmin=0,
-        CDmax=1,
-        CDlognorm=0,
-        columnDensity=0,
+        CDmin=None,
+        CDmax=None,
+        CDlognorm=None,
+        columnDensity=None,
         **extra):
         """General settings that affect the state app state
 
@@ -370,7 +331,7 @@ class Settings(object):
             This is a single value (not a dict), defaults to None
         :type decimate: int, optional
         :param start_tween: flag to initialize the Firefly scene in tween mode, 
-            requires a valid tweenParams.json file to be present in the JSONdir,
+            requires a valid tweenParams.json file to be present in the datadir,
             defaults to False
         :type start_tween: bool, optional
         :param CDmin: bottom of the renormalization for the experimental column density
@@ -452,36 +413,6 @@ class Settings(object):
             'sizeMult':dict() if sizeMult is None else sizeMult,
             'showParts':dict() if showParts is None else showParts,
             'radiusVariable':dict() if radiusVariable is None else radiusVariable
-        }
-
-    def particle_UI_settings(
-        self,
-        UIparticle=None,
-        UIdropdown=None,
-        UIcolorPicker=None,
-        **extra):
-        """Flags that control how the UI for each particle group looks like
-
-        :param UIparticle: do you want to show the particles 
-            in the user interface.
-            This is a dict with keys of the particle UInames mapped to bools,
-            defaults to dict([(UIname,True) for UIname in UInames])
-        :type UIparticle: dict of UIname:bool, optional
-        :param UIdropdown: do you want to enable the dropdown menus for 
-               particles in the user interface.
-               This is a dict with keys of the particle UInames mapped to bools,
-               defaults to dict([(UIname,True) for UIname in UInames])
-        :type UIdropdown: dict of UIname:bool, optional
-        :param UIcolorPicker: do you want to allow the user to change the color.
-               This is a dict with keys of the particle UInames mapped to bools,
-               defaults to dict([(UIname,True) for UIname in UInames])
-        :type UIcolorPicker: dict of UIname:bool, optional
-        """
-
-        self.__particle_UI_settings = {
-            'UIparticle':dict() if UIparticle is None else UIparticle,
-            'UIdropdown':dict() if UIdropdown is None else UIdropdown,
-            'UIcolorPicker':dict() if UIcolorPicker is None else UIcolorPicker,
         }
     
     def particle_velocity_settings(
@@ -575,6 +506,8 @@ class Settings(object):
         colormap=None,
         colormapVariable=None,
         showColormap=None,
+        depthTest=None,
+        blendingMode=None,
         **extra):
         """Settings that will define the initial values of the colormaps in the particle UI panes.
 
@@ -606,6 +539,16 @@ class Settings(object):
             This is a dict with keys of the particle UInames mapped to bools,
             (e.g. {'Gas':False, 'Stars':False}), defaults to False
         :type showColormap: dict of UIname:bool, optional
+        :param blendingMode: blending mode for each particle group,
+            options are: 'additive','normal','subtractive','multiplicative','none'.
+            This is a dict with keys of the particle UInames mapped to strs,
+            (e.g. {'Gas':'additive', 'Stars':'additive'}), defaults to 'additive'
+        :type blendingMode: dict of UIname:str, optional
+        :param depthTest: flags for whether the depth checkbox should 
+            be checked at startup. 
+            This is a dict with keys of the particle UInames mapped to bools,
+            (e.g. {'Gas':False, 'Stars':False}), defaults to False
+        :type depthTest: dict of UIname:bool, optional
         """
 
         ## settings that will define the initial values of the /colormap/ in the particle UI panes
@@ -616,6 +559,8 @@ class Settings(object):
             'colormap':dict() if colormap is None else colormap, 
             'colormapVariable':dict() if colormapVariable is None else colormapVariable,  
             'showColormap':dict() if showColormap is None else showColormap, 
+            'blendingMode':dict() if blendingMode is None else blendingMode, 
+            'depthTest':dict() if depthTest is None else depthTest, 
         }
 
 
@@ -632,7 +577,6 @@ class Settings(object):
 
         ## transfer keys from particle group
         for key in [
-            'UIparticle','UIdropdown','UIcolorPicker',
             'color','sizeMult','showParts','plotNmax','radiusVariable',
             'filterVals','filterLims','invertFilter',
             'colormapVals','colormapLims',
@@ -640,6 +584,27 @@ class Settings(object):
             'animateVel','animateVelDt','animateVelTmax',
             'colormap','colormapVariable','showColormap']:
             self[key][particleGroup.UIname]=particleGroup.settings_default[key]
+        
+        if particleGroup.settings_default['GUIExcludeList'] is not None:
+            self['GUIExcludeList'] += [
+                f"{particleGroup.UIname}/{key}" for key in 
+                particleGroup.settings_default['GUIExcludeList']]
+
+        ## replace colormapVariable and radiusVariable values
+        ##  with indices of field 
+        ##  (if passed as a string) 
+        for key,flags in zip(
+            ['colormapVariable','radiusVariable'],
+            [particleGroup.field_colormap_flags,particleGroup.field_radius_flags]):
+            value = particleGroup.settings_default[key]
+            if type(value) == str: 
+                value = [
+                    field_name for field_name,flag in 
+                    zip(particleGroup.field_names,flags) if flag].index(value)
+                ## offset by 1 if doing radiusVariable because
+                ##  0 corresponds to no scaling
+                if key == 'radiusVariable': value += 1
+                self[key][particleGroup.UIname] = value
         
         ## and link the other way, this Settings instance to the particleGroup
         particleGroup.attached_settings = self
@@ -664,29 +629,54 @@ class Settings(object):
                     ## copy the keys over
                     all_settings_dict.update(obj)
 
+        if ( all_settings_dict['GUIExcludeList'] is not None and 
+            len(all_settings_dict['GUIExcludeList']) > 0): 
+            self.validateGUIExcludeList(all_settings_dict['GUIExcludeList'])
+        
+        ## convert colormap strings to texture index
+        ##  (if passed as a string) 
+        for key,value in all_settings_dict['colormap'].items():
+            if type(value) == str: 
+                value = (colormaps.index(value)+0.5)/len(colormaps)
+                all_settings_dict['colormap'][key] = value
+
         return all_settings_dict
+    
+    def validateGUIExcludeList(self,GUIExcludeList):
+        pkey_particleGUIurlss = []
+        for pkey in self['sizeMult'].keys():
+            pkey_particleGUIurls = [url.replace('main/particles',pkey).lower() for url in particle_GUIurls]+[pkey]
+        pkey_particleGUIurlss += pkey_particleGUIurls
+
+        for url in GUIExcludeList:
+            if url.lower() in GUIurls: continue
+            elif url.lower() in pkey_particleGUIurlss: continue
+            else: 
+                closest_url,_ = find_closest_string(url.lower(),GUIurls+pkey_particleGUIurlss)
+                raise KeyError(f"Invalid GUIurl: '{url}' (did you mean '{closest_url}'?)")
+            
 
     def outputToJSON(
         self,
-        JSONdir,
-        JSON_prefix='',
+        datadir,
+        file_prefix='',
         filename=None,
         loud=True,
         write_to_disk=True,
         not_reader=True):
         """ Saves the current settings to a JSON file.
 
-        :param JSONdir: the sub-directory that will contain your JSON files, relative
-            to your :code:`$HOME directory`. , defaults to :code:`$HOME/<JSON_prefix>`
-        :type JSONdir: str, optional
-        :param JSON_prefix: Prefix for any :code:`.json` files created, :code:`.json` files will be of the format:
-            :code:`<JSON_prefix><filename>.json`, defaults to 'Data'
-        :type JSON_prefix: str, optional
+        :param datadir: the sub-directory that will contain your JSON files, relative
+            to your :code:`$HOME directory`. , defaults to :code:`$HOME/<file_prefix>`
+        :type datadir: str, optional
+        :param file_prefix: Prefix for any :code:`.json` files created, :code:`.json` files will be of the format:
+            :code:`<file_prefix><filename>.json`, defaults to 'Data'
+        :type file_prefix: str, optional
         :param filename: name of settings :code:`.json` file,
             defaults to self.settings_filename
         :type filename: str, optional
-        :param JSON_prefix: string that is prepended to filename, defaults to ''
-        :type JSON_prefix: str, optional
+        :param file_prefix: string that is prepended to filename, defaults to ''
+        :type file_prefix: str, optional
         :param loud: flag to print status information to the console, defaults to True
         :type loud: bool, optional
         :param write_to_disk: flag that controls whether data is saved to disk (:code:`True`)
@@ -701,7 +691,7 @@ class Settings(object):
         
         ## determine where we're saving the file
         filename = self.settings_filename if filename is None else filename
-        filename = os.path.join(JSONdir,JSON_prefix+filename)
+        filename = os.path.join(datadir,file_prefix+filename)
 
         ## export settings to a dictionary
         all_settings_dict = self.outputToDict()
@@ -744,3 +734,81 @@ class Settings(object):
                     print(self[key],'-->',settings_dict[key])
 
             self[key]=settings_dict[key]
+
+def find_closest_string(string,string_list):
+    min_dist = 1e10
+    closest_key = ''
+    for real_string in string_list:
+        rkset = set([char for char in real_string.lower()])
+        kset = set([char for char in string.lower()])
+        dist = max(len(rkset-kset),len(kset-rkset))
+        if dist < min_dist: 
+            closest_key = real_string
+            min_dist = dist
+    return closest_key,dist
+
+GUIurls = [
+    'main',
+    'main/general',
+    'main/general/data',
+    'main/general/data/decimation',
+    'main/general/data/savePreset',
+    'main/general/data/reset',
+    'main/general/data/loadNewData',
+    'main/general/camera',
+    'main/general/camera/centerTextBoxes',
+    'main/general/camera/cameraTextBoxes',
+    'main/general/camera/rotationTextBoxes',
+    'main/general/camera/cameraButtons',
+    'main/general/camera/fullScreen',
+    'main/general/camera/snapshot',
+    'main/general/camera/cameraFriction',
+    'main/general/camera/stereoSep',
+    'main/general/projection',
+    'main/general/projection/columnDensityCheckBox',
+    'main/general/projection/columnDensityLogCheckBox',
+    'main/general/projection/columnDensitySelectCmap',
+    'main/general/projection/columnDensitySliders',
+    'colorbarContainer',
+    'FPSContainer',
+    'octreeLoadingBarContainer',
+    'main/particles']
+GUIurls = [url.lower() for url in GUIurls]
+
+particle_GUIurls = [
+    'main/particles/onoff', 
+    'main/particles/sizeSlider',
+    'main/particles/colorPicker',
+    'main/particles/dropdown',
+    'main/particles/dropdown/general',
+    'main/particles/dropdown/general/octreeClearMemory',
+    'main/particles/dropdown/general/blendingModeSelectors',
+    'main/particles/dropdown/general/maxSlider',
+    'main/particles/dropdown/general/octreeCameraNorm',
+    'main/particles/dropdown/general/radiusVariableSelector',
+    'main/particles/dropdown/velocities',
+    'main/particles/dropdown/velocities/velocityCheckBox',
+    'main/particles/dropdown/velocities/velocityWidthSlider',
+    'main/particles/dropdown/velocities/velocityGradientCheckBox',
+    'main/particles/dropdown/velocities/velocityAnimatorCheckBox',
+    'main/particles/dropdown/velocities/velocityAnimatorTextBoxes',
+    'main/particles/dropdown/colormap',
+    'main/particles/dropdown/colormap/colormapCheckBox',
+    'main/particles/dropdown/colormap/colormapSliders',
+    'main/particles/dropdown/filters',
+    'main/particles/dropdown/filters/filterSliders',
+    'main/particles/dropdown/filters/filterPlayback',
+]
+
+particle_GUIurls = [url.lower() for url in particle_GUIurls]
+
+valid_settings = set([])
+for func in Settings.__dict__.keys():
+    if 'settings' in func: 
+        valid_settings.update(inspect.signature(Settings.__dict__[func]).parameters.keys())
+valid_settings-= set(['self'])
+
+colormaps = load_from_json(
+    os.path.abspath(os.path.join(
+        os.path.dirname(__file__),
+        '../static/textures/colormap_names.json')))['names']

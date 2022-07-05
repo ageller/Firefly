@@ -6,7 +6,7 @@ import pandas as pd
 import requests
 import numpy as np
 
-from .settings import Settings
+from .settings import Settings,valid_settings
 from .tween import TweenParams
 from .particlegroup import ParticleGroup
 from .json_utils import write_to_json,load_from_json
@@ -33,35 +33,36 @@ class Reader(object):
     
     def __init__(
         self,
-        JSONdir=None, 
-        JSON_prefix='Data',
-        clean_JSONdir=False,
+        datadir=None, 
+        file_prefix='Data',
+        clean_datadir=False,
         max_npart_per_file=10**5,
         write_startup='append',
         write_only_data=False,
         settings:Settings=None,
-        tweenParams:TweenParams=None):
+        tweenParams:TweenParams=None,
+        **kwargs):
         """Base initialization method for Reader instances. A Reader will read data and produce
             firefly compatible :code:`.json` files. 
 
-        :param JSONdir: the sub-directory that will contain your JSON files, relative
-            to your :code:`$HOME directory`. , defaults to :code:`$HOME/<JSON_prefix>`
-        :type JSONdir: str, optional
-        :param JSON_prefix: Prefix for any :code:`.json` files created, :code:`.json` files will be of the format:
-            :code:`<JSON_prefix><parttype>_%d.json`, defaults to 'Data'
-        :type JSON_prefix: str, optional
-        :param clean_JSONdir: flag to delete all :code:`.json` files in
-            the :code:`JSONdir`. Strictly not necessary (since :code:`filenames.json` 
+        :param datadir: the sub-directory that will contain your JSON files, relative
+            to your :code:`$HOME directory`. , defaults to :code:`$HOME/<file_prefix>`
+        :type datadir: str, optional
+        :param file_prefix: Prefix for any :code:`.json` files created, :code:`.json` files will be of the format:
+            :code:`<file_prefix><parttype>_%d.json`, defaults to 'Data'
+        :type file_prefix: str, optional
+        :param clean_datadir: flag to delete all :code:`.json` files in
+            the :code:`datadir`. Strictly not necessary (since :code:`filenames.json` 
             will be updated) but it is good to clean up after yourself., defaults to False
-        :type clean_JSONdir: bool, optional
+        :type clean_datadir: bool, optional
         :param max_npart_per_file: the maximum number of particles saved per :code:`.json` file,
             don't use too large a number or you will have trouble loading
             the individual files in., defaults to 10**4
         :type max_npart_per_file: int, optional
         :param write_startup: flag for how to treat the :code:`startup.json` file. 
             Takes three values: 
-            :code:`'append'`: appends :code:`JSONdir` to :code:`startup.json`, 
-            :code:`True`: overwrites :code:`startup.json` with a single entry, :code:`JSONdir`, 
+            :code:`'append'`: appends :code:`datadir` to :code:`startup.json`, 
+            :code:`True`: overwrites :code:`startup.json` with a single entry, :code:`datadir`, 
             :code:`False`: does not alter :code:`startup.json`, 
             , defaults to 'append'
         :type write_startup: str/bool, optional
@@ -89,21 +90,21 @@ class Reader(object):
                 os.path.realpath(__file__),
                 '..', '..', 'static', 'data'))
 
-        if JSONdir is None:
+        if datadir is None:
             ## default to saving directly into the firefly directory
-            print("JSONdir is None, defaulting to %s/%s"%(self.static_data_dir,JSON_prefix))
-            JSONdir = os.path.join(
+            print("datadir is None, defaulting to %s/%s"%(self.static_data_dir,file_prefix))
+            datadir = os.path.join(
                 self.static_data_dir,
-                JSON_prefix)
-        elif JSONdir[:1] != os.sep:
-            ## JSONdir is a relative path. 
+                file_prefix)
+        elif datadir[:1] != os.sep:
+            ## datadir is a relative path. 
             ##  Let's assume they want to save w.r.t. their home directory?
-            JSONdir = os.path.join(os.environ['HOME'],JSONdir)
-        if JSONdir[-1:]==os.sep:
+            datadir = os.path.join(os.environ['HOME'],datadir)
+        if datadir[-1:]==os.sep:
             ## get rid of the trailing '/' if it's there
-            JSONdir=JSONdir[:-1]
+            datadir=datadir[:-1]
 
-        self.JSONdir = JSONdir
+        self.datadir = datadir
 
         ## determine whether the directory we're saving the
         ##  actual data in is a sub-directory of firefly/static/data.
@@ -119,14 +120,16 @@ class Reader(object):
         #set the maximum number of particles per data file
         self.max_npart_per_file = max_npart_per_file
 
-        ## JSON_prefix for the datafiles e.g. Data 
-        self.JSON_prefix = JSON_prefix
+        ## file_prefix for the datafiles e.g. Data 
+        self.file_prefix = file_prefix
 
-        #remove existing data files in the JSONdir before adding more?
-        self.clean_JSONdir = clean_JSONdir 
+        #remove existing data files in the datadir before adding more?
+        self.clean_datadir = clean_datadir 
     
         ## array of particle groups
         self.particleGroups: list[ParticleGroup] = []
+
+        settings_kwargs,self.particlegroup_kwargs = split_kwargs(kwargs)
 
         if settings is not None:
             if settings.__class__.__name__ != 'Settings':
@@ -134,9 +137,20 @@ class Reader(object):
                 ##  that use %load_ext autoreload
                 raise TypeError("Make sure you use a Settings instance to specify firefly settings.")
         ## we'll use the default ones then
-        else: settings = Settings()
+        else: settings = Settings(**settings_kwargs)
+
+        self.settings_path = os.path.join(
+            self.static_data_dir,
+            os.path.basename(datadir),
+            self.file_prefix+settings.settings_filename)
+        if not self.clean_datadir and os.path.isfile(self.settings_path):
+            print(f"Importing existing settings from {self.settings_path}")
+            settings.loadFromJSON(self.settings_path,loud=False)
 
         self.settings = settings
+
+        ## and apply the settings that were passed as keyword arguments
+        for key,value in settings_kwargs.items(): self.settings[key] = value
 
         if tweenParams is not None:
             if tweenParams.__class__.__name__ != 'TweenParams':
@@ -162,7 +176,7 @@ class Reader(object):
         ## split the JSON directory path into the folder 
         ##  that will actually contain the JSON files and the path leading 
         ##  to it. 
-        hard_data_path,short_data_path = os.path.split(self.JSONdir)
+        hard_data_path,short_data_path = os.path.split(self.datadir)
 
         ## determine if we will need to soft link this data or if 
         ##  it was saved to some kind of self.static_data_dir (whether this one
@@ -173,11 +187,11 @@ class Reader(object):
                 os.path.join(hard_data_path,"..","..")):
 
                 if loud:
-                    print( "JSONdir: {} -- ".format(self.JSONdir)+
+                    print( "datadir: {} -- ".format(self.datadir)+
                         "is not a sub-directory of firefly/static/data. "+
                         "\nThis may produce confusing or inoperable results. "+
                         "As such, we will create a symlink for you when you "+
-                        " dumpToJSON.")
+                        "writeToDisk.")
 
                 self.needs_soft_link = True
                 break
@@ -229,7 +243,7 @@ class Reader(object):
         loud=False,
         write_to_disk=True,
         symlink=True,
-        extension='.ffly'):
+        **kwargs):
         """Creates all the necessary JSON files to run firefly and ensures they are
         properly linked and cross-referenced correctly using the
         :func:`firefly.data_reader.Settings.outputToJSON` and
@@ -243,7 +257,7 @@ class Reader(object):
         :param symlink: flag for whether a soft link should be created between where the data is stored on 
             disk and the :code:`self.static_data_dir` directory (:code:`True`) or whether it should be 
             saved directly to :code:`self.static_data_dir` directory (:code:`False`). 
-            Note that :code:`symlink=False` will not _also_ save results in :code:`self.JSONdir`, defaults to True
+            Note that :code:`symlink=False` will not _also_ save results in :code:`self.datadir`, defaults to True
         :type symlink: bool, optional
         :param extension: what output format should the particle data be saved in, JSON or binary 'ffly'
         :type: str
@@ -254,28 +268,28 @@ class Reader(object):
         ## path where data needs to be visible to firefly
         static_data_path = os.path.join(
             self.static_data_dir,
-            os.path.basename(self.JSONdir))
+            os.path.basename(self.datadir))
 
         ## where to put hard JSON files, if no symlink then we will
         ##  need to save directly to static_data_path
-        JSONdir = self.JSONdir if symlink else static_data_path
+        datadir = self.datadir if symlink else static_data_path
 
         if not symlink:
             ## we've been asked to ignore the request to put the
-            ##  hard files in self.JSONdir and instead actually put them in 
+            ##  hard files in self.datadir and instead actually put them in 
             ##  firefly/static/data/<short_data_path>
             if loud:
                 print("Outputting files to: %s instead of: %s as originally specified."%(
                         static_data_path,
-                        self.JSONdir))
+                        self.datadir))
 
 
         ## if we don't actually want to write to disk then we don't need
         ##  to do any filesystem tasks
         if write_to_disk:
             ## make the output directory
-            if not os.path.isdir(JSONdir):
-                os.makedirs(JSONdir)
+            if not os.path.isdir(datadir):
+                os.makedirs(datadir)
 
             ## soft link between the "hard" data and firefly/static/data
             ##  firefly can be run locally
@@ -283,7 +297,7 @@ class Reader(object):
                 try:
                     ## create a symlink so that data can 
                     ##  be read from a "sub-directory"
-                    os.symlink(JSONdir,static_data_path)
+                    os.symlink(datadir,static_data_path)
 
                 except FileExistsError:
                     if os.path.islink(static_data_path):
@@ -294,71 +308,62 @@ class Reader(object):
 
                     ## create a symlink so that data can 
                     ##  be read from a "sub-directory"
-                    os.symlink(JSONdir,static_data_path) 
+                    os.symlink(datadir,static_data_path) 
 
         ## initialize an output array to contain all the jsons and their names
-        JSON_array = []
+        file_array = []
 
         ## write each particleGroup to JSON using their own method
         ##  and save the filenames into a dictionary for filenames.json
-        filenamesDict = {}
-        for particleGroup in self.particleGroups:
-            if loud:
-                print("Outputting:",particleGroup)
 
-            if extension.lower() == '.json':
-                this_JSON_array,filenames_and_nparts = particleGroup.outputToJSON(
-                    os.path.basename(JSONdir),
-                    os.path.dirname(JSONdir),
-                    self.JSON_prefix,
-                    loud=loud,
-                    max_npart_per_file=self.max_npart_per_file,
-                    clean_JSONdir=self.clean_JSONdir if particleGroup is self.particleGroups[0] else False,
-                    write_to_disk=write_to_disk,
-                    not_reader=False)
-            elif extension.lower() == '.ffly':
-                this_JSON_array,filenames_and_nparts = particleGroup.outputToFFLY(
-                    os.path.basename(JSONdir),
-                    os.path.dirname(JSONdir),
-                    self.JSON_prefix,
-                    loud=loud,
-                    max_npart_per_file=self.max_npart_per_file,
-                    clean_FFLYdir= self.clean_JSONdir if particleGroup is self.particleGroups[0] else False,
-                    not_reader=False)
-            else: raise KeyError("Requested format %s not understood. Choose .json or .ffly."%extension)
+        manifest_file = os.path.join(datadir,'filenames.json')
+        if not self.clean_datadir and os.path.isfile(manifest_file):
+            filenamesDict = load_from_json(manifest_file)
+        else: filenamesDict = {}
+        for particleGroup in self.particleGroups:
+            print(particleGroup)
+            if loud: print("Outputting:",particleGroup)
+
+            this_file_array,filenames_and_nparts = particleGroup.writeToDisk(
+                datadir,
+                file_prefix=self.file_prefix,
+                loud=loud,
+                max_npart_per_file=self.max_npart_per_file,
+                clean_datadir=self.clean_datadir if particleGroup is self.particleGroups[0] else False,
+                not_reader=False,
+                **kwargs)
 
             ## append the JSON arrays for this particle group
-            JSON_array += this_JSON_array
+            file_array += this_file_array
 
             filenamesDict[particleGroup.UIname]=list(filenames_and_nparts)
 
         ## output the settings.json file
         if not self.write_only_data: 
-            JSON_array +=[self.dumpSettingsToJSON(symlink,write_to_disk,loud)]
+            file_array +=[self.dumpSettingsToJSON(symlink,write_to_disk,loud)]
 
             ## format and output the filenames.json file
             filenamesDict['options'] = [(os.path.join(
-                os.path.basename(JSONdir),
-                self.JSON_prefix+self.settings.settings_filename),0)]
+                os.path.basename(datadir),
+                self.file_prefix+self.settings.settings_filename),0)]
 
             ## write a tweenParams file if a TweenParams instance is attached to reader
             if hasattr(self,'tweenParams') and self.tweenParams is not None:
                 filenamesDict['tweenParams'] = [(os.path.join(
-                    os.path.basename(JSONdir),
+                    os.path.basename(datadir),
                     self.tweenParams.filename),0)]
-                JSON_array+=[self.tweenParams.outputToJSON(
-                    JSONdir,
-                    JSON_prefix=self.JSON_prefix,
+                file_array+=[self.tweenParams.outputToJSON(
+                    datadir,
+                    file_prefix=self.file_prefix,
                     loud=loud,
                     write_to_disk=write_to_disk,
                     not_reader=False)] ## None -> returns JSON string
 
-            filename=os.path.join(JSONdir,'filenames.json')
-            JSON_array +=[(
-                filename,
+            file_array +=[(
+                manifest_file,
                 write_to_json(
                     filenamesDict,
-                    filename if write_to_disk else None))] ## None -> returns JSON string
+                    manifest_file if write_to_disk else None))] ## None -> returns JSON string
 
             ## handle the startup.json file, may need to append or totally overwrite
             startup_file = os.path.join(
@@ -367,7 +372,7 @@ class Reader(object):
 
             ## relative path from .js interpreter (which runs in /firefly/static) 
             ##  to this dataset
-            startup_path = os.path.join("data",os.path.basename(JSONdir))
+            startup_path = os.path.join("data",os.path.basename(datadir))
 
             if self.write_startup == 'append' and os.path.isfile(startup_file):
                 startup_dict = load_from_json(startup_file)
@@ -383,7 +388,7 @@ class Reader(object):
                         maxx-=1 ## since we'll add 1 below
                 
                 startup_dict[str(maxx+1)]=startup_path
-                JSON_array+=[(
+                file_array+=[(
                     ## recreate in case we overwrote the startup_file variable in loop above
                     os.path.join(self.static_data_dir,'startup.json'), 
                     write_to_json(
@@ -391,7 +396,7 @@ class Reader(object):
                         startup_file if write_to_disk else None))] ## None -> returns JSON string
 
             elif self.write_startup:
-                JSON_array+=[(
+                file_array+=[(
                     startup_file,
                     write_to_json(
                         {"0":startup_path},
@@ -400,7 +405,7 @@ class Reader(object):
         if not write_to_disk:
             ## create a single "big JSON" with all the data in it in case
             ##  we want to send dataViaFlask
-            JSON_dict = dict(JSON_array)
+            JSON_dict = dict(file_array)
             self.JSON = write_to_json(JSON_dict,None)
             self.JSON_dict = JSON_dict
         else:
@@ -420,15 +425,15 @@ class Reader(object):
         ## path where data needs to be visible to firefly
         static_data_path = os.path.join(
             self.static_data_dir,
-            os.path.basename(self.JSONdir))
+            os.path.basename(self.datadir))
 
         ## where to put hard JSON files, if no symlink then we will
         ##  need to save directly to static_data_path
-        JSONdir = self.JSONdir if symlink else static_data_path
+        datadir = self.datadir if symlink else static_data_path
 
         return self.settings.outputToJSON(
-            JSONdir,
-            JSON_prefix=self.JSON_prefix,
+            datadir,
+            file_prefix=self.file_prefix,
             loud=loud,
             write_to_disk=write_to_disk,
             not_reader=False)
@@ -475,7 +480,7 @@ class Reader(object):
             self.writeToDisk(
                 loud=False,
                 write_to_disk=False,
-                extension='json')
+                extension='.json')
 
         ## post the json to the listening url data_input
         ##  defined in server.py
@@ -494,7 +499,8 @@ class Reader(object):
         init_gh_pages=False,
         GHREPONAME=None,
         GHUSER=None,
-        GHOAUTHTOKENPATH=None):
+        GHOAUTHTOKENPATH=None,
+        **kwargs):
         """ Copies the necessary source files to run a stand-alone instance of firefly
             on the web. Optionally, will also initialize a new GitHub repository with 
             GitHub pages, a free web-hosting service, so that this stand-alone instance 
@@ -511,7 +517,7 @@ class Reader(object):
         :param dump_data: flag for whether the data stored in this reader should also be saved
             to this new stand-alone firefly directory (vs. only the firefly source files), defaults to True
         :type dump_data: bool, optional
-        :param overwrite: flag for whether the existing target directory should be purged
+        :param overwrite: flag for whether the existing target static directory should be purged
             before anything is copied over or written to disk, defaults to True
         :type overwrite: bool, optional
         :param init_gh_pages: flag to run :code:`firefly/bin/make_new_repo.sh` in an attempt to initialize
@@ -541,10 +547,8 @@ class Reader(object):
             ## create the directory because it doesn't exist
             os.makedirs(target)
         elif overwrite:
-            ## purge the old
-            shutil.rmtree(target)
-            ## replace with the new
-            os.makedirs(target)
+            ## purge the old static directory
+            shutil.rmtree(os.path.join(target,'static'))
 
         ## identify source directory
         src = os.path.abspath(os.path.join(
@@ -587,9 +591,8 @@ class Reader(object):
                 self.static_data_dir = os.path.join(target,'static','data')
 
                 if not os.path.isdir(self.static_data_dir): os.makedirs(self.static_data_dir)
-                self.writeToDisk(symlink=False)
-            except:
-                raise
+                self.writeToDisk(symlink=False,**kwargs)
+            except: raise
             finally:
                 ## replace the old stat_data_dir
                 self.static_data_dir = old
@@ -657,6 +660,7 @@ class ArrayReader(Reader):
     def __init__(
         self,
         coordinates,
+        velocities=None,
         UInames=None,
         fields=None,
         field_names=None,
@@ -672,6 +676,11 @@ class ArrayReader(Reader):
             coordinates or a jagged (M,N_m,3) list of np.arrays which is interpreted as M many 
             particle groups with each having N_m particles
         :type coordinates: list, optional
+        :param velocities: raw velocity data,
+            Can either pass N,3 np.array which is interpreted as a single particle group's 
+            velocities or a jagged (M,N_m,3) list of np.arrays which is interpreted as M many 
+            particle groups with each having N_m particles
+        :type velocities: list, optional
         :param UInames: list of particle group UInames
         :type UInames: list of str
         :param fields: list of field arrays corresponding to each point of the coordinate data, 
@@ -704,6 +713,9 @@ class ArrayReader(Reader):
         if len(np.shape(coordinates))==2 and np.shape(coordinates)[-1]==3:
             ## passed a single list of coordinates, prepend an axis for the single group
             coordinates = [coordinates]
+            velocities = [velocities]
+            if UInames is not None: UInames = [UInames]
+            if fields is not None: fields = [fields]
         elif len(np.shape(coordinates[0]))==2 and np.shape(coordinates[0])[-1]==3:
             ## passed a jagged array of different coordinates
             pass
@@ -777,8 +789,8 @@ class ArrayReader(Reader):
         ## initialize default particle group names
         if UInames is None: UInames = ['PGroup_%d'%i for i in range(len(coordinates))]
         elif len(UInames) != len(coordinates): 
-            raise ValueError("%d UInames does not match passed"+
-            " number of %d coordinate arrays"%(len(UInames),len(coordinates)))
+            raise ValueError("%d UInames does not match passed"%len(UInames)+
+            " number of %d coordinate arrays"%(len(coordinates)))
 
         ## loop through each of the particle groups
         for i,(coords,UIname) in enumerate(zip(coordinates,UInames)):
@@ -787,9 +799,11 @@ class ArrayReader(Reader):
             firefly_particleGroup = ParticleGroup(
                 UIname,
                 coords,
+                velocities[i],
                 decimation_factor=decimation_factor,
                 field_arrays=None if fields is None else fields[i],
-                field_names=None if field_names is None else field_names[i])
+                field_names=None if field_names is None else field_names[i],
+                **self.particlegroup_kwargs)
 
             ## attach the instance to the reader
             self.addParticleGroup(firefly_particleGroup)
@@ -798,8 +812,7 @@ class ArrayReader(Reader):
         ##  a single big JSON in self.JSON
         self.writeToDisk(
             write_to_disk=write_to_disk,
-            loud=loud,
-            extension='.json' if not write_to_disk else '.ffly')
+            loud=loud)
 
 class SimpleReader(ArrayReader):
     """ A wrapper to :class:`firefly.data_reader.ArrayReader` that attempts to 
@@ -1050,3 +1063,9 @@ class SimpleReader(ArrayReader):
                     ## initialize it otherwise
                     else: fieldss[field_name] = this_group[field_name]
         return fieldss
+
+def split_kwargs(kwargs):
+    kwargs_keys = kwargs.keys()
+    settings_keys = kwargs_keys & valid_settings
+    particlegroup_keys = kwargs_keys - valid_settings
+    return {key:kwargs[key] for key in settings_keys},{key:kwargs[key] for key in particlegroup_keys}
