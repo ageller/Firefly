@@ -1,24 +1,24 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>firefly.data_reader.TweenParams &mdash; Firefly 3.0.0 documentation</title><link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <title>firefly.data_reader.TweenParams &mdash; Firefly 3.0.0 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/doctools.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
-    <link rel="search" title="Search" href="../../../search.html" />
-    <link rel="next" title="firefly.data_reader.SimpleReader" href="../readers/firefly.data_reader.SimpleReader.html" />
-    <link rel="prev" title="firefly.data_reader.Settings" href="firefly.data_reader.Settings.html" /> 
+    <link rel="search" title="Search" href="../../../search.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -26,7 +26,8 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../../index.html"><img src="../../../_static/logo_banner.png" class="logo" alt="Logo"/>
+            <a href="../../../index.html">
+            <img src="../../../_static/logo_banner.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -36,24 +37,13 @@
   </form>
 </div>
         </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <ul class="current">
+              <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../webapp/index.html">Interacting with a Firefly visualization</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../data_reader/index.html">Creating your own instance of Firefly</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../server.html">Hosting a Firefly webserver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../experimental.html">Experimental features</a></li>
-<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
-<li class="toctree-l2 current"><a class="reference internal" href="../api.html#base-classes">Base classes</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="firefly.data_reader.Reader.html">firefly.data_reader.Reader</a></li>
-<li class="toctree-l3"><a class="reference internal" href="firefly.data_reader.ParticleGroup.html">firefly.data_reader.ParticleGroup</a></li>
-<li class="toctree-l3"><a class="reference internal" href="firefly.data_reader.Settings.html">firefly.data_reader.Settings</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">firefly.data_reader.TweenParams</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="../api.html#pre-built-readers">Pre-built Readers</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../api.html#server-utitities">Server Utitities</a></li>
-</ul>
-</li>
+<li class="toctree-l1"><a class="reference internal" href="../api.html">API Reference</a></li>
 </ul>
 
         </div>
@@ -70,7 +60,6 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
-          <li><a href="../api.html">API Reference</a> &raquo;</li>
       <li>firefly.data_reader.TweenParams</li>
       <li class="wy-breadcrumbs-aside">
             <a href="../../../_sources/reference/api/classes/firefly.data_reader.TweenParams.rst.txt" rel="nofollow"> View page source</a>
@@ -106,139 +95,13 @@
 }
 </style>
 <section id="firefly-data-reader-tweenparams">
-<h1>firefly.data_reader.TweenParams<a class="headerlink" href="#firefly-data-reader-tweenparams" title="Permalink to this headline">¶</a></h1>
-<dl class="py class">
-<dt id="firefly.data_reader.TweenParams">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">firefly.data_reader.</span></code><code class="sig-name descname"><span class="pre">TweenParams</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/firefly/data_reader/tween.html#TweenParams"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#firefly.data_reader.TweenParams" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<p>A class to store tween parameters and make an output file</p>
-<dl class="py method">
-<dt id="firefly.data_reader.TweenParams.__init__">
-<code class="sig-name descname"><span class="pre">__init__</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coords</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loop</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/firefly/data_reader/tween.html#TweenParams.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#firefly.data_reader.TweenParams.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="simple">
-<dt>Create a new tween parameter object, allowing the user to press <code class="code docutils literal notranslate"><span class="pre">t</span></code> from within</dt><dd><p>the webapp to move between keyframe camera locations smoothly and automatically.</p>
-</dd>
-</dl>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>coords</strong> (<em>list of float</em>) – keyframe camera coordinates, list of positions that camera
-will move between. 3 acceptable input formats:
-* [x,y,z] single keyframe
-* [[x1,y1,z1],[x2,y2,z2],…] multiple keyframes
-* [x1,y1,z1,x2,y2,z2,…] multiple flattened keyframes,
-defaults to []</p></li>
-<li><p><strong>duration</strong> (<em>float/list of float</em>) – <p>duration to approach keyframe in seconds. 3 acceptable input formats:
-* d single duration (will be repeated)
-* [d] single duration in list (will be repeated)
-* [d1,d2,…] multiple durations (corresponding to number of keyframes or</p>
-<blockquote>
-<div><p>raises an error),</p>
-</div></blockquote>
-<p>defaults to 5</p>
-</p></li>
-<li><p><strong>loop</strong> (<em>bool</em><em>, </em><em>optional</em>) – flag to loop after reaching the last keyframe, defaults to True</p></li>
-<li><p><strong>filename</strong> (<em>str</em><em>, </em><em>optional</em>) – name of tween file <code class="code docutils literal notranslate"><span class="pre">.json</span></code> file,
-defaults to <code class="docutils literal notranslate"><span class="pre">'TweenParams.json'</span></code></p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py attribute">
-<dt id="firefly.data_reader.TweenParams.__weakref__">
-<code class="sig-name descname"><span class="pre">__weakref__</span></code><a class="headerlink" href="#firefly.data_reader.TweenParams.__weakref__" title="Permalink to this definition">¶</a></dt>
-<dd><p>list of weak references to the object (if defined)</p>
-</dd></dl>
-
-<dl class="py method">
-<dt id="firefly.data_reader.TweenParams.addKeyframe">
-<code class="sig-name descname"><span class="pre">addKeyframe</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">coords</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/firefly/data_reader/tween.html#TweenParams.addKeyframe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#firefly.data_reader.TweenParams.addKeyframe" title="Permalink to this definition">¶</a></dt>
-<dd><p>Adds a new keyframe to an existing TweenParams object.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>coords</strong> (<em>list of float</em>) – <p>keyframe camera coordinates, list of positions that camera
-will move between 3 acceptable input formats:</p>
-<blockquote>
-<div><ul>
-<li><p>[x,y,z] single keyframe</p></li>
-<li><p>[[x1,y1,z1],[x2,y2,z2],…] multiple keyframes</p></li>
-<li><p>[x1,y1,z1,x2,y2,z2,…] multiple flattened keyframes</p></li>
-</ul>
-</div></blockquote>
-</p></li>
-<li><p><strong>duration</strong> (<em>float/list of float</em>) – <p>duration to approach keyframe, 3 acceptable input formats:
-* d single duration (will be repeated)
-* [d] single duration in list (will be repeated)
-* [d1,d2,…] multiple durations (corresponding to number of keyframes or</p>
-<blockquote>
-<div><p>raises an error)</p>
-</div></blockquote>
-</p></li>
-</ul>
-</dd>
-<dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><ul class="simple">
-<li><p><strong>np.AxisError</strong> – if len of coords is not divisible by 3</p></li>
-<li><p><strong>np.AxisError</strong> – if len of durations does not match len of coords</p></li>
-</ul>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="firefly.data_reader.TweenParams.outputToDict">
-<code class="sig-name descname"><span class="pre">outputToDict</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/firefly/data_reader/tween.html#TweenParams.outputToDict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#firefly.data_reader.TweenParams.outputToDict" title="Permalink to this definition">¶</a></dt>
-<dd><p>Converts stored data into a single python dictionary.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>tween_params_dict</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>dict</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt id="firefly.data_reader.TweenParams.outputToJSON">
-<code class="sig-name descname"><span class="pre">outputToJSON</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">JSONdir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">JSON_prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loud</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_to_disk</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">not_reader</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/firefly/data_reader/tween.html#TweenParams.outputToJSON"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#firefly.data_reader.TweenParams.outputToJSON" title="Permalink to this definition">¶</a></dt>
-<dd><p>Saves the current tween parameters to a JSON file.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>JSONdir</strong> (<em>str</em><em>, </em><em>optional</em>) – the sub-directory that will contain your JSON files, relative
-to your <code class="code docutils literal notranslate"><span class="pre">$HOME</span> <span class="pre">directory</span></code>. , defaults to <code class="code docutils literal notranslate"><span class="pre">$HOME/&lt;JSON_prefix&gt;</span></code></p></li>
-<li><p><strong>JSON_prefix</strong> (<em>str</em><em>, </em><em>optional</em>) – Prefix for any <code class="code docutils literal notranslate"><span class="pre">.json</span></code> files created, <code class="code docutils literal notranslate"><span class="pre">.json</span></code> files will be of the format:
-<code class="code docutils literal notranslate"><span class="pre">&lt;JSON_prefix&gt;&lt;self.filename&gt;.json</span></code>, defaults to ‘’</p></li>
-<li><p><strong>loud</strong> (<em>bool</em><em>, </em><em>optional</em>) – flag to print status information to the console, defaults to True</p></li>
-<li><p><strong>write_to_disk</strong> (<em>bool</em><em>, </em><em>optional</em>) – flag that controls whether data is saved to disk (<code class="code docutils literal notranslate"><span class="pre">True</span></code>)
-or only converted to a string and returned (<code class="code docutils literal notranslate"><span class="pre">False</span></code>), defaults to True</p></li>
-<li><p><strong>not_reader</strong> – flag for whether to print the Reader <code class="code docutils literal notranslate"><span class="pre">filenames.json</span></code> warning, defaults to True</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>filename, JSON(tween_params_dict) (either a filename if
-written to disk or a JSON strs)</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>str, str</p>
-</dd>
-</dl>
-</dd></dl>
-
-</dd></dl>
-
+<h1>firefly.data_reader.TweenParams<a class="headerlink" href="#firefly-data-reader-tweenparams" title="Permalink to this headline"></a></h1>
 </section>
 
 
            </div>
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="firefly.data_reader.Settings.html" class="btn btn-neutral float-left" title="firefly.data_reader.Settings" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="../readers/firefly.data_reader.SimpleReader.html" class="btn btn-neutral float-right" title="firefly.data_reader.SimpleReader" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
+          <footer>
 
   <hr/>
 

@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Experimental features &mdash; Firefly 3.0.0 documentation</title><link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <title>Experimental features &mdash; Firefly 3.0.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
         <script src="_static/jquery.js"></script>
         <script src="_static/underscore.js"></script>
         <script src="_static/doctools.js"></script>
@@ -26,7 +28,8 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="index.html"><img src="_static/logo_banner.png" class="logo" alt="Logo"/>
+            <a href="index.html">
+            <img src="_static/logo_banner.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
@@ -97,27 +100,27 @@
     text-align: unset;
 }
 </style>
-<section id="experimental-features-1">
-<span id="experimental-features"></span><h1>Experimental features<a class="headerlink" href="#experimental-features-1" title="Permalink to this headline">¶</a></h1>
+<section id="experimental-features">
+<span id="id1"></span><h1>Experimental features<a class="headerlink" href="#experimental-features" title="Permalink to this headline"></a></h1>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>These features are not finalized, their functionality, API, and
 existence may be subject to change.</p>
-</aside>
+</div>
 <section id="streaming-the-firefly-view">
-<h2>Streaming the Firefly view<a class="headerlink" href="#streaming-the-firefly-view" title="Permalink to this headline">¶</a></h2>
+<h2>Streaming the Firefly view<a class="headerlink" href="#streaming-the-firefly-view" title="Permalink to this headline"></a></h2>
 <p>A Firefly server hosted via Flask can be rendered remotely and streamed
 by visiting the <code class="code docutils literal notranslate"><span class="pre">localhost:xxxx/stream</span></code> URL.
 For security reasons, this currently does not work if the host is not the current machine
 (which defeats the purpose of streaming the view in the first place,
 we’re working on getting around this limitation).</p>
 <p>The FPS of the stream can be specified when starting the Flask server
-see the <a class="reference internal" href="reference/api/api.html#server-api"><span class="std std-ref">documentation</span></a> for <a class="reference internal" href="reference/api/server/firefly.server.startFireflyServer.html#firefly.server.startFireflyServer" title="firefly.server.startFireflyServer"><code class="xref py py-func docutils literal notranslate"><span class="pre">firefly.server.startFireflyServer()</span></code></a>
+see the <a class="reference internal" href="reference/api/api.html#server-api"><span class="std std-ref">documentation</span></a> for <code class="xref py py-func docutils literal notranslate"><span class="pre">firefly.server.startFireflyServer()</span></code>
 for details.
 The stream quality will degrade to ensure the target FPS  is achieved.</p>
 </section>
 <section id="vr-support">
-<h2>VR support<a class="headerlink" href="#vr-support" title="Permalink to this headline">¶</a></h2>
+<h2>VR support<a class="headerlink" href="#vr-support" title="Permalink to this headline"></a></h2>
 <p>There is limited Google cardboard support for VR.
 If a Flask server is being hosted on a computer, then visit
 <a class="reference external" href="http://localhost:xxxx/cardboard">&lt;local ip address&gt;:xxxx/cardboard</a> from

@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Particle controls &mdash; Firefly 3.0.0 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <title>Particle controls &mdash; Firefly 3.0.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
@@ -26,7 +28,8 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html"><img src="../_static/logo_banner.png" class="logo" alt="Logo"/>
+            <a href="../index.html">
+            <img src="../_static/logo_banner.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -110,13 +113,13 @@
 }
 </style>
 <section id="particle-controls">
-<h1>Particle controls<a class="headerlink" href="#particle-controls" title="Permalink to this headline">¶</a></h1>
+<h1>Particle controls<a class="headerlink" href="#particle-controls" title="Permalink to this headline"></a></h1>
 <img alt="../_images/particle_controls.png" src="../_images/particle_controls.png" />
 <p>Upon startup this sub-panel will be collapsed.
 Click on the downward facing arrow on the right side to expand
 the sub-panel, as shown in the image above.</p>
 <section id="collapsed-view">
-<h2>Collapsed view<a class="headerlink" href="#collapsed-view" title="Permalink to this headline">¶</a></h2>
+<h2>Collapsed view<a class="headerlink" href="#collapsed-view" title="Permalink to this headline"></a></h2>
 <p>Each particle type will receive it own sub-panel.
 In the example above, we show two different particle types:
 Gas and Stars.
@@ -131,7 +134,7 @@ you can expand the sub-panel to review additional controls
 (as shown for Gas above).</p>
 </section>
 <section id="n">
-<h2>N<a class="headerlink" href="#n" title="Permalink to this headline">¶</a></h2>
+<h2>N<a class="headerlink" href="#n" title="Permalink to this headline"></a></h2>
 <p>The first item in the expanded sub-panel is a slider and text entry box
 for “N”, which controls the number of particles that will be drawn.
 (The default is to draw all, and you can slide this to
@@ -140,7 +143,7 @@ This is analogous to the global Decimation slider,
 but works on each particle separately.</p>
 </section>
 <section id="plot-velocities">
-<h2>Plot Velocities<a class="headerlink" href="#plot-velocities" title="Permalink to this headline">¶</a></h2>
+<h2>Plot Velocities<a class="headerlink" href="#plot-velocities" title="Permalink to this headline"></a></h2>
 <p>If you provide velocities to Firefly,
 there will be a checkbox to “Plot Velocity Vectors.”
 If you click the checkbox, the points will be converted to lines
@@ -158,10 +161,10 @@ direction of the velocity vector).</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p><code class="code docutils literal notranslate"><span class="pre">&quot;Velocities&quot;</span></code> is a special field name, see <span class="xref std std-ref">field names</span>.</p>
-</aside>
+</div>
 </section>
 <section id="colormap">
-<h2>Colormap<a class="headerlink" href="#colormap" title="Permalink to this headline">¶</a></h2>
+<h2>Colormap<a class="headerlink" href="#colormap" title="Permalink to this headline"></a></h2>
 <p>If you choose to define fields in your data that are colormappable then
 there will be a Colormap section containing a checkbox, two dropdowns,
 and a <strong>two-handled</strong> slider bar with text input boxes.</p>
@@ -186,10 +189,10 @@ And the corresponding line in the
 <code class="code docutils literal notranslate"><span class="pre">Firefly/src/firefly/static/textures/colormap_names.json</span></code>.
 There is a Jupyter notebook in that directory as well which was
 used to create the colormap texture.</p>
-</aside>
+</div>
 </section>
 <section id="filters">
-<h2>Filters<a class="headerlink" href="#filters" title="Permalink to this headline">¶</a></h2>
+<h2>Filters<a class="headerlink" href="#filters" title="Permalink to this headline"></a></h2>
 <p>If you choose to define Filters when creating your data (see <a class="reference internal" href="../reference/api/api.html#api"><span class="std std-ref">API Reference</span></a>),
 you will also see a dropdown, slider <strong>with two handles</strong>, two text entry boxes.
 each of the filters you indicated, and an “Invert” checkbox.</p>

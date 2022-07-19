@@ -1,21 +1,23 @@
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Tutorial notebook: Managing multiple datasets with Firefly &mdash; Firefly 3.0.0 documentation</title><link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <title>Tutorial notebook: Managing multiple datasets with Firefly &mdash; Firefly 3.0.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  <script id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
-        <script type="text/x-mathjax-config">MathJax.Hub.Config({"tex2jax": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true, "ignoreClass": "tex2jax_ignore|mathjax_ignore|document", "processClass": "tex2jax_process|mathjax_process|math|output_area"}})</script>
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
@@ -28,7 +30,8 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../index.html"><img src="../_static/logo_banner.png" class="logo" alt="Logo"/>
+            <a href="../index.html">
+            <img src="../_static/logo_banner.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
@@ -416,11 +419,11 @@ don&#39;t have phil&#39;s colormaps
 </pre></div></div>
 </div>
 <section id="Tutorial-notebook:-Managing-multiple-datasets-with-Firefly">
-<h1>Tutorial notebook: Managing multiple datasets with Firefly<a class="headerlink" href="#Tutorial-notebook:-Managing-multiple-datasets-with-Firefly" title="Permalink to this headline">¶</a></h1>
+<h1>Tutorial notebook: Managing multiple datasets with Firefly<a class="headerlink" href="#Tutorial-notebook:-Managing-multiple-datasets-with-Firefly" title="Permalink to this headline"></a></h1>
 <p>There are two ways to manage multiple datasets with Firefly 1. listing multiple entries in startup.json 2. creating a “standalone” iteration of Firefly</p>
 <p>1 and 2 can be combined so that visitors to different “standalone” iterations of Firefly can select between different sets of multiple datasets using a dropdown see this example.</p>
 <section id="Editing-the-entries-of-startup.json">
-<h2>Editing the entries of <code class="docutils literal notranslate"><span class="pre">startup.json</span></code><a class="headerlink" href="#Editing-the-entries-of-startup.json" title="Permalink to this headline">¶</a></h2>
+<h2>Editing the entries of <code class="docutils literal notranslate"><span class="pre">startup.json</span></code><a class="headerlink" href="#Editing-the-entries-of-startup.json" title="Permalink to this headline"></a></h2>
 <p>When the Firefly webapp starts up it looks for a <code class="docutils literal notranslate"><span class="pre">firefly/static/data/startup.json</span></code> file to tell it which dataset to display. If only a single entry is present then it will automatically begin loading that dataset. If multiple entries are listed then it will present the user with a dropdown box to select which dataset to load. See the documentation for managing multiple datasets for how to format the <code class="docutils literal notranslate"><span class="pre">startup.json</span></code> file to list multiple entries manually. We provide a method of easily adding
 datasets to the <code class="docutils literal notranslate"><span class="pre">startup.json</span></code> file using the <code class="docutils literal notranslate"><span class="pre">write_startup</span></code> keyword argument of the <code class="docutils literal notranslate"><span class="pre">firefly.data_reader.Reader</span></code> (sub-)class(es).</p>
 <div class="nbinput nblast docutils container">
@@ -531,7 +534,7 @@ Outputting: PGroup_1 - 8000/8000 particles - 2 tracked fields
 <p>Notice that the “NullData” <code class="docutils literal notranslate"><span class="pre">JSONdir</span></code> is not listed because we set <code class="docutils literal notranslate"><span class="pre">write_startup=False</span></code>.</p>
 </section>
 <section id="Creating-a-standalone-iteration-of-Firefly">
-<h2>Creating a standalone iteration of Firefly<a class="headerlink" href="#Creating-a-standalone-iteration-of-Firefly" title="Permalink to this headline">¶</a></h2>
+<h2>Creating a standalone iteration of Firefly<a class="headerlink" href="#Creating-a-standalone-iteration-of-Firefly" title="Permalink to this headline"></a></h2>
 <p>You can copy the necessary Firefly source files by creating a <code class="docutils literal notranslate"><span class="pre">Reader</span></code> object containing your data and using the <code class="docutils literal notranslate"><span class="pre">copyFireflySourceToTarget</span></code>. We’ve also included a script that will automatically create a new Github repository and enable GitHub pages so that your data can be visited by users over the internet via URL. For instructions on how to configure this feature and details for copying the Firefly source see the documentation for managing multiple datasets.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
