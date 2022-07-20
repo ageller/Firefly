@@ -206,6 +206,13 @@ Once the port is forwarded, simply navigate to `localhost:xxxx <http://localhost
 on your computer's browser and enjoy Firefly!
 
 .. note:: 
+    In general, HPC cluster environments are segregated into ``login'' nodes (whose computational resources are shared by many users at once) and ``compute'' nodes (whose computational resources are assigned to individual users using a queue system).
+    In this case, the researcher submits a request for an interactive job on a compute node.
+    Once assigned, the researcher then forwards the  port they intend to serve Firefly on from the login node to the compute node they were assigned.
+    Once on the compute node with a forwarded port, the researcher launches a Firefly server hosted on the cluster using the \code{firefly --method=flask} command from the terminal
+
+
+.. note:: 
 
     This same principle can be applied to expose a locally hosted version 
     of Firefly to users over the internet, visitable by anyone with your 

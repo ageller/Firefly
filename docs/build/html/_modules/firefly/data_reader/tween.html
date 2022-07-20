@@ -3,12 +3,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>firefly.data_reader.tween &mdash; Firefly 3.0.0 documentation</title><link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <title>firefly.data_reader.tween &mdash; Firefly 3.0.0 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/doctools.js"></script>
@@ -23,7 +25,8 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../../index.html"><img src="../../../_static/logo_banner.png" class="logo" alt="Logo"/>
+            <a href="../../../index.html">
+            <img src="../../../_static/logo_banner.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -233,6 +236,27 @@
         <span class="k">return</span> <span class="n">filename</span><span class="p">,</span><span class="n">write_to_json</span><span class="p">(</span>
             <span class="n">tween_params_dict</span><span class="p">,</span>
             <span class="n">filename</span> <span class="k">if</span> <span class="n">write_to_disk</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span> <span class="c1">## None-&gt; returns a string</span></div></div>
+
+
+<span class="k">def</span> <span class="nf">tweenOrbiter</span><span class="p">(</span><span class="n">radius</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span><span class="n">duration</span><span class="o">=</span><span class="mi">10</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Helper function to create tween parameters for a camera orbit</span>
+<span class="sd">        around the center.</span>
+
+<span class="sd">    :param radius: radius of the orbit, defaults to 1</span>
+<span class="sd">    :type radius: int, optional</span>
+<span class="sd">    :param duration: duration in seconds to complete a full orbit, defaults to 10</span>
+<span class="sd">    :type duration: int, optional</span>
+<span class="sd">    :return: a TweenParams object that can be attached to a reader.</span>
+<span class="sd">    :rtype: :class:`firefly.data_reader.TweenParams`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">thetas</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">360</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">xs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">thetas</span><span class="o">/</span><span class="mi">180</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span><span class="o">*</span><span class="n">radius</span>
+    <span class="n">zs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">thetas</span><span class="o">/</span><span class="mi">180</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span><span class="o">*</span><span class="n">radius</span>
+    <span class="n">coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">thetas</span><span class="o">.</span><span class="n">size</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+    <span class="n">coords</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">xs</span>
+    <span class="n">coords</span><span class="p">[:,</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">zs</span>
+
+    <span class="k">return</span> <span class="n">TweenParams</span><span class="p">(</span><span class="n">coords</span><span class="p">,</span><span class="n">duration</span><span class="o">=</span><span class="n">duration</span><span class="p">)</span>
 </pre></div>
 
            </div>

@@ -96,6 +96,46 @@
 </style>
 <section id="firefly-data-reader-simplereader">
 <h1>firefly.data_reader.SimpleReader<a class="headerlink" href="#firefly-data-reader-simplereader" title="Permalink to this headline"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="firefly.data_reader.SimpleReader">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firefly.data_reader.</span></span><span class="sig-name descname"><span class="pre">SimpleReader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path_to_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_to_disk</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extension</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.hdf5'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loud</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csv_sep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">','</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/firefly/data_reader/reader.html#SimpleReader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#firefly.data_reader.SimpleReader" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="firefly.data_reader.ArrayReader.html#firefly.data_reader.ArrayReader" title="firefly.data_reader.reader.ArrayReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">firefly.data_reader.reader.ArrayReader</span></code></a></p>
+<p>A wrapper to <a class="reference internal" href="firefly.data_reader.ArrayReader.html#firefly.data_reader.ArrayReader" title="firefly.data_reader.ArrayReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">firefly.data_reader.ArrayReader</span></code></a> that attempts to 
+flexibily open generically formatetd data with minimal interaction from the user.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="firefly.data_reader.SimpleReader.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path_to_data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_to_disk</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">extension</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.hdf5'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loud</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">csv_sep</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">','</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/firefly/data_reader/reader.html#SimpleReader.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#firefly.data_reader.SimpleReader.__init__" title="Permalink to this definition"></a></dt>
+<dd><p>A simple reader that will take as minimal input the path to a 
+(set of) .hdf5 file(s) and extract each top level group’s
+‘Coordinates’ or ‘x’,’y’,’z’ values. Coordinate data must saved either as an (N,3) array 
+or in 3 separate (N,) arrays indexed by x,y, and z.</p>
+<p>Keyword arguments are passed to the parent <a class="reference internal" href="../classes/firefly.data_reader.Reader.html#firefly.data_reader.Reader" title="firefly.data_reader.Reader"><code class="xref py py-class docutils literal notranslate"><span class="pre">Reader</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path_to_data</strong> (<em>str</em>) – path to .hdf5/csv file(s; can be a directory)</p></li>
+<li><p><strong>field_names</strong> (<em>list of strs</em>) – strings to try and extract from .hdf5 file. If file format is .csv then there must be a header row</p></li>
+<li><p><strong>extension</strong> (<em>str</em><em>, </em><em>optional</em>) – file extension to attempt to open. 
+Accepts only <code class="code docutils literal notranslate"><span class="pre">'.hdf5'</span></code> or <code class="code docutils literal notranslate"><span class="pre">'.csv'</span></code>, defaults to ‘.hdf5’</p></li>
+<li><p><strong>loud</strong> (<em>bool</em><em>, </em><em>optional</em>) – flag to print status information to the console, defaults to False</p></li>
+<li><p><strong>csv_sep</strong> (<em>str</em><em>, </em><em>optional</em>) – separator between values in the csv, defaults to ‘,’</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – if <code class="code docutils literal notranslate"><span class="pre">path_to_data</span></code> is not a directory or doesn’t contain
+<code class="code docutils literal notranslate"><span class="pre">extension</span></code></p></li>
+<li><p><strong>ValueError</strong> – if <code class="code docutils literal notranslate"><span class="pre">extension</span></code> is passed anything either 
+than <code class="code docutils literal notranslate"><span class="pre">'.hdf5'</span></code> or <code class="code docutils literal notranslate"><span class="pre">'.csv'</span></code></p></li>
+<li><p><strong>ValueError</strong> – if particle_groups is not None, extension = .csv, and 
+len(particle_groups) != len(detected filenames in path_to_data)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
 </section>
 
 

@@ -205,7 +205,7 @@ use the command:</p>
 <span class="n">killAllFireflyServers</span><span class="p">()</span>
 </pre></div>
 </div>
-<p>Note that the pid is accessible from the original <code class="xref py py-func docutils literal notranslate"><span class="pre">spawnFireflyServer()</span></code>
+<p>Note that the pid is accessible from the original <a class="reference internal" href="reference/api/server/firefly.server.spawnFireflyServer.html#firefly.server.spawnFireflyServer" title="firefly.server.spawnFireflyServer"><code class="xref py py-func docutils literal notranslate"><span class="pre">spawnFireflyServer()</span></code></a>
 call but that processes in general do not like to be killed and may sometimes
 survive the targeted attempt on their life. It’s more reliable to indiscriminately
 kill any process that has a Firefly server process name (the default).</p>
@@ -221,7 +221,7 @@ consult the <a class="reference internal" href="reference/api/api.html#server-ap
 </div>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p><code class="xref py py-func docutils literal notranslate"><span class="pre">copyFireflySourceToTarget()</span></code> takes an optional boolean
+<p><a class="reference internal" href="reference/api/classes/firefly.data_reader.Reader.html#firefly.data_reader.Reader.copyFireflySourceToTarget" title="firefly.data_reader.Reader.copyFireflySourceToTarget"><code class="xref py py-func docutils literal notranslate"><span class="pre">copyFireflySourceToTarget()</span></code></a> takes an optional boolean
 keyword argument <code class="code docutils literal notranslate"><span class="pre">init_gh_pages</span></code> that will attempt to
 create a new repository and enable GitHub pages automatically.
 See <a class="reference internal" href="data_reader/multiple_datasets.html#multiple-datasets"><span class="std std-ref">Managing multiple datasets</span></a> for details.</p>
@@ -272,6 +272,13 @@ port-forwarding.</p>
 </div>
 <p>Once the port is forwarded, simply navigate to <a class="reference external" href="http://localhost:xxxx">localhost:xxxx</a>
 on your computer’s browser and enjoy Firefly!</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In general, HPC cluster environments are segregated into <a href="#id1"><span class="problematic" id="id2">``</span></a>login’’ nodes (whose computational resources are shared by many users at once) and <a href="#id3"><span class="problematic" id="id4">``</span></a>compute’’ nodes (whose computational resources are assigned to individual users using a queue system).
+In this case, the researcher submits a request for an interactive job on a compute node.
+Once assigned, the researcher then forwards the  port they intend to serve Firefly on from the login node to the compute node they were assigned.
+Once on the compute node with a forwarded port, the researcher launches a Firefly server hosted on the cluster using the code{firefly –method=flask} command from the terminal</p>
+</div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>This same principle can be applied to expose a locally hosted version

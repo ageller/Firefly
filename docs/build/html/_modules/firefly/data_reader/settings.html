@@ -3,12 +3,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>firefly.data_reader.settings &mdash; Firefly 3.0.0 documentation</title><link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <title>firefly.data_reader.settings &mdash; Firefly 3.0.0 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/doctools.js"></script>
@@ -23,7 +25,8 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../../index.html"><img src="../../../_static/logo_banner.png" class="logo" alt="Logo"/>
+            <a href="../../../index.html">
+            <img src="../../../_static/logo_banner.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -72,6 +75,7 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="kn">import</span> <span class="nn">os</span> 
+<span class="kn">import</span> <span class="nn">inspect</span>
 
 <span class="kn">from</span> <span class="nn">.json_utils</span> <span class="kn">import</span> <span class="n">write_to_json</span><span class="p">,</span><span class="n">load_from_json</span>
 
@@ -124,7 +128,9 @@
                     <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">obj</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                         <span class="k">return</span> <span class="n">attr</span>
 
-        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;Invalid settings key </span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="n">key</span><span class="p">)</span>
+        <span class="n">closest_key</span><span class="p">,</span><span class="n">_</span> <span class="o">=</span> <span class="n">find_closest_string</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> 
+        
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;Invalid settings key: &#39;</span><span class="si">%s</span><span class="s2">&#39; (did you mean &#39;</span><span class="si">%s</span><span class="s2">&#39;?)&quot;</span><span class="o">%</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="n">closest_key</span><span class="p">))</span>
         
 <div class="viewcode-block" id="Settings.printKeys"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Settings.html#firefly.data_reader.Settings.printKeys">[docs]</a>    <span class="k">def</span> <span class="nf">printKeys</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -153,10 +159,7 @@
 
 <div class="viewcode-block" id="Settings.keys"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Settings.html#firefly.data_reader.Settings.keys">[docs]</a>    <span class="k">def</span> <span class="nf">keys</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Returns a list of keys for all the different settings sub-dictionaries &quot;&quot;&quot;</span>
-        <span class="n">this_keys</span> <span class="o">=</span> <span class="p">[]</span> 
-        <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="k">if</span> <span class="s1">&#39;_settings&#39;</span> <span class="ow">in</span> <span class="n">attr</span><span class="p">:</span>
-                <span class="n">this_keys</span> <span class="o">+=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">attr</span><span class="p">)</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">this_keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">valid_settings</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">this_keys</span></div>
 
 <div class="viewcode-block" id="Settings.__init__"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Settings.html#firefly.data_reader.Settings.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
@@ -168,10 +171,6 @@
 <span class="sd">            accepts passthrough kwargs from:</span>
 
 <span class="sd">            :func:`firefly.data_reader.Settings.window_settings`</span>
-
-<span class="sd">            :func:`firefly.data_reader.Settings.UI_settings`</span>
-
-<span class="sd">            :func:`firefly.data_reader.Settings.particle_UI_settings`</span>
 
 <span class="sd">            :func:`firefly.data_reader.Settings.camera_settings`</span>
 
@@ -194,11 +193,9 @@
 
         <span class="c1">## initialize default settings and apply any passed kwargs</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">startup_settings</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">UI_settings</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">window_settings</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">camera_settings</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">particle_startup_settings</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">particle_UI_settings</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">particle_velocity_settings</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">particle_filter_settings</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">particle_colormap_settings</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
@@ -255,7 +252,7 @@
 <span class="sd">            defaults to False</span>
 <span class="sd">        :type startFly: bool, optional</span>
 <span class="sd">        :param startTween: flag to initialize the Firefly scene in tween mode, </span>
-<span class="sd">            requires a valid tweenParams.json file to be present in the JSONdir,</span>
+<span class="sd">            requires a valid tweenParams.json file to be present in the datadir,</span>
 <span class="sd">            defaults to False</span>
 <span class="sd">        :type startTween: bool, optional</span>
 <span class="sd">        :param startVR: flag to initialize Firefly in VR mode, defaults to False</span>
@@ -281,48 +278,6 @@
             <span class="s1">&#39;maxPointScale&#39;</span><span class="p">:</span><span class="n">maxPointScale</span><span class="p">,</span>
         <span class="p">}</span>
 
-<div class="viewcode-block" id="Settings.UI_settings"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Settings.html#firefly.data_reader.Settings.UI_settings">[docs]</a>    <span class="k">def</span> <span class="nf">UI_settings</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">UI</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">UIfullscreen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">UIsnapshot</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">UIreset</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">UIsavePreset</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">UIloadNewData</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">UIcameraControls</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">UIdecimation</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">extra</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Flags for enabling different elements of the UI</span>
-
-<span class="sd">        :param UI: flag to show the UI as a whole, defaults to True</span>
-<span class="sd">        :type UI: bool, optional</span>
-<span class="sd">        :param UIfullscreen: flag to show the fullscreen button, defaults to True</span>
-<span class="sd">        :type UIfullscreen: bool, optional</span>
-<span class="sd">        :param UIsnapshot: flag to show the screenshot button, defaults to True</span>
-<span class="sd">        :type UIsnapshot: bool, optional</span>
-<span class="sd">        :param UIreset: flag to show the &quot;Default Settings&quot; button, defaults to True</span>
-<span class="sd">        :type UIreset: bool, optional</span>
-<span class="sd">        :param UIsavePreset: flag to show the &quot;Save Settings&quot; button, defaults to True</span>
-<span class="sd">        :type UIsavePreset: bool, optional</span>
-<span class="sd">        :param UIloadNewData: flag to show the &quot;Load Data&quot; button, defaults to True</span>
-<span class="sd">        :type UIloadNewData: bool, optional</span>
-<span class="sd">        :param UIcameraControls: flag to show the camera controls pane, defaults to True</span>
-<span class="sd">        :type UIcameraControls: bool, optional</span>
-<span class="sd">        :param UIdecimation: flag to show the decimation slider, defaults to True</span>
-<span class="sd">        :type UIdecimation: bool, optional</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">__UI_settings</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s1">&#39;UI&#39;</span><span class="p">:</span><span class="n">UI</span><span class="p">,</span> 
-            <span class="s1">&#39;UIfullscreen&#39;</span><span class="p">:</span><span class="n">UIfullscreen</span><span class="p">,</span> 
-            <span class="s1">&#39;UIsnapshot&#39;</span><span class="p">:</span><span class="n">UIsnapshot</span><span class="p">,</span> 
-            <span class="s1">&#39;UIreset&#39;</span><span class="p">:</span><span class="n">UIreset</span><span class="p">,</span> 
-            <span class="s1">&#39;UIsavePreset&#39;</span><span class="p">:</span><span class="n">UIsavePreset</span><span class="p">,</span> 
-            <span class="s1">&#39;UIloadNewData&#39;</span><span class="p">:</span><span class="n">UIloadNewData</span><span class="p">,</span> 
-            <span class="s1">&#39;UIcameraControls&#39;</span><span class="p">:</span><span class="n">UIcameraControls</span><span class="p">,</span> 
-            <span class="s1">&#39;UIdecimation&#39;</span><span class="p">:</span><span class="n">UIdecimation</span><span class="p">,</span> 
-        <span class="p">}</span></div>
-
 <div class="viewcode-block" id="Settings.window_settings"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Settings.html#firefly.data_reader.Settings.window_settings">[docs]</a>    <span class="k">def</span> <span class="nf">window_settings</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Firefly&#39;</span><span class="p">,</span>
@@ -330,6 +285,8 @@
         <span class="n">showFPS</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">showMemoryUsage</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">memoryLimit</span><span class="o">=</span><span class="mf">2e9</span><span class="p">,</span>
+        <span class="n">GUIExcludeList</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">collapseGUIAtStart</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">extra</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Settings that affect the browser window</span>
 
@@ -351,6 +308,11 @@
 <span class="sd">            the memory usage directly, otherwise memory usage is only estimated, </span>
 <span class="sd">            defaults to 2e9 </span>
 <span class="sd">        :type memoryLimit: float, optional</span>
+<span class="sd">        :param GUIExcludeList: list of string GUI element URLs (e.g. &#39;main/general/data/decimation&#39;) </span>
+<span class="sd">            to exclude from the GUI. Case insensitive. If None then an empty list, defaults to None</span>
+<span class="sd">        :type GUIExcludeList: list, optional</span>
+<span class="sd">        :param collapseGUIAtStart: flag to collapse the GUI when the app starts up, defaults to True</span>
+<span class="sd">        :type collapseGUIAtStart: bool, optional</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">__window_settings</span> <span class="o">=</span> <span class="p">{</span>
@@ -362,6 +324,8 @@
             <span class="s1">&#39;showFPS&#39;</span><span class="p">:</span><span class="n">showFPS</span><span class="p">,</span>
             <span class="s1">&#39;showMemoryUsage&#39;</span><span class="p">:</span><span class="n">showMemoryUsage</span><span class="p">,</span>
             <span class="s1">&#39;memoryLimit&#39;</span><span class="p">:</span><span class="n">memoryLimit</span><span class="p">,</span>
+            <span class="s1">&#39;GUIExcludeList&#39;</span><span class="p">:</span><span class="n">GUIExcludeList</span> <span class="k">if</span> <span class="n">GUIExcludeList</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[],</span>
+            <span class="s1">&#39;collapseGUIAtStart&#39;</span><span class="p">:</span><span class="n">collapseGUIAtStart</span>
         <span class="p">}</span></div>
 
 <div class="viewcode-block" id="Settings.camera_settings"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Settings.html#firefly.data_reader.Settings.camera_settings">[docs]</a>    <span class="k">def</span> <span class="nf">camera_settings</span><span class="p">(</span>
@@ -402,15 +366,15 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">maxVrange</span><span class="o">=</span><span class="mf">2000.</span><span class="p">,</span>
         <span class="n">startFly</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">friction</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+        <span class="n">friction</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">stereo</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">stereoSep</span><span class="o">=</span><span class="mf">0.06</span><span class="p">,</span>
+        <span class="n">stereoSep</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">decimate</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">start_tween</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">CDmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-        <span class="n">CDmax</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-        <span class="n">CDlognorm</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-        <span class="n">columnDensity</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">CDmin</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">CDmax</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">CDlognorm</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">columnDensity</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">extra</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;General settings that affect the state app state</span>
 
@@ -439,7 +403,7 @@
 <span class="sd">            This is a single value (not a dict), defaults to None</span>
 <span class="sd">        :type decimate: int, optional</span>
 <span class="sd">        :param start_tween: flag to initialize the Firefly scene in tween mode, </span>
-<span class="sd">            requires a valid tweenParams.json file to be present in the JSONdir,</span>
+<span class="sd">            requires a valid tweenParams.json file to be present in the datadir,</span>
 <span class="sd">            defaults to False</span>
 <span class="sd">        :type start_tween: bool, optional</span>
 <span class="sd">        :param CDmin: bottom of the renormalization for the experimental column density</span>
@@ -521,36 +485,6 @@
             <span class="s1">&#39;sizeMult&#39;</span><span class="p">:</span><span class="nb">dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">sizeMult</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">sizeMult</span><span class="p">,</span>
             <span class="s1">&#39;showParts&#39;</span><span class="p">:</span><span class="nb">dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">showParts</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">showParts</span><span class="p">,</span>
             <span class="s1">&#39;radiusVariable&#39;</span><span class="p">:</span><span class="nb">dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">radiusVariable</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">radiusVariable</span>
-        <span class="p">}</span></div>
-
-<div class="viewcode-block" id="Settings.particle_UI_settings"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Settings.html#firefly.data_reader.Settings.particle_UI_settings">[docs]</a>    <span class="k">def</span> <span class="nf">particle_UI_settings</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">UIparticle</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">UIdropdown</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">UIcolorPicker</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">extra</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Flags that control how the UI for each particle group looks like</span>
-
-<span class="sd">        :param UIparticle: do you want to show the particles </span>
-<span class="sd">            in the user interface.</span>
-<span class="sd">            This is a dict with keys of the particle UInames mapped to bools,</span>
-<span class="sd">            defaults to dict([(UIname,True) for UIname in UInames])</span>
-<span class="sd">        :type UIparticle: dict of UIname:bool, optional</span>
-<span class="sd">        :param UIdropdown: do you want to enable the dropdown menus for </span>
-<span class="sd">               particles in the user interface.</span>
-<span class="sd">               This is a dict with keys of the particle UInames mapped to bools,</span>
-<span class="sd">               defaults to dict([(UIname,True) for UIname in UInames])</span>
-<span class="sd">        :type UIdropdown: dict of UIname:bool, optional</span>
-<span class="sd">        :param UIcolorPicker: do you want to allow the user to change the color.</span>
-<span class="sd">               This is a dict with keys of the particle UInames mapped to bools,</span>
-<span class="sd">               defaults to dict([(UIname,True) for UIname in UInames])</span>
-<span class="sd">        :type UIcolorPicker: dict of UIname:bool, optional</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">__particle_UI_settings</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s1">&#39;UIparticle&#39;</span><span class="p">:</span><span class="nb">dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">UIparticle</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">UIparticle</span><span class="p">,</span>
-            <span class="s1">&#39;UIdropdown&#39;</span><span class="p">:</span><span class="nb">dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">UIdropdown</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">UIdropdown</span><span class="p">,</span>
-            <span class="s1">&#39;UIcolorPicker&#39;</span><span class="p">:</span><span class="nb">dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">UIcolorPicker</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">UIcolorPicker</span><span class="p">,</span>
         <span class="p">}</span></div>
     
 <div class="viewcode-block" id="Settings.particle_velocity_settings"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Settings.html#firefly.data_reader.Settings.particle_velocity_settings">[docs]</a>    <span class="k">def</span> <span class="nf">particle_velocity_settings</span><span class="p">(</span>
@@ -644,6 +578,8 @@
         <span class="n">colormap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">colormapVariable</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">showColormap</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">depthTest</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">blendingMode</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">extra</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Settings that will define the initial values of the colormaps in the particle UI panes.</span>
 
@@ -675,6 +611,16 @@
 <span class="sd">            This is a dict with keys of the particle UInames mapped to bools,</span>
 <span class="sd">            (e.g. {&#39;Gas&#39;:False, &#39;Stars&#39;:False}), defaults to False</span>
 <span class="sd">        :type showColormap: dict of UIname:bool, optional</span>
+<span class="sd">        :param blendingMode: blending mode for each particle group,</span>
+<span class="sd">            options are: &#39;additive&#39;,&#39;normal&#39;,&#39;subtractive&#39;,&#39;multiplicative&#39;,&#39;none&#39;.</span>
+<span class="sd">            This is a dict with keys of the particle UInames mapped to strs,</span>
+<span class="sd">            (e.g. {&#39;Gas&#39;:&#39;additive&#39;, &#39;Stars&#39;:&#39;additive&#39;}), defaults to &#39;additive&#39;</span>
+<span class="sd">        :type blendingMode: dict of UIname:str, optional</span>
+<span class="sd">        :param depthTest: flags for whether the depth checkbox should </span>
+<span class="sd">            be checked at startup. </span>
+<span class="sd">            This is a dict with keys of the particle UInames mapped to bools,</span>
+<span class="sd">            (e.g. {&#39;Gas&#39;:False, &#39;Stars&#39;:False}), defaults to False</span>
+<span class="sd">        :type depthTest: dict of UIname:bool, optional</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1">## settings that will define the initial values of the /colormap/ in the particle UI panes</span>
@@ -685,6 +631,8 @@
             <span class="s1">&#39;colormap&#39;</span><span class="p">:</span><span class="nb">dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">colormap</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">colormap</span><span class="p">,</span> 
             <span class="s1">&#39;colormapVariable&#39;</span><span class="p">:</span><span class="nb">dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">colormapVariable</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">colormapVariable</span><span class="p">,</span>  
             <span class="s1">&#39;showColormap&#39;</span><span class="p">:</span><span class="nb">dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">showColormap</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">showColormap</span><span class="p">,</span> 
+            <span class="s1">&#39;blendingMode&#39;</span><span class="p">:</span><span class="nb">dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">blendingMode</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">blendingMode</span><span class="p">,</span> 
+            <span class="s1">&#39;depthTest&#39;</span><span class="p">:</span><span class="nb">dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">depthTest</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">depthTest</span><span class="p">,</span> 
         <span class="p">}</span></div>
 
 
@@ -701,7 +649,6 @@
 
         <span class="c1">## transfer keys from particle group</span>
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span>
-            <span class="s1">&#39;UIparticle&#39;</span><span class="p">,</span><span class="s1">&#39;UIdropdown&#39;</span><span class="p">,</span><span class="s1">&#39;UIcolorPicker&#39;</span><span class="p">,</span>
             <span class="s1">&#39;color&#39;</span><span class="p">,</span><span class="s1">&#39;sizeMult&#39;</span><span class="p">,</span><span class="s1">&#39;showParts&#39;</span><span class="p">,</span><span class="s1">&#39;plotNmax&#39;</span><span class="p">,</span><span class="s1">&#39;radiusVariable&#39;</span><span class="p">,</span>
             <span class="s1">&#39;filterVals&#39;</span><span class="p">,</span><span class="s1">&#39;filterLims&#39;</span><span class="p">,</span><span class="s1">&#39;invertFilter&#39;</span><span class="p">,</span>
             <span class="s1">&#39;colormapVals&#39;</span><span class="p">,</span><span class="s1">&#39;colormapLims&#39;</span><span class="p">,</span>
@@ -709,6 +656,27 @@
             <span class="s1">&#39;animateVel&#39;</span><span class="p">,</span><span class="s1">&#39;animateVelDt&#39;</span><span class="p">,</span><span class="s1">&#39;animateVelTmax&#39;</span><span class="p">,</span>
             <span class="s1">&#39;colormap&#39;</span><span class="p">,</span><span class="s1">&#39;colormapVariable&#39;</span><span class="p">,</span><span class="s1">&#39;showColormap&#39;</span><span class="p">]:</span>
             <span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">particleGroup</span><span class="o">.</span><span class="n">UIname</span><span class="p">]</span><span class="o">=</span><span class="n">particleGroup</span><span class="o">.</span><span class="n">settings_default</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        
+        <span class="k">if</span> <span class="n">particleGroup</span><span class="o">.</span><span class="n">settings_default</span><span class="p">[</span><span class="s1">&#39;GUIExcludeList&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;GUIExcludeList&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="p">[</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">particleGroup</span><span class="o">.</span><span class="n">UIname</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> 
+                <span class="n">particleGroup</span><span class="o">.</span><span class="n">settings_default</span><span class="p">[</span><span class="s1">&#39;GUIExcludeList&#39;</span><span class="p">]]</span>
+
+        <span class="c1">## replace colormapVariable and radiusVariable values</span>
+        <span class="c1">##  with indices of field </span>
+        <span class="c1">##  (if passed as a string) </span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">flags</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+            <span class="p">[</span><span class="s1">&#39;colormapVariable&#39;</span><span class="p">,</span><span class="s1">&#39;radiusVariable&#39;</span><span class="p">],</span>
+            <span class="p">[</span><span class="n">particleGroup</span><span class="o">.</span><span class="n">field_colormap_flags</span><span class="p">,</span><span class="n">particleGroup</span><span class="o">.</span><span class="n">field_radius_flags</span><span class="p">]):</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">particleGroup</span><span class="o">.</span><span class="n">settings_default</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span> 
+                <span class="n">value</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="n">field_name</span> <span class="k">for</span> <span class="n">field_name</span><span class="p">,</span><span class="n">flag</span> <span class="ow">in</span> 
+                    <span class="nb">zip</span><span class="p">(</span><span class="n">particleGroup</span><span class="o">.</span><span class="n">field_names</span><span class="p">,</span><span class="n">flags</span><span class="p">)</span> <span class="k">if</span> <span class="n">flag</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                <span class="c1">## offset by 1 if doing radiusVariable because</span>
+                <span class="c1">##  0 corresponds to no scaling</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;radiusVariable&#39;</span><span class="p">:</span> <span class="n">value</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">][</span><span class="n">particleGroup</span><span class="o">.</span><span class="n">UIname</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
         
         <span class="c1">## and link the other way, this Settings instance to the particleGroup</span>
         <span class="n">particleGroup</span><span class="o">.</span><span class="n">attached_settings</span> <span class="o">=</span> <span class="bp">self</span></div>
@@ -733,29 +701,54 @@
                     <span class="c1">## copy the keys over</span>
                     <span class="n">all_settings_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
 
+        <span class="k">if</span> <span class="p">(</span> <span class="n">all_settings_dict</span><span class="p">[</span><span class="s1">&#39;GUIExcludeList&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> 
+            <span class="nb">len</span><span class="p">(</span><span class="n">all_settings_dict</span><span class="p">[</span><span class="s1">&#39;GUIExcludeList&#39;</span><span class="p">])</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">):</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">validateGUIExcludeList</span><span class="p">(</span><span class="n">all_settings_dict</span><span class="p">[</span><span class="s1">&#39;GUIExcludeList&#39;</span><span class="p">])</span>
+        
+        <span class="c1">## convert colormap strings to texture index</span>
+        <span class="c1">##  (if passed as a string) </span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">value</span> <span class="ow">in</span> <span class="n">all_settings_dict</span><span class="p">[</span><span class="s1">&#39;colormap&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span> 
+                <span class="n">value</span> <span class="o">=</span> <span class="p">(</span><span class="n">colormaps</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">+</span><span class="mf">0.5</span><span class="p">)</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">colormaps</span><span class="p">)</span>
+                <span class="n">all_settings_dict</span><span class="p">[</span><span class="s1">&#39;colormap&#39;</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
         <span class="k">return</span> <span class="n">all_settings_dict</span></div>
+    
+    <span class="k">def</span> <span class="nf">validateGUIExcludeList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">GUIExcludeList</span><span class="p">):</span>
+        <span class="n">pkey_particleGUIurlss</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">pkey</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;sizeMult&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">pkey_particleGUIurls</span> <span class="o">=</span> <span class="p">[</span><span class="n">url</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;main/particles&#39;</span><span class="p">,</span><span class="n">pkey</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">particle_GUIurls</span><span class="p">]</span><span class="o">+</span><span class="p">[</span><span class="n">pkey</span><span class="p">]</span>
+        <span class="n">pkey_particleGUIurlss</span> <span class="o">+=</span> <span class="n">pkey_particleGUIurls</span>
+
+        <span class="k">for</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">GUIExcludeList</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">url</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">GUIurls</span><span class="p">:</span> <span class="k">continue</span>
+            <span class="k">elif</span> <span class="n">url</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">pkey_particleGUIurlss</span><span class="p">:</span> <span class="k">continue</span>
+            <span class="k">else</span><span class="p">:</span> 
+                <span class="n">closest_url</span><span class="p">,</span><span class="n">_</span> <span class="o">=</span> <span class="n">find_closest_string</span><span class="p">(</span><span class="n">url</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span><span class="n">GUIurls</span><span class="o">+</span><span class="n">pkey_particleGUIurlss</span><span class="p">)</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid GUIurl: &#39;</span><span class="si">{</span><span class="n">url</span><span class="si">}</span><span class="s2">&#39; (did you mean &#39;</span><span class="si">{</span><span class="n">closest_url</span><span class="si">}</span><span class="s2">&#39;?)&quot;</span><span class="p">)</span>
+            
 
 <div class="viewcode-block" id="Settings.outputToJSON"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Settings.html#firefly.data_reader.Settings.outputToJSON">[docs]</a>    <span class="k">def</span> <span class="nf">outputToJSON</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">JSONdir</span><span class="p">,</span>
-        <span class="n">JSON_prefix</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+        <span class="n">datadir</span><span class="p">,</span>
+        <span class="n">file_prefix</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
         <span class="n">filename</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">loud</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">write_to_disk</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">not_reader</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Saves the current settings to a JSON file.</span>
 
-<span class="sd">        :param JSONdir: the sub-directory that will contain your JSON files, relative</span>
-<span class="sd">            to your :code:`$HOME directory`. , defaults to :code:`$HOME/&lt;JSON_prefix&gt;`</span>
-<span class="sd">        :type JSONdir: str, optional</span>
-<span class="sd">        :param JSON_prefix: Prefix for any :code:`.json` files created, :code:`.json` files will be of the format:</span>
-<span class="sd">            :code:`&lt;JSON_prefix&gt;&lt;filename&gt;.json`, defaults to &#39;Data&#39;</span>
-<span class="sd">        :type JSON_prefix: str, optional</span>
+<span class="sd">        :param datadir: the sub-directory that will contain your JSON files, relative</span>
+<span class="sd">            to your :code:`$HOME directory`. , defaults to :code:`$HOME/&lt;file_prefix&gt;`</span>
+<span class="sd">        :type datadir: str, optional</span>
+<span class="sd">        :param file_prefix: Prefix for any :code:`.json` files created, :code:`.json` files will be of the format:</span>
+<span class="sd">            :code:`&lt;file_prefix&gt;&lt;filename&gt;.json`, defaults to &#39;Data&#39;</span>
+<span class="sd">        :type file_prefix: str, optional</span>
 <span class="sd">        :param filename: name of settings :code:`.json` file,</span>
 <span class="sd">            defaults to self.settings_filename</span>
 <span class="sd">        :type filename: str, optional</span>
-<span class="sd">        :param JSON_prefix: string that is prepended to filename, defaults to &#39;&#39;</span>
-<span class="sd">        :type JSON_prefix: str, optional</span>
+<span class="sd">        :param file_prefix: string that is prepended to filename, defaults to &#39;&#39;</span>
+<span class="sd">        :type file_prefix: str, optional</span>
 <span class="sd">        :param loud: flag to print status information to the console, defaults to True</span>
 <span class="sd">        :type loud: bool, optional</span>
 <span class="sd">        :param write_to_disk: flag that controls whether data is saved to disk (:code:`True`)</span>
@@ -770,7 +763,7 @@
         
         <span class="c1">## determine where we&#39;re saving the file</span>
         <span class="n">filename</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings_filename</span> <span class="k">if</span> <span class="n">filename</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">filename</span>
-        <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">JSONdir</span><span class="p">,</span><span class="n">JSON_prefix</span><span class="o">+</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">datadir</span><span class="p">,</span><span class="n">file_prefix</span><span class="o">+</span><span class="n">filename</span><span class="p">)</span>
 
         <span class="c1">## export settings to a dictionary</span>
         <span class="n">all_settings_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">outputToDict</span><span class="p">()</span>
@@ -813,6 +806,84 @@
                     <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">],</span><span class="s1">&#39;--&gt;&#39;</span><span class="p">,</span><span class="n">settings_dict</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
 
             <span class="bp">self</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">=</span><span class="n">settings_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span></div></div>
+
+<span class="k">def</span> <span class="nf">find_closest_string</span><span class="p">(</span><span class="n">string</span><span class="p">,</span><span class="n">string_list</span><span class="p">):</span>
+    <span class="n">min_dist</span> <span class="o">=</span> <span class="mf">1e10</span>
+    <span class="n">closest_key</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="k">for</span> <span class="n">real_string</span> <span class="ow">in</span> <span class="n">string_list</span><span class="p">:</span>
+        <span class="n">rkset</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">char</span> <span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="n">real_string</span><span class="o">.</span><span class="n">lower</span><span class="p">()])</span>
+        <span class="n">kset</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">char</span> <span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="n">string</span><span class="o">.</span><span class="n">lower</span><span class="p">()])</span>
+        <span class="n">dist</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">rkset</span><span class="o">-</span><span class="n">kset</span><span class="p">),</span><span class="nb">len</span><span class="p">(</span><span class="n">kset</span><span class="o">-</span><span class="n">rkset</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">dist</span> <span class="o">&lt;</span> <span class="n">min_dist</span><span class="p">:</span> 
+            <span class="n">closest_key</span> <span class="o">=</span> <span class="n">real_string</span>
+            <span class="n">min_dist</span> <span class="o">=</span> <span class="n">dist</span>
+    <span class="k">return</span> <span class="n">closest_key</span><span class="p">,</span><span class="n">dist</span>
+
+<span class="n">GUIurls</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;main&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;main/general&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;main/general/data&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;main/general/data/decimation&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;main/general/data/savePreset&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;main/general/data/reset&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;main/general/data/loadNewData&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;main/general/camera&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;main/general/camera/centerTextBoxes&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;main/general/camera/cameraTextBoxes&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;main/general/camera/rotationTextBoxes&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;main/general/camera/cameraButtons&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;main/general/camera/fullScreen&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;main/general/camera/snapshot&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;main/general/camera/cameraFriction&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;main/general/camera/stereoSep&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;main/general/projection&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;main/general/projection/columnDensityCheckBox&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;main/general/projection/columnDensityLogCheckBox&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;main/general/projection/columnDensitySelectCmap&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;main/general/projection/columnDensitySliders&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;colorbarContainer&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;FPSContainer&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;octreeLoadingBarContainer&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;main/particles&#39;</span><span class="p">]</span>
+<span class="n">GUIurls</span> <span class="o">=</span> <span class="p">[</span><span class="n">url</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">GUIurls</span><span class="p">]</span>
+
+<span class="n">particle_GUIurls</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s1">&#39;main/particles/onoff&#39;</span><span class="p">,</span> 
+    <span class="s1">&#39;main/particles/sizeSlider&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;main/particles/colorPicker&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;main/particles/dropdown&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;main/particles/dropdown/general&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;main/particles/dropdown/general/octreeClearMemory&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;main/particles/dropdown/general/blendingModeSelectors&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;main/particles/dropdown/general/maxSlider&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;main/particles/dropdown/general/octreeCameraNorm&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;main/particles/dropdown/general/radiusVariableSelector&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;main/particles/dropdown/velocities&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;main/particles/dropdown/velocities/velocityCheckBox&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;main/particles/dropdown/velocities/velocityWidthSlider&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;main/particles/dropdown/velocities/velocityGradientCheckBox&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;main/particles/dropdown/velocities/velocityAnimatorCheckBox&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;main/particles/dropdown/velocities/velocityAnimatorTextBoxes&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;main/particles/dropdown/colormap&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;main/particles/dropdown/colormap/colormapCheckBox&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;main/particles/dropdown/colormap/colormapSliders&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;main/particles/dropdown/filters&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;main/particles/dropdown/filters/filterSliders&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;main/particles/dropdown/filters/filterPlayback&#39;</span><span class="p">,</span>
+<span class="p">]</span>
+
+<span class="n">particle_GUIurls</span> <span class="o">=</span> <span class="p">[</span><span class="n">url</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">particle_GUIurls</span><span class="p">]</span>
+
+<span class="n">valid_settings</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([])</span>
+<span class="k">for</span> <span class="n">func</span> <span class="ow">in</span> <span class="n">Settings</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+    <span class="k">if</span> <span class="s1">&#39;settings&#39;</span> <span class="ow">in</span> <span class="n">func</span><span class="p">:</span> 
+        <span class="n">valid_settings</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">Settings</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">func</span><span class="p">])</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+<span class="n">valid_settings</span><span class="o">-=</span> <span class="nb">set</span><span class="p">([</span><span class="s1">&#39;self&#39;</span><span class="p">])</span>
+
+<span class="n">colormaps</span> <span class="o">=</span> <span class="n">load_from_json</span><span class="p">(</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span>
+        <span class="s1">&#39;../static/textures/colormap_names.json&#39;</span><span class="p">)))[</span><span class="s1">&#39;names&#39;</span><span class="p">]</span>
 </pre></div>
 
            </div>

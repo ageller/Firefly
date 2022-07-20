@@ -3,12 +3,14 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>firefly.data_reader.reader &mdash; Firefly 3.0.0 documentation</title><link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <title>firefly.data_reader.reader &mdash; Firefly 3.0.0 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../../../_static/js/html5shiv.min.js"></script>
   <![endif]-->
-  <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/doctools.js"></script>
@@ -23,7 +25,8 @@
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-            <a href="../../../index.html"><img src="../../../_static/logo_banner.png" class="logo" alt="Logo"/>
+            <a href="../../../index.html">
+            <img src="../../../_static/logo_banner.png" class="logo" alt="Logo"/>
           </a>
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
@@ -75,7 +78,7 @@
 <span class="kn">import</span> <span class="nn">requests</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
-<span class="kn">from</span> <span class="nn">.settings</span> <span class="kn">import</span> <span class="n">Settings</span>
+<span class="kn">from</span> <span class="nn">.settings</span> <span class="kn">import</span> <span class="n">Settings</span><span class="p">,</span><span class="n">valid_settings</span>
 <span class="kn">from</span> <span class="nn">.tween</span> <span class="kn">import</span> <span class="n">TweenParams</span>
 <span class="kn">from</span> <span class="nn">.particlegroup</span> <span class="kn">import</span> <span class="n">ParticleGroup</span>
 <span class="kn">from</span> <span class="nn">.json_utils</span> <span class="kn">import</span> <span class="n">write_to_json</span><span class="p">,</span><span class="n">load_from_json</span>
@@ -102,35 +105,36 @@
     
 <div class="viewcode-block" id="Reader.__init__"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Reader.html#firefly.data_reader.Reader.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">JSONdir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
-        <span class="n">JSON_prefix</span><span class="o">=</span><span class="s1">&#39;Data&#39;</span><span class="p">,</span>
-        <span class="n">clean_JSONdir</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">datadir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+        <span class="n">file_prefix</span><span class="o">=</span><span class="s1">&#39;Data&#39;</span><span class="p">,</span>
+        <span class="n">clean_datadir</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">max_npart_per_file</span><span class="o">=</span><span class="mi">10</span><span class="o">**</span><span class="mi">5</span><span class="p">,</span>
         <span class="n">write_startup</span><span class="o">=</span><span class="s1">&#39;append&#39;</span><span class="p">,</span>
         <span class="n">write_only_data</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">settings</span><span class="p">:</span><span class="n">Settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">tweenParams</span><span class="p">:</span><span class="n">TweenParams</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">tweenParams</span><span class="p">:</span><span class="n">TweenParams</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Base initialization method for Reader instances. A Reader will read data and produce</span>
 <span class="sd">            firefly compatible :code:`.json` files. </span>
 
-<span class="sd">        :param JSONdir: the sub-directory that will contain your JSON files, relative</span>
-<span class="sd">            to your :code:`$HOME directory`. , defaults to :code:`$HOME/&lt;JSON_prefix&gt;`</span>
-<span class="sd">        :type JSONdir: str, optional</span>
-<span class="sd">        :param JSON_prefix: Prefix for any :code:`.json` files created, :code:`.json` files will be of the format:</span>
-<span class="sd">            :code:`&lt;JSON_prefix&gt;&lt;parttype&gt;_%d.json`, defaults to &#39;Data&#39;</span>
-<span class="sd">        :type JSON_prefix: str, optional</span>
-<span class="sd">        :param clean_JSONdir: flag to delete all :code:`.json` files in</span>
-<span class="sd">            the :code:`JSONdir`. Strictly not necessary (since :code:`filenames.json` </span>
+<span class="sd">        :param datadir: the sub-directory that will contain your JSON files, relative</span>
+<span class="sd">            to your :code:`$HOME directory`. , defaults to :code:`$HOME/&lt;file_prefix&gt;`</span>
+<span class="sd">        :type datadir: str, optional</span>
+<span class="sd">        :param file_prefix: Prefix for any :code:`.json` files created, :code:`.json` files will be of the format:</span>
+<span class="sd">            :code:`&lt;file_prefix&gt;&lt;parttype&gt;_%d.json`, defaults to &#39;Data&#39;</span>
+<span class="sd">        :type file_prefix: str, optional</span>
+<span class="sd">        :param clean_datadir: flag to delete all :code:`.json` files in</span>
+<span class="sd">            the :code:`datadir`. Strictly not necessary (since :code:`filenames.json` </span>
 <span class="sd">            will be updated) but it is good to clean up after yourself., defaults to False</span>
-<span class="sd">        :type clean_JSONdir: bool, optional</span>
+<span class="sd">        :type clean_datadir: bool, optional</span>
 <span class="sd">        :param max_npart_per_file: the maximum number of particles saved per :code:`.json` file,</span>
 <span class="sd">            don&#39;t use too large a number or you will have trouble loading</span>
 <span class="sd">            the individual files in., defaults to 10**4</span>
 <span class="sd">        :type max_npart_per_file: int, optional</span>
 <span class="sd">        :param write_startup: flag for how to treat the :code:`startup.json` file. </span>
 <span class="sd">            Takes three values: </span>
-<span class="sd">            :code:`&#39;append&#39;`: appends :code:`JSONdir` to :code:`startup.json`, </span>
-<span class="sd">            :code:`True`: overwrites :code:`startup.json` with a single entry, :code:`JSONdir`, </span>
+<span class="sd">            :code:`&#39;append&#39;`: appends :code:`datadir` to :code:`startup.json`, </span>
+<span class="sd">            :code:`True`: overwrites :code:`startup.json` with a single entry, :code:`datadir`, </span>
 <span class="sd">            :code:`False`: does not alter :code:`startup.json`, </span>
 <span class="sd">            , defaults to &#39;append&#39;</span>
 <span class="sd">        :type write_startup: str/bool, optional</span>
@@ -158,21 +162,21 @@
                 <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span>
                 <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="s1">&#39;static&#39;</span><span class="p">,</span> <span class="s1">&#39;data&#39;</span><span class="p">))</span>
 
-        <span class="k">if</span> <span class="n">JSONdir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">datadir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1">## default to saving directly into the firefly directory</span>
-            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;JSONdir is None, defaulting to </span><span class="si">%s</span><span class="s2">/</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">static_data_dir</span><span class="p">,</span><span class="n">JSON_prefix</span><span class="p">))</span>
-            <span class="n">JSONdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;datadir is None, defaulting to </span><span class="si">%s</span><span class="s2">/</span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">static_data_dir</span><span class="p">,</span><span class="n">file_prefix</span><span class="p">))</span>
+            <span class="n">datadir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">static_data_dir</span><span class="p">,</span>
-                <span class="n">JSON_prefix</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">JSONdir</span><span class="p">[:</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="p">:</span>
-            <span class="c1">## JSONdir is a relative path. </span>
+                <span class="n">file_prefix</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">datadir</span><span class="p">[:</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="p">:</span>
+            <span class="c1">## datadir is a relative path. </span>
             <span class="c1">##  Let&#39;s assume they want to save w.r.t. their home directory?</span>
-            <span class="n">JSONdir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;HOME&#39;</span><span class="p">],</span><span class="n">JSONdir</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">JSONdir</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">:]</span><span class="o">==</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="p">:</span>
+            <span class="n">datadir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;HOME&#39;</span><span class="p">],</span><span class="n">datadir</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">datadir</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">:]</span><span class="o">==</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="p">:</span>
             <span class="c1">## get rid of the trailing &#39;/&#39; if it&#39;s there</span>
-            <span class="n">JSONdir</span><span class="o">=</span><span class="n">JSONdir</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">datadir</span><span class="o">=</span><span class="n">datadir</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">JSONdir</span> <span class="o">=</span> <span class="n">JSONdir</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">datadir</span> <span class="o">=</span> <span class="n">datadir</span>
 
         <span class="c1">## determine whether the directory we&#39;re saving the</span>
         <span class="c1">##  actual data in is a sub-directory of firefly/static/data.</span>
@@ -188,14 +192,16 @@
         <span class="c1">#set the maximum number of particles per data file</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">max_npart_per_file</span> <span class="o">=</span> <span class="n">max_npart_per_file</span>
 
-        <span class="c1">## JSON_prefix for the datafiles e.g. Data </span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">JSON_prefix</span> <span class="o">=</span> <span class="n">JSON_prefix</span>
+        <span class="c1">## file_prefix for the datafiles e.g. Data </span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_prefix</span> <span class="o">=</span> <span class="n">file_prefix</span>
 
-        <span class="c1">#remove existing data files in the JSONdir before adding more?</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">clean_JSONdir</span> <span class="o">=</span> <span class="n">clean_JSONdir</span> 
+        <span class="c1">#remove existing data files in the datadir before adding more?</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">clean_datadir</span> <span class="o">=</span> <span class="n">clean_datadir</span> 
     
         <span class="c1">## array of particle groups</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">particleGroups</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ParticleGroup</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="n">settings_kwargs</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">particlegroup_kwargs</span> <span class="o">=</span> <span class="n">split_kwargs</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">settings</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">!=</span> <span class="s1">&#39;Settings&#39;</span><span class="p">:</span>
@@ -203,9 +209,20 @@
                 <span class="c1">##  that use %load_ext autoreload</span>
                 <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Make sure you use a Settings instance to specify firefly settings.&quot;</span><span class="p">)</span>
         <span class="c1">## we&#39;ll use the default ones then</span>
-        <span class="k">else</span><span class="p">:</span> <span class="n">settings</span> <span class="o">=</span> <span class="n">Settings</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span> <span class="n">settings</span> <span class="o">=</span> <span class="n">Settings</span><span class="p">(</span><span class="o">**</span><span class="n">settings_kwargs</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">static_data_dir</span><span class="p">,</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">datadir</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">file_prefix</span><span class="o">+</span><span class="n">settings</span><span class="o">.</span><span class="n">settings_filename</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">clean_datadir</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings_path</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Importing existing settings from </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">settings_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">settings</span><span class="o">.</span><span class="n">loadFromJSON</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">settings_path</span><span class="p">,</span><span class="n">loud</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">settings</span> <span class="o">=</span> <span class="n">settings</span>
+
+        <span class="c1">## and apply the settings that were passed as keyword arguments</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">value</span> <span class="ow">in</span> <span class="n">settings_kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
 
         <span class="k">if</span> <span class="n">tweenParams</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">tweenParams</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">!=</span> <span class="s1">&#39;TweenParams&#39;</span><span class="p">:</span>
@@ -231,7 +248,7 @@
         <span class="c1">## split the JSON directory path into the folder </span>
         <span class="c1">##  that will actually contain the JSON files and the path leading </span>
         <span class="c1">##  to it. </span>
-        <span class="n">hard_data_path</span><span class="p">,</span><span class="n">short_data_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">JSONdir</span><span class="p">)</span>
+        <span class="n">hard_data_path</span><span class="p">,</span><span class="n">short_data_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">datadir</span><span class="p">)</span>
 
         <span class="c1">## determine if we will need to soft link this data or if </span>
         <span class="c1">##  it was saved to some kind of self.static_data_dir (whether this one</span>
@@ -242,11 +259,11 @@
                 <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">hard_data_path</span><span class="p">,</span><span class="s2">&quot;..&quot;</span><span class="p">,</span><span class="s2">&quot;..&quot;</span><span class="p">)):</span>
 
                 <span class="k">if</span> <span class="n">loud</span><span class="p">:</span>
-                    <span class="nb">print</span><span class="p">(</span> <span class="s2">&quot;JSONdir: </span><span class="si">{}</span><span class="s2"> -- &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">JSONdir</span><span class="p">)</span><span class="o">+</span>
+                    <span class="nb">print</span><span class="p">(</span> <span class="s2">&quot;datadir: </span><span class="si">{}</span><span class="s2"> -- &quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">datadir</span><span class="p">)</span><span class="o">+</span>
                         <span class="s2">&quot;is not a sub-directory of firefly/static/data. &quot;</span><span class="o">+</span>
                         <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">This may produce confusing or inoperable results. &quot;</span><span class="o">+</span>
                         <span class="s2">&quot;As such, we will create a symlink for you when you &quot;</span><span class="o">+</span>
-                        <span class="s2">&quot; dumpToJSON.&quot;</span><span class="p">)</span>
+                        <span class="s2">&quot;writeToDisk.&quot;</span><span class="p">)</span>
 
                 <span class="bp">self</span><span class="o">.</span><span class="n">needs_soft_link</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="k">break</span>
@@ -298,7 +315,7 @@
         <span class="n">loud</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">write_to_disk</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">symlink</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-        <span class="n">extension</span><span class="o">=</span><span class="s1">&#39;.ffly&#39;</span><span class="p">):</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Creates all the necessary JSON files to run firefly and ensures they are</span>
 <span class="sd">        properly linked and cross-referenced correctly using the</span>
 <span class="sd">        :func:`firefly.data_reader.Settings.outputToJSON` and</span>
@@ -312,7 +329,7 @@
 <span class="sd">        :param symlink: flag for whether a soft link should be created between where the data is stored on </span>
 <span class="sd">            disk and the :code:`self.static_data_dir` directory (:code:`True`) or whether it should be </span>
 <span class="sd">            saved directly to :code:`self.static_data_dir` directory (:code:`False`). </span>
-<span class="sd">            Note that :code:`symlink=False` will not _also_ save results in :code:`self.JSONdir`, defaults to True</span>
+<span class="sd">            Note that :code:`symlink=False` will not _also_ save results in :code:`self.datadir`, defaults to True</span>
 <span class="sd">        :type symlink: bool, optional</span>
 <span class="sd">        :param extension: what output format should the particle data be saved in, JSON or binary &#39;ffly&#39;</span>
 <span class="sd">        :type: str</span>
@@ -323,28 +340,28 @@
         <span class="c1">## path where data needs to be visible to firefly</span>
         <span class="n">static_data_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">static_data_dir</span><span class="p">,</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">JSONdir</span><span class="p">))</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">datadir</span><span class="p">))</span>
 
         <span class="c1">## where to put hard JSON files, if no symlink then we will</span>
         <span class="c1">##  need to save directly to static_data_path</span>
-        <span class="n">JSONdir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">JSONdir</span> <span class="k">if</span> <span class="n">symlink</span> <span class="k">else</span> <span class="n">static_data_path</span>
+        <span class="n">datadir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">datadir</span> <span class="k">if</span> <span class="n">symlink</span> <span class="k">else</span> <span class="n">static_data_path</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">symlink</span><span class="p">:</span>
             <span class="c1">## we&#39;ve been asked to ignore the request to put the</span>
-            <span class="c1">##  hard files in self.JSONdir and instead actually put them in </span>
+            <span class="c1">##  hard files in self.datadir and instead actually put them in </span>
             <span class="c1">##  firefly/static/data/&lt;short_data_path&gt;</span>
             <span class="k">if</span> <span class="n">loud</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Outputting files to: </span><span class="si">%s</span><span class="s2"> instead of: </span><span class="si">%s</span><span class="s2"> as originally specified.&quot;</span><span class="o">%</span><span class="p">(</span>
                         <span class="n">static_data_path</span><span class="p">,</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">JSONdir</span><span class="p">))</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">datadir</span><span class="p">))</span>
 
 
         <span class="c1">## if we don&#39;t actually want to write to disk then we don&#39;t need</span>
         <span class="c1">##  to do any filesystem tasks</span>
         <span class="k">if</span> <span class="n">write_to_disk</span><span class="p">:</span>
             <span class="c1">## make the output directory</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">JSONdir</span><span class="p">):</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">JSONdir</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">datadir</span><span class="p">):</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">datadir</span><span class="p">)</span>
 
             <span class="c1">## soft link between the &quot;hard&quot; data and firefly/static/data</span>
             <span class="c1">##  firefly can be run locally</span>
@@ -352,7 +369,7 @@
                 <span class="k">try</span><span class="p">:</span>
                     <span class="c1">## create a symlink so that data can </span>
                     <span class="c1">##  be read from a &quot;sub-directory&quot;</span>
-                    <span class="n">os</span><span class="o">.</span><span class="n">symlink</span><span class="p">(</span><span class="n">JSONdir</span><span class="p">,</span><span class="n">static_data_path</span><span class="p">)</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">symlink</span><span class="p">(</span><span class="n">datadir</span><span class="p">,</span><span class="n">static_data_path</span><span class="p">)</span>
 
                 <span class="k">except</span> <span class="ne">FileExistsError</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">islink</span><span class="p">(</span><span class="n">static_data_path</span><span class="p">):</span>
@@ -363,71 +380,62 @@
 
                     <span class="c1">## create a symlink so that data can </span>
                     <span class="c1">##  be read from a &quot;sub-directory&quot;</span>
-                    <span class="n">os</span><span class="o">.</span><span class="n">symlink</span><span class="p">(</span><span class="n">JSONdir</span><span class="p">,</span><span class="n">static_data_path</span><span class="p">)</span> 
+                    <span class="n">os</span><span class="o">.</span><span class="n">symlink</span><span class="p">(</span><span class="n">datadir</span><span class="p">,</span><span class="n">static_data_path</span><span class="p">)</span> 
 
         <span class="c1">## initialize an output array to contain all the jsons and their names</span>
-        <span class="n">JSON_array</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">file_array</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="c1">## write each particleGroup to JSON using their own method</span>
         <span class="c1">##  and save the filenames into a dictionary for filenames.json</span>
-        <span class="n">filenamesDict</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="k">for</span> <span class="n">particleGroup</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">particleGroups</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">loud</span><span class="p">:</span>
-                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Outputting:&quot;</span><span class="p">,</span><span class="n">particleGroup</span><span class="p">)</span>
 
-            <span class="k">if</span> <span class="n">extension</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;.json&#39;</span><span class="p">:</span>
-                <span class="n">this_JSON_array</span><span class="p">,</span><span class="n">filenames_and_nparts</span> <span class="o">=</span> <span class="n">particleGroup</span><span class="o">.</span><span class="n">outputToJSON</span><span class="p">(</span>
-                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">JSONdir</span><span class="p">),</span>
-                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">JSONdir</span><span class="p">),</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">JSON_prefix</span><span class="p">,</span>
-                    <span class="n">loud</span><span class="o">=</span><span class="n">loud</span><span class="p">,</span>
-                    <span class="n">max_npart_per_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_npart_per_file</span><span class="p">,</span>
-                    <span class="n">clean_JSONdir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">clean_JSONdir</span> <span class="k">if</span> <span class="n">particleGroup</span> <span class="ow">is</span> <span class="bp">self</span><span class="o">.</span><span class="n">particleGroups</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">else</span> <span class="kc">False</span><span class="p">,</span>
-                    <span class="n">write_to_disk</span><span class="o">=</span><span class="n">write_to_disk</span><span class="p">,</span>
-                    <span class="n">not_reader</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-            <span class="k">elif</span> <span class="n">extension</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;.ffly&#39;</span><span class="p">:</span>
-                <span class="n">this_JSON_array</span><span class="p">,</span><span class="n">filenames_and_nparts</span> <span class="o">=</span> <span class="n">particleGroup</span><span class="o">.</span><span class="n">outputToFFLY</span><span class="p">(</span>
-                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">JSONdir</span><span class="p">),</span>
-                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">JSONdir</span><span class="p">),</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">JSON_prefix</span><span class="p">,</span>
-                    <span class="n">loud</span><span class="o">=</span><span class="n">loud</span><span class="p">,</span>
-                    <span class="n">max_npart_per_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_npart_per_file</span><span class="p">,</span>
-                    <span class="n">clean_FFLYdir</span><span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clean_JSONdir</span> <span class="k">if</span> <span class="n">particleGroup</span> <span class="ow">is</span> <span class="bp">self</span><span class="o">.</span><span class="n">particleGroups</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">else</span> <span class="kc">False</span><span class="p">,</span>
-                    <span class="n">not_reader</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;Requested format </span><span class="si">%s</span><span class="s2"> not understood. Choose .json or .ffly.&quot;</span><span class="o">%</span><span class="n">extension</span><span class="p">)</span>
+        <span class="n">manifest_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">datadir</span><span class="p">,</span><span class="s1">&#39;filenames.json&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">clean_datadir</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">manifest_file</span><span class="p">):</span>
+            <span class="n">filenamesDict</span> <span class="o">=</span> <span class="n">load_from_json</span><span class="p">(</span><span class="n">manifest_file</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span> <span class="n">filenamesDict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">particleGroup</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">particleGroups</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">particleGroup</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">loud</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Outputting:&quot;</span><span class="p">,</span><span class="n">particleGroup</span><span class="p">)</span>
+
+            <span class="n">this_file_array</span><span class="p">,</span><span class="n">filenames_and_nparts</span> <span class="o">=</span> <span class="n">particleGroup</span><span class="o">.</span><span class="n">writeToDisk</span><span class="p">(</span>
+                <span class="n">datadir</span><span class="p">,</span>
+                <span class="n">file_prefix</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">file_prefix</span><span class="p">,</span>
+                <span class="n">loud</span><span class="o">=</span><span class="n">loud</span><span class="p">,</span>
+                <span class="n">max_npart_per_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_npart_per_file</span><span class="p">,</span>
+                <span class="n">clean_datadir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">clean_datadir</span> <span class="k">if</span> <span class="n">particleGroup</span> <span class="ow">is</span> <span class="bp">self</span><span class="o">.</span><span class="n">particleGroups</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">else</span> <span class="kc">False</span><span class="p">,</span>
+                <span class="n">not_reader</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
             <span class="c1">## append the JSON arrays for this particle group</span>
-            <span class="n">JSON_array</span> <span class="o">+=</span> <span class="n">this_JSON_array</span>
+            <span class="n">file_array</span> <span class="o">+=</span> <span class="n">this_file_array</span>
 
             <span class="n">filenamesDict</span><span class="p">[</span><span class="n">particleGroup</span><span class="o">.</span><span class="n">UIname</span><span class="p">]</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">filenames_and_nparts</span><span class="p">)</span>
 
         <span class="c1">## output the settings.json file</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">write_only_data</span><span class="p">:</span> 
-            <span class="n">JSON_array</span> <span class="o">+=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">dumpSettingsToJSON</span><span class="p">(</span><span class="n">symlink</span><span class="p">,</span><span class="n">write_to_disk</span><span class="p">,</span><span class="n">loud</span><span class="p">)]</span>
+            <span class="n">file_array</span> <span class="o">+=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">dumpSettingsToJSON</span><span class="p">(</span><span class="n">symlink</span><span class="p">,</span><span class="n">write_to_disk</span><span class="p">,</span><span class="n">loud</span><span class="p">)]</span>
 
             <span class="c1">## format and output the filenames.json file</span>
             <span class="n">filenamesDict</span><span class="p">[</span><span class="s1">&#39;options&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">JSONdir</span><span class="p">),</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">JSON_prefix</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">settings_filename</span><span class="p">),</span><span class="mi">0</span><span class="p">)]</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">datadir</span><span class="p">),</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">file_prefix</span><span class="o">+</span><span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">settings_filename</span><span class="p">),</span><span class="mi">0</span><span class="p">)]</span>
 
             <span class="c1">## write a tweenParams file if a TweenParams instance is attached to reader</span>
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;tweenParams&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">tweenParams</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">filenamesDict</span><span class="p">[</span><span class="s1">&#39;tweenParams&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">JSONdir</span><span class="p">),</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">datadir</span><span class="p">),</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">tweenParams</span><span class="o">.</span><span class="n">filename</span><span class="p">),</span><span class="mi">0</span><span class="p">)]</span>
-                <span class="n">JSON_array</span><span class="o">+=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">tweenParams</span><span class="o">.</span><span class="n">outputToJSON</span><span class="p">(</span>
-                    <span class="n">JSONdir</span><span class="p">,</span>
-                    <span class="n">JSON_prefix</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">JSON_prefix</span><span class="p">,</span>
+                <span class="n">file_array</span><span class="o">+=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">tweenParams</span><span class="o">.</span><span class="n">outputToJSON</span><span class="p">(</span>
+                    <span class="n">datadir</span><span class="p">,</span>
+                    <span class="n">file_prefix</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">file_prefix</span><span class="p">,</span>
                     <span class="n">loud</span><span class="o">=</span><span class="n">loud</span><span class="p">,</span>
                     <span class="n">write_to_disk</span><span class="o">=</span><span class="n">write_to_disk</span><span class="p">,</span>
                     <span class="n">not_reader</span><span class="o">=</span><span class="kc">False</span><span class="p">)]</span> <span class="c1">## None -&gt; returns JSON string</span>
 
-            <span class="n">filename</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">JSONdir</span><span class="p">,</span><span class="s1">&#39;filenames.json&#39;</span><span class="p">)</span>
-            <span class="n">JSON_array</span> <span class="o">+=</span><span class="p">[(</span>
-                <span class="n">filename</span><span class="p">,</span>
+            <span class="n">file_array</span> <span class="o">+=</span><span class="p">[(</span>
+                <span class="n">manifest_file</span><span class="p">,</span>
                 <span class="n">write_to_json</span><span class="p">(</span>
                     <span class="n">filenamesDict</span><span class="p">,</span>
-                    <span class="n">filename</span> <span class="k">if</span> <span class="n">write_to_disk</span> <span class="k">else</span> <span class="kc">None</span><span class="p">))]</span> <span class="c1">## None -&gt; returns JSON string</span>
+                    <span class="n">manifest_file</span> <span class="k">if</span> <span class="n">write_to_disk</span> <span class="k">else</span> <span class="kc">None</span><span class="p">))]</span> <span class="c1">## None -&gt; returns JSON string</span>
 
             <span class="c1">## handle the startup.json file, may need to append or totally overwrite</span>
             <span class="n">startup_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
@@ -436,7 +444,7 @@
 
             <span class="c1">## relative path from .js interpreter (which runs in /firefly/static) </span>
             <span class="c1">##  to this dataset</span>
-            <span class="n">startup_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">JSONdir</span><span class="p">))</span>
+            <span class="n">startup_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;data&quot;</span><span class="p">,</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">datadir</span><span class="p">))</span>
 
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">write_startup</span> <span class="o">==</span> <span class="s1">&#39;append&#39;</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">startup_file</span><span class="p">):</span>
                 <span class="n">startup_dict</span> <span class="o">=</span> <span class="n">load_from_json</span><span class="p">(</span><span class="n">startup_file</span><span class="p">)</span>
@@ -452,7 +460,7 @@
                         <span class="n">maxx</span><span class="o">-=</span><span class="mi">1</span> <span class="c1">## since we&#39;ll add 1 below</span>
                 
                 <span class="n">startup_dict</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">maxx</span><span class="o">+</span><span class="mi">1</span><span class="p">)]</span><span class="o">=</span><span class="n">startup_path</span>
-                <span class="n">JSON_array</span><span class="o">+=</span><span class="p">[(</span>
+                <span class="n">file_array</span><span class="o">+=</span><span class="p">[(</span>
                     <span class="c1">## recreate in case we overwrote the startup_file variable in loop above</span>
                     <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">static_data_dir</span><span class="p">,</span><span class="s1">&#39;startup.json&#39;</span><span class="p">),</span> 
                     <span class="n">write_to_json</span><span class="p">(</span>
@@ -460,7 +468,7 @@
                         <span class="n">startup_file</span> <span class="k">if</span> <span class="n">write_to_disk</span> <span class="k">else</span> <span class="kc">None</span><span class="p">))]</span> <span class="c1">## None -&gt; returns JSON string</span>
 
             <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">write_startup</span><span class="p">:</span>
-                <span class="n">JSON_array</span><span class="o">+=</span><span class="p">[(</span>
+                <span class="n">file_array</span><span class="o">+=</span><span class="p">[(</span>
                     <span class="n">startup_file</span><span class="p">,</span>
                     <span class="n">write_to_json</span><span class="p">(</span>
                         <span class="p">{</span><span class="s2">&quot;0&quot;</span><span class="p">:</span><span class="n">startup_path</span><span class="p">},</span>
@@ -469,7 +477,7 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">write_to_disk</span><span class="p">:</span>
             <span class="c1">## create a single &quot;big JSON&quot; with all the data in it in case</span>
             <span class="c1">##  we want to send dataViaFlask</span>
-            <span class="n">JSON_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">JSON_array</span><span class="p">)</span>
+            <span class="n">JSON_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">file_array</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">JSON</span> <span class="o">=</span> <span class="n">write_to_json</span><span class="p">(</span><span class="n">JSON_dict</span><span class="p">,</span><span class="kc">None</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">JSON_dict</span> <span class="o">=</span> <span class="n">JSON_dict</span>
         <span class="k">else</span><span class="p">:</span>
@@ -489,15 +497,15 @@
         <span class="c1">## path where data needs to be visible to firefly</span>
         <span class="n">static_data_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">static_data_dir</span><span class="p">,</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">JSONdir</span><span class="p">))</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">datadir</span><span class="p">))</span>
 
         <span class="c1">## where to put hard JSON files, if no symlink then we will</span>
         <span class="c1">##  need to save directly to static_data_path</span>
-        <span class="n">JSONdir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">JSONdir</span> <span class="k">if</span> <span class="n">symlink</span> <span class="k">else</span> <span class="n">static_data_path</span>
+        <span class="n">datadir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">datadir</span> <span class="k">if</span> <span class="n">symlink</span> <span class="k">else</span> <span class="n">static_data_path</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">outputToJSON</span><span class="p">(</span>
-            <span class="n">JSONdir</span><span class="p">,</span>
-            <span class="n">JSON_prefix</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">JSON_prefix</span><span class="p">,</span>
+            <span class="n">datadir</span><span class="p">,</span>
+            <span class="n">file_prefix</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">file_prefix</span><span class="p">,</span>
             <span class="n">loud</span><span class="o">=</span><span class="n">loud</span><span class="p">,</span>
             <span class="n">write_to_disk</span><span class="o">=</span><span class="n">write_to_disk</span><span class="p">,</span>
             <span class="n">not_reader</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -544,7 +552,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">writeToDisk</span><span class="p">(</span>
                 <span class="n">loud</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
                 <span class="n">write_to_disk</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                <span class="n">extension</span><span class="o">=</span><span class="s1">&#39;json&#39;</span><span class="p">)</span>
+                <span class="n">extension</span><span class="o">=</span><span class="s1">&#39;.json&#39;</span><span class="p">)</span>
 
         <span class="c1">## post the json to the listening url data_input</span>
         <span class="c1">##  defined in server.py</span>
@@ -563,7 +571,8 @@
         <span class="n">init_gh_pages</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">GHREPONAME</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">GHUSER</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">GHOAUTHTOKENPATH</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">GHOAUTHTOKENPATH</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Copies the necessary source files to run a stand-alone instance of firefly</span>
 <span class="sd">            on the web. Optionally, will also initialize a new GitHub repository with </span>
 <span class="sd">            GitHub pages, a free web-hosting service, so that this stand-alone instance </span>
@@ -580,7 +589,7 @@
 <span class="sd">        :param dump_data: flag for whether the data stored in this reader should also be saved</span>
 <span class="sd">            to this new stand-alone firefly directory (vs. only the firefly source files), defaults to True</span>
 <span class="sd">        :type dump_data: bool, optional</span>
-<span class="sd">        :param overwrite: flag for whether the existing target directory should be purged</span>
+<span class="sd">        :param overwrite: flag for whether the existing target static directory should be purged</span>
 <span class="sd">            before anything is copied over or written to disk, defaults to True</span>
 <span class="sd">        :type overwrite: bool, optional</span>
 <span class="sd">        :param init_gh_pages: flag to run :code:`firefly/bin/make_new_repo.sh` in an attempt to initialize</span>
@@ -610,10 +619,8 @@
             <span class="c1">## create the directory because it doesn&#39;t exist</span>
             <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">overwrite</span><span class="p">:</span>
-            <span class="c1">## purge the old</span>
-            <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
-            <span class="c1">## replace with the new</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+            <span class="c1">## purge the old static directory</span>
+            <span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">target</span><span class="p">,</span><span class="s1">&#39;static&#39;</span><span class="p">))</span>
 
         <span class="c1">## identify source directory</span>
         <span class="n">src</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
@@ -656,9 +663,8 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">static_data_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">target</span><span class="p">,</span><span class="s1">&#39;static&#39;</span><span class="p">,</span><span class="s1">&#39;data&#39;</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">static_data_dir</span><span class="p">):</span> <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">static_data_dir</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">writeToDisk</span><span class="p">(</span><span class="n">symlink</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-            <span class="k">except</span><span class="p">:</span>
-                <span class="k">raise</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">writeToDisk</span><span class="p">(</span><span class="n">symlink</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span> <span class="k">raise</span>
             <span class="k">finally</span><span class="p">:</span>
                 <span class="c1">## replace the old stat_data_dir</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">static_data_dir</span> <span class="o">=</span> <span class="n">old</span>
@@ -726,6 +732,7 @@
 <div class="viewcode-block" id="ArrayReader.__init__"><a class="viewcode-back" href="../../../reference/api/readers/firefly.data_reader.ArrayReader.html#firefly.data_reader.ArrayReader.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">coordinates</span><span class="p">,</span>
+        <span class="n">velocities</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">UInames</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">fields</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">field_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -741,6 +748,11 @@
 <span class="sd">            coordinates or a jagged (M,N_m,3) list of np.arrays which is interpreted as M many </span>
 <span class="sd">            particle groups with each having N_m particles</span>
 <span class="sd">        :type coordinates: list, optional</span>
+<span class="sd">        :param velocities: raw velocity data,</span>
+<span class="sd">            Can either pass N,3 np.array which is interpreted as a single particle group&#39;s </span>
+<span class="sd">            velocities or a jagged (M,N_m,3) list of np.arrays which is interpreted as M many </span>
+<span class="sd">            particle groups with each having N_m particles</span>
+<span class="sd">        :type velocities: list, optional</span>
 <span class="sd">        :param UInames: list of particle group UInames</span>
 <span class="sd">        :type UInames: list of str</span>
 <span class="sd">        :param fields: list of field arrays corresponding to each point of the coordinate data, </span>
@@ -773,6 +785,9 @@
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">coordinates</span><span class="p">))</span><span class="o">==</span><span class="mi">2</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="mi">3</span><span class="p">:</span>
             <span class="c1">## passed a single list of coordinates, prepend an axis for the single group</span>
             <span class="n">coordinates</span> <span class="o">=</span> <span class="p">[</span><span class="n">coordinates</span><span class="p">]</span>
+            <span class="n">velocities</span> <span class="o">=</span> <span class="p">[</span><span class="n">velocities</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">UInames</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="n">UInames</span> <span class="o">=</span> <span class="p">[</span><span class="n">UInames</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">fields</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="n">fields</span> <span class="o">=</span> <span class="p">[</span><span class="n">fields</span><span class="p">]</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">coordinates</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span><span class="o">==</span><span class="mi">2</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">shape</span><span class="p">(</span><span class="n">coordinates</span><span class="p">[</span><span class="mi">0</span><span class="p">])[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="mi">3</span><span class="p">:</span>
             <span class="c1">## passed a jagged array of different coordinates</span>
             <span class="k">pass</span>
@@ -846,8 +861,8 @@
         <span class="c1">## initialize default particle group names</span>
         <span class="k">if</span> <span class="n">UInames</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> <span class="n">UInames</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;PGroup_</span><span class="si">%d</span><span class="s1">&#39;</span><span class="o">%</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">coordinates</span><span class="p">))]</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">UInames</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">coordinates</span><span class="p">):</span> 
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%d</span><span class="s2"> UInames does not match passed&quot;</span><span class="o">+</span>
-            <span class="s2">&quot; number of </span><span class="si">%d</span><span class="s2"> coordinate arrays&quot;</span><span class="o">%</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">UInames</span><span class="p">),</span><span class="nb">len</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)))</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%d</span><span class="s2"> UInames does not match passed&quot;</span><span class="o">%</span><span class="nb">len</span><span class="p">(</span><span class="n">UInames</span><span class="p">)</span><span class="o">+</span>
+            <span class="s2">&quot; number of </span><span class="si">%d</span><span class="s2"> coordinate arrays&quot;</span><span class="o">%</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)))</span>
 
         <span class="c1">## loop through each of the particle groups</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,(</span><span class="n">coords</span><span class="p">,</span><span class="n">UIname</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">coordinates</span><span class="p">,</span><span class="n">UInames</span><span class="p">)):</span>
@@ -856,9 +871,11 @@
             <span class="n">firefly_particleGroup</span> <span class="o">=</span> <span class="n">ParticleGroup</span><span class="p">(</span>
                 <span class="n">UIname</span><span class="p">,</span>
                 <span class="n">coords</span><span class="p">,</span>
+                <span class="n">velocities</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
                 <span class="n">decimation_factor</span><span class="o">=</span><span class="n">decimation_factor</span><span class="p">,</span>
                 <span class="n">field_arrays</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="n">fields</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">fields</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
-                <span class="n">field_names</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="n">field_names</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">field_names</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                <span class="n">field_names</span><span class="o">=</span><span class="kc">None</span> <span class="k">if</span> <span class="n">field_names</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">field_names</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">particlegroup_kwargs</span><span class="p">)</span>
 
             <span class="c1">## attach the instance to the reader</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">addParticleGroup</span><span class="p">(</span><span class="n">firefly_particleGroup</span><span class="p">)</span>
@@ -867,8 +884,7 @@
         <span class="c1">##  a single big JSON in self.JSON</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">writeToDisk</span><span class="p">(</span>
             <span class="n">write_to_disk</span><span class="o">=</span><span class="n">write_to_disk</span><span class="p">,</span>
-            <span class="n">loud</span><span class="o">=</span><span class="n">loud</span><span class="p">,</span>
-            <span class="n">extension</span><span class="o">=</span><span class="s1">&#39;.json&#39;</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">write_to_disk</span> <span class="k">else</span> <span class="s1">&#39;.ffly&#39;</span><span class="p">)</span></div></div>
+            <span class="n">loud</span><span class="o">=</span><span class="n">loud</span><span class="p">)</span></div></div>
 
 <div class="viewcode-block" id="SimpleReader"><a class="viewcode-back" href="../../../reference/api/readers/firefly.data_reader.SimpleReader.html#firefly.data_reader.SimpleReader">[docs]</a><span class="k">class</span> <span class="nc">SimpleReader</span><span class="p">(</span><span class="n">ArrayReader</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; A wrapper to :class:`firefly.data_reader.ArrayReader` that attempts to </span>
@@ -1119,6 +1135,12 @@
                     <span class="c1">## initialize it otherwise</span>
                     <span class="k">else</span><span class="p">:</span> <span class="n">fieldss</span><span class="p">[</span><span class="n">field_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">this_group</span><span class="p">[</span><span class="n">field_name</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">fieldss</span></div>
+
+<span class="k">def</span> <span class="nf">split_kwargs</span><span class="p">(</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">kwargs_keys</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+    <span class="n">settings_keys</span> <span class="o">=</span> <span class="n">kwargs_keys</span> <span class="o">&amp;</span> <span class="n">valid_settings</span>
+    <span class="n">particlegroup_keys</span> <span class="o">=</span> <span class="n">kwargs_keys</span> <span class="o">-</span> <span class="n">valid_settings</span>
+    <span class="k">return</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span><span class="n">kwargs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">settings_keys</span><span class="p">},{</span><span class="n">key</span><span class="p">:</span><span class="n">kwargs</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">particlegroup_keys</span><span class="p">}</span>
 </pre></div>
 
            </div>
