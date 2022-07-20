@@ -127,19 +127,19 @@ class TweenParams(object):
 
     def outputToJSON(
         self,
-        JSONdir,
-        JSON_prefix='',
+        datadir,
+        file_prefix='',
         loud=1,
         write_to_disk=True,
         not_reader=True):
         """ Saves the current tween parameters to a JSON file.
 
-        :param JSONdir: the sub-directory that will contain your JSON files, relative
-            to your :code:`$HOME directory`. , defaults to :code:`$HOME/<JSON_prefix>`
-        :type JSONdir: str, optional
-        :param JSON_prefix: Prefix for any :code:`.json` files created, :code:`.json` files will be of the format:
-            :code:`<JSON_prefix><self.filename>.json`, defaults to ''
-        :type JSON_prefix: str, optional
+        :param datadir: the sub-directory that will contain your JSON files, relative
+            to your :code:`$HOME directory`. , defaults to :code:`$HOME/<file_prefix>`
+        :type datadir: str, optional
+        :param file_prefix: Prefix for any :code:`.json` files created, :code:`.json` files will be of the format:
+            :code:`<file_prefix><self.filename>.json`, defaults to ''
+        :type file_prefix: str, optional
         :param loud: flag to print status information to the console, defaults to True
         :type loud: bool, optional
         :param write_to_disk: flag that controls whether data is saved to disk (:code:`True`)
@@ -154,8 +154,8 @@ class TweenParams(object):
 
         tween_params_dict = self.outputToDict()
 
-        ## JSON_prefix+
-        filename = os.path.join(JSONdir,self.filename)
+        ## file_prefix+
+        filename = os.path.join(datadir,file_prefix+self.filename)
 
         if loud and not_reader:
             print("You will need to add this tween params filename to"+
