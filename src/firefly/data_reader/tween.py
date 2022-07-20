@@ -155,7 +155,7 @@ class TweenParams(object):
         tween_params_dict = self.outputToDict()
 
         ## file_prefix+
-        filename = os.path.join(datadir,file_prefix+self.filename)
+        filename = os.path.join(datadir,self.filename)
 
         if loud and not_reader:
             print("You will need to add this tween params filename to"+
