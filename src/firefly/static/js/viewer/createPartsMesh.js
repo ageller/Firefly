@@ -170,7 +170,7 @@ function createPartsMesh(pdraw = viewerParams.partsKeys, node=null){
 	//if (ndraw >= Math.floor(viewerParams.parts.totalSize/viewerParams.decimate)){
 	//console.log("done drawing")
 
-	clearloading();
+	clearloading(false);
 
 	//}
 	return true;

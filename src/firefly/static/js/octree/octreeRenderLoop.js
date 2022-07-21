@@ -4,7 +4,7 @@ function containsPoint(t){
 	for(let n=0;n<6;n++) if (e[n].distanceToPoint(t)<0) return false; return true;
 }
 
-function updateOctree(){
+function updateOctree(treewalk=false){
 
 	var pkey = viewerParams.partsKeys[viewerParams.octree.pIndex];
 
@@ -30,7 +30,7 @@ function updateOctree(){
 			if (!(node_name.includes('root') || node_name.includes('Standard'))){
 				node = octree[node_name.slice(prefix_length)];
 				node_dist = viewerParams.camera.position.distanceTo(node.center);
-				if ((node_dist > max_node_dist ) && !checkOnScreen(node)){
+				if ((node_dist > max_node_dist ) || !checkOnScreen(node)){
 					max_node_dist = node_dist;
 					max_node = node;
 				}
@@ -41,10 +41,40 @@ function updateOctree(){
 	}
 
 	//  check if we can draw a new node
-	if (!viewerParams.octree.waitingToDraw && viewerParams.octree.toDraw[pkey].length > 0 ) drawNextOctreeNode();
+	if (!viewerParams.octree.waitingToDraw && viewerParams.octree.toDraw[pkey].length > 0 ){
+		/*
+		console.log('before',
+			viewerParams.octree.toDraw[pkey][0][0].name,
+			viewerParams.camera.position.distanceTo(viewerParams.octree.toDraw[pkey][0][0].center))
+			var min_dist = 1e10;
+			var min_name;
+		*/
 
-	// check if we can remove  a node
-	if (!viewerParams.octree.waitingToRemove && viewerParams.octree.toRemove.length > 0) removeNextOctreeNode();
+		// sort the draw list by distance to the camera
+		viewerParams.octree.toDraw[pkey].sort(function (nodetuple1,nodetuple2){
+			dist1 = viewerParams.camera.position.distanceTo(nodetuple1[0].center)
+			dist2 = viewerParams.camera.position.distanceTo(nodetuple2[0].center)
+			/*
+			if (dist1 < min_dist){
+				min_dist = dist1;
+				min_name = nodetuple1[0].name;
+			}
+			*/
+			return dist1-dist2;
+		});
+
+		/*
+		console.log('after ',
+			viewerParams.octree.toDraw[pkey][0][0].name,
+			viewerParams.camera.position.distanceTo(viewerParams.octree.toDraw[pkey][0][0].center))
+		console.log('min   ',min_name,min_dist)
+		*/
+		
+		drawNextOctreeNode();
+	}
+
+	// check if we can remove a node
+	while (!viewerParams.octree.waitingToRemove && viewerParams.octree.toRemove.length > 0) removeNextOctreeNode();
 
 	//check and remove duplicates from scene (I don't know why this happens)
 	//also perform a few other updates
@@ -62,9 +92,15 @@ function updateOctree(){
 			viewerParams.camera.projectionMatrix,
 			viewerParams.camera.matrixWorldInverse));
 
-	// only update the octree if this pkey has an octree
-	//  and we're actually showing it on the screen
-	openCloseNodes(octree[''],octree);
+	// walk children and try to short-circuit the walk when no longer necessary
+	if (treewalk) openCloseNodes(octree[''],octree,true);
+	// loop through every single node every single render frame. reliable but expensive
+	else{
+		evaluateFunctionOnOctreeNodes(
+			openCloseNodes,
+			octree[''],
+			octree);
+	}
 
 	//if we are done drawing, check if we should adjust the number of particles further see if I need to reduce the particles even further
 	/*
@@ -96,7 +132,7 @@ function updateOctree(){
 	return updateOctreePindex();
 }
 
-function openCloseNodes(node,octree){
+function openCloseNodes(node,octree,treewalk=false){
 	//adjust the draw range based on GUI sliders
 	/*
 	var nparts = THREE.Math.clamp(
@@ -107,7 +143,6 @@ function openCloseNodes(node,octree){
 	obj.geometry.setDrawRange( 0, nparts); //is this giving me an error sometimes?
 
 	*/
-
 	// find the node size in pixels and then compare to the 
 	//  size of the window
 	var node_angle_deg = getScreenSize(node);
@@ -121,12 +156,12 @@ function openCloseNodes(node,octree){
 	var too_small = checkTooSmall(node_angle_deg);
 
 	// this node is too small. we should hide each of its children *and* its CoM
-	if (too_small){
+	if (too_small || !onscreen){
 		node.state = 'too small';
 		node.current_state = 'remove';
 		// if we haven't already, let's hide the CoM
 		free_buffer(node,hideCoM);
-		node.children.forEach(function (child_name){free_buffer(octree[child_name],hideCoM)});
+		if (treewalk) node.children.forEach(function (child_name){free_buffer(octree[child_name],hideCoM)});
 	}
 	// don't need to draw nodes that aren't on screen 
 	else if (!onscreen && !inside){
@@ -142,7 +177,7 @@ function openCloseNodes(node,octree){
  			showCoM(node);
 		}
 		//free_buffer(node,showCoM);
-		node.children.forEach(function (child_name){free_buffer(octree[child_name],hideCoM)});
+		if (treewalk) node.children.forEach(function (child_name){free_buffer(octree[child_name],hideCoM)});
 	}
 	// we should add this node's buffer particles to the scene and hide its CoM. 
 	//  then think about its children
@@ -152,7 +187,7 @@ function openCloseNodes(node,octree){
 		node.current_state = 'draw';
 		// if we haven't already, let's hide the CoM
 		load_buffer(node,hideCoM);
-		node.children.forEach(function (child_name){openCloseNodes(octree[child_name],octree)});
+		if (treewalk) node.children.forEach(function (child_name){openCloseNodes(octree[child_name],octree)});
 	}  
 	// this node is just right. let's check if we should do anything
 	//  to its children
@@ -162,12 +197,12 @@ function openCloseNodes(node,octree){
 		// loaded then we'll show the CoM.
 		if (!node.drawn) showCoM(node);
 		// check if any of the children also need to be opened/closed
-		node.children.forEach(function (child_name){openCloseNodes(octree[child_name],octree)});
+		if (treewalk) node.children.forEach(function (child_name){openCloseNodes(octree[child_name],octree)});
 	}
 	// I don't think it is actually possible to get into here but if we do
 	//  I want to know about it
 	else {
-		console.log(onscreen,inside,too_small,too_big)
+		console.log(node.name,node_angle_deg,'onscreen:',onscreen,'inside',inside,'too_small',too_small,'too_big',too_big)
 		debugger
 	}
 }
@@ -205,7 +240,7 @@ function hideCoM(node){
 }
 
 function showCoM(node){
-	if (node.com_shown) return;
+	if (node.com_shown || !viewerParams.showCoMParticles) return;
 	node.com_shown = true;
 	mesh = viewerParams.partsMesh[node.pkey][0];
 	if (node.octbox) node.octbox.visible = true;
@@ -324,7 +359,7 @@ function drawNextOctreeNode(){
 
 	//work from the back of the array
 	var pkey = viewerParams.partsKeys[viewerParams.octree.pIndex];
-	var tuple = viewerParams.octree.toDraw[pkey].pop(); // shift takes the first element, pop does the last
+	var tuple = viewerParams.octree.toDraw[pkey].shift(); // shift takes the first element, pop does the last
 
 	// not sure why you might end up in here if the list is empty
 	//  but it happened while i was testing toggling
@@ -456,6 +491,7 @@ function checkOnScreen(node){
 			})
 		})
 	})
+	return foo;
 
 	
 	p = new THREE.Vector3(

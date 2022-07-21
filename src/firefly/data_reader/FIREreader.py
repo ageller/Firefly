@@ -250,7 +250,7 @@ class FIREreader(Reader):
                     snapdict['Coordinates'],
                     snapdict['Velocities'],
                     field_names=field_names,
-                    field_arrays=np.array(field_arrays,ndmin=2),
+                    field_arrays=np.array(field_arrays).reshape(-1,snapdict['Coordinates'].shape[0]),
                     decimation_factor=dec_factor,
                     field_filter_flags=field_filter_flags,
                     field_colormap_flags=field_colormap_flags,
