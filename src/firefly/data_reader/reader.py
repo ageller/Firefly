@@ -216,7 +216,7 @@ class Reader(object):
         ## add this particle group to the reader's settings file
         self.settings.attachSettings(particleGroup)
     
-    def createOctrees(self,mask=None,**kwargs):
+    def createOctrees(self,mask=None,max_npart_per_node=10**4,nrecurse=10,**kwargs):
 
         ## validate mask length entry , each particle group
         ##  should have a true or false entry
@@ -224,19 +224,15 @@ class Reader(object):
             f"mask must be of length: {len(self.particleGroups):d}"+
             f" not length {len(mask):d}.")
 
-        for i,particleGroup in enumerate(self.particleGroups): 
-            if mask is None or mask[i]: particleGroup.createOctree(**kwargs)
-    
-    def pruneOctrees(self,min_npart_per_node,mask=None):
-        ## validate mask length entry , each particle group
-        ##  should have a true or false entry
-        if mask is not None and len(mask) != len(self.particleGroups): raise ValueError(
-            f"mask must be of length: {len(self.particleGroups):d}"+
-            f" not length {len(mask):d}.")
-
-        for i,particleGroup in enumerate(self.particleGroups): 
-            if (hasattr(particleGroup,'octree') and (mask is None or mask[i])): 
-                particleGroup.octree.pruneOctree(min_npart_per_node)
+        for i in range(len(self.particleGroups)):
+            if mask is None or mask[i]: 
+                ## the old particle group will get garbage collected... eventually??
+                self.particleGroups[i] = self.particleGroups[i].spawn_octree_pg(
+                    self.datadir,
+                    max_npart_per_node,
+                    nrecurse=nrecurse,
+                    build=True,
+                    **kwargs)
 
     def writeToDisk(
         self,
