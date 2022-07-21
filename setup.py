@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="firefly",
-    version="3.0.0",
+    version="3.1.0",
     author = 'Alex Gurvich, Aaron Geller',
     author_email = 'agurvich@u.northwestern.edu, ageller@northwestern.edu',
     description="A browser-based particle visualization platform",
