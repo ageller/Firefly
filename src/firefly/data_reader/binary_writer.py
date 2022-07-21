@@ -135,22 +135,20 @@ class BinaryWriter(object):
       
     def calculate_header_size(self):
         header_size = 0
-        ## size of the header, 2 32 bit ints and a 1 bit boolean
-        header_size += 4 ## size of header
+        header_size += 4 ## this integer we're predicting
         header_size += 1 ## velocity flag
         header_size += 1 ## rgba_color flag
         header_size += 4 ## nparts 
         header_size += 4 ## nfields
 
-        ## length of string as an int followed by the string
+        ## length of string (int) followed by the string
         ## each char gets 4 bytes for UTF-8 
         header_size += 4*np.sum([1+len(field_name) for field_name in self.field_names]) 
 
-        ## filter, colormap, and radius flags
-        header_size += ((
-            len(self.filter_flags)>0 + 
-            len(self.colormap_flags)>0 + 
-            len(self.radius_flags)>0) * self.nfields) 
+        ## filter, colormap, and radius flags, each a single byte boolean
+        if len(self.filter_flags) > 0: header_size += self.nfields
+        if len(self.colormap_flags) > 0: header_size += self.nfields
+        if len(self.radius_flags) > 0: header_size += self.nfields
 
         return header_size
 
