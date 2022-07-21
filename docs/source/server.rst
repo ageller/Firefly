@@ -134,7 +134,9 @@ consult the :ref:`server API documentation <server api>`.
 Hosting a static version on the internet
 ----------------------------------------
 
-To make Firefly accessible via the internet, the 
+To make Firefly accessible via the internet, users need only replace their final call to the  \docref{reference/api/classes/firefly.data\_reader.Reader.html\#firefly.data\_reader.Reader.writeToDisk}{Reader.writeToDisk} method with an analogous call to the \docref{reference/api/classes/firefly.data\_reader.Reader.html\#firefly.data\_reader.Reader.copyFireflySourceToTarget}{Reader.copyFireflySourceToTarget} method.
+The \code{copyFireflySourceToTarget} method will copy the necessary Firefly source files along with the visualization data to a target directory on the researcher's local computer.
+In order to automatically upload their visualization to GitHub Pages, a free web-hosting service provided by GitHub, the researcher would also pass the path to their GitHub OAuth authentication key and \code{init\_gh\_pages=True} as keyword arguments.
 
 .. code-block:: 
     
@@ -147,6 +149,7 @@ To make Firefly accessible via the internet, the
     keyword argument :code:`init_gh_pages` that will attempt to 
     create a new repository and enable GitHub pages automatically.
     See :ref:`multiple datasets` for details.
+
 
 
 
