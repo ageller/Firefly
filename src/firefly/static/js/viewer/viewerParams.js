@@ -181,7 +181,7 @@ function defineViewerParams(){
 		this.materialCD = null;
 		this.sceneCD = null;
 		this.cameraCD = null;
-		this.scaleCD = 0.1; //scaling factor for the shader so that it adds up to one at highest density
+		this.scaleCD = 0.01; //scaling factor for the shader so that it adds up to one at highest density
 
 		this.CDmin = 1;
 		this.CDmax = 10;
