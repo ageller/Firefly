@@ -56,15 +56,6 @@ to Trackball mode now centered at your current location.
     Now in Trackball mode, you can **"orbit"** that region of interest,
     while always facing it.
 
-Tweening
---------
-
-When the **T** key is pressed on the keyboard the camera's position
-and orientation will be smoothly adjusted according to the keyframes 
-defined by the user in the :code:`TweenParams`. 
-
-See the :ref:`frontend documentation <frontend api>` for details.
-
 .. _UI:
 
 Using the user interface
@@ -103,6 +94,7 @@ Sub-panels
 
     data_controls
     camera_controls
+    projection_controls
     particle_controls
 
 

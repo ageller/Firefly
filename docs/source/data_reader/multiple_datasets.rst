@@ -43,7 +43,7 @@ the :ref:`load new data button` button.
 
 		ln -s /home/mydirectory/snapdir_XXX
 	
-	:func:`firefly.data_reader.Reader.dumpToJSON` will automatically
+	:func:`firefly.data_reader.Reader.writeToDisk` will automatically
 	create a symbolic link if it detects that the :code:`JSONdir` you
 	specified is not a sub-directory of :code:`firefly/static/data`.
 

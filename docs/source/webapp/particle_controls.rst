@@ -83,8 +83,11 @@ for fine adjustment using the slider between the new limits.
 	enterprising user could consider replacing the corresponding 
 	row in the texture map located at:
 	:code:`Firefly/src/firefly/static/textures/colormap.png`. 
-	The name in the UI can't be changed but you'll be able to colormap 
-	your data nonetheless.
+	And the corresponding line in the 
+	:code:`Firefly/src/firefly/static/textures/colormap_names.json`. 
+	There is a Jupyter notebook in that directory as well which was
+	used to create the colormap texture.
+
 
 Filters
 -------

@@ -1,0 +1,6 @@
+﻿firefly.server.startFlaskServer
+===============================
+
+.. currentmodule:: firefly.server
+
+.. autofunction:: startFlaskServer

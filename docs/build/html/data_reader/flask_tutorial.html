@@ -1,77 +1,38 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>Tutorial notebook: Sending data to a local Firefly server through Flask &mdash; Firefly 2.0.5 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+  <title>Tutorial notebook: Sending data to a local Firefly server through Flask &mdash; Firefly 3.0.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "document", "processHtmlClass": "math|output_area"}}</script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-
-    
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Using Firefly to view FIRE data" href="fire_quickstart.html" />
+    <link rel="next" title="Hosting a Firefly webserver" href="../server.html" />
     <link rel="prev" title="Sending data to a Firefly server via Flask" href="flask.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../index.html">
-          
-
-          
-            
             <img src="../_static/logo_banner.png" class="logo" alt="Logo"/>
-          
           </a>
-
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -79,18 +40,7 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../webapp/index.html">Interacting with a Firefly visualization</a></li>
@@ -104,7 +54,6 @@
 <li class="toctree-l4 current"><a class="current reference internal" href="#">Tutorial notebook: Sending data to a local Firefly server through Flask</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="fire_quickstart.html">Using Firefly to view FIRE data</a></li>
 </ul>
 </li>
 </ul>
@@ -114,75 +63,32 @@
 <li class="toctree-l1"><a class="reference internal" href="../reference/api/api.html">API Reference</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">Firefly</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-        
           <li><a href="index.html">Creating your own instance of Firefly</a> &raquo;</li>
-        
           <li><a href="flask.html">Sending data to a Firefly server via Flask</a> &raquo;</li>
-        
       <li>Tutorial notebook: Sending data to a local Firefly server through Flask</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="../_sources/data_reader/flask_tutorial.ipynb.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   
 <style>
 /* CSS for nbsphinx extension */
@@ -393,7 +299,7 @@ div.nboutput.container div.output_area > div[class^='highlight']{
 }
 
 /* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
-.prompt a.copybtn {
+.prompt .copybtn {
     display: none;
 }
 
@@ -458,8 +364,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="o">%</span><span class="k">load_ext</span> autoreload
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">load_ext</span> autoreload
 <span class="o">%</span><span class="k">autoreload</span> 2
 <span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">IFrame</span><span class="p">,</span><span class="n">YouTubeVideo</span>
 </pre></div>
@@ -470,8 +375,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">YouTubeVideo</span><span class="p">(</span><span class="s2">&quot;OD598z7pqB0&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">YouTubeVideo</span><span class="p">(</span><span class="s2">&quot;OD598z7pqB0&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -486,40 +390,25 @@ div.rendered_html tbody tr:hover {
     src="https://www.youtube.com/embed/OD598z7pqB0"
     frameborder="0"
     allowfullscreen
+
 ></iframe></div>
 </div>
-<div class="nbinput nblast docutils container">
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">os</span>
 
 <span class="kn">import</span> <span class="nn">requests</span>
 
 
 <span class="kn">import</span> <span class="nn">sys</span>
+<span class="c1">## ignore these lines, you do not need to add this if Firefly is pip installed into your PYTHONPATH</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;/Users/ageller/VISUALIZATIONS/Firefly&#39;</span><span class="p">)</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;/Users/agurvich/research/repos/firefly/src&#39;</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">firefly.data_reader</span> <span class="kn">import</span> <span class="n">ArrayReader</span>
-<span class="kn">from</span> <span class="nn">firefly.server</span> <span class="kn">import</span> <span class="n">spawnFireflyServer</span><span class="p">,</span><span class="n">killAllFireflyServers</span>
-</pre></div>
-</div>
-</div>
-<section id="Tutorial-notebook:-Sending-data-to-a-local-Firefly-server-through-Flask">
-<h1>Tutorial notebook: Sending data to a local Firefly server through Flask<a class="headerlink" href="#Tutorial-notebook:-Sending-data-to-a-local-Firefly-server-through-Flask" title="Permalink to this headline">¶</a></h1>
-<p>A drawback of using <code class="docutils literal notranslate"><span class="pre">.json</span></code> files on disk to pass data between the Python frontend and the Firefly webapp is that these <code class="docutils literal notranslate"><span class="pre">.json</span></code> files can 1. take up a lot of unnecessary disk space 2. take a long time to read from disk</p>
-<p>To address these problems, we use Flask to host a webserver and parse data directly from Python at a data upload endpoint. This procedure is detailed in the server documentation. From the user’s perspective, all they need to do is POST their data to a specific port on their local machine and they will be able to explore their own data without ever having to write a file to disk.</p>
-<section id="Start-the-Firefly-server-as-a-background-process">
-<h2>Start the Firefly server as a background process<a class="headerlink" href="#Start-the-Firefly-server-as-a-background-process" title="Permalink to this headline">¶</a></h2>
-<p>In this tutorial we’ll demonstrate how to update the data being shown in a live instance of Firefly running on a local webserver through Flask. Before attempting this tutorial read through the server documentation which explains how to specify the listening port and different methods of hosting a Flask Firefly server (here we use the <code class="docutils literal notranslate"><span class="pre">firefly.server.spawnFireflyServer</span></code> function which starts a background process).</p>
-<div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
-</pre></div>
-</div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">process</span> <span class="o">=</span> <span class="n">spawnFireflyServer</span><span class="p">()</span>
+<span class="kn">from</span> <span class="nn">firefly.server</span> <span class="kn">import</span> <span class="n">spawnFireflyServer</span><span class="p">,</span><span class="n">quitAllFireflyServers</span>
 </pre></div>
 </div>
 </div>
@@ -528,19 +417,50 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Waiting up to 10 seconds for background Firefly server to start...done! Your server is available at - http://localhost:5000
+palettable colormaps are not installed
+don&#39;t have phil&#39;s colormaps
+</pre></div></div>
+</div>
+<section id="Tutorial-notebook:-Sending-data-to-a-local-Firefly-server-through-Flask">
+<h1>Tutorial notebook: Sending data to a local Firefly server through Flask<a class="headerlink" href="#Tutorial-notebook:-Sending-data-to-a-local-Firefly-server-through-Flask" title="Permalink to this headline"></a></h1>
+<p>A drawback of using <code class="docutils literal notranslate"><span class="pre">.json</span></code> files on disk to pass data between the Python frontend and the Firefly webapp is that these <code class="docutils literal notranslate"><span class="pre">.json</span></code> files can 1. take up a lot of unnecessary disk space 2. take a long time to read from disk</p>
+<p>To address these problems, we use Flask to host a webserver and parse data directly from Python at a data upload endpoint. This procedure is detailed in the server documentation. From the user’s perspective, all they need to do is POST their data to a specific port on their local machine and they will be able to explore their own data without ever having to write a file to disk.</p>
+<section id="Start-the-Firefly-server-as-a-background-process">
+<h2>Start the Firefly server as a background process<a class="headerlink" href="#Start-the-Firefly-server-as-a-background-process" title="Permalink to this headline"></a></h2>
+<p>In this tutorial we’ll demonstrate how to update the data being shown in a live instance of Firefly running on a local webserver through Flask. Before attempting this tutorial read through the server documentation which explains how to specify the listening port and different methods of hosting a Flask Firefly server (here we use the <code class="docutils literal notranslate"><span class="pre">firefly.server.spawnFireflyServer</span></code> function which starts a background process).</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">process</span> <span class="o">=</span> <span class="n">spawnFireflyServer</span><span class="p">(</span><span class="mi">5500</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Waiting up to 10 seconds for background Firefly server to startdone! Your server is available at - http://localhost:5500
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+ * Restarting with stat
 </pre></div></div>
 </div>
 </section>
 <section id="Show-Firefly-in-an-IFrame">
-<h2>Show Firefly in an IFrame<a class="headerlink" href="#Show-Firefly-in-an-IFrame" title="Permalink to this headline">¶</a></h2>
-<p>IPython allows one to embed webpages into a notebook using an IFrame, we’ll take advantage of that to embed Firefly here (you can also visit the localhost:5000 url in your browser if you’d prefer).</p>
+<h2>Show Firefly in an IFrame<a class="headerlink" href="#Show-Firefly-in-an-IFrame" title="Permalink to this headline"></a></h2>
+<p>IPython allows one to embed webpages into a notebook using an IFrame, we’ll take advantage of that to embed Firefly here (you can also visit the localhost:5500 url in your browser if you’d prefer).</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;http://localhost:5000&quot;</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;http://localhost:5500&quot;</span>
 <span class="n">IFrame</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">500</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -553,21 +473,21 @@ Waiting up to 10 seconds for background Firefly server to start...done! Your ser
 <iframe
     width="1000"
     height="500"
-    src="http://localhost:5000"
+    src="http://localhost:5500"
     frameborder="0"
     allowfullscreen
+
 ></iframe></div>
 </div>
 </section>
 <section id="Create-some-example-data-and-put-it-into-a-firefly.data_reader.Reader-object">
-<h2>Create some example data and put it into a <code class="docutils literal notranslate"><span class="pre">firefly.data_reader.Reader</span></code> object<a class="headerlink" href="#Create-some-example-data-and-put-it-into-a-firefly.data_reader.Reader-object" title="Permalink to this headline">¶</a></h2>
+<h2>Create some example data and put it into a <code class="docutils literal notranslate"><span class="pre">firefly.data_reader.Reader</span></code> object<a class="headerlink" href="#Create-some-example-data-and-put-it-into-a-firefly.data_reader.Reader-object" title="Permalink to this headline"></a></h2>
 <p>See the reader documentation or the <code class="docutils literal notranslate"><span class="pre">reader_tutorial.ipynb</span></code> example notebook.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1">## let&#39;s create some sample data, a grid of points in a 3d cube</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">## let&#39;s create some sample data, a grid of points in a 3d cube</span>
 <span class="n">my_coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">20</span><span class="p">)</span>
 <span class="n">xs</span><span class="p">,</span><span class="n">ys</span><span class="p">,</span><span class="n">zs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">my_coords</span><span class="p">,</span><span class="n">my_coords</span><span class="p">,</span><span class="n">my_coords</span><span class="p">)</span>
 <span class="n">xs</span><span class="p">,</span><span class="n">ys</span><span class="p">,</span><span class="n">zs</span> <span class="o">=</span> <span class="n">xs</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span><span class="n">ys</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span><span class="n">zs</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
@@ -583,11 +503,10 @@ Waiting up to 10 seconds for background Firefly server to start...done! Your ser
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">my_arrayReader</span> <span class="o">=</span> <span class="n">ArrayReader</span><span class="p">(</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">my_arrayReader</span> <span class="o">=</span> <span class="n">ArrayReader</span><span class="p">(</span>
     <span class="n">coords</span><span class="p">,</span>
     <span class="n">fields</span><span class="o">=</span><span class="n">fields</span><span class="p">,</span>
-    <span class="n">write_jsons_to_disk</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">write_to_disk</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -596,25 +515,25 @@ Waiting up to 10 seconds for background Firefly server to start...done! Your ser
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-JSONdir is None, defaulting to /Users/agurvich/research/repos/firefly/src/firefly/static/data/Data
-Make sure each tracked_array (1) has a tracked_filter_flag (0), assuming True.
-Make sure each tracked_array (1) has a tracked_colormap_flag (0), assuming True.
-Outputting: PGroup_0 - 8000/8000 particles - 1 tracked fields
+datadir is None, defaulting to /Users/agurvich/research/repos/firefly/src/firefly/static/data/Data
+Make sure each field_array (1) has a field_filter_flag (0), assuming True.
+Make sure each field_array (1) has a field_colormap_flag (0), assuming True.
+Make sure each field_array (1) has a field_radius_flag (0), assuming False.
+PGroup_0 - 8000/8000 particles - 1 tracked fields
 </pre></div></div>
 </div>
 </section>
 <section id="Send-this-data-to-the-Flask-app">
-<h2>Send this data to the Flask app<a class="headerlink" href="#Send-this-data-to-the-Flask-app" title="Permalink to this headline">¶</a></h2>
+<h2>Send this data to the Flask app<a class="headerlink" href="#Send-this-data-to-the-Flask-app" title="Permalink to this headline"></a></h2>
 <p>The data will be sent to the Firefly server via a POST request, we can do this in python using the <code class="docutils literal notranslate"><span class="pre">requests</span></code> module. One the POST has been made scroll back up to the window above and see the new data (if you don’t see new data, it’s possible that you’ve overwritten the default <code class="docutils literal notranslate"><span class="pre">startup.json</span></code> that shipped with Firefly by following some of the other tutorials. That’s okay! See the multiple datasets documentation or the <code class="docutils literal notranslate"><span class="pre">multiple_datasets.ipynb</span></code> example notebook to learn more about the
 <code class="docutils literal notranslate"><span class="pre">startup.json</span></code> file.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1">## make a POST request to port 5000, supplying the JSON produced by setting</span>
-<span class="c1">##  write_jsons_to_disk=False and calling .dumpToJSON</span>
-<span class="n">port</span> <span class="o">=</span> <span class="mi">5000</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">## make a POST request to port 5500, supplying the JSON produced by setting</span>
+<span class="c1">##  write_jsons_to_disk=False and calling .dumpToJSON&quot;</span>
+<span class="n">port</span> <span class="o">=</span> <span class="mi">5500</span>
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;sending to Firefly&#39;</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">getsizeof</span><span class="p">(</span><span class="n">my_arrayReader</span><span class="o">.</span><span class="n">JSON</span><span class="p">))</span>
 <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;http://localhost:</span><span class="si">{</span><span class="n">port</span><span class="si">:</span><span class="s1">d</span><span class="si">}</span><span class="s1">/data_input&#39;</span><span class="p">,</span><span class="n">json</span><span class="o">=</span><span class="n">my_arrayReader</span><span class="o">.</span><span class="n">JSON</span><span class="p">)</span>
 </pre></div>
@@ -625,7 +544,7 @@ Outputting: PGroup_0 - 8000/8000 particles - 1 tracked fields
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-sending to Firefly 425649
+sending to Firefly 49
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -634,7 +553,7 @@ sending to Firefly 425649
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;Response [200]&gt;
+&lt;Response [500]&gt;
 </pre></div></div>
 </div>
 <p>We’ve also wrapped this code in the <code class="docutils literal notranslate"><span class="pre">.sendDataViaFlask</span></code> method.</p>
@@ -642,9 +561,8 @@ sending to Firefly 425649
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1">## make a POST request</span>
-<span class="n">my_arrayReader</span><span class="o">.</span><span class="n">sendDataViaFlask</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">## make a POST request</span>
+<span class="n">my_arrayReader</span><span class="o">.</span><span class="n">sendDataViaFlask</span><span class="p">(</span><span class="mi">5500</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -653,81 +571,94 @@ sending to Firefly 425649
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Posting...data posted!
+PGroup_0 - 8000/8000 particles - 1 tracked fields
+Posting to port 5500...data posted!
 </pre></div></div>
 </div>
 </section>
-<section id="Killing-the-Firefly-server-process-when-you’re-done">
-<h2>Killing the Firefly server process when you’re done<a class="headerlink" href="#Killing-the-Firefly-server-process-when-you’re-done" title="Permalink to this headline">¶</a></h2>
-<p>Because the Firefly server was started in the background, the process will persist even when you’re done with it. You should make sure to kill it using the <code class="docutils literal notranslate"><span class="pre">firefly.server.killAllFireflyServers</span></code> function. If you supply a process id (which is returned by the <code class="docutils literal notranslate"><span class="pre">spawnFireflyServer</span></code> function) then it will only kill that one process. However, processes are a bit defensive and sometimes we’ve found they survive the attempt on their life and then hide under a different PID. In which case, it’s
-always safest to just kill all the servers indiscriminately. Generally the two are interchangeable unless you’re hosting multiple local servers of Firefly on different ports. This is pretty uncommon/advanced in which case you hopefully know what you’re doing.</p>
+<section id="Quitting-the-Firefly-server-process-when-you’re-done">
+<h2>Quitting the Firefly server process when you’re done<a class="headerlink" href="#Quitting-the-Firefly-server-process-when-you’re-done" title="Permalink to this headline"></a></h2>
+<p>Because the Firefly server was started in the background, the process will persist even when you’re done with it. You should make sure to quit it using the <code class="docutils literal notranslate"><span class="pre">firefly.server.quitAllFireflyServers</span></code> function. If you supply a process id (which is returned by the <code class="docutils literal notranslate"><span class="pre">spawnFireflyServer</span></code> function) then it will only quit that one process. However, processes are a bit defensive and sometimes we’ve found they survive the attempt on their life and then hide under a different PID. In which case, it’s
+always safest to just quit all the servers indiscriminately. Generally the two are interchangeable unless you’re hosting multiple local servers of Firefly on different ports. This is pretty uncommon/advanced in which case you hopefully know what you’re doing.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">firefly.server.quitAllFireflyServers</span></code> function will print all of the output the Firefly server</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">killAllFireflyServers</span><span class="p">()</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">return_code</span> <span class="o">=</span> <span class="n">quitAllFireflyServers</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
-</pre></div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-15
+Server output:
+--------------
 </pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+kill: 69304: No such process
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+palettable colormaps are not installed
+don&#39;t have phil&#39;s colormaps
+Launching Firefly at: http://localhost:5500
+palettable colormaps are not installed
+don&#39;t have phil&#39;s colormaps
+Launching Firefly at: http://localhost:5500
+</pre></div></div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span>
+</pre></div>
+</div>
 </div>
 </section>
 </section>
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="fire_quickstart.html" class="btn btn-neutral float-right" title="Using Firefly to view FIRE data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="flask.html" class="btn btn-neutral float-left" title="Sending data to a Firefly server via Flask" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../server.html" class="btn btn-neutral float-right" title="Hosting a Firefly webserver" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2021, Alex Gurvich, Aaron Geller.
-
-    </p>
+    <p>&#169; Copyright 2022, Alex Gurvich, Aaron Geller.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

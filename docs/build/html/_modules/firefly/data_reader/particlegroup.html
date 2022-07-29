@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>firefly.data_reader.particlegroup &mdash; Firefly 3.0.0 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html">
+            <img src="../../../_static/logo_banner.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../webapp/index.html">Interacting with a Firefly visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../data_reader/index.html">Creating your own instance of Firefly</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../server.html">Hosting a Firefly webserver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../experimental.html">Experimental features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/api/api.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Firefly</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>firefly.data_reader.particlegroup</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for firefly.data_reader.particlegroup</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="kn">from</span> <span class="nn">matplotlib.colors</span> <span class="kn">import</span> <span class="n">hex2color</span>
+
+<span class="kn">import</span> <span class="nn">os</span> 
+
+<span class="kn">from</span> <span class="nn">.json_utils</span> <span class="kn">import</span> <span class="n">write_to_json</span><span class="p">,</span><span class="n">load_from_json</span>
+<span class="kn">from</span> <span class="nn">.binary_writer</span> <span class="kn">import</span> <span class="n">BinaryWriter</span>
+
+<span class="kn">from</span> <span class="nn">.octree</span> <span class="kn">import</span> <span class="n">Octree</span><span class="p">,</span> <span class="n">init_octree_root_node</span>
+
+<div class="viewcode-block" id="ParticleGroup"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.ParticleGroup.html#firefly.data_reader.ParticleGroup">[docs]</a><span class="k">class</span> <span class="nc">ParticleGroup</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This is a class for organizing data that you want to interface with a </span>
+<span class="sd">    Reader instance. This class provides rudimentary data validation and </span>
+<span class="sd">    settings defaults specific to this data class. If you do not intend</span>
+<span class="sd">    to attach it to a Reader instance using that reader&#39;s addParticleGroup</span>
+<span class="sd">    method please be careful!!</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ParticleGroup.__repr__"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.ParticleGroup.html#firefly.data_reader.ParticleGroup.__repr__">[docs]</a>    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Implementation of builtin function __repr__</span>
+
+<span class="sd">        :return: mystr, the pretty rendering of a particle group</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="n">mystr</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> &quot;</span><span class="o">%</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">UIname</span><span class="p">)</span>
+        <span class="n">mystr</span> <span class="o">+=</span> <span class="s2">&quot;- </span><span class="si">%d</span><span class="s2">/</span><span class="si">%d</span><span class="s2"> particles - </span><span class="si">%d</span><span class="s2"> tracked fields&quot;</span><span class="o">%</span><span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nparts</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">decimation_factor</span><span class="p">),</span><span class="bp">self</span><span class="o">.</span><span class="n">nparts</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">field_names</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">mystr</span></div>
+
+<div class="viewcode-block" id="ParticleGroup.__getitem__"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.ParticleGroup.html#firefly.data_reader.ParticleGroup.__getitem__">[docs]</a>    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">key</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Implementation of builtin function __getitem__ to retreive tracked field data.</span>
+
+<span class="sd">        :param key: field array to extract</span>
+<span class="sd">        :type key: str </span>
+<span class="sd">        :raises KeyError: if field is not one of the tracked fields</span>
+<span class="sd">        :return: field</span>
+<span class="sd">        :rtype: np.ndarray</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;Coordinates&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span>
+
+        <span class="k">elif</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">field_names</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">field_arrays</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">field_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">key</span><span class="p">)]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%s</span><span class="s2"> is not a field array&quot;</span><span class="o">%</span><span class="n">key</span><span class="p">)</span></div>
+    
+<div class="viewcode-block" id="ParticleGroup.__setitem__"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.ParticleGroup.html#firefly.data_reader.ParticleGroup.__setitem__">[docs]</a>    <span class="k">def</span> <span class="fm">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">key</span><span class="p">,</span><span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Implementation of builtin function __setitem__ to replace</span>
+<span class="sd">            field data or track new fields. Filter flag and colormap flags</span>
+<span class="sd">            will be set to true, call :func:`firefly.data_reader.ParticleGroup.trackArray`</span>
+<span class="sd">            directly if this is undesired.</span>
+
+<span class="sd">        :param key: name of field to alter or start tracking</span>
+<span class="sd">        :type key: str</span>
+<span class="sd">        :param value: field data to replace current field data with</span>
+<span class="sd">            or initially track</span>
+<span class="sd">        :type value: np.ndarray </span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;Coordinates&#39;</span><span class="p">:</span>
+            <span class="c1">## replace the coordinates</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span><span class="o">=</span><span class="n">value</span>
+        <span class="k">elif</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">field_names</span><span class="p">:</span>
+            <span class="c1">## replace a field array</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">field_arrays</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">field_names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">key</span><span class="p">)]</span><span class="o">=</span><span class="n">value</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1">## track a key we haven&#39;t tracked yet,</span>
+            <span class="c1">##  filter and colormap flags will be set to True by default.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">trackArray</span><span class="p">(</span><span class="n">key</span><span class="p">,</span><span class="n">value</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="ParticleGroup.__init__"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.ParticleGroup.html#firefly.data_reader.ParticleGroup.__init__">[docs]</a>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">UIname</span><span class="p">,</span>
+        <span class="n">coordinates</span><span class="p">,</span>
+        <span class="n">velocities</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">rgba_colors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">field_arrays</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">field_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">field_filter_flags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">field_colormap_flags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">field_radius_flags</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">decimation_factor</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">attached_settings</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">loud</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">settings_kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Accepts pass-through kwargs for :class:`firefly.data_reader.Settings` whether one is attached</span>
+<span class="sd">            at initialization or not.</span>
+
+<span class="sd">        :param UIname: Name of the particle group that shows up in the UI, 4-5 characters is best</span>
+<span class="sd">            so that it doesn&#39;t spill out of the GUI.</span>
+<span class="sd">        :type UIname: str </span>
+<span class="sd">        :param coordinates: The coordinates of the points in 3d space, should have a shape of `(nparts,3)`</span>
+<span class="sd">        :type coordinates: np.ndarray</span>
+<span class="sd">        :param velocities: The velocities associated with each coordinate, should have a shape of `(nparts,3)`</span>
+<span class="sd">            allows vectors to be plotted at the coordinate location</span>
+<span class="sd">        :type velocities: np.ndarray</span>
+<span class="sd">        :param rgba_colors: The RGBA tuples associated with each coordinate, should have a shape of `(nparts,4)`</span>
+<span class="sd">        :type rgba_colors: np.ndarray</span>
+<span class="sd">        :param field_arrays: The field data arrays to associate with each coordinate in space, each array</span>
+<span class="sd">            should be one-dimensional and have `nparts` entries., defaults to None</span>
+<span class="sd">        :type field_arrays: (nfields,nparts) np.ndarray, optional</span>
+<span class="sd">        :param field_names: Should be the same length as `field_arrays`, and gives a</span>
+<span class="sd">            name to each of the arrays when they show up in the UI dropdowns., defaults to None</span>
+<span class="sd">        :type field_names: list of str with len = nfields, optional</span>
+<span class="sd">        :param field_filter_flags: Should be the same length as `field_arrays`,</span>
+<span class="sd">            and gives a flag for whether that array should be available as an</span>
+<span class="sd">            interactive filter within the webapp, defaults to None</span>
+<span class="sd">        :type field_filter_flags: list of bool with len = nfields, optional</span>
+<span class="sd">        :param field_colormap_flags: Should be the same length as `field_arrays`,</span>
+<span class="sd">            and gives a flag for whether that field should be </span>
+<span class="sd">            &quot;colormappable&quot; within the webapp, defaults to None</span>
+<span class="sd">        :type field_colormap_flags: list of bool with len = nfields, optional</span>
+<span class="sd">        :param field_radius_flags: Should be the same length as `field_arrays`,</span>
+<span class="sd">            and gives a flag for whether that field should be allowed to scale</span>
+<span class="sd">            particle radii within the webapp, defaults to None</span>
+<span class="sd">        :type field_radius_flags: list of bool with len = nfields, optional</span>
+<span class="sd">        :param decimation_factor: factor by which to reduce the data randomly </span>
+<span class="sd">                i.e. :code:`data=data[::decimation_factor]`, defaults to 1</span>
+<span class="sd">        :type decimation_factor: int, optional</span>
+<span class="sd">        :param attached_settings: :class:`~firefly.data_reader.Settings` instance that should be linked</span>
+<span class="sd">            to this particle group such that GUI elements are connected correctly. If not provided here</span>
+<span class="sd">            can be attached after-the-fact using the</span>
+<span class="sd">            :func:`firefly.data-reader.Settings.attachSettings` method, defaults to None</span>
+<span class="sd">        :type attached_settings: :class:`firefly.data_reader.Settings`, optional</span>
+<span class="sd">        :param loud: flag to print status information to the console, defaults to False</span>
+<span class="sd">        :type loud: bool, optional</span>
+<span class="sd">        :raises ValueError: if len(field_names) != len(field arrays)</span>
+<span class="sd">        :raises ValueError: if a field_array has length other than len(coordinates)</span>
+<span class="sd">        :raises ValueError: if :code:`color` is passed as an option kwarg but the value is </span>
+<span class="sd">            not an RGBA iterable</span>
+<span class="sd">        :raises KeyError: if passed an invalid option_kwarg</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="c1">## this will be overwritten if we call the self.createOctree method</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">octree</span><span class="p">:</span> <span class="n">Octree</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1">## handle default values for iterables</span>
+        <span class="n">field_filter_flags</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">field_filter_flags</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">field_filter_flags</span>
+        <span class="n">field_colormap_flags</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">field_colormap_flags</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">field_colormap_flags</span>
+        <span class="n">field_radius_flags</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">field_radius_flags</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">field_radius_flags</span>
+
+        <span class="c1">## bind input that will not be validated</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">UIname</span> <span class="o">=</span> <span class="n">UIname</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">decimation_factor</span> <span class="o">=</span> <span class="n">decimation_factor</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">coordinates</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">velocities</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">velocities</span><span class="p">)</span> <span class="k">if</span> <span class="n">velocities</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rgba_colors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">rgba_colors</span><span class="p">)</span> <span class="k">if</span> <span class="n">rgba_colors</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nparts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">field_arrays</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span> <span class="k">if</span> <span class="n">field_arrays</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">field_arrays</span>
+
+        <span class="c1">## reduce the decimation factor if someone has asked to skip</span>
+        <span class="c1">##  too many particles for the given dataset so that a single particle</span>
+        <span class="c1">##  is shown.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">decimation_factor</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">nparts</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">decimation_factor</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">nparts</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1">## allow users to pass in field data as a dictionary rather than a list</span>
+        <span class="c1">##  and use keys as field names</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">field_arrays</span><span class="p">)</span> <span class="o">==</span> <span class="nb">dict</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">field_names</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span> 
+                <span class="n">field_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">field_arrays</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;filter/colormap/radius flags correspond to:&#39;</span><span class="p">,</span><span class="n">field_names</span><span class="p">)</span>
+            <span class="n">field_arrays</span> <span class="o">=</span> <span class="p">[</span><span class="n">field_arrays</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">field_names</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span> <span class="n">field_names</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">field_names</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">field_names</span>
+
+        <span class="c1">## check if each field is named</span>
+        <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">field_names</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">field_arrays</span><span class="p">))</span> <span class="ow">and</span> <span class="n">np</span><span class="o">.</span><span class="n">size</span><span class="p">(</span><span class="n">field_arrays</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Make sure each field_array (</span><span class="si">%d</span><span class="s2">) has a field_name (</span><span class="si">%d</span><span class="s2">)&quot;</span><span class="o">%</span><span class="p">(</span>
+                <span class="nb">len</span><span class="p">(</span><span class="n">field_arrays</span><span class="p">),</span><span class="nb">len</span><span class="p">(</span><span class="n">field_names</span><span class="p">)))</span>
+
+        <span class="c1">## check if each field is the right length</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span><span class="n">array</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">field_names</span><span class="p">,</span><span class="n">field_arrays</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">array</span><span class="p">)</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">nparts</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;You passed me </span><span class="si">%s</span><span class="s2"> with </span><span class="si">%d</span><span class="s2"> entries but only </span><span class="si">%d</span><span class="s2"> coordinates&quot;</span><span class="o">%</span><span class="p">(</span>
+                    <span class="n">name</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">array</span><span class="p">),</span><span class="bp">self</span><span class="o">.</span><span class="n">nparts</span><span class="p">))</span>
+    
+        <span class="c1">## check if each field was specified to be filterable</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">field_names</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">field_filter_flags</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">loud</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Make sure each field_array (</span><span class="si">%d</span><span class="s2">) has a field_filter_flag (</span><span class="si">%d</span><span class="s2">), assuming True.&quot;</span><span class="o">%</span><span class="p">(</span>
+                    <span class="nb">len</span><span class="p">(</span><span class="n">field_names</span><span class="p">),</span><span class="nb">len</span><span class="p">(</span><span class="n">field_colormap_flags</span><span class="p">)))</span>
+
+            <span class="n">new_field_filter_flags</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">field_filter_flags</span><span class="p">,</span>
+                <span class="p">[</span><span class="kc">True</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">field_names</span><span class="p">)</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">field_filter_flags</span><span class="p">)),</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span>
+            <span class="p">)</span>
+            <span class="n">field_filter_flags</span> <span class="o">=</span> <span class="n">new_field_filter_flags</span>
+
+        <span class="c1">## check if each field was specified to be colormappable</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">field_names</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">field_colormap_flags</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">loud</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Make sure each field_array (</span><span class="si">%d</span><span class="s2">) has a field_colormap_flag (</span><span class="si">%d</span><span class="s2">), assuming True.&quot;</span><span class="o">%</span><span class="p">(</span>
+                    <span class="nb">len</span><span class="p">(</span><span class="n">field_names</span><span class="p">),</span><span class="nb">len</span><span class="p">(</span><span class="n">field_colormap_flags</span><span class="p">)))</span>
+
+            <span class="n">new_field_colormap_flags</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">field_colormap_flags</span><span class="p">,</span>
+                <span class="p">[</span><span class="kc">True</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">field_names</span><span class="p">)</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">field_colormap_flags</span><span class="p">)),</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span>
+            <span class="p">)</span>
+            <span class="n">field_colormap_flags</span> <span class="o">=</span> <span class="n">new_field_colormap_flags</span>
+
+        <span class="c1">## check if each field was specified whether to be allowed to scale radius</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">field_names</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">field_radius_flags</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">loud</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Make sure each field_array (</span><span class="si">%d</span><span class="s2">) has a field_radius_flag (</span><span class="si">%d</span><span class="s2">), assuming False.&quot;</span><span class="o">%</span><span class="p">(</span>
+                    <span class="nb">len</span><span class="p">(</span><span class="n">field_names</span><span class="p">),</span><span class="nb">len</span><span class="p">(</span><span class="n">field_radius_flags</span><span class="p">)))</span>
+
+            <span class="n">new_field_radius_flags</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="n">field_radius_flags</span><span class="p">,</span>
+                <span class="p">[</span><span class="kc">False</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">field_names</span><span class="p">)</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">field_radius_flags</span><span class="p">)),</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span>
+            <span class="p">)</span>
+            <span class="n">field_radius_flags</span> <span class="o">=</span> <span class="n">new_field_radius_flags</span>
+
+        <span class="c1">## bind validated input</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">field_names</span> <span class="o">=</span> <span class="n">field_names</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">field_arrays</span> <span class="o">=</span> <span class="n">field_arrays</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">field_filter_flags</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">field_filter_flags</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">field_colormap_flags</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">field_colormap_flags</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">field_radius_flags</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">field_radius_flags</span><span class="p">)</span>
+
+        <span class="c1">## TODO how do these interface with javascript code?</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">radiusFunction</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">weightFunction</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1">######### setup the settings for this particleGroup </span>
+
+        <span class="c1">## start with the default</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">settings_default</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;color&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="mi">3</span><span class="p">),[</span><span class="mi">1</span><span class="p">]),</span>
+            <span class="s1">&#39;sizeMult&#39;</span><span class="p">:</span><span class="mf">.1</span><span class="p">,</span>
+            <span class="s1">&#39;showParts&#39;</span><span class="p">:</span><span class="kc">True</span><span class="p">,</span>
+            <span class="s1">&#39;filterVals&#39;</span><span class="p">:</span><span class="nb">dict</span><span class="p">(),</span>
+            <span class="s1">&#39;filterLims&#39;</span><span class="p">:</span><span class="nb">dict</span><span class="p">(),</span>
+            <span class="s1">&#39;invertFilter&#39;</span><span class="p">:</span><span class="nb">dict</span><span class="p">(),</span>
+            <span class="s1">&#39;colormapVals&#39;</span><span class="p">:</span><span class="nb">dict</span><span class="p">(),</span>
+            <span class="s1">&#39;colormapLims&#39;</span><span class="p">:</span><span class="nb">dict</span><span class="p">(),</span>
+            <span class="s1">&#39;colormap&#39;</span><span class="p">:</span><span class="mf">1.</span><span class="o">/</span><span class="mi">64</span><span class="p">,</span>
+            <span class="s1">&#39;colormapVariable&#39;</span><span class="p">:</span><span class="kc">None</span><span class="p">,</span> <span class="c1">## use default set in javascript</span>
+            <span class="s1">&#39;showColormap&#39;</span><span class="p">:</span><span class="kc">None</span><span class="p">,</span> <span class="c1">## use default set in javascript</span>
+            <span class="s1">&#39;showVel&#39;</span><span class="p">:</span><span class="kc">None</span><span class="p">,</span> <span class="c1">## use default set in javascript</span>
+            <span class="s1">&#39;velVectorWidth&#39;</span><span class="p">:</span><span class="kc">None</span><span class="p">,</span> <span class="c1">## use default set in javascript</span>
+            <span class="s1">&#39;velGradient&#39;</span><span class="p">:</span><span class="kc">None</span><span class="p">,</span> <span class="c1">## use default set in javascript</span>
+            <span class="s1">&#39;plotNmax&#39;</span><span class="p">:</span><span class="kc">None</span><span class="p">,</span> <span class="c1">## use default set in javascript</span>
+            <span class="s1">&#39;velType&#39;</span><span class="p">:</span><span class="kc">None</span><span class="p">,</span> <span class="c1">## use default set in javascript</span>
+            <span class="s1">&#39;animateVel&#39;</span><span class="p">:</span><span class="kc">None</span><span class="p">,</span> <span class="c1">## use default set in javascript</span>
+            <span class="s1">&#39;animateVelDt&#39;</span><span class="p">:</span><span class="kc">None</span><span class="p">,</span> <span class="c1">## use default set in javascript</span>
+            <span class="s1">&#39;animateVelTmax&#39;</span><span class="p">:</span><span class="kc">None</span><span class="p">,</span> <span class="c1">## use default set in javascript</span>
+            <span class="s1">&#39;radiusVariable&#39;</span><span class="p">:</span><span class="mi">0</span><span class="p">,</span> 
+            <span class="s1">&#39;GUIExcludeList&#39;</span><span class="p">:</span><span class="kc">None</span>
+        <span class="p">}</span>
+        
+        <span class="c1">## setup default values for the initial filter limits (vals/lims represent the interactive</span>
+        <span class="c1">##  &quot;displayed&quot; particles and the available boundaries for the limits)</span>
+        <span class="k">for</span> <span class="n">field_name</span><span class="p">,</span><span class="n">field_filter_flag</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">field_names</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">field_filter_flags</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">field_filter_flag</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">settings_default</span><span class="p">[</span><span class="s1">&#39;filterVals&#39;</span><span class="p">][</span><span class="n">field_name</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">settings_default</span><span class="p">[</span><span class="s1">&#39;filterLims&#39;</span><span class="p">][</span><span class="n">field_name</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1">## setup default values for the initial color limits (vals/lims represent the interactive</span>
+        <span class="c1">##  &quot;displayed&quot; particles and the available boundaries for the limits)</span>
+        <span class="k">for</span> <span class="n">field_name</span><span class="p">,</span><span class="n">field_colormap_flag</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">field_names</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">field_colormap_flags</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">field_colormap_flag</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">settings_default</span><span class="p">[</span><span class="s1">&#39;colormapVals&#39;</span><span class="p">][</span><span class="n">field_name</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">settings_default</span><span class="p">[</span><span class="s1">&#39;colormapLims&#39;</span><span class="p">][</span><span class="n">field_name</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        
+        <span class="c1">## now let the user overwrite the defaults if they&#39;d like (e.g. the color, likely</span>
+        <span class="c1">##  the most popular thing users will like to do)</span>
+        <span class="k">for</span> <span class="n">settings_kwarg</span> <span class="ow">in</span> <span class="n">settings_kwargs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">settings_kwarg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings_default</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">settings_kwarg</span> <span class="o">==</span> <span class="s1">&#39;color&#39;</span><span class="p">:</span>
+                    <span class="n">color</span> <span class="o">=</span> <span class="n">settings_kwargs</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">color</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span> <span class="n">color</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">hex2color</span><span class="p">(</span><span class="n">color</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">color</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">:</span>
+                        <span class="c1">## passed an RGB color, assume alpha value of 1</span>
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">color</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span> <span class="n">color</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">color</span><span class="p">,[</span><span class="mi">1</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                            <span class="s2">&quot;Make sure you pass the color as an RGB(A) array&quot;</span><span class="p">)</span>
+                    <span class="n">settings_kwargs</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">color</span>
+                        
+                <span class="bp">self</span><span class="o">.</span><span class="n">settings_default</span><span class="p">[</span><span class="n">settings_kwarg</span><span class="p">]</span> <span class="o">=</span> <span class="n">settings_kwargs</span><span class="p">[</span><span class="n">settings_kwarg</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;Invalid settings kwarg </span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="n">settings_kwarg</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">attached_settings</span> <span class="o">=</span> <span class="n">attached_settings</span>
+
+        <span class="c1">## add magnitude of velocity to fields</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">velocities</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">trackArray</span><span class="p">(</span><span class="s1">&#39;Velocity&#39;</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">norm</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">velocities</span><span class="p">,</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span><span class="n">radius_flag</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+        
+<div class="viewcode-block" id="ParticleGroup.trackArray"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.ParticleGroup.html#firefly.data_reader.ParticleGroup.trackArray">[docs]</a>    <span class="k">def</span> <span class="nf">trackArray</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">field_name</span><span class="p">,</span>
+        <span class="n">arr</span><span class="p">,</span>
+        <span class="n">filter_flag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">colormap_flag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">radius_flag</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">filterLims</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">filterVals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">colormapLims</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">colormapVals</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Adds an additional data field to the ParticleGroup&#39;s tracked fields arrays.</span>
+
+<span class="sd">        :param field_name: name to show in the GUI for this field</span>
+<span class="sd">        :type field_name: str</span>
+<span class="sd">        :param arr: data array for this field, should be self.nparts long</span>
+<span class="sd">        :type arr: np.ndarray</span>
+<span class="sd">        :param filter_flag: flag to make field filterable in the GUI, defaults to True</span>
+<span class="sd">        :type filter_flag: bool, optional</span>
+<span class="sd">        :param colormap_flag: flag to make field colormappable in the GUI, defaults to True</span>
+<span class="sd">        :type colormap_flag: bool, optional</span>
+<span class="sd">        :param radius_flag: flag to allow field to be used as a radius scale in the GUI, defaults to True</span>
+<span class="sd">        :type radius_flag: bool, optional</span>
+<span class="sd">        :param filterLims: initial [min, max] limits to the filters. </span>
+<span class="sd">            defaults to None and is set in the web app to [min, max] of the field</span>
+<span class="sd">        :type filterLims: list of float, optional</span>
+<span class="sd">        :param filterVals: initial location of the filter slider handles.</span>
+<span class="sd">            defaults to None and is set in the web app to [min, max] of the field</span>
+<span class="sd">        :type filterVals: list of float, optional</span>
+<span class="sd">        :param colormapLims: initial [min, max] limits to the colormaps. </span>
+<span class="sd">            defaults to None and is set in the web app to [min, max] of the field</span>
+<span class="sd">        :type colormapLims: list of float, optional</span>
+<span class="sd">        :param colormapVals: initial location of the colormap slider handles.</span>
+<span class="sd">            defaults to None and is set in the web app to [min, max] of the field</span>
+<span class="sd">        :type colormapVals: list of float, optional</span>
+<span class="sd">        :raises ValueError: if the length of the field array is not self.nparts</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="c1">## check that it&#39;s the correct length</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nparts</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">arr</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;You passed me </span><span class="si">%s</span><span class="s2"> with </span><span class="si">%d</span><span class="s2"> entries but only </span><span class="si">%d</span><span class="s2"> coordinates&quot;</span><span class="o">%</span><span class="p">(</span>
+                <span class="n">field_name</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">arr</span><span class="p">),</span><span class="bp">self</span><span class="o">.</span><span class="n">nparts</span><span class="p">))</span>
+
+        <span class="c1">## go ahead and put it in the field arrays</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">field_names</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">field_names</span><span class="p">,</span>
+            <span class="p">[</span><span class="n">field_name</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">field_arrays</span><span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">field_arrays</span><span class="p">,</span>
+            <span class="p">[</span><span class="n">arr</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">field_filter_flags</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">field_filter_flags</span><span class="p">,</span>
+            <span class="p">[</span><span class="n">filter_flag</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">field_colormap_flags</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">field_colormap_flags</span><span class="p">,</span>
+            <span class="p">[</span><span class="n">colormap_flag</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">field_radius_flags</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">field_radius_flags</span><span class="p">,</span>
+            <span class="p">[</span><span class="n">radius_flag</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1">## update the default settings with this array&#39;s filterVals/Lims</span>
+        <span class="k">if</span> <span class="n">filter_flag</span><span class="p">:</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">settings_default</span><span class="p">[</span><span class="s1">&#39;filterLims&#39;</span><span class="p">][</span><span class="n">field_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">filterLims</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">settings_default</span><span class="p">[</span><span class="s1">&#39;filterVals&#39;</span><span class="p">][</span><span class="n">field_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">filterVals</span> 
+
+        <span class="c1">## update the default settings with this array&#39;s colormapVals/Lims</span>
+        <span class="k">if</span> <span class="n">colormap_flag</span><span class="p">:</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">settings_default</span><span class="p">[</span><span class="s1">&#39;colormapLims&#39;</span><span class="p">][</span><span class="n">field_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">colormapLims</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">settings_default</span><span class="p">[</span><span class="s1">&#39;colormapVals&#39;</span><span class="p">][</span><span class="n">field_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">colormapVals</span>
+
+        <span class="c1">## update the attached settings if they&#39;re already there</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">attached_settings</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">attached_settings</span><span class="p">[</span><span class="s1">&#39;filterLims&#39;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">UIname</span><span class="p">][</span><span class="n">field_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">filterLims</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">attached_settings</span><span class="p">[</span><span class="s1">&#39;filterVals&#39;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">UIname</span><span class="p">][</span><span class="n">field_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">filterVals</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">attached_settings</span><span class="p">[</span><span class="s1">&#39;colormapLims&#39;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">UIname</span><span class="p">][</span><span class="n">field_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">colormapLims</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">attached_settings</span><span class="p">[</span><span class="s1">&#39;colormapVals&#39;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">UIname</span><span class="p">][</span><span class="n">field_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">colormapVals</span></div>
+
+<div class="viewcode-block" id="ParticleGroup.getDecimationIndexArray"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.ParticleGroup.html#firefly.data_reader.ParticleGroup.getDecimationIndexArray">[docs]</a>    <span class="k">def</span> <span class="nf">getDecimationIndexArray</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Creates a numpy index array to handle decimation (sub-sampling) of your</span>
+<span class="sd">        data. Chooses nparts/decimation_factor many particles randomly without</span>
+<span class="sd">        replacement. Binds it to self.dec_inds.</span>
+<span class="sd">        :return: dec_inds, indices corresponding to randomly chosen particles</span>
+<span class="sd">        :rtype: np.ndarray</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">decimation_factor</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">nparts</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">decimation_factor</span><span class="p">:</span>
+            <span class="c1">## we&#39;ve been instructed to decimate and it makes sense to do so</span>
+            <span class="c1">##  (decimation factor is not &gt; self.nparts)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dec_inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nparts</span><span class="p">),</span><span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nparts</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">decimation_factor</span><span class="p">),</span>
+                <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1">## use a dummy boolean mask full of True instead</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dec_inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nparts</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dec_inds</span></div>
+
+<div class="viewcode-block" id="ParticleGroup.outputToDict"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.ParticleGroup.html#firefly.data_reader.ParticleGroup.outputToDict">[docs]</a>    <span class="k">def</span> <span class="nf">outputToDict</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">dec_inds</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">store_extra_keys</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">loud</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Outputs a subset of this ParticleGroup instance&#39;s </span>
+<span class="sd">            data to a dictionary. The subset is determined by the </span>
+<span class="sd">            :code:`dec_inds` input which should be an array of indices</span>
+<span class="sd">            matching the tracked field arrays. </span>
+
+<span class="sd">        :param dec_inds: the decimation indices to </span>
+<span class="sd">                use, defining a subset of the :class:`~firefly.data_reader.ParticleGroup` data to </span>
+<span class="sd">                output, defaults to np.arange(self.nparts)</span>
+<span class="sd">        :type dec_inds: np.ndarray, optional</span>
+<span class="sd">        :param store_extra_keys: flag to store filter, colormap, and radius flags defaults to True</span>
+<span class="sd">        :type store_extra_keys: bool, optional</span>
+<span class="sd">        :param loud: flag to print status information to the console, defaults to False</span>
+<span class="sd">        :type loud: bool, optional</span>
+<span class="sd">        :return: outDict of particle data</span>
+<span class="sd">        :rtype: dict</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        
+        <span class="c1">## initialize the output dictionary</span>
+        <span class="n">outDict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+        <span class="c1">## initialize a default set of dec inds if none are passed</span>
+        <span class="k">if</span> <span class="n">dec_inds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">dec_inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">nparts</span><span class="p">)</span>
+        
+        <span class="c1">## save the coordinates as a special case since they </span>
+        <span class="c1">##  aren&#39;t in the field array</span>
+        <span class="n">outDict</span><span class="p">[</span><span class="s1">&#39;Coordinates_flat&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span><span class="p">[</span><span class="n">dec_inds</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">velocities</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">outDict</span><span class="p">[</span><span class="s1">&#39;Velocities_flat&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">velocities</span><span class="p">[</span><span class="n">dec_inds</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rgba_colors</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">outDict</span><span class="p">[</span><span class="s1">&#39;rgbaColors_flat&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rgba_colors</span><span class="p">[</span><span class="n">dec_inds</span><span class="p">]</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
+
+        <span class="c1">## store the field arrays</span>
+        <span class="k">for</span> <span class="n">field_name</span><span class="p">,</span><span class="n">field_arr</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">field_names</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">field_arrays</span><span class="p">):</span>
+
+            <span class="n">outDict</span><span class="p">[</span><span class="n">field_name</span><span class="p">]</span><span class="o">=</span><span class="n">field_arr</span><span class="p">[</span><span class="n">dec_inds</span><span class="p">]</span>
+
+        <span class="c1">## if this is the first file, let&#39;s also include the colormap</span>
+        <span class="c1">##  and filter keys</span>
+        <span class="k">if</span> <span class="n">store_extra_keys</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">loud</span><span class="p">:</span> <span class="nb">print</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">field_names</span><span class="p">,</span>
+                <span class="s1">&#39;filter:&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">field_filter_flags</span><span class="p">,</span>
+                <span class="s1">&#39;colormap:&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">field_colormap_flags</span><span class="p">,</span>
+                <span class="s1">&#39;radius:&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">field_radius_flags</span><span class="p">)</span>
+
+            <span class="n">outDict</span><span class="p">[</span><span class="s1">&#39;filterKeys&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">field_names</span><span class="p">)[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                 <span class="bp">self</span><span class="o">.</span><span class="n">field_filter_flags</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)]</span>
+
+            <span class="n">outDict</span><span class="p">[</span><span class="s1">&#39;colormapKeys&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">field_names</span><span class="p">)[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">field_colormap_flags</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)]</span>
+
+            <span class="n">outDict</span><span class="p">[</span><span class="s1">&#39;radiusKeys&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">field_names</span><span class="p">)[</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">field_radius_flags</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)]</span>
+
+        <span class="k">return</span> <span class="n">outDict</span></div>
+    
+<div class="viewcode-block" id="ParticleGroup.spawn_octree_pg"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.ParticleGroup.html#firefly.data_reader.ParticleGroup.spawn_octree_pg">[docs]</a>    <span class="k">def</span> <span class="nf">spawn_octree_pg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">datadir</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span><span class="n">max_npart_per_node</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Creates a new :class:`firefly.data_reader.particlegroup.OctreeParticleGroup` instance</span>
+<span class="sd">            that references the data contained by the :class:`firefly.data_reader.particlegroup.ParticleGroup`</span>
+<span class="sd">            instance that calls this method.</span>
+
+<span class="sd">        :param datadir: directory to output ``self.UIname/octree.json`` (and corresponding files) to.</span>
+<span class="sd">        :type datadir: str</span>
+<span class="sd">        :param max_npart_per_node: maximum number of particles a node can contain before it should be refined.</span>
+<span class="sd">        :type max_npart_per_node: int</span>
+<span class="sd">        :return: octree_pg</span>
+<span class="sd">        :rtype: :class:`~firefly.data_reader.particlegroup.OctreeParticleGroup`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1">## create a directory for this particle group to store the octree data in</span>
+        <span class="n">pathh</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">datadir</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">UIname</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">pathh</span><span class="p">):</span> <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">pathh</span><span class="p">)</span>
+
+        <span class="c1">## decimate if necessary</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">getDecimationIndexArray</span><span class="p">()</span>
+
+        <span class="n">dictionary</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;x&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span><span class="p">[:,</span><span class="mi">0</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">dec_inds</span><span class="p">],</span>
+            <span class="s1">&#39;y&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span><span class="p">[:,</span><span class="mi">1</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">dec_inds</span><span class="p">],</span>
+            <span class="s1">&#39;z&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span><span class="p">[:,</span><span class="mi">2</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">dec_inds</span><span class="p">],</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">velocities</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">dictionary</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+                <span class="s1">&#39;vx&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">velocities</span><span class="p">[:,</span><span class="mi">0</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">dec_inds</span><span class="p">],</span>
+                <span class="s1">&#39;vy&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">velocities</span><span class="p">[:,</span><span class="mi">1</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">dec_inds</span><span class="p">],</span>
+                <span class="s1">&#39;vz&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">velocities</span><span class="p">[:,</span><span class="mi">2</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">dec_inds</span><span class="p">]</span>
+            <span class="p">})</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rgba_colors</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">dictionary</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+                <span class="s1">&#39;rgba_r&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">rgba_colors</span><span class="p">[:,</span><span class="mi">0</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">dec_inds</span><span class="p">],</span>
+                <span class="s1">&#39;rgba_g&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">rgba_colors</span><span class="p">[:,</span><span class="mi">1</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">dec_inds</span><span class="p">],</span>
+                <span class="s1">&#39;rgba_b&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">rgba_colors</span><span class="p">[:,</span><span class="mi">2</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">dec_inds</span><span class="p">],</span>
+                <span class="s1">&#39;rgba_a&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">rgba_colors</span><span class="p">[:,</span><span class="mi">3</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">dec_inds</span><span class="p">]</span>
+            <span class="p">})</span>
+        
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">field_names</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span> <span class="n">dictionary</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">field_names</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">field_arrays</span><span class="p">[</span><span class="o">...</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">dec_inds</span><span class="p">]))</span>
+
+        <span class="c1">## saves relevant data to disk in the correct .ffraw format at pathh</span>
+        <span class="n">init_octree_root_node</span><span class="p">(</span><span class="n">dictionary</span><span class="p">,</span><span class="n">pathh</span><span class="p">)</span>
+
+        <span class="c1">## create the new particle group instance</span>
+        <span class="n">octree_pg</span> <span class="o">=</span> <span class="n">OctreeParticleGroup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">UIname</span><span class="p">,</span><span class="n">pathh</span><span class="p">,</span><span class="n">max_npart_per_node</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">octree_pg</span></div>
+
+<div class="viewcode-block" id="ParticleGroup.writeToDisk"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.ParticleGroup.html#firefly.data_reader.ParticleGroup.writeToDisk">[docs]</a>    <span class="k">def</span> <span class="nf">writeToDisk</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">target_directory</span><span class="p">,</span>
+        <span class="n">file_prefix</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+        <span class="n">file_extension</span><span class="o">=</span><span class="s1">&#39;.ffly&#39;</span><span class="p">,</span>
+        <span class="n">loud</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">max_npart_per_file</span><span class="o">=</span><span class="mi">10</span><span class="o">**</span><span class="mi">5</span><span class="p">,</span>
+        <span class="n">clean_datadir</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">not_reader</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">write_to_disk</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Outputs this ParticleGroup instance&#39;s data to a compatible Firefly format,</span>
+<span class="sd">            either `.ffly` or `.json`. Data is partitioned into </span>
+<span class="sd">            multiple sub-files. This is best used when coupled with a :class:`firefly.data_reader.Reader`&#39;s</span>
+<span class="sd">            :func:`~firefly.data_reader.Reader.writeToDisk` method.</span>
+
+<span class="sd">        :param target_directory: the path to the directory where data should be saved</span>
+<span class="sd">        :type target_directory: str</span>
+<span class="sd">        :param file_extension: File extension for data files created, one of `.ffly` (binary)</span>
+<span class="sd">            or `.json` (ASCII).</span>
+<span class="sd">        :type file_extension: str, optional</span>
+<span class="sd">        :param file_prefix: Prefix for any files created, filenames will look like:</span>
+<span class="sd">            `f&quot;{file_prefix}{self.UIname}{i_file:03d}{file_extension}&quot;` </span>
+<span class="sd">        :type file_prefix: str, optional</span>
+<span class="sd">        :param loud: flag to print status information to the console, defaults to True</span>
+<span class="sd">        :type loud: bool, optional</span>
+<span class="sd">        :param max_npart_per_file: the maximum number of particles saved per :code:`.json` file,</span>
+<span class="sd">            don&#39;t use too large a number or you will have trouble loading</span>
+<span class="sd">            the individual files in., defaults to 10**4</span>
+<span class="sd">        :type max_npart_per_file: int, optional</span>
+<span class="sd">        :param clean_datadir: flag to delete all :code:`.json` files in</span>
+<span class="sd">            the :code:`JSONdir`. Strictly not necessary (since :code:`filenames.json` </span>
+<span class="sd">            will be updated) but it is good to clean up after yourself., defaults to False</span>
+<span class="sd">        :type clean_datadir: bool, optional</span>
+<span class="sd">        :param write_to_disk: flag that controls whether data is saved to disk (:code:`True`)</span>
+<span class="sd">            or only converted to a string and returned (:code:`False`), defaults to True</span>
+<span class="sd">        :type write_to_disk: bool, optional</span>
+<span class="sd">        :param not_reader: flag for whether to print the Reader :code:`filenames.json` warning, defaults to True</span>
+<span class="sd">        :type not_reader: bool, optional</span>
+<span class="sd">        :return: filename, file_list (either a list full of filenames if</span>
+<span class="sd">            written to disk or a list of JSON strs)</span>
+<span class="sd">        :rtype: str, list of str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1">## prepend a . if there isn&#39;t one in the string</span>
+        <span class="k">if</span> <span class="s1">&#39;.&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">file_extension</span><span class="p">:</span> <span class="n">file_extension</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="o">+</span><span class="n">file_extension</span>
+        
+        <span class="n">extensions</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;.json&#39;</span><span class="p">,</span><span class="s1">&#39;.ffly&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">file_extension</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">extensions</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Invalid extension </span><span class="si">{</span><span class="n">file_extension</span><span class="si">}</span><span class="s2"> must be one of </span><span class="si">{</span><span class="n">extensions</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="c1">## can&#39;t pass raw binary data to the app while it&#39;s running (yet?)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">write_to_disk</span><span class="p">:</span> <span class="n">file_extension</span> <span class="o">=</span> <span class="s1">&#39;.json&#39;</span>
+
+        <span class="c1">## where are we saving this json to?</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">target_directory</span><span class="p">):</span> <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">target_directory</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">loud</span> <span class="ow">and</span> <span class="n">not_reader</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;You will need to add the sub-filenames to&quot;</span><span class="o">+</span>
+                <span class="s2">&quot; filenames.json if this was not called by a Reader instance.&quot;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Writing:&quot;</span><span class="p">,</span><span class="bp">self</span><span class="p">,</span><span class="s2">&quot;files to </span><span class="si">%s</span><span class="s2">&quot;</span><span class="o">%</span><span class="n">target_directory</span><span class="p">)</span>
+
+        <span class="c1">## do we want to delete any existing files here?</span>
+        <span class="k">if</span> <span class="n">clean_datadir</span><span class="p">:</span>
+            <span class="c1">#print(&quot;Removing old ffly files from %s&quot;%target_directory)</span>
+            <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">target_directory</span><span class="p">):</span>
+                <span class="k">if</span> <span class="p">(</span><span class="s2">&quot;.ffly&quot;</span> <span class="ow">in</span> <span class="n">fname</span> <span class="ow">or</span>
+                    <span class="s2">&quot;.json&quot;</span> <span class="ow">in</span> <span class="n">fname</span> <span class="ow">or</span> 
+                    <span class="s2">&quot;.fftree&quot;</span> <span class="ow">in</span> <span class="n">fname</span><span class="p">):</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">target_directory</span><span class="p">,</span><span class="n">fname</span><span class="p">))</span>
+
+        <span class="c1">## shuffle particles and decimate as necessary, save the output in dec_inds</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">getDecimationIndexArray</span><span class="p">()</span>
+
+        <span class="c1">## determine if we were passed a boolean mask or a index array</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dec_inds</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="nb">bool</span><span class="p">:</span>
+            <span class="n">nparts</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dec_inds</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dec_inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">argwhere</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dec_inds</span><span class="p">)</span> <span class="c1">## convert to an index array</span>
+        <span class="k">else</span><span class="p">:</span> <span class="n">nparts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dec_inds</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1">## how many sub-files are we going to need?</span>
+        <span class="n">nfiles</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">nparts</span><span class="o">/</span><span class="n">max_npart_per_file</span> <span class="o">+</span> <span class="p">((</span><span class="n">nparts</span><span class="o">%</span><span class="n">max_npart_per_file</span><span class="p">)</span><span class="o">!=</span><span class="mi">0</span><span class="p">))</span>
+
+        <span class="c1">## how many particles will each file have and what are they named?</span>
+        <span class="n">filenames</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">target_directory</span><span class="p">),</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">file_prefix</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">UIname</span><span class="si">}{</span><span class="n">i_file</span><span class="si">:</span><span class="s2">03d</span><span class="si">}{</span><span class="n">file_extension</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> 
+                <span class="k">for</span> <span class="n">i_file</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nfiles</span><span class="p">)]</span>
+        <span class="n">nparts</span> <span class="o">=</span> <span class="p">[</span><span class="nb">min</span><span class="p">(</span><span class="n">max_npart_per_file</span><span class="p">,</span><span class="n">nparts</span><span class="o">-</span><span class="p">(</span><span class="n">i_file</span><span class="p">)</span><span class="o">*</span><span class="p">(</span><span class="n">max_npart_per_file</span><span class="p">))</span> <span class="k">for</span> <span class="n">i_file</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nfiles</span><span class="p">)]</span>
+
+        <span class="n">filenames_and_nparts</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">filenames</span><span class="p">,</span><span class="n">nparts</span><span class="p">))</span>
+        
+        <span class="n">file_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1">## loop through the sub-files</span>
+        <span class="n">cur_index</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">for</span> <span class="n">i_file</span><span class="p">,(</span><span class="n">fname</span><span class="p">,</span><span class="n">nparts_this_file</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">filenames_and_nparts</span><span class="p">):</span>
+            <span class="n">nparts_this_file</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">nparts_this_file</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+            <span class="n">abs_fname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">target_directory</span><span class="p">),</span><span class="n">fname</span><span class="p">)</span>
+            <span class="c1">## pick out the indices for this file</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">decimation_factor</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">these_dec_inds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dec_inds</span><span class="p">[</span><span class="n">cur_index</span><span class="p">:</span><span class="n">cur_index</span><span class="o">+</span><span class="n">nparts_this_file</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1">## create a dummy index array that takes everything</span>
+                <span class="n">these_dec_inds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">cur_index</span><span class="p">,</span><span class="n">cur_index</span><span class="o">+</span><span class="n">nparts_this_file</span><span class="p">,</span><span class="n">dtype</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        
+            <span class="k">if</span> <span class="n">file_extension</span><span class="o">==</span><span class="s1">&#39;.ffly&#39;</span><span class="p">:</span>
+                <span class="c1">## prepare writer class</span>
+                <span class="n">binary_writer</span> <span class="o">=</span> <span class="n">BinaryWriter</span><span class="p">(</span>
+                    <span class="n">abs_fname</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span><span class="p">[</span><span class="n">these_dec_inds</span><span class="p">],</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">velocities</span><span class="p">[</span><span class="n">these_dec_inds</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">velocities</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">rgba_colors</span><span class="p">[</span><span class="n">these_dec_inds</span><span class="p">]</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rgba_colors</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span><span class="p">)</span>
+
+                <span class="c1">## fill necessary attributes</span>
+                <span class="n">binary_writer</span><span class="o">.</span><span class="n">nfields</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">field_names</span><span class="p">)</span>
+                <span class="n">binary_writer</span><span class="o">.</span><span class="n">field_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">field_names</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">field_names</span><span class="p">):</span> <span class="n">binary_writer</span><span class="o">.</span><span class="n">fields</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">field_arrays</span><span class="p">)[:,</span><span class="n">these_dec_inds</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span> <span class="n">binary_writer</span><span class="o">.</span><span class="n">fields</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">binary_writer</span><span class="o">.</span><span class="n">filter_flags</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">field_filter_flags</span>
+                <span class="n">binary_writer</span><span class="o">.</span><span class="n">colormap_flags</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">field_colormap_flags</span>
+                <span class="n">binary_writer</span><span class="o">.</span><span class="n">radius_flags</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">field_radius_flags</span>
+
+                <span class="n">file_list</span> <span class="o">+=</span> <span class="p">[(</span>
+                    <span class="c1">## need to replace w/ relative path from static/data</span>
+                    <span class="c1">##  in reader</span>
+                    <span class="n">abs_fname</span><span class="p">,</span>
+                    <span class="n">binary_writer</span><span class="o">.</span><span class="n">write</span><span class="p">())]</span> 
+            <span class="k">elif</span> <span class="n">file_extension</span> <span class="o">==</span> <span class="s1">&#39;.json&#39;</span><span class="p">:</span> 
+                <span class="c1">## format an output dictionary</span>
+                <span class="n">outDict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">outputToDict</span><span class="p">(</span>
+                    <span class="n">these_dec_inds</span><span class="p">,</span>
+                    <span class="n">i_file</span><span class="o">==</span><span class="mi">0</span><span class="p">)</span>
+
+                <span class="n">file_list</span> <span class="o">+=</span> <span class="p">[</span>
+                    <span class="p">(</span><span class="n">abs_fname</span><span class="p">,</span>
+                    <span class="n">write_to_json</span><span class="p">(</span><span class="n">outDict</span><span class="p">,</span>
+                        <span class="n">abs_fname</span> <span class="k">if</span> <span class="n">write_to_disk</span> <span class="k">else</span> <span class="kc">None</span><span class="p">))]</span>
+            <span class="c1"># else: &lt;-- unnecessary b.c. we do validation above</span>
+
+            <span class="c1">## move onto the next file</span>
+            <span class="n">cur_index</span> <span class="o">+=</span> <span class="n">nparts_this_file</span>
+        
+        <span class="k">return</span> <span class="n">file_list</span><span class="p">,</span><span class="n">filenames_and_nparts</span></div></div>
+
+<span class="c1">## Octree&#39;s methods will be called before ParticleGroup&#39;s</span>
+<span class="k">class</span> <span class="nc">OctreeParticleGroup</span><span class="p">(</span><span class="n">Octree</span><span class="p">,</span><span class="n">ParticleGroup</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">UIname</span><span class="p">,</span>
+        <span class="n">pathh</span><span class="p">,</span>
+        <span class="n">min_to_refine</span><span class="o">=</span><span class="mf">1e6</span><span class="p">,</span>
+        <span class="n">build</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="c1">## initialize the octree portion of the OctreeParticleGroup</span>
+        <span class="n">Octree</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">UIname</span><span class="p">,</span><span class="n">pathh</span><span class="p">,</span><span class="n">min_to_refine</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">build</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
+        <span class="n">nthreads</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">nrecurse</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+        <span class="n">use_mps</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">loud</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="c1">## do the actual work of building the octree,</span>
+        <span class="c1">##  might take a while...</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">full_refine</span><span class="p">(</span><span class="n">nthreads</span><span class="p">,</span><span class="n">nrecurse</span><span class="p">,</span><span class="n">use_mps</span><span class="p">,</span><span class="n">loud</span><span class="o">=</span><span class="n">loud</span><span class="p">)</span>
+
+        <span class="c1">## unpack the center coordinates and field values</span>
+        <span class="p">(</span><span class="n">coordinates</span><span class="p">,</span>
+            <span class="n">velocities</span><span class="p">,</span>
+            <span class="n">rgba_colors</span><span class="p">,</span>
+            <span class="n">field_arrays</span><span class="p">)</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unpack_tree_nodes</span><span class="p">()</span>
+
+        <span class="c1">## initialize the particlegroup portion of the OctreeParticleGroup</span>
+        <span class="n">ParticleGroup</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">UIname</span><span class="p">,</span>
+            <span class="n">coordinates</span><span class="p">,</span>
+            <span class="n">velocities</span><span class="p">,</span>
+            <span class="n">rgba_colors</span><span class="p">,</span>
+            <span class="n">field_arrays</span><span class="p">,</span>
+            <span class="n">field_names</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">[</span><span class="s1">&#39;field_names&#39;</span><span class="p">],</span>
+            <span class="n">loud</span><span class="o">=</span><span class="n">loud</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+ 
+    <span class="k">def</span> <span class="nf">unpack_tree_nodes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+        <span class="n">nodes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">[</span><span class="s1">&#39;nodes&#39;</span><span class="p">]</span>
+        <span class="n">field_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">[</span><span class="s1">&#39;field_names&#39;</span><span class="p">]</span>
+
+        <span class="n">numnodes</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">nodes</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+        <span class="n">coordinates</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">numnodes</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">[</span><span class="s1">&#39;has_velocities&#39;</span><span class="p">]:</span> 
+            <span class="n">velocities</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">numnodes</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span> <span class="n">velocities</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="p">[</span><span class="s1">&#39;has_colors&#39;</span><span class="p">]:</span> 
+            <span class="n">rgba_colors</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="n">numnodes</span><span class="p">,</span><span class="mi">4</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span> <span class="n">rgba_colors</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">field_names</span><span class="p">),</span><span class="n">numnodes</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">inode</span><span class="p">,</span><span class="n">node_dict</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">nodes</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
+            <span class="n">coordinates</span><span class="p">[</span><span class="n">inode</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">node_dict</span><span class="p">[</span><span class="s1">&#39;center_of_mass&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">velocities</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="n">velocities</span><span class="p">[</span><span class="n">inode</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">node_dict</span><span class="p">[</span><span class="s1">&#39;com_velocity&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">rgba_colors</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span> <span class="n">rgba_colors</span><span class="p">[</span><span class="n">inode</span><span class="p">,:]</span> <span class="o">=</span> <span class="n">node_dict</span><span class="p">[</span><span class="s1">&#39;rgba_color&#39;</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">ifield</span><span class="p">,</span><span class="n">field_name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">field_names</span><span class="p">):</span>
+                <span class="n">fields</span><span class="p">[</span><span class="n">ifield</span><span class="p">,</span><span class="n">inode</span><span class="p">]</span> <span class="o">=</span> <span class="n">node_dict</span><span class="p">[</span><span class="n">field_name</span><span class="p">]</span>
+            <span class="n">node_dict</span><span class="p">[</span><span class="s1">&#39;node_index&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">inode</span>
+
+        <span class="k">return</span> <span class="n">coordinates</span><span class="p">,</span><span class="n">velocities</span><span class="p">,</span><span class="n">rgba_colors</span><span class="p">,</span><span class="n">fields</span>
+
+    <span class="k">def</span> <span class="nf">writeToDisk</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">target_directory</span><span class="p">,</span>
+        <span class="n">file_prefix</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+        <span class="n">octree_format</span><span class="o">=</span><span class="s1">&#39;.fftree&#39;</span><span class="p">,</span>
+        <span class="n">nthreads</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="n">octree_formats</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;.fftree&#39;</span><span class="p">,</span><span class="s1">&#39;.ffraw&#39;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="s1">&#39;.&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">octree_format</span><span class="p">:</span> <span class="n">octree_format</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span> <span class="o">+</span> <span class="n">octree_format</span>
+
+        <span class="k">if</span> <span class="n">octree_format</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">octree_formats</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Invalid extension </span><span class="si">{</span><span class="n">octree_format</span><span class="si">}</span><span class="s2"> must be one of </span><span class="si">{</span><span class="n">octree_formats</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1">## call super to write &quot;normal&quot; particle data</span>
+        <span class="n">file_list</span><span class="p">,</span><span class="n">filenames_and_nparts</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">writeToDisk</span><span class="p">(</span>
+            <span class="n">target_directory</span><span class="p">,</span>
+            <span class="n">file_prefix</span><span class="o">=</span><span class="n">file_prefix</span><span class="p">,</span>
+            <span class="n">file_extension</span><span class="o">=</span><span class="s1">&#39;.json&#39;</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="c1">## need to convert from .ffraw to .fftree, save .fftree files in target_directory</span>
+        <span class="k">if</span> <span class="n">octree_format</span> <span class="o">==</span> <span class="s1">&#39;.fftree&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">convert_ffraw_to_fftree</span><span class="p">(</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">target_directory</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">UIname</span><span class="o">+</span><span class="s1">&#39;fftree&#39;</span><span class="p">),</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">file_prefix</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">UIname</span><span class="si">}</span><span class="s2">%04d.fftree&quot;</span><span class="p">,</span>
+            <span class="n">nthreads</span><span class="o">=</span><span class="n">nthreads</span><span class="p">)</span> 
+        <span class="k">elif</span> <span class="n">octree_format</span> <span class="o">==</span> <span class="s1">&#39;.ffraw&#39;</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+            <span class="s2">&quot;Javascript can&#39;t read .ffraw yet... must convert to .fftree&quot;</span><span class="p">)</span>
+
+        <span class="c1">## load the first .json particle file for the centers</span>
+        <span class="c1">##  and append the octree metadata </span>
+        <span class="n">data_dict</span> <span class="o">=</span> <span class="n">load_from_json</span><span class="p">(</span><span class="n">file_list</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+        
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span><span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">items</span><span class="p">():</span> 
+            <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;nodes&#39;</span><span class="p">:</span> <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;octree&#39;</span>
+            <span class="n">data_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="n">data_dict</span><span class="p">[</span><span class="s1">&#39;prefixes&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prefixes</span>
+
+        <span class="c1">## change absolute paths to relative paths</span>
+        <span class="k">if</span> <span class="n">octree_format</span> <span class="o">==</span> <span class="s1">&#39;ffraw&#39;</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">node_dict</span> <span class="ow">in</span> <span class="n">data_dict</span><span class="p">[</span><span class="s1">&#39;octree&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+                <span class="k">if</span> <span class="s1">&#39;files&#39;</span> <span class="ow">in</span> <span class="n">node_dict</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">ftuple</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">node_dict</span><span class="p">[</span><span class="s1">&#39;files&#39;</span><span class="p">]):</span>
+                        <span class="n">relative_fname</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="o">*</span><span class="n">ftuple</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span><span class="p">)[</span><span class="o">-</span><span class="mi">3</span><span class="p">:])</span>
+                        <span class="n">new_name</span> <span class="o">=</span><span class="n">relative_fname</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)</span>
+                        <span class="n">new_name</span> <span class="o">=</span> <span class="s1">&#39;-&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">new_name</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span><span class="s1">&#39;-&lt;prefix&gt;.&#39;</span><span class="o">+</span><span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">new_name</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">2</span><span class="p">:])</span>
+                        <span class="n">node_dict</span><span class="p">[</span><span class="s1">&#39;files&#39;</span><span class="p">][</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                            <span class="n">new_name</span><span class="p">,</span>
+                            <span class="n">ftuple</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                            <span class="n">ftuple</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+                    <span class="n">node_dict</span><span class="p">[</span><span class="s1">&#39;files&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">node_dict</span><span class="p">[</span><span class="s1">&#39;files&#39;</span><span class="p">])</span>
+
+        <span class="n">write_to_json</span><span class="p">(</span><span class="n">data_dict</span><span class="p">,</span><span class="n">file_list</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">file_list</span><span class="p">,</span><span class="n">filenames_and_nparts</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Alex Gurvich, Aaron Geller.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
