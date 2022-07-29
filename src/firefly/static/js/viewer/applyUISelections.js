@@ -489,7 +489,8 @@ function createPreset(){
 	if (elm.style.display == 'block') preset.annotation = elm.innerHTML;
 
 	// flag to show fps in top right corner
-	preset.showfps = copyValue(viewerParams.showfps);
+	preset.showFPS = copyValue(viewerParams.showFPS);
+	preset.showMemoryUsage = copyValue(viewerParams.showMemoryUsage);
 
 	// change the memory limit for octrees, in bytes
 	preset.memoryLimit = copyValue(viewerParams.memoryLimit);

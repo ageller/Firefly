@@ -107,9 +107,6 @@ function initInputData(){
 		makeViewer(null, forGUIprepend, forGUIappend);
 		WebGLStart();
 	}, 1000);
-
-
-
 }
 
 //so that it can run locally also without using Flask
@@ -1280,7 +1277,7 @@ function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
 			}
 		});
 		// replace the parts key with the sanitary_p
-		viewerParams.partsKeys[i] = sanitary_p;
+		if (i < viewerParams.partsKeys.length-1) viewerParams.partsKeys[i] = sanitary_p;
 	});
 }
 

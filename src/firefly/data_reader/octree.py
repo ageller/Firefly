@@ -67,7 +67,24 @@ class OctNode(object):
         self.children = []
         self.child_names = []
  
-    def set_buffers_from_dict(self,data_dict,width=None):
+    def set_buffers_from_dict(self,data_dict,width=None,init_node=False):
+        """ data_dict requires: 
+            'x','y','z'
+
+            optionally:
+            'vx','vy','vz'
+            'rgba_r','rgba_g','rgba_b','rgba_a'
+             
+             any number of field names and arrays
+
+        :param data_dict: _description_
+        :type data_dict: _type_
+        :param width: _description_, defaults to None
+        :type width: _type_, optional
+        :raises KeyError: _description_
+        :return: _description_
+        :rtype: _type_
+        """
  
         keys = list(data_dict.keys())
         if 'x' not in keys: raise KeyError(f"Data dict missing coordinates {keys}")
@@ -111,9 +128,9 @@ class OctNode(object):
 
         #if width is None: width = np.max(coordss.max(axis=0) - coordss.min(axis=0))
         if width is None: 
-            width = np.percentile(
-                np.sqrt(np.sum(coordss**2,axis=1)),
-                99)
+            width = np.max(np.percentile(
+                np.abs(coordss),
+                99,axis=0))*2
 
         self.width = width
         self.center = np.zeros(3)
@@ -123,7 +140,8 @@ class OctNode(object):
             fieldss,
             velss,
             rgba_colorss,
-            check_boundaries=True) ## eject the particles outside the 99th %ile
+            check_boundaries=True,
+            init_node=init_node) ## eject the particles outside the 99th %ile
         
         root_dict = {}
 
@@ -186,7 +204,8 @@ class OctNode(object):
         fieldss:np.ndarray,
         velss:np.ndarray=None,
         rgba_colorss:np.ndarray=None,
-        check_boundaries:bool=False):
+        check_boundaries:bool=False,
+        init_node:bool=False):
 
         if coordss is None: coordss = np.zeros((0,3))
 
@@ -199,9 +218,9 @@ class OctNode(object):
                     np.abs(coordss[:,axis]) <= (self.center[axis]+self.width/2) )
 
             if self.nthreads == 1 and np.sum(mask) != mask.size: 
-                print(f'ejecting {np.sum(~mask)} particles that are outside this node')
+                print(f'ejecting {np.sum(~mask)} particles that are outside this node ({100*np.sum(~mask)/mask.size:0.2f}%)')
 
-        self.buffer_coordss = self.buffer_coordss[mask].tolist()
+        if not init_node: self.buffer_coordss = self.buffer_coordss[mask].tolist()
 
         ## initialize the field buffers
         if fieldss is not None:
@@ -218,7 +237,7 @@ class OctNode(object):
             self.buffer_fieldss = self.buffer_fieldss[mask]
 
         else: self.buffer_fieldss = np.zeros((0,self.nfields))
-        self.buffer_fieldss = self.buffer_fieldss.tolist()
+        if not init_node:self.buffer_fieldss = self.buffer_fieldss.tolist()
  
         ## determine if we're taking a weighted average
         if self.weight_index is not None:
@@ -243,7 +262,7 @@ class OctNode(object):
             self.buffer_velss = (velss * weights)[mask]
 
         else: self.buffer_velss = np.zeros((0,3))
-        self.buffer_velss = self.buffer_velss.tolist()
+        if not init_node:self.buffer_velss = self.buffer_velss.tolist()
 
         ## initialize the rgba_colors buffer
         if rgba_colorss is not None:
@@ -254,7 +273,7 @@ class OctNode(object):
             self.buffer_rgba_colorss = (rgba_colorss * weights)[mask]
 
         else: self.buffer_rgba_colorss = np.zeros((0,4))
-        self.buffer_rgba_colorss = self.buffer_rgba_colorss.tolist()  
+        if not init_node:self.buffer_rgba_colorss = self.buffer_rgba_colorss.tolist()  
 
         ## initialize com accumulators
         self.velocity = np.sum(self.buffer_velss,axis=0)
@@ -1048,8 +1067,7 @@ def init_octree_root_node(dictionary,top_level_directory=None,thread_id=0):
 
 
     root = OctNode(None,None,[]) 
-    root_dict = root.set_buffers_from_dict(dictionary)
-
+    root_dict = root.set_buffers_from_dict(dictionary,init_node=True)
 
     if top_level_directory is not None:
         output_dir = os.path.join(top_level_directory,f'output_{thread_id:02d}.0')

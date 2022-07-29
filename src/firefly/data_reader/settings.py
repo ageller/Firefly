@@ -587,7 +587,7 @@ class Settings(object):
         
         if particleGroup.settings_default['GUIExcludeList'] is not None:
             self['GUIExcludeList'] += [
-                f"{particleGroup.UIname}/{key}" for key in 
+                f"{particleGroup.UIname}/{key}" if key != '' else f"{particleGroup.UIname}" for key in 
                 particleGroup.settings_default['GUIExcludeList']]
 
         ## replace colormapVariable and radiusVariable values
@@ -645,8 +645,7 @@ class Settings(object):
     def validateGUIExcludeList(self,GUIExcludeList):
         pkey_particleGUIurlss = []
         for pkey in self['sizeMult'].keys():
-            pkey_particleGUIurls = [url.replace('main/particles',pkey).lower() for url in particle_GUIurls]+[pkey]
-        pkey_particleGUIurlss += pkey_particleGUIurls
+            pkey_particleGUIurlss += [url.replace('main/particles',pkey).lower() for url in particle_GUIurls]+[pkey]
 
         for url in GUIExcludeList:
             if url.lower() in GUIurls: continue
@@ -778,7 +777,8 @@ GUIurls = [url.lower() for url in GUIurls]
 particle_GUIurls = [
     'main/particles/onoff', 
     'main/particles/sizeSlider',
-    'main/particles/colorPicker',
+    'main/particles/colorPicker', ## hides colorpicker all together
+    'main/particles/colorPicker/onclick', ## shows colorpicker but disables onclick
     'main/particles/dropdown',
     'main/particles/dropdown/general',
     'main/particles/dropdown/general/octreeClearMemory',

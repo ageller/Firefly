@@ -1,12 +1,13 @@
 import numpy as np
 
+from matplotlib.colors import hex2color
 
 import os 
 
 from .json_utils import write_to_json,load_from_json
 from .binary_writer import BinaryWriter
 
-from .octree import Octree
+from .octree import Octree, init_octree_root_node
 
 class ParticleGroup(object):
     """
@@ -271,13 +272,13 @@ class ParticleGroup(object):
             if settings_kwarg in self.settings_default.keys():
                 if settings_kwarg == 'color':
                     color = settings_kwargs['color']
+                    if type(color) == str: color = list(hex2color(color))
                     if len(color) != 4:
-                        ## if passed an RGB color
-                        if len(color) == 3:
-                            ## assume alpha value of 1
-                            settings_kwarg['color'] = np.append(color,[1],axis=0)
-                        else:
-                            raise ValueError("Make sure you pass the color as an RGB(A) array")
+                        ## passed an RGB color, assume alpha value of 1
+                        if len(color) == 3: color = np.append(color,[1],axis=0)
+                        else: raise ValueError(
+                            "Make sure you pass the color as an RGB(A) array")
+                    settings_kwargs['color'] = color
                         
                 self.settings_default[settings_kwarg] = settings_kwargs[settings_kwarg]
             else:
@@ -454,18 +455,56 @@ class ParticleGroup(object):
 
         return outDict
     
-    def createOctree(self,npart_min_node=2e2,npart_max_node=1e3):
+    def spawn_octree_pg(self,datadir:str,max_npart_per_node:int,**kwargs):
+        """ Creates a new :class:`firefly.data_reader.particlegroup.OctreeParticleGroup` instance
+            that references the data contained by the :class:`firefly.data_reader.particlegroup.ParticleGroup`
+            instance that calls this method.
 
-        ## initialize the octree
-        self.octree = Octree(self,npart_max_node)
+        :param datadir: directory to output ``self.UIname/octree.json`` (and corresponding files) to.
+        :type datadir: str
+        :param max_npart_per_node: maximum number of particles a node can contain before it should be refined.
+        :type max_npart_per_node: int
+        :return: octree_pg
+        :rtype: :class:`~firefly.data_reader.particlegroup.OctreeParticleGroup`
+        """
 
-        ## build the octree (may take a while)
-        self.octree.buildOctree()
+        ## create a directory for this particle group to store the octree data in
+        pathh = os.path.join(datadir,self.UIname)
+        if not os.path.isdir(pathh): os.makedirs(pathh)
 
-        ## prune the tiny nodes (should be relatively fast)
-        self.octree.pruneOctree(npart_min_node)
+        ## decimate if necessary
+        self.getDecimationIndexArray()
 
-        return self.octree
+        dictionary = {
+            'x':self.coordinates[:,0][self.dec_inds],
+            'y':self.coordinates[:,1][self.dec_inds],
+            'z':self.coordinates[:,2][self.dec_inds],
+        }
+
+        if self.velocities is not None:
+            dictionary.update({
+                'vx':self.velocities[:,0][self.dec_inds],
+                'vy':self.velocities[:,1][self.dec_inds],
+                'vz':self.velocities[:,2][self.dec_inds]
+            })
+
+        if self.rgba_colors is not None:
+            dictionary.update({
+                'rgba_r':self.rgba_colors[:,0][self.dec_inds],
+                'rgba_g':self.rgba_colors[:,1][self.dec_inds],
+                'rgba_b':self.rgba_colors[:,2][self.dec_inds],
+                'rgba_a':self.rgba_colors[:,3][self.dec_inds]
+            })
+        
+        if len(self.field_names) > 0: dictionary.update(zip(self.field_names,self.field_arrays[...,self.dec_inds]))
+
+        ## saves relevant data to disk in the correct .ffraw format at pathh
+        init_octree_root_node(dictionary,pathh)
+
+        ## create the new particle group instance
+        octree_pg = OctreeParticleGroup(self.UIname,pathh,max_npart_per_node,**kwargs)
+
+        return octree_pg
 
     def writeToDisk(
         self,
@@ -622,14 +661,20 @@ class OctreeParticleGroup(Octree,ParticleGroup):
         UIname,
         pathh,
         min_to_refine=1e6,
+        build=False,
+        **kwargs):
+
+        ## initialize the octree portion of the OctreeParticleGroup
+        Octree.__init__(self,UIname,pathh,min_to_refine)
+        
+        if build: self.build(**kwargs)
+    
+    def build(self,
         nthreads=1,
         nrecurse=0,
         use_mps=True,
         loud=True,
         **kwargs):
-
-        ## initialize the octree portion of the OctreeParticleGroup
-        Octree.__init__(self,UIname,pathh,min_to_refine)
 
         ## do the actual work of building the octree,
         ##  might take a while...
