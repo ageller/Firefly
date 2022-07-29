@@ -35,7 +35,7 @@ class Reader(object):
         self,
         datadir=None, 
         file_prefix='Data',
-        clean_datadir=False,
+        clean_datadir=True,
         max_npart_per_file=10**5,
         write_startup='append',
         write_only_data=False,
@@ -239,6 +239,7 @@ class Reader(object):
         loud=False,
         write_to_disk=True,
         symlink=True,
+        file_extension='.ffly',
         **kwargs):
         """Creates all the necessary JSON files to run firefly and ensures they are
         properly linked and cross-referenced correctly using the
@@ -255,8 +256,9 @@ class Reader(object):
             saved directly to :code:`self.static_data_dir` directory (:code:`False`). 
             Note that :code:`symlink=False` will not _also_ save results in :code:`self.datadir`, defaults to True
         :type symlink: bool, optional
-        :param extension: what output format should the particle data be saved in, JSON or binary 'ffly'
-        :type: str
+        :param file_extension: File extension for data files created, one of `.ffly` (binary)
+            or `.json` (ASCII).
+        :type file_extension: str, optional
         :return: :code:`self.JSON` or :code:`""` according to :code:`write_to_disk`
         :rtype: str
         """
@@ -327,6 +329,8 @@ class Reader(object):
                 max_npart_per_file=self.max_npart_per_file,
                 clean_datadir=self.clean_datadir if particleGroup is self.particleGroups[0] else False,
                 not_reader=False,
+                file_extension=file_extension,
+                write_to_disk=write_to_disk,
                 **kwargs)
 
             ## append the JSON arrays for this particle group
@@ -398,7 +402,7 @@ class Reader(object):
                         {"0":startup_path},
                         startup_file if write_to_disk else None))] ## None -> returns JSON string
 
-        if not write_to_disk:
+        if not write_to_disk and file_extension.lower() == '.json':
             ## create a single "big JSON" with all the data in it in case
             ##  we want to send dataViaFlask
             JSON_dict = dict(file_array)
@@ -460,27 +464,25 @@ class Reader(object):
 
         return outputDict
 
-    def sendDataViaFlask(self,port=5000):
+    def sendDataViaFlask(self,port=5500):
         """ Exports the data as if it were being dumped to disk
             but instead stores it as a string. Then feeds this string
             to the js interpreter via Flask.
 
         :param port: port that the firefly Flask server is being hosted on,
-            defaults to 5000
+            defaults to 5500
         :type port: int, optional
         """
 
-        ## retrieve a single "big JSON" of all the mini-JSON 
-        ##  sub-files. 
-        if not hasattr(self,'JSON') or self.JSON is None:
-            self.writeToDisk(
-                loud=False,
-                write_to_disk=False,
-                extension='.json')
+        ## retrieve a single "big JSON" of all the mini-JSON sub-files. 
+        self.writeToDisk(
+            loud=False,
+            write_to_disk=False,
+            file_extension='.json')
 
         ## post the json to the listening url data_input
         ##  defined in server.py
-        print("Posting...",end='')
+        print(f"Posting to port {int(port):d}...",end='')
         requests.post(
             f'http://localhost:{port:d}/data_input',
             json=self.JSON)
@@ -808,7 +810,7 @@ class ArrayReader(Reader):
         ##  a single big JSON in self.JSON
         self.writeToDisk(
             write_to_disk=write_to_disk,
-            loud=loud)
+            loud=loud and write_to_disk)
 
 class SimpleReader(ArrayReader):
     """ A wrapper to :class:`firefly.data_reader.ArrayReader` that attempts to 
