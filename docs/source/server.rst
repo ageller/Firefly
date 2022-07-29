@@ -111,20 +111,20 @@ command line from within a Jupyter notebook as well.
 
 Where `xxxx` is the 4 digit port number that you'd like to host the server on.
 
-When you would like to kill this server when you are done with it,
+When you would like to quit this server when you are done with it,
 use the command:
 
 .. code-block:: 
 
-    from firefly.server import killAllFireflyServers
+    from firefly.server import quitAllFireflyServers
 
-    ## optionally accepts a single process id to kill
-    killAllFireflyServers()
+    ## optionally accepts a single process id to quit
+    quitAllFireflyServers()
 
 Note that the pid is accessible from the original :func:`~firefly.server.spawnFireflyServer`
-call but that processes in general do not like to be killed and may sometimes
+call but that processes in general do not like to be quited and may sometimes
 survive the targeted attempt on their life. It's more reliable to indiscriminately 
-kill any process that has a Firefly server process name (the default).
+quit any process that has a Firefly server process name (the default).
 
 For the details of the usage of these functions,
 consult the :ref:`server API documentation <server api>`.

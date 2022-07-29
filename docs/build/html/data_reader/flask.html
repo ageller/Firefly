@@ -52,7 +52,6 @@
 <li class="toctree-l4"><a class="reference internal" href="flask_tutorial.html">Tutorial notebook: Sending data to a local Firefly server through Flask</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="fire_quickstart.html">Using Firefly to view FIRE data</a></li>
 </ul>
 </li>
 </ul>
@@ -129,9 +128,9 @@ string (formatted to contain the <code class="code docutils literal notranslate"
 written to disk as a <code class="code docutils literal notranslate"><span class="pre">.ffly</span></code> file) that is <code class="code docutils literal notranslate"><span class="pre">POST</span></code>’d to the data input
 endpoint using the <code class="code docutils literal notranslate"><span class="pre">requests</span></code> Python module.</p>
 <p>To facilitate this, we provide the
-<code class="xref py py-func docutils literal notranslate"><span class="pre">firefly.data_reader.Reader.sendDataViaFlask()</span></code> method,
+<a class="reference internal" href="../reference/api/classes/firefly.data_reader.Reader.html#firefly.data_reader.Reader.sendDataViaFlask" title="firefly.data_reader.Reader.sendDataViaFlask"><code class="xref py py-func docutils literal notranslate"><span class="pre">firefly.data_reader.Reader.sendDataViaFlask()</span></code></a> method,
 which will output the data contained in a
-<code class="xref py py-class docutils literal notranslate"><span class="pre">Reader</span></code> instance to a <code class="code docutils literal notranslate"><span class="pre">JSON</span></code>
+<a class="reference internal" href="../reference/api/classes/firefly.data_reader.Reader.html#firefly.data_reader.Reader" title="firefly.data_reader.Reader"><code class="xref py py-class docutils literal notranslate"><span class="pre">Reader</span></code></a> instance to a <code class="code docutils literal notranslate"><span class="pre">JSON</span></code>
 <em>string</em> and then <code class="code docutils literal notranslate"><span class="pre">POST</span></code> it to the data input endpoint of
 the specified localhost port.</p>
 <div class="toctree-wrapper compound">

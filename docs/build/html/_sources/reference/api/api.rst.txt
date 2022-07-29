@@ -39,6 +39,7 @@ Server Utitities
     :toctree: server
     :recursive:
 
-    firefly.server.startFireflyServer
+    firefly.server.startHTTPServer
+    firefly.server.startFlaskServer
     firefly.server.spawnFireflyServer
-    firefly.server.killAllFireflyServers
+    firefly.server.quitAllFireflyServers

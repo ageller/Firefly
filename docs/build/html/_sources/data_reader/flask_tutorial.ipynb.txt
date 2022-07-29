@@ -46,7 +46,7 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.YouTubeVideo at 0x105d88280>"
+       "<IPython.lib.display.YouTubeVideo at 0x11342b520>"
       ]
      },
      "execution_count": 2,
@@ -67,6 +67,7 @@
      "name": "stdout",
      "output_type": "stream",
      "text": [
+      "palettable colormaps are not installed\n",
       "don't have phil's colormaps\n"
      ]
     }
@@ -108,14 +109,14 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 33,
+   "execution_count": 4,
    "metadata": {},
    "outputs": [
     {
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "Waiting up to 10 seconds for background Firefly server to start.."
+      "Waiting up to 10 seconds for background Firefly server to startdone! Your server is available at - http://localhost:5500\n"
      ]
     },
     {
@@ -123,13 +124,6 @@
      "output_type": "stream",
      "text": [
       " * Restarting with stat\n"
-     ]
-    },
-    {
-     "name": "stdout",
-     "output_type": "stream",
-     "text": [
-      ".done! Your server is available at - http://localhost:5500\n"
      ]
     }
    ],
@@ -165,7 +159,7 @@
        "        "
       ],
       "text/plain": [
-       "<IPython.lib.display.IFrame at 0x13b8c65b0>"
+       "<IPython.lib.display.IFrame at 0x1733b4910>"
       ]
      },
      "execution_count": 5,
@@ -188,7 +182,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 11,
+   "execution_count": 6,
    "metadata": {},
    "outputs": [],
    "source": [
@@ -211,18 +205,18 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 24,
+   "execution_count": 7,
    "metadata": {},
    "outputs": [
     {
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "JSONdir is None, defaulting to /Users/agurvich/research/repos/firefly/src/firefly/static/data/Data\n",
+      "datadir is None, defaulting to /Users/agurvich/research/repos/firefly/src/firefly/static/data/Data\n",
       "Make sure each field_array (1) has a field_filter_flag (0), assuming True.\n",
       "Make sure each field_array (1) has a field_colormap_flag (0), assuming True.\n",
       "Make sure each field_array (1) has a field_radius_flag (0), assuming False.\n",
-      "Outputting: PGroup_0 - 8000/8000 particles - 1 tracked fields\n"
+      "PGroup_0 - 8000/8000 particles - 1 tracked fields\n"
      ]
     }
    ],
@@ -243,23 +237,23 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 34,
+   "execution_count": 8,
    "metadata": {},
    "outputs": [
     {
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "sending to Firefly 410131\n"
+      "sending to Firefly 49\n"
      ]
     },
     {
      "data": {
       "text/plain": [
-       "<Response [200]>"
+       "<Response [500]>"
       ]
      },
-     "execution_count": 34,
+     "execution_count": 8,
      "metadata": {},
      "output_type": "execute_result"
     }
@@ -281,69 +275,15 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 39,
+   "execution_count": 9,
    "metadata": {},
    "outputs": [
     {
      "name": "stdout",
      "output_type": "stream",
      "text": [
-      "Posting...data posted!\n",
-      "don't have phil's colormaps\n",
-      "Launching Firefly at: http://localhost:5500\n",
-      "======= showing loader\n",
-      "======= receiving data from server ...\n",
-      "======= size of data 410131\n",
-      "======= sending data to viewer ...\n",
-      "/Users/agurvich/research/repos/firefly/src/firefly/static/data/Data/DataPGroup_0000.json 408002\n",
-      "/Users/agurvich/research/repos/firefly/src/firefly/static/data/Data/DataSettings.json 1345\n",
-      "/Users/agurvich/research/repos/firefly/src/firefly/static/data/Data/filenames.json 92\n",
-      "/Users/agurvich/research/repos/firefly/src/firefly/static/data/startup.json 45\n",
-      "======= done\n",
-      "======= showing loader\n",
-      "======= receiving data from server ...\n",
-      "======= size of data 410131\n",
-      "======= sending data to viewer ...\n",
-      "/Users/agurvich/research/repos/firefly/src/firefly/static/data/Data/DataPGroup_0000.json 408002\n",
-      "/Users/agurvich/research/repos/firefly/src/firefly/static/data/Data/DataSettings.json 1345\n",
-      "/Users/agurvich/research/repos/firefly/src/firefly/static/data/Data/filenames.json 92\n",
-      "/Users/agurvich/research/repos/firefly/src/firefly/static/data/startup.json 45\n",
-      "======= done\n",
-      "======= connected {'data': 'GUI connected!'}\n",
-      "======= connected {'data': 'Viewer connected!'}\n",
-      "======= showing loader\n",
-      "======= receiving data from server ...\n",
-      "======= size of data 410131\n",
-      "======= sending data to viewer ...\n",
-      "/Users/agurvich/research/repos/firefly/src/firefly/static/data/Data/DataPGroup_0000.json 408002\n",
-      "/Users/agurvich/research/repos/firefly/src/firefly/static/data/Data/DataSettings.json 1345\n",
-      "/Users/agurvich/research/repos/firefly/src/firefly/static/data/Data/filenames.json 92\n",
-      "/Users/agurvich/research/repos/firefly/src/firefly/static/data/startup.json 45\n",
-      "======= done\n",
-      "======= connected {'data': 'GUI connected!'}\n",
-      "======= connected {'data': 'Viewer connected!'}\n",
-      "======= showing loader\n",
-      "======= receiving data from server ...\n",
-      "======= size of data 410131\n",
-      "======= sending data to viewer ...\n",
-      "/Users/agurvich/research/repos/firefly/src/firefly/static/data/Data/DataPGroup_0000.json 408002\n",
-      "/Users/agurvich/research/repos/firefly/src/firefly/static/data/Data/DataSettings.json 1345\n",
-      "/Users/agurvich/research/repos/firefly/src/firefly/static/data/Data/filenames.json 92\n",
-      "/Users/agurvich/research/repos/firefly/src/firefly/static/data/startup.json 45\n",
-      "======= done\n",
-      "======= connected {'data': 'GUI connected!'}\n",
-      "======= connected {'data': 'Viewer connected!'}\n",
-      "======= showing loader\n",
-      "======= receiving data from server ...\n",
-      "======= size of data 410131\n",
-      "======= sending data to viewer ...\n",
-      "/Users/agurvich/research/repos/firefly/src/firefly/static/data/Data/DataPGroup_0000.json 408002\n",
-      "/Users/agurvich/research/repos/firefly/src/firefly/static/data/Data/DataSettings.json 1345\n",
-      "/Users/agurvich/research/repos/firefly/src/firefly/static/data/Data/filenames.json 92\n",
-      "/Users/agurvich/research/repos/firefly/src/firefly/static/data/startup.json 45\n",
-      "======= done\n",
-      "don't have phil's colormaps\n",
-      "Launching Firefly at: http://localhost:5500\n"
+      "PGroup_0 - 8000/8000 particles - 1 tracked fields\n",
+      "Posting to port 5500...data posted!\n"
      ]
     }
    ],
@@ -364,7 +304,7 @@
   },
   {
    "cell_type": "code",
-   "execution_count": 32,
+   "execution_count": 10,
    "metadata": {},
    "outputs": [
     {
@@ -379,21 +319,19 @@
      "name": "stderr",
      "output_type": "stream",
      "text": [
-      "kill: 22297: No such process\n"
+      "kill: 69304: No such process\n"
      ]
     },
     {
      "name": "stdout",
      "output_type": "stream",
      "text": [
+      "palettable colormaps are not installed\n",
       "don't have phil's colormaps\n",
-      "Launching Firefly at: http://localhost:3473359\n",
+      "Launching Firefly at: http://localhost:5500\n",
+      "palettable colormaps are not installed\n",
       "don't have phil's colormaps\n",
-      "Launching Firefly at: http://localhost:34733\n",
-      "don't have phil's colormaps\n",
-      "Launching Firefly at: http://localhost:3473359\n",
-      "don't have phil's colormaps\n",
-      "Launching Firefly at: http://localhost:34733\n"
+      "Launching Firefly at: http://localhost:5500\n"
      ]
     }
    ],
@@ -429,7 +367,7 @@
    "name": "python",
    "nbconvert_exporter": "python",
    "pygments_lexer": "ipython3",
-   "version": "3.9.7"
+   "version": "3.9.11"
   }
  },
  "nbformat": 4,

@@ -21,7 +21,7 @@
     <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Using Firefly to view FIRE data" href="fire_quickstart.html" />
+    <link rel="next" title="Hosting a Firefly webserver" href="../server.html" />
     <link rel="prev" title="Sending data to a Firefly server via Flask" href="flask.html" /> 
 </head>
 
@@ -54,7 +54,6 @@
 <li class="toctree-l4 current"><a class="current reference internal" href="#">Tutorial notebook: Sending data to a local Firefly server through Flask</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="fire_quickstart.html">Using Firefly to view FIRE data</a></li>
 </ul>
 </li>
 </ul>
@@ -418,6 +417,7 @@ div.rendered_html tbody tr:hover {
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
+palettable colormaps are not installed
 don&#39;t have phil&#39;s colormaps
 </pre></div></div>
 </div>
@@ -429,7 +429,7 @@ don&#39;t have phil&#39;s colormaps
 <h2>Start the Firefly server as a background process<a class="headerlink" href="#Start-the-Firefly-server-as-a-background-process" title="Permalink to this headline"></a></h2>
 <p>In this tutorial we’ll demonstrate how to update the data being shown in a live instance of Firefly running on a local webserver through Flask. Before attempting this tutorial read through the server documentation which explains how to specify the listening port and different methods of hosting a Flask Firefly server (here we use the <code class="docutils literal notranslate"><span class="pre">firefly.server.spawnFireflyServer</span></code> function which starts a background process).</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[33]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">process</span> <span class="o">=</span> <span class="n">spawnFireflyServer</span><span class="p">(</span><span class="mi">5500</span><span class="p">)</span>
@@ -441,23 +441,15 @@ don&#39;t have phil&#39;s colormaps
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Waiting up to 10 seconds for background Firefly server to start..
-</pre></div></div>
-</div>
-<div class="nboutput docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
- * Restarting with stat
+Waiting up to 10 seconds for background Firefly server to startdone! Your server is available at - http://localhost:5500
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
-<div class="output_area docutils container">
+<div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-.done! Your server is available at - http://localhost:5500
+ * Restarting with stat
 </pre></div></div>
 </div>
 </section>
@@ -492,7 +484,7 @@ Waiting up to 10 seconds for background Firefly server to start..
 <h2>Create some example data and put it into a <code class="docutils literal notranslate"><span class="pre">firefly.data_reader.Reader</span></code> object<a class="headerlink" href="#Create-some-example-data-and-put-it-into-a-firefly.data_reader.Reader-object" title="Permalink to this headline"></a></h2>
 <p>See the reader documentation or the <code class="docutils literal notranslate"><span class="pre">reader_tutorial.ipynb</span></code> example notebook.</p>
 <div class="nbinput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">## let&#39;s create some sample data, a grid of points in a 3d cube</span>
@@ -508,7 +500,7 @@ Waiting up to 10 seconds for background Firefly server to start..
 </div>
 <p>We’ll use an <code class="docutils literal notranslate"><span class="pre">ArrayReader</span></code> here, check out the <code class="docutils literal notranslate"><span class="pre">reader_tutorial.ipynb</span></code> example notebook if this is new for you!</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[24]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">my_arrayReader</span> <span class="o">=</span> <span class="n">ArrayReader</span><span class="p">(</span>
@@ -523,11 +515,11 @@ Waiting up to 10 seconds for background Firefly server to start..
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-JSONdir is None, defaulting to /Users/agurvich/research/repos/firefly/src/firefly/static/data/Data
+datadir is None, defaulting to /Users/agurvich/research/repos/firefly/src/firefly/static/data/Data
 Make sure each field_array (1) has a field_filter_flag (0), assuming True.
 Make sure each field_array (1) has a field_colormap_flag (0), assuming True.
 Make sure each field_array (1) has a field_radius_flag (0), assuming False.
-Outputting: PGroup_0 - 8000/8000 particles - 1 tracked fields
+PGroup_0 - 8000/8000 particles - 1 tracked fields
 </pre></div></div>
 </div>
 </section>
@@ -536,7 +528,7 @@ Outputting: PGroup_0 - 8000/8000 particles - 1 tracked fields
 <p>The data will be sent to the Firefly server via a POST request, we can do this in python using the <code class="docutils literal notranslate"><span class="pre">requests</span></code> module. One the POST has been made scroll back up to the window above and see the new data (if you don’t see new data, it’s possible that you’ve overwritten the default <code class="docutils literal notranslate"><span class="pre">startup.json</span></code> that shipped with Firefly by following some of the other tutorials. That’s okay! See the multiple datasets documentation or the <code class="docutils literal notranslate"><span class="pre">multiple_datasets.ipynb</span></code> example notebook to learn more about the
 <code class="docutils literal notranslate"><span class="pre">startup.json</span></code> file.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[34]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">## make a POST request to port 5500, supplying the JSON produced by setting</span>
@@ -552,21 +544,21 @@ Outputting: PGroup_0 - 8000/8000 particles - 1 tracked fields
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-sending to Firefly 410131
+sending to Firefly 49
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[34]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;Response [200]&gt;
+&lt;Response [500]&gt;
 </pre></div></div>
 </div>
 <p>We’ve also wrapped this code in the <code class="docutils literal notranslate"><span class="pre">.sendDataViaFlask</span></code> method.</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[39]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">## make a POST request</span>
@@ -579,62 +571,8 @@ sending to Firefly 410131
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Posting...data posted!
-don&#39;t have phil&#39;s colormaps
-Launching Firefly at: http://localhost:5500
-======= showing loader
-======= receiving data from server ...
-======= size of data 410131
-======= sending data to viewer ...
-/Users/agurvich/research/repos/firefly/src/firefly/static/data/Data/DataPGroup_0000.json 408002
-/Users/agurvich/research/repos/firefly/src/firefly/static/data/Data/DataSettings.json 1345
-/Users/agurvich/research/repos/firefly/src/firefly/static/data/Data/filenames.json 92
-/Users/agurvich/research/repos/firefly/src/firefly/static/data/startup.json 45
-======= done
-======= showing loader
-======= receiving data from server ...
-======= size of data 410131
-======= sending data to viewer ...
-/Users/agurvich/research/repos/firefly/src/firefly/static/data/Data/DataPGroup_0000.json 408002
-/Users/agurvich/research/repos/firefly/src/firefly/static/data/Data/DataSettings.json 1345
-/Users/agurvich/research/repos/firefly/src/firefly/static/data/Data/filenames.json 92
-/Users/agurvich/research/repos/firefly/src/firefly/static/data/startup.json 45
-======= done
-======= connected {&#39;data&#39;: &#39;GUI connected!&#39;}
-======= connected {&#39;data&#39;: &#39;Viewer connected!&#39;}
-======= showing loader
-======= receiving data from server ...
-======= size of data 410131
-======= sending data to viewer ...
-/Users/agurvich/research/repos/firefly/src/firefly/static/data/Data/DataPGroup_0000.json 408002
-/Users/agurvich/research/repos/firefly/src/firefly/static/data/Data/DataSettings.json 1345
-/Users/agurvich/research/repos/firefly/src/firefly/static/data/Data/filenames.json 92
-/Users/agurvich/research/repos/firefly/src/firefly/static/data/startup.json 45
-======= done
-======= connected {&#39;data&#39;: &#39;GUI connected!&#39;}
-======= connected {&#39;data&#39;: &#39;Viewer connected!&#39;}
-======= showing loader
-======= receiving data from server ...
-======= size of data 410131
-======= sending data to viewer ...
-/Users/agurvich/research/repos/firefly/src/firefly/static/data/Data/DataPGroup_0000.json 408002
-/Users/agurvich/research/repos/firefly/src/firefly/static/data/Data/DataSettings.json 1345
-/Users/agurvich/research/repos/firefly/src/firefly/static/data/Data/filenames.json 92
-/Users/agurvich/research/repos/firefly/src/firefly/static/data/startup.json 45
-======= done
-======= connected {&#39;data&#39;: &#39;GUI connected!&#39;}
-======= connected {&#39;data&#39;: &#39;Viewer connected!&#39;}
-======= showing loader
-======= receiving data from server ...
-======= size of data 410131
-======= sending data to viewer ...
-/Users/agurvich/research/repos/firefly/src/firefly/static/data/Data/DataPGroup_0000.json 408002
-/Users/agurvich/research/repos/firefly/src/firefly/static/data/Data/DataSettings.json 1345
-/Users/agurvich/research/repos/firefly/src/firefly/static/data/Data/filenames.json 92
-/Users/agurvich/research/repos/firefly/src/firefly/static/data/startup.json 45
-======= done
-don&#39;t have phil&#39;s colormaps
-Launching Firefly at: http://localhost:5500
+PGroup_0 - 8000/8000 particles - 1 tracked fields
+Posting to port 5500...data posted!
 </pre></div></div>
 </div>
 </section>
@@ -644,7 +582,7 @@ Launching Firefly at: http://localhost:5500
 always safest to just quit all the servers indiscriminately. Generally the two are interchangeable unless you’re hosting multiple local servers of Firefly on different ports. This is pretty uncommon/advanced in which case you hopefully know what you’re doing.</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">firefly.server.quitAllFireflyServers</span></code> function will print all of the output the Firefly server</p>
 <div class="nbinput docutils container">
-<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[32]:
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">return_code</span> <span class="o">=</span> <span class="n">quitAllFireflyServers</span><span class="p">()</span>
@@ -665,7 +603,7 @@ Server output:
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-kill: 22297: No such process
+kill: 69304: No such process
 </pre></div></div>
 </div>
 <div class="nboutput nblast docutils container">
@@ -673,14 +611,12 @@ kill: 22297: No such process
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
+palettable colormaps are not installed
 don&#39;t have phil&#39;s colormaps
-Launching Firefly at: http://localhost:3473359
+Launching Firefly at: http://localhost:5500
+palettable colormaps are not installed
 don&#39;t have phil&#39;s colormaps
-Launching Firefly at: http://localhost:34733
-don&#39;t have phil&#39;s colormaps
-Launching Firefly at: http://localhost:3473359
-don&#39;t have phil&#39;s colormaps
-Launching Firefly at: http://localhost:34733
+Launching Firefly at: http://localhost:5500
 </pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">
@@ -699,7 +635,7 @@ Launching Firefly at: http://localhost:34733
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="flask.html" class="btn btn-neutral float-left" title="Sending data to a Firefly server via Flask" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="fire_quickstart.html" class="btn btn-neutral float-right" title="Using Firefly to view FIRE data" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="../server.html" class="btn btn-neutral float-right" title="Hosting a Firefly webserver" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

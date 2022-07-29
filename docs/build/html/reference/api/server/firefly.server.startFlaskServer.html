@@ -4,7 +4,7 @@
   <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>firefly.server.spawnFireflyServer &mdash; Firefly 3.0.0 documentation</title>
+  <title>firefly.server.startFlaskServer &mdash; Firefly 3.0.0 documentation</title>
       <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
       <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
@@ -19,8 +19,8 @@
     <script src="../../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
-    <link rel="next" title="firefly.server.quitAllFireflyServers" href="firefly.server.quitAllFireflyServers.html" />
-    <link rel="prev" title="firefly.server.startFlaskServer" href="firefly.server.startFlaskServer.html" /> 
+    <link rel="next" title="firefly.server.spawnFireflyServer" href="firefly.server.spawnFireflyServer.html" />
+    <link rel="prev" title="firefly.server.startHTTPServer" href="firefly.server.startHTTPServer.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -50,8 +50,8 @@
 <li class="toctree-l2"><a class="reference internal" href="../api.html#pre-built-readers">Pre-built Readers</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="../api.html#server-utitities">Server Utitities</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="firefly.server.startHTTPServer.html">firefly.server.startHTTPServer</a></li>
-<li class="toctree-l3"><a class="reference internal" href="firefly.server.startFlaskServer.html">firefly.server.startFlaskServer</a></li>
-<li class="toctree-l3 current"><a class="current reference internal" href="#">firefly.server.spawnFireflyServer</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">firefly.server.startFlaskServer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="firefly.server.spawnFireflyServer.html">firefly.server.spawnFireflyServer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="firefly.server.quitAllFireflyServers.html">firefly.server.quitAllFireflyServers</a></li>
 </ul>
 </li>
@@ -74,9 +74,9 @@
   <ul class="wy-breadcrumbs">
       <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
           <li><a href="../api.html">API Reference</a> &raquo;</li>
-      <li>firefly.server.spawnFireflyServer</li>
+      <li>firefly.server.startFlaskServer</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../../../_sources/reference/api/server/firefly.server.spawnFireflyServer.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../../../_sources/reference/api/server/firefly.server.startFlaskServer.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -108,40 +108,24 @@
     text-align: unset;
 }
 </style>
-<section id="firefly-server-spawnfireflyserver">
-<h1>firefly.server.spawnFireflyServer<a class="headerlink" href="#firefly-server-spawnfireflyserver" title="Permalink to this headline"></a></h1>
+<section id="firefly-server-startflaskserver">
+<h1>firefly.server.startFlaskServer<a class="headerlink" href="#firefly-server-startflaskserver" title="Permalink to this headline"></a></h1>
 <dl class="py function">
-<dt class="sig sig-object py" id="firefly.server.spawnFireflyServer">
-<span class="sig-prename descclassname"><span class="pre">firefly.server.</span></span><span class="sig-name descname"><span class="pre">spawnFireflyServer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'flask'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frames_per_second</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimation_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_time</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/firefly/server.html#spawnFireflyServer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#firefly.server.spawnFireflyServer" title="Permalink to this definition"></a></dt>
+<dt class="sig sig-object py" id="firefly.server.startFlaskServer">
+<span class="sig-prename descclassname"><span class="pre">firefly.server.</span></span><span class="sig-name descname"><span class="pre">startFlaskServer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">port</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">5500</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">frames_per_second</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimation_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/firefly/server.html#startFlaskServer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#firefly.server.startFlaskServer" title="Permalink to this definition"></a></dt>
 <dd><dl class="simple">
-<dt>Starts a Firefly server as a background process. Close the server by calling</dt><dd><p><a class="reference internal" href="firefly.server.quitAllFireflyServers.html#firefly.server.quitAllFireflyServers" title="firefly.server.quitAllFireflyServers"><code class="xref py py-func docutils literal notranslate"><span class="pre">firefly.server.quitAllFireflyServers()</span></code></a>.</p>
+<dt>Creates a global interpreter locked process to host a Flask server</dt><dd><p>that can be accessed via localhost:&lt;port&gt;.</p>
 </dd>
 </dl>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>port</strong> (<em>int</em><em>, </em><em>optional</em>) – port number to serve the <code class="code docutils literal notranslate"><span class="pre">.html</span></code> files on, defaults to 5500</p></li>
-<li><p><strong>method</strong> (<em>str</em><em>, </em><em>optional</em>) – what sort of Firefly server to open, a Flask (“flask”) server 
-or an HTTP (“http”), defaults to “flask”</p></li>
-<li><p><strong>directory</strong> (<em>str</em><em>, </em><em>optional</em>) – the directory of the Firefly source files to be served, 
-if None, uses <cite>os.dirname(__file__)</cite> i.e. the directory of the <cite>firefly</cite>
-python distribution, defaults to None</p></li>
 <li><p><strong>frames_per_second</strong> (<em>int</em><em>, </em><em>optional</em>) – enforced FPS for stream quality, used only if
 localhost:&lt;port&gt;/stream is accessed, defaults to 30</p></li>
 <li><p><strong>decimation_factor</strong> (<em>int</em><em>, </em><em>optional</em>) – factor to decimate data that is being passed through
 localhost:&lt;port&gt;/data_input, defaults to 1</p></li>
-<li><p><strong>max_time</strong> (<em>float</em><em>, </em><em>optional</em>) – maximum amount of time to wait for a Firefly server
-to be available.</p></li>
 </ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>subprocess.Popen</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>subprocess handler</p>
-</dd>
-<dt class="field-even">Raises</dt>
-<dd class="field-even"><p><strong>RuntimeError</strong> – if max_time elapses without a successful Firefly server being initialized.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -152,8 +136,8 @@ to be available.</p></li>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="firefly.server.startFlaskServer.html" class="btn btn-neutral float-left" title="firefly.server.startFlaskServer" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="firefly.server.quitAllFireflyServers.html" class="btn btn-neutral float-right" title="firefly.server.quitAllFireflyServers" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="firefly.server.startHTTPServer.html" class="btn btn-neutral float-left" title="firefly.server.startHTTPServer" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="firefly.server.spawnFireflyServer.html" class="btn btn-neutral float-right" title="firefly.server.spawnFireflyServer" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

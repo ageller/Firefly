@@ -111,20 +111,20 @@ command line from within a Jupyter notebook as well.
 
 Where `xxxx` is the 4 digit port number that you'd like to host the server on.
 
-When you would like to kill this server when you are done with it,
+When you would like to quit this server when you are done with it,
 use the command:
 
 .. code-block:: 
 
-    from firefly.server import killAllFireflyServers
+    from firefly.server import quitAllFireflyServers
 
-    ## optionally accepts a single process id to kill
-    killAllFireflyServers()
+    ## optionally accepts a single process id to quit
+    quitAllFireflyServers()
 
 Note that the pid is accessible from the original :func:`~firefly.server.spawnFireflyServer`
-call but that processes in general do not like to be killed and may sometimes
+call but that processes in general do not like to be quited and may sometimes
 survive the targeted attempt on their life. It's more reliable to indiscriminately 
-kill any process that has a Firefly server process name (the default).
+quit any process that has a Firefly server process name (the default).
 
 For the details of the usage of these functions,
 consult the :ref:`server API documentation <server api>`.
@@ -134,7 +134,9 @@ consult the :ref:`server API documentation <server api>`.
 Hosting a static version on the internet
 ----------------------------------------
 
-To make Firefly accessible via the internet, the 
+To make Firefly accessible via the internet, users need only replace their final call to the  \docref{reference/api/classes/firefly.data\_reader.Reader.html\#firefly.data\_reader.Reader.writeToDisk}{Reader.writeToDisk} method with an analogous call to the \docref{reference/api/classes/firefly.data\_reader.Reader.html\#firefly.data\_reader.Reader.copyFireflySourceToTarget}{Reader.copyFireflySourceToTarget} method.
+The \code{copyFireflySourceToTarget} method will copy the necessary Firefly source files along with the visualization data to a target directory on the researcher's local computer.
+In order to automatically upload their visualization to GitHub Pages, a free web-hosting service provided by GitHub, the researcher would also pass the path to their GitHub OAuth authentication key and \code{init\_gh\_pages=True} as keyword arguments.
 
 .. code-block:: 
     
@@ -147,6 +149,7 @@ To make Firefly accessible via the internet, the
     keyword argument :code:`init_gh_pages` that will attempt to 
     create a new repository and enable GitHub pages automatically.
     See :ref:`multiple datasets` for details.
+
 
 
 

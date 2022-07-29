@@ -20,7 +20,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Experimental features" href="experimental.html" />
-    <link rel="prev" title="Using Firefly to view FIRE data" href="data_reader/fire_quickstart.html" /> 
+    <link rel="prev" title="Tutorial notebook: Sending data to a local Firefly server through Flask" href="data_reader/flask_tutorial.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -197,25 +197,27 @@ command line from within a Jupyter notebook as well.</p>
 </pre></div>
 </div>
 <p>Where <cite>xxxx</cite> is the 4 digit port number that you’d like to host the server on.</p>
-<p>When you would like to kill this server when you are done with it,
+<p>When you would like to quit this server when you are done with it,
 use the command:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">firefly.server</span> <span class="kn">import</span> <span class="n">killAllFireflyServers</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">firefly.server</span> <span class="kn">import</span> <span class="n">quitAllFireflyServers</span>
 
-<span class="c1">## optionally accepts a single process id to kill</span>
-<span class="n">killAllFireflyServers</span><span class="p">()</span>
+<span class="c1">## optionally accepts a single process id to quit</span>
+<span class="n">quitAllFireflyServers</span><span class="p">()</span>
 </pre></div>
 </div>
 <p>Note that the pid is accessible from the original <a class="reference internal" href="reference/api/server/firefly.server.spawnFireflyServer.html#firefly.server.spawnFireflyServer" title="firefly.server.spawnFireflyServer"><code class="xref py py-func docutils literal notranslate"><span class="pre">spawnFireflyServer()</span></code></a>
-call but that processes in general do not like to be killed and may sometimes
+call but that processes in general do not like to be quited and may sometimes
 survive the targeted attempt on their life. It’s more reliable to indiscriminately
-kill any process that has a Firefly server process name (the default).</p>
+quit any process that has a Firefly server process name (the default).</p>
 <p>For the details of the usage of these functions,
 consult the <a class="reference internal" href="reference/api/api.html#server-api"><span class="std std-ref">server API documentation</span></a>.</p>
 </section>
 </section>
 <section id="hosting-a-static-version-on-the-internet">
 <span id="internet-host"></span><h2>Hosting a static version on the internet<a class="headerlink" href="#hosting-a-static-version-on-the-internet" title="Permalink to this headline"></a></h2>
-<p>To make Firefly accessible via the internet, the</p>
+<p>To make Firefly accessible via the internet, users need only replace their final call to the  docref{reference/api/classes/firefly.data_reader.Reader.html#firefly.data_reader.Reader.writeToDisk}{Reader.writeToDisk} method with an analogous call to the docref{reference/api/classes/firefly.data_reader.Reader.html#firefly.data_reader.Reader.copyFireflySourceToTarget}{Reader.copyFireflySourceToTarget} method.
+The code{copyFireflySourceToTarget} method will copy the necessary Firefly source files along with the visualization data to a target directory on the researcher’s local computer.
+In order to automatically upload their visualization to GitHub Pages, a free web-hosting service provided by GitHub, the researcher would also pass the path to their GitHub OAuth authentication key and code{init_gh_pages=True} as keyword arguments.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">reader</span><span class="o">.</span><span class="n">copyFireflySourceToTarget</span><span class="p">(</span><span class="s2">&quot;my_Firefly&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -300,7 +302,7 @@ the consequences should attempt this!</p>
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="data_reader/fire_quickstart.html" class="btn btn-neutral float-left" title="Using Firefly to view FIRE data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="data_reader/flask_tutorial.html" class="btn btn-neutral float-left" title="Tutorial notebook: Sending data to a local Firefly server through Flask" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="experimental.html" class="btn btn-neutral float-right" title="Experimental features" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 

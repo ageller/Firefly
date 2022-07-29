@@ -1,0 +1,6 @@
+﻿firefly.server.quitAllFireflyServers
+====================================
+
+.. currentmodule:: firefly.server
+
+.. autofunction:: quitAllFireflyServers

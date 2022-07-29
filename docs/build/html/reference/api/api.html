@@ -61,7 +61,10 @@
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#server-utitities">Server Utitities</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="server/firefly.server.startHTTPServer.html">firefly.server.startHTTPServer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="server/firefly.server.startFlaskServer.html">firefly.server.startFlaskServer</a></li>
 <li class="toctree-l3"><a class="reference internal" href="server/firefly.server.spawnFireflyServer.html">firefly.server.spawnFireflyServer</a></li>
+<li class="toctree-l3"><a class="reference internal" href="server/firefly.server.quitAllFireflyServers.html">firefly.server.quitAllFireflyServers</a></li>
 </ul>
 </li>
 </ul>
@@ -172,8 +175,17 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="server/firefly.server.startHTTPServer.html#firefly.server.startHTTPServer" title="firefly.server.startHTTPServer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">firefly.server.startHTTPServer</span></code></a>([port, directory])</p></td>
+<td><p>Creates a global interpreter locked process to host either a Flask</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="server/firefly.server.startFlaskServer.html#firefly.server.startFlaskServer" title="firefly.server.startFlaskServer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">firefly.server.startFlaskServer</span></code></a>([port, ...])</p></td>
+<td><p>Creates a global interpreter locked process to host a Flask server</p></td>
+</tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="server/firefly.server.spawnFireflyServer.html#firefly.server.spawnFireflyServer" title="firefly.server.spawnFireflyServer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">firefly.server.spawnFireflyServer</span></code></a>([port, ...])</p></td>
 <td><p>Starts a Firefly server as a background process. Close the server by calling</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="server/firefly.server.quitAllFireflyServers.html#firefly.server.quitAllFireflyServers" title="firefly.server.quitAllFireflyServers"><code class="xref py py-obj docutils literal notranslate"><span class="pre">firefly.server.quitAllFireflyServers</span></code></a>([pid])</p></td>
+<td><p>Quit python processes associated with hosting Flask web-servers.</p></td>
 </tr>
 </tbody>
 </table>
