@@ -659,7 +659,7 @@
         
         <span class="k">if</span> <span class="n">particleGroup</span><span class="o">.</span><span class="n">settings_default</span><span class="p">[</span><span class="s1">&#39;GUIExcludeList&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;GUIExcludeList&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="p">[</span>
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">particleGroup</span><span class="o">.</span><span class="n">UIname</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> 
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">particleGroup</span><span class="o">.</span><span class="n">UIname</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">key</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">particleGroup</span><span class="o">.</span><span class="n">UIname</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> 
                 <span class="n">particleGroup</span><span class="o">.</span><span class="n">settings_default</span><span class="p">[</span><span class="s1">&#39;GUIExcludeList&#39;</span><span class="p">]]</span>
 
         <span class="c1">## replace colormapVariable and radiusVariable values</span>
@@ -717,8 +717,7 @@
     <span class="k">def</span> <span class="nf">validateGUIExcludeList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">GUIExcludeList</span><span class="p">):</span>
         <span class="n">pkey_particleGUIurlss</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">pkey</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">[</span><span class="s1">&#39;sizeMult&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="n">pkey_particleGUIurls</span> <span class="o">=</span> <span class="p">[</span><span class="n">url</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;main/particles&#39;</span><span class="p">,</span><span class="n">pkey</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">particle_GUIurls</span><span class="p">]</span><span class="o">+</span><span class="p">[</span><span class="n">pkey</span><span class="p">]</span>
-        <span class="n">pkey_particleGUIurlss</span> <span class="o">+=</span> <span class="n">pkey_particleGUIurls</span>
+            <span class="n">pkey_particleGUIurlss</span> <span class="o">+=</span> <span class="p">[</span><span class="n">url</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;main/particles&#39;</span><span class="p">,</span><span class="n">pkey</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">particle_GUIurls</span><span class="p">]</span><span class="o">+</span><span class="p">[</span><span class="n">pkey</span><span class="p">]</span>
 
         <span class="k">for</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">GUIExcludeList</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">url</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="ow">in</span> <span class="n">GUIurls</span><span class="p">:</span> <span class="k">continue</span>
@@ -850,7 +849,8 @@
 <span class="n">particle_GUIurls</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">&#39;main/particles/onoff&#39;</span><span class="p">,</span> 
     <span class="s1">&#39;main/particles/sizeSlider&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;main/particles/colorPicker&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;main/particles/colorPicker&#39;</span><span class="p">,</span> <span class="c1">## hides colorpicker all together</span>
+    <span class="s1">&#39;main/particles/colorPicker/onclick&#39;</span><span class="p">,</span> <span class="c1">## shows colorpicker but disables onclick</span>
     <span class="s1">&#39;main/particles/dropdown&#39;</span><span class="p">,</span>
     <span class="s1">&#39;main/particles/dropdown/general&#39;</span><span class="p">,</span>
     <span class="s1">&#39;main/particles/dropdown/general/octreeClearMemory&#39;</span><span class="p">,</span>

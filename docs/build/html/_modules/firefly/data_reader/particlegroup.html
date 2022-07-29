@@ -72,13 +72,14 @@
   <h1>Source code for firefly.data_reader.particlegroup</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
+<span class="kn">from</span> <span class="nn">matplotlib.colors</span> <span class="kn">import</span> <span class="n">hex2color</span>
 
 <span class="kn">import</span> <span class="nn">os</span> 
 
 <span class="kn">from</span> <span class="nn">.json_utils</span> <span class="kn">import</span> <span class="n">write_to_json</span><span class="p">,</span><span class="n">load_from_json</span>
 <span class="kn">from</span> <span class="nn">.binary_writer</span> <span class="kn">import</span> <span class="n">BinaryWriter</span>
 
-<span class="kn">from</span> <span class="nn">.octree</span> <span class="kn">import</span> <span class="n">Octree</span>
+<span class="kn">from</span> <span class="nn">.octree</span> <span class="kn">import</span> <span class="n">Octree</span><span class="p">,</span> <span class="n">init_octree_root_node</span>
 
 <div class="viewcode-block" id="ParticleGroup"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.ParticleGroup.html#firefly.data_reader.ParticleGroup">[docs]</a><span class="k">class</span> <span class="nc">ParticleGroup</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -343,13 +344,13 @@
             <span class="k">if</span> <span class="n">settings_kwarg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">settings_default</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                 <span class="k">if</span> <span class="n">settings_kwarg</span> <span class="o">==</span> <span class="s1">&#39;color&#39;</span><span class="p">:</span>
                     <span class="n">color</span> <span class="o">=</span> <span class="n">settings_kwargs</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">color</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span> <span class="n">color</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">hex2color</span><span class="p">(</span><span class="n">color</span><span class="p">))</span>
                     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">color</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">:</span>
-                        <span class="c1">## if passed an RGB color</span>
-                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">color</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-                            <span class="c1">## assume alpha value of 1</span>
-                            <span class="n">settings_kwarg</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">color</span><span class="p">,[</span><span class="mi">1</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-                        <span class="k">else</span><span class="p">:</span>
-                            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Make sure you pass the color as an RGB(A) array&quot;</span><span class="p">)</span>
+                        <span class="c1">## passed an RGB color, assume alpha value of 1</span>
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">color</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span> <span class="n">color</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">color</span><span class="p">,[</span><span class="mi">1</span><span class="p">],</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                            <span class="s2">&quot;Make sure you pass the color as an RGB(A) array&quot;</span><span class="p">)</span>
+                    <span class="n">settings_kwargs</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">color</span>
                         
                 <span class="bp">self</span><span class="o">.</span><span class="n">settings_default</span><span class="p">[</span><span class="n">settings_kwarg</span><span class="p">]</span> <span class="o">=</span> <span class="n">settings_kwargs</span><span class="p">[</span><span class="n">settings_kwarg</span><span class="p">]</span>
             <span class="k">else</span><span class="p">:</span>
@@ -526,18 +527,56 @@
 
         <span class="k">return</span> <span class="n">outDict</span></div>
     
-    <span class="k">def</span> <span class="nf">createOctree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">npart_min_node</span><span class="o">=</span><span class="mf">2e2</span><span class="p">,</span><span class="n">npart_max_node</span><span class="o">=</span><span class="mf">1e3</span><span class="p">):</span>
+<div class="viewcode-block" id="ParticleGroup.spawn_octree_pg"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.ParticleGroup.html#firefly.data_reader.ParticleGroup.spawn_octree_pg">[docs]</a>    <span class="k">def</span> <span class="nf">spawn_octree_pg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">datadir</span><span class="p">:</span><span class="nb">str</span><span class="p">,</span><span class="n">max_npart_per_node</span><span class="p">:</span><span class="nb">int</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Creates a new :class:`firefly.data_reader.particlegroup.OctreeParticleGroup` instance</span>
+<span class="sd">            that references the data contained by the :class:`firefly.data_reader.particlegroup.ParticleGroup`</span>
+<span class="sd">            instance that calls this method.</span>
 
-        <span class="c1">## initialize the octree</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">octree</span> <span class="o">=</span> <span class="n">Octree</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">npart_max_node</span><span class="p">)</span>
+<span class="sd">        :param datadir: directory to output ``self.UIname/octree.json`` (and corresponding files) to.</span>
+<span class="sd">        :type datadir: str</span>
+<span class="sd">        :param max_npart_per_node: maximum number of particles a node can contain before it should be refined.</span>
+<span class="sd">        :type max_npart_per_node: int</span>
+<span class="sd">        :return: octree_pg</span>
+<span class="sd">        :rtype: :class:`~firefly.data_reader.particlegroup.OctreeParticleGroup`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="c1">## build the octree (may take a while)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">octree</span><span class="o">.</span><span class="n">buildOctree</span><span class="p">()</span>
+        <span class="c1">## create a directory for this particle group to store the octree data in</span>
+        <span class="n">pathh</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">datadir</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">UIname</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">pathh</span><span class="p">):</span> <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">pathh</span><span class="p">)</span>
 
-        <span class="c1">## prune the tiny nodes (should be relatively fast)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">octree</span><span class="o">.</span><span class="n">pruneOctree</span><span class="p">(</span><span class="n">npart_min_node</span><span class="p">)</span>
+        <span class="c1">## decimate if necessary</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">getDecimationIndexArray</span><span class="p">()</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">octree</span>
+        <span class="n">dictionary</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;x&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span><span class="p">[:,</span><span class="mi">0</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">dec_inds</span><span class="p">],</span>
+            <span class="s1">&#39;y&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span><span class="p">[:,</span><span class="mi">1</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">dec_inds</span><span class="p">],</span>
+            <span class="s1">&#39;z&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">coordinates</span><span class="p">[:,</span><span class="mi">2</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">dec_inds</span><span class="p">],</span>
+        <span class="p">}</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">velocities</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">dictionary</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+                <span class="s1">&#39;vx&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">velocities</span><span class="p">[:,</span><span class="mi">0</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">dec_inds</span><span class="p">],</span>
+                <span class="s1">&#39;vy&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">velocities</span><span class="p">[:,</span><span class="mi">1</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">dec_inds</span><span class="p">],</span>
+                <span class="s1">&#39;vz&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">velocities</span><span class="p">[:,</span><span class="mi">2</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">dec_inds</span><span class="p">]</span>
+            <span class="p">})</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rgba_colors</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">dictionary</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
+                <span class="s1">&#39;rgba_r&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">rgba_colors</span><span class="p">[:,</span><span class="mi">0</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">dec_inds</span><span class="p">],</span>
+                <span class="s1">&#39;rgba_g&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">rgba_colors</span><span class="p">[:,</span><span class="mi">1</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">dec_inds</span><span class="p">],</span>
+                <span class="s1">&#39;rgba_b&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">rgba_colors</span><span class="p">[:,</span><span class="mi">2</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">dec_inds</span><span class="p">],</span>
+                <span class="s1">&#39;rgba_a&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">rgba_colors</span><span class="p">[:,</span><span class="mi">3</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">dec_inds</span><span class="p">]</span>
+            <span class="p">})</span>
+        
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">field_names</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span> <span class="n">dictionary</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">field_names</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">field_arrays</span><span class="p">[</span><span class="o">...</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">dec_inds</span><span class="p">]))</span>
+
+        <span class="c1">## saves relevant data to disk in the correct .ffraw format at pathh</span>
+        <span class="n">init_octree_root_node</span><span class="p">(</span><span class="n">dictionary</span><span class="p">,</span><span class="n">pathh</span><span class="p">)</span>
+
+        <span class="c1">## create the new particle group instance</span>
+        <span class="n">octree_pg</span> <span class="o">=</span> <span class="n">OctreeParticleGroup</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">UIname</span><span class="p">,</span><span class="n">pathh</span><span class="p">,</span><span class="n">max_npart_per_node</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">octree_pg</span></div>
 
 <div class="viewcode-block" id="ParticleGroup.writeToDisk"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.ParticleGroup.html#firefly.data_reader.ParticleGroup.writeToDisk">[docs]</a>    <span class="k">def</span> <span class="nf">writeToDisk</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -694,14 +733,20 @@
         <span class="n">UIname</span><span class="p">,</span>
         <span class="n">pathh</span><span class="p">,</span>
         <span class="n">min_to_refine</span><span class="o">=</span><span class="mf">1e6</span><span class="p">,</span>
+        <span class="n">build</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+
+        <span class="c1">## initialize the octree portion of the OctreeParticleGroup</span>
+        <span class="n">Octree</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">UIname</span><span class="p">,</span><span class="n">pathh</span><span class="p">,</span><span class="n">min_to_refine</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">build</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span>
         <span class="n">nthreads</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
         <span class="n">nrecurse</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
         <span class="n">use_mps</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">loud</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-
-        <span class="c1">## initialize the octree portion of the OctreeParticleGroup</span>
-        <span class="n">Octree</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">UIname</span><span class="p">,</span><span class="n">pathh</span><span class="p">,</span><span class="n">min_to_refine</span><span class="p">)</span>
 
         <span class="c1">## do the actual work of building the octree,</span>
         <span class="c1">##  might take a while...</span>

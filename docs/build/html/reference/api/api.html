@@ -19,6 +19,7 @@
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="firefly.data_reader.Reader" href="classes/firefly.data_reader.Reader.html" />
     <link rel="prev" title="Experimental features" href="../../experimental.html" /> 
 </head>
 
@@ -45,9 +46,24 @@
 <li class="toctree-l1"><a class="reference internal" href="../../server.html">Hosting a Firefly webserver</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../experimental.html">Experimental features</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">API Reference</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#base-classes">Base classes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#pre-built-readers">Pre-built Readers</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#server-utitities">Server Utitities</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#base-classes">Base classes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="classes/firefly.data_reader.Reader.html">firefly.data_reader.Reader</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/firefly.data_reader.ParticleGroup.html">firefly.data_reader.ParticleGroup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/firefly.data_reader.Settings.html">firefly.data_reader.Settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="classes/firefly.data_reader.TweenParams.html">firefly.data_reader.TweenParams</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#pre-built-readers">Pre-built Readers</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="readers/firefly.data_reader.SimpleReader.html">firefly.data_reader.SimpleReader</a></li>
+<li class="toctree-l3"><a class="reference internal" href="readers/firefly.data_reader.ArrayReader.html">firefly.data_reader.ArrayReader</a></li>
+<li class="toctree-l3"><a class="reference internal" href="readers/firefly.data_reader.FIREreader.html">firefly.data_reader.FIREreader</a></li>
+<li class="toctree-l3"><a class="reference internal" href="readers/firefly.data_reader.SimpleFIREreader.html">firefly.data_reader.SimpleFIREreader</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#server-utitities">Server Utitities</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="server/firefly.server.spawnFireflyServer.html">firefly.server.spawnFireflyServer</a></li>
+</ul>
+</li>
 </ul>
 </li>
 </ul>
@@ -110,6 +126,18 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="classes/firefly.data_reader.Reader.html#firefly.data_reader.Reader" title="firefly.data_reader.Reader"><code class="xref py py-obj docutils literal notranslate"><span class="pre">firefly.data_reader.Reader</span></code></a>([datadir, ...])</p></td>
+<td><p>This class provides a framework to unify the Settings and ParticleGroup classes to make sure that the user can easily produce firefly compatible files.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="classes/firefly.data_reader.ParticleGroup.html#firefly.data_reader.ParticleGroup" title="firefly.data_reader.ParticleGroup"><code class="xref py py-obj docutils literal notranslate"><span class="pre">firefly.data_reader.ParticleGroup</span></code></a>(UIname, ...)</p></td>
+<td><p>This is a class for organizing data that you want to interface with a  Reader instance.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="classes/firefly.data_reader.Settings.html#firefly.data_reader.Settings" title="firefly.data_reader.Settings"><code class="xref py py-obj docutils literal notranslate"><span class="pre">firefly.data_reader.Settings</span></code></a>([settings_filename])</p></td>
+<td><p>This is a class for organizing the various settings you can pass to  Firefly to customize how the app is initialized and what features  the user has access to.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="classes/firefly.data_reader.TweenParams.html#firefly.data_reader.TweenParams" title="firefly.data_reader.TweenParams"><code class="xref py py-obj docutils literal notranslate"><span class="pre">firefly.data_reader.TweenParams</span></code></a>([coords, ...])</p></td>
+<td><p>A class to store tween parameters and make an output file</p></td>
+</tr>
 </tbody>
 </table>
 </section>
@@ -121,6 +149,18 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="readers/firefly.data_reader.SimpleReader.html#firefly.data_reader.SimpleReader" title="firefly.data_reader.SimpleReader"><code class="xref py py-obj docutils literal notranslate"><span class="pre">firefly.data_reader.SimpleReader</span></code></a>(path_to_data)</p></td>
+<td><p>A wrapper to <a class="reference internal" href="readers/firefly.data_reader.ArrayReader.html#firefly.data_reader.ArrayReader" title="firefly.data_reader.ArrayReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">firefly.data_reader.ArrayReader</span></code></a> that attempts to  flexibily open generically formatetd data with minimal interaction from the user.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="readers/firefly.data_reader.ArrayReader.html#firefly.data_reader.ArrayReader" title="firefly.data_reader.ArrayReader"><code class="xref py py-obj docutils literal notranslate"><span class="pre">firefly.data_reader.ArrayReader</span></code></a>(coordinates)</p></td>
+<td><p>A wrapper to <a class="reference internal" href="classes/firefly.data_reader.Reader.html#firefly.data_reader.Reader" title="firefly.data_reader.Reader"><code class="xref py py-class docutils literal notranslate"><span class="pre">firefly.data_reader.Reader</span></code></a> that stores  raw numpy array data without opening anything from disk.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="readers/firefly.data_reader.FIREreader.html#firefly.data_reader.FIREreader" title="firefly.data_reader.FIREreader"><code class="xref py py-obj docutils literal notranslate"><span class="pre">firefly.data_reader.FIREreader</span></code></a>(snapdir, snapnum)</p></td>
+<td><p>This is an example of a &quot;custom&quot; Reader that has been tuned to  open data from the <a class="reference external" href="https://fire.northwestern.edu">FIRE galaxy formation collaboration</a>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="readers/firefly.data_reader.SimpleFIREreader.html#firefly.data_reader.SimpleFIREreader" title="firefly.data_reader.SimpleFIREreader"><code class="xref py py-obj docutils literal notranslate"><span class="pre">firefly.data_reader.SimpleFIREreader</span></code></a>(...[, ...])</p></td>
+<td><p></p></td>
+</tr>
 </tbody>
 </table>
 </section>
@@ -132,6 +172,9 @@
 <col style="width: 90%" />
 </colgroup>
 <tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="server/firefly.server.spawnFireflyServer.html#firefly.server.spawnFireflyServer" title="firefly.server.spawnFireflyServer"><code class="xref py py-obj docutils literal notranslate"><span class="pre">firefly.server.spawnFireflyServer</span></code></a>([port, ...])</p></td>
+<td><p>Starts a Firefly server as a background process. Close the server by calling</p></td>
+</tr>
 </tbody>
 </table>
 </section>
@@ -142,6 +185,7 @@
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="../../experimental.html" class="btn btn-neutral float-left" title="Experimental features" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="classes/firefly.data_reader.Reader.html" class="btn btn-neutral float-right" title="firefly.data_reader.Reader" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

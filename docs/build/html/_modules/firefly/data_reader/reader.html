@@ -107,7 +107,7 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">datadir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
         <span class="n">file_prefix</span><span class="o">=</span><span class="s1">&#39;Data&#39;</span><span class="p">,</span>
-        <span class="n">clean_datadir</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">clean_datadir</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">max_npart_per_file</span><span class="o">=</span><span class="mi">10</span><span class="o">**</span><span class="mi">5</span><span class="p">,</span>
         <span class="n">write_startup</span><span class="o">=</span><span class="s1">&#39;append&#39;</span><span class="p">,</span>
         <span class="n">write_only_data</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -288,7 +288,7 @@
         <span class="c1">## add this particle group to the reader&#39;s settings file</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">settings</span><span class="o">.</span><span class="n">attachSettings</span><span class="p">(</span><span class="n">particleGroup</span><span class="p">)</span></div>
     
-    <span class="k">def</span> <span class="nf">createOctrees</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">createOctrees</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span><span class="n">max_npart_per_node</span><span class="o">=</span><span class="mi">10</span><span class="o">**</span><span class="mi">4</span><span class="p">,</span><span class="n">nrecurse</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 
         <span class="c1">## validate mask length entry , each particle group</span>
         <span class="c1">##  should have a true or false entry</span>
@@ -296,25 +296,22 @@
             <span class="sa">f</span><span class="s2">&quot;mask must be of length: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">particleGroups</span><span class="p">)</span><span class="si">:</span><span class="s2">d</span><span class="si">}</span><span class="s2">&quot;</span><span class="o">+</span>
             <span class="sa">f</span><span class="s2">&quot; not length </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span><span class="si">:</span><span class="s2">d</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
 
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">particleGroup</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">particleGroups</span><span class="p">):</span> 
-            <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">mask</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span> <span class="n">particleGroup</span><span class="o">.</span><span class="n">createOctree</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-    
-    <span class="k">def</span> <span class="nf">pruneOctrees</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">min_npart_per_node</span><span class="p">,</span><span class="n">mask</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="c1">## validate mask length entry , each particle group</span>
-        <span class="c1">##  should have a true or false entry</span>
-        <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">particleGroups</span><span class="p">):</span> <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="sa">f</span><span class="s2">&quot;mask must be of length: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">particleGroups</span><span class="p">)</span><span class="si">:</span><span class="s2">d</span><span class="si">}</span><span class="s2">&quot;</span><span class="o">+</span>
-            <span class="sa">f</span><span class="s2">&quot; not length </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span><span class="si">:</span><span class="s2">d</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
-
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span><span class="n">particleGroup</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">particleGroups</span><span class="p">):</span> 
-            <span class="k">if</span> <span class="p">(</span><span class="nb">hasattr</span><span class="p">(</span><span class="n">particleGroup</span><span class="p">,</span><span class="s1">&#39;octree&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">mask</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">mask</span><span class="p">[</span><span class="n">i</span><span class="p">])):</span> 
-                <span class="n">particleGroup</span><span class="o">.</span><span class="n">octree</span><span class="o">.</span><span class="n">pruneOctree</span><span class="p">(</span><span class="n">min_npart_per_node</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">particleGroups</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">mask</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span> 
+                <span class="c1">## the old particle group will get garbage collected... eventually??</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">particleGroups</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">particleGroups</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">spawn_octree_pg</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">datadir</span><span class="p">,</span>
+                    <span class="n">max_npart_per_node</span><span class="p">,</span>
+                    <span class="n">nrecurse</span><span class="o">=</span><span class="n">nrecurse</span><span class="p">,</span>
+                    <span class="n">build</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Reader.writeToDisk"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Reader.html#firefly.data_reader.Reader.writeToDisk">[docs]</a>    <span class="k">def</span> <span class="nf">writeToDisk</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">loud</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">write_to_disk</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">symlink</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">file_extension</span><span class="o">=</span><span class="s1">&#39;.ffly&#39;</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Creates all the necessary JSON files to run firefly and ensures they are</span>
 <span class="sd">        properly linked and cross-referenced correctly using the</span>
@@ -331,8 +328,9 @@
 <span class="sd">            saved directly to :code:`self.static_data_dir` directory (:code:`False`). </span>
 <span class="sd">            Note that :code:`symlink=False` will not _also_ save results in :code:`self.datadir`, defaults to True</span>
 <span class="sd">        :type symlink: bool, optional</span>
-<span class="sd">        :param extension: what output format should the particle data be saved in, JSON or binary &#39;ffly&#39;</span>
-<span class="sd">        :type: str</span>
+<span class="sd">        :param file_extension: File extension for data files created, one of `.ffly` (binary)</span>
+<span class="sd">            or `.json` (ASCII).</span>
+<span class="sd">        :type file_extension: str, optional</span>
 <span class="sd">        :return: :code:`self.JSON` or :code:`&quot;&quot;` according to :code:`write_to_disk`</span>
 <span class="sd">        :rtype: str</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -403,6 +401,8 @@
                 <span class="n">max_npart_per_file</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_npart_per_file</span><span class="p">,</span>
                 <span class="n">clean_datadir</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">clean_datadir</span> <span class="k">if</span> <span class="n">particleGroup</span> <span class="ow">is</span> <span class="bp">self</span><span class="o">.</span><span class="n">particleGroups</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">else</span> <span class="kc">False</span><span class="p">,</span>
                 <span class="n">not_reader</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">file_extension</span><span class="o">=</span><span class="n">file_extension</span><span class="p">,</span>
+                <span class="n">write_to_disk</span><span class="o">=</span><span class="n">write_to_disk</span><span class="p">,</span>
                 <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
             <span class="c1">## append the JSON arrays for this particle group</span>
@@ -474,7 +474,7 @@
                         <span class="p">{</span><span class="s2">&quot;0&quot;</span><span class="p">:</span><span class="n">startup_path</span><span class="p">},</span>
                         <span class="n">startup_file</span> <span class="k">if</span> <span class="n">write_to_disk</span> <span class="k">else</span> <span class="kc">None</span><span class="p">))]</span> <span class="c1">## None -&gt; returns JSON string</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">write_to_disk</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">write_to_disk</span> <span class="ow">and</span> <span class="n">file_extension</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;.json&#39;</span><span class="p">:</span>
             <span class="c1">## create a single &quot;big JSON&quot; with all the data in it in case</span>
             <span class="c1">##  we want to send dataViaFlask</span>
             <span class="n">JSON_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">file_array</span><span class="p">)</span>
@@ -536,27 +536,25 @@
 
         <span class="k">return</span> <span class="n">outputDict</span></div>
 
-<div class="viewcode-block" id="Reader.sendDataViaFlask"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Reader.html#firefly.data_reader.Reader.sendDataViaFlask">[docs]</a>    <span class="k">def</span> <span class="nf">sendDataViaFlask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">port</span><span class="o">=</span><span class="mi">5000</span><span class="p">):</span>
+<div class="viewcode-block" id="Reader.sendDataViaFlask"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.Reader.html#firefly.data_reader.Reader.sendDataViaFlask">[docs]</a>    <span class="k">def</span> <span class="nf">sendDataViaFlask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">port</span><span class="o">=</span><span class="mi">5500</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Exports the data as if it were being dumped to disk</span>
 <span class="sd">            but instead stores it as a string. Then feeds this string</span>
 <span class="sd">            to the js interpreter via Flask.</span>
 
 <span class="sd">        :param port: port that the firefly Flask server is being hosted on,</span>
-<span class="sd">            defaults to 5000</span>
+<span class="sd">            defaults to 5500</span>
 <span class="sd">        :type port: int, optional</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="c1">## retrieve a single &quot;big JSON&quot; of all the mini-JSON </span>
-        <span class="c1">##  sub-files. </span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="s1">&#39;JSON&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">JSON</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">writeToDisk</span><span class="p">(</span>
-                <span class="n">loud</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                <span class="n">write_to_disk</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                <span class="n">extension</span><span class="o">=</span><span class="s1">&#39;.json&#39;</span><span class="p">)</span>
+        <span class="c1">## retrieve a single &quot;big JSON&quot; of all the mini-JSON sub-files. </span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">writeToDisk</span><span class="p">(</span>
+            <span class="n">loud</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">write_to_disk</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">file_extension</span><span class="o">=</span><span class="s1">&#39;.json&#39;</span><span class="p">)</span>
 
         <span class="c1">## post the json to the listening url data_input</span>
         <span class="c1">##  defined in server.py</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Posting...&quot;</span><span class="p">,</span><span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Posting to port </span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">port</span><span class="p">)</span><span class="si">:</span><span class="s2">d</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">,</span><span class="n">end</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
         <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span>
             <span class="sa">f</span><span class="s1">&#39;http://localhost:</span><span class="si">{</span><span class="n">port</span><span class="si">:</span><span class="s1">d</span><span class="si">}</span><span class="s1">/data_input&#39;</span><span class="p">,</span>
             <span class="n">json</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">JSON</span><span class="p">)</span>
@@ -884,7 +882,7 @@
         <span class="c1">##  a single big JSON in self.JSON</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">writeToDisk</span><span class="p">(</span>
             <span class="n">write_to_disk</span><span class="o">=</span><span class="n">write_to_disk</span><span class="p">,</span>
-            <span class="n">loud</span><span class="o">=</span><span class="n">loud</span><span class="p">)</span></div></div>
+            <span class="n">loud</span><span class="o">=</span><span class="n">loud</span> <span class="ow">and</span> <span class="n">write_to_disk</span><span class="p">)</span></div></div>
 
 <div class="viewcode-block" id="SimpleReader"><a class="viewcode-back" href="../../../reference/api/readers/firefly.data_reader.SimpleReader.html#firefly.data_reader.SimpleReader">[docs]</a><span class="k">class</span> <span class="nc">SimpleReader</span><span class="p">(</span><span class="n">ArrayReader</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot; A wrapper to :class:`firefly.data_reader.ArrayReader` that attempts to </span>

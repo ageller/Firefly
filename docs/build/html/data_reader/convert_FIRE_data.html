@@ -415,7 +415,6 @@ don&#39;t have phil&#39;s colormaps
 <div class="highlight"><pre>
 Couldn&#39;t find a metadata file... for
  Metadata object at /Users/agurvich/scratch/data/metal_diffusion/m12b_res57000/metadata/meta_Galaxy_600.hdf5
-Tracing the rockstar halo files with fancy:True and None Gyr smoothing.
 No rstar 1/2 in halo or metadata files, we will need to calculate it ourselves.
 Loading star particles of m12b_res57000 at 600 at /Users/agurvich/snaps/metal_diffusion/m12b_res57000/output
 Failed to open saved sub-snapshots AssertionError(&#39;Told not to use saved sub-snapshots&#39;)
@@ -423,7 +422,7 @@ Loading gas particles of m12b_res57000 at 600 at /Users/agurvich/snaps/metal_dif
 Loading dark matter particles of m12b_res57000 at 600 at /Users/agurvich/snaps/metal_diffusion/m12b_res57000/output
 Reorienting...
 Done.
-extract_halo_inner(m12b_res57000 at 600,){&#39;orient_stars&#39;: True, &#39;use_saved_subsnapshots&#39;: False} 10.11 s elapsed
+extract_halo_inner(m12b_res57000 at 600,){&#39;orient_stars&#39;: True, &#39;use_saved_subsnapshots&#39;: False} 19.53 s elapsed
 Snapshot memory free
 </pre></div></div>
 </div>
@@ -471,7 +470,7 @@ Snapshot memory free
     <span class="c1">## what to call them in the UI</span>
     <span class="n">UInames</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Gas&#39;</span><span class="p">,</span><span class="s1">&#39;Stars&#39;</span><span class="p">,</span><span class="s1">&#39;HRDM&#39;</span><span class="p">,</span><span class="s1">&#39;LRDM&#39;</span><span class="p">],</span>
     <span class="c1">## by what factor would we like to reduce the data for performance stability and disk space concerns</span>
-    <span class="n">decimation_factors</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">],</span>
+    <span class="n">decimation_factors</span><span class="o">=</span><span class="p">[</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">50</span><span class="p">,</span><span class="mi">50</span><span class="p">],</span>
     <span class="c1">## what fields would we like to extract</span>
     <span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Density&#39;</span><span class="p">,</span><span class="s1">&#39;Temperature&#39;</span><span class="p">,</span><span class="s1">&#39;AgeGyr&#39;</span><span class="p">,</span><span class="s1">&#39;GCRadius&#39;</span><span class="p">],</span>
     <span class="c1">## do we want to take the magnitude of any of these fields?</span>
@@ -485,9 +484,10 @@ Snapshot memory free
     <span class="c1">## where should the output .json files be saved to?</span>
     <span class="c1">##  if a relative path is given, like here, saves to $HOME/&lt;JSONdir&gt;</span>
     <span class="c1">##  and creates a soft-link to firefly/static/data</span>
-    <span class="n">JSONdir</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span><span class="s1">&#39;..&#39;</span><span class="p">,</span><span class="s1">&#39;static&#39;</span><span class="p">,</span><span class="s1">&#39;data&#39;</span><span class="p">,</span><span class="s1">&#39;FIRESampleData&#39;</span><span class="p">)),</span>
+    <span class="n">datadir</span><span class="o">=</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">(),</span><span class="s1">&#39;..&#39;</span><span class="p">,</span><span class="s1">&#39;static&#39;</span><span class="p">,</span><span class="s1">&#39;data&#39;</span><span class="p">,</span><span class="s1">&#39;FIRESampleData&#39;</span><span class="p">)),</span>
     <span class="c1">## overwrite the existing startup.json file</span>
     <span class="n">write_startup</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">clean_datadir</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="n">tweenParams</span><span class="o">=</span><span class="n">my_tweenParams</span><span class="p">)</span>
 
 <span class="c1">## fetch data from .hdf5 files</span>
@@ -514,8 +514,8 @@ Loading ptype 0
 <div class="highlight"><pre>
 array([Gas - 622573/6225729 particles - 4 tracked fields,
        Stars - 326473/3264723 particles - 3 tracked fields,
-       HRDM - 932304/9323040 particles - 2 tracked fields,
-       LRDM - 304227/3042265 particles - 2 tracked fields], dtype=object)
+       HRDM - 186461/9323040 particles - 2 tracked fields,
+       LRDM - 60846/3042265 particles - 2 tracked fields], dtype=object)
 </pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">
@@ -535,7 +535,7 @@ array([Gas - 622573/6225729 particles - 4 tracked fields,
 
 <span class="c1">## set the sizes of each of the particle groups</span>
 <span class="n">reader</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;sizeMult&#39;</span><span class="p">][</span><span class="s1">&#39;Gas&#39;</span><span class="p">]</span><span class="o">=</span><span class="mf">0.25</span>
-<span class="n">reader</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;sizeMult&#39;</span><span class="p">][</span><span class="s1">&#39;Stars&#39;</span><span class="p">]</span><span class="o">=</span><span class="mf">0.1</span>
+<span class="n">reader</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;sizeMult&#39;</span><span class="p">][</span><span class="s1">&#39;Stars&#39;</span><span class="p">]</span><span class="o">=</span><span class="mf">0.03</span>
 <span class="n">reader</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;sizeMult&#39;</span><span class="p">][</span><span class="s1">&#39;HRDM&#39;</span><span class="p">]</span><span class="o">=</span><span class="mi">1</span>
 <span class="n">reader</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;sizeMult&#39;</span><span class="p">][</span><span class="s1">&#39;LRDM&#39;</span><span class="p">]</span><span class="o">=</span><span class="mi">1</span>
 </pre></div>
@@ -547,6 +547,8 @@ array([Gas - 622573/6225729 particles - 4 tracked fields,
 </div>
 <div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">## initialize the gas with a colormap</span>
 <span class="n">reader</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;showColormap&#39;</span><span class="p">][</span><span class="s1">&#39;Gas&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">reader</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;blendingMode&#39;</span><span class="p">][</span><span class="s1">&#39;Gas&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;normal&#39;</span>
+<span class="n">reader</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;depthTest&#39;</span><span class="p">][</span><span class="s1">&#39;Gas&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">True</span>
 <span class="n">reader</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;colormapVariable&#39;</span><span class="p">][</span><span class="s1">&#39;Gas&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span>
 <span class="n">reader</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;colormapLims&#39;</span><span class="p">][</span><span class="s1">&#39;Gas&#39;</span><span class="p">][</span><span class="s1">&#39;Velocity&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">50</span><span class="p">,</span><span class="mi">500</span><span class="p">]</span>
 <span class="n">reader</span><span class="o">.</span><span class="n">settings</span><span class="p">[</span><span class="s1">&#39;colormapVals&#39;</span><span class="p">][</span><span class="s1">&#39;Gas&#39;</span><span class="p">][</span><span class="s1">&#39;Velocity&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">50</span><span class="p">,</span><span class="mi">500</span><span class="p">]</span>
@@ -573,6 +575,17 @@ array([Gas - 622573/6225729 particles - 4 tracked fields,
 </pre></div>
 </div>
 </div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Gas - 622573/6225729 particles - 4 tracked fields
+Stars - 326473/3264723 particles - 3 tracked fields
+HRDM - 186461/9323040 particles - 2 tracked fields
+LRDM - 60846/3042265 particles - 2 tracked fields
+</pre></div></div>
+</div>
 <div class="nboutput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
@@ -580,6 +593,340 @@ array([Gas - 622573/6225729 particles - 4 tracked fields,
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 &#39;&#39;
+</pre></div></div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[46]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">reader</span><span class="o">.</span><span class="n">copyFireflySourceToTarget</span><span class="p">(</span><span class="s2">&quot;FIRE_lowres&quot;</span><span class="p">,</span><span class="n">init_gh_pages</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Gas - 3112865/6225729 particles - 4 tracked fields
+Stars - 1632362/3264723 particles - 3 tracked fields
+HRDM - 932304/9323040 particles - 2 tracked fields
+LRDM - 304227/3042265 particles - 2 tracked fields
+Initializing a new GitHub repository at /Users/agurvich/FIRE_lowres with
+        GHREPONAME: FIRE_lowres
+        GHUSER: agurvich
+        GHOAUTHTOKENPATH: /Users/agurvich/.github.token
+
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100  5766  100  5744  100    22   4401     16  0:00:01  0:00:01 --:--:--  4473
+To github.com:agurvich/FIRE_lowres.git
+ * [new branch]      main -&gt; main
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100   626  100   587  100    39    930     61 --:--:-- --:--:-- --:--:--  1012
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[46]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+[&#39;{&#39;,
+ &#39;  &#34;id&#34;: 516071472,&#39;,
+ &#39;  &#34;node_id&#34;: &#34;R_kgDOHsKgMA&#34;,&#39;,
+ &#39;  &#34;name&#34;: &#34;FIRE_lowres&#34;,&#39;,
+ &#39;  &#34;full_name&#34;: &#34;agurvich/FIRE_lowres&#34;,&#39;,
+ &#39;  &#34;private&#34;: false,&#39;,
+ &#39;  &#34;owner&#34;: {&#39;,
+ &#39;    &#34;login&#34;: &#34;agurvich&#34;,&#39;,
+ &#39;    &#34;id&#34;: 7799423,&#39;,
+ &#39;    &#34;node_id&#34;: &#34;MDQ6VXNlcjc3OTk0MjM=&#34;,&#39;,
+ &#39;    &#34;avatar_url&#34;: &#34;https://avatars.githubusercontent.com/u/7799423?v=4&#34;,&#39;,
+ &#39;    &#34;gravatar_id&#34;: &#34;&#34;,&#39;,
+ &#39;    &#34;url&#34;: &#34;https://api.github.com/users/agurvich&#34;,&#39;,
+ &#39;    &#34;html_url&#34;: &#34;https://github.com/agurvich&#34;,&#39;,
+ &#39;    &#34;followers_url&#34;: &#34;https://api.github.com/users/agurvich/followers&#34;,&#39;,
+ &#39;    &#34;following_url&#34;: &#34;https://api.github.com/users/agurvich/following{/other_user}&#34;,&#39;,
+ &#39;    &#34;gists_url&#34;: &#34;https://api.github.com/users/agurvich/gists{/gist_id}&#34;,&#39;,
+ &#39;    &#34;starred_url&#34;: &#34;https://api.github.com/users/agurvich/starred{/owner}{/repo}&#34;,&#39;,
+ &#39;    &#34;subscriptions_url&#34;: &#34;https://api.github.com/users/agurvich/subscriptions&#34;,&#39;,
+ &#39;    &#34;organizations_url&#34;: &#34;https://api.github.com/users/agurvich/orgs&#34;,&#39;,
+ &#39;    &#34;repos_url&#34;: &#34;https://api.github.com/users/agurvich/repos&#34;,&#39;,
+ &#39;    &#34;events_url&#34;: &#34;https://api.github.com/users/agurvich/events{/privacy}&#34;,&#39;,
+ &#39;    &#34;received_events_url&#34;: &#34;https://api.github.com/users/agurvich/received_events&#34;,&#39;,
+ &#39;    &#34;type&#34;: &#34;User&#34;,&#39;,
+ &#39;    &#34;site_admin&#34;: false&#39;,
+ &#39;  },&#39;,
+ &#39;  &#34;html_url&#34;: &#34;https://github.com/agurvich/FIRE_lowres&#34;,&#39;,
+ &#39;  &#34;description&#34;: null,&#39;,
+ &#39;  &#34;fork&#34;: false,&#39;,
+ &#39;  &#34;url&#34;: &#34;https://api.github.com/repos/agurvich/FIRE_lowres&#34;,&#39;,
+ &#39;  &#34;forks_url&#34;: &#34;https://api.github.com/repos/agurvich/FIRE_lowres/forks&#34;,&#39;,
+ &#39;  &#34;keys_url&#34;: &#34;https://api.github.com/repos/agurvich/FIRE_lowres/keys{/key_id}&#34;,&#39;,
+ &#39;  &#34;collaborators_url&#34;: &#34;https://api.github.com/repos/agurvich/FIRE_lowres/collaborators{/collaborator}&#34;,&#39;,
+ &#39;  &#34;teams_url&#34;: &#34;https://api.github.com/repos/agurvich/FIRE_lowres/teams&#34;,&#39;,
+ &#39;  &#34;hooks_url&#34;: &#34;https://api.github.com/repos/agurvich/FIRE_lowres/hooks&#34;,&#39;,
+ &#39;  &#34;issue_events_url&#34;: &#34;https://api.github.com/repos/agurvich/FIRE_lowres/issues/events{/number}&#34;,&#39;,
+ &#39;  &#34;events_url&#34;: &#34;https://api.github.com/repos/agurvich/FIRE_lowres/events&#34;,&#39;,
+ &#39;  &#34;assignees_url&#34;: &#34;https://api.github.com/repos/agurvich/FIRE_lowres/assignees{/user}&#34;,&#39;,
+ &#39;  &#34;branches_url&#34;: &#34;https://api.github.com/repos/agurvich/FIRE_lowres/branches{/branch}&#34;,&#39;,
+ &#39;  &#34;tags_url&#34;: &#34;https://api.github.com/repos/agurvich/FIRE_lowres/tags&#34;,&#39;,
+ &#39;  &#34;blobs_url&#34;: &#34;https://api.github.com/repos/agurvich/FIRE_lowres/git/blobs{/sha}&#34;,&#39;,
+ &#39;  &#34;git_tags_url&#34;: &#34;https://api.github.com/repos/agurvich/FIRE_lowres/git/tags{/sha}&#34;,&#39;,
+ &#39;  &#34;git_refs_url&#34;: &#34;https://api.github.com/repos/agurvich/FIRE_lowres/git/refs{/sha}&#34;,&#39;,
+ &#39;  &#34;trees_url&#34;: &#34;https://api.github.com/repos/agurvich/FIRE_lowres/git/trees{/sha}&#34;,&#39;,
+ &#39;  &#34;statuses_url&#34;: &#34;https://api.github.com/repos/agurvich/FIRE_lowres/statuses/{sha}&#34;,&#39;,
+ &#39;  &#34;languages_url&#34;: &#34;https://api.github.com/repos/agurvich/FIRE_lowres/languages&#34;,&#39;,
+ &#39;  &#34;stargazers_url&#34;: &#34;https://api.github.com/repos/agurvich/FIRE_lowres/stargazers&#34;,&#39;,
+ &#39;  &#34;contributors_url&#34;: &#34;https://api.github.com/repos/agurvich/FIRE_lowres/contributors&#34;,&#39;,
+ &#39;  &#34;subscribers_url&#34;: &#34;https://api.github.com/repos/agurvich/FIRE_lowres/subscribers&#34;,&#39;,
+ &#39;  &#34;subscription_url&#34;: &#34;https://api.github.com/repos/agurvich/FIRE_lowres/subscription&#34;,&#39;,
+ &#39;  &#34;commits_url&#34;: &#34;https://api.github.com/repos/agurvich/FIRE_lowres/commits{/sha}&#34;,&#39;,
+ &#39;  &#34;git_commits_url&#34;: &#34;https://api.github.com/repos/agurvich/FIRE_lowres/git/commits{/sha}&#34;,&#39;,
+ &#39;  &#34;comments_url&#34;: &#34;https://api.github.com/repos/agurvich/FIRE_lowres/comments{/number}&#34;,&#39;,
+ &#39;  &#34;issue_comment_url&#34;: &#34;https://api.github.com/repos/agurvich/FIRE_lowres/issues/comments{/number}&#34;,&#39;,
+ &#39;  &#34;contents_url&#34;: &#34;https://api.github.com/repos/agurvich/FIRE_lowres/contents/{+path}&#34;,&#39;,
+ &#39;  &#34;compare_url&#34;: &#34;https://api.github.com/repos/agurvich/FIRE_lowres/compare/{base}...{head}&#34;,&#39;,
+ &#39;  &#34;merges_url&#34;: &#34;https://api.github.com/repos/agurvich/FIRE_lowres/merges&#34;,&#39;,
+ &#39;  &#34;archive_url&#34;: &#34;https://api.github.com/repos/agurvich/FIRE_lowres/{archive_format}{/ref}&#34;,&#39;,
+ &#39;  &#34;downloads_url&#34;: &#34;https://api.github.com/repos/agurvich/FIRE_lowres/downloads&#34;,&#39;,
+ &#39;  &#34;issues_url&#34;: &#34;https://api.github.com/repos/agurvich/FIRE_lowres/issues{/number}&#34;,&#39;,
+ &#39;  &#34;pulls_url&#34;: &#34;https://api.github.com/repos/agurvich/FIRE_lowres/pulls{/number}&#34;,&#39;,
+ &#39;  &#34;milestones_url&#34;: &#34;https://api.github.com/repos/agurvich/FIRE_lowres/milestones{/number}&#34;,&#39;,
+ &#39;  &#34;notifications_url&#34;: &#34;https://api.github.com/repos/agurvich/FIRE_lowres/notifications{?since,all,participating}&#34;,&#39;,
+ &#39;  &#34;labels_url&#34;: &#34;https://api.github.com/repos/agurvich/FIRE_lowres/labels{/name}&#34;,&#39;,
+ &#39;  &#34;releases_url&#34;: &#34;https://api.github.com/repos/agurvich/FIRE_lowres/releases{/id}&#34;,&#39;,
+ &#39;  &#34;deployments_url&#34;: &#34;https://api.github.com/repos/agurvich/FIRE_lowres/deployments&#34;,&#39;,
+ &#39;  &#34;created_at&#34;: &#34;2022-07-20T17:17:09Z&#34;,&#39;,
+ &#39;  &#34;updated_at&#34;: &#34;2022-07-20T17:17:09Z&#34;,&#39;,
+ &#39;  &#34;pushed_at&#34;: &#34;2022-07-20T17:17:09Z&#34;,&#39;,
+ &#39;  &#34;git_url&#34;: &#34;git://github.com/agurvich/FIRE_lowres.git&#34;,&#39;,
+ &#39;  &#34;ssh_url&#34;: &#34;git@github.com:agurvich/FIRE_lowres.git&#34;,&#39;,
+ &#39;  &#34;clone_url&#34;: &#34;https://github.com/agurvich/FIRE_lowres.git&#34;,&#39;,
+ &#39;  &#34;svn_url&#34;: &#34;https://github.com/agurvich/FIRE_lowres&#34;,&#39;,
+ &#39;  &#34;homepage&#34;: null,&#39;,
+ &#39;  &#34;size&#34;: 0,&#39;,
+ &#39;  &#34;stargazers_count&#34;: 0,&#39;,
+ &#39;  &#34;watchers_count&#34;: 0,&#39;,
+ &#39;  &#34;language&#34;: null,&#39;,
+ &#39;  &#34;has_issues&#34;: true,&#39;,
+ &#39;  &#34;has_projects&#34;: true,&#39;,
+ &#39;  &#34;has_downloads&#34;: true,&#39;,
+ &#39;  &#34;has_wiki&#34;: true,&#39;,
+ &#39;  &#34;has_pages&#34;: false,&#39;,
+ &#39;  &#34;forks_count&#34;: 0,&#39;,
+ &#39;  &#34;mirror_url&#34;: null,&#39;,
+ &#39;  &#34;archived&#34;: false,&#39;,
+ &#39;  &#34;disabled&#34;: false,&#39;,
+ &#39;  &#34;open_issues_count&#34;: 0,&#39;,
+ &#39;  &#34;license&#34;: null,&#39;,
+ &#39;  &#34;allow_forking&#34;: true,&#39;,
+ &#39;  &#34;is_template&#34;: false,&#39;,
+ &#39;  &#34;web_commit_signoff_required&#34;: false,&#39;,
+ &#39;  &#34;topics&#34;: [&#39;,
+ &#39;&#39;,
+ &#39;  ],&#39;,
+ &#39;  &#34;visibility&#34;: &#34;public&#34;,&#39;,
+ &#39;  &#34;forks&#34;: 0,&#39;,
+ &#39;  &#34;open_issues&#34;: 0,&#39;,
+ &#39;  &#34;watchers&#34;: 0,&#39;,
+ &#39;  &#34;default_branch&#34;: &#34;main&#34;,&#39;,
+ &#39;  &#34;permissions&#34;: {&#39;,
+ &#39;    &#34;admin&#34;: true,&#39;,
+ &#39;    &#34;maintain&#34;: true,&#39;,
+ &#39;    &#34;push&#34;: true,&#39;,
+ &#39;    &#34;triage&#34;: true,&#39;,
+ &#39;    &#34;pull&#34;: true&#39;,
+ &#39;  },&#39;,
+ &#39;  &#34;allow_squash_merge&#34;: true,&#39;,
+ &#39;  &#34;allow_merge_commit&#34;: true,&#39;,
+ &#39;  &#34;allow_rebase_merge&#34;: true,&#39;,
+ &#39;  &#34;allow_auto_merge&#34;: false,&#39;,
+ &#39;  &#34;delete_branch_on_merge&#34;: false,&#39;,
+ &#39;  &#34;allow_update_branch&#34;: false,&#39;,
+ &#39;  &#34;use_squash_pr_title_as_default&#34;: false,&#39;,
+ &#39;  &#34;network_count&#34;: 0,&#39;,
+ &#39;  &#34;subscribers_count&#34;: 1&#39;,
+ &#39;}&#39;,
+ &#39;Initialized empty Git repository in /Users/agurvich/FIRE_lowres/.git/&#39;,
+ &#39;[main (root-commit) ba2a742] initial commit&#39;,
+ &#39; 139 files changed, 20846 insertions(+)&#39;,
+ &#39; create mode 100644 README.md&#39;,
+ &#39; create mode 100644 index.html&#39;,
+ &#39; create mode 100644 static/css/UIStyles.css&#39;,
+ &#39; create mode 100644 static/css/UIStyles2.css&#39;,
+ &#39; create mode 100644 static/css/mainStyles.css&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataGas000.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataGas001.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataGas002.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataGas003.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataGas004.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataGas005.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataGas006.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataGas007.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataGas008.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataGas009.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataGas010.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataGas011.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataGas012.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataGas013.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataGas014.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataGas015.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataGas016.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataGas017.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataGas018.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataGas019.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataGas020.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataGas021.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataGas022.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataGas023.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataGas024.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataGas025.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataGas026.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataGas027.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataGas028.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataGas029.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataGas030.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataGas031.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataHRDM000.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataHRDM001.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataHRDM002.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataHRDM003.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataHRDM004.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataHRDM005.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataHRDM006.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataHRDM007.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataHRDM008.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataHRDM009.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataLRDM000.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataLRDM001.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataLRDM002.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataLRDM003.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataSettings.json&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataStars000.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataStars001.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataStars002.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataStars003.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataStars004.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataStars005.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataStars006.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataStars007.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataStars008.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataStars009.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataStars010.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataStars011.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataStars012.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataStars013.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataStars014.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataStars015.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/DataStars016.ffly&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/TweenParams.json&#39;,
+ &#39; create mode 100644 static/data/FIRESampleData/filenames.json&#39;,
+ &#39; create mode 100644 static/data/startup.json&#39;,
+ &#39; create mode 100644 static/docs/FIREFLY-02_trimmed.png&#39;,
+ &#39; create mode 100644 static/docs/GUIicon.png&#39;,
+ &#39; create mode 100644 static/docs/README.md&#39;,
+ &#39; create mode 100644 static/docs/READMEcleanPack.md&#39;,
+ &#39; create mode 100644 static/docs/UI.png&#39;,
+ &#39; create mode 100644 static/docs/icon.png&#39;,
+ &#39; create mode 100644 static/docs/jupyter_embed.png&#39;,
+ &#39; create mode 100644 static/docs/screenGrab.png&#39;,
+ &#39; create mode 100644 static/js/.DS_Store&#39;,
+ &#39; create mode 100644 static/js/gui/GUIParams.js&#39;,
+ &#39; create mode 100644 static/js/gui/GUIconstructors.js&#39;,
+ &#39; create mode 100644 static/js/gui/GUIsocket.js&#39;,
+ &#39; create mode 100644 static/js/gui/UI.js&#39;,
+ &#39; create mode 100644 static/js/gui/colormap.js&#39;,
+ &#39; create mode 100644 static/js/gui/initGUI.js&#39;,
+ &#39; create mode 100644 static/js/gui/particles.js&#39;,
+ &#39; create mode 100644 static/js/gui/sliders.js&#39;,
+ &#39; create mode 100644 static/js/misc/FireflyFormat1.js&#39;,
+ &#39; create mode 100644 static/js/misc/FireflyOctnodeSubstring.js&#39;,
+ &#39; create mode 100644 static/js/misc/MyArrayBuffer.js&#39;,
+ &#39; create mode 100644 static/js/misc/kaitai-struct/KaitaiStream.js&#39;,
+ &#39; create mode 100644 static/js/misc/socketParams.js&#39;,
+ &#39; create mode 100644 static/js/misc/utils.js&#39;,
+ &#39; create mode 100644 static/js/misc/windowEvents.js&#39;,
+ &#39; create mode 100644 static/js/octree/octreeCreatePartsMesh.js&#39;,
+ &#39; create mode 100644 static/js/octree/octreeInit.js&#39;,
+ &#39; create mode 100644 static/js/octree/octreeRenderLoop.js&#39;,
+ &#39; create mode 100644 static/js/streamer/initStreamer.js&#39;,
+ &#39; create mode 100644 static/js/viewer/applyUISelections.js&#39;,
+ &#39; create mode 100644 static/js/viewer/createPartsMesh.js&#39;,
+ &#39; create mode 100644 static/js/viewer/initViewer.js&#39;,
+ &#39; create mode 100644 static/js/viewer/renderLoop.js&#39;,
+ &#39; create mode 100644 static/js/viewer/runTweens.js&#39;,
+ &#39; create mode 100644 static/js/viewer/viewerParams.js&#39;,
+ &#39; create mode 100644 static/lib/Detector.js&#39;,
+ &#39; create mode 100644 static/lib/DeviceOrientationControls.js&#39;,
+ &#39; create mode 100644 static/lib/KeyboardState.js&#39;,
+ &#39; create mode 100644 static/lib/StereoEffect.js&#39;,
+ &#39; create mode 100644 static/lib/THREEx.FullScreen.js&#39;,
+ &#39; create mode 100644 static/lib/THREEx.WindowResize.js&#39;,
+ &#39; create mode 100644 static/lib/TrackballControls.js&#39;,
+ &#39; create mode 100644 static/lib/Tween.js&#39;,
+ &#39; create mode 100644 static/lib/VRButton.js&#39;,
+ &#39; create mode 100644 static/lib/d3.v4.10.2.min.js&#39;,
+ &#39; create mode 100644 static/lib/jquery-3.2.1.min.js&#39;,
+ &#39; create mode 100644 static/lib/nouislider.min.css&#39;,
+ &#39; create mode 100644 static/lib/nouislider.min.js&#39;,
+ &#39; create mode 100644 static/lib/socket.io.min.js&#39;,
+ &#39; create mode 100644 static/lib/socket.io.min.js.map&#39;,
+ &#39; create mode 100644 static/lib/socket.io.min.js.org&#39;,
+ &#39; create mode 100644 static/lib/spectrum.css&#39;,
+ &#39; create mode 100644 static/lib/spectrum.js&#39;,
+ &#39; create mode 100644 static/lib/three-fly-controls.js&#39;,
+ &#39; create mode 100644 static/lib/three.min.js.old&#39;,
+ &#39; create mode 100644 static/lib/three.min.r102.js&#39;,
+ &#39; create mode 100644 static/lib/three.min.r137.js&#39;,
+ &#39; create mode 100644 static/lib/threeoctree.min.js&#39;,
+ &#39; create mode 100644 static/lib/wNumb.js&#39;,
+ &#39; create mode 100644 static/shaders/fragment.glsl.js&#39;,
+ &#39; create mode 100644 static/shaders/fragment_pass2.glsl.js&#39;,
+ &#39; create mode 100644 static/shaders/vertex.glsl.js&#39;,
+ &#39; create mode 100644 static/textures/.ipynb_checkpoints/createColormap-checkpoint.ipynb&#39;,
+ &#39; create mode 100644 static/textures/bb.png&#39;,
+ &#39; create mode 100644 static/textures/cmap.png&#39;,
+ &#39; create mode 100644 static/textures/colormap.png&#39;,
+ &#39; create mode 100644 static/textures/colormap_names.json&#39;,
+ &#39; create mode 100644 static/textures/createColormap.ipynb&#39;,
+ &#34;branch &#39;main&#39; set up to track &#39;origin/main&#39;.&#34;,
+ &#39;{&#39;,
+ &#39;  &#34;url&#34;: &#34;https://api.github.com/repos/agurvich/FIRE_lowres/pages&#34;,&#39;,
+ &#39;  &#34;status&#34;: null,&#39;,
+ &#39;  &#34;cname&#34;: null,&#39;,
+ &#39;  &#34;custom_404&#34;: false,&#39;,
+ &#39;  &#34;html_url&#34;: &#34;http://www.alexbgurvi.ch/FIRE_lowres/&#34;,&#39;,
+ &#39;  &#34;build_type&#34;: &#34;legacy&#34;,&#39;,
+ &#39;  &#34;source&#34;: {&#39;,
+ &#39;    &#34;branch&#34;: &#34;main&#34;,&#39;,
+ &#39;    &#34;path&#34;: &#34;/&#34;&#39;,
+ &#39;  },&#39;,
+ &#39;  &#34;public&#34;: true,&#39;,
+ &#39;  &#34;protected_domain_state&#34;: null,&#39;,
+ &#39;  &#34;pending_domain_unverified_at&#34;: null,&#39;,
+ &#39;  &#34;https_certificate&#34;: {&#39;,
+ &#39;    &#34;state&#34;: &#34;approved&#34;,&#39;,
+ &#39;    &#34;description&#34;: &#34;The certificate has been approved.&#34;,&#39;,
+ &#39;    &#34;domains&#34;: [&#39;,
+ &#39;      null,&#39;,
+ &#39;      &#34;alexbgurvi.ch&#34;&#39;,
+ &#39;    ],&#39;,
+ &#39;    &#34;expires_at&#34;: &#34;2022-08-27&#34;&#39;,
+ &#39;  },&#39;,
+ &#39;  &#34;https_enforced&#34;: false&#39;,
+ &#39;}&#39;,
+ &#39;Check the status of your new github pages site at: https://github.com/agurvich/FIRE_lowres/settings/pages or visit it at https://agurvich.github.io/FIRE_lowres&#39;,
+ &#39;&#39;]
 </pre></div></div>
 </div>
 <section id="Using-firefly.data_reader.SimpleFIREreader">

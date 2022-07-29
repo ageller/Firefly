@@ -199,19 +199,19 @@
 
 <div class="viewcode-block" id="TweenParams.outputToJSON"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.TweenParams.html#firefly.data_reader.TweenParams.outputToJSON">[docs]</a>    <span class="k">def</span> <span class="nf">outputToJSON</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">JSONdir</span><span class="p">,</span>
-        <span class="n">JSON_prefix</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+        <span class="n">datadir</span><span class="p">,</span>
+        <span class="n">file_prefix</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
         <span class="n">loud</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
         <span class="n">write_to_disk</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="n">not_reader</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; Saves the current tween parameters to a JSON file.</span>
 
-<span class="sd">        :param JSONdir: the sub-directory that will contain your JSON files, relative</span>
-<span class="sd">            to your :code:`$HOME directory`. , defaults to :code:`$HOME/&lt;JSON_prefix&gt;`</span>
-<span class="sd">        :type JSONdir: str, optional</span>
-<span class="sd">        :param JSON_prefix: Prefix for any :code:`.json` files created, :code:`.json` files will be of the format:</span>
-<span class="sd">            :code:`&lt;JSON_prefix&gt;&lt;self.filename&gt;.json`, defaults to &#39;&#39;</span>
-<span class="sd">        :type JSON_prefix: str, optional</span>
+<span class="sd">        :param datadir: the sub-directory that will contain your JSON files, relative</span>
+<span class="sd">            to your :code:`$HOME directory`. , defaults to :code:`$HOME/&lt;file_prefix&gt;`</span>
+<span class="sd">        :type datadir: str, optional</span>
+<span class="sd">        :param file_prefix: Prefix for any :code:`.json` files created, :code:`.json` files will be of the format:</span>
+<span class="sd">            :code:`&lt;file_prefix&gt;&lt;self.filename&gt;.json`, defaults to &#39;&#39;</span>
+<span class="sd">        :type file_prefix: str, optional</span>
 <span class="sd">        :param loud: flag to print status information to the console, defaults to True</span>
 <span class="sd">        :type loud: bool, optional</span>
 <span class="sd">        :param write_to_disk: flag that controls whether data is saved to disk (:code:`True`)</span>
@@ -226,8 +226,8 @@
 
         <span class="n">tween_params_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">outputToDict</span><span class="p">()</span>
 
-        <span class="c1">## JSON_prefix+</span>
-        <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">JSONdir</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+        <span class="c1">## file_prefix+</span>
+        <span class="n">filename</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">datadir</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">loud</span> <span class="ow">and</span> <span class="n">not_reader</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;You will need to add this tween params filename to&quot;</span><span class="o">+</span>
