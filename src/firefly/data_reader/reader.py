@@ -569,16 +569,14 @@ class Reader(object):
         
         for obj in os.listdir(os.path.join(src,'static')):
             this_target = os.path.join(target,'static',obj)
-            if not os.path.isdir(this_target):
-                if obj == 'data':
-                    ## make an empty data directory rather than copy
-                    ##  whatever jsons happen to be there
-                    os.mkdir(this_target) 
-                else:
-                    ## copy the source files
-                    shutil.copytree(
-                        os.path.join(src,'static',obj),
-                        this_target)
+            if obj == 'data':
+                ## make an empty data directory rather than copy
+                ##  whatever jsons happen to be there
+                if not os.path.isdir(this_target): os.mkdir(this_target) 
+            else:
+                ## copy the source files
+                shutil.rmtree(this_target)
+                shutil.copytree(os.path.join(src,'static',obj),this_target)
 
         if dump_data:
             try:
