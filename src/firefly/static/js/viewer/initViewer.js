@@ -175,13 +175,15 @@ function getFilenames(prefix=""){
 			var i = 0;
 			viewerParams.dir = dir;
 			if (Object.keys(viewerParams.dir).length > 1){
-				i = null
-				console.log("multiple file options in startup:", Object.keys(viewerParams.dir).length, viewerParams.dir);
-				var forGUI = [];
-				forGUI.push({'setGUIParamByKey':[viewerParams.dir, "dir"]});
-				forGUI.push({'showLoadingButton':'#selectStartupButton'});
-				forGUI.push({'selectFromStartup':prefix});
-				sendToGUI(forGUI);
+				i = viewerParams.url.searchParams.has("startup") ? viewerParams.url.searchParams.get("startup") : null
+				if (i == null){
+					console.log("multiple file options in startup:", Object.keys(viewerParams.dir).length, viewerParams.dir);
+					var forGUI = [];
+					forGUI.push({'setGUIParamByKey':[viewerParams.dir, "dir"]});
+					forGUI.push({'showLoadingButton':'#selectStartupButton'});
+					forGUI.push({'selectFromStartup':prefix});
+					sendToGUI(forGUI);
+				}
 			} 
 			if (i != null && i < Object.keys(viewerParams.dir).length){
 				d3.json(prefix+viewerParams.dir[i] + "/filenames.json",  function(files) {
