@@ -21,11 +21,11 @@ import firefly
 # -- Project information -----------------------------------------------------
 
 project = 'Firefly'
-copyright = '2021, Alex Gurvich, Aaron Geller'
+copyright = '2022, Alex Gurvich, Aaron Geller'
 author = 'Alex Gurvich, Aaron Geller'
 
 # The full version, including alpha/beta/rc tags
-release = '2.0.5'
+release = '3.0.0'
 
 
 # -- General configuration ---------------------------------------------------
@@ -35,6 +35,8 @@ release = '2.0.5'
 # ones.
 extensions = ['sphinx.ext.autodoc','sphinx.ext.autosummary','sphinx.ext.viewcode',
     'sphinx.ext.intersphinx','sphinx.ext.autosectionlabel','nbsphinx']
+
+autosummary_generate = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

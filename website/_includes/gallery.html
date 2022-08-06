@@ -1,0 +1,18 @@
+<div class='user-details'> <h1> Gallery </h1> </div>
+
+
+<div class='gallery'>
+<ul class="rig columns-3">
+  {% for entry in site.gallery %}
+  <li > 
+    <a target="_blank" href="{{ entry.source }}">
+      <img alt="viz" src="{{"/assets/img/gallery/" | prepend: site.baseurl | append: entry.img }} ">
+    </a>
+      <div class="info"> 
+        <h3>{{ entry.title }}</h3> 
+        <p> {{ entry.author}} </p>
+      </div>
+  </li>
+  {% endfor %}
+</ul>
+</div>

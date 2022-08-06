@@ -12,8 +12,8 @@ BUILDDIR      = build
 help:
 	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 clean:
-	@rm -r source/reference/api/classes
-	@rm -r source/reference/api/readers
+	@rm -rf source/reference/api/classes
+	@rm -rf source/reference/api/readers
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
 .PHONY: help Makefile

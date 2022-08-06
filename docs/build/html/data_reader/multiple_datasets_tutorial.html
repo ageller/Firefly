@@ -1,77 +1,38 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>Tutorial notebook: Managing multiple datasets with Firefly &mdash; Firefly 2.0.5 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+  <title>Tutorial notebook: Managing multiple datasets with Firefly &mdash; Firefly 3.0.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "document", "processHtmlClass": "math|output_area"}}</script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-
-    
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Sending data to a Firefly server via Flask" href="flask.html" />
     <link rel="prev" title="Managing multiple datasets" href="multiple_datasets.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../index.html">
-          
-
-          
-            
             <img src="../_static/logo_banner.png" class="logo" alt="Logo"/>
-          
           </a>
-
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -79,18 +40,7 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../webapp/index.html">Interacting with a Firefly visualization</a></li>
@@ -106,7 +56,6 @@
 </ul>
 </li>
 <li class="toctree-l3"><a class="reference internal" href="flask.html">Sending data to a Firefly server via Flask</a></li>
-<li class="toctree-l3"><a class="reference internal" href="fire_quickstart.html">Using Firefly to view FIRE data</a></li>
 </ul>
 </li>
 </ul>
@@ -116,75 +65,32 @@
 <li class="toctree-l1"><a class="reference internal" href="../reference/api/api.html">API Reference</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">Firefly</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-        
           <li><a href="index.html">Creating your own instance of Firefly</a> &raquo;</li>
-        
           <li><a href="multiple_datasets.html">Managing multiple datasets</a> &raquo;</li>
-        
       <li>Tutorial notebook: Managing multiple datasets with Firefly</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="../_sources/data_reader/multiple_datasets_tutorial.ipynb.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   
 <style>
 /* CSS for nbsphinx extension */
@@ -395,7 +301,7 @@ div.nboutput.container div.output_area > div[class^='highlight']{
 }
 
 /* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
-.prompt a.copybtn {
+.prompt .copybtn {
     display: none;
 }
 
@@ -460,8 +366,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="o">%</span><span class="k">load_ext</span> autoreload
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">load_ext</span> autoreload
 <span class="o">%</span><span class="k">autoreload</span> 2
 <span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">YouTubeVideo</span>
 </pre></div>
@@ -472,8 +377,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">YouTubeVideo</span><span class="p">(</span><span class="s2">&quot;TMq3IvnxGY8&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">YouTubeVideo</span><span class="p">(</span><span class="s2">&quot;TMq3IvnxGY8&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -488,36 +392,44 @@ div.rendered_html tbody tr:hover {
     src="https://www.youtube.com/embed/TMq3IvnxGY8"
     frameborder="0"
     allowfullscreen
+
 ></iframe></div>
 </div>
-<div class="nbinput nblast docutils container">
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">os</span>
 
 <span class="kn">import</span> <span class="nn">sys</span>
+<span class="c1">## ignore this line, you do not need to add this if Firefly is pip installed into your PYTHONPATH</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="s1">&#39;/Users/agurvich/research/repos/firefly/src&#39;</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">firefly.data_reader</span> <span class="kn">import</span> <span class="n">ArrayReader</span>
 </pre></div>
 </div>
 </div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+don&#39;t have phil&#39;s colormaps
+</pre></div></div>
+</div>
 <section id="Tutorial-notebook:-Managing-multiple-datasets-with-Firefly">
-<h1>Tutorial notebook: Managing multiple datasets with Firefly<a class="headerlink" href="#Tutorial-notebook:-Managing-multiple-datasets-with-Firefly" title="Permalink to this headline">¶</a></h1>
+<h1>Tutorial notebook: Managing multiple datasets with Firefly<a class="headerlink" href="#Tutorial-notebook:-Managing-multiple-datasets-with-Firefly" title="Permalink to this headline"></a></h1>
 <p>There are two ways to manage multiple datasets with Firefly 1. listing multiple entries in startup.json 2. creating a “standalone” iteration of Firefly</p>
 <p>1 and 2 can be combined so that visitors to different “standalone” iterations of Firefly can select between different sets of multiple datasets using a dropdown see this example.</p>
 <section id="Editing-the-entries-of-startup.json">
-<h2>Editing the entries of <code class="docutils literal notranslate"><span class="pre">startup.json</span></code><a class="headerlink" href="#Editing-the-entries-of-startup.json" title="Permalink to this headline">¶</a></h2>
+<h2>Editing the entries of <code class="docutils literal notranslate"><span class="pre">startup.json</span></code><a class="headerlink" href="#Editing-the-entries-of-startup.json" title="Permalink to this headline"></a></h2>
 <p>When the Firefly webapp starts up it looks for a <code class="docutils literal notranslate"><span class="pre">firefly/static/data/startup.json</span></code> file to tell it which dataset to display. If only a single entry is present then it will automatically begin loading that dataset. If multiple entries are listed then it will present the user with a dropdown box to select which dataset to load. See the documentation for managing multiple datasets for how to format the <code class="docutils literal notranslate"><span class="pre">startup.json</span></code> file to list multiple entries manually. We provide a method of easily adding
 datasets to the <code class="docutils literal notranslate"><span class="pre">startup.json</span></code> file using the <code class="docutils literal notranslate"><span class="pre">write_startup</span></code> keyword argument of the <code class="docutils literal notranslate"><span class="pre">firefly.data_reader.Reader</span></code> (sub-)class(es).</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1">## let&#39;s create some sample data, a grid of points in a 3d cube</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">## let&#39;s create some sample data, a grid of points in a 3d cube</span>
 <span class="n">my_coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">20</span><span class="p">)</span>
 <span class="n">xs</span><span class="p">,</span><span class="n">ys</span><span class="p">,</span><span class="n">zs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">my_coords</span><span class="p">,</span><span class="n">my_coords</span><span class="p">,</span><span class="n">my_coords</span><span class="p">)</span>
 <span class="n">xs</span><span class="p">,</span><span class="n">ys</span><span class="p">,</span><span class="n">zs</span> <span class="o">=</span> <span class="n">xs</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span><span class="n">ys</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span><span class="n">zs</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
@@ -533,8 +445,7 @@ datasets to the <code class="docutils literal notranslate"><span class="pre">sta
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1">## initialize an ArrayReader</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">## initialize an ArrayReader</span>
 <span class="n">reader</span> <span class="o">=</span> <span class="n">ArrayReader</span><span class="p">(</span>
     <span class="n">coordinates</span><span class="o">=</span><span class="p">[</span><span class="n">coords</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="n">coords</span><span class="p">],</span> <span class="c1">## pass in two particle groups as a demonstration (just copies of our sample data)</span>
     <span class="n">fields</span><span class="o">=</span><span class="p">[[],[</span><span class="n">fields</span><span class="p">,</span><span class="n">fields</span><span class="p">]],</span> <span class="c1">## field data for each particle group, 0 fields for 1 and 2 repeated fields for the other.</span>
@@ -562,20 +473,23 @@ datasets to the <code class="docutils literal notranslate"><span class="pre">sta
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 JSONdir is None, defaulting to /Users/agurvich/research/repos/firefly/src/firefly/static/data/Data
-Make sure each tracked_array (2) has a tracked_filter_flag (0), assuming True.
-Make sure each tracked_array (2) has a tracked_colormap_flag (0), assuming True.
+Make sure each field_array (2) has a field_filter_flag (0), assuming True.
+Make sure each field_array (2) has a field_colormap_flag (0), assuming True.
+Make sure each field_array (2) has a field_radius_flag (0), assuming False.
 Outputting: PGroup_0 - 7999/7999 particles - 0 tracked fields
 Outputting: PGroup_1 - 8000/8000 particles - 2 tracked fields
 JSONdir: /Users/agurvich/FakeData -- is not a sub-directory of firefly/static/data.
 This may produce confusing or inoperable results. As such, we will create a symlink for you when you  dumpToJSON.
-Make sure each tracked_array (2) has a tracked_filter_flag (0), assuming True.
-Make sure each tracked_array (2) has a tracked_colormap_flag (0), assuming True.
+Make sure each field_array (2) has a field_filter_flag (0), assuming True.
+Make sure each field_array (2) has a field_colormap_flag (0), assuming True.
+Make sure each field_array (2) has a field_radius_flag (0), assuming False.
 Outputting: PGroup_0 - 7999/7999 particles - 0 tracked fields
 Outputting: PGroup_1 - 8000/8000 particles - 2 tracked fields
 JSONdir: /Users/agurvich/NullData -- is not a sub-directory of firefly/static/data.
 This may produce confusing or inoperable results. As such, we will create a symlink for you when you  dumpToJSON.
-Make sure each tracked_array (2) has a tracked_filter_flag (0), assuming True.
-Make sure each tracked_array (2) has a tracked_colormap_flag (0), assuming True.
+Make sure each field_array (2) has a field_filter_flag (0), assuming True.
+Make sure each field_array (2) has a field_colormap_flag (0), assuming True.
+Make sure each field_array (2) has a field_radius_flag (0), assuming False.
 Outputting: PGroup_0 - 7999/7999 particles - 0 tracked fields
 Outputting: PGroup_1 - 8000/8000 particles - 2 tracked fields
 </pre></div></div>
@@ -585,8 +499,18 @@ Outputting: PGroup_1 - 8000/8000 particles - 2 tracked fields
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/Users/agurvich/miniconda3/envs/firefly/lib/python3.9/site-packages/numpy/core/_asarray.py:102: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify &#39;dtype=object&#39; when creating the ndarray.
-  return array(a, dtype, copy=False, order=order)
+/opt/homebrew/Caskroom/miniconda/base/envs/python38/lib/python3.9/site-packages/numpy/core/fromnumeric.py:1970: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify &#39;dtype=object&#39; when creating the ndarray.
+  result = asarray(a).shape
+/opt/homebrew/Caskroom/miniconda/base/envs/python38/lib/python3.9/site-packages/numpy/core/fromnumeric.py:43: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify &#39;dtype=object&#39; when creating the ndarray.
+  result = getattr(asarray(obj), method)(*args, **kwds)
+/opt/homebrew/Caskroom/miniconda/base/envs/python38/lib/python3.9/site-packages/numpy/core/fromnumeric.py:1970: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify &#39;dtype=object&#39; when creating the ndarray.
+  result = asarray(a).shape
+/opt/homebrew/Caskroom/miniconda/base/envs/python38/lib/python3.9/site-packages/numpy/core/fromnumeric.py:43: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify &#39;dtype=object&#39; when creating the ndarray.
+  result = getattr(asarray(obj), method)(*args, **kwds)
+/opt/homebrew/Caskroom/miniconda/base/envs/python38/lib/python3.9/site-packages/numpy/core/fromnumeric.py:1970: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify &#39;dtype=object&#39; when creating the ndarray.
+  result = asarray(a).shape
+/opt/homebrew/Caskroom/miniconda/base/envs/python38/lib/python3.9/site-packages/numpy/core/fromnumeric.py:43: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify &#39;dtype=object&#39; when creating the ndarray.
+  result = getattr(asarray(obj), method)(*args, **kwds)
 </pre></div></div>
 </div>
 <p>Let’s read the content of the <code class="docutils literal notranslate"><span class="pre">startup.json</span></code> file:</p>
@@ -594,8 +518,7 @@ Outputting: PGroup_1 - 8000/8000 particles - 2 tracked fields
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="o">!</span>cat /Users/agurvich/research/repos/firefly/src/firefly/static/data/startup.json
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>cat /Users/agurvich/research/repos/firefly/src/firefly/static/data/startup.json
 </pre></div>
 </div>
 </div>
@@ -610,14 +533,13 @@ Outputting: PGroup_1 - 8000/8000 particles - 2 tracked fields
 <p>Notice that the “NullData” <code class="docutils literal notranslate"><span class="pre">JSONdir</span></code> is not listed because we set <code class="docutils literal notranslate"><span class="pre">write_startup=False</span></code>.</p>
 </section>
 <section id="Creating-a-standalone-iteration-of-Firefly">
-<h2>Creating a standalone iteration of Firefly<a class="headerlink" href="#Creating-a-standalone-iteration-of-Firefly" title="Permalink to this headline">¶</a></h2>
+<h2>Creating a standalone iteration of Firefly<a class="headerlink" href="#Creating-a-standalone-iteration-of-Firefly" title="Permalink to this headline"></a></h2>
 <p>You can copy the necessary Firefly source files by creating a <code class="docutils literal notranslate"><span class="pre">Reader</span></code> object containing your data and using the <code class="docutils literal notranslate"><span class="pre">copyFireflySourceToTarget</span></code>. We’ve also included a script that will automatically create a new Github repository and enable GitHub pages so that your data can be visited by users over the internet via URL. For instructions on how to configure this feature and details for copying the Firefly source see the documentation for managing multiple datasets.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">reader</span><span class="o">.</span><span class="n">copyFireflySourceToTarget</span><span class="p">(</span><span class="n">init_gh_pages</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">reader</span><span class="o">.</span><span class="n">copyFireflySourceToTarget</span><span class="p">(</span><span class="n">init_gh_pages</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -635,8 +557,7 @@ Outputting: PGroup_1 - 8000/8000 particles - 2 tracked fields
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="o">!</span>ls /Users/agurvich/my_Firefly/
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>ls /Users/agurvich/my_Firefly/
 </pre></div>
 </div>
 </div>
@@ -652,8 +573,7 @@ index.html <span class="ansi-blue-fg">static</span>
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="o">!</span>ls /Users/agurvich/my_firefly/static/data/
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">!</span>ls /Users/agurvich/my_firefly/static/data/
 </pre></div>
 </div>
 </div>
@@ -670,50 +590,33 @@ index.html <span class="ansi-blue-fg">static</span>
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="flask.html" class="btn btn-neutral float-right" title="Sending data to a Firefly server via Flask" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="multiple_datasets.html" class="btn btn-neutral float-left" title="Managing multiple datasets" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="flask.html" class="btn btn-neutral float-right" title="Sending data to a Firefly server via Flask" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2021, Alex Gurvich, Aaron Geller.
-
-    </p>
+    <p>&#169; Copyright 2022, Alex Gurvich, Aaron Geller.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

@@ -15,9 +15,9 @@ endpoint is exposed through which new particle data, settings, and
 tween params can passed to an active Firefly visualization. 
 
 Using this endpoint, it is possible to circumvent the need to output
-data to :code:`.json` files entirely, instead creating a Python
+data to :code:`.ffly` files entirely, instead creating a Python
 string (formatted to contain the :code:`.json` data that *would've* been 
-written to disk) that is :code:`POST`'d to the data input
+written to disk as a :code:`.ffly` file) that is :code:`POST`'d to the data input
 endpoint using the :code:`requests` Python module. 
 
 To facilitate this, we provide the
