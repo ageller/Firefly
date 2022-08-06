@@ -5,6 +5,7 @@ import subprocess
 import pandas as pd
 import requests
 import numpy as np
+import time
 
 from .settings import Settings,valid_settings
 from .tween import TweenParams
@@ -615,7 +616,14 @@ class Reader(object):
                 GHOAUTHTOKENPATH)
 
             ## default to the current user name
-            if GHUSER is None: GHUSER = os.environ['USER']
+            if GHUSER is None: 
+                GHUSER = os.environ['USER']
+                print(f"GHUSER not provided, defaulting to {GHUSER}")
+                print('Waiting for 3 seconds in case you want to interrupt this',end='')
+                for i in range(3):
+                    print('.',end='')
+                    time.sleep(1)
+                print()
 
             if not os.path.isfile(GHOAUTHTOKENPATH):
                 raise FileNotFoundError(f"No OAUTH token file matching {GHOAUTHTOKENPATH}, generate one from"+
