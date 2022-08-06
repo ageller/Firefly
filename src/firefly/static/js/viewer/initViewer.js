@@ -175,7 +175,10 @@ function getFilenames(prefix=""){
 			var i = 0;
 			viewerParams.dir = dir;
 			if (Object.keys(viewerParams.dir).length > 1){
-				i = viewerParams.url.searchParams.has("startup") ? viewerParams.url.searchParams.get("startup") : null
+				if (viewerParams.url.searchParams.has("startup") && 
+					viewerParams.url.searchParams.get("startup") < Object.keys(viewerParams.dir).length){
+					i = viewerParams.url.searchParams.get("startup");}
+				else i = null;
 				if (i == null){
 					console.log("multiple file options in startup:", Object.keys(viewerParams.dir).length, viewerParams.dir);
 					var forGUI = [];
