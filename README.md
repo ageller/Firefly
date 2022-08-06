@@ -1,20 +1,20 @@
 
 # Firefly
 
-[![PyPI](https://img.shields.io/pypi/v/Firefly)](https://pypi.org/project/Firefly-vis)
+[![PyPI](https://img.shields.io/pypi/v/Firefly)](https://pypi.org/project/Firefly)
 <a href="https://ascl.net/1810.021"><img src="https://img.shields.io/badge/ascl-1810.021-blue.svg?colorB=262255" alt="ascl:1810.021" /></a>
 
 ![logo banner](https://github.com/ageller/Firefly/blob/main/docs/source/_static/four_view_banner.png?raw=true)
 
 
 Firefly is an interactive viewer for any particle-based data. A live example is available [here](https://ageller.github.io/Firefly/)
-or if you're ready to get started creating your own interactive viewer, [click here](https://ageller.github.io/Firefly/docs/build/html/data_reader/index.html).
+or if you're ready to get started creating your own interactive viewer, [click here](https://alexbgurvi.ch/Firefly/docs/build/html/data_reader/index.html).
 
 If you use Firefly, please cite us using the [ADS listing](http://adsabs.harvard.edu/abs/2018ascl.soft10021G) that points to our Astrophysics Source Code Library (ASCL) entry.
 
 ## Additional Docs
 
-Comprehensive documentation is available [here](http://ageller.github.io/Firefly/docs/build/html/index.html).
+Comprehensive documentation is available [here](http://alexbgurvi.ch/Firefly/docs/build/html/index.html).
 
 ## Contributors 
 ### Primary Developers

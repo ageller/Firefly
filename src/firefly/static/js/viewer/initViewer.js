@@ -107,9 +107,6 @@ function initInputData(){
 		makeViewer(null, forGUIprepend, forGUIappend);
 		WebGLStart();
 	}, 1000);
-
-
-
 }
 
 //so that it can run locally also without using Flask
@@ -178,13 +175,18 @@ function getFilenames(prefix=""){
 			var i = 0;
 			viewerParams.dir = dir;
 			if (Object.keys(viewerParams.dir).length > 1){
-				i = null
-				console.log("multiple file options in startup:", Object.keys(viewerParams.dir).length, viewerParams.dir);
-				var forGUI = [];
-				forGUI.push({'setGUIParamByKey':[viewerParams.dir, "dir"]});
-				forGUI.push({'showLoadingButton':'#selectStartupButton'});
-				forGUI.push({'selectFromStartup':prefix});
-				sendToGUI(forGUI);
+				if (viewerParams.url.searchParams.has("startup") && 
+					viewerParams.url.searchParams.get("startup") < Object.keys(viewerParams.dir).length){
+					i = viewerParams.url.searchParams.get("startup");}
+				else i = null;
+				if (i == null){
+					console.log("multiple file options in startup:", Object.keys(viewerParams.dir).length, viewerParams.dir);
+					var forGUI = [];
+					forGUI.push({'setGUIParamByKey':[viewerParams.dir, "dir"]});
+					forGUI.push({'showLoadingButton':'#selectStartupButton'});
+					forGUI.push({'selectFromStartup':prefix});
+					sendToGUI(forGUI);
+				}
 			} 
 			if (i != null && i < Object.keys(viewerParams.dir).length){
 				d3.json(prefix+viewerParams.dir[i] + "/filenames.json",  function(files) {
@@ -1280,7 +1282,7 @@ function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
 			}
 		});
 		// replace the parts key with the sanitary_p
-		viewerParams.partsKeys[i] = sanitary_p;
+		if (i < viewerParams.partsKeys.length-1) viewerParams.partsKeys[i] = sanitary_p;
 	});
 }
 

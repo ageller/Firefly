@@ -1,77 +1,38 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>Tutorial notebook: Managing Custom Settings &mdash; Firefly 2.0.5 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+  <title>Tutorial notebook: Managing Custom Settings &mdash; Firefly 3.0.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "document", "processHtmlClass": "math|output_area"}}</script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-
-    
+        <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+        <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Managing multiple datasets" href="multiple_datasets.html" />
     <link rel="prev" title="Convert FIRE data" href="convert_FIRE_data.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../index.html">
-          
-
-          
-            
             <img src="../_static/logo_banner.png" class="logo" alt="Logo"/>
-          
           </a>
-
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -79,18 +40,7 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../webapp/index.html">Interacting with a Firefly visualization</a></li>
@@ -107,7 +57,6 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="multiple_datasets.html">Managing multiple datasets</a></li>
 <li class="toctree-l3"><a class="reference internal" href="flask.html">Sending data to a Firefly server via Flask</a></li>
-<li class="toctree-l3"><a class="reference internal" href="fire_quickstart.html">Using Firefly to view FIRE data</a></li>
 </ul>
 </li>
 </ul>
@@ -117,75 +66,32 @@
 <li class="toctree-l1"><a class="reference internal" href="../reference/api/api.html">API Reference</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">Firefly</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-        
           <li><a href="index.html">Creating your own instance of Firefly</a> &raquo;</li>
-        
           <li><a href="reader.html">Producing Firefly formatted <code class="code docutils literal notranslate"><span class="pre">.json</span></code> files using the <span class="xref std std-ref">Python API</span></a> &raquo;</li>
-        
       <li>Tutorial notebook: Managing Custom Settings</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="../_sources/data_reader/settings_tutorial.ipynb.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   
 <style>
 /* CSS for nbsphinx extension */
@@ -396,7 +302,7 @@ div.nboutput.container div.output_area > div[class^='highlight']{
 }
 
 /* hide copybtn icon on prompts (needed for 'sphinx_copybutton') */
-.prompt a.copybtn {
+.prompt .copybtn {
     display: none;
 }
 
@@ -461,8 +367,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[1]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="o">%</span><span class="k">load_ext</span> autoreload
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="o">%</span><span class="k">load_ext</span> autoreload
 <span class="o">%</span><span class="k">autoreload</span> 2
 <span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">YouTubeVideo</span>
 </pre></div>
@@ -473,8 +378,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[2]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">YouTubeVideo</span><span class="p">(</span><span class="s2">&quot;Xt1vce_2DYo&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">YouTubeVideo</span><span class="p">(</span><span class="s2">&quot;Xt1vce_2DYo&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -489,14 +393,14 @@ div.rendered_html tbody tr:hover {
     src="https://www.youtube.com/embed/Xt1vce_2DYo"
     frameborder="0"
     allowfullscreen
+
 ></iframe></div>
 </div>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="n">YouTubeVideo</span><span class="p">(</span><span class="s2">&quot;ft0Y3XNJhl4&quot;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">YouTubeVideo</span><span class="p">(</span><span class="s2">&quot;ft0Y3XNJhl4&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -511,22 +415,30 @@ div.rendered_html tbody tr:hover {
     src="https://www.youtube.com/embed/ft0Y3XNJhl4"
     frameborder="0"
     allowfullscreen
+
 ></iframe></div>
 </div>
-<div class="nbinput nblast docutils container">
+<div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[4]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">sys</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">from</span> <span class="nn">firefly.data_reader</span> <span class="kn">import</span> <span class="n">ParticleGroup</span><span class="p">,</span><span class="n">Settings</span><span class="p">,</span><span class="n">ArrayReader</span>
 </pre></div>
 </div>
 </div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+don&#39;t have phil&#39;s colormaps
+</pre></div></div>
+</div>
 <section id="Tutorial-notebook:-Managing-Custom-Settings">
-<h1>Tutorial notebook: Managing Custom Settings<a class="headerlink" href="#Tutorial-notebook:-Managing-Custom-Settings" title="Permalink to this headline">¶</a></h1>
+<h1>Tutorial notebook: Managing Custom Settings<a class="headerlink" href="#Tutorial-notebook:-Managing-Custom-Settings" title="Permalink to this headline"></a></h1>
 <p>One of the core features of Firefly is the ability to customize the user interface (UI) and the startup behavior to make bespoke iterations of Firefly using ones own data. We have organized the different options that one can customize into different settings groups that fall into two categories: those that affect the app as a whole and those that are particular to an individual group of particles.</p>
 <table class="docutils align-default">
 <colgroup>
@@ -559,8 +471,7 @@ div.rendered_html tbody tr:hover {
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1">## let&#39;s create an settings object with the default keys</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">## let&#39;s create an settings object with the default keys</span>
 <span class="n">settings</span> <span class="o">=</span> <span class="n">Settings</span><span class="p">()</span>
 
 <span class="c1">## we&#39;ll print the current settings to the console, organized into groups</span>
@@ -575,25 +486,28 @@ div.rendered_html tbody tr:hover {
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 --  Settings: startup settings --
-[&#39;maxVrange&#39;, &#39;startFly&#39;, &#39;friction&#39;, &#39;stereo&#39;, &#39;stereoSep&#39;, &#39;decimate&#39;]
+[&#39;maxVrange&#39;, &#39;startFly&#39;, &#39;friction&#39;, &#39;stereo&#39;, &#39;stereoSep&#39;, &#39;decimate&#39;, &#39;start_tween&#39;, &#39;CDmin&#39;, &#39;CDmax&#39;, &#39;CDlognorm&#39;, &#39;columnDensity&#39;]
 
 --  Settings: UI settings --
 [&#39;UI&#39;, &#39;UIfullscreen&#39;, &#39;UIsnapshot&#39;, &#39;UIreset&#39;, &#39;UIsavePreset&#39;, &#39;UIloadNewData&#39;, &#39;UIcameraControls&#39;, &#39;UIdecimation&#39;]
 
 --  Settings: window settings --
-[&#39;title&#39;, &#39;loaded&#39;, &#39;annotation&#39;]
+[&#39;title&#39;, &#39;loaded&#39;, &#39;annotation&#39;, &#39;showFPS&#39;, &#39;showMemoryUsage&#39;, &#39;memoryLimit&#39;]
 
 --  Settings: camera settings --
-[&#39;center&#39;, &#39;camera&#39;, &#39;cameraRotation&#39;]
+[&#39;center&#39;, &#39;camera&#39;, &#39;cameraRotation&#39;, &#39;cameraUp&#39;, &#39;quaternion&#39;]
 
 --  Settings: particle startup settings --
-[&#39;plotNmax&#39;, &#39;showVel&#39;, &#39;velType&#39;, &#39;color&#39;, &#39;sizeMult&#39;, &#39;showParts&#39;]
+[&#39;plotNmax&#39;, &#39;color&#39;, &#39;sizeMult&#39;, &#39;showParts&#39;, &#39;radiusVariable&#39;]
 
 --  Settings: particle UI settings --
 [&#39;UIparticle&#39;, &#39;UIdropdown&#39;, &#39;UIcolorPicker&#39;]
 
+--  Settings: particle velocity settings --
+[&#39;showVel&#39;, &#39;velType&#39;, &#39;velVectorWidth&#39;, &#39;velGradient&#39;, &#39;animateVel&#39;, &#39;animateVelDt&#39;, &#39;animateVelTmax&#39;]
+
 --  Settings: particle filter settings --
-[&#39;filterLims&#39;, &#39;filterVals&#39;]
+[&#39;filterLims&#39;, &#39;filterVals&#39;, &#39;invertFilter&#39;]
 
 --  Settings: particle colormap settings --
 [&#39;colormapLims&#39;, &#39;colormapVals&#39;, &#39;colormap&#39;, &#39;colormapVariable&#39;, &#39;showColormap&#39;]
@@ -601,14 +515,13 @@ div.rendered_html tbody tr:hover {
 </pre></div></div>
 </div>
 <section id="Settings-can-be-changed-the-same-way-you-would-change-a-key-in-a-dictionary">
-<h2>Settings can be changed the same way you would change a key in a dictionary<a class="headerlink" href="#Settings-can-be-changed-the-same-way-you-would-change-a-key-in-a-dictionary" title="Permalink to this headline">¶</a></h2>
+<h2>Settings can be changed the same way you would change a key in a dictionary<a class="headerlink" href="#Settings-can-be-changed-the-same-way-you-would-change-a-key-in-a-dictionary" title="Permalink to this headline"></a></h2>
 <p>There is key validation (so you can’t attempt to set a setting that doesn’t exist) but there is no value validation, so be careful that you use appropriate values or your app might not work. See the settings documentation for details on what values each setting can take.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1">## let&#39;s change the title that shows up in the browser&#39;s tab list</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">## let&#39;s change the title that shows up in the browser&#39;s tab list</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;before:&quot;</span><span class="p">)</span>
 <span class="c1">## print only the settings that have to do with the window</span>
 <span class="n">settings</span><span class="o">.</span><span class="n">printKeys</span><span class="p">(</span><span class="n">pattern</span><span class="o">=</span><span class="s1">&#39;window&#39;</span><span class="p">)</span>
@@ -630,25 +543,30 @@ before:
 title Firefly
 loaded True
 annotation None
+showFPS True
+showMemoryUsage True
+memoryLimit 2000000000.0
 
 after:
 --  Settings: window settings --
 title ---&gt; My Favorite Data &lt;---
 loaded True
 annotation None
+showFPS True
+showMemoryUsage True
+memoryLimit 2000000000.0
 
 </pre></div></div>
 </div>
 </section>
 <section id="Settings-are-most-useful-when-connected-to-a-firefly.data_reader.Reader-object">
-<h2>Settings are most useful when connected to a <code class="docutils literal notranslate"><span class="pre">firefly.data_reader.Reader</span></code> object<a class="headerlink" href="#Settings-are-most-useful-when-connected-to-a-firefly.data_reader.Reader-object" title="Permalink to this headline">¶</a></h2>
+<h2>Settings are most useful when connected to a <code class="docutils literal notranslate"><span class="pre">firefly.data_reader.Reader</span></code> object<a class="headerlink" href="#Settings-are-most-useful-when-connected-to-a-firefly.data_reader.Reader-object" title="Permalink to this headline"></a></h2>
 <p>Doing so allows many of the necessary settings to be automatically generated as additional particle groups are added.</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[7]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1">## let&#39;s create some sample data, a grid of points in a 3d cube</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">## let&#39;s create some sample data, a grid of points in a 3d cube</span>
 <span class="n">my_coords</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="mi">10</span><span class="p">,</span><span class="mi">10</span><span class="p">,</span><span class="mi">20</span><span class="p">)</span>
 <span class="n">xs</span><span class="p">,</span><span class="n">ys</span><span class="p">,</span><span class="n">zs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">my_coords</span><span class="p">,</span><span class="n">my_coords</span><span class="p">,</span><span class="n">my_coords</span><span class="p">)</span>
 <span class="n">xs</span><span class="p">,</span><span class="n">ys</span><span class="p">,</span><span class="n">zs</span> <span class="o">=</span> <span class="n">xs</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span><span class="n">ys</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span><span class="n">zs</span><span class="o">.</span><span class="n">flatten</span><span class="p">()</span>
@@ -664,9 +582,7 @@ annotation None
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[8]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-
-<span></span><span class="n">settings</span><span class="o">.</span><span class="n">printKeys</span><span class="p">(</span><span class="n">pattern</span><span class="o">=</span><span class="s1">&#39;particle&#39;</span><span class="p">)</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">settings</span><span class="o">.</span><span class="n">printKeys</span><span class="p">(</span><span class="n">pattern</span><span class="o">=</span><span class="s1">&#39;particle&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -677,20 +593,29 @@ annotation None
 <div class="highlight"><pre>
 --  Settings: particle startup settings --
 plotNmax {}
-showVel {}
-velType {}
 color {}
 sizeMult {}
 showParts {}
+radiusVariable {}
 
 --  Settings: particle UI settings --
 UIparticle {}
 UIdropdown {}
 UIcolorPicker {}
 
+--  Settings: particle velocity settings --
+showVel {}
+velType {}
+velVectorWidth {}
+velGradient {}
+animateVel {}
+animateVelDt {}
+animateVelTmax {}
+
 --  Settings: particle filter settings --
 filterLims {}
 filterVals {}
+invertFilter {}
 
 --  Settings: particle colormap settings --
 colormapLims {}
@@ -706,11 +631,10 @@ showColormap {}
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[9]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1">## initialize an ArrayReader</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">## initialize an ArrayReader</span>
 <span class="n">reader</span> <span class="o">=</span> <span class="n">ArrayReader</span><span class="p">(</span>
     <span class="n">coordinates</span><span class="o">=</span><span class="p">[</span><span class="n">coords</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span><span class="n">coords</span><span class="p">],</span> <span class="c1">## pass in two particle groups as a demonstration (just copies of our sample data)</span>
-    <span class="n">write_jsons_to_disk</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">write_to_disk</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
     <span class="n">settings</span><span class="o">=</span><span class="n">settings</span><span class="p">,</span> <span class="c1">## the settings object to link</span>
     <span class="n">fields</span><span class="o">=</span><span class="p">[[],[</span><span class="n">fields</span><span class="p">,</span><span class="n">fields</span><span class="p">]])</span> <span class="c1">## field data for each particle group, 0 fields for 1 and 2 repeated fields for the other.</span>
 </pre></div>
@@ -721,9 +645,10 @@ showColormap {}
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-JSONdir is None, defaulting to /Users/agurvich/research/repos/firefly/src/firefly/static/data/Data
-Make sure each tracked_array (2) has a tracked_filter_flag (0), assuming True.
-Make sure each tracked_array (2) has a tracked_colormap_flag (0), assuming True.
+JSONdir is None, defaulting to /Users/agurvich/research/repos/Firefly/src/firefly/static/data/Data
+Make sure each field_array (2) has a field_filter_flag (0), assuming True.
+Make sure each field_array (2) has a field_colormap_flag (0), assuming True.
+Make sure each field_array (2) has a field_radius_flag (0), assuming False.
 Outputting: PGroup_0 - 7999/7999 particles - 0 tracked fields
 Outputting: PGroup_1 - 8000/8000 particles - 2 tracked fields
 </pre></div></div>
@@ -733,8 +658,10 @@ Outputting: PGroup_1 - 8000/8000 particles - 2 tracked fields
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-/Users/agurvich/miniconda3/envs/firefly/lib/python3.9/site-packages/numpy/core/_asarray.py:102: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify &#39;dtype=object&#39; when creating the ndarray.
-  return array(a, dtype, copy=False, order=order)
+/opt/homebrew/Caskroom/miniconda/base/envs/python38/lib/python3.9/site-packages/numpy/core/fromnumeric.py:1970: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify &#39;dtype=object&#39; when creating the ndarray.
+  result = asarray(a).shape
+/opt/homebrew/Caskroom/miniconda/base/envs/python38/lib/python3.9/site-packages/numpy/core/fromnumeric.py:43: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify &#39;dtype=object&#39; when creating the ndarray.
+  result = getattr(asarray(obj), method)(*args, **kwds)
 </pre></div></div>
 </div>
 <p>The original <code class="docutils literal notranslate"><span class="pre">Settings</span></code> object is stored in <code class="docutils literal notranslate"><span class="pre">reader.settings</span></code>.</p>
@@ -742,8 +669,7 @@ Outputting: PGroup_1 - 8000/8000 particles - 2 tracked fields
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[10]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1">## demonstrate that reader.settings is the original settings object</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">## demonstrate that reader.settings is the original settings object</span>
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;(reader.settings is settings) =&#39;</span><span class="p">,</span><span class="n">reader</span><span class="o">.</span><span class="n">settings</span> <span class="ow">is</span> <span class="n">settings</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">()</span>
 
@@ -760,27 +686,36 @@ Outputting: PGroup_1 - 8000/8000 particles - 2 tracked fields
 
 --  Settings: particle startup settings --
 plotNmax {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None}
-showVel {&#39;PGroup_0&#39;: False, &#39;PGroup_1&#39;: False}
-velType {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None}
-color {&#39;PGroup_0&#39;: array([0.09532231, 0.24132833, 0.13068872, 1.        ]), &#39;PGroup_1&#39;: array([0.9250689 , 0.38517182, 0.57390387, 1.        ])}
-sizeMult {&#39;PGroup_0&#39;: 1.0, &#39;PGroup_1&#39;: 1.0}
+color {&#39;PGroup_0&#39;: array([0.88100143, 0.73655243, 0.77324641, 1.        ]), &#39;PGroup_1&#39;: array([0.36571498, 0.50979664, 0.02474504, 1.        ])}
+sizeMult {&#39;PGroup_0&#39;: 0.1, &#39;PGroup_1&#39;: 0.1}
 showParts {&#39;PGroup_0&#39;: True, &#39;PGroup_1&#39;: True}
+radiusVariable {&#39;PGroup_0&#39;: 0, &#39;PGroup_1&#39;: 0}
 
 --  Settings: particle UI settings --
 UIparticle {&#39;PGroup_0&#39;: True, &#39;PGroup_1&#39;: True}
 UIdropdown {&#39;PGroup_0&#39;: True, &#39;PGroup_1&#39;: True}
 UIcolorPicker {&#39;PGroup_0&#39;: True, &#39;PGroup_1&#39;: True}
 
+--  Settings: particle velocity settings --
+showVel {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None}
+velType {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None}
+velVectorWidth {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None}
+velGradient {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None}
+animateVel {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None}
+animateVelDt {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None}
+animateVelTmax {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None}
+
 --  Settings: particle filter settings --
 filterLims {&#39;PGroup_0&#39;: {}, &#39;PGroup_1&#39;: {&#39;field0&#39;: None, &#39;field1&#39;: None}}
 filterVals {&#39;PGroup_0&#39;: {}, &#39;PGroup_1&#39;: {&#39;field0&#39;: None, &#39;field1&#39;: None}}
+invertFilter {&#39;PGroup_0&#39;: {}, &#39;PGroup_1&#39;: {}}
 
 --  Settings: particle colormap settings --
 colormapLims {&#39;PGroup_0&#39;: {}, &#39;PGroup_1&#39;: {&#39;field0&#39;: None, &#39;field1&#39;: None}}
 colormapVals {&#39;PGroup_0&#39;: {}, &#39;PGroup_1&#39;: {&#39;field0&#39;: None, &#39;field1&#39;: None}}
 colormap {&#39;PGroup_0&#39;: 0.015625, &#39;PGroup_1&#39;: 0.015625}
-colormapVariable {&#39;PGroup_0&#39;: 0, &#39;PGroup_1&#39;: 0}
-showColormap {&#39;PGroup_0&#39;: False, &#39;PGroup_1&#39;: False}
+colormapVariable {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None}
+showColormap {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None}
 
 </pre></div></div>
 </div>
@@ -793,8 +728,7 @@ showColormap {&#39;PGroup_0&#39;: False, &#39;PGroup_1&#39;: False}
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1">## output the example settings file to a .json in this directory</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">## output the example settings file to a .json in this directory</span>
 <span class="n">settings</span><span class="o">.</span><span class="n">outputToJSON</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span><span class="s1">&#39;example&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -818,14 +752,13 @@ You will need to add this settings filename to filenames.json if this was not ca
 </div>
 </section>
 <section id="Settings-can-also-be-imported-from-.json-files">
-<h2>Settings can also be imported from <code class="docutils literal notranslate"><span class="pre">.json</span></code> files<a class="headerlink" href="#Settings-can-also-be-imported-from-.json-files" title="Permalink to this headline">¶</a></h2>
+<h2>Settings can also be imported from <code class="docutils literal notranslate"><span class="pre">.json</span></code> files<a class="headerlink" href="#Settings-can-also-be-imported-from-.json-files" title="Permalink to this headline"></a></h2>
 <p>Only settings defined in the file will be overwritten, so you can also mix-and-match settings files.</p>
 <div class="nbinput docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[12]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1">## initialize a new settings object</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">## initialize a new settings object</span>
 <span class="n">new_settings</span> <span class="o">=</span> <span class="n">Settings</span><span class="p">()</span>
 
 <span class="c1">## import the settings from what we just saved above; prints the settings that are updated</span>
@@ -842,26 +775,40 @@ replacing title
 Firefly --&gt; ---&gt; My Favorite Data &lt;---
 replacing plotNmax
 {} --&gt; {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None}
-replacing showVel
-{} --&gt; {&#39;PGroup_0&#39;: False, &#39;PGroup_1&#39;: False}
-replacing velType
-{} --&gt; {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None}
 replacing color
-{} --&gt; {&#39;PGroup_0&#39;: [0.0953223144, 0.24132833010000002, 0.13068871810000002, 1.0], &#39;PGroup_1&#39;: [0.9250688992, 0.38517182310000003, 0.5739038666, 1.0]}
+{} --&gt; {&#39;PGroup_0&#39;: [0.8810014255, 0.7365524281, 0.7732464137, 1.0], &#39;PGroup_1&#39;: [0.3657149758, 0.5097966367, 0.0247450409, 1.0]}
 replacing sizeMult
-{} --&gt; {&#39;PGroup_0&#39;: 1.0, &#39;PGroup_1&#39;: 1.0}
+{} --&gt; {&#39;PGroup_0&#39;: 0.1, &#39;PGroup_1&#39;: 0.1}
 replacing showParts
 {} --&gt; {&#39;PGroup_0&#39;: True, &#39;PGroup_1&#39;: True}
+replacing radiusVariable
+{} --&gt; {&#39;PGroup_0&#39;: 0, &#39;PGroup_1&#39;: 0}
 replacing UIparticle
 {} --&gt; {&#39;PGroup_0&#39;: True, &#39;PGroup_1&#39;: True}
 replacing UIdropdown
 {} --&gt; {&#39;PGroup_0&#39;: True, &#39;PGroup_1&#39;: True}
 replacing UIcolorPicker
 {} --&gt; {&#39;PGroup_0&#39;: True, &#39;PGroup_1&#39;: True}
+replacing showVel
+{} --&gt; {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None}
+replacing velType
+{} --&gt; {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None}
+replacing velVectorWidth
+{} --&gt; {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None}
+replacing velGradient
+{} --&gt; {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None}
+replacing animateVel
+{} --&gt; {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None}
+replacing animateVelDt
+{} --&gt; {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None}
+replacing animateVelTmax
+{} --&gt; {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None}
 replacing filterLims
 {} --&gt; {&#39;PGroup_0&#39;: {}, &#39;PGroup_1&#39;: {&#39;field0&#39;: None, &#39;field1&#39;: None}}
 replacing filterVals
 {} --&gt; {&#39;PGroup_0&#39;: {}, &#39;PGroup_1&#39;: {&#39;field0&#39;: None, &#39;field1&#39;: None}}
+replacing invertFilter
+{} --&gt; {&#39;PGroup_0&#39;: {}, &#39;PGroup_1&#39;: {}}
 replacing colormapLims
 {} --&gt; {&#39;PGroup_0&#39;: {}, &#39;PGroup_1&#39;: {&#39;field0&#39;: None, &#39;field1&#39;: None}}
 replacing colormapVals
@@ -869,21 +816,20 @@ replacing colormapVals
 replacing colormap
 {} --&gt; {&#39;PGroup_0&#39;: 0.015625, &#39;PGroup_1&#39;: 0.015625}
 replacing colormapVariable
-{} --&gt; {&#39;PGroup_0&#39;: 0, &#39;PGroup_1&#39;: 0}
+{} --&gt; {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None}
 replacing showColormap
-{} --&gt; {&#39;PGroup_0&#39;: False, &#39;PGroup_1&#39;: False}
+{} --&gt; {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None}
 </pre></div></div>
 </div>
 </section>
 <section id="Attaching-a-ParticleGroup-to-a-Settings">
-<h2>Attaching a ParticleGroup to a Settings<a class="headerlink" href="#Attaching-a-ParticleGroup-to-a-Settings" title="Permalink to this headline">¶</a></h2>
+<h2>Attaching a ParticleGroup to a Settings<a class="headerlink" href="#Attaching-a-ParticleGroup-to-a-Settings" title="Permalink to this headline"></a></h2>
 <p>One other thing you may want to do (perhaps in the course of building your own custom <code class="docutils literal notranslate"><span class="pre">Reader</span></code> sub-class) is link a <code class="docutils literal notranslate"><span class="pre">firefly.data_reader.ParticleGroup</span></code> object to a <code class="docutils literal notranslate"><span class="pre">Settings</span></code> object so that the different particle settings can be imported. <code class="docutils literal notranslate"><span class="pre">ParticleGroup</span></code> settings can be changed in <code class="docutils literal notranslate"><span class="pre">settings_default</span></code> attribute (which is just a normal python dictionary).</p>
 <div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[13]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1">## create a test particle group</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">## create a test particle group</span>
 <span class="n">particleGroup</span> <span class="o">=</span> <span class="n">ParticleGroup</span><span class="p">(</span><span class="s1">&#39;test&#39;</span><span class="p">,</span><span class="n">coords</span><span class="p">)</span>
 <span class="c1">## update the color of this particle group *before* attaching it to a settings object</span>
 <span class="n">particleGroup</span><span class="o">.</span><span class="n">settings_default</span><span class="p">[</span><span class="s1">&#39;color&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
@@ -894,8 +840,7 @@ replacing showColormap
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[14]:
 </pre></div>
 </div>
-<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre>
-<span></span><span class="c1">## attach the particle group to the settings object</span>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1">## attach the particle group to the settings object</span>
 <span class="c1">##  you can find the settings in the &quot;particleGroup.attached_settings attribute&quot;</span>
 <span class="n">new_settings</span><span class="o">.</span><span class="n">attachSettings</span><span class="p">(</span><span class="n">particleGroup</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;(particleGroup.attached_settings is new_settings) =&#39;</span><span class="p">,</span><span class="n">particleGroup</span><span class="o">.</span><span class="n">attached_settings</span> <span class="ow">is</span> <span class="n">new_settings</span><span class="p">)</span>
@@ -913,27 +858,36 @@ replacing showColormap
 
 --  Settings: particle startup settings --
 plotNmax {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None, &#39;test&#39;: None}
-showVel {&#39;PGroup_0&#39;: False, &#39;PGroup_1&#39;: False, &#39;test&#39;: False}
-velType {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None, &#39;test&#39;: None}
-color {&#39;PGroup_0&#39;: [0.0953223144, 0.24132833010000002, 0.13068871810000002, 1.0], &#39;PGroup_1&#39;: [0.9250688992, 0.38517182310000003, 0.5739038666, 1.0], &#39;test&#39;: [0, 0, 1, 1]}
-sizeMult {&#39;PGroup_0&#39;: 1.0, &#39;PGroup_1&#39;: 1.0, &#39;test&#39;: 1.0}
+color {&#39;PGroup_0&#39;: [0.8810014255, 0.7365524281, 0.7732464137, 1.0], &#39;PGroup_1&#39;: [0.3657149758, 0.5097966367, 0.0247450409, 1.0], &#39;test&#39;: [0, 0, 1, 1]}
+sizeMult {&#39;PGroup_0&#39;: 0.1, &#39;PGroup_1&#39;: 0.1, &#39;test&#39;: 0.1}
 showParts {&#39;PGroup_0&#39;: True, &#39;PGroup_1&#39;: True, &#39;test&#39;: True}
+radiusVariable {&#39;PGroup_0&#39;: 0, &#39;PGroup_1&#39;: 0, &#39;test&#39;: 0}
 
 --  Settings: particle UI settings --
 UIparticle {&#39;PGroup_0&#39;: True, &#39;PGroup_1&#39;: True, &#39;test&#39;: True}
 UIdropdown {&#39;PGroup_0&#39;: True, &#39;PGroup_1&#39;: True, &#39;test&#39;: True}
 UIcolorPicker {&#39;PGroup_0&#39;: True, &#39;PGroup_1&#39;: True, &#39;test&#39;: True}
 
+--  Settings: particle velocity settings --
+showVel {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None, &#39;test&#39;: None}
+velType {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None, &#39;test&#39;: None}
+velVectorWidth {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None, &#39;test&#39;: None}
+velGradient {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None, &#39;test&#39;: None}
+animateVel {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None, &#39;test&#39;: None}
+animateVelDt {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None, &#39;test&#39;: None}
+animateVelTmax {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None, &#39;test&#39;: None}
+
 --  Settings: particle filter settings --
 filterLims {&#39;PGroup_0&#39;: {}, &#39;PGroup_1&#39;: {&#39;field0&#39;: None, &#39;field1&#39;: None}, &#39;test&#39;: {}}
 filterVals {&#39;PGroup_0&#39;: {}, &#39;PGroup_1&#39;: {&#39;field0&#39;: None, &#39;field1&#39;: None}, &#39;test&#39;: {}}
+invertFilter {&#39;PGroup_0&#39;: {}, &#39;PGroup_1&#39;: {}, &#39;test&#39;: {}}
 
 --  Settings: particle colormap settings --
 colormapLims {&#39;PGroup_0&#39;: {}, &#39;PGroup_1&#39;: {&#39;field0&#39;: None, &#39;field1&#39;: None}, &#39;test&#39;: {}}
 colormapVals {&#39;PGroup_0&#39;: {}, &#39;PGroup_1&#39;: {&#39;field0&#39;: None, &#39;field1&#39;: None}, &#39;test&#39;: {}}
 colormap {&#39;PGroup_0&#39;: 0.015625, &#39;PGroup_1&#39;: 0.015625, &#39;test&#39;: 0.015625}
-colormapVariable {&#39;PGroup_0&#39;: 0, &#39;PGroup_1&#39;: 0, &#39;test&#39;: 0}
-showColormap {&#39;PGroup_0&#39;: False, &#39;PGroup_1&#39;: False, &#39;test&#39;: False}
+colormapVariable {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None, &#39;test&#39;: None}
+showColormap {&#39;PGroup_0&#39;: None, &#39;PGroup_1&#39;: None, &#39;test&#39;: None}
 
 </pre></div></div>
 </div>
@@ -943,50 +897,33 @@ showColormap {&#39;PGroup_0&#39;: False, &#39;PGroup_1&#39;: False, &#39;test&#3
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
-        <a href="multiple_datasets.html" class="btn btn-neutral float-right" title="Managing multiple datasets" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
         <a href="convert_FIRE_data.html" class="btn btn-neutral float-left" title="Convert FIRE data" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="multiple_datasets.html" class="btn btn-neutral float-right" title="Managing multiple datasets" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2021, Alex Gurvich, Aaron Geller.
-
-    </p>
+    <p>&#169; Copyright 2022, Alex Gurvich, Aaron Geller.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

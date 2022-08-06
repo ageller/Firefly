@@ -1,75 +1,36 @@
-
-
 <!DOCTYPE html>
 <html class="writer-html5" lang="en" >
 <head>
-  <meta charset="utf-8" />
-  <meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  
-  <title>Particle controls &mdash; Firefly 2.0.5 documentation</title>
-  
-
-  
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-
-  
-  
-
-  
-  
-
-  
-
-  
+  <title>Particle controls &mdash; Firefly 3.0.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
   <!--[if lt IE 9]>
     <script src="../_static/js/html5shiv.min.js"></script>
   <![endif]-->
   
-    
-      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
         <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
         <script src="../_static/jquery.js"></script>
         <script src="../_static/underscore.js"></script>
         <script src="../_static/doctools.js"></script>
         <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-
-    
+    <script src="../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Creating your own instance of Firefly" href="../data_reader/index.html" />
-    <link rel="prev" title="Camera controls" href="camera_controls.html" /> 
+    <link rel="prev" title="Volume rendering with 2d projection" href="projection_controls.html" /> 
 </head>
 
-<body class="wy-body-for-nav">
-
-   
+<body class="wy-body-for-nav"> 
   <div class="wy-grid-for-nav">
-    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
-          
-
-          
             <a href="../index.html">
-          
-
-          
-            
             <img src="../_static/logo_banner.png" class="logo" alt="Logo"/>
-          
           </a>
-
-          
-
-          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -77,28 +38,17 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-
-          
-        </div>
-
-        
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
               <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Interacting with a Firefly visualization</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="index.html#flying-with-the-mouse-or-keyboard">Flying with the mouse or keyboard</a></li>
-<li class="toctree-l2"><a class="reference internal" href="index.html#tweening">Tweening</a></li>
 <li class="toctree-l2 current"><a class="reference internal" href="index.html#using-the-user-interface">Using the user interface</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="index.html#the-top-bar">The top bar</a></li>
 <li class="toctree-l3 current"><a class="reference internal" href="index.html#sub-panels">Sub-panels</a><ul class="current">
 <li class="toctree-l4"><a class="reference internal" href="data_controls.html">Data controls</a></li>
 <li class="toctree-l4"><a class="reference internal" href="camera_controls.html">Camera controls</a></li>
+<li class="toctree-l4"><a class="reference internal" href="projection_controls.html">Volume rendering with 2d projection</a></li>
 <li class="toctree-l4 current"><a class="current reference internal" href="#">Particle controls</a></li>
 </ul>
 </li>
@@ -113,73 +63,31 @@
 <li class="toctree-l1"><a class="reference internal" href="../reference/api/api.html">API Reference</a></li>
 </ul>
 
-            
-          
         </div>
-        
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../index.html">Firefly</a>
-        
       </nav>
 
-
       <div class="wy-nav-content">
-        
         <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
+          <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
-    
       <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
-        
           <li><a href="index.html">Interacting with a Firefly visualization</a> &raquo;</li>
-        
       <li>Particle controls</li>
-    
-    
       <li class="wy-breadcrumbs-aside">
-        
-          
             <a href="../_sources/webapp/particle_controls.rst.txt" rel="nofollow"> View page source</a>
-          
-        
       </li>
-    
   </ul>
-
-  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-            
+             
   
 <style>
 /* CSS overrides for sphinx_rtd_theme */
@@ -205,13 +113,13 @@
 }
 </style>
 <section id="particle-controls">
-<h1>Particle controls<a class="headerlink" href="#particle-controls" title="Permalink to this headline">¶</a></h1>
+<h1>Particle controls<a class="headerlink" href="#particle-controls" title="Permalink to this headline"></a></h1>
 <img alt="../_images/particle_controls.png" src="../_images/particle_controls.png" />
 <p>Upon startup this sub-panel will be collapsed.
 Click on the downward facing arrow on the right side to expand
 the sub-panel, as shown in the image above.</p>
 <section id="collapsed-view">
-<h2>Collapsed view<a class="headerlink" href="#collapsed-view" title="Permalink to this headline">¶</a></h2>
+<h2>Collapsed view<a class="headerlink" href="#collapsed-view" title="Permalink to this headline"></a></h2>
 <p>Each particle type will receive it own sub-panel.
 In the example above, we show two different particle types:
 Gas and Stars.
@@ -226,7 +134,7 @@ you can expand the sub-panel to review additional controls
 (as shown for Gas above).</p>
 </section>
 <section id="n">
-<h2>N<a class="headerlink" href="#n" title="Permalink to this headline">¶</a></h2>
+<h2>N<a class="headerlink" href="#n" title="Permalink to this headline"></a></h2>
 <p>The first item in the expanded sub-panel is a slider and text entry box
 for “N”, which controls the number of particles that will be drawn.
 (The default is to draw all, and you can slide this to
@@ -235,7 +143,7 @@ This is analogous to the global Decimation slider,
 but works on each particle separately.</p>
 </section>
 <section id="plot-velocities">
-<h2>Plot Velocities<a class="headerlink" href="#plot-velocities" title="Permalink to this headline">¶</a></h2>
+<h2>Plot Velocities<a class="headerlink" href="#plot-velocities" title="Permalink to this headline"></a></h2>
 <p>If you provide velocities to Firefly,
 there will be a checkbox to “Plot Velocity Vectors.”
 If you click the checkbox, the points will be converted to lines
@@ -252,11 +160,11 @@ You may need to increase the particle size to see the vectors.</p>
 direction of the velocity vector).</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p><code class="code docutils literal notranslate"><span class="pre">&quot;Velocities&quot;</span></code> is a special field name, see <a class="reference internal" href="../reference/api/api.html#field-names"><span class="std std-ref">Special field names</span></a>.</p>
+<p><code class="code docutils literal notranslate"><span class="pre">&quot;Velocities&quot;</span></code> is a special field name, see <span class="xref std std-ref">field names</span>.</p>
 </div>
 </section>
 <section id="colormap">
-<h2>Colormap<a class="headerlink" href="#colormap" title="Permalink to this headline">¶</a></h2>
+<h2>Colormap<a class="headerlink" href="#colormap" title="Permalink to this headline"></a></h2>
 <p>If you choose to define fields in your data that are colormappable then
 there will be a Colormap section containing a checkbox, two dropdowns,
 and a <strong>two-handled</strong> slider bar with text input boxes.</p>
@@ -277,12 +185,14 @@ for fine adjustment using the slider between the new limits.</p>
 enterprising user could consider replacing the corresponding
 row in the texture map located at:
 <code class="code docutils literal notranslate"><span class="pre">Firefly/src/firefly/static/textures/colormap.png</span></code>.
-The name in the UI can’t be changed but you’ll be able to colormap
-your data nonetheless.</p>
+And the corresponding line in the
+<code class="code docutils literal notranslate"><span class="pre">Firefly/src/firefly/static/textures/colormap_names.json</span></code>.
+There is a Jupyter notebook in that directory as well which was
+used to create the colormap texture.</p>
 </div>
 </section>
 <section id="filters">
-<h2>Filters<a class="headerlink" href="#filters" title="Permalink to this headline">¶</a></h2>
+<h2>Filters<a class="headerlink" href="#filters" title="Permalink to this headline"></a></h2>
 <p>If you choose to define Filters when creating your data (see <a class="reference internal" href="../reference/api/api.html#api"><span class="std std-ref">API Reference</span></a>),
 you will also see a dropdown, slider <strong>with two handles</strong>, two text entry boxes.
 each of the filters you indicated, and an “Invert” checkbox.</p>
@@ -311,50 +221,33 @@ and it is discouraged from layering different playbacks
 
 
            </div>
-           
           </div>
-          <footer>
-    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="projection_controls.html" class="btn btn-neutral float-left" title="Volume rendering with 2d projection" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="../data_reader/index.html" class="btn btn-neutral float-right" title="Creating your own instance of Firefly" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-        <a href="camera_controls.html" class="btn btn-neutral float-left" title="Camera controls" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>
-        &#169; Copyright 2021, Alex Gurvich, Aaron Geller.
-
-    </p>
+    <p>&#169; Copyright 2022, Alex Gurvich, Aaron Geller.</p>
   </div>
-    
-    
-    
-    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
     <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    
-    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
 
 </footer>
         </div>
       </div>
-
     </section>
-
   </div>
-  
-
-  <script type="text/javascript">
+  <script>
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script>
-
-  
-  
-    
-   
+  </script> 
 
 </body>
 </html>

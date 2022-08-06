@@ -36,7 +36,7 @@ class Reader(object):
         self,
         datadir=None, 
         file_prefix='Data',
-        clean_datadir=False,
+        clean_datadir=True,
         max_npart_per_file=10**5,
         write_startup='append',
         write_only_data=False,
@@ -217,7 +217,7 @@ class Reader(object):
         ## add this particle group to the reader's settings file
         self.settings.attachSettings(particleGroup)
     
-    def createOctrees(self,mask=None,**kwargs):
+    def createOctrees(self,mask=None,max_npart_per_node=10**4,nrecurse=10,**kwargs):
 
         ## validate mask length entry , each particle group
         ##  should have a true or false entry
@@ -225,25 +225,22 @@ class Reader(object):
             f"mask must be of length: {len(self.particleGroups):d}"+
             f" not length {len(mask):d}.")
 
-        for i,particleGroup in enumerate(self.particleGroups): 
-            if mask is None or mask[i]: particleGroup.createOctree(**kwargs)
-    
-    def pruneOctrees(self,min_npart_per_node,mask=None):
-        ## validate mask length entry , each particle group
-        ##  should have a true or false entry
-        if mask is not None and len(mask) != len(self.particleGroups): raise ValueError(
-            f"mask must be of length: {len(self.particleGroups):d}"+
-            f" not length {len(mask):d}.")
-
-        for i,particleGroup in enumerate(self.particleGroups): 
-            if (hasattr(particleGroup,'octree') and (mask is None or mask[i])): 
-                particleGroup.octree.pruneOctree(min_npart_per_node)
+        for i in range(len(self.particleGroups)):
+            if mask is None or mask[i]: 
+                ## the old particle group will get garbage collected... eventually??
+                self.particleGroups[i] = self.particleGroups[i].spawn_octree_pg(
+                    self.datadir,
+                    max_npart_per_node,
+                    nrecurse=nrecurse,
+                    build=True,
+                    **kwargs)
 
     def writeToDisk(
         self,
         loud=False,
         write_to_disk=True,
         symlink=True,
+        file_extension='.ffly',
         **kwargs):
         """Creates all the necessary JSON files to run firefly and ensures they are
         properly linked and cross-referenced correctly using the
@@ -260,8 +257,9 @@ class Reader(object):
             saved directly to :code:`self.static_data_dir` directory (:code:`False`). 
             Note that :code:`symlink=False` will not _also_ save results in :code:`self.datadir`, defaults to True
         :type symlink: bool, optional
-        :param extension: what output format should the particle data be saved in, JSON or binary 'ffly'
-        :type: str
+        :param file_extension: File extension for data files created, one of `.ffly` (binary)
+            or `.json` (ASCII).
+        :type file_extension: str, optional
         :return: :code:`self.JSON` or :code:`""` according to :code:`write_to_disk`
         :rtype: str
         """
@@ -332,6 +330,8 @@ class Reader(object):
                 max_npart_per_file=self.max_npart_per_file,
                 clean_datadir=self.clean_datadir if particleGroup is self.particleGroups[0] else False,
                 not_reader=False,
+                file_extension=file_extension,
+                write_to_disk=write_to_disk,
                 **kwargs)
 
             ## append the JSON arrays for this particle group
@@ -403,7 +403,7 @@ class Reader(object):
                         {"0":startup_path},
                         startup_file if write_to_disk else None))] ## None -> returns JSON string
 
-        if not write_to_disk:
+        if not write_to_disk and file_extension.lower() == '.json':
             ## create a single "big JSON" with all the data in it in case
             ##  we want to send dataViaFlask
             JSON_dict = dict(file_array)
@@ -465,27 +465,25 @@ class Reader(object):
 
         return outputDict
 
-    def sendDataViaFlask(self,port=5000):
+    def sendDataViaFlask(self,port=5500):
         """ Exports the data as if it were being dumped to disk
             but instead stores it as a string. Then feeds this string
             to the js interpreter via Flask.
 
         :param port: port that the firefly Flask server is being hosted on,
-            defaults to 5000
+            defaults to 5500
         :type port: int, optional
         """
 
-        ## retrieve a single "big JSON" of all the mini-JSON 
-        ##  sub-files. 
-        if not hasattr(self,'JSON') or self.JSON is None:
-            self.writeToDisk(
-                loud=False,
-                write_to_disk=False,
-                extension='.json')
+        ## retrieve a single "big JSON" of all the mini-JSON sub-files. 
+        self.writeToDisk(
+            loud=False,
+            write_to_disk=False,
+            file_extension='.json')
 
         ## post the json to the listening url data_input
         ##  defined in server.py
-        print("Posting...",end='')
+        print(f"Posting to port {int(port):d}...",end='')
         requests.post(
             f'http://localhost:{port:d}/data_input',
             json=self.JSON)
@@ -572,16 +570,14 @@ class Reader(object):
         
         for obj in os.listdir(os.path.join(src,'static')):
             this_target = os.path.join(target,'static',obj)
-            if not os.path.isdir(this_target):
-                if obj == 'data':
-                    ## make an empty data directory rather than copy
-                    ##  whatever jsons happen to be there
-                    os.mkdir(this_target) 
-                else:
-                    ## copy the source files
-                    shutil.copytree(
-                        os.path.join(src,'static',obj),
-                        this_target)
+            if obj == 'data':
+                ## make an empty data directory rather than copy
+                ##  whatever jsons happen to be there
+                if not os.path.isdir(this_target): os.mkdir(this_target) 
+            else:
+                ## copy the source files
+                shutil.rmtree(this_target)
+                shutil.copytree(os.path.join(src,'static',obj),this_target)
 
         if dump_data:
             try:
@@ -820,7 +816,7 @@ class ArrayReader(Reader):
         ##  a single big JSON in self.JSON
         self.writeToDisk(
             write_to_disk=write_to_disk,
-            loud=loud)
+            loud=loud and write_to_disk)
 
 class SimpleReader(ArrayReader):
     """ A wrapper to :class:`firefly.data_reader.ArrayReader` that attempts to 

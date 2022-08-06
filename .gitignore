@@ -16,6 +16,9 @@ Thumbs.db
 #####################
 *.hdf5
 *.csv
+*.ffraw
+*.ffly
+*.fftree
 
 # pip #
 ###################
@@ -25,7 +28,7 @@ build/*
 # docs #
 ###################
 docs/source/reference/api/*
-docs/build/html/.doctrees
+docs/build/doctrees/*
 
 # python #
 ###################
@@ -39,6 +42,4 @@ __pycache__
 
 dist/*.whl
 dist/*.tar.gz
-*.ffly
-*.fftree
 */node_modules/*
