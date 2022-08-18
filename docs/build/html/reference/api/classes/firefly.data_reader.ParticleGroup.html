@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>firefly.data_reader.ParticleGroup &mdash; Firefly 3.0.0 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="firefly.data_reader.Settings" href="firefly.data_reader.Settings.html" />
+    <link rel="prev" title="firefly.data_reader.Reader" href="firefly.data_reader.Reader.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html">
+            <img src="../../../_static/logo_banner.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../webapp/index.html">Interacting with a Firefly visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../data_reader/index.html">Creating your own instance of Firefly</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../server.html">Hosting a Firefly webserver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../experimental.html">Experimental features</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../api.html#base-classes">Base classes</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="firefly.data_reader.Reader.html">firefly.data_reader.Reader</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">firefly.data_reader.ParticleGroup</a></li>
+<li class="toctree-l3"><a class="reference internal" href="firefly.data_reader.Settings.html">firefly.data_reader.Settings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="firefly.data_reader.TweenParams.html">firefly.data_reader.TweenParams</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#pre-built-readers">Pre-built Readers</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../api.html#server-utitities">Server Utitities</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Firefly</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../api.html">API Reference</a> &raquo;</li>
+      <li>firefly.data_reader.ParticleGroup</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/reference/api/classes/firefly.data_reader.ParticleGroup.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<section id="firefly-data-reader-particlegroup">
+<h1>firefly.data_reader.ParticleGroup<a class="headerlink" href="#firefly-data-reader-particlegroup" title="Permalink to this headline"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="firefly.data_reader.ParticleGroup">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">firefly.data_reader.</span></span><span class="sig-name descname"><span class="pre">ParticleGroup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">UIname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coordinates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocities</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rgba_colors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_arrays</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_filter_flags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_colormap_flags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_radius_flags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimation_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attached_settings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loud</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">settings_kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/firefly/data_reader/particlegroup.html#ParticleGroup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#firefly.data_reader.ParticleGroup" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>This is a class for organizing data that you want to interface with a 
+Reader instance. This class provides rudimentary data validation and 
+settings defaults specific to this data class. If you do not intend
+to attach it to a Reader instance using that reader’s addParticleGroup
+method please be careful!!</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="firefly.data_reader.ParticleGroup.__getitem__">
+<span class="sig-name descname"><span class="pre">__getitem__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/firefly/data_reader/particlegroup.html#ParticleGroup.__getitem__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#firefly.data_reader.ParticleGroup.__getitem__" title="Permalink to this definition"></a></dt>
+<dd><p>Implementation of builtin function __getitem__ to retreive tracked field data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>key</strong> (<em>str</em>) – field array to extract</p>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>KeyError</strong> – if field is not one of the tracked fields</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>field</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="firefly.data_reader.ParticleGroup.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">UIname</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">coordinates</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">velocities</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rgba_colors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_arrays</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_names</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_filter_flags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_colormap_flags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">field_radius_flags</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">decimation_factor</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attached_settings</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loud</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">settings_kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/firefly/data_reader/particlegroup.html#ParticleGroup.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#firefly.data_reader.ParticleGroup.__init__" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Accepts pass-through kwargs for <a class="reference internal" href="firefly.data_reader.Settings.html#firefly.data_reader.Settings" title="firefly.data_reader.Settings"><code class="xref py py-class docutils literal notranslate"><span class="pre">firefly.data_reader.Settings</span></code></a> whether one is attached</dt><dd><p>at initialization or not.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>UIname</strong> (<em>str</em>) – Name of the particle group that shows up in the UI, 4-5 characters is best
+so that it doesn’t spill out of the GUI.</p></li>
+<li><p><strong>coordinates</strong> (<em>np.ndarray</em>) – The coordinates of the points in 3d space, should have a shape of <cite>(nparts,3)</cite></p></li>
+<li><p><strong>velocities</strong> (<em>np.ndarray</em>) – The velocities associated with each coordinate, should have a shape of <cite>(nparts,3)</cite>
+allows vectors to be plotted at the coordinate location</p></li>
+<li><p><strong>rgba_colors</strong> (<em>np.ndarray</em>) – The RGBA tuples associated with each coordinate, should have a shape of <cite>(nparts,4)</cite></p></li>
+<li><p><strong>field_arrays</strong> (<em>(</em><em>nfields</em><em>,</em><em>nparts</em><em>) </em><em>np.ndarray</em><em>, </em><em>optional</em>) – The field data arrays to associate with each coordinate in space, each array
+should be one-dimensional and have <cite>nparts</cite> entries., defaults to None</p></li>
+<li><p><strong>field_names</strong> (<em>list of str with len = nfields</em><em>, </em><em>optional</em>) – Should be the same length as <cite>field_arrays</cite>, and gives a
+name to each of the arrays when they show up in the UI dropdowns., defaults to None</p></li>
+<li><p><strong>field_filter_flags</strong> (<em>list of bool with len = nfields</em><em>, </em><em>optional</em>) – Should be the same length as <cite>field_arrays</cite>,
+and gives a flag for whether that array should be available as an
+interactive filter within the webapp, defaults to None</p></li>
+<li><p><strong>field_colormap_flags</strong> (<em>list of bool with len = nfields</em><em>, </em><em>optional</em>) – Should be the same length as <cite>field_arrays</cite>,
+and gives a flag for whether that field should be 
+“colormappable” within the webapp, defaults to None</p></li>
+<li><p><strong>field_radius_flags</strong> (<em>list of bool with len = nfields</em><em>, </em><em>optional</em>) – Should be the same length as <cite>field_arrays</cite>,
+and gives a flag for whether that field should be allowed to scale
+particle radii within the webapp, defaults to None</p></li>
+<li><p><strong>decimation_factor</strong> (<em>int</em><em>, </em><em>optional</em>) – factor by which to reduce the data randomly 
+i.e. <code class="code docutils literal notranslate"><span class="pre">data=data[::decimation_factor]</span></code>, defaults to 1</p></li>
+<li><p><strong>attached_settings</strong> (<a class="reference internal" href="firefly.data_reader.Settings.html#firefly.data_reader.Settings" title="firefly.data_reader.Settings"><code class="xref py py-class docutils literal notranslate"><span class="pre">firefly.data_reader.Settings</span></code></a>, optional) – <a class="reference internal" href="firefly.data_reader.Settings.html#firefly.data_reader.Settings" title="firefly.data_reader.Settings"><code class="xref py py-class docutils literal notranslate"><span class="pre">Settings</span></code></a> instance that should be linked
+to this particle group such that GUI elements are connected correctly. If not provided here
+can be attached after-the-fact using the
+<code class="xref py py-func docutils literal notranslate"><span class="pre">firefly.data-reader.Settings.attachSettings()</span></code> method, defaults to None</p></li>
+<li><p><strong>loud</strong> (<em>bool</em><em>, </em><em>optional</em>) – flag to print status information to the console, defaults to False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>ValueError</strong> – if len(field_names) != len(field arrays)</p></li>
+<li><p><strong>ValueError</strong> – if a field_array has length other than len(coordinates)</p></li>
+<li><p><strong>ValueError</strong> – if <code class="code docutils literal notranslate"><span class="pre">color</span></code> is passed as an option kwarg but the value is 
+not an RGBA iterable</p></li>
+<li><p><strong>KeyError</strong> – if passed an invalid option_kwarg</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="firefly.data_reader.ParticleGroup.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/firefly/data_reader/particlegroup.html#ParticleGroup.__repr__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#firefly.data_reader.ParticleGroup.__repr__" title="Permalink to this definition"></a></dt>
+<dd><p>Implementation of builtin function __repr__</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>mystr, the pretty rendering of a particle group</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="firefly.data_reader.ParticleGroup.__setitem__">
+<span class="sig-name descname"><span class="pre">__setitem__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/firefly/data_reader/particlegroup.html#ParticleGroup.__setitem__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#firefly.data_reader.ParticleGroup.__setitem__" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Implementation of builtin function __setitem__ to replace</dt><dd><p>field data or track new fields. Filter flag and colormap flags
+will be set to true, call <a class="reference internal" href="#firefly.data_reader.ParticleGroup.trackArray" title="firefly.data_reader.ParticleGroup.trackArray"><code class="xref py py-func docutils literal notranslate"><span class="pre">firefly.data_reader.ParticleGroup.trackArray()</span></code></a>
+directly if this is undesired.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<em>str</em>) – name of field to alter or start tracking</p></li>
+<li><p><strong>value</strong> (<em>np.ndarray</em>) – field data to replace current field data with
+or initially track</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="firefly.data_reader.ParticleGroup.__weakref__">
+<span class="sig-name descname"><span class="pre">__weakref__</span></span><a class="headerlink" href="#firefly.data_reader.ParticleGroup.__weakref__" title="Permalink to this definition"></a></dt>
+<dd><p>list of weak references to the object (if defined)</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="firefly.data_reader.ParticleGroup.getDecimationIndexArray">
+<span class="sig-name descname"><span class="pre">getDecimationIndexArray</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/firefly/data_reader/particlegroup.html#ParticleGroup.getDecimationIndexArray"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#firefly.data_reader.ParticleGroup.getDecimationIndexArray" title="Permalink to this definition"></a></dt>
+<dd><p>Creates a numpy index array to handle decimation (sub-sampling) of your
+data. Chooses nparts/decimation_factor many particles randomly without
+replacement. Binds it to self.dec_inds.
+:return: dec_inds, indices corresponding to randomly chosen particles
+:rtype: np.ndarray</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="firefly.data_reader.ParticleGroup.outputToDict">
+<span class="sig-name descname"><span class="pre">outputToDict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dec_inds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">store_extra_keys</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loud</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/firefly/data_reader/particlegroup.html#ParticleGroup.outputToDict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#firefly.data_reader.ParticleGroup.outputToDict" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Outputs a subset of this ParticleGroup instance’s </dt><dd><p>data to a dictionary. The subset is determined by the 
+<code class="code docutils literal notranslate"><span class="pre">dec_inds</span></code> input which should be an array of indices
+matching the tracked field arrays.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dec_inds</strong> (<em>np.ndarray</em><em>, </em><em>optional</em>) – the decimation indices to 
+use, defining a subset of the <a class="reference internal" href="#firefly.data_reader.ParticleGroup" title="firefly.data_reader.ParticleGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">ParticleGroup</span></code></a> data to 
+output, defaults to np.arange(self.nparts)</p></li>
+<li><p><strong>store_extra_keys</strong> (<em>bool</em><em>, </em><em>optional</em>) – flag to store filter, colormap, and radius flags defaults to True</p></li>
+<li><p><strong>loud</strong> (<em>bool</em><em>, </em><em>optional</em>) – flag to print status information to the console, defaults to False</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>outDict of particle data</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>dict</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="firefly.data_reader.ParticleGroup.spawn_octree_pg">
+<span class="sig-name descname"><span class="pre">spawn_octree_pg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">datadir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_npart_per_node</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/firefly/data_reader/particlegroup.html#ParticleGroup.spawn_octree_pg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#firefly.data_reader.ParticleGroup.spawn_octree_pg" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Creates a new <code class="xref py py-class docutils literal notranslate"><span class="pre">firefly.data_reader.particlegroup.OctreeParticleGroup</span></code> instance</dt><dd><p>that references the data contained by the <a class="reference internal" href="#firefly.data_reader.ParticleGroup" title="firefly.data_reader.particlegroup.ParticleGroup"><code class="xref py py-class docutils literal notranslate"><span class="pre">firefly.data_reader.particlegroup.ParticleGroup</span></code></a>
+instance that calls this method.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>datadir</strong> (<em>str</em>) – directory to output <code class="docutils literal notranslate"><span class="pre">self.UIname/octree.json</span></code> (and corresponding files) to.</p></li>
+<li><p><strong>max_npart_per_node</strong> (<em>int</em>) – maximum number of particles a node can contain before it should be refined.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>octree_pg</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><code class="xref py py-class docutils literal notranslate"><span class="pre">OctreeParticleGroup</span></code></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="firefly.data_reader.ParticleGroup.trackArray">
+<span class="sig-name descname"><span class="pre">trackArray</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field_name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">arr</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_flag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colormap_flag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius_flag</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filterLims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filterVals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colormapLims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colormapVals</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/firefly/data_reader/particlegroup.html#ParticleGroup.trackArray"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#firefly.data_reader.ParticleGroup.trackArray" title="Permalink to this definition"></a></dt>
+<dd><p>Adds an additional data field to the ParticleGroup’s tracked fields arrays.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>field_name</strong> (<em>str</em>) – name to show in the GUI for this field</p></li>
+<li><p><strong>arr</strong> (<em>np.ndarray</em>) – data array for this field, should be self.nparts long</p></li>
+<li><p><strong>filter_flag</strong> (<em>bool</em><em>, </em><em>optional</em>) – flag to make field filterable in the GUI, defaults to True</p></li>
+<li><p><strong>colormap_flag</strong> (<em>bool</em><em>, </em><em>optional</em>) – flag to make field colormappable in the GUI, defaults to True</p></li>
+<li><p><strong>radius_flag</strong> (<em>bool</em><em>, </em><em>optional</em>) – flag to allow field to be used as a radius scale in the GUI, defaults to True</p></li>
+<li><p><strong>filterLims</strong> (<em>list of float</em><em>, </em><em>optional</em>) – initial [min, max] limits to the filters. 
+defaults to None and is set in the web app to [min, max] of the field</p></li>
+<li><p><strong>filterVals</strong> (<em>list of float</em><em>, </em><em>optional</em>) – initial location of the filter slider handles.
+defaults to None and is set in the web app to [min, max] of the field</p></li>
+<li><p><strong>colormapLims</strong> (<em>list of float</em><em>, </em><em>optional</em>) – initial [min, max] limits to the colormaps. 
+defaults to None and is set in the web app to [min, max] of the field</p></li>
+<li><p><strong>colormapVals</strong> (<em>list of float</em><em>, </em><em>optional</em>) – initial location of the colormap slider handles.
+defaults to None and is set in the web app to [min, max] of the field</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><strong>ValueError</strong> – if the length of the field array is not self.nparts</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="firefly.data_reader.ParticleGroup.writeToDisk">
+<span class="sig-name descname"><span class="pre">writeToDisk</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_directory</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_prefix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_extension</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'.ffly'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">loud</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_npart_per_file</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clean_datadir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">not_reader</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write_to_disk</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/firefly/data_reader/particlegroup.html#ParticleGroup.writeToDisk"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#firefly.data_reader.ParticleGroup.writeToDisk" title="Permalink to this definition"></a></dt>
+<dd><dl class="simple">
+<dt>Outputs this ParticleGroup instance’s data to a compatible Firefly format,</dt><dd><p>either <cite>.ffly</cite> or <cite>.json</cite>. Data is partitioned into 
+multiple sub-files. This is best used when coupled with a <a class="reference internal" href="firefly.data_reader.Reader.html#firefly.data_reader.Reader" title="firefly.data_reader.Reader"><code class="xref py py-class docutils literal notranslate"><span class="pre">firefly.data_reader.Reader</span></code></a>’s
+<a class="reference internal" href="firefly.data_reader.Reader.html#firefly.data_reader.Reader.writeToDisk" title="firefly.data_reader.Reader.writeToDisk"><code class="xref py py-func docutils literal notranslate"><span class="pre">writeToDisk()</span></code></a> method.</p>
+</dd>
+</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>target_directory</strong> (<em>str</em>) – the path to the directory where data should be saved</p></li>
+<li><p><strong>file_extension</strong> (<em>str</em><em>, </em><em>optional</em>) – File extension for data files created, one of <cite>.ffly</cite> (binary)
+or <cite>.json</cite> (ASCII).</p></li>
+<li><p><strong>file_prefix</strong> (<em>str</em><em>, </em><em>optional</em>) – Prefix for any files created, filenames will look like:
+<cite>f”{file_prefix}{self.UIname}{i_file:03d}{file_extension}”</cite></p></li>
+<li><p><strong>loud</strong> (<em>bool</em><em>, </em><em>optional</em>) – flag to print status information to the console, defaults to True</p></li>
+<li><p><strong>max_npart_per_file</strong> (<em>int</em><em>, </em><em>optional</em>) – the maximum number of particles saved per <code class="code docutils literal notranslate"><span class="pre">.json</span></code> file,
+don’t use too large a number or you will have trouble loading
+the individual files in., defaults to 10**4</p></li>
+<li><p><strong>clean_datadir</strong> (<em>bool</em><em>, </em><em>optional</em>) – flag to delete all <code class="code docutils literal notranslate"><span class="pre">.json</span></code> files in
+the <code class="code docutils literal notranslate"><span class="pre">JSONdir</span></code>. Strictly not necessary (since <code class="code docutils literal notranslate"><span class="pre">filenames.json</span></code> 
+will be updated) but it is good to clean up after yourself., defaults to False</p></li>
+<li><p><strong>write_to_disk</strong> (<em>bool</em><em>, </em><em>optional</em>) – flag that controls whether data is saved to disk (<code class="code docutils literal notranslate"><span class="pre">True</span></code>)
+or only converted to a string and returned (<code class="code docutils literal notranslate"><span class="pre">False</span></code>), defaults to True</p></li>
+<li><p><strong>not_reader</strong> (<em>bool</em><em>, </em><em>optional</em>) – flag for whether to print the Reader <code class="code docutils literal notranslate"><span class="pre">filenames.json</span></code> warning, defaults to True</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>filename, file_list (either a list full of filenames if
+written to disk or a list of JSON strs)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str, list of str</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="firefly.data_reader.Reader.html" class="btn btn-neutral float-left" title="firefly.data_reader.Reader" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="firefly.data_reader.Settings.html" class="btn btn-neutral float-right" title="firefly.data_reader.Settings" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Alex Gurvich, Aaron Geller.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

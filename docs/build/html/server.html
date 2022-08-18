@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hosting a Firefly webserver &mdash; Firefly 3.0.0 documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Experimental features" href="experimental.html" />
+    <link rel="prev" title="Tutorial notebook: Sending data to a local Firefly server through Flask" href="data_reader/flask_tutorial.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html">
+            <img src="_static/logo_banner.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="webapp/index.html">Interacting with a Firefly visualization</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data_reader/index.html">Creating your own instance of Firefly</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Hosting a Firefly webserver</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#hosting-firefly-locally">Hosting Firefly locally</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#using-python-m-http-server-to-host-index-html">Using <code class="code docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">http.server</span></code> to host <code class="code docutils literal notranslate"><span class="pre">index.html</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#using-run-server-py-to-launch-flask">Using <code class="code docutils literal notranslate"><span class="pre">run_server.py</span></code> to launch Flask</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#using-the-firefly-executable-to-launch-flask">Using the <code class="code docutils literal notranslate"><span class="pre">Firefly</span></code> executable to launch Flask</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#using-firefly-from-within-a-jupyter-notebook">Using Firefly from within a Jupyter notebook</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#embedding-within-an-iframe">Embedding within an iframe</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#hosting-a-firefly-server-within-a-notebook">Hosting a Firefly server within a notebook</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#hosting-a-static-version-on-the-internet">Hosting a static version on the internet</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#accessing-remote-firefly-servers-via-port-forwarding">Accessing remote Firefly servers via port forwarding</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="experimental.html">Experimental features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="reference/api/api.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Firefly</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Hosting a Firefly webserver</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/server.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<section id="hosting-a-firefly-webserver">
+<h1>Hosting a Firefly webserver<a class="headerlink" href="#hosting-a-firefly-webserver" title="Permalink to this headline"></a></h1>
+<p>Because Firefly is fundamentally a web application it must be served
+to your browser from a web server.
+That server can either be located on the internet or can be hosted
+locally (and accessed through the <code class="code docutils literal notranslate"><span class="pre">localhost</span></code> url).</p>
+<section id="hosting-firefly-locally">
+<span id="local"></span><h2>Hosting Firefly locally<a class="headerlink" href="#hosting-firefly-locally" title="Permalink to this headline"></a></h2>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For the <a class="reference internal" href="webapp/data_controls.html#load-new-data-button"><span class="std std-ref">Load New Data</span></a> button to work Firefly
+must be hosted locally (vs. <a class="reference internal" href="#internet-host"><span class="std std-ref">hosted on the internet</span></a>).</p>
+</div>
+<section id="using-python-m-http-server-to-host-index-html">
+<h3>Using <code class="code docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">http.server</span></code> to host <code class="code docutils literal notranslate"><span class="pre">index.html</span></code><a class="headerlink" href="#using-python-m-http-server-to-host-index-html" title="Permalink to this headline"></a></h3>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p><a class="reference internal" href="data_reader/flask.html#flask"><span class="std std-ref">Features that require Flask</span></a>
+will not work if Firefly is hosted this way.</p>
+</div>
+<p>From within the the <code class="code docutils literal notranslate"><span class="pre">Firefly/src/firefly</span></code> directory (or from within
+the corresponding sub-directory in your site-packages directory) execute</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python -m http.server
+</pre></div>
+</div>
+<p>This launches a Python <code class="code docutils literal notranslate"><span class="pre">SimpleHTTPServer</span></code> that will serve the
+<code class="code docutils literal notranslate"><span class="pre">index.html</span></code> file located in the directory where the command is
+executed.
+This will host a version of Firefly identical to the one hosted on
+<a class="reference internal" href="#internet-host"><span class="std std-ref">the internet</span></a> with the exception that you can
+use the <a class="reference internal" href="webapp/data_controls.html#load-new-data-button"><span class="std std-ref">Load New Data</span></a> button.</p>
+</section>
+<section id="using-run-server-py-to-launch-flask">
+<span id="flask-host"></span><h3>Using <code class="code docutils literal notranslate"><span class="pre">run_server.py</span></code> to launch Flask<a class="headerlink" href="#using-run-server-py-to-launch-flask" title="Permalink to this headline"></a></h3>
+<p>From within the the <code class="code docutils literal notranslate"><span class="pre">Firefly/src/firefly</span></code> directory (or from within
+the corresponding sub-directory in your site-packages directory) execute</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python run_server.py
+</pre></div>
+</div>
+</section>
+<section id="using-the-firefly-executable-to-launch-flask">
+<h3>Using the <code class="code docutils literal notranslate"><span class="pre">Firefly</span></code> executable to launch Flask<a class="headerlink" href="#using-the-firefly-executable-to-launch-flask" title="Permalink to this headline"></a></h3>
+<p>The Firefly bash executable is a wrapper to
+<code class="code docutils literal notranslate"><span class="pre">run_server.py</span></code> so that it can be initialized without having to
+be in <code class="code docutils literal notranslate"><span class="pre">Firefly/src/firefly</span></code> directory.</p>
+<p>It is distributed along with the Firefly source
+files and Python API and is located in <code class="code docutils literal notranslate"><span class="pre">Firefly/src/firefly/bin</span></code>
+(or the corresponding sub-directory in your site-packages directory).
+When Firefly is <a class="reference internal" href="installation.html#install"><span class="std std-ref">correctly installed</span></a> then this directory
+will be added to your <code class="code docutils literal notranslate"><span class="pre">${PATH}$</span></code> variable.</p>
+<p>You should then be able to execute</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>Firefly
+</pre></div>
+</div>
+<p>from any directory to launch a Firefly Flask server.</p>
+</section>
+</section>
+<section id="using-firefly-from-within-a-jupyter-notebook">
+<h2>Using Firefly from within a Jupyter notebook<a class="headerlink" href="#using-firefly-from-within-a-jupyter-notebook" title="Permalink to this headline"></a></h2>
+<p>Jupyter notebooks are powerful analysis tools that allow you to
+interactively explore your data, much like Firefly!</p>
+<p>Because Firefly is built as a webpage it can easily be displayed,
+with its full functionality, within a Jupyter notebook using an iframe.</p>
+<img alt="_images/jupyter_embed.png" class="align-center" src="_images/jupyter_embed.png" />
+<section id="embedding-within-an-iframe">
+<h3>Embedding within an iframe<a class="headerlink" href="#embedding-within-an-iframe" title="Permalink to this headline"></a></h3>
+<p>With a Firefly server hosted at <cite>localhost:xxxx</cite> you can access it
+by creating an iframe with the command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">IFrame</span>
+
+<span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;http://localhost:xxxx/&quot;</span>
+<span class="n">IFrame</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">700</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">700</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="hosting-a-firefly-server-within-a-notebook">
+<h3>Hosting a Firefly server within a notebook<a class="headerlink" href="#hosting-a-firefly-server-within-a-notebook" title="Permalink to this headline"></a></h3>
+<p>You can even host a Firefly Flask server without going back to the
+command line from within a Jupyter notebook as well.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">firefly.server</span> <span class="kn">import</span> <span class="n">spawnFireflyServer</span>
+
+<span class="c1">## optionally accepts port as positional argument</span>
+<span class="n">spawnFireflyServer</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Where <cite>xxxx</cite> is the 4 digit port number that you’d like to host the server on.</p>
+<p>When you would like to quit this server when you are done with it,
+use the command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">firefly.server</span> <span class="kn">import</span> <span class="n">quitAllFireflyServers</span>
+
+<span class="c1">## optionally accepts a single process id to quit</span>
+<span class="n">quitAllFireflyServers</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Note that the pid is accessible from the original <a class="reference internal" href="reference/api/server/firefly.server.spawnFireflyServer.html#firefly.server.spawnFireflyServer" title="firefly.server.spawnFireflyServer"><code class="xref py py-func docutils literal notranslate"><span class="pre">spawnFireflyServer()</span></code></a>
+call but that processes in general do not like to be quited and may sometimes
+survive the targeted attempt on their life. It’s more reliable to indiscriminately
+quit any process that has a Firefly server process name (the default).</p>
+<p>For the details of the usage of these functions,
+consult the <a class="reference internal" href="reference/api/api.html#server-api"><span class="std std-ref">server API documentation</span></a>.</p>
+</section>
+</section>
+<section id="hosting-a-static-version-on-the-internet">
+<span id="internet-host"></span><h2>Hosting a static version on the internet<a class="headerlink" href="#hosting-a-static-version-on-the-internet" title="Permalink to this headline"></a></h2>
+<p>To make Firefly accessible via the internet, users need only replace their final call to the  docref{reference/api/classes/firefly.data_reader.Reader.html#firefly.data_reader.Reader.writeToDisk}{Reader.writeToDisk} method with an analogous call to the docref{reference/api/classes/firefly.data_reader.Reader.html#firefly.data_reader.Reader.copyFireflySourceToTarget}{Reader.copyFireflySourceToTarget} method.
+The code{copyFireflySourceToTarget} method will copy the necessary Firefly source files along with the visualization data to a target directory on the researcher’s local computer.
+In order to automatically upload their visualization to GitHub Pages, a free web-hosting service provided by GitHub, the researcher would also pass the path to their GitHub OAuth authentication key and code{init_gh_pages=True} as keyword arguments.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">reader</span><span class="o">.</span><span class="n">copyFireflySourceToTarget</span><span class="p">(</span><span class="s2">&quot;my_Firefly&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition seealso">
+<p class="admonition-title">See also</p>
+<p><a class="reference internal" href="reference/api/classes/firefly.data_reader.Reader.html#firefly.data_reader.Reader.copyFireflySourceToTarget" title="firefly.data_reader.Reader.copyFireflySourceToTarget"><code class="xref py py-func docutils literal notranslate"><span class="pre">copyFireflySourceToTarget()</span></code></a> takes an optional boolean
+keyword argument <code class="code docutils literal notranslate"><span class="pre">init_gh_pages</span></code> that will attempt to
+create a new repository and enable GitHub pages automatically.
+See <a class="reference internal" href="data_reader/multiple_datasets.html#multiple-datasets"><span class="std std-ref">Managing multiple datasets</span></a> for details.</p>
+</div>
+</section>
+<section id="accessing-remote-firefly-servers-via-port-forwarding">
+<span id="port-forwarding"></span><h2>Accessing remote Firefly servers via port forwarding<a class="headerlink" href="#accessing-remote-firefly-servers-via-port-forwarding" title="Permalink to this headline"></a></h2>
+<p>Firefly can easily be hosted on a cluster environment for
+two main benefits:</p>
+<p>1. Data that is stored on the cluster can be rendered
+without having to transfer them to ones local machine</p>
+<p>2. Firefly can be embedded into an iframe within a Jupyter notebook
+hosted on the cluster</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The polite thing to do is to host your Firefly server from within an
+interactive session on a compute node, but a login node will work
+as well. The server will only serve the files, it won’t actually
+do any of the rendering, so the actual load on the login node
+could be small.</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This is an identical process to hosting a Jupyter notebook
+remotely on a cluster and accessing it through your local machine,
+so if you know how to do that you’re already set!</p>
+</div>
+<p>Once the server is hosted following one of the procedures listed in
+<a class="reference internal" href="#local"><span class="std std-ref">the section above</span></a> the port the server is hosted on must
+be forwarded to your local machine.
+This can be done with a simple ssh command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ssh</span> <span class="o">-</span><span class="n">L</span> <span class="n">xxxx</span><span class="p">:</span><span class="n">localhost</span><span class="p">:</span><span class="n">xxxx</span> <span class="n">UNAME</span><span class="nd">@stampede2</span><span class="o">.</span><span class="n">tacc</span><span class="o">.</span><span class="n">xsede</span><span class="o">.</span><span class="n">org</span> <span class="n">ssh</span> <span class="o">-</span><span class="n">L</span> <span class="n">xxxx</span><span class="p">:</span><span class="n">localhost</span><span class="p">:</span><span class="n">xxxx</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This command can be stored in an alias in ones’ <code class="code docutils literal notranslate"><span class="pre">.bashrc</span></code>
+as something like: <code class="code docutils literal notranslate"><span class="pre">alias</span> <span class="pre">s2firefly='...'</span></code>
+Which is executed like:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">s2firefly</span> <span class="n">YYY</span>
+</pre></div>
+</div>
+<p>Where <cite>YYY</cite> is the hostname of the compute node.
+This command will open a pseudo-terminal once you login,
+it is not necessary to do anything once the connection is established
+but closing the pseudo-terminal window will terminate the
+port-forwarding.</p>
+</div>
+<p>Once the port is forwarded, simply navigate to <a class="reference external" href="http://localhost:xxxx">localhost:xxxx</a>
+on your computer’s browser and enjoy Firefly!</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>In general, HPC cluster environments are segregated into <a href="#id1"><span class="problematic" id="id2">``</span></a>login’’ nodes (whose computational resources are shared by many users at once) and <a href="#id3"><span class="problematic" id="id4">``</span></a>compute’’ nodes (whose computational resources are assigned to individual users using a queue system).
+In this case, the researcher submits a request for an interactive job on a compute node.
+Once assigned, the researcher then forwards the  port they intend to serve Firefly on from the login node to the compute node they were assigned.
+Once on the compute node with a forwarded port, the researcher launches a Firefly server hosted on the cluster using the code{firefly –method=flask} command from the terminal</p>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>This same principle can be applied to expose a locally hosted version
+of Firefly to users over the internet, visitable by anyone with your
+ip address (which one could share). The procedure for forwarding
+the port is different and requires going into ones’ router settings.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Doing this could expose your home computer system,
+proceed with caution! We do not share the details of
+how to accomplish this because only those who understand
+the consequences should attempt this!</p>
+</div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="data_reader/flask_tutorial.html" class="btn btn-neutral float-left" title="Tutorial notebook: Sending data to a local Firefly server through Flask" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="experimental.html" class="btn btn-neutral float-right" title="Experimental features" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Alex Gurvich, Aaron Geller.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

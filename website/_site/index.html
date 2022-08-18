@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Firefly</title>
+  <meta name="description" content="A broswer-based interactive particle visualization app">
+
+  <link rel="shortcut icon" type="image/png" href="/Firefly/website/_site/assets/img/favicon.png">
+  <link rel="stylesheet" href="/Firefly/website/_site/assets/css/main.css">
+  <link rel="stylesheet" href="/Firefly/website/_site/assets/css/fa-icons.css">
+  <link rel="stylesheet" href="/Firefly/website/_site/assets/css/devicon-icons.css">
+</head>
+
+  <body>
+      <div id="particles-js">
+  <div class="header">
+      <h1>
+      <img alt="logo" 
+        src="/Firefly/website/_site/assets/img/logo_banner.png" 
+        style="width:100%"/>
+        <!-- <span class="site-title">Firefly</span> -->
+        <span class="site-description">a browser-based interactive particle visualization app</span>
+      </h1>
+      <div class="header-icons">
+        <a aria-label="Contact us" href="http://github.com/agurvich/Firefly/issues"><i class="icon fa fa-envelope"></i></a>
+        <a aria-label="Github" target="_blank" href="http://github.com/agurvich/Firefly"><i class="icon fa fa-github-alt" aria-hidden="true"></i></a>
+      </div>
+      <div class="header-links">
+        <a class="link" href="#about" data-scroll>What is Firefly?</a> - 
+        <a class="link" target="_blank" href="http://www.alexbgurvi.ch/Firefly/docs/build/html/index.html">Documentation</a> - 
+        <a class="link" href="#gallery" data-scroll>Gallery</a>
+      </div>
+  </div>
+  <a class="down" href="#about" data-scroll><i class="icon fa fa-chevron-down" aria-hidden="true"></i></a>
+</div>
+
+      <section id="about">
+         <div class="user-details">
+  <h1> What is Firefly? </h1>
+</div>
+  <div class="user">
+    <div class="tech" style="width:auto; margin-left:auto; margin-right:auto">
+      <i class="devicon-html5-plain-wordmark colored"></i>
+      <i class="devicon-css3-plain-wordmark colored"></i>
+      
+        <a style="text-decoration: none" target="_blank" href="https://www.javascript.com/">
+        <i class="devicon-javascript-plain colored"></i>
+      </a>
+
+        <a style="text-decoration: none" target="_blank" href="https://d3js.org/">
+        <i class="devicon-d3js-plain colored"></i>
+      </a>
+
+        <a style="text-decoration: none" target="_blank" href="https://www.python.org/">
+        <i class="devicon-python-plain colored"></i>
+      </a>
+
+      <br>
+        <a style="text-decoration: none" target="_blank" href="https://threejs.org/">
+        <img src="/Firefly/website/_site/assets/img/threejs_icon_wordmark.png" style="height:70px"> </img> 
+      </a>
+
+        <a style="text-decoration: none" target="_blank" href="https://get.webgl.org/">
+        <img src="/Firefly/website/_site/assets/img/WebGL_Logo.png" style="height:70px"> </img> 
+      </a>
+
+        <a style="text-decoration: none" target="_blank" href="https://flask.palletsprojects.com/">
+        <img src="/Firefly/website/_site/assets/img/flask-logo.png" style="height:70px"> </img> 
+      </a>
+      
+      <p>Firefly is web application that allows users to interactively explore their 3D particle data.
+      At its core, it is a Javascript app that uses WebGL to efficiently render millions of particles in an interactive three.js scene.
+      In addition to traditional static html and css, the user interface is procedurally generated using d3.js according to a configuration file, allowing visualization creators to ship different versions of their visualization for different audiences without changing the underlying code or data.
+      On top of this framework, we provide a python frontend that allows users to generate their own Firefly visualizations and host virtual webservers using Flask, enabling users to control their visualization via a remote device (i.e. an iPad), livestream the output of their visualization from a remote server (like a supercomputing cluster), or load new data directly from a Python interpreter without having to read it in from disk.
+      </p>
+    </div>
+</div>
+
+      </section>
+      <section id="gallery">
+        <div class='user-details'> <h1> Gallery </h1> </div>
+
+
+<div class='gallery'>
+<ul class="rig columns-3">
+  
+  <li > 
+    <a target="_blank" href="https://www.alexbgurvi.ch/FIRE_hires/index.html">
+      <img alt="viz" src="/Firefly/website/_site/assets/img/gallery/FIRE-hires-thumb.png ">
+    </a>
+      <div class="info"> 
+        <h3>High-res FIRE example</h3> 
+        <p> Alex Gurvich </p>
+      </div>
+  </li>
+  
+  <li > 
+    <a target="_blank" href="https://www.alexbgurvi.ch/FIRE_lowres/index.html">
+      <img alt="viz" src="/Firefly/website/_site/assets/img/gallery/FIRE-lowres-thumb.png ">
+    </a>
+      <div class="info"> 
+        <h3>Low-res FIRE example</h3> 
+        <p> Alex Gurvich </p>
+      </div>
+  </li>
+  
+  <li > 
+    <a target="_blank" href="https://www.alexbgurvi.ch/Gaia_test/index.html">
+      <img alt="viz" src="/Firefly/website/_site/assets/img/gallery/Gaia-test-thumb.png ">
+    </a>
+      <div class="info"> 
+        <h3>Gaia eDR3 example</h3> 
+        <p> Alex Gurvich </p>
+      </div>
+  </li>
+  
+  <li > 
+    <a target="_blank" href="https://www.alexbgurvi.ch/firefly_disk_settling/index.html">
+      <img alt="viz" src="/Firefly/website/_site/assets/img/gallery/disk-formation-thumb.png ">
+    </a>
+      <div class="info"> 
+        <h3>disk formation</h3> 
+        <p> Alex Gurvich </p>
+      </div>
+  </li>
+  
+  <li > 
+    <a target="_blank" href="https://www.alexbgurvi.ch/SDSS_test/index.html">
+      <img alt="viz" src="/Firefly/website/_site/assets/img/gallery/SDSS-test-thumb.png ">
+    </a>
+      <div class="info"> 
+        <h3>SDSS example</h3> 
+        <p> Alex Gurvich </p>
+      </div>
+  </li>
+  
+  <li > 
+    <a target="_blank" href="https://zhafen.github.io/CGM-fates/">
+      <img alt="viz" src="/Firefly/website/_site/assets/img/gallery/CGM-fates-thumb.png ">
+    </a>
+      <div class="info"> 
+        <h3>CGM fates</h3> 
+        <p> Zach Hafen </p>
+      </div>
+  </li>
+  
+  <li > 
+    <a target="_blank" href="https://zhafen.github.io/CGM-origins/">
+      <img alt="viz" src="/Firefly/website/_site/assets/img/gallery/CGM-origins-thumb.png ">
+    </a>
+      <div class="info"> 
+        <h3>CGM origins</h3> 
+        <p> Zach Hafen </p>
+      </div>
+  </li>
+  
+</ul>
+</div>
+      </section>
+        
+      <footer class="footer">
+    <p>&copy; Alex Gurvich and Aaron Geller, 2021 </p>
+    <p>Build with Jekyll and <span class="love">❤</span> by <a href="https://github.com/nrandecker">Nathan Randecker</a></p>
+</footer>
+<script src="//cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+<script src="/Firefly/website/_site/assets/js/sweet-scroll.min.js"></script>
+<script src="/Firefly/website/_site/assets/js/main.js"></script>
+<!-- Google Analytics -->
+
+
+
+  </body>

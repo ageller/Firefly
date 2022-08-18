@@ -1,0 +1,341 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "c39086e0-4b8f-44de-92ad-eaed486e44dd",
+   "metadata": {},
+   "source": [
+    "`firefly/ntbks/multiple_datasets_tutorial.ipynb`"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "id": "44f4b221-ab90-4ae9-b26b-81f3566fabd6",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "%load_ext autoreload\n",
+    "%autoreload 2\n",
+    "from IPython.display import YouTubeVideo"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "d039be1e-f265-4eb3-82a6-5e4f4bbfdd38",
+   "metadata": {},
+   "source": [
+    "A recording of this jupyter notebook in action is available at:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "id": "b8f5f94b-faff-4e69-8aa9-2825dd5db901",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "image/jpeg": "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\n",
+      "text/html": [
+       "\n",
+       "        <iframe\n",
+       "            width=\"400\"\n",
+       "            height=\"300\"\n",
+       "            src=\"https://www.youtube.com/embed/TMq3IvnxGY8\"\n",
+       "            frameborder=\"0\"\n",
+       "            allowfullscreen\n",
+       "            \n",
+       "        ></iframe>\n",
+       "        "
+      ],
+      "text/plain": [
+       "<IPython.lib.display.YouTubeVideo at 0x1050e1400>"
+      ]
+     },
+     "execution_count": 2,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "YouTubeVideo(\"TMq3IvnxGY8\")"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "id": "0c9f95ca-28fe-457b-afb9-7471f4d419fb",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "don't have phil's colormaps\n"
+     ]
+    }
+   ],
+   "source": [
+    "import numpy as np\n",
+    "import os\n",
+    "\n",
+    "import sys\n",
+    "## ignore this line, you do not need to add this if Firefly is pip installed into your PYTHONPATH\n",
+    "sys.path.insert(0,'/Users/agurvich/research/repos/firefly/src')\n",
+    "from firefly.data_reader import ArrayReader"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "10a8d0c3-94ca-4945-a061-bd1ca2c98ef9",
+   "metadata": {},
+   "source": [
+    "# Tutorial notebook: Managing multiple datasets with Firefly\n",
+    "There are two ways to manage multiple datasets with Firefly\n",
+    "1. listing multiple entries in startup.json\n",
+    "2. creating a \"standalone\" iteration of Firefly\n",
+    "\n",
+    "1 and 2 can be combined so that visitors to different \"standalone\" iterations of Firefly can select between different sets of multiple datasets using a dropdown see <a href=\"https://agurvich.github.io/firefly_versions\">this example</a>."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "cbb5f801-043b-49bc-9b8b-d0886336f7e0",
+   "metadata": {},
+   "source": [
+    "## Editing the entries of `startup.json`\n",
+    "When the Firefly webapp starts up it looks for a `firefly/static/data/startup.json` file to tell it which dataset to display. If only a single entry is present then it will automatically begin loading that dataset. If multiple entries are listed then it will present the user with a dropdown box to select which dataset to load. See the <a href=\"https://alexbgurvi.ch/Firefly/docs/build/html/data_reader/multiple_datasets.html\">documentation for managing multiple datasets</a> for how to format the `startup.json` file to list multiple entries manually. We provide a method of easily adding datasets to the `startup.json` file using the `write_startup` keyword argument of the `firefly.data_reader.Reader` (sub-)class(es). "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "id": "a7729b73-d7e3-4c0a-a0e0-fb9a41be0112",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "## let's create some sample data, a grid of points in a 3d cube\n",
+    "my_coords = np.linspace(-10,10,20)\n",
+    "xs,ys,zs = np.meshgrid(my_coords,my_coords,my_coords)\n",
+    "xs,ys,zs = xs.flatten(),ys.flatten(),zs.flatten()\n",
+    "coords = np.array([xs,ys,zs]).T\n",
+    "\n",
+    "## we'll pick some random field values to demonstrate filtering/colormapping\n",
+    "fields = np.random.random(size=xs.size)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "5c43a58c-6c90-4a08-998e-7dc08f2e2d0b",
+   "metadata": {},
+   "source": [
+    "We'll overwrite whatever file is existing with a new `startup.json` with only 1 entry in it. Then we'll append a second entry. Then we'll create a reader and specify that it should not be added to the `startup.json` file. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "id": "615a47a9-259c-43a3-b29c-ba0f9ed3b286",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "JSONdir is None, defaulting to /Users/agurvich/research/repos/firefly/src/firefly/static/data/Data\n",
+      "Make sure each field_array (2) has a field_filter_flag (0), assuming True.\n",
+      "Make sure each field_array (2) has a field_colormap_flag (0), assuming True.\n",
+      "Make sure each field_array (2) has a field_radius_flag (0), assuming False.\n",
+      "Outputting: PGroup_0 - 7999/7999 particles - 0 tracked fields\n",
+      "Outputting: PGroup_1 - 8000/8000 particles - 2 tracked fields\n",
+      "JSONdir: /Users/agurvich/FakeData -- is not a sub-directory of firefly/static/data. \n",
+      "This may produce confusing or inoperable results. As such, we will create a symlink for you when you  dumpToJSON.\n",
+      "Make sure each field_array (2) has a field_filter_flag (0), assuming True.\n",
+      "Make sure each field_array (2) has a field_colormap_flag (0), assuming True.\n",
+      "Make sure each field_array (2) has a field_radius_flag (0), assuming False.\n",
+      "Outputting: PGroup_0 - 7999/7999 particles - 0 tracked fields\n",
+      "Outputting: PGroup_1 - 8000/8000 particles - 2 tracked fields\n",
+      "JSONdir: /Users/agurvich/NullData -- is not a sub-directory of firefly/static/data. \n",
+      "This may produce confusing or inoperable results. As such, we will create a symlink for you when you  dumpToJSON.\n",
+      "Make sure each field_array (2) has a field_filter_flag (0), assuming True.\n",
+      "Make sure each field_array (2) has a field_colormap_flag (0), assuming True.\n",
+      "Make sure each field_array (2) has a field_radius_flag (0), assuming False.\n",
+      "Outputting: PGroup_0 - 7999/7999 particles - 0 tracked fields\n",
+      "Outputting: PGroup_1 - 8000/8000 particles - 2 tracked fields\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/opt/homebrew/Caskroom/miniconda/base/envs/python38/lib/python3.9/site-packages/numpy/core/fromnumeric.py:1970: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.\n",
+      "  result = asarray(a).shape\n",
+      "/opt/homebrew/Caskroom/miniconda/base/envs/python38/lib/python3.9/site-packages/numpy/core/fromnumeric.py:43: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.\n",
+      "  result = getattr(asarray(obj), method)(*args, **kwds)\n",
+      "/opt/homebrew/Caskroom/miniconda/base/envs/python38/lib/python3.9/site-packages/numpy/core/fromnumeric.py:1970: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.\n",
+      "  result = asarray(a).shape\n",
+      "/opt/homebrew/Caskroom/miniconda/base/envs/python38/lib/python3.9/site-packages/numpy/core/fromnumeric.py:43: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.\n",
+      "  result = getattr(asarray(obj), method)(*args, **kwds)\n",
+      "/opt/homebrew/Caskroom/miniconda/base/envs/python38/lib/python3.9/site-packages/numpy/core/fromnumeric.py:1970: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.\n",
+      "  result = asarray(a).shape\n",
+      "/opt/homebrew/Caskroom/miniconda/base/envs/python38/lib/python3.9/site-packages/numpy/core/fromnumeric.py:43: VisibleDeprecationWarning: Creating an ndarray from ragged nested sequences (which is a list-or-tuple of lists-or-tuples-or ndarrays with different lengths or shapes) is deprecated. If you meant to do this, you must specify 'dtype=object' when creating the ndarray.\n",
+      "  result = getattr(asarray(obj), method)(*args, **kwds)\n"
+     ]
+    }
+   ],
+   "source": [
+    "## initialize an ArrayReader\n",
+    "reader = ArrayReader(\n",
+    "    coordinates=[coords[:-1],coords], ## pass in two particle groups as a demonstration (just copies of our sample data)\n",
+    "    fields=[[],[fields,fields]], ## field data for each particle group, 0 fields for 1 and 2 repeated fields for the other.\n",
+    "    write_startup=True) ## overwrite the existing startup.json file\n",
+    "\n",
+    "## initialize a second ArrayReader\n",
+    "fake_reader = ArrayReader(\n",
+    "    coordinates=[coords[:-1],coords], ## pass in two particle groups as a demonstration (just copies of our sample data)\n",
+    "    fields=[[],[fields,fields]],## field data for each particle group, 0 fields for 1 and 2 repeated fields for the other.\n",
+    "    JSONdir=\"FakeData\",\n",
+    "    write_startup='append') ## append this entry to the startup.json file if it doesn't already exists\n",
+    "\n",
+    "## initialize a THIRD ArrayReader\n",
+    "null_reader = ArrayReader(\n",
+    "    coordinates=[coords[:-1],coords], ## pass in two particle groups as a demonstration (just copies of our sample data)\n",
+    "    fields=[[],[fields,fields]],## field data for each particle group, 0 fields for 1 and 2 repeated fields for the other.\n",
+    "    JSONdir=\"NullData\",\n",
+    "    write_startup=False) ## do not add this reader to the startup.json file"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "824b5f82-72df-45c0-8226-14fb613c6af7",
+   "metadata": {},
+   "source": [
+    "Let's read the content of the `startup.json` file:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "id": "82be986a-84ad-4829-8080-88488e33c0f0",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "{\"0\":\"data\\/Data\",\"1\":\"data\\/FakeData\"}"
+     ]
+    }
+   ],
+   "source": [
+    "!cat /Users/agurvich/research/repos/firefly/src/firefly/static/data/startup.json"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "77a41bf6-89a4-42f9-beb0-5d77ecad92b9",
+   "metadata": {},
+   "source": [
+    "Notice that the \"NullData\" `JSONdir` is not listed because we set `write_startup=False`. "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "a59ab2a2-0812-4dfc-9df8-8f277cd0c7a6",
+   "metadata": {},
+   "source": [
+    "## Creating a standalone iteration of Firefly\n",
+    "You can copy the necessary Firefly source files by creating a `Reader` object containing your data and using the `copyFireflySourceToTarget`. \n",
+    "We've also included a script that will automatically create a new Github repository and enable GitHub pages so that your data can be visited by users over the internet via URL. \n",
+    "For instructions on how to configure this feature and details for copying the Firefly source see the <a href=\"https://alexbgurvi.ch/Firefly/docs/build/html/data_reader/multiple_datasets.html\">documentation for managing multiple datasets</a>."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "id": "5c1b91ad-28d6-40d9-95ac-52a4077a34f9",
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "['/Users/agurvich/my_Firefly']"
+      ]
+     },
+     "execution_count": 7,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "reader.copyFireflySourceToTarget(init_gh_pages=False)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "a7944ab9-ed38-40c4-b494-627cd692dd3e",
+   "metadata": {},
+   "source": [
+    "Let's read the contents of the new `my_Firefly` directory:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "id": "7e502018-95e1-495e-965b-a9ce0cda9f11",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "index.html \u001b[34mstatic\u001b[m\u001b[m\n"
+     ]
+    }
+   ],
+   "source": [
+    "!ls /Users/agurvich/my_Firefly/"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "id": "1fb1c73c-c9ca-4e31-b923-97387835986b",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\u001b[34mData\u001b[m\u001b[m         startup.json\n"
+     ]
+    }
+   ],
+   "source": [
+    "!ls /Users/agurvich/my_firefly/static/data/"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.9.7"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

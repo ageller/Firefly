@@ -1,0 +1,6 @@
+﻿firefly.server.startFireflyServer
+=================================
+
+.. currentmodule:: firefly.server
+
+.. autofunction:: startFireflyServer

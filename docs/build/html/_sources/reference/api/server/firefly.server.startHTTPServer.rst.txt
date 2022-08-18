@@ -1,0 +1,6 @@
+﻿firefly.server.startHTTPServer
+==============================
+
+.. currentmodule:: firefly.server
+
+.. autofunction:: startHTTPServer

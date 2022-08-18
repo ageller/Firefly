@@ -1,0 +1,6 @@
+﻿firefly.server.spawnFireflyServer
+=================================
+
+.. currentmodule:: firefly.server
+
+.. autofunction:: spawnFireflyServer

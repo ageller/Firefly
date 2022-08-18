@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Managing multiple datasets &mdash; Firefly 3.0.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Tutorial notebook: Managing multiple datasets with Firefly" href="multiple_datasets_tutorial.html" />
+    <link rel="prev" title="Tutorial notebook: Managing Custom Settings" href="settings_tutorial.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html">
+            <img src="../_static/logo_banner.png" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../webapp/index.html">Interacting with a Firefly visualization</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Creating your own instance of Firefly</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="index.html#quickstart">Quickstart</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html#next-steps">Next steps</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="files.html">Understanding Firefly’s input requirements</a></li>
+<li class="toctree-l3"><a class="reference internal" href="reader.html">Producing Firefly formatted <code class="code docutils literal notranslate"><span class="pre">.json</span></code> files using the <span class="xref std std-ref">Python API</span></a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Managing multiple datasets</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="multiple_datasets_tutorial.html">Tutorial notebook: Managing multiple datasets with Firefly</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#with-startup-json">With <code class="code docutils literal notranslate"><span class="pre">startup.json</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#with-separate-firefly-source-directories">With separate Firefly source directories</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="flask.html">Sending data to a Firefly server via Flask</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../server.html">Hosting a Firefly webserver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../experimental.html">Experimental features</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../reference/api/api.html">API Reference</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Firefly</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="index.html">Creating your own instance of Firefly</a> &raquo;</li>
+      <li>Managing multiple datasets</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/data_reader/multiple_datasets.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  
+<style>
+/* CSS overrides for sphinx_rtd_theme */
+
+/* 24px margin */
+.nbinput.nblast.container,
+.nboutput.nblast.container {
+    margin-bottom: 19px;  /* padding has already 5px */
+}
+
+/* ... except between code cells! */
+.nblast.container + .nbinput.container {
+    margin-top: -19px;
+}
+
+.admonition > p:before {
+    margin-right: 4px;  /* make room for the exclamation icon */
+}
+
+/* Fix math alignment, see https://github.com/rtfd/sphinx_rtd_theme/pull/686 */
+.math {
+    text-align: unset;
+}
+</style>
+<section id="managing-multiple-datasets">
+<span id="multiple-datasets"></span><h1>Managing multiple datasets<a class="headerlink" href="#managing-multiple-datasets" title="Permalink to this headline"></a></h1>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="multiple_datasets_tutorial.html">Tutorial notebook: Managing multiple datasets with Firefly</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="multiple_datasets_tutorial.html#Editing-the-entries-of-startup.json">Editing the entries of <code class="docutils literal notranslate"><span class="pre">startup.json</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="multiple_datasets_tutorial.html#Creating-a-standalone-iteration-of-Firefly">Creating a standalone iteration of Firefly</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<section id="with-startup-json">
+<h2>With <code class="code docutils literal notranslate"><span class="pre">startup.json</span></code><a class="headerlink" href="#with-startup-json" title="Permalink to this headline"></a></h2>
+<p>When Firefly first opens it searches for <a class="reference internal" href="files.html#docsstartup"><span class="std std-ref">the startup file</span></a>, <code class="code docutils literal notranslate"><span class="pre">startup.json</span></code>,
+in <code class="code docutils literal notranslate"><span class="pre">firefly/static/data</span></code>. If <code class="code docutils literal notranslate"><span class="pre">startup.json</span></code> does not exist,
+Firefly will display a button that will allow you to
+select the directory containing the files you want to
+load (the directory must contain a <a class="reference internal" href="files.html#docsfilename"><span class="std std-ref">manifest file</span></a>, <code class="code docutils literal notranslate"><span class="pre">filenames.json</span></code>).</p>
+<p>This interface can also be accessed if you already have a dataset loaded
+and displayed in Firefly from within the UI by clicking on
+the <a class="reference internal" href="../webapp/data_controls.html#load-new-data-button"><span class="std std-ref">Load New Data</span></a> button.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Some browsers may show a default warning message that you
+are about to upload many files to the site and
+to only do so if you trust the site.
+Please allow Firefly to upload these files–
+you are not uploading them to the internet,
+only to your browser.</p>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>For most browsers, you will only be able to select a
+directory that is a sub-directory of <code class="code docutils literal notranslate"><span class="pre">firefly/static/data</span></code>.
+You must keep your <code class="code docutils literal notranslate"><span class="pre">.json</span></code> files there or
+could use symbolic links within
+the data directory pointing to elsewhere on your local
+disk, e.g.,</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>ln -s /home/mydirectory/snapdir_XXX
+</pre></div>
+</div>
+<p><a class="reference internal" href="../reference/api/classes/firefly.data_reader.Reader.html#firefly.data_reader.Reader.writeToDisk" title="firefly.data_reader.Reader.writeToDisk"><code class="xref py py-func docutils literal notranslate"><span class="pre">firefly.data_reader.Reader.writeToDisk()</span></code></a> will automatically
+create a symbolic link if it detects that the <code class="code docutils literal notranslate"><span class="pre">JSONdir</span></code> you
+specified is not a sub-directory of <code class="code docutils literal notranslate"><span class="pre">firefly/static/data</span></code>.</p>
+</div>
+<p>If you have multiple data sets available on your computer
+and prefer to have a menu of these data files to choose
+from at the start of Firefly, you can append entries to the
+<code class="code docutils literal notranslate"><span class="pre">startup.json</span></code> file to create a list of directories
+.  For instance, a <a class="reference internal" href="../reference/api/classes/firefly.data_reader.Reader.html#firefly.data_reader.Reader" title="firefly.data_reader.Reader"><code class="xref py py-class docutils literal notranslate"><span class="pre">Reader</span></code></a> may create a
+<code class="code docutils literal notranslate"><span class="pre">startup.json</span></code> file that contains the following:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s2">&quot;0&quot;</span><span class="p">:</span><span class="s2">&quot;data\/snapdir_001&quot;</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>You could manually append this to contain the following:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="s2">&quot;0&quot;</span><span class="p">:</span><span class="s2">&quot;data\/snapdir_001&quot;</span><span class="p">,</span>
+<span class="s2">&quot;1&quot;</span><span class="p">:</span><span class="s2">&quot;data\/snapdir_002&quot;</span><span class="p">,</span>
+<span class="s2">&quot;2&quot;</span><span class="p">:</span><span class="s2">&quot;data\/snapdir_003&quot;</span><span class="p">,</span>
+<span class="s2">&quot;3&quot;</span><span class="p">:</span><span class="s2">&quot;data\/snapdir_004&quot;</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>Or use the <code class="code docutils literal notranslate"><span class="pre">write_startup=append</span></code>
+keyword argument of <a class="reference internal" href="../reference/api/classes/firefly.data_reader.Reader.html#firefly.data_reader.Reader.__init__" title="firefly.data_reader.Reader.__init__"><code class="xref py py-func docutils literal notranslate"><span class="pre">__init__()</span></code></a>
+when initializing your second dataset.</p>
+<p>With this <code class="code docutils literal notranslate"><span class="pre">startup.json</span></code>, you would see a button when
+Firefly loads that, when clicked, will allow you to choose
+which data set to display.
+In general, this method may be useful if the Firefly webserver
+you are accessing is not <a class="reference internal" href="../server.html#local"><span class="std std-ref">hosted locally</span></a> and is instead
+being <a class="reference internal" href="../server.html#port-forwarding"><span class="std std-ref">port forwarded</span></a>
+to your local browser (which can only see your local file system).</p>
+</section>
+<section id="with-separate-firefly-source-directories">
+<h2>With separate Firefly source directories<a class="headerlink" href="#with-separate-firefly-source-directories" title="Permalink to this headline"></a></h2>
+<p>Alternatively, one could make many copies of the Firefly source directory,
+each with their own <code class="code docutils literal notranslate"><span class="pre">startup.json</span></code>.</p>
+<p>To facilitate this, we provide the
+<a class="reference internal" href="../reference/api/classes/firefly.data_reader.Reader.html#firefly.data_reader.Reader.copyFireflySourceToTarget" title="firefly.data_reader.Reader.copyFireflySourceToTarget"><code class="xref py py-func docutils literal notranslate"><span class="pre">firefly.data_reader.Reader.copyFireflySourceToTarget()</span></code></a>
+method which will create a new directory and copy the necessary source
+files to run Firefly within it (without the Python frontend API).</p>
+<p>You can optionally specify to also copy the necessary Flask files to
+run a flask local server by keyword argument but this is disabled by default.
+Instead, this feature is envisioned to enable users to quickly create instances of
+Firefly that <a class="reference internal" href="../server.html#internet-host"><span class="std std-ref">they can host on the internet</span></a>.</p>
+<p>To streamline this process even further, we provide an optional
+<code class="code docutils literal notranslate"><span class="pre">init_gh_pages</span></code> keyword argument that will even attempt to make
+a new GitHub repository with GitHub pages, a free webhosting service offered
+by GitHub, enabled.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>To use the <code class="code docutils literal notranslate"><span class="pre">init_gh_pages</span></code> keyword argument you must have created
+a GitHub OAUTH token somewhere on your system and passed it to
+<a class="reference internal" href="../reference/api/classes/firefly.data_reader.Reader.html#firefly.data_reader.Reader.copyFireflySourceToTarget" title="firefly.data_reader.Reader.copyFireflySourceToTarget"><code class="xref py py-func docutils literal notranslate"><span class="pre">copyFireflySourceToTarget()</span></code></a>
+using the <code class="code docutils literal notranslate"><span class="pre">GHOAUTHTOKENPATH</span></code> keyword argument (which defaults
+to <code class="code docutils literal notranslate"><span class="pre">$HOME/.github.token</span></code>.
+Attempting to use the <code class="code docutils literal notranslate"><span class="pre">init_gh_pages</span></code> flag without doing so
+will raise an error message with instructions for how to generate
+a GitHub OAUTH token.</p>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="settings_tutorial.html" class="btn btn-neutral float-left" title="Tutorial notebook: Managing Custom Settings" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="multiple_datasets_tutorial.html" class="btn btn-neutral float-right" title="Tutorial notebook: Managing multiple datasets with Firefly" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2022, Alex Gurvich, Aaron Geller.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
