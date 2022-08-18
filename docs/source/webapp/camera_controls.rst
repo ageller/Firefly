@@ -1,3 +1,5 @@
+.. _camera controls:
+
 Camera controls
 ===============
 
@@ -57,3 +59,12 @@ effect.
 
 	There is experimental support for VR using the stereoscopic mode,
 	see :ref:`experimental features`.
+
+Tweening
+--------
+
+Using the checkbox labeled Tween, the camera's position
+and orientation will be smoothly adjusted according to the keyframes 
+defined by the user in the :code:`TweenParams`. 
+
+See the :ref:`frontend documentation <frontend api>` for details.
