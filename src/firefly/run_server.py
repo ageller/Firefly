@@ -2,6 +2,7 @@
 import sys
 import os
 import getopt
+from firefly.data_reader.reader import Reader
 
 ## make sure we are importing from wherever this file is, rather than the system 
 ##  installation of Firefly. Saves us devs a lot of confusion and is equivalent 
@@ -14,7 +15,8 @@ def main(
     method='http',
     directory=None,
     dec=1,
-    fps=30):
+    fps=30,
+    copy_source=False):
     """Creates a global interpreter locked process to host either a Flask 
         or HTTP server that can be accessed via localhost:<port>. 
 
@@ -33,13 +35,23 @@ def main(
     :param dec: factor to decimate data that is being passed through
 		localhost:<port>/data_input, defaults to 1
     :type dec: int, optional
+    :param copy_source: flag to tell the ``firefly`` command to copy the source files for Firefly into 
+        the directory specified by ``directory``, defaults to ``False``
+    :type copy_source: bool, optional
     """
 
-    if method not in ['flask','http']: raise ValueError(
-        f"method must be one of flask or http, not {method}")
+    if copy_source:
+        if directory is None: raise IOError("Must pass --directory= when --copy_source=True")
+        else:
+            reader = Reader(datadir=os.path.join(os.path.dirname(__file__),'..','static','data','dummy'))
+            reader.copyFireflySourceToTarget(os.path.abspath(directory),dump_data=False,overwrite=False)
 
-    if method == 'flask': startFlaskServer(port,directory,fps,dec)
-    else: startHTTPServer(port,directory)
+    else:
+        if method not in ['flask','http']: raise ValueError(
+            f"method must be one of flask or http, not {method}")
+
+        if method == 'flask': startFlaskServer(port,directory,fps,dec)
+        else: startHTTPServer(port,directory)
 
 if __name__ == '__main__':
     argv = sys.argv[1:]
@@ -49,7 +61,8 @@ if __name__ == '__main__':
         'port=',
         'directory=',
         'dec=',
-        'fps='])
+        'fps=',
+        'copy_source='])
     for i,opt in enumerate(opts):
         if opt[1]=='':
             opts[i]=('mode',opt[0].replace('-',''))

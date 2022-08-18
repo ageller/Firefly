@@ -4,6 +4,8 @@ var viewerParams;
 function defineViewerParams(){
 	viewerParams = new function() {
 
+		this.url = new URL(window.location.href);
+
 		var currentTime = new Date();
 		// in seconds
 		this.initialize_time = currentTime.getTime()/1000;
