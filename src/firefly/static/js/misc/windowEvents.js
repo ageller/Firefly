@@ -110,7 +110,7 @@ function hideSleep(){
 }
 
 function changeSnapSizes(){
-	if (viewerParams){
+	if (typeof viewerParams !== 'undefined') {
 		if (viewerParams.haveUI){
 			//size of the snapshot (from text input)
 			var oldW = 0+viewerParams.renderWidth;

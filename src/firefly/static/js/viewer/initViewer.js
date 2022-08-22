@@ -7,11 +7,16 @@
 function connectViewerSocket(){
 	//$(document).ready(function() {
 	document.addEventListener("DOMContentLoaded", function(event) { 
+		// get the room name
+		socketParams.room = prompt("Please enter a session name.  This should be a unique string that you will use for all connections to this session.  Do not include any spaces.");
+
 		// Event handler for new connections.
 		// The callback function is invoked when a connection with the
 		// server is established.
 		socketParams.socket.on('connect', function() {
+			socketParams.socket.emit('join', {room: socketParams.room});
 			socketParams.socket.emit('connection_test', {data: 'Viewer connected!'});
+
 		});
 		socketParams.socket.on('connection_response', function(msg) {
 			console.log('connection response', msg);

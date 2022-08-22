@@ -18,8 +18,12 @@ function initFPS(inp){
 }
 function connectStreamerSocket(){
 	document.addEventListener("DOMContentLoaded", function(event) { 
+		// get the room name
+		socketParams.room = prompt("Please enter a session name.  This should be a unique string that you will use for all connections to this session.  Do not include any spaces.");
 
+		
 		socketParams.socket.on('connect', function() {
+			socketParams.socket.emit('join', {room: socketParams.room});
 			socketParams.socket.emit('connection_test', {data: 'Streamer connected!'});
 		});
 		socketParams.socket.on('connection_response', function(msg) {

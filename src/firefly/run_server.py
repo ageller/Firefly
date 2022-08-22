@@ -73,4 +73,5 @@ if __name__ == '__main__':
             except:
                 ## if it's a string... not so much
                 opts[i]=(opt[0].replace('-',''),opt[1])
+    # print('checking args', argv, opts)
     main(**dict(opts))

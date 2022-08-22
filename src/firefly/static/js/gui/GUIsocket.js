@@ -7,10 +7,15 @@
 function connectGUISocket(){
 	//$(document).ready(function() {
 	document.addEventListener("DOMContentLoaded", function(event) { 
+
+		// get the room name
+		socketParams.room = prompt("Please enter a session name.  This should be a unique string that you will use for all connections to this session.  Do not include any spaces.");
+
 		// Event handler for new connections.
 		// The callback function is invoked when a connection with the
 		// server is established.
 		socketParams.socket.on('connect', function() {
+			socketParams.socket.emit('join', {room: socketParams.room});
 			socketParams.socket.emit('connection_test', {data: 'GUI connected!'});
 		});
 		socketParams.socket.on('connection_response', function(msg) {
@@ -160,7 +165,7 @@ function createCube(){
 		new THREE.MeshBasicMaterial({color:"purple", side: THREE.DoubleSide}), 
 	]; 
 	// Create a MeshFaceMaterial, which allows the cube to have different materials on each face 
-	var cubeMaterial = cubeMaterials;//new THREE.MeshFaceMaterial(cubeMaterials); 
+	var cubeMaterial = cubeMaterials;
 	GUIParams.cube = new THREE.Mesh(geometry, cubeMaterial);
 	setCubePosition(GUIParams.controls.target);
 
