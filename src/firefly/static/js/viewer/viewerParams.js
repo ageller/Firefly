@@ -61,7 +61,7 @@ function defineViewerParams(){
 		this.invertFilter = {};
 		this.currentlyShownFilter = {};
 
-		//for frustum      
+		//for frustum
 		this.zmax = 5.e10;
 		this.zmin = 0.01;
 		this.fov = 45.
@@ -236,6 +236,10 @@ function defineViewerParams(){
 		this.drawPass = 0;
 		this.totalParticlesInMemory = 0; //try to hold the total number of particles in memory
 		this.memoryLimit = 2*1e9; //bytes, maximum memory allowed -- for now this is more like a target
+
+		this.showFPS = true;
+		this.showMemoryUsage = true;
+
 
 		//default min/max particles sizes
 		this.minPointScale = .01;
