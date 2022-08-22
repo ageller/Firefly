@@ -42,10 +42,12 @@ if [ -z "${FIREFLY_BROWSER}" ]; then
 	elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
 		# Do something under GNU/Linux platform
 		export FIREFLY_BROWSER=xdg-open
-	# elif [ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]; then
-	# 	# Do something under 32 bits Windows NT platform
-	# elif [ "$(expr substr $(uname -s) 1 10)" == "MINGW64_NT" ]; then
-	# 	# Do something under 64 bits Windows NT platform
+	 elif [ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]; then
+	 	# Do something under 32 bits Windows NT platform
+		export FIREFLY_BROWSER='start ""'
+	 elif [ "$(expr substr $(uname -s) 1 10)" == "MINGW64_NT" ]; then
+	 	# Do something under 64 bits Windows NT platform
+		export FIREFLY_BROWSER='start ""'
 	fi
 fi
 if [ -z "${FIREFLY_BROWSER}" ]; then
@@ -67,10 +69,10 @@ if [ ! -z "${FIREFLY_BROWSER}" ] && [ ! -z "${FIREFLY_DIR}" ]; then
 
 	#launch the browser (some browsers will automatically reload when flask is connected, but some won't... so wait to launch)
 	sleep 3 && \
-	$FIREFLY_BROWSER http://localhost:5000/ & 
+	$FIREFLY_BROWSER http://localhost:5500/ & 
 
 	#launch the flask server
 	python $FIREFLY_DIR/run_server.py
 fi
 
-/bin/bash
+# /bin/bash
