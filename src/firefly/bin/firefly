@@ -89,4 +89,6 @@ if [ ! -z "${FIREFLY_BROWSER}" ] && [ ! -z "${FIREFLY_DIR}" ]; then
 
 fi
 
+#
 # /bin/bash
+#
