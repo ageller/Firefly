@@ -576,7 +576,7 @@ class Reader(object):
                 if not os.path.isdir(this_target): os.mkdir(this_target) 
             else:
                 ## copy the source files
-                shutil.rmtree(this_target)
+                if os.path.exists(this_target): shutil.rmtree(this_target)
                 shutil.copytree(os.path.join(src,'static',obj),this_target)
 
         if dump_data:
