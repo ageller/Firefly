@@ -1559,7 +1559,7 @@ function setBoxSize(coords_flat){
 	var fee, foo;
 	var nparts = coords_flat.length/3;
 	for( var i = 0; i < nparts; i++ ){
-		foo = new THREE.Vector3(coords_flat.slice(3*i,3*(i+1)))
+		foo = new THREE.Vector3(coords_flat.slice(3*i,3*(i+1))[0])
 		fee = viewerParams.center.distanceTo(foo);
 		if (fee > viewerParams.boxSize){
 			viewerParams.boxSize = fee;
