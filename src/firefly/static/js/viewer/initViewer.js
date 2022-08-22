@@ -1298,7 +1298,7 @@ function compileJSONData(data, p, callback, initialLoadFrac=0){
 				data[key+'_flat'][3*i+1] = data[key][i][1];
 				data[key+'_flat'][3*i+2] = data[key][i][2];
 			}
-			delete data[key];
+			data.removeProperty(key);
 		}
 	})
 
@@ -1311,7 +1311,7 @@ function compileJSONData(data, p, callback, initialLoadFrac=0){
 			data['rgbaColors_flat'][4*i+2] = data[key][i][2];
 			data['rgbaColors_flat'][4*i+3] = data[key][i][3];
 		}
-        delete data[key];
+		data.removeProperty(key);
 	}
 
 	Object.keys(data).forEach(function(k, jj) {
