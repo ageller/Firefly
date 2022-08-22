@@ -11,7 +11,7 @@ import socketserver
 
 import numpy as np
 
-from flask import Flask, render_template, request, session
+from flask import Flask, render_template, request, session, current_app
 from flask_socketio import SocketIO, emit, join_room, leave_room
 from threading import Lock
 
@@ -56,26 +56,34 @@ dec = 1
 GUIseparated = False
 
 #this will pass to the viewer every "seconds" 
-def background_thread():
+# now I need to allow multiple background_threads!
+def background_thread(room):
 	global viewerParams, updateViewerParams, GUIParams, updateGUIParams
 	while True:
 		socketio.sleep(seconds)
+		print(room)
 		if (updateViewerParams):
 			#print("========= viewerParams:",viewerParams)
-			socketio.emit('update_viewerParams', viewerParams, namespace=namespace, to=rooms[request.sid])
+			socketio.emit('update_viewerParams', viewerParams, namespace=namespace, to=room)
 		if (updateGUIParams):
 			#print("========= GUIParams:",GUIParams)
-			socketio.emit('update_GUIParams', GUIParams, namespace=namespace, to=rooms[request.sid])
+			socketio.emit('update_GUIParams', GUIParams, namespace=namespace, to=room)
 		updateViewerParams = False
 		updateGUIParams = False
 
 ####### setting the room (to keep each session distinct)
 @socketio.on('join', namespace=namespace)
 def on_join(message):
-	global rooms
+	global rooms, thread
+	# join the room
 	rooms[request.sid] = message['room']
 	print('======= in room', message['room'])
 	join_room(message['room'])
+
+	# start the background thread
+	with thread_lock:
+		if thread is None:
+			thread = socketio.start_background_task(background_thread, message['room'])
 
 @socketio.on('leave', namespace=namespace)
 def on_leave(message):
@@ -97,13 +105,13 @@ def viewer_input(message):
 	updateViewerParams = True
 	viewerParams = message
 
-#the background task sends data to the viewer
-@socketio.on('connect', namespace=namespace)
-def from_viewer():
-	global thread
-	with thread_lock:
-		if thread is None:
-			thread = socketio.start_background_task(target=background_thread)
+# #the background task sends data to the viewer
+# @socketio.on('connect', namespace=namespace)
+# def from_viewer():
+# 	global thread
+# 	with thread_lock:
+# 		if thread is None:
+# 			thread = socketio.start_background_task(background_thread, current_app._get_current_object())
 
 
 #######for GUI
@@ -115,12 +123,12 @@ def gui_input(message):
 	GUIParams = message
 
 #the background task sends data to the viewer
-@socketio.on('connect', namespace=namespace)
-def from_gui():
-	global thread
-	with thread_lock:
-		if thread is None:
-			thread = socketio.start_background_task(target=background_thread)
+# @socketio.on('connect', namespace=namespace)
+# def from_gui():
+# 	global thread
+# 	with thread_lock:
+# 		if thread is None:
+# 			thread = socketio.start_background_task(background_thread, current_app._get_current_object())
 
 @socketio.on('separate_GUI', namespace=namespace)
 def separate_GUI():
