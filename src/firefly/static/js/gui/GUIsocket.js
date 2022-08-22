@@ -160,7 +160,7 @@ function createCube(){
 		new THREE.MeshBasicMaterial({color:"purple", side: THREE.DoubleSide}), 
 	]; 
 	// Create a MeshFaceMaterial, which allows the cube to have different materials on each face 
-	var cubeMaterial = new THREE.MeshFaceMaterial(cubeMaterials); 
+	var cubeMaterial = cubeMaterials;//new THREE.MeshFaceMaterial(cubeMaterials); 
 	GUIParams.cube = new THREE.Mesh(geometry, cubeMaterial);
 	setCubePosition(GUIParams.controls.target);
 
