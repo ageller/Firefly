@@ -20,8 +20,8 @@ fi
 #check if the firefly directory env variable (FIREFLY_DIR) is set
 if [ -z "${FIREFLY_DIR}" ]; then
 #	if command -v python run_server.py &> /dev/null; then
-	if [ -f run_server.py ]; then
-		export FIREFLY_DIR=$PWD
+	if [ -f ../run_server.py ]; then
+		export FIREFLY_DIR="$PWD/.."
 	else
 		LOC=$(pip show run_server | grep Location)
 		if [ ! -z "${LOC}" ]; then
