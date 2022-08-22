@@ -12,7 +12,7 @@ import socketserver
 import numpy as np
 
 from flask import Flask, render_template, request, session
-from flask_socketio import SocketIO, emit
+from flask_socketio import SocketIO, emit, join_room, leave_room
 from threading import Lock
 
 from firefly.data_reader import SimpleReader
@@ -40,6 +40,9 @@ GUIParams = None
 updateGUIParams = False
 
 namespace = '/Firefly'
+
+rooms = {} #will be updated below
+
 #number of seconds between updates
 seconds = 0.01
 
@@ -54,65 +57,75 @@ GUIseparated = False
 
 #this will pass to the viewer every "seconds" 
 def background_thread():
-    """Example of how to send server generated events to clients."""
-    global viewerParams, updateViewerParams, GUIParams, updateGUIParams
-    while True:
-        socketio.sleep(seconds)
-        if (updateViewerParams):
-            #print("========= viewerParams:",viewerParams)
-            socketio.emit('update_viewerParams', viewerParams, namespace=namespace)
-        if (updateGUIParams):
-            #print("========= GUIParams:",GUIParams)
-            socketio.emit('update_GUIParams', GUIParams, namespace=namespace)
-        updateViewerParams = False
-        updateGUIParams = False
+	global viewerParams, updateViewerParams, GUIParams, updateGUIParams
+	while True:
+		socketio.sleep(seconds)
+		if (updateViewerParams):
+			#print("========= viewerParams:",viewerParams)
+			socketio.emit('update_viewerParams', viewerParams, namespace=namespace, to=rooms[request.sid])
+		if (updateGUIParams):
+			#print("========= GUIParams:",GUIParams)
+			socketio.emit('update_GUIParams', GUIParams, namespace=namespace, to=rooms[request.sid])
+		updateViewerParams = False
+		updateGUIParams = False
 
+####### setting the room (to keep each session distinct)
+@socketio.on('join', namespace=namespace)
+def on_join(message):
+	global rooms
+	rooms[request.sid] = message['room']
+	print('======= in room', message['room'])
+	join_room(message['room'])
+
+@socketio.on('leave', namespace=namespace)
+def on_leave(message):
+	leave_room(message['room'])
 
 #testing the connection
 @socketio.on('connection_test', namespace=namespace)
 def connection_test(message):
-    print('======= connected', message)
-    session['receive_count'] = session.get('receive_count', 0) + 1
-    emit('connection_response',{'data': message['data'], 'count': session['receive_count']}, namespace=namespace)
+	print('======= connected', message)
+	session['receive_count'] = session.get('receive_count', 0) + 1
+	emit('connection_response',{'data': message['data'], 'count': session['receive_count']}, namespace=namespace, to=rooms[request.sid])
 
 
 ######for viewer
 #will receive data from viewer 
 @socketio.on('viewer_input', namespace=namespace)
 def viewer_input(message):
-    global viewerParams, updateViewerParams
-    updateViewerParams = True
-    viewerParams = message
+	global viewerParams, updateViewerParams
+	updateViewerParams = True
+	viewerParams = message
 
 #the background task sends data to the viewer
 @socketio.on('connect', namespace=namespace)
 def from_viewer():
-    global thread
-    with thread_lock:
-        if thread is None:
-            thread = socketio.start_background_task(target=background_thread)
+	global thread
+	with thread_lock:
+		if thread is None:
+			thread = socketio.start_background_task(target=background_thread)
 
 
 #######for GUI
 #will receive data from gui
 @socketio.on('gui_input', namespace=namespace)
 def gui_input(message):
-    global GUIParams, updateGUIParams
-    updateGUIParams = True
-    GUIParams = message
+	global GUIParams, updateGUIParams
+	updateGUIParams = True
+	GUIParams = message
 
 #the background task sends data to the viewer
 @socketio.on('connect', namespace=namespace)
 def from_gui():
-    global thread
-    with thread_lock:
-        if thread is None:
-            thread = socketio.start_background_task(target=background_thread)
+	global thread
+	with thread_lock:
+		if thread is None:
+			thread = socketio.start_background_task(target=background_thread)
 
 @socketio.on('separate_GUI', namespace=namespace)
 def separate_GUI():
-    global GUIseparated
-    GUIseparated = True
+	global GUIseparated
+	GUIseparated = True
 
 #######for Streamer
 #passing the rendered texture
@@ -125,38 +138,38 @@ def separate_GUI():
 ########reading in a directory of hdf5 or csv files
 @socketio.on('input_otherType', namespace=namespace)
 def input_otherType(filedir):
-    print('======= showing loader')
-    socketio.emit('show_loader', None, namespace=namespace)
-    socketio.sleep(0.1) #to make sure that the above emit is executed
+	print('======= showing loader')
+	socketio.emit('show_loader', None, namespace=namespace, to=rooms[request.sid])
+	socketio.sleep(0.1) #to make sure that the above emit is executed
 
-    fdir = os.path.join(os.getcwd(),'static','data',filedir)
-    #check the file types
-    ftype = '.hdf5'
-    try:
-        for f in os.listdir(fdir):
-            if ('.csv' in f):
-                ftype = '.csv'
-            if ('.hdf5' in f):
-                ftype = '.hdf5'
-    except:
-        pass
+	fdir = os.path.join(os.getcwd(),'static','data',filedir)
+	#check the file types
+	ftype = '.hdf5'
+	try:
+		for f in os.listdir(fdir):
+			if ('.csv' in f):
+				ftype = '.csv'
+			if ('.hdf5' in f):
+				ftype = '.hdf5'
+	except:
+		pass
 
-    print('======= have input '+ftype+' data file(s) in', fdir)
-    reader = SimpleReader(fdir, write_to_disk=False, extension=ftype, decimation_factor=dec)
-    data = json.loads(reader.JSON)
+	print('======= have input '+ftype+' data file(s) in', fdir)
+	reader = SimpleReader(fdir, write_to_disk=False, extension=ftype, decimation_factor=dec)
+	data = json.loads(reader.JSON)
 
-    print('======= have data from file(s), sending to viewer ...')
-    socketio.emit('input_data', {'status':'start', 'length':len(data)}, namespace=namespace)
-    socketio.sleep(0.1) #to make sure that the above emit is executed
-    for fname in data:
-        print(fname, len(data[fname]))
-        output = {fname:data[fname], 'status':'data'}
-        socketio.emit('input_data', output, namespace=namespace)
-        socketio.sleep(0.1) #to make sure that the above emit is executed
-    socketio.emit('input_data', {'status':'done'}, namespace=namespace)
-    socketio.sleep(0.1) #to make sure that the above emit is executed
+	print('======= have data from file(s), sending to viewer ...')
+	socketio.emit('input_data', {'status':'start', 'length':len(data)}, namespace=namespace, to=rooms[request.sid])
+	socketio.sleep(0.1) #to make sure that the above emit is executed
+	for fname in data:
+		print(fname, len(data[fname]))
+		output = {fname:data[fname], 'status':'data'}
+		socketio.emit('input_data', output, namespace=namespace, to=rooms[request.sid])
+		socketio.sleep(0.1) #to make sure that the above emit is executed
+	socketio.emit('input_data', {'status':'done'}, namespace=namespace, to=rooms[request.sid])
+	socketio.sleep(0.1) #to make sure that the above emit is executed
 
-    print('======= done')
+	print('======= done')
 
 
 ##############
@@ -164,204 +177,205 @@ def input_otherType(filedir):
 #flask stuff
 @app.route("/viewer")
 def viewer():  
-    return render_template("viewer.html")
+	return render_template("viewer.html")
 
 @app.route("/gui")
 def gui(): 
-    return render_template("gui.html")
+	return render_template("gui.html")
 
 @app.route("/")
 def default(): 
-    return render_template("combined.html")
+	return render_template("combined.html")
 @app.route("/index")
 def index(): 
-    return render_template("combined.html")
+	return render_template("combined.html")
 @app.route("/combined")
 def combined(): 
-    return render_template("combined.html")
+	return render_template("combined.html")
 
 @app.route("/VR")
 def cardboard(): 
-    return render_template("VR.html")
+	return render_template("VR.html")
 
 @app.route('/data_input', methods = ['POST'])
 def data_input():
 
-    print('======= showing loader')
-    socketio.emit('show_loader', None, namespace=namespace)
-    socketio.sleep(0.1) #to make sure that the above emit is executed
+	print('======= showing loader')
+	socketio.emit('show_loader', None, namespace=namespace, to=rooms[request.sid])
+	socketio.sleep(0.1) #to make sure that the above emit is executed
 
-    print('======= receiving data from server ...')
-    jsondata = request.get_json()
-    #this loop may not be necessary
-    # sze = 0
-    # while (sze != sys.getsizeof(jsondata)):
-    #     socketio.sleep(0.1)
-    #     sze = sys.getsizeof(jsondata)
-    #     print("======= size of data", sze)
-    sze = sys.getsizeof(jsondata)
-    print("======= size of data", sze)
+	print('======= receiving data from server ...')
+	jsondata = request.get_json()
+	#this loop may not be necessary
+	# sze = 0
+	# while (sze != sys.getsizeof(jsondata)):
+	#     socketio.sleep(0.1)
+	#     sze = sys.getsizeof(jsondata)
+	#     print("======= size of data", sze)
+	sze = sys.getsizeof(jsondata)
+	print("======= size of data", sze)
 
-    data = json.loads(jsondata)
-    print('======= sending data to viewer ...')#,data.keys())
-    socketio.emit('input_data', {'status':'start', 'length':len(data)}, namespace=namespace)
-    socketio.sleep(0.1) #to make sure that the above emit is executed
-    for fname in data:
-        print(fname, len(data[fname]))
-        output = {fname:data[fname], 'status':'data'}
-        socketio.emit('input_data', output, namespace=namespace)
-        socketio.sleep(0.1) #to make sure that the above emit is executed
-    socketio.emit('input_data', {'status':'done'}, namespace=namespace)
-    socketio.sleep(0.1) #to make sure that the above emit is executed
+	data = json.loads(jsondata)
+	print('======= sending data to viewer ...')#,data.keys())
+	socketio.emit('input_data', {'status':'start', 'length':len(data)}, namespace=namespace, to=rooms[request.sid])
+	socketio.sleep(0.1) #to make sure that the above emit is executed
+	for fname in data:
+		print(fname, len(data[fname]))
+		output = {fname:data[fname], 'status':'data'}
+		socketio.emit('input_data', output, namespace=namespace, to=rooms[request.sid])
+		socketio.sleep(0.1) #to make sure that the above emit is executed
+	socketio.emit('input_data', {'status':'done'}, namespace=namespace, to=rooms[request.sid])
+	socketio.sleep(0.1) #to make sure that the above emit is executed
 
-    print('======= done')
-    return 'Done'
+	print('======= done')
+	return 'Done'
 
 @app.route("/stream")
 def streamer():  
-    return render_template("streamer.html", input=json.dumps({'fps':fps}))
+	return render_template("streamer.html", input=json.dumps({'fps':fps}))
 
 @app.route('/stream_input', methods = ['GET','POST'])
 def stream_input():
-    blob = request.files['image']  # get the image
-    blob_binary = blob.read()
-    #blob.save('tmp.jpg')
-    socketio.emit('update_streamer', blob_binary, namespace=namespace, broadcast = True)
+	blob = request.files['image']  # get the image
+	blob_binary = blob.read()
+	#blob.save('tmp.jpg')
+	socketio.emit('update_streamer', blob_binary, namespace=namespace,  to=rooms[request.sid]) #broadcast = True,
 
-    return 'Done'
+	return 'Done'
 
 def reload():
-    #currently not used
-    if (GUIseparated):
-        print('======= reloading GUI')
-        socketio.emit('reload_GUI', None, namespace=namespace) 
-    print('======= reloading viewer')
-    socketio.emit('reload_viewer', None, namespace=namespace)
+	#currently not used
+	if (GUIseparated):
+		print('======= reloading GUI')
+		socketio.emit('reload_GUI', None, namespace=namespace, to=rooms[request.sid]) 
+	print('======= reloading viewer')
+	socketio.emit('reload_viewer', None, namespace=namespace, to=rooms[request.sid])
 
 # Helper functions to start/stop the server
 def startFlaskServer(
-    port=5500,
-    directory=None,
-    frames_per_second=30,
-    decimation_factor=1,
-    ):
-    """Creates a global interpreter locked process to host a Flask server
-        that can be accessed via localhost:<port>. 
+	port=5500,
+	directory=None,
+	frames_per_second=30,
+	decimation_factor=1,
+	):
+	"""Creates a global interpreter locked process to host a Flask server
+		that can be accessed via localhost:<port>. 
 
-    :param port: port number to serve the :code:`.html` files on, defaults to 5500
-    :type port: int, optional
-    :param frames_per_second: enforced FPS for stream quality, used only if
-        localhost:<port>/stream is accessed, defaults to 30
-    :type frames_per_second: int, optional
-    :param decimation_factor: factor to decimate data that is being passed through
-        localhost:<port>/data_input, defaults to 1
-    :type decimation_factor: int, optional
-    """
+	:param port: port number to serve the :code:`.html` files on, defaults to 5500
+	:type port: int, optional
+	:param frames_per_second: enforced FPS for stream quality, used only if
+		localhost:<port>/stream is accessed, defaults to 30
+	:type frames_per_second: int, optional
+	:param decimation_factor: factor to decimate data that is being passed through
+		localhost:<port>/data_input, defaults to 1
+	:type decimation_factor: int, optional
+	"""
 
-    if directory is None: directory = os.path.dirname(__file__)
-    old_dir = os.getcwd()
-    try:
-        os.chdir(directory)
-        global fps, dec
+	if directory is None: directory = os.path.dirname(__file__)
+	old_dir = os.getcwd()
+	try:
+		os.chdir(directory)
+		global fps, dec
 
-        fps = frames_per_second
-        dec = decimation_factor
+		fps = frames_per_second
+		dec = decimation_factor
 
-        print("Launching Firefly at: http://localhost:%d"%port)
-        socketio.run(app, host='0.0.0.0', port=port, use_reloader=True)
-    except: raise
-    finally: os.chdir(old_dir)
+		print("Launching Firefly at: http://localhost:%d"%port)
+		socketio.run(app, host='0.0.0.0', port=port, use_reloader=True)
+	except: raise
+	finally: os.chdir(old_dir)
 
 def startHTTPServer(port=5500,directory=None):
-    """Creates a global interpreter locked process to host either a Flask 
-        or HTTP server that can be accessed via localhost:<port>. 
+	"""Creates a global interpreter locked process to host either a Flask 
+		or HTTP server that can be accessed via localhost:<port>. 
 
-    :param port: port number to serve the :code:`.html` files on, defaults to 5500
-    :type port: int, optional
-    :param directory: the directory of the Firefly source files to be served, 
-        if None, uses `os.dirname(__file__)` i.e. the directory of the `firefly`
-        python distribution, defaults to None
-    :type directory: str, optional
-    """
+	:param port: port number to serve the :code:`.html` files on, defaults to 5500
+	:type port: int, optional
+	:param directory: the directory of the Firefly source files to be served, 
+		if None, uses `os.dirname(__file__)` i.e. the directory of the `firefly`
+		python distribution, defaults to None
+	:type directory: str, optional
+	"""
 
-    if directory is None: directory = os.path.dirname(__file__)
-    Handler = http.server.SimpleHTTPRequestHandler
-    with socketserver.TCPServer(("", port), Handler) as httpd:
-        ipaddress,port=httpd.server_address
-        os.chdir(directory)
-        print(f'Serving {os.getcwd()}/index.html at http://{ipaddress}:{port}')
-        httpd.serve_forever()
+	if directory is None: directory = os.path.dirname(__file__)
+	Handler = http.server.SimpleHTTPRequestHandler
+	with socketserver.TCPServer(("", port), Handler) as httpd:
+		ipaddress,port=httpd.server_address
+		os.chdir(directory)
+		print(f'Serving {os.getcwd()}/index.html at http://{ipaddress}:{port}')
+		httpd.serve_forever()
 
 def spawnFireflyServer(
-    port=5500,
-    method="flask",
-    directory=None,
-    frames_per_second=30,
-    decimation_factor=1,
-    max_time=10):
-    """ Starts a Firefly server as a background process. Close the server by calling
-        :func:`firefly.server.quitAllFireflyServers`.
+	port=5500,
+	method="flask",
+	directory=None,
+	frames_per_second=30,
+	decimation_factor=1,
+	max_time=10):
+	""" Starts a Firefly server as a background process. Close the server by calling
+		:func:`firefly.server.quitAllFireflyServers`.
 
-    :param port: port number to serve the :code:`.html` files on, defaults to 5500
-    :type port: int, optional
-    :param method: what sort of Firefly server to open, a Flask ("flask") server 
-        or an HTTP ("http"), defaults to "flask"
-    :type method: str, optional
-    :param directory: the directory of the Firefly source files to be served, 
-        if None, uses `os.dirname(__file__)` i.e. the directory of the `firefly`
-        python distribution, defaults to None
-    :type directory: str, optional
-    :param frames_per_second: enforced FPS for stream quality, used only if
-        localhost:<port>/stream is accessed, defaults to 30
-    :type frames_per_second: int, optional
-    :param decimation_factor: factor to decimate data that is being passed through
-        localhost:<port>/data_input, defaults to 1
-    :type decimation_factor: int, optional
-    :param max_time: maximum amount of time to wait for a Firefly server
-        to be available. 
-    :type max_time: float, optional
-    :return: subprocess.Popen
-    :rtype: subprocess handler
-    :raises RuntimeError: if max_time elapses without a successful Firefly server being initialized.
-    """
+	:param port: port number to serve the :code:`.html` files on, defaults to 5500
+	:type port: int, optional
+	:param method: what sort of Firefly server to open, a Flask ("flask") server 
+		or an HTTP ("http"), defaults to "flask"
+	:type method: str, optional
+	:param directory: the directory of the Firefly source files to be served, 
+		if None, uses `os.dirname(__file__)` i.e. the directory of the `firefly`
+		python distribution, defaults to None
+	:type directory: str, optional
+	:param frames_per_second: enforced FPS for stream quality, used only if
+		localhost:<port>/stream is accessed, defaults to 30
+	:type frames_per_second: int, optional
+	:param decimation_factor: factor to decimate data that is being passed through
+		localhost:<port>/data_input, defaults to 1
+	:type decimation_factor: int, optional
+	:param max_time: maximum amount of time to wait for a Firefly server
+		to be available. 
+	:type max_time: float, optional
+	:return: subprocess.Popen
+	:rtype: subprocess handler
+	:raises RuntimeError: if max_time elapses without a successful Firefly server being initialized.
+	"""
 
-    port = int(port)
+	port = int(port)
 
-    ## wrap passed arguments into a list of strings
-    args = [
-        f"--port={port:d}",
-        f"--fps={int(frames_per_second):d}",
-        f"--dec={int(decimation_factor):d}",
-        f"--method={method}",
-        f"--directory={directory}"]
+	## wrap passed arguments into a list of strings
+	args = [
+		f"--port={port:d}",
+		f"--fps={int(frames_per_second):d}",
+		f"--dec={int(decimation_factor):d}",
+		f"--method={method}",
+		f"--directory={directory}"]
 
     ## use this run_server.py (even if the other directory has one)
     ##  since it can be run remotely
     run_server = os.path.join(os.path.dirname(__file__),'bin','firefly')
-    process = subprocess.Popen([sys.executable, run_server]+args)
+	process = subprocess.Popen([sys.executable, run_server]+args)
 
-    init_time = time.time()
-    ## check if port is in use
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        print(
-            "Waiting up to %d seconds for background Firefly server to start"%max_time,
-            end="")
-        while True:
-            try: requests.post(f'http://localhost:{port:d}',json="test"); break
-            except: 
-            ## need to re-check the connection each iteration
-                if time.time()-init_time >= max_time: raise RuntimeError(
-                    "Hit max wait-time of %d seconds."%max_time+
-                    " A Firefly server could not be opened in the background.")
-                else: print(".",end=""); time.sleep(1)
-            
-    print(f"done! Your server is available at - http://localhost:{port}")
+	init_time = time.time()
+	## check if port is in use
+	with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+		print(
+			"Waiting up to %d seconds for background Firefly server to start"%max_time,
+			end="")
+		while True:
+			try: requests.post(f'http://localhost:{port:d}',json="test"); break
+			except: 
+			## need to re-check the connection each iteration
+				if time.time()-init_time >= max_time: raise RuntimeError(
+					"Hit max wait-time of %d seconds."%max_time+
+					" A Firefly server could not be opened in the background.")
+				else: print(".",end=""); time.sleep(1)
+			
+	print(f"done! Your server is available at - http://localhost:{port}")
 
-    return process
+	return process
 
 def quitAllFireflyServers(pid=None):
-    """Quit python processes associated with hosting Flask web-servers.
+	"""Quit python processes associated with hosting Flask web-servers.
 
+<<<<<<< HEAD
     :param pid: process id to quit, defaults to None, quitting all processes
     :type pid: int, optional
     :return: return_code
