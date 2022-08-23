@@ -30,7 +30,7 @@ async_mode = "eventlet" #"eventlet" is WAY better than "threading"
 app = Flask(__name__) 
 app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app, async_mode=async_mode)
-thread = None
+thread = {}
 thread_lock = Lock()
 
 #global variables to hold the params object (not all of this needs to be passed along...)
@@ -61,12 +61,11 @@ def background_thread(room):
 	global viewerParams, updateViewerParams, GUIParams, updateGUIParams
 	while True:
 		socketio.sleep(seconds)
-		print(room)
 		if (updateViewerParams):
 			#print("========= viewerParams:",viewerParams)
 			socketio.emit('update_viewerParams', viewerParams, namespace=namespace, to=room)
 		if (updateGUIParams):
-			#print("========= GUIParams:",GUIParams)
+			print("========= GUIParams:",GUIParams)
 			socketio.emit('update_GUIParams', GUIParams, namespace=namespace, to=room)
 		updateViewerParams = False
 		updateGUIParams = False
@@ -76,14 +75,17 @@ def background_thread(room):
 def on_join(message):
 	global rooms, thread
 	# join the room
-	rooms[request.sid] = message['room']
-	print('======= in room', message['room'])
-	join_room(message['room'])
+	room = message['room']
+	rooms[request.sid] = room
+	thread[room] = None
+	print('======= in room', room)
+	join_room(room)
 
 	# start the background thread
 	with thread_lock:
-		if thread is None:
-			thread = socketio.start_background_task(background_thread, message['room'])
+		if room in thread:
+			if thread[room] is None:
+				thread[room] = socketio.start_background_task(background_thread, room)
 
 @socketio.on('leave', namespace=namespace)
 def on_leave(message):

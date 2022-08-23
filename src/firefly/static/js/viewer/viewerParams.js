@@ -232,7 +232,9 @@ function defineViewerParams(){
 		this.haveOctree = {}; //will be initialized to false for each of the parts keys in loadData
 		this.haveAnyOctree = false; //must be a better way to do this!
 		this.FPS = 30; //will be upated in the octree render loop
+		this.FPS0 = 30; //save the previous to check if we need to update the GUI
 		this.memoryUsage = 0; //if using Chrome, we can track the memory usage and try to avoid crashes
+		this.memoryUsage0 = 0; //save the previous to check if we need to update the GUI
 		this.drawPass = 0;
 		this.totalParticlesInMemory = 0; //try to hold the total number of particles in memory
 		this.memoryLimit = 2*1e9; //bytes, maximum memory allowed -- for now this is more like a target

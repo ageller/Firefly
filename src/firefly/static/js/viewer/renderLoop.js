@@ -567,12 +567,17 @@ function update_framerate(seconds,time){
 	viewerParams.FPS = viewerParams.fps_list.slice().sort(function(a, b){return a-b})[15]
 
 	if ((viewerParams.drawPass % Math.min(Math.round(viewerParams.FPS),60)) == 0){
-		// fill FPS container div with calculated FPS and memory usage
-		var forGUI = [];
-		forGUI.push({'setGUIParamByKey':[viewerParams.FPS, "FPS"]});
-		forGUI.push({'setGUIParamByKey':[viewerParams.memoryUsage, "memoryUsage"]});
-		forGUI.push({'updateFPSContainer':[]});
-		sendToGUI(forGUI);
+		// only send this if the parameters have changed (to avoid clogging the socket)
+		if (Math.abs(viewerParams.FPS - viewerParams.FPS0) > 0.1 || Math.abs(viewerParams.memoryUsage - viewerParams.memoryUsage0) > 1e7){
+			viewerParams.FPS0 = viewerParams.FPS;
+			viewerParams.memoryUsage0 = viewerParams.memoryUsage;
+			// fill FPS container div with calculated FPS and memory usage
+			var forGUI = [];
+			forGUI.push({'setGUIParamByKey':[viewerParams.FPS, "FPS"]});
+			forGUI.push({'setGUIParamByKey':[viewerParams.memoryUsage, "memoryUsage"]});
+			forGUI.push({'updateFPSContainer':[]});
+			sendToGUI(forGUI);
+		}
 	}
 
 
