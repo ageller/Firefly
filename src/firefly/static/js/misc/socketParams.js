@@ -13,7 +13,7 @@ function defineSocketParams(){
 		this.namespace = '/Firefly';
 
 		//room will be set by the user with a prompt.  This will allow different sessions of e.g., gui+viewer to connect at the same time without confusing messages
-		this.room = 'room'; 
+		this.room = null; 
 		
 		// Connect to the Socket.IO server.
 		// The connection URL has the following format:
