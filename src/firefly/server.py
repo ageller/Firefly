@@ -13,7 +13,6 @@ import numpy as np
 
 from flask import Flask, render_template, request, session, current_app
 from flask_socketio import SocketIO, emit, join_room, leave_room
-from threading import Lock
 
 from firefly.data_reader import SimpleReader
 
@@ -30,14 +29,7 @@ async_mode = "eventlet" #"eventlet" is WAY better than "threading"
 app = Flask(__name__) 
 app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app, async_mode=async_mode)
-thread = {}
-thread_lock = Lock()
 
-#global variables to hold the params object (not all of this needs to be passed along...)
-viewerParams = None
-updateViewerParams = False
-GUIParams = None
-updateGUIParams = False
 
 namespace = '/Firefly'
 
@@ -55,37 +47,16 @@ dec = 1
 #check if the GUI is separated to see if we need to send a reload signal (currently not used)
 GUIseparated = False
 
-#this will pass to the viewer every "seconds" 
-# now I need to allow multiple background_threads!
-def background_thread(room):
-	global viewerParams, updateViewerParams, GUIParams, updateGUIParams
-	while True:
-		socketio.sleep(seconds)
-		if (updateViewerParams):
-			#print("========= viewerParams:",viewerParams)
-			socketio.emit('update_viewerParams', viewerParams, namespace=namespace, to=room)
-		if (updateGUIParams):
-			print("========= GUIParams:",GUIParams)
-			socketio.emit('update_GUIParams', GUIParams, namespace=namespace, to=room)
-		updateViewerParams = False
-		updateGUIParams = False
-
 ####### setting the room (to keep each session distinct)
 @socketio.on('join', namespace=namespace)
 def on_join(message):
-	global rooms, thread
+	global rooms
 	# join the room
 	room = message['room']
 	rooms[request.sid] = room
-	thread[room] = None
 	print('======= in room', room)
 	join_room(room)
 
-	# start the background thread
-	with thread_lock:
-		if room in thread:
-			if thread[room] is None:
-				thread[room] = socketio.start_background_task(background_thread, room)
 
 @socketio.on('leave', namespace=namespace)
 def on_leave(message):
@@ -103,34 +74,16 @@ def connection_test(message):
 #will receive data from viewer 
 @socketio.on('viewer_input', namespace=namespace)
 def viewer_input(message):
-	global viewerParams, updateViewerParams
-	updateViewerParams = True
-	viewerParams = message
-
-# #the background task sends data to the viewer
-# @socketio.on('connect', namespace=namespace)
-# def from_viewer():
-# 	global thread
-# 	with thread_lock:
-# 		if thread is None:
-# 			thread = socketio.start_background_task(background_thread, current_app._get_current_object())
-
+	if (request.sid in rooms):
+		socketio.emit('update_viewerParams', message, namespace=namespace, to=rooms[request.sid])
 
 #######for GUI
 #will receive data from gui
 @socketio.on('gui_input', namespace=namespace)
 def gui_input(message):
-	global GUIParams, updateGUIParams
-	updateGUIParams = True
-	GUIParams = message
+	if (request.sid in rooms):
+		socketio.emit('update_GUIParams', message, namespace=namespace, to=rooms[request.sid])
 
-#the background task sends data to the viewer
-# @socketio.on('connect', namespace=namespace)
-# def from_gui():
-# 	global thread
-# 	with thread_lock:
-# 		if thread is None:
-# 			thread = socketio.start_background_task(background_thread, current_app._get_current_object())
 
 @socketio.on('separate_GUI', namespace=namespace)
 def separate_GUI():
@@ -195,10 +148,14 @@ def gui():
 
 @app.route("/")
 def default(): 
-	return render_template("combined.html")
+	return render_template("default.html")
+@app.route("/default")
+def default1(): 
+	return render_template("default.html")
 @app.route("/index")
-def index(): 
-	return render_template("combined.html")
+def default2(): 
+	return render_template("default.html")
+
 @app.route("/combined")
 def combined(): 
 	return render_template("combined.html")
@@ -209,36 +166,37 @@ def cardboard():
 
 @app.route('/data_input', methods = ['POST'])
 def data_input():
-
-	print('======= showing loader')
-	socketio.emit('show_loader', None, namespace=namespace, to=rooms[request.sid])
-	socketio.sleep(0.1) #to make sure that the above emit is executed
-
 	print('======= receiving data from server ...')
 	jsondata = request.get_json()
-	#this loop may not be necessary
-	# sze = 0
-	# while (sze != sys.getsizeof(jsondata)):
-	#     socketio.sleep(0.1)
-	#     sze = sys.getsizeof(jsondata)
-	#     print("======= size of data", sze)
+
 	sze = sys.getsizeof(jsondata)
 	print("======= size of data", sze)
 
 	data = json.loads(jsondata)
-	print('======= sending data to viewer ...')#,data.keys())
-	socketio.emit('input_data', {'status':'start', 'length':len(data)}, namespace=namespace, to=rooms[request.sid])
-	socketio.sleep(0.1) #to make sure that the above emit is executed
-	for fname in data:
-		print(fname, len(data[fname]))
-		output = {fname:data[fname], 'status':'data'}
-		socketio.emit('input_data', output, namespace=namespace, to=rooms[request.sid])
-		socketio.sleep(0.1) #to make sure that the above emit is executed
-	socketio.emit('input_data', {'status':'done'}, namespace=namespace, to=rooms[request.sid])
-	socketio.sleep(0.1) #to make sure that the above emit is executed
 
-	print('======= done')
-	return 'Done'
+	if ('room' in data):
+		room = data['room']
+
+		print('======= showing loader')
+		socketio.emit('show_loader', None, namespace=namespace, to=room)
+		socketio.sleep(0.1) #to make sure that the above emit is executed
+
+		print('======= sending data to viewer ...')#,data.keys())
+		socketio.emit('input_data', {'status':'start', 'length':len(data)}, namespace=namespace, to=room)
+		socketio.sleep(0.1) #to make sure that the above emit is executed
+		for fname in data:
+			print(fname, len(data[fname]))
+			output = {fname:data[fname], 'status':'data'}
+			socketio.emit('input_data', output, namespace=namespace, to=room)
+			socketio.sleep(0.1) #to make sure that the above emit is executed
+		socketio.emit('input_data', {'status':'done'}, namespace=namespace, to=room)
+		socketio.sleep(0.1) #to make sure that the above emit is executed
+
+		print('======= done')
+		return 'Done'
+	else:
+		print('User must specify a name for the websocket "room" connected to an active firefly instance.')
+		return 'Error'
 
 @app.route("/stream")
 def streamer():  
@@ -246,10 +204,15 @@ def streamer():
 
 @app.route('/stream_input', methods = ['GET','POST'])
 def stream_input():
-	blob = request.files['image']  # get the image
+	# get the image
+	blob = request.files['image']  
 	blob_binary = blob.read()
 	#blob.save('tmp.jpg')
-	socketio.emit('update_streamer', blob_binary, namespace=namespace,  to=rooms[request.sid]) #broadcast = True,
+
+	# get the room
+	room = request.form['room']
+
+	socketio.emit('update_streamer', blob_binary, namespace=namespace,  to=room) #broadcast = True,
 
 	return 'Done'
 

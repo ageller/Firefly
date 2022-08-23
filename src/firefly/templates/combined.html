@@ -87,7 +87,7 @@
 		<script src="static/lib/Tween.js"></script>
 
 		<!-- web sockets -->
-	    <!-- <script src="static/lib/socket.io.min.js"></script> -->
+	    <script src="static/lib/socket.io.min.js"></script>
 
 		<!-- the main attraction -->
 
@@ -105,7 +105,7 @@
 		<script src="static/js/viewer/viewerParams.js"></script>
 		<script>
 			//called upon loading
-			// defineSocketParams();			
+			defineSocketParams();			
 			defineGUIParams();
 			defineViewerParams();
 		</script>
@@ -137,9 +137,9 @@
 
 		<script>
 			//called upon loading
-			// connectGUISocket();
-			// connectViewerSocket();
-			runLocal(false);
+			connectGUISocket();
+			connectViewerSocket();
+			runLocal(true);
 		</script>
 
 	</body>
