@@ -11,9 +11,8 @@ import socketserver
 
 import numpy as np
 
-from flask import Flask, render_template, request, session
-from flask_socketio import SocketIO, emit
-from threading import Lock
+from flask import Flask, render_template, request, session, current_app
+from flask_socketio import SocketIO, emit, join_room, leave_room
 
 from firefly.data_reader import SimpleReader
 
@@ -30,16 +29,12 @@ async_mode = "eventlet" #"eventlet" is WAY better than "threading"
 app = Flask(__name__) 
 app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app, async_mode=async_mode)
-thread = None
-thread_lock = Lock()
 
-#global variables to hold the params object (not all of this needs to be passed along...)
-viewerParams = None
-updateViewerParams = False
-GUIParams = None
-updateGUIParams = False
 
 namespace = '/Firefly'
+
+rooms = {} #will be updated below
+
 #number of seconds between updates
 seconds = 0.01
 
@@ -52,62 +47,43 @@ dec = 1
 #check if the GUI is separated to see if we need to send a reload signal (currently not used)
 GUIseparated = False
 
-#this will pass to the viewer every "seconds" 
-def background_thread():
-    """Example of how to send server generated events to clients."""
-    global viewerParams, updateViewerParams, GUIParams, updateGUIParams
-    while True:
-        socketio.sleep(seconds)
-        if (updateViewerParams):
-            #print("========= viewerParams:",viewerParams)
-            socketio.emit('update_viewerParams', viewerParams, namespace=namespace)
-        if (updateGUIParams):
-            #print("========= GUIParams:",GUIParams)
-            socketio.emit('update_GUIParams', GUIParams, namespace=namespace)
-        updateViewerParams = False
-        updateGUIParams = False
+####### setting the room (to keep each session distinct)
+@socketio.on('join', namespace=namespace)
+def on_join(message):
+    global rooms
+    # join the room
+    room = message['room']
+    rooms[request.sid] = room
+    print('======= in room', room)
+    join_room(room)
 
+
+@socketio.on('leave', namespace=namespace)
+def on_leave(message):
+    leave_room(message['room'])
 
 #testing the connection
 @socketio.on('connection_test', namespace=namespace)
 def connection_test(message):
     print('======= connected', message)
     session['receive_count'] = session.get('receive_count', 0) + 1
-    emit('connection_response',{'data': message['data'], 'count': session['receive_count']}, namespace=namespace)
+    emit('connection_response',{'data': message['data'], 'count': session['receive_count']}, namespace=namespace, to=rooms[request.sid])
 
 
 ######for viewer
 #will receive data from viewer 
 @socketio.on('viewer_input', namespace=namespace)
 def viewer_input(message):
-    global viewerParams, updateViewerParams
-    updateViewerParams = True
-    viewerParams = message
-
-#the background task sends data to the viewer
-@socketio.on('connect', namespace=namespace)
-def from_viewer():
-    global thread
-    with thread_lock:
-        if thread is None:
-            thread = socketio.start_background_task(target=background_thread)
-
+    if (request.sid in rooms):
+        socketio.emit('update_viewerParams', message, namespace=namespace, to=rooms[request.sid])
 
 #######for GUI
 #will receive data from gui
 @socketio.on('gui_input', namespace=namespace)
 def gui_input(message):
-    global GUIParams, updateGUIParams
-    updateGUIParams = True
-    GUIParams = message
+    if (request.sid in rooms):
+        socketio.emit('update_GUIParams', message, namespace=namespace, to=rooms[request.sid])
 
-#the background task sends data to the viewer
-@socketio.on('connect', namespace=namespace)
-def from_gui():
-    global thread
-    with thread_lock:
-        if thread is None:
-            thread = socketio.start_background_task(target=background_thread)
 
 @socketio.on('separate_GUI', namespace=namespace)
 def separate_GUI():
@@ -126,7 +102,7 @@ def separate_GUI():
 @socketio.on('input_otherType', namespace=namespace)
 def input_otherType(filedir):
     print('======= showing loader')
-    socketio.emit('show_loader', None, namespace=namespace)
+    socketio.emit('show_loader', None, namespace=namespace, to=rooms[request.sid])
     socketio.sleep(0.1) #to make sure that the above emit is executed
 
     fdir = os.path.join(os.getcwd(),'static','data',filedir)
@@ -146,14 +122,14 @@ def input_otherType(filedir):
     data = json.loads(reader.JSON)
 
     print('======= have data from file(s), sending to viewer ...')
-    socketio.emit('input_data', {'status':'start', 'length':len(data)}, namespace=namespace)
+    socketio.emit('input_data', {'status':'start', 'length':len(data)}, namespace=namespace, to=rooms[request.sid])
     socketio.sleep(0.1) #to make sure that the above emit is executed
     for fname in data:
         print(fname, len(data[fname]))
         output = {fname:data[fname], 'status':'data'}
-        socketio.emit('input_data', output, namespace=namespace)
+        socketio.emit('input_data', output, namespace=namespace, to=rooms[request.sid])
         socketio.sleep(0.1) #to make sure that the above emit is executed
-    socketio.emit('input_data', {'status':'done'}, namespace=namespace)
+    socketio.emit('input_data', {'status':'done'}, namespace=namespace, to=rooms[request.sid])
     socketio.sleep(0.1) #to make sure that the above emit is executed
 
     print('======= done')
@@ -172,10 +148,14 @@ def gui():
 
 @app.route("/")
 def default(): 
-    return render_template("combined.html")
+    return render_template("default.html")
+@app.route("/default")
+def default1(): 
+    return render_template("default.html")
 @app.route("/index")
-def index(): 
-    return render_template("combined.html")
+def default2(): 
+    return render_template("default.html")
+
 @app.route("/combined")
 def combined(): 
     return render_template("combined.html")
@@ -186,36 +166,39 @@ def cardboard():
 
 @app.route('/data_input', methods = ['POST'])
 def data_input():
-
-    print('======= showing loader')
-    socketio.emit('show_loader', None, namespace=namespace)
-    socketio.sleep(0.1) #to make sure that the above emit is executed
-
     print('======= receiving data from server ...')
     jsondata = request.get_json()
-    #this loop may not be necessary
-    # sze = 0
-    # while (sze != sys.getsizeof(jsondata)):
-    #     socketio.sleep(0.1)
-    #     sze = sys.getsizeof(jsondata)
-    #     print("======= size of data", sze)
+
     sze = sys.getsizeof(jsondata)
     print("======= size of data", sze)
 
     data = json.loads(jsondata)
-    print('======= sending data to viewer ...')#,data.keys())
-    socketio.emit('input_data', {'status':'start', 'length':len(data)}, namespace=namespace)
-    socketio.sleep(0.1) #to make sure that the above emit is executed
-    for fname in data:
-        print(fname, len(data[fname]))
-        output = {fname:data[fname], 'status':'data'}
-        socketio.emit('input_data', output, namespace=namespace)
-        socketio.sleep(0.1) #to make sure that the above emit is executed
-    socketio.emit('input_data', {'status':'done'}, namespace=namespace)
-    socketio.sleep(0.1) #to make sure that the above emit is executed
 
-    print('======= done')
-    return 'Done'
+    if ('room' in data):
+        ## need to remove it from the request because we don't want to send it to 
+        ##  the firefly instance on the other side, just need to identify the socket.
+        room = data.pop('room')
+
+        print('======= showing loader')
+        socketio.emit('show_loader', None, namespace=namespace, to=room)
+        socketio.sleep(0.1) #to make sure that the above emit is executed
+
+        print('======= sending data to viewer ...')#,data.keys())
+        socketio.emit('input_data', {'status':'start', 'length':len(data)}, namespace=namespace, to=room)
+        socketio.sleep(0.1) #to make sure that the above emit is executed
+        for fname in data:
+            print(fname, len(data[fname]))
+            output = {fname:data[fname], 'status':'data'}
+            socketio.emit('input_data', output, namespace=namespace, to=room)
+            socketio.sleep(0.1) #to make sure that the above emit is executed
+        socketio.emit('input_data', {'status':'done'}, namespace=namespace, to=room)
+        socketio.sleep(0.1) #to make sure that the above emit is executed
+
+        print('======= done')
+        return 'Done'
+    else:
+        print('User must specify a name for the websocket "room" connected to an active firefly instance.')
+        return 'Error'
 
 @app.route("/stream")
 def streamer():  
@@ -223,10 +206,15 @@ def streamer():
 
 @app.route('/stream_input', methods = ['GET','POST'])
 def stream_input():
-    blob = request.files['image']  # get the image
+    # get the image
+    blob = request.files['image']  
     blob_binary = blob.read()
     #blob.save('tmp.jpg')
-    socketio.emit('update_streamer', blob_binary, namespace=namespace, broadcast = True)
+
+    # get the room
+    room = request.form['room']
+
+    socketio.emit('update_streamer', blob_binary, namespace=namespace,  to=room) #broadcast = True,
 
     return 'Done'
 
@@ -234,9 +222,9 @@ def reload():
     #currently not used
     if (GUIseparated):
         print('======= reloading GUI')
-        socketio.emit('reload_GUI', None, namespace=namespace) 
+        socketio.emit('reload_GUI', None, namespace=namespace, to=rooms[request.sid]) 
     print('======= reloading viewer')
-    socketio.emit('reload_viewer', None, namespace=namespace)
+    socketio.emit('reload_viewer', None, namespace=namespace, to=rooms[request.sid])
 
 # Helper functions to start/stop the server
 def startFlaskServer(

@@ -93,7 +93,7 @@ function setViewerParamByKey(args){
 
 // function to send events to the viewer
 function sendToViewer(viewerInput){
-	if (GUIParams.usingSocket){
+	if (GUIParams.usingSocket && socketParams.socket){
 		socketParams.socket.emit('viewer_input',viewerInput);
 	} else {
 		setParams(viewerInput);

@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+cd "${DIR}"
+
+
+#check if the firefly directory env variable (FIREFLY_DIR) is set
+if [ -z "${FIREFLY_DIR}" ]; then
+#	if command -v python run_server.py &> /dev/null; then
+	if [ -f ../run_server.py ]; then
+		export FIREFLY_DIR="$PWD/.."
+	else
+		LOC=$(pip show run_server | grep Location)
+		if [ ! -z "${LOC}" ]; then
+			export FIREFLY_DIR=$(cut -d " " -f2 <<< $LOC)
+		fi
+	fi
+fi
+if [ -z "${FIREFLY_DIR}" ]; then
+	echo "ERROR: Can't detect your firefly directory.  Please set the FIREFLY_DIR environmental variable or launch Firefly manually."
+	#exit 1
+fi
+if [ ! -z "${FIREFLY_DIR}" ]; then
+
+	#launch the server
+	python $FIREFLY_DIR/run_server.py "$@"
+
+fi

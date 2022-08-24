@@ -37,7 +37,7 @@
 						</ul>
 				</div>
 				<div id="splashdivLoader">
-					<button id='loadDataButton' class='button'  style='display:none; font-size:24px; width:415px; height:50px'>
+					<button id='loadDataButton' class='button' style='display:none; font-size:24px; width:415px; height:50px'>
 						<span>Click here to select a data directory</span>
 					</button>
 					<button id='selectStartupButton' class='button' style='display:none; font-size:24px; width:600px; height:50px'>
@@ -50,7 +50,7 @@
 
 			<div id="UIcontainer" style="visibility:hidden; height:0; width:0"></div>
 			
-			<div id="annotate_container" class="dropdown-content"></div>			
+			<div id="annotate_container" class="dropdown-content"></div>
 
 			<div id="WebGLContainer" ></div>
 
@@ -61,14 +61,12 @@
 		<script src="static/lib/Detector.js"></script>
 		<script src="static/lib/TrackballControls.js"></script>
 		<script src="static/lib/three-fly-controls.js"></script>
-		<!-- <script src="static/lib/DeviceOrientationControls.js"></script> -->
-		<script src="static/lib/VRButton.js"></script>
 		<script src="static/lib/KeyboardState.js"></script>
 		<script src="static/lib/THREEx.FullScreen.js"></script>
 		<script src="static/lib/THREEx.WindowResize.js"></script>
 		<script src="static/lib/StereoEffect.js"></script>
 <!-- https://github.com/collinhover/threeoctree -->
-<!-- 		<script src="static/lib/threeoctree.min.js"></script> -->
+		<!-- <script src="static/lib/threeoctree.min.js"></script>   -->
 		
 		<!-- for the color picker = spectrum : https://github.com/bgrins/spectrum -->
 		<link rel="stylesheet" href="static/lib/spectrum.css" />
@@ -89,7 +87,7 @@
 		<script src="static/lib/Tween.js"></script>
 
 		<!-- web sockets -->
-	    <script src="static/lib/socket.io.min.js"></script>
+	    <!-- <script src="static/lib/socket.io.min.js"></script> -->
 
 		<!-- the main attraction -->
 
@@ -107,7 +105,6 @@
 		<script src="static/js/viewer/viewerParams.js"></script>
 		<script>
 			//called upon loading
-			defineSocketParams();			
 			defineGUIParams();
 			defineViewerParams();
 		</script>
@@ -136,19 +133,10 @@
 		<script src="static/js/misc/MyArrayBuffer.js"></script>
 		<script src="static/js/misc/FireflyFormat1.js"></script>
 		<script src="static/js/misc/FireflyOctnodeSubstring.js"></script>
-		
+
 		<script>
 			//called upon loading
-			connectGUISocket();
-			connectViewerSocket();
-			// for testing on local wifi network
-			// 1.  Install Android SDK Platform Tools : https://developer.android.com/studio/releases/platform-tools
-			// 2.  Connect VR device (e.g. phone or oculus) to your computer
-			// 3.  Run `adb devices` on the command line to make sure your device is recognized
-			// 4.  Run `adb reverse tcp:5000 tcp:5000` on the command line to enable port 5000 on device
-			// 5.  Go to localhost:5000/VR on device to enter VR
-			// runLocal(useSockets=true, showGUI=true, allowVRControls=false, startStereo=false, pSize=null
-			runLocal(true, true, true, false);//, 2);
+			runLocal(false);
 		</script>
 
 	</body>

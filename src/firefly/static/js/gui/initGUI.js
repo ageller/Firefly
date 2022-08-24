@@ -51,7 +51,7 @@ function confirmGUIInit(keys = ["partsKeys", "PsizeMult", "plotNmax", "decimate"
 
 	var ready = keys.every(function(k,i){
 		if (GUIParams[k] == null) {
-			//console.log("GUI missing ", k)
+			console.log("GUI missing ", k)
 			return false;
 		}
 		return true;
