@@ -178,6 +178,12 @@ function defineGUIParams(){
 
 		this.FPS = 0;
 		this.memoryUsage = 0;
+
+		this.VideoCapture_duration = 5; // seconds
+		this.VideoCapture_FPS = 30; // 30 frames per second
+		this.VideoCapture_filename = 'firefly_capture';
+		this.VideoCapture_format = '.gif';
+		this.VideoCapture_formats = ['.gif','.png','.jpg']
 		
 
 		this.GUIState_variables = [
@@ -251,10 +257,22 @@ function defineGUIParams(){
 					'capture':{
 						'id':'capture',
 						'builder':createControlsBox,
-						'snapshot':{
-							'id':'snapshot',
-							'builder':createSnapshotSegment
+						'captureButtons':{
+							'id':'captureButtons',
+							'builder':createCaptureButtonsSegment
 						},
+						'captureResolution':{
+							'id':'captureResolution',
+							'builder':createCaptureResolutionSegment
+						},
+						'videoDuration':{
+							'id':'videoDuration',
+							'builder':createVideoDurationSegment
+						},
+						'videoFormat':{
+							'id':'videoDuration',
+							'builder':createVideoFormatSegment
+						}
 					},
 					'projection':{
 						'id':'projection',
