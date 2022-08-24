@@ -182,8 +182,8 @@ function defineGUIParams(){
 		this.VideoCapture_duration = 5; // seconds
 		this.VideoCapture_FPS = 30; // 30 frames per second
 		this.VideoCapture_filename = 'firefly_capture';
-		this.VideoCapture_format = '.gif';
-		this.VideoCapture_formats = ['.gif','.png','.jpg']
+		this.VideoCapture_format = 0; // index of format
+		this.VideoCapture_formats = ['.gif','.png','.jpg']//,'.webm'] // webm doesn't seem to be working :\
 		
 
 		this.GUIState_variables = [

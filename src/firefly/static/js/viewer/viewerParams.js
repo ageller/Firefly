@@ -85,7 +85,10 @@ function defineViewerParams(){
 		this.VideoCapture_FPS = 30; // 30 frames per second
 		this.VideoCapture_filename = 'firefly_capture';
 		this.VideoCapture_format = 0; // index of format
-		this.VideoCapture_formats = ['.gif','.png','.jpg']
+		this.VideoCapture_formats = ['.gif','.png','.jpg']//,'.webm'] // webm doesn't seem to be working :\
+		// the  CCCapture object will be added when recordVideo is called
+		this.capturer = null; 
+		this.captureCanvas = false;
 
 		//for deciding whether to show velocity vectors
 		this.showVel = {};
