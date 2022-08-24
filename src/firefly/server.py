@@ -175,7 +175,9 @@ def data_input():
     data = json.loads(jsondata)
 
     if ('room' in data):
-        room = data['room']
+        ## need to remove it from the request because we don't want to send it to 
+        ##  the firefly instance on the other side, just need to identify the socket.
+        room = data.pop('room')
 
         print('======= showing loader')
         socketio.emit('show_loader', None, namespace=namespace, to=room)
