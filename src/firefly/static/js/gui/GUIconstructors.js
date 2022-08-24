@@ -735,9 +735,10 @@ function createVideoFormatSegment(container,parent,name){
 		.append('option')
 			.attr('value',function(d,i){ return i; })
 			.text(function (d) { return d; });
-	
-	return segment_height;
 
+	elm = document.getElementById('VideoCapture_format');
+	elm.value = GUIParams.VideoCapture_format;
+	return segment_height;
 }
 
 function createColumnDensityCheckBoxSegment(container,parent,name){
