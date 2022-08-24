@@ -58,9 +58,18 @@ def on_join(message):
     join_room(room)
 
 
+# This will probalby never fire
 @socketio.on('leave', namespace=namespace)
 def on_leave(message):
+    print(f'======= sid {request.sid} left room {rooms[request.sid]}', )
     leave_room(message['room'])
+
+# this should fire when a user closes/refreshes their browser
+@socketio.on('disconnect', namespace=namespace)
+def disconnect():
+    print(f'======= sid {request.sid} disconnected from room {rooms[request.sid]}', )
+    # remove this room from the dict
+    rooms.pop(request.sid, None)
 
 #testing the connection
 @socketio.on('connection_test', namespace=namespace)
