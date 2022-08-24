@@ -86,9 +86,11 @@ function defineViewerParams(){
 		this.VideoCapture_filename = 'firefly_capture';
 		this.VideoCapture_format = 0; // index of format
 		this.VideoCapture_formats = ['.gif','.png','.jpg']//,'.webm'] // webm doesn't seem to be working :\
+		this.VideoCapture_frame = 0; // will store the frame so that we can shut off the capture when completed
 		// the  CCCapture object will be added when recordVideo is called
 		this.capturer = null; 
 		this.captureCanvas = false;
+		this.imageCaptureClicked = true; //to help differentiate between an image and movie for a gif
 
 		//for deciding whether to show velocity vectors
 		this.showVel = {};

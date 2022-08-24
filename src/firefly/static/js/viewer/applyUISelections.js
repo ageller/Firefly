@@ -415,7 +415,7 @@ function renderImage() {
 	var screenHeight = window.innerHeight;
 	var aspect = screenWidth / screenHeight;
 
-
+	viewerParams.imageCaptureClicked = true;
 
 
 	try {
@@ -438,13 +438,7 @@ function renderImage() {
 		}
 		// gif is not supported so we have to cheat a bit
 		else if (extension == '.gif'){
-			var old_FPS = viewerParams.VideoCapture_FPS
-			var old_duration = viewerParams.VideoCapture_duration
-			viewerParams.VideoCapture_FPS = 1
-			viewerParams.VideoCapture_duration = 1
-			recordVideo();
-			viewerParams.VideoCapture_FPS = old_FPS 
-			viewerParams.VideoCapture_duration = old_duration
+			recordVideo(1, 1);
 			return
 		}
 		else {
@@ -470,16 +464,19 @@ function renderImage() {
 
 }
 
-function recordVideo(){
+function recordVideo(fps = null, duration = null){
+
+	if (!fps) fps = viewerParams.VideoCapture_FPS;
+	if (!duration) duration = viewerParams.VideoCapture_duration;
 
 	viewerParams.captureCanvas = true;
 	viewerParams.capturer = new CCapture( { 
 		format: viewerParams.VideoCapture_formats[viewerParams.VideoCapture_format].slice(1), 
 		workersPath: 'static/lib/CCapture/',
-		framerate: viewerParams.VideoCapture_FPS,
+		framerate: fps,
 		name: viewerParams.VideoCapture_filename,
-		timeLimit: viewerParams.VideoCapture_duration,
-		autoSaveTime: viewerParams.VideoCapture_duration,
+		timeLimit: duration,
+		autoSaveTime: duration,
 		verbose: true,
 	} );
 

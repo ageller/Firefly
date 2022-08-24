@@ -534,6 +534,7 @@ function render_stream(){
 }
 
 function capture(){
+
 	var screenWidth = window.innerWidth;
 	var screenHeight = window.innerHeight;
 	var aspect = screenWidth / screenHeight;
@@ -553,9 +554,15 @@ function capture(){
 	viewerParams.renderer.setSize(screenWidth, screenHeight);
 	viewerParams.camera.aspect = aspect;
 	viewerParams.camera.updateProjectionMatrix();
+	
+	viewerParams.VideoCapture_frame += 1;
+	if (viewerParams.VideoCapture_frame >= viewerParams.VideoCapture_duration*viewerParams.VideoCapture_FPS || viewerParams.imageCaptureClicked){
+		// reset
+		viewerParams.captureCanvas = false;
+		viewerParams.VideoCapture_frame = 0;
+		viewerParams.imageCaptureClicked = false;
+	}
 
-	// why the extra render here at the bottom?
-	//viewerParams.renderer.render( scene, camera );
 }
 
 function update_memory_usage(){
