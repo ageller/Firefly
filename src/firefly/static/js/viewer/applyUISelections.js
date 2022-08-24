@@ -340,17 +340,21 @@ function checkText(args){
 	var cameraRotation = new THREE.Vector3(viewerParams.camera.rotation.x, viewerParams.camera.rotation.y, viewerParams.camera.rotation.z);
 
 	if (id == "CenterXText") viewerParams.center.x = parseFloat(value);
-	if (id == "CenterYText") viewerParams.center.y = parseFloat(value);
-	if (id == "CenterZText") viewerParams.center.z = parseFloat(value);
-	if (id == "CameraXText") cameraPosition.x = parseFloat(value) - viewerParams.center.x;
-	if (id == "CameraYText") cameraPosition.y = parseFloat(value) - viewerParams.center.y
-	if (id == "CameraZText") cameraPosition.z = parseFloat(value) - viewerParams.center.z;
-	if (id == "RotXText") cameraRotation.x = parseFloat(value)
-	if (id == "RotYText") cameraRotation.y = parseFloat(value)
-	if (id == "RotZText") cameraRotation.z = parseFloat(value)
-	if (id == "RenderXText") viewerParams.renderWidth = parseInt(value);
-	if (id == "RenderYText") viewerParams.renderHeight = parseInt(value);
-	if (id == "RenderYText") viewerParams.renderHeight = parseInt(value);
+	else if (id == "CenterYText") viewerParams.center.y = parseFloat(value);
+	else if (id == "CenterZText") viewerParams.center.z = parseFloat(value);
+	else if (id == "CameraXText") cameraPosition.x = parseFloat(value) - viewerParams.center.x;
+	else if (id == "CameraYText") cameraPosition.y = parseFloat(value) - viewerParams.center.y
+	else if (id == "CameraZText") cameraPosition.z = parseFloat(value) - viewerParams.center.z;
+	else if (id == "RotXText") cameraRotation.x = parseFloat(value)
+	else if (id == "RotYText") cameraRotation.y = parseFloat(value)
+	else if (id == "RotZText") cameraRotation.z = parseFloat(value)
+	else if (id == "RenderXText") viewerParams.renderWidth = parseInt(value);
+	else if (id == "RenderYText") viewerParams.renderHeight = parseInt(value);
+	else if (id == "VideoCapture_duration") viewerParams.VideoCapture_duration = parseFloat(value);
+	else if (id == "VideoCapture_FPS") viewerParams.VideoCapture_FPS = parseInt(value);
+	else if (id == "VideoCapture_format") viewerParams.VideoCapture_format = parseInt(value);
+	else if (id == "VideoCapture_filename") viewerParams.VideoCapture_filename = value;
+	else console.log(id,'not recognized in applyUISelections.js:checkText');
 
 	if (p){
 		if (id == p+'velAnimateDt') {

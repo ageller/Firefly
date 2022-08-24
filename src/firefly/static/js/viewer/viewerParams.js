@@ -80,6 +80,13 @@ function defineViewerParams(){
 		this.renderWidth = 1920;
 		this.renderHeight = 1200;
 
+		// defaults for rendering to movie
+		this.VideoCapture_duration = 5; // seconds
+		this.VideoCapture_FPS = 30; // 30 frames per second
+		this.VideoCapture_filename = 'firefly_capture';
+		this.VideoCapture_format = 0; // index of format
+		this.VideoCapture_formats = ['.gif','.png','.jpg']
+
 		//for deciding whether to show velocity vectors
 		this.showVel = {};
 		this.velopts = {'line':0., 'arrow':1., 'triangle':2.};
