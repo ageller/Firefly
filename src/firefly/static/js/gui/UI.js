@@ -475,21 +475,32 @@ function createGeneralWindow(container,parent,name,this_UIcontainer=null){
 	}
 	else { // this is a branch leading to more buttons
 		var sub_url;
-		var singleWidth = GUIParams.containerWidth/keys.filter(function (val){
+		var button_count = keys.filter(function (val){
 			sub_url = this_pane.url+'/' + val;
 			return !excluded(sub_url);
-		}).length - 4;
+		}).length;
+		var denom = Math.min(button_count,2);
+		var singleWidth = GUIParams.containerWidth/denom - 14;
+
 		//console.log('hardcoded padding between',this_pane.url,'/',keys,'buttons');
 
-		this_pane.d3Element = this_UIcontainer.style('display','flex')
+		// each button has 36 pixels associated with it, 22 in height,
+		//  7 in buffer/padding that expands the width of the gray box, and then
+		//  an additional 8 of blank space
+		//  so we want the number of rows (button_count/2 + button_count%2)
+		//  which could change (right now between 1 and 2)
+		segment_height=36 * (Math.floor(button_count/2) + button_count%2);
+		this_pane.d3Element = this_UIcontainer.style('display','flex-wrap')
+			.style('height', segment_height + 'px')
+			.attr('trueHeight', segment_height + 'px');
 
 		// short-circuit once we've made the div for the particles above
 		if (this_pane.id != 'particles'){
-			this_pane.children.forEach(function(k){
+			this_pane.children.forEach(function(k,index){
 				var sub_url = this_pane[k].url = this_pane.url+'/' + k;
-				//console.log(sub_url)
+				//console.log(this_pane.id,sub_url,singleWidth)
 				if (excluded(sub_url)) return;
-				this_pane.d3Element.append('div')
+				last_button = this_pane.d3Element.append('div')
 					.attr('id',this_pane[k].id + 'button')
 					.attr('class','particleDiv')
 					.style('width', singleWidth + 'px')
@@ -497,9 +508,17 @@ function createGeneralWindow(container,parent,name,this_UIcontainer=null){
 					.style('margin','2px')
 					.style('cursor','pointer')
 					.on('click',function(){transitionUIWindows(sub_url)})
-					.append('div')
-						.attr('class','pLabelDiv')
-						.text(this_pane[k].id[0].toUpperCase()+this_pane[k].id.slice(1,))
+				
+				last_label = last_button.append('div')
+					.attr('class','pLabelDiv')
+					.text(this_pane[k].id[0].toUpperCase()+this_pane[k].id.slice(1,))
+
+				// if we have an odd number of buttons, make the last one wider
+				if (button_count%2 && index == (button_count-1)){
+					last_button.style('width',GUIParams.containerWidth-14)
+					last_label.style('width',GUIParams.containerWidth-14)
+				}
+
 				createGeneralWindow(container,this_pane,k);
 			})
 		}// this_pane.id != 'particles'

@@ -238,11 +238,7 @@ function defineGUIParams(){
 						'fullScreen':{
 							'id':'fullScreen',
 							'builder':createFullScreenSegment
-						},
-						'snapshot':{
-							'id':'snapshot',
-							'builder':createSnapshotSegment
-						},
+						},	
 						'cameraFriction':{
 							'id':'cameraFriction',
 							'builder':createCameraFrictionSegment
@@ -251,6 +247,14 @@ function defineGUIParams(){
 							'id':'stereoSep',
 							'builder':createStereoSepSegment
 						}
+					},
+					'capture':{
+						'id':'capture',
+						'builder':createControlsBox,
+						'snapshot':{
+							'id':'snapshot',
+							'builder':createSnapshotSegment
+						},
 					},
 					'projection':{
 						'id':'projection',
