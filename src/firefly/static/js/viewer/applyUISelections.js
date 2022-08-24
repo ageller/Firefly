@@ -424,7 +424,11 @@ function renderImage() {
 		viewerParams.renderer.setSize(viewerParams.renderWidth, viewerParams.renderHeight);
 		viewerParams.camera.aspect = viewerParams.renderWidth / viewerParams.renderHeight;
 		viewerParams.camera.updateProjectionMatrix();
-		viewerParams.renderer.render( viewerParams.scene, viewerParams.camera );
+		if (viewerParams.columnDensity){
+			viewerParams.renderer.render( viewerParams.sceneCD, viewerParams.cameraCD );
+		} else {
+			viewerParams.renderer.render( viewerParams.scene, viewerParams.camera );
+		}
 
 		//save image
 		var extension = viewerParams.VideoCapture_formats[viewerParams.VideoCapture_format]
@@ -456,7 +460,7 @@ function renderImage() {
 		viewerParams.renderer.setSize(screenWidth, screenHeight);
 		viewerParams.camera.aspect = aspect;
 		viewerParams.camera.updateProjectionMatrix();
-		viewerParams.renderer.render( viewerParams.scene, viewerParams.camera );
+
 
 	} catch (e) {
 		console.log(e);

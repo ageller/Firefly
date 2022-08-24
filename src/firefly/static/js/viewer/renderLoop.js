@@ -10,7 +10,6 @@ function animate(time) {
 		update(time);
 
 		// render partsMesh to target
-
 		if (viewerParams.captureCanvas) capture();
 
 		render();
@@ -505,6 +504,7 @@ function render_column_density(){
 
 	viewerParams.renderer.setRenderTarget(null)
 	viewerParams.renderer.render( viewerParams.sceneCD, viewerParams.cameraCD );
+
 }
 
 function render_stream(){
@@ -534,7 +534,6 @@ function render_stream(){
 }
 
 function capture(){
-
 	var screenWidth = window.innerWidth;
 	var screenHeight = window.innerHeight;
 	var aspect = screenWidth / screenHeight;
@@ -543,7 +542,11 @@ function capture(){
 	viewerParams.renderer.setSize(viewerParams.renderWidth, viewerParams.renderHeight);
 	viewerParams.camera.aspect = viewerParams.renderWidth / viewerParams.renderHeight;
 	viewerParams.camera.updateProjectionMatrix();
-	viewerParams.renderer.render( viewerParams.scene, viewerParams.camera );
+	if (viewerParams.columnDensity){
+		viewerParams.renderer.render( viewerParams.sceneCD, viewerParams.cameraCD );
+	} else {
+		viewerParams.renderer.render( viewerParams.scene, viewerParams.camera );
+	}
 
 	viewerParams.capturer.capture( viewerParams.renderer.domElement );
 
