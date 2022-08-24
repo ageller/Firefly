@@ -706,7 +706,7 @@ function createVideoFormatSegment(container,parent,name){
 		.attr('value',GUIParams.VideoCapture_filename)
 		.attr('autocomplete','off')
 		.attr('class','pTextInput')
-		.style('width','100px')
+		.style('width','92px')
 		.style('margin-left','5px')
 		.style('margin-right','5px')
 		.on('keyup',function(){
@@ -717,17 +717,17 @@ function createVideoFormatSegment(container,parent,name){
 
 	segment.append('div')
 		.attr('class','pLabelDiv')
-		.style('width','60px')
+		.style('width','55px')
 		.style('display','inline-block')
 		.text('Format:');
 
 	var selectFormat = segment.append('select')
 		.attr('class','selectVideoFormat')
-		.attr('id',GUIParams.CDkey+'_SelectVideoFormat')
+		.attr('id','VideoCapture_format')
 		.style('margin-left','5px')
-		.style('width','35px')
+		.style('width','45px')
 		.on('change', function(){
-			GUIParams.VideoCapture_format = this.value;
+			sendToViewer([{'checkText':[this.id, this.value]}]);
 		})
 
 	var options = selectFormat.selectAll('option')
@@ -735,9 +735,6 @@ function createVideoFormatSegment(container,parent,name){
 		.append('option')
 			.attr('value',function(d,i){ return i; })
 			.text(function (d) { return d; });
-	return segment_height;
-
-	
 	
 	return segment_height;
 
