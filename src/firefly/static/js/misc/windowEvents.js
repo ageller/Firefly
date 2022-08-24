@@ -1,6 +1,7 @@
 function fullscreen(){
 	THREEx.FullScreen.request()
-	document.getElementById("fullScreenButton").style.display = "none";//visibility = "hidden"
+	// ABG: Let's not hide the button because it breaks the height of the UI. It's fine the way it is.
+	//document.getElementById("fullScreenButton").style.display = "none";//visibility = "hidden"
 }
 
 if (document.addEventListener){

@@ -433,7 +433,7 @@ function createCameraButtonsSegment(container,parent,name){
 }
 
 function createFullScreenSegment(container,parent,name){
-	var segment_height = 35;
+	var segment_height = 30;
 	//fullscreen button
 	container.append('div')
 		.attr('id','fullScreenDiv')
