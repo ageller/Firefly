@@ -48,8 +48,9 @@
 			</div>
 
 
-			<div class="UIcontainer hidden" style="visibility:hidden; height:0; width:0"></div>
+			<div id="UIcontainer" style="visibility:hidden; height:0; width:0"></div>
 			
+			<div id="annotate_container" class="dropdown-content"></div>			
 
 			<div id="WebGLContainer" ></div>
 
@@ -89,6 +90,9 @@
 
 		<!-- web sockets -->
 	    <script src="static/lib/socket.io.min.js"></script>
+
+		<!-- for capturing video -->
+		<script src="static/lib/CCapture/CCapture.all.min.js"></script>
 
 		<!-- the main attraction -->
 
@@ -130,6 +134,12 @@
 		<script src="static/js/octree/octreeCreatePartsMesh.js"></script>
 		<script src="static/js/octree/octreeRenderLoop.js"></script>
 
+		<!-- katai.io reqs-->
+		<script src="static/js/misc/kaitai-struct/KaitaiStream.js"></script>
+		<script src="static/js/misc/MyArrayBuffer.js"></script>
+		<script src="static/js/misc/FireflyFormat1.js"></script>
+		<script src="static/js/misc/FireflyOctnodeSubstring.js"></script>
+		
 		<script>
 			//called upon loading
 			connectGUISocket();

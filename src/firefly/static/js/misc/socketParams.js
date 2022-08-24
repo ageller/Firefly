@@ -11,6 +11,10 @@ function defineSocketParams(){
 		// physical channel. If you don't care about multiple channels, you
 		// can set the namespace to an empty string.
 		this.namespace = '/Firefly';
+
+		//room will be set by the user with a prompt.  This will allow different sessions of e.g., gui+viewer to connect at the same time without confusing messages
+		this.room = null; 
+		
 		// Connect to the Socket.IO server.
 		// The connection URL has the following format:
 		//     http[s]://<domain>:<port>[/<namespace>]

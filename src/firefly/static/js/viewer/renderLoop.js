@@ -10,6 +10,9 @@ function animate(time) {
 		update(time);
 
 		// render partsMesh to target
+
+		if (viewerParams.captureCanvas) capture();
+
 		render();
 
 		// calculate framerate and optionally display it. 
@@ -507,16 +510,20 @@ function render_column_density(){
 function render_stream(){
 	viewerParams.usingSocket = true;
 	//send the image through flask to the stream webpage
-	if (viewerParams.streamReady){
+	if (viewerParams.streamReady && socketParams.room){
 		//https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
 		viewerParams.renderer.domElement.toBlob(function(blob) {
+			var formdata = new FormData();
+			formdata.append("image", blob);
+			formdata.append("room", socketParams.room);
+			//console.log('checking room in stream',socketParams.room)
+
 			var url = URL.createObjectURL(blob);
 
 			var xhr = new XMLHttpRequest();
 			xhr.open('POST', '/stream_input', true);
 
-			var formdata = new FormData();
-			formdata.append("image", blob);
+
 			xhr.send(formdata);
 
 			//this is giving errors when not on the same localhost
@@ -524,6 +531,28 @@ function render_stream(){
 		},'image/jpeg', viewerParams.streamQuality);
 		viewerParams.streamReady = false;
 	}
+}
+
+function capture(){
+
+	var screenWidth = window.innerWidth;
+	var screenHeight = window.innerHeight;
+	var aspect = screenWidth / screenHeight;
+	
+
+	viewerParams.renderer.setSize(viewerParams.renderWidth, viewerParams.renderHeight);
+	viewerParams.camera.aspect = viewerParams.renderWidth / viewerParams.renderHeight;
+	viewerParams.camera.updateProjectionMatrix();
+	viewerParams.renderer.render( viewerParams.scene, viewerParams.camera );
+
+	viewerParams.capturer.capture( viewerParams.renderer.domElement );
+
+	viewerParams.renderer.setSize(screenWidth, screenHeight);
+	viewerParams.camera.aspect = aspect;
+	viewerParams.camera.updateProjectionMatrix();
+
+	// why the extra render here at the bottom?
+	//viewerParams.renderer.render( scene, camera );
 }
 
 function update_memory_usage(){
@@ -567,12 +596,17 @@ function update_framerate(seconds,time){
 	viewerParams.FPS = viewerParams.fps_list.slice().sort(function(a, b){return a-b})[15]
 
 	if ((viewerParams.drawPass % Math.min(Math.round(viewerParams.FPS),60)) == 0){
-		// fill FPS container div with calculated FPS and memory usage
-		var forGUI = [];
-		forGUI.push({'setGUIParamByKey':[viewerParams.FPS, "FPS"]});
-		forGUI.push({'setGUIParamByKey':[viewerParams.memoryUsage, "memoryUsage"]});
-		forGUI.push({'updateFPSContainer':[]});
-		sendToGUI(forGUI);
+		// only send this if the parameters have changed (to avoid clogging the socket)
+		if (Math.abs(viewerParams.FPS - viewerParams.FPS0) > 0.1 || Math.abs(viewerParams.memoryUsage - viewerParams.memoryUsage0) > 1e7){
+			viewerParams.FPS0 = viewerParams.FPS;
+			viewerParams.memoryUsage0 = viewerParams.memoryUsage;
+			// fill FPS container div with calculated FPS and memory usage
+			var forGUI = [];
+			forGUI.push({'setGUIParamByKey':[viewerParams.FPS, "FPS"]});
+			forGUI.push({'setGUIParamByKey':[viewerParams.memoryUsage, "memoryUsage"]});
+			forGUI.push({'updateFPSContainer':[]});
+			sendToGUI(forGUI);
+		}
 	}
 
 

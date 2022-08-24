@@ -66,7 +66,7 @@
 		<script src="static/lib/THREEx.WindowResize.js"></script>
 		<script src="static/lib/StereoEffect.js"></script>
 <!-- https://github.com/collinhover/threeoctree -->
-<!-- 		<script src="static/lib/threeoctree.min.js"></script> -->
+		<!-- <script src="static/lib/threeoctree.min.js"></script>   -->
 		
 		<!-- for the color picker = spectrum : https://github.com/bgrins/spectrum -->
 		<link rel="stylesheet" href="static/lib/spectrum.css" />
@@ -87,7 +87,7 @@
 		<script src="static/lib/Tween.js"></script>
 
 		<!-- web sockets -->
-	    <script src="static/lib/socket.io.min.js"></script>
+	    <!-- <script src="static/lib/socket.io.min.js"></script> -->
 
 		<!-- for capturing video -->
 		<script src="static/lib/CCapture/CCapture.all.min.js"></script>
@@ -108,7 +108,6 @@
 		<script src="static/js/viewer/viewerParams.js"></script>
 		<script>
 			//called upon loading
-			defineSocketParams();			
 			defineGUIParams();
 			defineViewerParams();
 		</script>
@@ -140,9 +139,7 @@
 
 		<script>
 			//called upon loading
-			connectGUISocket();
-			connectViewerSocket();
-			runLocal(true);
+			runLocal(false);
 		</script>
 
 	</body>

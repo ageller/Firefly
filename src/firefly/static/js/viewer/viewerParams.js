@@ -80,6 +80,16 @@ function defineViewerParams(){
 		this.renderWidth = 1920;
 		this.renderHeight = 1200;
 
+		// defaults for rendering to movie
+		this.VideoCapture_duration = 5; // seconds
+		this.VideoCapture_FPS = 30; // 30 frames per second
+		this.VideoCapture_filename = 'firefly_capture';
+		this.VideoCapture_format = 0; // index of format
+		this.VideoCapture_formats = ['.gif','.png','.jpg']//,'.webm'] // webm doesn't seem to be working :\
+		// the  CCCapture object will be added when recordVideo is called
+		this.capturer = null; 
+		this.captureCanvas = false;
+
 		//for deciding whether to show velocity vectors
 		this.showVel = {};
 		this.velopts = {'line':0., 'arrow':1., 'triangle':2.};
@@ -232,7 +242,9 @@ function defineViewerParams(){
 		this.haveOctree = {}; //will be initialized to false for each of the parts keys in loadData
 		this.haveAnyOctree = false; //must be a better way to do this!
 		this.FPS = 30; //will be upated in the octree render loop
+		this.FPS0 = 30; //save the previous to check if we need to update the GUI
 		this.memoryUsage = 0; //if using Chrome, we can track the memory usage and try to avoid crashes
+		this.memoryUsage0 = 0; //save the previous to check if we need to update the GUI
 		this.drawPass = 0;
 		this.totalParticlesInMemory = 0; //try to hold the total number of particles in memory
 		this.memoryLimit = 2*1e9; //bytes, maximum memory allowed -- for now this is more like a target
