@@ -337,7 +337,7 @@ def spawnFireflyServer(
 
     ## use this run_server.py (even if the other directory has one)
     ##  since it can be run remotely
-    run_server = os.path.join(os.path.dirname(__file__),'run_server.py')
+    run_server = os.path.join(os.path.dirname(__file__),'bin','run_server.py')
     process = subprocess.Popen([sys.executable, run_server]+args)
 
     init_time = time.time()
@@ -362,16 +362,16 @@ def spawnFireflyServer(
 def quitAllFireflyServers(pid=None):
     """Quit python processes associated with hosting Flask web-servers.
 
-    :param pid: process id to kill, defaults to None, quitting all processes
+    :param pid: process id to quit, defaults to None, quitting all processes
     :type pid: int, optional
     :return: return_code
     :rtype: int 
     """
     print("Server output:")
     print("--------------")
-    ## kill indiscriminately
+    ## quit indiscriminately
     if pid is None: return_code = os.system("ps aux | grep 'run_server.py' | awk '{print $2}' | xargs kill")
-    ## kill only the pid we were passed, ideally from the subprocess.Popen().pid but
+    ## quit only the pid we were passed, ideally from the subprocess.Popen().pid but
     ##  you know I don't judge.  
     else: return_code = os.kill(pid,signal.SIGINT)
     return return_code
