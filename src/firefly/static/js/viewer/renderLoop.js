@@ -10,6 +10,9 @@ function animate(time) {
 		update(time);
 
 		// render partsMesh to target
+
+		if (viewerParams.captureCanvas) capture();
+
 		render();
 
 		// calculate framerate and optionally display it. 
@@ -528,6 +531,28 @@ function render_stream(){
 		},'image/jpeg', viewerParams.streamQuality);
 		viewerParams.streamReady = false;
 	}
+}
+
+function capture(){
+
+	var screenWidth = window.innerWidth;
+	var screenHeight = window.innerHeight;
+	var aspect = screenWidth / screenHeight;
+	
+
+	viewerParams.renderer.setSize(viewerParams.renderWidth, viewerParams.renderHeight);
+	viewerParams.camera.aspect = viewerParams.renderWidth / viewerParams.renderHeight;
+	viewerParams.camera.updateProjectionMatrix();
+	viewerParams.renderer.render( viewerParams.scene, viewerParams.camera );
+
+	viewerParams.capturer.capture( viewerParams.renderer.domElement );
+
+	viewerParams.renderer.setSize(screenWidth, screenHeight);
+	viewerParams.camera.aspect = aspect;
+	viewerParams.camera.updateProjectionMatrix();
+
+	// why the extra render here at the bottom?
+	//viewerParams.renderer.render( scene, camera );
 }
 
 function update_memory_usage(){

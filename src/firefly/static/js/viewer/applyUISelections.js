@@ -446,6 +446,23 @@ function renderImage() {
 
 }
 
+function recordVideo(){
+
+	viewerParams.captureCanvas = true;
+	viewerParams.capturer = new CCapture( { 
+		format: viewerParams.VideoCapture_formats[viewerParams.VideoCapture_format].slice(1), 
+		workersPath: 'static/lib/CCapture/',
+		framerate: viewerParams.VideoCapture_FPS,
+		name: viewerParams.VideoCapture_filename,
+		timeLimit: viewerParams.VideoCapture_duration,
+		autoSaveTime: viewerParams.VideoCapture_duration,
+		verbose: true,
+	} );
+
+	viewerParams.capturer.start()
+
+}
+
 function isPrimitive(test) {
 	return test !== Object(test);
 }

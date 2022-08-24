@@ -568,7 +568,7 @@ function createCaptureButtonsSegment(container,parent,name){
 		.style('margin-left','4px')
 		.style('opacity',1)
 		.on('click',function(){
-			sendToViewer([{'renderImage':null}]);
+			sendToViewer([{'recordVideo':null}]);
 		})
 		.append('span')
 		.text('Record Video');
