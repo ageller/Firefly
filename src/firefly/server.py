@@ -349,6 +349,7 @@ def quitAllFireflyServers(pid=None):
 	"""Quit python processes associated with hosting Flask web-servers.
 
 <<<<<<< HEAD
+<<<<<<< HEAD
     :param pid: process id to quit, defaults to None, quitting all processes
     :type pid: int, optional
     :return: return_code
@@ -362,3 +363,18 @@ def quitAllFireflyServers(pid=None):
     ##  you know I don't judge.  
     else: return_code = os.kill(pid,signal.SIGINT)
     return return_code
+=======
+	:param pid: process id to kill, defaults to None, quitting all processes
+	:type pid: int, optional
+	:return: return_code
+	:rtype: int 
+	"""
+	print("Server output:")
+	print("--------------")
+	## kill indiscriminately
+	if pid is None: return_code = os.system("ps aux | grep 'run_server.py' | awk '{print $2}' | xargs kill")
+	## kill only the pid we were passed, ideally from the subprocess.Popen().pid but
+	##  you know I don't judge.  
+	else: return_code = os.kill(pid,signal.SIGINT)
+	return return_code
+>>>>>>> 90692fb02ed81ff542aa7de45384784a183c2746
