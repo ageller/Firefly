@@ -337,7 +337,7 @@ def spawnFireflyServer(
 
     ## use this run_server.py (even if the other directory has one)
     ##  since it can be run remotely
-    run_server = os.path.join(os.path.dirname(__file__),'bin','run_server.py')
+    run_server = os.path.join(os.path.dirname(__file__),'bin','firefly')
     process = subprocess.Popen([sys.executable, run_server]+args)
 
     init_time = time.time()
