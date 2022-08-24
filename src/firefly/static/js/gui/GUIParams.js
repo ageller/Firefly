@@ -178,6 +178,12 @@ function defineGUIParams(){
 
 		this.FPS = 0;
 		this.memoryUsage = 0;
+
+		this.VideoCapture_duration = 5; // seconds
+		this.VideoCapture_FPS = 30; // 30 frames per second
+		this.VideoCapture_filename = 'firefly_capture';
+		this.VideoCapture_format = 0; // index of format
+		this.VideoCapture_formats = ['.gif','.png','.jpg']//,'.webm'] // webm doesn't seem to be working :\
 		
 
 		this.GUIState_variables = [
@@ -238,11 +244,7 @@ function defineGUIParams(){
 						'fullScreen':{
 							'id':'fullScreen',
 							'builder':createFullScreenSegment
-						},
-						'snapshot':{
-							'id':'snapshot',
-							'builder':createSnapshotSegment
-						},
+						},	
 						'cameraFriction':{
 							'id':'cameraFriction',
 							'builder':createCameraFrictionSegment
@@ -250,6 +252,26 @@ function defineGUIParams(){
 						'stereoSep':{
 							'id':'stereoSep',
 							'builder':createStereoSepSegment
+						}
+					},
+					'capture':{
+						'id':'capture',
+						'builder':createControlsBox,
+						'captureButtons':{
+							'id':'captureButtons',
+							'builder':createCaptureButtonsSegment
+						},
+						'captureResolution':{
+							'id':'captureResolution',
+							'builder':createCaptureResolutionSegment
+						},
+						'videoDuration':{
+							'id':'videoDuration',
+							'builder':createVideoDurationSegment
+						},
+						'videoFormat':{
+							'id':'videoDuration',
+							'builder':createVideoFormatSegment
 						}
 					},
 					'projection':{

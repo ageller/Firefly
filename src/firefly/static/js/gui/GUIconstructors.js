@@ -433,7 +433,7 @@ function createCameraButtonsSegment(container,parent,name){
 }
 
 function createFullScreenSegment(container,parent,name){
-	var segment_height = 35;
+	var segment_height = 30;
 	//fullscreen button
 	container.append('div')
 		.attr('id','fullScreenDiv')
@@ -445,56 +445,6 @@ function createFullScreenSegment(container,parent,name){
 			.attr('onclick','fullscreen();')
 			.append('span')
 			.text('Fullscreen');
-	return segment_height;
-}
-
-function createSnapshotSegment(container,parent,name){
-	var segment_height = 35;
-	//snapshots
-	var snap = container.append('div')
-		.attr('id','snapshotDiv')
-		.attr('class', 'button-div')
-		.style('width',(GUIParams.containerWidth - 10) + 'px')
-		.style('margin-left','0px')
-	snap.append('button')
-		.attr('class','button')
-		.style('width','140px')
-		.style('padding','5px')
-		.style('margin',0)
-		.style('opacity',1)
-		.on('click',function(){
-			sendToViewer([{'renderImage':null}]);
-		})
-		.append('span')
-		.text('Take Snapshot');
-
-	snap.append('input')
-		.attr('id','RenderXText')
-		.attr('type', 'text')
-		.attr('value',GUIParams.renderWidth)
-		.attr('autocomplete','off')
-		.attr('class','pTextInput')
-		.style('width','50px')
-		.style('margin-top','5px')
-		.style('margin-right','5px')
-		.on('keyup',function(){
-			var key = event.keyCode || event.which;
-			//if (key == 13) sendToViewer([{'checkText':[this.id, this.value]}]);
-			sendToViewer([{'checkText':[this.id, this.value]}]);
-		})
-	snap.append('input')
-		.attr('id','RenderYText')
-		.attr('type', 'text')
-		.attr('value',GUIParams.renderHeight)
-		.attr('autocomplete','off')
-		.attr('class','pTextInput')
-		.style('width','50px')
-		.style('margin-top','5px')
-		.on('keyup',function(){
-			var key = event.keyCode || event.which;
-			//if (key == 13) sendToViewer([{'checkText':[this.id, this.value]}]);
-			sendToViewer([{'checkText':[this.id, this.value]}]);
-		})
 	return segment_height;
 }
 
@@ -573,6 +523,221 @@ function createStereoSepSegment(container,parent,name){
 		.style('margin-top','-2px');
 
 	createStereoSlider();
+	return segment_height;
+}
+
+// capture segments
+function createCaptureButtonsSegment(container,parent,name){
+	var segment_height = 35;
+	//snapshots
+	var segment = container.append('div')
+		.attr('id', 'captureButtonsDiv')
+		.style('width',(GUIParams.containerWidth - 10) + 'px')
+		.style('margin-left','5px')
+		.style('display','flex')
+
+	var snap = segment.append('div')
+		.attr('id','snapshotDiv')
+		.attr('class', 'button-div')
+		.style('width',(GUIParams.containerWidth/2 - 10) + 'px')
+		.style('margin-left','0px')
+
+	snap.append('button')
+		.attr('class','button')
+		.style('width',GUIParams.containerWidth/2-10)
+		.style('padding','5px')
+		.style('margin',0)
+		.style('opacity',1)
+		.on('click',function(){
+			sendToViewer([{'renderImage':null}]);
+		})
+		.append('span')
+		.text('Take Snapshot');
+
+	var snap = segment.append('div')
+		.attr('id','videoDiv')
+		.attr('class', 'button-div')
+		.style('width',(GUIParams.containerWidth/2 - 10) + 'px')
+		.style('margin-left','0px')
+
+	snap.append('button')
+		.attr('class','button')
+		.style('width',GUIParams.containerWidth/2-10)
+		.style('padding','5px')
+		.style('margin',0)
+		.style('margin-left','4px')
+		.style('opacity',1)
+		.on('click',function(){
+			sendToViewer([{'recordVideo':null}]);
+		})
+		.append('span')
+		.text('Record Video');
+
+	return segment_height;
+}
+
+function createCaptureResolutionSegment(container,parent,name){
+	segment_height = 32;
+	var segment = container.append('div')
+		.attr('id', 'captureResolutionDiv')
+		.style('width',(GUIParams.containerWidth - 10) + 'px')
+		.style('margin-left','5px')
+		.style('margin-top','10px')
+		.style('display','inline-block')
+
+	segment.append('div')
+		.attr('class','pLabelDiv')
+		.style('width','130px')
+		.style('display','inline-block')
+		.text('Capture Region:');
+
+	segment.append('input')
+		.attr('id','RenderXText')
+		.attr('type', 'text')
+		.attr('value',GUIParams.renderWidth)
+		.attr('autocomplete','off')
+		.attr('class','pTextInput')
+		.style('width','50px')
+		.style('margin-left','46px')
+		.style('margin-right','5px')
+		.on('keyup',function(){
+			var key = event.keyCode || event.which;
+			//if (key == 13) sendToViewer([{'checkText':[this.id, this.value]}]);
+			sendToViewer([{'checkText':[this.id, this.value]}]);
+		})
+
+	segment.append('input')
+		.attr('id','RenderYText')
+		.attr('type', 'text')
+		.attr('value',GUIParams.renderHeight)
+		.attr('autocomplete','off')
+		.attr('class','pTextInput')
+		.style('width','50px')
+		.on('keyup',function(){
+			var key = event.keyCode || event.which;
+			//if (key == 13) sendToViewer([{'checkText':[this.id, this.value]}]);
+			sendToViewer([{'checkText':[this.id, this.value]}]);
+		})
+	
+	return segment_height;
+}
+
+function createVideoDurationSegment(container,parent,name){
+	var segment_height = 35;
+
+	var segment = container.append('div')
+		.attr('id', name+'Div')
+		.style('width',(GUIParams.containerWidth - 10) + 'px')
+		.style('margin-left','5px')
+		.style('margin-top','10px')
+		.style('display','inline-block')
+
+	segment.append('div')
+		.attr('class','pLabelDiv')
+		.style('width','65px')
+		.style('display','inline-block')
+		.text('Duration:');
+
+	segment.append('input')
+		.attr('id','VideoCapture_duration')
+		.attr('type', 'text')
+		.attr('value',GUIParams.VideoCapture_duration)
+		.attr('autocomplete','off')
+		.attr('class','pTextInput')
+		.style('width','50px')
+		.style('margin-left','5px')
+		.style('margin-right','5px')
+		.on('keyup',function(){
+			var key = event.keyCode || event.which;
+			//if (key == 13) sendToViewer([{'checkText':[this.id, this.value]}]);
+			sendToViewer([{'checkText':[this.id, this.value]}]);
+		})
+
+	segment.append('div')
+		.attr('class','pLabelDiv')
+		.style('width','30px')
+		.style('display','inline-block')
+		.text('sec');
+
+	segment.append('div')
+		.attr('class','pLabelDiv')
+		.style('width','35px')
+		.style('margin-left','28px')
+		.style('display','inline-block')
+		.text('FPS:');
+
+	segment.append('input')
+		.attr('id','VideoCapture_FPS')
+		.attr('type', 'text')
+		.attr('value',GUIParams.VideoCapture_FPS)
+		.attr('autocomplete','off')
+		.attr('class','pTextInput')
+		.style('width','50px')
+		.style('margin-left','5px')
+		.style('margin-right','5px')
+		.on('keyup',function(){
+			var key = event.keyCode || event.which;
+			//if (key == 13) sendToViewer([{'checkText':[this.id, this.value]}]);
+			sendToViewer([{'checkText':[this.id, this.value]}]);
+		})
+
+	return segment_height;
+}
+
+function createVideoFormatSegment(container,parent,name){
+	var segment_height = 32;
+
+	var segment = container.append('div')
+		.attr('id', name+'Div')
+		.style('width',(GUIParams.containerWidth - 10) + 'px')
+		.style('margin-left','5px')
+		.style('margin-top','10px')
+		.style('display','inline-block')
+
+	segment.append('div')
+		.attr('class','pLabelDiv')
+		.style('width','70px')
+		.style('display','inline-block')
+		.text('Filename:');
+
+	segment.append('input')
+		.attr('id','VideoCapture_filename')
+		.attr('type', 'text')
+		.attr('value',GUIParams.VideoCapture_filename)
+		.attr('autocomplete','off')
+		.attr('class','pTextInput')
+		.style('width','92px')
+		.style('margin-left','5px')
+		.style('margin-right','5px')
+		.on('keyup',function(){
+			var key = event.keyCode || event.which;
+			//if (key == 13) sendToViewer([{'checkText':[this.id, this.value]}]);
+			sendToViewer([{'checkText':[this.id, this.value]}]);
+		})
+
+	segment.append('div')
+		.attr('class','pLabelDiv')
+		.style('width','55px')
+		.style('display','inline-block')
+		.text('Format:');
+
+	var selectFormat = segment.append('select')
+		.attr('class','selectVideoFormat')
+		.attr('id','VideoCapture_format')
+		.style('margin-left','5px')
+		.style('width','45px')
+		.on('change', function(){
+			sendToViewer([{'checkText':[this.id, this.value]}]);
+		})
+
+	var options = selectFormat.selectAll('option')
+		.data(GUIParams.VideoCapture_formats).enter()
+		.append('option')
+			.attr('value',function(d,i){ return i; })
+			.text(function (d) { return d; });
+
+	elm = document.getElementById('VideoCapture_format');
+	elm.value = GUIParams.VideoCapture_format;
 	return segment_height;
 }
 
