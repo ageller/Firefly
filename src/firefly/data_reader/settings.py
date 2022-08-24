@@ -749,25 +749,34 @@ def find_closest_string(string,string_list):
 GUIurls = [
     'main',
     'main/general',
+
     'main/general/data',
     'main/general/data/decimation',
     'main/general/data/savePreset',
     'main/general/data/reset',
     'main/general/data/loadNewData',
+
     'main/general/camera',
     'main/general/camera/centerTextBoxes',
     'main/general/camera/cameraTextBoxes',
     'main/general/camera/rotationTextBoxes',
     'main/general/camera/cameraButtons',
     'main/general/camera/fullScreen',
-    'main/general/camera/snapshot',
     'main/general/camera/cameraFriction',
     'main/general/camera/stereoSep',
+
+    'main/general/capture',
+    'main/general/capture/captureButtons',
+    'main/general/capture/captureResolution',
+    'main/general/capture/videoDuration',
+    'main/general/capture/videoFormat',
+
     'main/general/projection',
     'main/general/projection/columnDensityCheckBox',
     'main/general/projection/columnDensityLogCheckBox',
     'main/general/projection/columnDensitySelectCmap',
     'main/general/projection/columnDensitySliders',
+
     'colorbarContainer',
     'FPSContainer',
     'octreeLoadingBarContainer',
@@ -777,24 +786,30 @@ GUIurls = [url.lower() for url in GUIurls]
 particle_GUIurls = [
     'main/particles/onoff', 
     'main/particles/sizeSlider',
+
     'main/particles/colorPicker', ## hides colorpicker all together
     'main/particles/colorPicker/onclick', ## shows colorpicker but disables onclick
+
     'main/particles/dropdown',
+
     'main/particles/dropdown/general',
     'main/particles/dropdown/general/octreeClearMemory',
     'main/particles/dropdown/general/blendingModeSelectors',
     'main/particles/dropdown/general/maxSlider',
     'main/particles/dropdown/general/octreeCameraNorm',
     'main/particles/dropdown/general/radiusVariableSelector',
+
     'main/particles/dropdown/velocities',
     'main/particles/dropdown/velocities/velocityCheckBox',
     'main/particles/dropdown/velocities/velocityWidthSlider',
     'main/particles/dropdown/velocities/velocityGradientCheckBox',
     'main/particles/dropdown/velocities/velocityAnimatorCheckBox',
     'main/particles/dropdown/velocities/velocityAnimatorTextBoxes',
+
     'main/particles/dropdown/colormap',
     'main/particles/dropdown/colormap/colormapCheckBox',
     'main/particles/dropdown/colormap/colormapSliders',
+
     'main/particles/dropdown/filters',
     'main/particles/dropdown/filters/filterSliders',
     'main/particles/dropdown/filters/filterPlayback',
