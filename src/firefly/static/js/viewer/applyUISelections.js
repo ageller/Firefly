@@ -410,7 +410,7 @@ function renderImage() {
 //best to use Firefox to render images  
 	var imgData, imgNode;
 	var strDownloadMime = "image/octet-stream";
-	var strMime = "image/png";
+	// can't use viewerParams.VideoCapture_formats b.c. it needs jpEg not jpg
 	var screenWidth = window.innerWidth;
 	var screenHeight = window.innerHeight;
 	var aspect = screenWidth / screenHeight;
@@ -427,9 +427,29 @@ function renderImage() {
 		viewerParams.renderer.render( viewerParams.scene, viewerParams.camera );
 
 		//save image
-		imgData = viewerParams.renderer.domElement.toDataURL(strMime);
+		var extension = viewerParams.VideoCapture_formats[viewerParams.VideoCapture_format]
+		if (extension == '.jpg'){
+			var strMime = "image/jpeg"
+			imgData = viewerParams.renderer.domElement.toDataURL(strMime,1.0);
+		}
+		// gif is not supported so we have to cheat a bit
+		else if (extension == '.gif'){
+			var old_FPS = viewerParams.VideoCapture_FPS
+			var old_duration = viewerParams.VideoCapture_duration
+			viewerParams.VideoCapture_FPS = 1
+			viewerParams.VideoCapture_duration = 1
+			recordVideo();
+			viewerParams.VideoCapture_FPS = old_FPS 
+			viewerParams.VideoCapture_duration = old_duration
+			return
+		}
+		else {
+			var strMime = "image/png"
+			imgData = viewerParams.renderer.domElement.toDataURL(strMime)
+		}
 
-		saveFile(imgData.replace(strMime, strDownloadMime), "image.png");
+		var fname = viewerParams.VideoCapture_filename + extension;
+		saveFile(imgData.replace(strMime, strDownloadMime),fname);
 
 
 		//back to original size
