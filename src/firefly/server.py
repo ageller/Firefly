@@ -197,6 +197,10 @@ def data_input():
         ## need to remove it from the request because we don't want to send it to 
         ##  the firefly instance on the other side, just need to identify the socket.
         room = data.pop('room')
+    else:
+        room = default_room
+
+    if (room):
 
         print('======= showing loader')
         socketio.emit('show_loader', None, namespace=namespace, to=room)
@@ -272,7 +276,7 @@ def startFlaskServer(
     global default_room
     if (multiple_rooms): default_room = None
 
-    if directory is None: directory = os.path.dirname(__file__)
+    if (directory is None or directory == "None"): directory = os.path.dirname(__file__)
     old_dir = os.getcwd()
     try:
         os.chdir(directory)
@@ -352,8 +356,9 @@ def spawnFireflyServer(
         f"--fps={int(frames_per_second):d}",
         f"--dec={int(decimation_factor):d}",
         f"--method={method}",
-        f"--directory={directory}",
-        f"--multiple_rooms={multiple_rooms}"]
+        f"--directory={directory}"]
+    if (multiple_rooms):
+        args.append(f"--multiple_rooms")
 
     ## use this run_server.py (even if the other directory has one)
     ##  since it can be run remotely
@@ -364,7 +369,7 @@ def spawnFireflyServer(
     ## check if port is in use
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         print(
-            "Waiting up to %d seconds for background Firefly server to start"%max_time,
+            "Waiting up to %d seconds for background Firefly server to start..."%max_time,
             end="")
         while True:
             try: requests.post(f'http://localhost:{port:d}',json="test"); break

@@ -474,8 +474,8 @@ class Reader(object):
             defaults to 5500
         :type port: int, optional
         :param room: the name of the flask session to send 
-            data to on the specified port. Raises an error if None, defaults to None
-        :type room: str
+            data to on the specified port. defaults to None
+        :type room: str, optional
         :raises ValueError: if `room`  is not specified.
         """
 
@@ -485,17 +485,21 @@ class Reader(object):
             write_to_disk=False,
             file_extension='.json')
 
-        if room is None: raise ValueError(
-            f"Enter a valid room on port: {int(port):d} using the room (keyword) argument.")
+        # we do not need to raise an error anymore, now that we have a default room 
+        # if room is None: raise ValueError(
+        #     f"Enter a valid room on port: {int(port):d} using the room (keyword) argument.")
 
-        self.JSON_dict['room'] = room
+        if (room is not None): self.JSON_dict['room'] = room
         ## None as the second argument (filename) -> converts dictionary 
         ##  to JSON string rather than writing to a file
         self.JSON = write_to_json(self.JSON_dict,None)
 
         ## post the json to the listening url data_input
         ##  defined in server.py
-        print(f"Posting to {room} on port {int(port):d}...",end='')
+        if (room is None):
+            print(f"Posting data on port {int(port):d}...",end='')
+        else:
+            print(f"Posting data to room {room} on port {int(port):d}...",end='')
         requests.post(
             f'http://localhost:{port:d}/data_input',
             json=self.JSON)
