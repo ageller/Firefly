@@ -17,7 +17,8 @@ def main(
     directory=None,
     dec=1,
     fps=30,
-    copy_source=False):
+    copy_source=False,
+    multiple_rooms=False):
     """Creates a global interpreter locked process to host either a Flask 
         or HTTP server that can be accessed via localhost:<port>. 
 
@@ -39,6 +40,10 @@ def main(
     :param copy_source: flag to tell the ``firefly`` command to copy the source files for Firefly into 
         the directory specified by ``directory``, defaults to ``False``
     :type copy_source: bool, optional
+    :param multiple_rooms: allow multiple rooms? If True, the user will be prompted in the browser to enter 
+        a string to define the room for the given session (which would allow multiple users to interact with 
+        separate Firefly instances on a server), defaults to False.
+    :type multiple_rooms: bool, optional
     """
 
     if copy_source:
@@ -51,23 +56,25 @@ def main(
         if method not in ['flask','http']: raise ValueError(
             f"method must be one of flask or http, not {method}")
 
-        if method == 'flask': startFlaskServer(port,directory,fps,dec)
+        if method == 'flask': startFlaskServer(port,directory,fps,dec,multiple_rooms)
         else: startHTTPServer(port,directory)
 
 def define_parser():
     parser = argparse.ArgumentParser(description = 'Firefly')
     parser.add_argument('--method', default = 'http', type = str,
-        help = 'what sort of Firefly server to open, a Flask ("flask") server or an HTTP ("http"), defaults to "http"')
+        help = 'What sort of Firefly server to open, a Flask ("flask") server or an HTTP ("http"), defaults to "http".')
     parser.add_argument('--port', default = 5500, type = int,
-        help = 'port number for the server, defaults to 5500')
+        help = 'Port number for the server, defaults to 5500')
     parser.add_argument('--directory', default = None, type = str,
-        help = 'the directory of the Firefly source files to be served, if None, uses `os.dirname(__file__)` i.e. the directory of the `firefly` python distribution, defaults to None')
+        help = 'The directory of the Firefly source files to be served; if None, uses `os.dirname(__file__)`, i.e., the directory of the `firefly` Python distribution, defaults to None.')
     parser.add_argument('--dec', default = 1, type = int,
-        help = 'factor to decimate data that is being passed through localhost:<port>/data_input, defaults to 1')
+        help = 'Factor to decimate data that is being passed through localhost:<port>/data_input, defaults to 1.')
     parser.add_argument('--fps', default = 30, type = int,
-        help = 'enforced FPS for stream quality, used only if localhost:<port>/stream is accessed, defaults to 30')    
-    parser.add_argument('--copy_source', default = False, type = bool,
-        help = 'flag to tell the ``firefly`` command to copy the source files for Firefly into the directory specified by ``directory``, defaults to False')
+        help = 'Enforced FPS for stream quality, used only if localhost:<port>/stream is accessed, defaults to 30.')    
+    parser.add_argument('--copy_source', action='store_true',
+        help = 'Flag to tell the ``firefly`` command to copy the source files for Firefly into the directory specified by ``directory``. (If this flag is not supplied, the default behavior is to set copy_source=False).')
+    parser.add_argument('--multiple_rooms', action='store_true',
+        help = 'flag to enable multiple rooms.  If set, the user will be prompted in the browser to enter a string to define the room for the given session, which would allow multiple users to interact with separate Firefly instances on a server. (if this flag is not supplied, the default behavior is to set multiple_rooms=False) ')    
 
     return parser
 

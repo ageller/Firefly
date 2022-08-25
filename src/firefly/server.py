@@ -33,6 +33,8 @@ socketio = SocketIO(app, async_mode=async_mode)
 
 namespace = '/Firefly'
 
+default_room = 'default_Firefly_AMG_ABG'
+
 rooms = {} #will be updated below
 
 #number of seconds between updates
@@ -67,16 +69,24 @@ def on_leave(message):
 # this should fire when a user closes/refreshes their browser
 @socketio.on('disconnect', namespace=namespace)
 def disconnect():
-    print(f'======= sid {request.sid} disconnected from room {rooms[request.sid]}', )
+    if (request.sid in rooms):
+        print(f'======= sid {request.sid} disconnected from room {rooms[request.sid]}', )
     # remove this room from the dict
     rooms.pop(request.sid, None)
 
-#testing the connection
+# will fire when user connects
+@socketio.on('connect', namespace=namespace)
+def connect():
+    # if there is a room defined, emit that.  If there is no room defined, then the client will be prompted to enter one before joining
+    emit('room_check',{'room': default_room}, namespace=namespace)
+
+
+# testing the connection
 @socketio.on('connection_test', namespace=namespace)
 def connection_test(message):
     print('======= connected', message)
-    session['receive_count'] = session.get('receive_count', 0) + 1
-    emit('connection_response',{'data': message['data'], 'count': session['receive_count']}, namespace=namespace, to=rooms[request.sid])
+    # session['receive_count'] = session.get('receive_count', 0) + 1
+    # emit('connection_response',{'data': message['data'], 'count': session['receive_count']}, namespace=namespace, to=rooms[request.sid])
 
 
 ######for viewer
@@ -241,7 +251,7 @@ def startFlaskServer(
     directory=None,
     frames_per_second=30,
     decimation_factor=1,
-    ):
+    multiple_rooms=False):
     """Creates a global interpreter locked process to host a Flask server
         that can be accessed via localhost:<port>. 
 
@@ -253,7 +263,14 @@ def startFlaskServer(
     :param decimation_factor: factor to decimate data that is being passed through
         localhost:<port>/data_input, defaults to 1
     :type decimation_factor: int, optional
+    :param multiple_rooms: allow multiple rooms? If True, the user will be prompted in the browser to enter 
+        a string to define the room for the given session (which would allow multiple users to interact with 
+        separate Firefly instances on a server), defaults to False.
+    :type multiple_rooms: bool, optional
     """
+
+    global default_room
+    if (multiple_rooms): default_room = None
 
     if directory is None: directory = os.path.dirname(__file__)
     old_dir = os.getcwd()
@@ -265,7 +282,7 @@ def startFlaskServer(
         dec = decimation_factor
 
         print("Launching Firefly at: http://localhost:%d"%port)
-        socketio.run(app, host='0.0.0.0', port=port, use_reloader=True)
+        socketio.run(app, host='0.0.0.0', port=port)#, use_reloader=True)
     except: raise
     finally: os.chdir(old_dir)
 
@@ -295,7 +312,8 @@ def spawnFireflyServer(
     directory=None,
     frames_per_second=30,
     decimation_factor=1,
-    max_time=10):
+    max_time=10,
+    multiple_rooms=False):
     """ Starts a Firefly server as a background process. Close the server by calling
         :func:`firefly.server.quitAllFireflyServers`.
 
@@ -317,6 +335,10 @@ def spawnFireflyServer(
     :param max_time: maximum amount of time to wait for a Firefly server
         to be available. 
     :type max_time: float, optional
+     :param multiple_rooms: allow multiple rooms? If True, the user will be prompted in the browser to enter 
+        a string to define the room for the given session (which would allow multiple users to interact with 
+        separate Firefly instances on a server), defaults to False.
+    :type multiple_rooms: bool, optional
     :return: subprocess.Popen
     :rtype: subprocess handler
     :raises RuntimeError: if max_time elapses without a successful Firefly server being initialized.
@@ -330,7 +352,8 @@ def spawnFireflyServer(
         f"--fps={int(frames_per_second):d}",
         f"--dec={int(decimation_factor):d}",
         f"--method={method}",
-        f"--directory={directory}"]
+        f"--directory={directory}",
+        f"--multiple_rooms={multiple_rooms}"]
 
     ## use this run_server.py (even if the other directory has one)
     ##  since it can be run remotely
