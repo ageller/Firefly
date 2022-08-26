@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="firefly",
-    version="3.1.2",
+    version="3.2.0",
     author = 'Alex Gurvich, Aaron Geller',
     author_email = 'agurvich@u.northwestern.edu, ageller@northwestern.edu',
     description="A browser-based particle visualization platform",
@@ -31,7 +31,7 @@ setuptools.setup(
           'flask-socketio',
           'flask',
           'requests',
-          'abg_python>=1.0.6'
+          'abg_python>=1.1.0'
       ],
     include_package_data=True,
     scripts=["src/firefly/bin/firefly"]
