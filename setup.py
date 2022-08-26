@@ -31,7 +31,7 @@ setuptools.setup(
           'flask-socketio',
           'flask',
           'requests',
-          'abg_python>=1.1.0'
+          'abg_python>=1.1.1'
       ],
     include_package_data=True,
     scripts=["src/firefly/bin/firefly"]
