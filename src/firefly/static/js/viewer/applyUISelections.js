@@ -497,6 +497,33 @@ function copyValue(a){
 
 function createPreset(){
 	var preset = {};
+
+	var keys_to_avoid = [
+		"loaded",
+		"center", // values copied into array below
+		"camera", // values copied into array below
+		"cameraRotation", // values copied into array below
+		"cameraUp", // values copied into array below
+		"quaternion", // values copied into array below
+		"sizeMult", // PsizeMult -__-
+		"color" // Pcolors -__-
+	]
+
+	Object.keys(viewerParams.defaultSettings).forEach(function (key){
+		if (key.includes("start")) return;
+		else if (keys_to_avoid.includes(key)) return;
+		if (viewerParams.hasOwnProperty(key)){
+			value = viewerParams[key];
+			console.log(key,value)
+			if (value != null && Object.keys(value) > 0) return;
+			preset[key] = copyValue(viewerParams[key]); 
+		}
+		else {
+			console.log(key,'missing')
+			debugger
+		}
+	});
+
 	if (viewerParams.useTrackball){
 		preset.center = copyValue([viewerParams.controls.target.x, viewerParams.controls.target.y, viewerParams.controls.target.z]);
 	} else {
@@ -505,8 +532,6 @@ function createPreset(){
 		preset.center = copyValue([xx.x + viewerParams.camera.position.x, xx.y + viewerParams.camera.position.y, xx.z + viewerParams.camera.position.z]);
 	}
 
-	preset.zmin = copyValue(viewerParams.zmin);
-	preset.zmax = copyValue(viewerParams.zmax);
 
 	preset.camera = copyValue([viewerParams.camera.position.x, viewerParams.camera.position.y, viewerParams.camera.position.z]);
 	preset.cameraRotation = copyValue([viewerParams.camera.rotation.x, viewerParams.camera.rotation.y, viewerParams.camera.rotation.z]);
@@ -517,30 +542,6 @@ function createPreset(){
 	preset.startVR = copyValue(viewerParams.allowVRControls);
 	preset.startColumnDensity = copyValue(viewerParams.columnDensity);
 	preset.startTween = copyValue(viewerParams.updateTween);
-
-	preset.friction = copyValue(viewerParams.friction);
-	preset.stereo = copyValue(viewerParams.useStereo);
-	preset.stereoSep = copyValue(viewerParams.stereoSep);
-
-	preset.decimate = copyValue(viewerParams.decimate);
-	preset.maxVrange = copyValue(viewerParams.maxVrange);
-	preset.minPointScale = copyValue(viewerParams.minPointScale);
-	preset.maxPointScale = copyValue(viewerParams.maxPointScale);
-
-	elm = document.getElementById('annotate_container');
-	if (elm.style.display == 'block') preset.annotation = elm.innerHTML;
-
-	// flag to show fps in top right corner
-	preset.showFPS = copyValue(viewerParams.showFPS);
-	preset.showMemoryUsage = copyValue(viewerParams.showMemoryUsage);
-
-	// change the memory limit for octrees, in bytes
-	preset.memoryLimit = copyValue(viewerParams.memoryLimit);
-
-	//for the UI
-	preset.GUIExcludeList = copyValue(viewerParams.GUIExcludeList)
-	preset.collapseGUIAtStart = copyValue(viewerParams.collapseGUIAtStart)
-
 
 	//particle specific options
 	preset.UIparticle = {};
