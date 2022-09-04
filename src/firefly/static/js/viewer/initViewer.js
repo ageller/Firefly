@@ -527,11 +527,29 @@ function applyOptions(){
 
 	var forGUI = [];
 
-	//modify the minimum z to show particles at (avoid having particles up in your face)
-	if (options.hasOwnProperty('zmin') && options.zmin != null) viewerParams.zmin = options.zmin;
+	var keys_to_avoid = [
+		"center", // values copied into array below
+		"camera", // values copied into array below
+		"cameraRotation", // values copied into array below
+		"cameraUp", // values copied into array below
+		"quaternion", // not input, only output
+		"title", // handled in WebGLStart
+	]
 
-	//modify the maximum z to show particles at (avoid having particles up way in the background)
-	if (options.hasOwnProperty('zmax') && options.zmax != null) viewerParams.zmax = options.zmax;
+	Object.keys(viewerParams.defaultSettings).forEach(function (key){
+		if (options.hasOwnProperty(key) && options[key] != null){
+			value = options[key];
+			console.log(key,value,viewerParams[key])
+			// don't touch this guy
+			if (key == "loaded") return;
+			else if (key.includes("start")) return;
+			else if (keys_to_avoid.includes(key)) return;
+			else if (Object.keys(value).length > 0) return;
+			else viewerParams[key] = options[key]; // copy the value into the same key
+			debugger
+		}
+
+	})
 
 	//initialize center
 	if (options.hasOwnProperty('center')){
@@ -577,9 +595,6 @@ function applyOptions(){
 		setTweenviewerParams();
 	}
 
-	//modify the initial friction
-	if (options.hasOwnProperty('friction') && options.friction != null) viewerParams.friction = options.friction;
-
 	//check if we are starting in Stereo
 	if (options.hasOwnProperty('stereo') && options.stereo){
 		viewerParams.normalRenderer = viewerParams.renderer;
@@ -596,9 +611,6 @@ function applyOptions(){
 			viewerParams.effect.setEyeSeparation(viewerParams.stereoSep);
 	}
 
-	//modify the initial decimation
-	if (options.hasOwnProperty('decimate') && options.decimate != null) viewerParams.decimate = options.decimate;
-	
 	//maximum range in calculating the length the velocity vectors
 	if (options.hasOwnProperty("maxVrange") && options.maxVrange != null){
 		viewerParams.maxVrange = options.maxVrange; //maximum dynamic range for length of velocity vectors
@@ -608,12 +620,6 @@ function applyOptions(){
 				calcVelVals(viewerParams.parts[p]);     
 	} 	} 	}
 
-	//modify the minimum point scale factor
-	if (options.hasOwnProperty('minPointScale') && options.minPointScale != null) viewerParams.minPointScale = options.minPointScale;
-
-	//modify the maximum point scale factor
-	if (options.hasOwnProperty('maxPointScale') && options.maxPointScale != null) viewerParams.maxPointScale = options.maxPointScale;
-
     // add an annotation to the top if necessary
 	if (options.hasOwnProperty('annotation') && options.annotation != null){
 		elm = document.getElementById('annotate_container');
@@ -621,66 +627,8 @@ function applyOptions(){
 		elm.style.display='block';
     }
 
-	// flag to show fps in top right corner
-	if (options.hasOwnProperty('showFPS') && options.showFPS != null) viewerParams.showFPS = options.showFPS;
-
-	// flag to show memory usage in top right corner
-	if (options.hasOwnProperty('showMemoryUsage') && options.showMemoryUsage != null) viewerParams.showMemoryUsage = options.showMemoryUsage;
-
-	// change the memory limit for octrees, in bytes
-	if (options.hasOwnProperty('memoryLimit') && options.memoryLimit != null) viewerParams.memoryLimit = options.memoryLimit;
-	// flag to launch the app in a tween loop
-	if (viewerParams.parts.options.hasOwnProperty('start_tween')){
-		if (viewerParams.parts.options.start_tween){
-			viewerParams.updateTween = true	
-			setTweenviewerParams();
-		}
-	}
-
 	//  --------- column density options ----------- 
 
-	// flag to launch the app with the column density projection mode enabled
-	if (viewerParams.parts.options.hasOwnProperty(viewerParams.CDkey)){
-		if (viewerParams.parts.options.columnDensity != null){
-			viewerParams.columnDensity = viewerParams.parts.options.columnDensity;
-		}
-	}
-
-	// flag to renormalize column densities in logspace
-	if (viewerParams.parts.options.hasOwnProperty('CDlognorm')){
-		if (viewerParams.parts.options.CDlognorm != null){
-			viewerParams.CDlognorm = viewerParams.parts.options.CDlognorm;
-		}
-	}
-
-	// bottom of the column density renormalization
-	if (viewerParams.parts.options.hasOwnProperty('CDmin')){
-		if (viewerParams.parts.options.CDmin != null){
-			viewerParams.CDmin = viewerParams.parts.options.CDmin;
-		}
-	}
-
-	// top of the column density renormalization
-	if (viewerParams.parts.options.hasOwnProperty('CDmax')){
-		if (viewerParams.parts.options.CDmax != null){
-			viewerParams.CDmax = viewerParams.parts.options.CDmax;
-		}
-	}	
-
-	// disable GUI elements
-	if (viewerParams.parts.options.hasOwnProperty('GUIExcludeList')){
-		if (viewerParams.parts.options.GUIExcludeList != null){
-			viewerParams.GUIExcludeList = viewerParams.parts.options.GUIExcludeList;
-		}
-	}
-
-	if (viewerParams.parts.options.hasOwnProperty('collapseGUIAtStart')){
-		if (viewerParams.parts.options.collapseGUIAtStart != null){
-			viewerParams.collapseGUIAtStart = viewerParams.parts.options.collapseGUIAtStart;
-		}
-	}
-
-	//particle specific options
 	var options_keys = Object.keys(viewerParams.parts.options.showParts);
 	for (var i=0; i<viewerParams.partsKeys.length; i++){
 		var viewer_p = viewerParams.partsKeys[i];
