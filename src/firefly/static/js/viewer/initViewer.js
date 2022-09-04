@@ -238,6 +238,7 @@ function WebGLStart(){
 	if (viewerParams.parts.hasOwnProperty('options')){
 		if (viewerParams.parts.options.hasOwnProperty('title')){
 			window.document.title = viewerParams.parts.options.title
+			viewerParams.title = viewerParams.parts.options.title;
 		}
 	}
 
@@ -528,6 +529,7 @@ function applyOptions(){
 	var forGUI = [];
 
 	var keys_to_avoid = [
+		"loaded",
 		"center", // values copied into array below
 		"camera", // values copied into array below
 		"cameraRotation", // values copied into array below
@@ -539,17 +541,12 @@ function applyOptions(){
 	Object.keys(viewerParams.defaultSettings).forEach(function (key){
 		if (options.hasOwnProperty(key) && options[key] != null){
 			value = options[key];
-			console.log(key,value,viewerParams[key])
-			// don't touch this guy
-			if (key == "loaded") return;
-			else if (key.includes("start")) return;
+			if (key.includes("start")) return;
 			else if (keys_to_avoid.includes(key)) return;
 			else if (Object.keys(value).length > 0) return;
 			else viewerParams[key] = options[key]; // copy the value into the same key
-			debugger
 		}
-
-	})
+	});
 
 	//initialize center
 	if (options.hasOwnProperty('center')){
@@ -596,7 +593,7 @@ function applyOptions(){
 	}
 
 	//check if we are starting in Stereo
-	if (options.hasOwnProperty('stereo') && options.stereo){
+	if (options.hasOwnProperty('useStereo') && options.useStereo){
 		viewerParams.normalRenderer = viewerParams.renderer;
 		viewerParams.renderer = viewerParams.effect;
 		viewerParams.useStereo = true;
@@ -625,6 +622,7 @@ function applyOptions(){
 		elm = document.getElementById('annotate_container');
 		elm.innerHTML=options.annotation;
 		elm.style.display='block';
+		viewerParams.annotation = options.annotation;
     }
 
 	//  --------- column density options ----------- 
