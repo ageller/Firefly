@@ -1,6 +1,27 @@
 //all "global" variables are contained within params object
 var viewerParams;
 
+function setDefaultViewerParams(these_params){
+	d3.json("static/js/misc/defaultSettings.json", function(defaultSettings) {
+		viewerParams.defaultSettings = defaultSettings;
+		/*
+		var match;
+		Object.keys(defaultSettings).forEach(function (key){
+			if (viewerParams.hasOwnProperty(key)){
+				match = ( 
+					viewerParams[key] == defaultSettings[key]
+				);
+				//if (!match){ console.log(key,"didn't match")}
+				//else console.log("----- remove:",key)
+			}
+			else{ console.log(key,"wasn't here")
+
+			}
+		});
+		*/
+	})
+}
+
 function defineViewerParams(){
 	viewerParams = new function() {
 
@@ -22,6 +43,9 @@ function defineViewerParams(){
 		this.controls = null
 		this.effect = null;
 		this.normalRenderer = null;
+
+		this.title = null;
+		this.annotation = null;
 
 		this.keyboard = null;
 
@@ -299,5 +323,6 @@ function defineViewerParams(){
 
 		}
 
+		setDefaultViewerParams(this);
 	};
 }
