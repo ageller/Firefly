@@ -1,0 +1,118 @@
+{
+    "loaded": true,
+        
+    "startFly": false,
+    "startVR": false,
+    "startColumnDensity": false,
+    "startTween": false,
+
+    "sleepTimeout": 1.5,
+    "showSplashAtStartup": false,
+
+    "center": null,
+    "camera": null,
+    "cameraRotation": null,
+    "cameraUp": [1,0,0] ,
+    "quaternion": [0,0,0,1] ,
+
+    "friction": 0.1,
+    "flyffac": 1.0,
+    "stereo": false,
+    "stereoSep": 0.06,
+	"stereoSepMax" : 1.0,
+
+    "zmin": 1e-2,
+    "zmax": 5e10,
+    "decimate": 1,
+
+    "minPointScale": 0.01,
+    "maxPointScale": 10,
+
+    "annotation": null,
+    "title": "Firefly",
+    "showFPS": true,
+    "showMemoryUsage": true,
+    "memoryLimit": 2000000000.0,
+    "streamQuality": 1.0,
+
+    "GUIExcludeList": [],
+    "collapseGUIAtStart": true,
+
+    "colormapTextureFile": "static/textures/colormap.png",
+
+    "CDckey":"ColumnDensity",
+    "CDlognorm": false,
+    "CDmin": 1,
+    "CDmax": 10,
+    "scaleCD" : 0.01,
+
+    "VideoCapture_duration": 5,
+    "VideoCapture_FPS": 30,
+    "VideoCapture_filename": "firefly_capture",
+    "VideoCapture_format": 0,
+    "VideoCapture_formats": [".gif",".png",".jpg"],
+
+    "blendingMode": {
+        "pkey": "additive"
+    },
+    "depthTest": {
+        "pkey": false
+    },
+    "showParts": {
+        "pkey": true
+    },
+    "plotNmax": {
+        "pkey": null
+    },
+    "sizeMult": {
+        "pkey": 1
+    },
+    "color": {
+        "pkey": [1,0,0,1]
+    },
+    "showVel": {
+        "pkey": false
+    },
+    "velType": {
+        "pkey": "line"
+    },
+    "velVectorWidth": {
+        "pkey": 1
+    },
+    "velGradient": {
+        "pkey": false
+    },
+    "maxVrange": 2000.0,
+    "animateVel": {
+        "pkey": false
+    },
+    "animateVelDt": 0.0,
+    "animateVelTmax": 1.0,
+    "filterLims": {
+        "pkey": {"fkey": [0,1]}
+    },
+    "filterVals": {
+        "pkey": {"fkey": [0,1]}
+    },
+    "invertFilter": {
+        "pkey": {"fkey": false}
+    },
+    "showColormap": {
+        "pkey": false
+    },
+    "colormap": {
+        "pkey": 0.015625
+    },
+    "colormapLims": {
+        "pkey": {"ckey": [0,1]}
+    },
+    "colormapVals": {
+        "pkey": {"ckey": [0,1]}
+    },
+    "colormapVariable": {
+        "pkey": 0
+    },
+    "radiusVariable": {
+        "pkey": 0
+    }
+}
