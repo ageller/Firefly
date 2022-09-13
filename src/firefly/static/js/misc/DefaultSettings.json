@@ -1,5 +1,5 @@
 {
-    "loaded": true,
+    "loaded": false,
         
     "startFly": false,
     "startVR": false,
@@ -17,7 +17,7 @@
 
     "friction": 0.1,
     "flyffac": 1.0,
-    "stereo": false,
+    "useStereo": false,
     "stereoSep": 0.06,
 	"stereoSepMax" : 1.0,
 
@@ -37,8 +37,6 @@
 
     "GUIExcludeList": [],
     "collapseGUIAtStart": true,
-
-    "colormapTextureFile": "static/textures/colormap.png",
 
     "CDckey":"ColumnDensity",
     "CDlognorm": false,
