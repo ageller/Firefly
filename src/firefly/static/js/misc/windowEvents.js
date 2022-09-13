@@ -139,53 +139,78 @@ window.addEventListener('resize', changeSnapSizes);
 
 function showFlyExplainer(){
 	var elem = d3.select('#flyExplainer');
-	var bbox = elem.node().getBoundingClientRect();
-	elem.style('z-index', 100);
-	elem.transition().style('transform', 'translate(0px,0px)');
-	elem.classed('flyExplainerShown',true)
+	if (elem.node()){
+		var bbox = elem.node().getBoundingClientRect();
+		elem
+			.style('z-index', 100)
+			.classed('flyExplainerShown',true)
+			.transition().style('transform', 'translate(0px,0px)');
 
-	var elem2 = d3.select('#flyExplainerHider');
-	elem2.style('z-index', 100);
-	elem2.transition()
-		.style('transform', 'translate(0px,0px)')
-		.style('margin-top', parseFloat(bbox.height) + 'px');
-	d3.select('#flyExplainerHiderContent').transition().style('transform', 'rotate(0deg)')
+		var elem2 = d3.select('#flyExplainerHider');
+		elem2
+			.style('z-index', 100)
+			.transition()
+				.style('transform', 'translate(0px,0px)')
+				.style('margin-top', parseFloat(bbox.height) + 'px');
+
+		d3.select('#flyExplainerHiderContent').transition().style('transform', 'rotate(0deg)');
+	}
 }
 
 function hideFlyExplainer(){
 	var elem = d3.select('#flyExplainer');
-	var bbox = elem.node().getBoundingClientRect();
-	elem.transition().style('transform', 'translate(0px,' + parseFloat(bbox.height) + 'px)').on('end', function(){elem.style('z-index', 0)});
-	elem.classed('flyExplainerShown',false)
+	if (elem.node()){
 
-	d3.select('#flyExplainerHider').transition()
-		.style('transform', 'translate(0px,' + parseFloat(bbox.height) + 'px)')
-		.style('margin-top', parseFloat(bbox.height) + 'px');
-	d3.select('#flyExplainerHiderContent').transition().style('transform', 'rotate(180deg)')
+		var bbox = elem.node().getBoundingClientRect();
+		elem
+			.classed('flyExplainerShown',false)
+			.transition()
+				.style('transform', 'translate(0px,' + parseFloat(bbox.height) + 'px)')
+				.on('end', function(){
+					elem.style('z-index', 0)
+				});
+
+		d3.select('#flyExplainerHider').transition()
+			.style('transform', 'translate(0px,' + parseFloat(bbox.height) + 'px)')
+			.style('margin-bottom', parseFloat(bbox.height) + 'px');
+
+		d3.select('#flyExplainerHiderContent').transition().style('transform', 'rotate(180deg)');
+	}
 
 }
 
 function removeFlyExplainer(){
 	var elem = d3.select('#flyExplainer');
-	var bbox = elem.node().getBoundingClientRect();
+	if (elem.node()){
+		var bbox = elem.node().getBoundingClientRect();
 
-	elem
-		.classed('flyExplainerShown',false)
-		.style('transform', 'translate(0px,' + parseFloat(bbox.height) + 'px)')
-		.style('z-index', 0);
+		elem
+			.classed('flyExplainerShown',false)
+			.style('transform', 'translate(0px,' + parseFloat(bbox.height) + 'px)')
+			.style('z-index', 0);
 
-	d3.select('#flyExplainerHider')
-		.style('transform', 'translate(0px,' + parseFloat(bbox.height) + 'px)')
-		.style('margin-top', parseFloat(bbox.height) + 'px')
-		.style('z-index', 0);
+		d3.select('#flyExplainerHider')
+			.style('transform', 'translate(0px,' + parseFloat(bbox.height) + 'px)')
+			.style('margin-bottom', parseFloat(bbox.height) + 'px')
+			.style('z-index', 0);
+	}
 }
 
 d3.select('#flyExplainerHider').on('click', function(){
 	var elem = d3.select('#flyExplainer');
-	if (elem.classed('flyExplainerShown')) {
-		hideFlyExplainer();
-	} else {
-		showFlyExplainer()
+	if (elem.node()){
+		if (elem.classed('flyExplainerShown')) {
+			hideFlyExplainer();
+		} else {
+			showFlyExplainer()
+		}
 	}
 	
 })
+window.addEventListener('resize', function(){
+	var elem = d3.select('#flyExplainer');
+	if (elem.node()){
+		var bbox = elem.node().getBoundingClientRect();
+		d3.select('#flyExplainerHider').style('margin-bottom', parseFloat(bbox.height) + 'px');
+	}
+});

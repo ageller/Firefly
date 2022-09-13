@@ -242,7 +242,7 @@ a:visited {
 	bottom:0; 
 	left: 0px;
 	padding:2px; 
-	margin-bottom: 70px;
+	/*margin-bottom: 70px;*/
 	/*z-index:100;*/
 	border-radius: 10px 10px 0px 0px;
 	transform:  translate(0px, 0px);
