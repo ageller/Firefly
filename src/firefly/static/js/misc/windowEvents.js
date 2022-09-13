@@ -142,16 +142,16 @@ function showFlyExplainer(){
 	if (elem.node()){
 		var bbox = elem.node().getBoundingClientRect();
 		elem
-			.style('z-index', 100)
+			.style('z-index', 3)
 			.classed('flyExplainerShown',true)
 			.transition().style('transform', 'translate(0px,0px)');
 
 		var elem2 = d3.select('#flyExplainerHider');
 		elem2
-			.style('z-index', 100)
+			.style('z-index', 3)
 			.transition()
 				.style('transform', 'translate(0px,0px)')
-				.style('margin-top', parseFloat(bbox.height) + 'px');
+				.style('margin-bottom', parseFloat(bbox.height) + 'px');
 
 		d3.select('#flyExplainerHiderContent').transition().style('transform', 'rotate(0deg)');
 	}

@@ -235,8 +235,8 @@ a:visited {
 	transform:  translate(0px, 0px);
 }
 #flyExplainerHider{
-	background-color:#808080; 
-	color: black; 
+	background-color:rgb(80,80,80); 
+	color: white; 
 	position:fixed; 
 	height: 20px;
 	bottom:0; 
@@ -247,4 +247,7 @@ a:visited {
 	border-radius: 10px 10px 0px 0px;
 	transform:  translate(0px, 0px);
 	cursor: pointer;
+}
+#flyExplainerHider:hover{
+	color: black;
 }
