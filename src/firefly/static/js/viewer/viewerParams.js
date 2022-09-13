@@ -90,7 +90,7 @@ function defineViewerParams(){
 		// the  CCCapture object will be added when recordVideo is called
 		this.capturer = null; 
 		this.captureCanvas = false;
-		this.imageCaptureClicked = true; //to help differentiate between an image and movie for a gif
+		this.imageCaptureClicked = false; //to help differentiate between an image and movie for a gif
 
 		//for deciding whether to show velocity vectors
 		this.showVel = {};

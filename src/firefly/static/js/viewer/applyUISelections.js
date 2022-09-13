@@ -469,6 +469,8 @@ function recordVideo(fps = null, duration = null){
 	if (!fps) fps = viewerParams.VideoCapture_FPS;
 	if (!duration) duration = viewerParams.VideoCapture_duration;
 
+	console.log('recording', fps, duration)
+
 	viewerParams.captureCanvas = true;
 	viewerParams.capturer = new CCapture( { 
 		format: viewerParams.VideoCapture_formats[viewerParams.VideoCapture_format].slice(1), 

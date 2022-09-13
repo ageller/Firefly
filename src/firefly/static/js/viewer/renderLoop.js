@@ -13,7 +13,6 @@ function animate(time) {
 		if (viewerParams.captureCanvas) capture();
 
 		render();
-
 		// calculate framerate and optionally display it. 
 		// put the app to sleep if FPS < .66 by setting
 		// viewerParams.pauseAnimation = true
@@ -562,7 +561,6 @@ function capture(){
 		viewerParams.VideoCapture_frame = 0;
 		viewerParams.imageCaptureClicked = false;
 	}
-
 }
 
 function update_memory_usage(){
