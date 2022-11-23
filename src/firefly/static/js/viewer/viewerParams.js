@@ -68,10 +68,10 @@ function defineViewerParams(){
 		this.updateOnOff = {};
 
 		//particle size multiplicative factor
-		this.PsizeMult = {};
+		this.partsSizeMultipliers = {};
 
 		//particle default colors;
-		this.Pcolors = {};
+		this.partsColors = {};
 
 		//Decimation
 		this.decimate = 1;
@@ -131,7 +131,6 @@ function defineViewerParams(){
 							 'multiply':THREE.MultiplyBlending, 
 							 'none':THREE.NoBlending};
 		this.blendingMode = {};
-		this.depthWrite = {};
 		this.depthTest = {};
 
 		//for deciding whether to animate the velocities

@@ -828,7 +828,6 @@ function applyOptions(){
 			options.depthTest.hasOwnProperty(p) && 
 			options.depthTest[p] != null){
 				viewerParams.depthTest[viewer_p] = copyValue(options.depthTest[p]);
-				viewerParams.depthWrite[viewer_p] = copyValue(options.depthTest[p]);
 				/*
 				var evalString =( 'elm = document.getElementById(' + p + '_depthCheckBox);'+
 					'elm.checked = ' + options.depthTest[p] + ';'+
@@ -967,7 +966,7 @@ function initColumnDensity(){
 // continuously check if viewerParams attributes that
 // should be initialized here are null, if so, keep waiting
 function confirmViewerInit(){
-	var keys = ["partsKeys", "PsizeMult", "plotNmax", "decimate", "stereoSepMax", "friction", "Pcolors", "showParts", "showVel", "animateVel", "velopts", "velType", "ckeys", "colormapVals", "colormapLims", "colormapVariable", "colormap", "showColormap", "fkeys", "filterVals", "filterLims", "renderer", "scene", "controls","camera","parts"];
+	var keys = ["partsKeys", "partsSizeMultipliers", "plotNmax", "decimate", "stereoSepMax", "friction", "partsColors", "showParts", "showVel", "animateVel", "velopts", "velType", "ckeys", "colormapVals", "colormapLims", "colormapVariable", "colormap", "showColormap", "fkeys", "filterVals", "filterLims", "renderer", "scene", "controls","camera","parts"];
 
 	var ready = true;
 	keys.forEach(function(k,i){
@@ -998,10 +997,10 @@ function sendInitGUI(prepend=[], append=[]){
 	var forGUI = prepend;
 	forGUI.push({'setGUIParamByKey':[false,"GUIready"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.partsKeys, "partsKeys"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.PsizeMult, "PsizeMult"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.partsSizeMultipliers, "partsSizeMultipliers"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.plotNmax, "plotNmax"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.decimate, "decimate"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.Pcolors, "Pcolors"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.partsColors, "partsColors"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.showParts, "showParts"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.boxSize, "boxSize"]});
 

@@ -453,7 +453,7 @@ function createColorPicker(p){
 	/* for color pickers*/
 	//can I write this in d3? I don't think so.  It needs a jquery object
 	$("#"+p+"ColorPicker").spectrum({
-		color: "rgba("+(GUIParams.Pcolors[p][0]*255)+","+(GUIParams.Pcolors[p][1]*255)+","+(GUIParams.Pcolors[p][2]*255)+","+GUIParams.Pcolors[p][3]+")",
+		color: "rgba("+(GUIParams.partsColors[p][0]*255)+","+(GUIParams.partsColors[p][1]*255)+","+(GUIParams.partsColors[p][2]*255)+","+GUIParams.partsColors[p][3]+")",
 		flat: false,
 		showInput: true,
 		showInitial: false,
@@ -472,7 +472,7 @@ function createColorPicker(p){
 	// special URL to disable the colorpicker
 	if (excluded(p+'/colorPicker/onclick')){
 		$("#"+p+"ColorPicker").spectrum({
-			color: "rgba("+(GUIParams.Pcolors[p][0]*255)+","+(GUIParams.Pcolors[p][1]*255)+","+(GUIParams.Pcolors[p][2]*255)+","+GUIParams.Pcolors[p][3]+")",
+			color: "rgba("+(GUIParams.partsColors[p][0]*255)+","+(GUIParams.partsColors[p][1]*255)+","+(GUIParams.partsColors[p][2]*255)+","+GUIParams.partsColors[p][3]+")",
 			disabled: true,
 		});		
 	}

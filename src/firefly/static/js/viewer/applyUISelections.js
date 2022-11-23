@@ -269,13 +269,11 @@ function changeBlendingForColormap(args){
 
 		if ( viewerParams.showColormap[p]){
 			viewerParams.blendingMode[p] = 'normal';
-			viewerParams.depthWrite[p] = true;
 			viewerParams.depthTest[p] = true;
 		}
 		else {
 			// update the blending mode for the whole particle group (kind of wasteful)
 			viewerParams.blendingMode[p] = 'additive';
-			viewerParams.depthWrite[p] = false;
 			viewerParams.depthTest[p] = false;
 		}
 	})
@@ -298,11 +296,11 @@ function checkInvertFilterBox(args){
 function checkColor(args){
 	var p = args[0];
 	var rgb = args[1];
-	viewerParams.Pcolors[p] = [rgb.r/255., rgb.g/255., rgb.b/255., rgb.a];
+	viewerParams.partsColors[p] = [rgb.r/255., rgb.g/255., rgb.b/255., rgb.a];
 	//update the octree loading bar if it exists
 	if (viewerParams.haveOctree[p]){
-		d3.select('#' + p + 'octreeLoadingFill').attr('fill','rgb(' + (255*viewerParams.Pcolors[p][0]) + ',' + (255*viewerParams.Pcolors[p][1]) + ',' + (255*viewerParams.Pcolors[p][2]) + ')')
-		d3.select('#' + p + 'octreeLoadingText').attr('fill','rgb(' + (255*viewerParams.Pcolors[p][0]) + ',' + (255*viewerParams.Pcolors[p][1]) + ',' + (255*viewerParams.Pcolors[p][2]) + ')')
+		d3.select('#' + p + 'octreeLoadingFill').attr('fill','rgb(' + (255*viewerParams.partsColors[p][0]) + ',' + (255*viewerParams.partsColors[p][1]) + ',' + (255*viewerParams.partsColors[p][2]) + ')')
+		d3.select('#' + p + 'octreeLoadingText').attr('fill','rgb(' + (255*viewerParams.partsColors[p][0]) + ',' + (255*viewerParams.partsColors[p][1]) + ',' + (255*viewerParams.partsColors[p][2]) + ')')
 	}
 }
 
@@ -505,8 +503,6 @@ function createPreset(){
 		"cameraRotation", // values copied into array below
 		"cameraUp", // values copied into array below
 		"quaternion", // values copied into array below
-		"sizeMult", // PsizeMult -__-
-		"color" // Pcolors -__-
 	]
 
 	Object.keys(viewerParams.defaultSettings).forEach(function (key){
@@ -549,8 +545,8 @@ function createPreset(){
 	preset.UIcolorPicker = {};
 
 	preset.showParts = {};
-	preset.sizeMult = {};
-	preset.color = {};
+	preset.partsSizeMultipliers = {};
+	preset.partsColors = {};
 	preset.plotNmax = {};
 
 	preset.showVel = {};
@@ -579,8 +575,8 @@ function createPreset(){
 		var p = copyValue(viewerParams.partsKeys[i]);
 
 		preset.showParts[p] = copyValue(viewerParams.showParts[p]);
-		preset.sizeMult[p] = copyValue(viewerParams.PsizeMult[p]);
-		preset.color[p] = copyValue(viewerParams.Pcolors[p]);
+		preset.partsSizeMultipliers[p] = copyValue(viewerParams.partsSizeMultipliers[p]);
+		preset.partsColors[p] = copyValue(viewerParams.partsColors[p]);
 		preset.plotNmax[p] = copyValue(viewerParams.plotNmax[p]);
 
 		preset.showVel[p] = copyValue(viewerParams.showVel[p]);
@@ -670,7 +666,7 @@ function setBlendingMode(args){
 	var blend = viewerParams.blendingOpts[mode];
 
 	viewerParams.partsMesh[p].forEach( function( m, j ) {
-		m.material.depthWrite = viewerParams.depthWrite[p];
+		m.material.depthWrite = viewerParams.depthTest[p];
 		m.material.depthTest = viewerParams.depthTest[p];
 		m.material.blending = blend;
 		m.material.uniforms.useDepth.value = +viewerParams.depthTest[p]
@@ -705,7 +701,6 @@ function setDepthMode(args){
 
 	// update the viewer params and rely on the render loop
 	//  to apply them.
-	viewerParams.depthWrite[p] = checked;
 	viewerParams.depthTest[p] = checked;
 }
 

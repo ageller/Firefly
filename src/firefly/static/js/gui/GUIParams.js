@@ -104,13 +104,13 @@ function defineGUIParams(){
 		this.reset = false;
 
 		this.partsKeys = null;
-		this.PsizeMult = null;
+		this.partsSizeMultipliers = null;
 		this.plotNmax = null;
 		this.decimate = null;
 		this.stereoSepMax = null;
 		this.friction = null;
 
-		this.Pcolors = null;
+		this.partsColors = null;
 		this.showParts = null;
 		this.showVel = null;
 		this.velopts = null; 

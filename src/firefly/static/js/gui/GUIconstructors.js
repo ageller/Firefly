@@ -1560,13 +1560,13 @@ function createOctreeLoadingBar(container){
 				.attr('y', (nRects*(height + offset) + margin) + 'px')
 				.attr('width','0px') //will be updated
 				.attr('height',height + 'px')
-				.attr('fill','rgb(' + (255*GUIParams.Pcolors[p][0]) + ',' + (255*GUIParams.Pcolors[p][1]) + ',' + (255*GUIParams.Pcolors[p][2]) + ')')
+				.attr('fill','rgb(' + (255*GUIParams.partsColors[p][0]) + ',' + (255*GUIParams.partsColors[p][1]) + ',' + (255*GUIParams.partsColors[p][2]) + ')')
 			svg.append('text')
 				.attr('id',p + 'octreeLoadingText')
 				.attr('class','octreeLoadingText')
 				.attr('x', (width + margin + offset) + 'px')
 				.attr('y', (nRects*(height + offset) + margin + 0.75*height) + 'px')
-				.attr('fill','rgb(' + (255*GUIParams.Pcolors[p][0]) + ',' + (255*GUIParams.Pcolors[p][1]) + ',' + (255*GUIParams.Pcolors[p][2]) + ')')
+				.attr('fill','rgb(' + (255*GUIParams.partsColors[p][0]) + ',' + (255*GUIParams.partsColors[p][1]) + ',' + (255*GUIParams.partsColors[p][2]) + ')')
 				.style('font-size', (0.75*height) + 'px')
 				.text(p + ' (0/0)')				
 			nRects += 1;
