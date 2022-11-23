@@ -112,14 +112,14 @@ function initInputData(){
 
 	//I think I need to wait a moment because sometimes this doesn't fire (?)
 	setTimeout(function(){
-		makeViewer(null, forGUIprepend, forGUIappend);
+		makeViewer(forGUIprepend, forGUIappend);
 		WebGLStart();
 	}, 1000);
 }
 
 //so that it can run locally also without using Flask
 // note that if allowVRControls == true, then you do not want to start in stereo (the VR button will do the work)
-function runLocal(useSockets=true, showGUI=true, allowVRControls=false, startStereo=false, pSize=null){
+function runLocal(useSockets=true, showGUI=true, allowVRControls=false, startStereo=false){
 	d3.select("#splashdiv5").text("Loading particle data...");
 	viewerParams.local = true;
 	viewerParams.usingSocket = useSockets;
@@ -137,7 +137,7 @@ function runLocal(useSockets=true, showGUI=true, allowVRControls=false, startSte
 	viewerParams.useStereo = false;
 
 	//both of these start setIntervals to wait for the proper variables to be set
-	makeViewer(pSize);
+	makeViewer();
 	if (showGUI) {
 		makeUI(local=true);
 	} else {
@@ -150,7 +150,7 @@ function runLocal(useSockets=true, showGUI=true, allowVRControls=false, startSte
 }
 
 //wait for all the input before loading
-function makeViewer(pSize=null, prepend=[], append=[]){
+function makeViewer(prepend=[], append=[]){
 	viewerParams.haveUI = false;
 	viewerParams.ready = false; 
 	console.log("Waiting for viewer init ...")
@@ -165,11 +165,6 @@ function makeViewer(pSize=null, prepend=[], append=[]){
 			viewerParams.parts.options_initial = createPreset(); //this might break things if the presets don't work...
 			//console.log("initial options", viewerParams.parts.options)
 
-			//to test
-			if (pSize) {
-				viewerParams.PsizeMult.Gas = pSize;
-				console.log('new Psize', pSize)
-			}
 			sendInitGUI(prepend=prepend, append=append);
 		}
 	}, 100);
