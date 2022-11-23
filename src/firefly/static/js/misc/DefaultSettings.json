@@ -28,6 +28,8 @@
     "minPointScale": 0.01,
     "maxPointScale": 10,
 
+    "maxVrange": 2000.0,
+
     "annotation": null,
     "title": "Firefly",
     "showFPS": true,
@@ -48,69 +50,5 @@
     "VideoCapture_FPS": 30,
     "VideoCapture_filename": "firefly_capture",
     "VideoCapture_format": 0,
-    "VideoCapture_formats": [".gif",".png",".jpg"],
-
-    "blendingMode": {
-        "pkey": "additive"
-    },
-    "depthTest": {
-        "pkey": false
-    },
-    "showParts": {
-        "pkey": true
-    },
-    "plotNmax": {
-        "pkey": null
-    },
-    "sizeMult": {
-        "pkey": 1
-    },
-    "color": {
-        "pkey": [1,0,0,1]
-    },
-    "showVel": {
-        "pkey": false
-    },
-    "velType": {
-        "pkey": "line"
-    },
-    "velVectorWidth": {
-        "pkey": 1
-    },
-    "velGradient": {
-        "pkey": false
-    },
-    "maxVrange": 2000.0,
-    "animateVel": {
-        "pkey": false
-    },
-    "animateVelDt": 0.0,
-    "animateVelTmax": 1.0,
-    "filterLims": {
-        "pkey": {"fkey": [0,1]}
-    },
-    "filterVals": {
-        "pkey": {"fkey": [0,1]}
-    },
-    "invertFilter": {
-        "pkey": {"fkey": false}
-    },
-    "showColormap": {
-        "pkey": false
-    },
-    "colormap": {
-        "pkey": 0.015625
-    },
-    "colormapLims": {
-        "pkey": {"ckey": [0,1]}
-    },
-    "colormapVals": {
-        "pkey": {"ckey": [0,1]}
-    },
-    "colormapVariable": {
-        "pkey": 0
-    },
-    "radiusVariable": {
-        "pkey": 0
-    }
+    "VideoCapture_formats": [".gif",".png",".jpg"]
 }
