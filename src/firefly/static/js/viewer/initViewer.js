@@ -275,73 +275,47 @@ function initPVals(){
 			viewerParams.partsMesh[p] = [];
 		}
 
+		// copy the value into the same key to initialize the particle settings from the default
+		Object.keys(viewerParams.defaultParticleSettings).forEach(function (key){
+			viewerParams[key][p] = viewerParams.defaultParticleSettings[key]; 
+		});
+
 		// store the name inside the dictionary
 		viewerParams.parts[p].pkey = p;
 
 		//misc
 		if (!viewerParams.haveOctree[p]) viewerParams.plotNmax[p] = viewerParams.parts.count[p];
-		viewerParams.PsizeMult[p] = 1.;
-		viewerParams.showParts[p] = true;
 		viewerParams.updateOnOff[p] = false;
-
 		//filter
 		viewerParams.updateFilter[p] = false;
-		viewerParams.filterLims[p] = {};
-		viewerParams.filterVals[p] = {};
-		viewerParams.invertFilter[p] = {};
-		viewerParams.fkeys[p] = [];
-
 		//colormap
-		viewerParams.ckeys[p] = [];
-		viewerParams.colormapVariable[p] = 0;
-		viewerParams.colormap[p] = 4/256;
-		viewerParams.showColormap[p] = false;
 		viewerParams.updateColormapVariable[p] = false;
-		viewerParams.colormapVals[p] = {};
-		viewerParams.colormapLims[p] = {};
-
 		// radius scaling
-		viewerParams.radiusVariable[p] = 0; // corresponds to "None"
 		viewerParams.updateRadiusVariable[p] = false;
-		viewerParams.rkeys[p] = [];
-
-		//blending
-		viewerParams.blendingMode[p] = 'additive';
-		viewerParams.depthWrite[p] = false;
-		viewerParams.depthTest[p] = false;
 
 		//velocities
-		viewerParams.showVel[p] = false;
-		viewerParams.velVectorWidth[p] = 1.;
-		viewerParams.velGradient[p] = 0.; //0 == false, 1 == true
-		viewerParams.animateVel[p] = false;
-		viewerParams.animateVelDt[p] = 0.;
-		viewerParams.animateVelTmax[p] = 0.;
 		if (viewerParams.parts[p].Velocities_flat != null){
 			if (!viewerParams.reset){
 				calcVelVals(viewerParams.parts[p]);
 				if(!viewerParams.parts[p].hasOwnProperty("filterKeys")){
 					viewerParams.parts[p].filterKeys = [];
 				}
-			 
 			}
-			viewerParams.velType[p] = 'line';
 		}
 		
 		//filters
 		//in case there are no filter possibilities (but will be overwritten below)
-		viewerParams.fkeys[p] = ["None"];
-		viewerParams.filterLims[p]["None"] = [0,1];
-		viewerParams.filterVals[p]["None"] = [0,1]; 
 		var haveCurrentFilter = true;
 		if (viewerParams.parts[p].currentlyShownFilter == undefined) {
 			viewerParams.parts[p].currentlyShownFilter = ["None"];
 			haveCurrentFilter = false;
 		}
+
+		viewerParams.parts[p]['playbackTicks'] = 0;
+		viewerParams.parts[p]['playbackTickRate'] = 10;   
+
 		if (viewerParams.parts[p].hasOwnProperty("filterKeys")){
 			viewerParams.fkeys[p] = viewerParams.parts[p].filterKeys;
-			viewerParams.parts[p]['playbackTicks'] = 0;
-			viewerParams.parts[p]['playbackTickRate'] = 10;   
 			for (var k=0; k<viewerParams.fkeys[p].length; k++){
 				// TODO we should consider removing this "feature"
 				//  and just require users to pass in the mag velocity
@@ -368,9 +342,6 @@ function initPVals(){
 		}
 		//colormap
 		//in case there are no colormap possibilities (but will be overwritten below)
-		viewerParams.ckeys[p] = ["None"];
-		viewerParams.colormapLims[p]["None"] = [0,1];
-		viewerParams.colormapVals[p]["None"] = [0,1];
 		if (viewerParams.parts[p].hasOwnProperty("colormapKeys")){
 			if (viewerParams.parts[p].colormapKeys.length > 0){
 				viewerParams.ckeys[p] = viewerParams.parts[p].colormapKeys;
@@ -402,7 +373,6 @@ function initPVals(){
 		}
 		// radius scaling
 		// None for no radius scaling radius possibilities
-		viewerParams.rkeys[p] = ["None"];
 		if (viewerParams.parts[p].hasOwnProperty("radiusKeys") &&
 			viewerParams.parts[p].radiusKeys.length > 0){
 				viewerParams.rkeys[p] = viewerParams.rkeys[p].concat(viewerParams.parts[p].radiusKeys);
@@ -538,7 +508,12 @@ function applyOptions(){
 			value = options[key];
 			if (key.includes("start")) return;
 			else if (keys_to_avoid.includes(key)) return;
-			else if (Object.keys(value).length > 0) return;
+			else if (Object.keys(value).length > 0){
+				key=animateVelTmax;
+				console.log(key,value,Object.keys(value))
+				debugger
+				return
+			}
 			else viewerParams[key] = options[key]; // copy the value into the same key
 		}
 	});
@@ -640,16 +615,16 @@ function applyOptions(){
 			options.showParts[p] != null) viewerParams.showParts[viewer_p] = options.showParts[p];
 
 		//size
-		if (options.hasOwnProperty("sizeMult") && 
-			options.sizeMult != null && 
-			options.sizeMult.hasOwnProperty(p) && 
-			options.sizeMult[p] != null) viewerParams.PsizeMult[viewer_p] = options.sizeMult[p];
+		if (options.hasOwnProperty("partsSizeMultipliers") && 
+			options.partsSizeMultipliers != null && 
+			options.partsSizeMultipliers.hasOwnProperty(p) && 
+			options.partsSizeMultipliers[p] != null) viewerParams.partsSizeMultipliers[viewer_p] = options.partsSizeMultipliers[p];
 
 		//color
 		if (options.hasOwnProperty("color") &&
 			options.color != null &&
 			options.color.hasOwnProperty(p) && 
-			options.color[p] != null) viewerParams.Pcolors[viewer_p] = options.color[p];
+			options.color[p] != null) viewerParams.partsColors[viewer_p] = options.color[p];
 
 		//maximum number of particles to plot
 		if (options.hasOwnProperty("plotNmax") &&

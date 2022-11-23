@@ -20,6 +20,13 @@ function setDefaultViewerParams(these_params){
 		});
 		*/
 	})
+
+	// load the default particle settings
+	d3.json("static/js/misc/defaultParticleSettings.json", function(defaultParticleSettings) {
+		viewerParams.defaultParticleSettings = defaultParticleSettings;
+	});
+
+
 }
 
 function defineViewerParams(){
