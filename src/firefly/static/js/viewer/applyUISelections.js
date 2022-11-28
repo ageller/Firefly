@@ -505,20 +505,18 @@ function createPreset(){
 		"quaternion", // values copied into array below
 	]
 
+	// copy settings that user can directly set
 	Object.keys(viewerParams.defaultSettings).forEach(function (key){
 		if (key.includes("start")) return;
 		else if (keys_to_avoid.includes(key)) return;
-		if (viewerParams.hasOwnProperty(key)){
-			value = viewerParams[key];
-			if (value != null && Object.keys(value) > 0) return;
-			preset[key] = copyValue(viewerParams[key]); 
-		}
-		else {
-			console.log(key,'missing')
-			debugger
-		}
+		if (viewerParams.hasOwnProperty(key)) preset[key] = copyValue(viewerParams[key]); 
 	});
 
+	Object.keys(viewerParams.defaultParticleSettings).forEach(function (key){
+		if (viewerParams.hasOwnProperty(key)) preset[key] = copyValue(viewerParams[key]); 
+	});
+
+	// copy camera settings
 	if (viewerParams.useTrackball){
 		preset.center = copyValue([viewerParams.controls.target.x, viewerParams.controls.target.y, viewerParams.controls.target.z]);
 	} else {
@@ -533,89 +531,14 @@ function createPreset(){
 	preset.cameraUp = copyValue([viewerParams.camera.up.x, viewerParams.camera.up.y, viewerParams.camera.up.z]);
 	preset.quaternion = copyValue([viewerParams.camera.quaternion.w,viewerParams.camera.quaternion.x, viewerParams.camera.quaternion.y, viewerParams.camera.quaternion.z]);
 
+	// copy startup settings
 	preset.startFly = copyValue(!viewerParams.useTrackball);
 	preset.startVR = copyValue(viewerParams.allowVRControls);
 	preset.startColumnDensity = copyValue(viewerParams.columnDensity);
 	preset.startTween = copyValue(viewerParams.updateTween);
 
-	//particle specific options
-	preset.UIparticle = {};
-	preset.UIdropdown = {};
-	preset.UIcolorPicker = {};
-
-	preset.showParts = {};
-	preset.partsSizeMultipliers = {};
-	preset.partsColors = {};
-	preset.plotNmax = {};
-
-	preset.showVel = {};
-	preset.velType = {};
-	preset.velVectorWidth = {};
-	preset.velGradient = {};
-	preset.animateVel = {};
-	preset.animateVelDt = {};
-	preset.animateVelTmax = {};
-
-	preset.filterLims = {};
-	preset.filterVals = {};
-	preset.invertFilter = {};
-
-	preset.colormapLims = {};
-	preset.colormapVals = {};
-	preset.showColormap = {};
-	preset.colormap = {};
-	preset.colormapVariable = {};
-	preset.blendingMode = {};
-	preset.depthTest = {};
-
-	preset.radiusVariable = {};
-
-	for (var i=0; i<viewerParams.partsKeys.length; i++){
-		var p = copyValue(viewerParams.partsKeys[i]);
-
-		preset.showParts[p] = copyValue(viewerParams.showParts[p]);
-		preset.partsSizeMultipliers[p] = copyValue(viewerParams.partsSizeMultipliers[p]);
-		preset.partsColors[p] = copyValue(viewerParams.partsColors[p]);
-		preset.plotNmax[p] = copyValue(viewerParams.plotNmax[p]);
-
-		preset.showVel[p] = copyValue(viewerParams.showVel[p]);
-		preset.velType[p] = copyValue(viewerParams.velType[p]);
-		preset.velVectorWidth[p] = copyValue(viewerParams.velVectorWidth[p]);
-		preset.velGradient[p] = copyValue(viewerParams.velGradient[p]);
-		preset.animateVel[p] = copyValue(viewerParams.animateVel[p]);
-		preset.animateVelDt[p] = copyValue(viewerParams.animateVelDt[p]);
-		preset.animateVelTmax[p] = copyValue(viewerParams.animateVelTmax[p]);
-
-		preset.filterLims[p] = {};
-		preset.filterVals[p] = {};
-		preset.invertFilter[p] = {};
-		for (k=0; k<viewerParams.fkeys[p].length; k++){
-			var fkey = copyValue(viewerParams.fkeys[p][k]);
-			preset.filterLims[p][fkey] = copyValue(viewerParams.filterLims[p][fkey]);
-			preset.filterVals[p][fkey] = copyValue(viewerParams.filterVals[p][fkey]);
-			preset.invertFilter[p][fkey] = copyValue(viewerParams.invertFilter[p][fkey]);
-		}
-
-		preset.colormapLims[p] = {};
-		preset.colormapVals[p] = {};
-		for (k=0; k<viewerParams.ckeys[p].length; k++){
-			var ckey = copyValue(viewerParams.ckeys[p][k]);
-			preset.colormapLims[p][ckey] = copyValue(viewerParams.colormapLims[p][ckey]);
-			preset.colormapVals[p][ckey] = copyValue(viewerParams.colormapVals[p][ckey]);
-		}
-		preset.showColormap[p] = copyValue(viewerParams.showColormap[p]);
-		preset.colormap[p] = copyValue(viewerParams.colormap[p]);
-		preset.colormapVariable[p] = copyValue(viewerParams.colormapVariable[p]);	
-
-		preset.blendingMode[p] = copyValue(viewerParams.blendingMode[p]);	
-		preset.depthTest[p] = copyValue(viewerParams.depthTest[p]);	
-
-		preset.radiusVariable[p] = copyValue(viewerParams.radiusVariable[p]);
-	}// per particle options
-
 	preset.loaded = true;
 	return preset;
-
 }
 
 function savePreset(){
