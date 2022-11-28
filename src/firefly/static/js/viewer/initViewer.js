@@ -275,23 +275,23 @@ function initPVals(){
 			viewerParams.partsMesh[p] = [];
 		}
 
-		// copy the value into the same key to initialize the particle settings from the default
+		// copy the value from the default settings
+		//  into viewerParams using the same key. If the particle group
+		//  has other settings these will be overwritten in a later step.
 		Object.keys(viewerParams.defaultParticleSettings).forEach(function (key){
-			viewerParams[key][p] = viewerParams.defaultParticleSettings[key]; 
+			viewerParams[key][p] = copyValue(viewerParams.defaultParticleSettings[key]); 
 		});
 
 		// store the name inside the dictionary
 		viewerParams.parts[p].pkey = p;
 
-		//misc
 		if (!viewerParams.haveOctree[p]) viewerParams.plotNmax[p] = viewerParams.parts.count[p];
-		viewerParams.updateOnOff[p] = false;
-		//filter
-		viewerParams.updateFilter[p] = false;
-		//colormap
-		viewerParams.updateColormapVariable[p] = false;
-		// radius scaling
-		viewerParams.updateRadiusVariable[p] = false;
+
+		// initialize all update variables to true for the first pass
+		viewerParams.updateOnOff[p] = true;
+		viewerParams.updateFilter[p] = true;
+		viewerParams.updateColormapVariable[p] = true;
+		viewerParams.updateRadiusVariable[p] = true;
 
 		//velocities
 		if (viewerParams.parts[p].Velocities_flat != null){
@@ -491,16 +491,25 @@ function applyOptions(){
 
 	var options = viewerParams.parts.options;
 
+	// TODO compatability keys, color and sizeMult are deprecated keys
+	if (options['partsColors'] == undefined && options['color'] != undefined) options['partsColors'] = options['color'];
+	if (options['partsSizeMultipliers'] == undefined && options['sizeMult'] != undefined) options['partsSizeMultipliers'] = options['sizeMult'];
+
 	var forGUI = [];
 
 	var keys_to_avoid = [
 		"loaded",
-		"center", // values copied into array below
-		"camera", // values copied into array below
-		"cameraRotation", // values copied into array below
-		"cameraUp", // values copied into array below
-		"quaternion", // not input, only output
+		"center", // values copied into a named array below
+		"camera", // values copied into a named array below
+		"cameraRotation", // values copied a named into array below
+		"cameraUp", // values copied into a named array below
+		"quaternion", // not used for input, only output as a preset
+		"useStereo", // changes the renderer and needs to update an element in the gui
 		"title", // handled in WebGLStart
+		// TODO: the GUI isn't built yet... can't update the GUI
+		"showVel", // needs to update an element in the gui
+		"velType", // needs to update an element in the gui
+		"animateVel" // needs to update an element in the gui
 	]
 
 	Object.keys(viewerParams.defaultSettings).forEach(function (key){
@@ -508,12 +517,6 @@ function applyOptions(){
 			value = options[key];
 			if (key.includes("start")) return;
 			else if (keys_to_avoid.includes(key)) return;
-			else if (Object.keys(value).length > 0){
-				key=animateVelTmax;
-				console.log(key,value,Object.keys(value))
-				debugger
-				return
-			}
 			else viewerParams[key] = options[key]; // copy the value into the same key
 		}
 	});
@@ -569,7 +572,7 @@ function applyOptions(){
 		viewerParams.useStereo = true;
 		if (viewerParams.haveUI){
 			var evalString = 'elm = document.getElementById("StereoCheckBox"); elm.checked = true; elm.value = true;'
-			forGUI.push({'evalCommand':[evalString]})
+			//TODO: forGUI.push({'evalCommand':[evalString]})
 	} 	}
 
 	//modify the initial stereo separation
@@ -595,9 +598,8 @@ function applyOptions(){
 		viewerParams.annotation = options.annotation;
     }
 
-	//  --------- column density options ----------- 
-
 	var options_keys = Object.keys(viewerParams.parts.options.showParts);
+	var xkeys; // x = c (color), f (filter), maybe r (radius) ?. field names.
 	for (var i=0; i<viewerParams.partsKeys.length; i++){
 		var viewer_p = viewerParams.partsKeys[i];
 		var p;
@@ -608,29 +610,35 @@ function applyOptions(){
 			}
 		}
 
-		//on/off
-		if (options.hasOwnProperty("showParts") && 
-			options.showParts != null && 
-			options.showParts.hasOwnProperty(p) && 
-			options.showParts[p] != null) viewerParams.showParts[viewer_p] = options.showParts[p];
+		// overwrite the default settings with what's in the passed settings dictionary
+		Object.keys(viewerParams.defaultParticleSettings).forEach(function (key){
+			if (
+				!keys_to_avoid.includes(key) && // some keys require extra attention, let's skip them
+				options.hasOwnProperty(key) &&  // some settings dictionaries don't have all keys
+				options[key] != null && // sometimes the dictionary might have a "use the default" value
+				options[key].hasOwnProperty(p) &&  // sometimes only some particle groups will be specified
+				options[key][p] != null){ // sometimes the dictionary might have a "use the default" value
 
-		//size
-		if (options.hasOwnProperty("partsSizeMultipliers") && 
-			options.partsSizeMultipliers != null && 
-			options.partsSizeMultipliers.hasOwnProperty(p) && 
-			options.partsSizeMultipliers[p] != null) viewerParams.partsSizeMultipliers[viewer_p] = options.partsSizeMultipliers[p];
-
-		//color
-		if (options.hasOwnProperty("color") &&
-			options.color != null &&
-			options.color.hasOwnProperty(p) && 
-			options.color[p] != null) viewerParams.partsColors[viewer_p] = options.color[p];
-
-		//maximum number of particles to plot
-		if (options.hasOwnProperty("plotNmax") &&
-			options.plotNmax != null &&
-			options.plotNmax.hasOwnProperty(p) &&
-			options.plotNmax[p] != null) viewerParams.plotNmax[viewer_p] = options.plotNmax[p];
+				value = options[key][p];
+				// passed a simple value we want to copy
+				if (value.constructor != Object) viewerParams[key][viewer_p] = copyValue(value); 
+				// passed an xkey dictionary (x=f or x=c most likely)
+				else { 
+					xkeys = Object.keys(value);
+					xkeys.forEach(function(xkey){
+						if (value[xkey] != null){ // check each xkey for null values
+							if (Array.isArray(value[xkey])){ // check each element of the array for null values
+								value[xkey].forEach(function(arr_value,index){
+									if (arr_value != null) viewerParams[key][viewer_p][xkey][index] = copyValue(arr_value);
+								});
+							}
+							// just a single value, e.g. invertFilter = fkey -> boolean
+							else viewerParams[key][viewer_p][xkey] = copyValue(value[xkey]);
+						} 
+					});
+				}
+			}
+		});
 
 		//start plotting the velocity vectors
 		if (options.hasOwnProperty("showVel") && 
@@ -641,7 +649,7 @@ function applyOptions(){
 			viewerParams.showVel[viewer_p] = true;
 			if (viewerParams.haveUI){
 				var evalString = 'elm = document.getElementById("'+p+'velCheckBox"); elm.checked = true; elm.value = true;'
-				forGUI.push({'evalCommand':[evalString]})
+				//TODO: forGUI.push({'evalCommand':[evalString]})
 		} 	}
 
 		//type of velocity vectors
@@ -654,18 +662,6 @@ function applyOptions(){
 				viewerParams.velType[viewer_p] = options.velType[p];
 		} 	}
 
-		//velocity vector width
-		if (options.hasOwnProperty("velVectorWidth") &&
-			options.velVectorWidth != null &&
-			options.velVectorWidth.hasOwnProperty(p) &&
-			options.velVectorWidth[p] != null) viewerParams.velVectorWidth[viewer_p] = options.velVectorWidth[p]; 
-
-		//velocity vector gradient
-		if (options.hasOwnProperty("velGradient") && 
-			options.velGradient != null && 
-			options.velGradient.hasOwnProperty(p) &&
-			options.velGradient[p] != null) viewerParams.velGradient[viewer_p] = +options.velGradient[p]; //convert from bool to int
-
 		//start showing the velocity animation
 		if (options.hasOwnProperty("animateVel") && 
 			options.animateVel != null &&
@@ -675,93 +671,8 @@ function applyOptions(){
 			viewerParams.animateVel[viewer_p] = true;
 			if (viewerParams.haveUI){
 				var evalString = 'elm = document.getElementById("'+p+'velAnimateCheckBox"); elm.checked = true; elm.value = true;'
-				forGUI.push({'evalCommand':[evalString]})
+				//TODO: forGUI.push({'evalCommand':[evalString]})
 		} 	}
-
-		//animate velocity dt
-		if (options.hasOwnProperty("animateVelDt") &&
-			options.animateVelDt != null &&
-			options.animateVelDt.hasOwnProperty(p) &&
-			options.animateVelDt[p] != null) viewerParams.animateVelDt[viewer_p] = options.animateVelDt[p];
-
-		//animate velocity tmax
-		if (options.hasOwnProperty("animateVelTmax") &&
-			options.animateVelTmax != null &&
-			options.animateVelTmax.hasOwnProperty(p) &&
-			options.animateVelTmax[p] != null) viewerParams.animateVelTmax[viewer_p] = options.animateVelTmax[p];
-
-		//filter limits
-		if (options.hasOwnProperty("filterLims") &&
-			options.filterLims != null &&
-			options.filterLims.hasOwnProperty(p) &&
-			options.filterLims[p] != null){
-			viewerParams.updateFilter[viewer_p] = true
-
-			for (k=0; k<viewerParams.fkeys[viewer_p].length; k++){
-				var fkey = viewerParams.fkeys[viewer_p][k]
-				if (options.filterLims[p].hasOwnProperty(fkey)){
-					if (options.filterLims[p][fkey] != null){
-						viewerParams.filterLims[viewer_p][fkey] = []
-						viewerParams.filterLims[viewer_p][fkey].push(options.filterLims[p][fkey][0]);
-						viewerParams.filterLims[viewer_p][fkey].push(options.filterLims[p][fkey][1]);
-		} 	} 	} 	}
-
-		//filter values
-		if (options.hasOwnProperty("filterVals") &&
-			options.filterVals != null &&
-			options.filterVals.hasOwnProperty(p) &&
-			options.filterVals[p] != null){
-			viewerParams.updateFilter[viewer_p] = true
-
-			for (k=0; k<viewerParams.fkeys[viewer_p].length; k++){
-				var fkey = viewerParams.fkeys[viewer_p][k]
-				if (options.filterVals[p].hasOwnProperty(fkey)){
-					if (options.filterVals[p][fkey] != null){
-						viewerParams.filterVals[viewer_p][fkey] = []
-						viewerParams.filterVals[viewer_p][fkey].push(options.filterVals[p][fkey][0]);
-						viewerParams.filterVals[viewer_p][fkey].push(options.filterVals[p][fkey][1]);
-		} 	} 	} 	}
-
-		//filter invert
-		if (options.hasOwnProperty("invertFilter") &&
-			options.invertFilter != null &&
-			options.invertFilter.hasOwnProperty(p) &&
-			options.invertFilter[p] != null){
-			for (k=0; k<viewerParams.fkeys[viewer_p].length; k++){
-				var fkey = viewerParams.fkeys[viewer_p][k]
-				if (options.invertFilter[p].hasOwnProperty(fkey)){
-					if (options.invertFilter[p][fkey] != null){
-						viewerParams.invertFilter[viewer_p][fkey] = options.invertFilter[p][fkey];
-		} 	}	 } 	}
-
-		//colormap limits
-		if (options.hasOwnProperty("colormapLims") &&
-			options.colormapLims != null && 
-			options.colormapLims.hasOwnProperty(p) && 
-			options.colormapLims[p] != null){
-			for (k=0; k<viewerParams.ckeys[viewer_p].length; k++){
-				var ckey = viewerParams.ckeys[viewer_p][k]
-				if (options.colormapLims[p].hasOwnProperty(ckey)){
-					if (options.colormapLims[p][ckey] != null){
-						viewerParams.colormapLims[viewer_p][ckey] = []
-						viewerParams.colormapLims[viewer_p][ckey].push(options.colormapLims[p][ckey][0]);
-						viewerParams.colormapLims[viewer_p][ckey].push(options.colormapLims[p][ckey][1]);
-		} 	} 	} 	}
-
-		//colormap values
-		if (options.hasOwnProperty("colormapVals") &&
-			options.colormapVals != null &&
-			options.colormapVals.hasOwnProperty(p) &&
-			options.colormapVals[p] != null){
-
-			for (k=0; k<viewerParams.ckeys[viewer_p].length; k++){
-				var ckey = viewerParams.ckeys[viewer_p][k]
-				if (options.colormapVals[p].hasOwnProperty(ckey)){
-					if (options.colormapVals[p][ckey] != null){
-						viewerParams.colormapVals[viewer_p][ckey] = []
-						viewerParams.colormapVals[viewer_p][ckey].push(options.colormapVals[p][ckey][0]);
-						viewerParams.colormapVals[viewer_p][ckey].push(options.colormapVals[p][ckey][1]);
-		} 	} 	} 	}
 
 		//start plotting with a colormap
 		if (options.hasOwnProperty("showColormap") &&
@@ -772,43 +683,18 @@ function applyOptions(){
 			if (viewerParams.haveUI){
 				console.log(p+'colorCheckBox')
 				var evalString = 'elm = document.getElementById("'+p+'colorCheckBox"); elm.checked = true; elm.value = true;'
-				forGUI.push({'evalCommand':[evalString]})
+				//TODO: forGUI.push({'evalCommand':[evalString]})
 		} 	}
 
-		//choose which colormap to use
-		if (options.hasOwnProperty("colormap") && 
-			options.colormap != null &&
-			options.colormap.hasOwnProperty(p) && 
-			options.colormap[p] != null) viewerParams.colormap[viewer_p] = copyValue(options.colormap[p]);
-
-		//select the colormap variable to color by
-		if (options.hasOwnProperty("colormapVariable") && 
-			options.colormapVariable != null &&
-			options.colormapVariable.hasOwnProperty(p) && 
-			options.colormapVariable[p] != null) viewerParams.colormapVariable[viewer_p] = copyValue(options.colormapVariable[p]);
-
-		//select the radius variable to scale by
-		if (options.hasOwnProperty("radiusVariable") && 
-			options.radiusVariable != null &&
-			options.radiusVariable.hasOwnProperty(p) && 
-			options.radiusVariable[p] != null) viewerParams.radiusVariable[viewer_p] = copyValue(options.radiusVariable[p]);
-
-		if (options.hasOwnProperty("blendingMode") && 
-			options.blendingMode != null &&
-			options.blendingMode.hasOwnProperty(p) && 
-			options.blendingMode[p] != null) viewerParams.blendingMode[viewer_p] = copyValue(options.blendingMode[p]);
-			
 		if (options.hasOwnProperty("depthTest") && 
 			options.depthTest != null &&
 			options.depthTest.hasOwnProperty(p) && 
 			options.depthTest[p] != null){
 				viewerParams.depthTest[viewer_p] = copyValue(options.depthTest[p]);
-				/*
-				var evalString =( 'elm = document.getElementById(' + p + '_depthCheckBox);'+
+				var evalString =( 'elm = document.getElementById("' + p + '_depthCheckBox");'+
 					'elm.checked = ' + options.depthTest[p] + ';'+
 					'elm.value = ' + options.depthTest[p]+';')
-				forGUI.push({'evalCommand':evalString});
-				*/
+				//TODO: forGUI.push({'evalCommand':evalString});
 			}
 			
 	}// particle specific options
@@ -818,7 +704,7 @@ function applyOptions(){
 	//  do it here so it happens in the presets too and load settings, etc...
 	viewerParams.showParts[viewerParams.CDkey] = viewerParams.partsKeys.some(
 		function (key){return viewerParams.showParts[key]});
-	viewerParams.colormap[viewerParams.CDkey] = 4/256
+	viewerParams.colormap[viewerParams.CDkey] = 4/256;
 	viewerParams.ckeys[viewerParams.CDkey] = [viewerParams.CDckey]
 	viewerParams.colormapLims[viewerParams.CDkey] = {}
 	viewerParams.colormapLims[viewerParams.CDkey][viewerParams.ckeys[viewerParams.CDkey][0]] = [viewerParams.CDmin,viewerParams.CDmax]
@@ -885,7 +771,7 @@ function initControls(updateGUI = true,force_fly=false){
 
 	if (viewerParams.haveUI){
 		var evalString = 'elm = document.getElementById("CenterCheckBox"); elm.checked = '+viewerParams.useTrackball+'; elm.value = '+viewerParams.useTrackball+';'
-		forGUI.push({'evalCommand':evalString});
+		//TODO: forGUI.push({'evalCommand':evalString});
 	}
 
 	viewerParams.switchControls = false;

@@ -1,10 +1,8 @@
 {
-    "blendingMode":"additive",
-    "depthTest":false,
     "showParts":true,
-    "plotNmax":null,
     "partsSizeMultipliers":1,
     "partsColors":[1,0,0,1],
+    "plotNmax":null,
     "showVel":false,
     "velType":"line",
     "velVectorWidth":1,
@@ -23,5 +21,7 @@
     "colormapVals":{"None":[0,1]},
     "colormapVariable":0,
     "rkeys":["None"],
-    "radiusVariable":0
+    "radiusVariable":0,
+    "blendingMode":"additive",
+    "depthTest":false
 }

@@ -510,7 +510,6 @@ function createPreset(){
 		else if (keys_to_avoid.includes(key)) return;
 		if (viewerParams.hasOwnProperty(key)){
 			value = viewerParams[key];
-			console.log(key,value)
 			if (value != null && Object.keys(value) > 0) return;
 			preset[key] = copyValue(viewerParams[key]); 
 		}
