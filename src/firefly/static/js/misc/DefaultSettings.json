@@ -9,6 +9,9 @@
     "sleepTimeout": 1.5,
     "showSplashAtStartup": false,
 
+    "annotation": null,
+    "title": "Firefly",
+
     "center": null,
     "camera": null,
     "cameraRotation": null,
@@ -21,17 +24,15 @@
     "stereoSep": 0.06,
 	"stereoSepMax" : 1.0,
 
-    "zmin": 1e-2,
-    "zmax": 5e10,
     "decimate": 1,
 
+    "zmin": 1e-2,
+    "zmax": 5e10,
     "minPointScale": 0.01,
     "maxPointScale": 10,
 
     "maxVrange": 2000.0,
 
-    "annotation": null,
-    "title": "Firefly",
     "showFPS": true,
     "showMemoryUsage": true,
     "memoryLimit": 2000000000.0,
