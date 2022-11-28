@@ -1095,12 +1095,18 @@ function getGUIIDs(){
 	// iterate through and grab all the id keys 
 	GUIParams.GUIIDs = ['UIcontainer'];
 
+	var obj;
 	function iterate(obj) {
+		var key;
 		Object.keys(obj).forEach(function(key){
-
 			if (key == 'id') GUIParams.GUIIDs.push(obj[key]);
 
-			if (typeof obj[key] === 'object' && obj[key] !== null) iterate(obj[key])
+			if (
+				typeof obj[key] == 'object' && 
+				obj[key] != null && 
+				!GUIParams.GUIState_variables.includes(key)){
+				iterate(obj[key])
+			}
 		})
 	}
 	iterate(GUIParams.GUIState);
