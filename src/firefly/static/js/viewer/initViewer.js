@@ -859,26 +859,46 @@ function sendInitGUI(prepend=[], append=[]){
 
 	var forGUI = prepend;
 	forGUI.push({'setGUIParamByKey':[false,"GUIready"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.partsKeys, "partsKeys"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.partsSizeMultipliers, "partsSizeMultipliers"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.plotNmax, "plotNmax"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.decimate, "decimate"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.partsColors, "partsColors"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.showParts, "showParts"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.boxSize, "boxSize"]});
 
-	//for velocities
-	forGUI.push({'setGUIParamByKey':[viewerParams.showVel, "showVel"]});
+	// copy GUI settings
+	forGUI.push({'setGUIParamByKey':[viewerParams.GUIExcludeList,"GUIExcludeList"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.collapseGUIAtStart,"collapseGUIAtStart"]});
+
+	// copy any viewer settings the user is able to change to the GUIParams
+	Object.keys(viewerParams.defaultSettings).forEach(function (key){
+		if (viewerParams[key] != undefined) forGUI.push({'setGUIParamByKey':[viewerParams[key],key]});
+	});
+	Object.keys(viewerParams.defaultParticleSettings).forEach(function (key){
+		if (viewerParams[key] != undefined) forGUI.push({'setGUIParamByKey':[viewerParams[key],key]});
+	});
+
+	// copy viewer settings which the user can't change
+	forGUI.push({'setGUIParamByKey':[viewerParams.partsKeys, "partsKeys"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.boxSize, "boxSize"]}); // TODO do we use this anymore?
+
 	forGUI.push({'setGUIParamByKey':[viewerParams.velopts, "velopts"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.velType, "velType"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.velVectorWidth, "velVectorWidth"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.velGradient, "velGradient"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.animateVel, "animateVel"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.animateVelDt, "animateVelDt"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.animateVelTmax, "animateVelTmax"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.blendingOpts, "blendingOpts"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.blendingMode, "blendingMode"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.depthTest, "depthTest"]});
+
+	// copy viewer settings related to the camera
+	forGUI.push({'setGUIParamByKey':[viewerParams.useTrackball, "useTrackball"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.renderWidth,"renderWidth"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.renderHeight,"renderHeight"]});
+
+	forGUI.push({'setGUIParamByKey':[viewerParams.reset,"reset"]});
+
+	var xx = new THREE.Vector3(0,0,0);
+	viewerParams.camera.getWorldDirection(xx);
+	forGUI.push({'setGUIParamByKey':[xx, "cameraDirection"]});
+	if (viewerParams.useTrackball) forGUI.push({'setGUIParamByKey':[viewerParams.controls.target, "controlsTarget"]});
+
+	forGUI.push({'updateUICenterText':null});
+	forGUI.push({'updateUICameraText':null});
+	forGUI.push({'updateUIRotText':null});
+
+	//if (viewerParams.usingSocket && !viewerParams.local) forGUI.push({'updateGUICamera':null});
+	if (viewerParams.usingSocket && !viewerParams.local) forGUI.push({'setGUIParamByKey':[true, "cameraNeedsUpdate"]});
+
+	// determine which particle groups have velocities and pass flags
 	var haveVelocities = {};
 	viewerParams.partsKeys.forEach(function(p){
 		haveVelocities[p] = false;
@@ -888,34 +908,7 @@ function sendInitGUI(prepend=[], append=[]){
 	});
 	forGUI.push({'setGUIParamByKey':[haveVelocities,"haveVelocities"]});
 
-	//for colormap
-	forGUI.push({'setGUIParamByKey':[viewerParams.ckeys,"ckeys"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.colormapVals, "colormapVals"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.colormapLims, "colormapLims"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.colormapVariable, "colormapVariable"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.colormap, "colormap"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.showColormap, "showColormap"]});
-	var haveColormap = {};
-	var haveColormapSlider = {};
-	viewerParams.partsKeys.forEach(function(p){
-		haveColormap[p] = false;
-		haveColormapSlider[p] = {};
-		viewerParams.ckeys[p].forEach(function(ck){
-			haveColormapSlider[p][ck] = false;
-			if (viewerParams.parts[p][ck] != null){
-				haveColormap[p] = true;
-				haveColormapSlider[p][ck] = true;
-			}
-		});
-	});
-	forGUI.push({'setGUIParamByKey':[haveColormap,"haveColormap"]});
-	forGUI.push({'setGUIParamByKey':[haveColormapSlider,"haveColormapSlider"]});
-
-	//for filters
-	forGUI.push({'setGUIParamByKey':[viewerParams.fkeys,"fkeys"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.filterVals,"filterVals"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.filterLims,"filterLims"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.invertFilter,"invertFilter"]});
+	// determine which particle groups have filters and pass flags TODO: why are there two?
 	var haveFilter = {};
 	var haveFilterSlider = {};
 	viewerParams.partsKeys.forEach(function(p){
@@ -933,52 +926,31 @@ function sendInitGUI(prepend=[], append=[]){
 	forGUI.push({'setGUIParamByKey':[haveFilter,"haveFilter"]});
 	forGUI.push({'setGUIParamByKey':[haveFilterSlider,"haveFilterSlider"]});
 
+	// determine which particle groups have colormaps and pass flags TODO: why are there two?
+	var haveColormap = {};
+	var haveColormapSlider = {};
+	viewerParams.partsKeys.forEach(function(p){
+		haveColormap[p] = false;
+		haveColormapSlider[p] = {};
+		viewerParams.ckeys[p].forEach(function(ck){
+			haveColormapSlider[p][ck] = false;
+			if (viewerParams.parts[p][ck] != null){
+				haveColormap[p] = true;
+				haveColormapSlider[p][ck] = true;
+			}
+		});
+	});
+	forGUI.push({'setGUIParamByKey':[haveColormap,"haveColormap"]});
+	forGUI.push({'setGUIParamByKey':[haveColormapSlider,"haveColormapSlider"]});
 
-	forGUI.push({'setGUIParamByKey':[viewerParams.rkeys,"rkeys"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.radiusVariable,"radiusVariable"]});
-
-
-	//for camera
-	forGUI.push({'setGUIParamByKey':[viewerParams.stereoSepMax, "stereoSepMax"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.friction, "friction"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.useTrackball, "useTrackball"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.useStereo, "useStereo"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.renderWidth,"renderWidth"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.renderHeight,"renderHeight"]});
-
-	forGUI.push({'setGUIParamByKey':[viewerParams.reset,"reset"]});
-
-	forGUI.push({'setGUIParamByKey':[viewerParams.camera.position, "cameraPosition"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.camera.rotation, "cameraRotation"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.camera.up, "cameraUp"]});
-	var xx = new THREE.Vector3(0,0,0);
-	viewerParams.camera.getWorldDirection(xx);
-	forGUI.push({'setGUIParamByKey':[xx, "cameraDirection"]});
-	if (viewerParams.useTrackball) forGUI.push({'setGUIParamByKey':[viewerParams.controls.target, "controlsTarget"]});
-
-	forGUI.push({'updateUICenterText':null});
-	forGUI.push({'updateUICameraText':null});
-	forGUI.push({'updateUIRotText':null});
-
-	//if (viewerParams.usingSocket && !viewerParams.local) forGUI.push({'updateGUICamera':null});
-	if (viewerParams.usingSocket && !viewerParams.local) forGUI.push({'setGUIParamByKey':[true, "cameraNeedsUpdate"]});
-
+	//octree
 	forGUI.push({'setGUIParamByKey':[viewerParams.haveOctree,"haveOctree"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.haveAnyOctree,"haveAnyOctree"]});
-	if (viewerParams.haveAnyOctree) {
-		forGUI.push({'setGUIParamByKey':[viewerParams.memoryLimit,"octreeMemoryLimit"]});
-		forGUI.push({'setGUIParamByKey':[viewerParams.octree.normCameraDistance,"octreeNormCameraDistance"]});
-		}
+	forGUI.push({'setGUIParamByKey':[viewerParams.memoryLimit,"octreeMemoryLimit"]});
 
-	forGUI.push({'setGUIParamByKey':[viewerParams.showFPS,"showFPS"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.showMemoryUsage,"showMemoryUsage"]});
 
 	forGUI.push({'setGUIParamByKey':[viewerParams.columnDensity,"columnDensity"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.CDmin,"CDmin"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.CDmax,"CDmax"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.CDkey,"CDkey"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.CDckey,"CDckey"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.CDlognorm,"CDlognorm"]});
 
 	//check if there is a tween file
 	viewerParams.haveTween = false;
@@ -986,10 +958,7 @@ function sendInitGUI(prepend=[], append=[]){
 	forGUI.push({'setGUIParamByKey':[viewerParams.haveTween,"haveTween"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.inTween,"inTween"]});
 
-	forGUI.push({'setGUIParamByKey':[viewerParams.GUIExcludeList,"GUIExcludeList"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.collapseGUIAtStart,"collapseGUIAtStart"]});
-
-	// add any extra commands
+	// add any extra commands we were passed in the function call
 	append.forEach(function(x,i){
 		forGUI.push(x);
 	})
