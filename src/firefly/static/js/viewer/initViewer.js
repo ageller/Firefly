@@ -598,6 +598,8 @@ function applyOptions(){
 		viewerParams.annotation = options.annotation;
     }
 
+	//  --------- column density options ----------- 
+
 	var options_keys = Object.keys(viewerParams.parts.options.showParts);
 	var xkeys; // x = c (color), f (filter), maybe r (radius) ?. field names.
 	for (var i=0; i<viewerParams.partsKeys.length; i++){
