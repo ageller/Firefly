@@ -317,13 +317,6 @@ function initPVals(){
 		if (viewerParams.parts[p].hasOwnProperty("filterKeys")){
 			viewerParams.fkeys[p] = viewerParams.parts[p].filterKeys;
 			for (var k=0; k<viewerParams.fkeys[p].length; k++){
-				// TODO we should consider removing this "feature"
-				//  and just require users to pass in the mag velocity
-				//  as its own field-- or also radius and do radius/speed
-				//  flags or something
-				//if (viewerParams.fkeys[p][k] == "Velocities"){
-					//viewerParams.fkeys[p][k] = "magVelocities";
-				//}
 				var fkey = viewerParams.fkeys[p][k];
 				//calculate limits for the filters
 				if (viewerParams.parts[p][fkey] != null){
@@ -346,13 +339,6 @@ function initPVals(){
 			if (viewerParams.parts[p].colormapKeys.length > 0){
 				viewerParams.ckeys[p] = viewerParams.parts[p].colormapKeys;
 				for (var k=0; k<viewerParams.ckeys[p].length; k++){
-						// TODO we should consider removing this "feature"
-						//  and just require users to pass in the mag velocity
-						//  as its own field-- or also radius and do radius/speed
-						//  flags or something
-					//if (viewerParams.ckeys[p][k] == "Velocities"){
-						//viewerParams.ckeys[p][k] = "magVelocities";
-					//}
 					var ckey = viewerParams.ckeys[p][k];
 					viewerParams.colormapLims[p][ckey] = [0,1];
 					viewerParams.colormapVals[p][ckey] = [0,1];
@@ -491,7 +477,7 @@ function applyOptions(){
 
 	var options = viewerParams.parts.options;
 
-	// TODO compatability keys, color and sizeMult are deprecated keys
+	// TODO compatability key matching, "color" and "sizeMult" are deprecated
 	if (options['partsColors'] == undefined && options['color'] != undefined) options['partsColors'] = options['color'];
 	if (options['partsSizeMultipliers'] == undefined && options['sizeMult'] != undefined) options['partsSizeMultipliers'] = options['sizeMult'];
 
@@ -506,7 +492,9 @@ function applyOptions(){
 		"quaternion", // not used for input, only output as a preset
 		"useStereo", // changes the renderer and needs to update an element in the gui
 		"title", // handled in WebGLStart
-		// TODO: the GUI isn't built yet... can't update the GUI
+		// TODO: do we actually need to do this?
+		//  GUI creation initializes correctly from the values in GUIParams
+		//  can't we just send the values and then make a call to build the GUI?
 		"showVel", // needs to update an element in the gui
 		"velType", // needs to update an element in the gui
 		"animateVel" // needs to update an element in the gui
@@ -572,7 +560,7 @@ function applyOptions(){
 		viewerParams.useStereo = true;
 		if (viewerParams.haveUI){
 			var evalString = 'elm = document.getElementById("StereoCheckBox"); elm.checked = true; elm.value = true;'
-			//TODO: forGUI.push({'evalCommand':[evalString]})
+			forGUI.push({'evalCommand':[evalString]})
 	} 	}
 
 	//modify the initial stereo separation
@@ -651,7 +639,7 @@ function applyOptions(){
 			viewerParams.showVel[viewer_p] = true;
 			if (viewerParams.haveUI){
 				var evalString = 'elm = document.getElementById("'+p+'velCheckBox"); elm.checked = true; elm.value = true;'
-				//TODO: forGUI.push({'evalCommand':[evalString]})
+				forGUI.push({'evalCommand':[evalString]})
 		} 	}
 
 		//type of velocity vectors
@@ -673,7 +661,7 @@ function applyOptions(){
 			viewerParams.animateVel[viewer_p] = true;
 			if (viewerParams.haveUI){
 				var evalString = 'elm = document.getElementById("'+p+'velAnimateCheckBox"); elm.checked = true; elm.value = true;'
-				//TODO: forGUI.push({'evalCommand':[evalString]})
+				forGUI.push({'evalCommand':[evalString]})
 		} 	}
 
 		//start plotting with a colormap
@@ -685,19 +673,21 @@ function applyOptions(){
 			if (viewerParams.haveUI){
 				console.log(p+'colorCheckBox')
 				var evalString = 'elm = document.getElementById("'+p+'colorCheckBox"); elm.checked = true; elm.value = true;'
-				//TODO: forGUI.push({'evalCommand':[evalString]})
+				forGUI.push({'evalCommand':[evalString]})
 		} 	}
 
 		if (options.hasOwnProperty("depthTest") && 
 			options.depthTest != null &&
 			options.depthTest.hasOwnProperty(p) && 
 			options.depthTest[p] != null){
+			if (viewerParams.haveUI){
 				viewerParams.depthTest[viewer_p] = copyValue(options.depthTest[p]);
 				var evalString =( 'elm = document.getElementById("' + p + '_depthCheckBox");'+
 					'elm.checked = ' + options.depthTest[p] + ';'+
 					'elm.value = ' + options.depthTest[p]+';')
-				//TODO: forGUI.push({'evalCommand':evalString});
+				forGUI.push({'evalCommand':evalString});
 			}
+		}
 			
 	}// particle specific options
 
@@ -773,7 +763,7 @@ function initControls(updateGUI = true,force_fly=false){
 
 	if (viewerParams.haveUI){
 		var evalString = 'elm = document.getElementById("CenterCheckBox"); elm.checked = '+viewerParams.useTrackball+'; elm.value = '+viewerParams.useTrackball+';'
-		//TODO: forGUI.push({'evalCommand':evalString});
+		forGUI.push({'evalCommand':evalString});
 	}
 
 	viewerParams.switchControls = false;
@@ -874,7 +864,8 @@ function sendInitGUI(prepend=[], append=[]){
 
 	// copy viewer settings which the user can't change
 	forGUI.push({'setGUIParamByKey':[viewerParams.partsKeys, "partsKeys"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.boxSize, "boxSize"]}); // TODO do we use this anymore?
+	// TODO do we use boxSize anymore?
+	forGUI.push({'setGUIParamByKey':[viewerParams.boxSize, "boxSize"]}); 
 
 	forGUI.push({'setGUIParamByKey':[viewerParams.velopts, "velopts"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.blendingOpts, "blendingOpts"]});
@@ -908,7 +899,8 @@ function sendInitGUI(prepend=[], append=[]){
 	});
 	forGUI.push({'setGUIParamByKey':[haveVelocities,"haveVelocities"]});
 
-	// determine which particle groups have filters and pass flags TODO: why are there two?
+	// determine which particle groups have filters and pass flags 
+	//  TODO: why are there two flags (what is haveFilterSlider for?)
 	var haveFilter = {};
 	var haveFilterSlider = {};
 	viewerParams.partsKeys.forEach(function(p){
@@ -926,7 +918,8 @@ function sendInitGUI(prepend=[], append=[]){
 	forGUI.push({'setGUIParamByKey':[haveFilter,"haveFilter"]});
 	forGUI.push({'setGUIParamByKey':[haveFilterSlider,"haveFilterSlider"]});
 
-	// determine which particle groups have colormaps and pass flags TODO: why are there two?
+	// determine which particle groups have colormaps and pass flags 
+	//  TODO: why are there two flags (what is haveFilterSlider for?)
 	var haveColormap = {};
 	var haveColormapSlider = {};
 	viewerParams.partsKeys.forEach(function(p){
@@ -1188,7 +1181,6 @@ function compileFFLYData(data, p, callback, initialLoadFrac=0){
 			if (hasRgbaColors) this_parts.rgbaColors_flat = [];
 			this_parts.filterKeys = [];
 			this_parts.colormapKeys = [];
-			// TODO hook this up for choosing which variable to scale points by
 			this_parts.radiusKeys = [];
 			//this_parts.doSPHrad = Array(false);
 
