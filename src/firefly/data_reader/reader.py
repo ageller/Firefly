@@ -1086,6 +1086,6 @@ class SimpleReader(ArrayReader):
 
 def split_kwargs(kwargs):
     kwargs_keys = kwargs.keys()
-    settings_keys = kwargs_keys & set(default_settings)
-    particlegroup_keys = kwargs_keys - set(default_settings)
+    settings_keys = kwargs_keys & set(default_settings.keys())
+    particlegroup_keys = kwargs_keys - set(default_settings.keys())
     return {key:kwargs[key] for key in settings_keys},{key:kwargs[key] for key in particlegroup_keys}
