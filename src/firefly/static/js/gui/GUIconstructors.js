@@ -776,7 +776,7 @@ function createColumnDensityLogCheckBoxSegment(container,parent,name){
 
 	logContainer.append('input')
 		.attr('id','columnDensityLogCheckBoxElm')
-		.attr('value',false)
+		.attr('value',GUIParams.CDlognorm)
 		.attr('type','checkbox')
 		.attr('autocomplete','off')
 		.on('change',function(){
@@ -1060,7 +1060,7 @@ function createParticleVelocityCheckBoxSegment(container,parent,name,p){
 	// add velocity vector checkbox
 	dVcontent.append('input')
 		.attr('id',p+'velCheckBox')
-		.attr('value','false')
+		.attr('value',GUIParams.showVel[p])
 		.attr('type','checkbox')
 		.attr('autocomplete','off')
 		.on('change',function(){
@@ -1125,7 +1125,7 @@ function createParticleVelocityGradientCheckBoxSegment(container,parent,name,p){
 
 	dVGcontent.append('input')
 		.attr('id',p+'velGradientCheckBox')
-		.attr('value','false')
+		.attr('value',GUIParams.velGradient[p])
 		.attr('type','checkbox')
 		.attr('autocomplete','off')
 		.on('change',function(){
@@ -1146,7 +1146,7 @@ function createParticleVelocityAnimatorCheckBoxSegment(container,parent,name,p){
 
 	dAVcontent.append('input')
 		.attr('id',p+'velAnimateCheckBox')
-		.attr('value','false')
+		.attr('value',GUIParams.animateVel[p])
 		.attr('type','checkbox')
 		.attr('autocomplete','off')
 		.on('change',function(){
@@ -1217,7 +1217,7 @@ function createParticleColormapCheckBoxSegment(container,parent,name,p){
 
 	this_container.append('input')
 		.attr('id',p+'colorCheckBox')
-		.attr('value','false')
+		.attr('value',GUIParams.showColormap[p])
 		.attr('type','checkbox')
 		.attr('autocomplete','off')
 		.on('change',function(){
@@ -1364,7 +1364,7 @@ function createParticleFilterSlidersSegment(container,parent,name,p){
 
 			invFilter.append('input')
 				.attr('id',p+'_FK_'+fk+'_END_InvertFilterCheckBox')
-				.attr('value','false')
+				.attr('value',GUIParams.invertFilter[p][fk])
 				.attr('type','checkbox')
 				.attr('autocomplete','off')
 				.on('change',function(){
