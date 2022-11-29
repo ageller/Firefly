@@ -7,7 +7,7 @@ import requests
 import numpy as np
 import time
 
-from .settings import Settings,valid_settings
+from .settings import Settings,default_settings
 from .tween import TweenParams
 from .particlegroup import ParticleGroup
 from .json_utils import write_to_json,load_from_json
@@ -1086,6 +1086,6 @@ class SimpleReader(ArrayReader):
 
 def split_kwargs(kwargs):
     kwargs_keys = kwargs.keys()
-    settings_keys = kwargs_keys & valid_settings
-    particlegroup_keys = kwargs_keys - valid_settings
+    settings_keys = kwargs_keys & set(default_settings)
+    particlegroup_keys = kwargs_keys - set(default_settings)
     return {key:kwargs[key] for key in settings_keys},{key:kwargs[key] for key in particlegroup_keys}

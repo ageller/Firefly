@@ -42,4 +42,4 @@ __pycache__
 
 dist/*.whl
 dist/*.tar.gz
-*/node_modules/*
+*node_modules*
