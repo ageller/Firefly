@@ -1,6 +1,19 @@
 //all "global" variables are contained within params object
 var viewerParams;
 
+function setDefaultViewerParams(these_params){
+	d3.json("static/js/misc/defaultSettings.json", function(defaultSettings) {
+		viewerParams.defaultSettings = defaultSettings;
+	})
+
+	// load the default particle settings
+	d3.json("static/js/misc/defaultParticleSettings.json", function(defaultParticleSettings) {
+		viewerParams.defaultParticleSettings = defaultParticleSettings;
+	});
+
+
+}
+
 function defineViewerParams(){
 	viewerParams = new function() {
 
@@ -23,6 +36,9 @@ function defineViewerParams(){
 		this.effect = null;
 		this.normalRenderer = null;
 
+		this.title = null;
+		this.annotation = null;
+
 		this.keyboard = null;
 
 		this.parts = null;
@@ -44,10 +60,10 @@ function defineViewerParams(){
 		this.updateOnOff = {};
 
 		//particle size multiplicative factor
-		this.PsizeMult = {};
+		this.partsSizeMultipliers = {};
 
 		//particle default colors;
-		this.Pcolors = {};
+		this.partsColors = {};
 
 		//Decimation
 		this.decimate = 1;
@@ -107,7 +123,6 @@ function defineViewerParams(){
 							 'multiply':THREE.MultiplyBlending, 
 							 'none':THREE.NoBlending};
 		this.blendingMode = {};
-		this.depthWrite = {};
 		this.depthTest = {};
 
 		//for deciding whether to animate the velocities
@@ -299,5 +314,6 @@ function defineViewerParams(){
 
 		}
 
+		setDefaultViewerParams(this);
 	};
 }

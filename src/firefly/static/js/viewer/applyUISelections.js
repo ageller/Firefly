@@ -269,13 +269,11 @@ function changeBlendingForColormap(args){
 
 		if ( viewerParams.showColormap[p]){
 			viewerParams.blendingMode[p] = 'normal';
-			viewerParams.depthWrite[p] = true;
 			viewerParams.depthTest[p] = true;
 		}
 		else {
 			// update the blending mode for the whole particle group (kind of wasteful)
 			viewerParams.blendingMode[p] = 'additive';
-			viewerParams.depthWrite[p] = false;
 			viewerParams.depthTest[p] = false;
 		}
 	})
@@ -298,11 +296,11 @@ function checkInvertFilterBox(args){
 function checkColor(args){
 	var p = args[0];
 	var rgb = args[1];
-	viewerParams.Pcolors[p] = [rgb.r/255., rgb.g/255., rgb.b/255., rgb.a];
+	viewerParams.partsColors[p] = [rgb.r/255., rgb.g/255., rgb.b/255., rgb.a];
 	//update the octree loading bar if it exists
 	if (viewerParams.haveOctree[p]){
-		d3.select('#' + p + 'octreeLoadingFill').attr('fill','rgb(' + (255*viewerParams.Pcolors[p][0]) + ',' + (255*viewerParams.Pcolors[p][1]) + ',' + (255*viewerParams.Pcolors[p][2]) + ')')
-		d3.select('#' + p + 'octreeLoadingText').attr('fill','rgb(' + (255*viewerParams.Pcolors[p][0]) + ',' + (255*viewerParams.Pcolors[p][1]) + ',' + (255*viewerParams.Pcolors[p][2]) + ')')
+		d3.select('#' + p + 'octreeLoadingFill').attr('fill','rgb(' + (255*viewerParams.partsColors[p][0]) + ',' + (255*viewerParams.partsColors[p][1]) + ',' + (255*viewerParams.partsColors[p][2]) + ')')
+		d3.select('#' + p + 'octreeLoadingText').attr('fill','rgb(' + (255*viewerParams.partsColors[p][0]) + ',' + (255*viewerParams.partsColors[p][1]) + ',' + (255*viewerParams.partsColors[p][2]) + ')')
 	}
 }
 
@@ -497,6 +495,28 @@ function copyValue(a){
 
 function createPreset(){
 	var preset = {};
+
+	var keys_to_avoid = [
+		"loaded",
+		"center", // values copied into array below
+		"camera", // values copied into array below
+		"cameraRotation", // values copied into array below
+		"cameraUp", // values copied into array below
+		"quaternion", // values copied into array below
+	]
+
+	// copy settings that user can directly set
+	Object.keys(viewerParams.defaultSettings).forEach(function (key){
+		if (key.includes("start")) return;
+		else if (keys_to_avoid.includes(key)) return;
+		if (viewerParams.hasOwnProperty(key)) preset[key] = copyValue(viewerParams[key]); 
+	});
+
+	Object.keys(viewerParams.defaultParticleSettings).forEach(function (key){
+		if (viewerParams.hasOwnProperty(key)) preset[key] = copyValue(viewerParams[key]); 
+	});
+
+	// copy camera settings
 	if (viewerParams.useTrackball){
 		preset.center = copyValue([viewerParams.controls.target.x, viewerParams.controls.target.y, viewerParams.controls.target.z]);
 	} else {
@@ -505,121 +525,20 @@ function createPreset(){
 		preset.center = copyValue([xx.x + viewerParams.camera.position.x, xx.y + viewerParams.camera.position.y, xx.z + viewerParams.camera.position.z]);
 	}
 
-	preset.zmin = copyValue(viewerParams.zmin);
-	preset.zmax = copyValue(viewerParams.zmax);
 
 	preset.camera = copyValue([viewerParams.camera.position.x, viewerParams.camera.position.y, viewerParams.camera.position.z]);
 	preset.cameraRotation = copyValue([viewerParams.camera.rotation.x, viewerParams.camera.rotation.y, viewerParams.camera.rotation.z]);
 	preset.cameraUp = copyValue([viewerParams.camera.up.x, viewerParams.camera.up.y, viewerParams.camera.up.z]);
 	preset.quaternion = copyValue([viewerParams.camera.quaternion.w,viewerParams.camera.quaternion.x, viewerParams.camera.quaternion.y, viewerParams.camera.quaternion.z]);
 
+	// copy startup settings
 	preset.startFly = copyValue(!viewerParams.useTrackball);
 	preset.startVR = copyValue(viewerParams.allowVRControls);
 	preset.startColumnDensity = copyValue(viewerParams.columnDensity);
 	preset.startTween = copyValue(viewerParams.updateTween);
 
-	preset.friction = copyValue(viewerParams.friction);
-	preset.stereo = copyValue(viewerParams.useStereo);
-	preset.stereoSep = copyValue(viewerParams.stereoSep);
-
-	preset.decimate = copyValue(viewerParams.decimate);
-	preset.maxVrange = copyValue(viewerParams.maxVrange);
-	preset.minPointScale = copyValue(viewerParams.minPointScale);
-	preset.maxPointScale = copyValue(viewerParams.maxPointScale);
-
-	elm = document.getElementById('annotate_container');
-	if (elm.style.display == 'block') preset.annotation = elm.innerHTML;
-
-	// flag to show fps in top right corner
-	preset.showFPS = copyValue(viewerParams.showFPS);
-	preset.showMemoryUsage = copyValue(viewerParams.showMemoryUsage);
-
-	// change the memory limit for octrees, in bytes
-	preset.memoryLimit = copyValue(viewerParams.memoryLimit);
-
-	//for the UI
-	preset.GUIExcludeList = copyValue(viewerParams.GUIExcludeList)
-	preset.collapseGUIAtStart = copyValue(viewerParams.collapseGUIAtStart)
-
-
-	//particle specific options
-	preset.UIparticle = {};
-	preset.UIdropdown = {};
-	preset.UIcolorPicker = {};
-
-	preset.showParts = {};
-	preset.sizeMult = {};
-	preset.color = {};
-	preset.plotNmax = {};
-
-	preset.showVel = {};
-	preset.velType = {};
-	preset.velVectorWidth = {};
-	preset.velGradient = {};
-	preset.animateVel = {};
-	preset.animateVelDt = {};
-	preset.animateVelTmax = {};
-
-	preset.filterLims = {};
-	preset.filterVals = {};
-	preset.invertFilter = {};
-
-	preset.colormapLims = {};
-	preset.colormapVals = {};
-	preset.showColormap = {};
-	preset.colormap = {};
-	preset.colormapVariable = {};
-	preset.blendingMode = {};
-	preset.depthTest = {};
-
-	preset.radiusVariable = {};
-
-	for (var i=0; i<viewerParams.partsKeys.length; i++){
-		var p = copyValue(viewerParams.partsKeys[i]);
-
-		preset.showParts[p] = copyValue(viewerParams.showParts[p]);
-		preset.sizeMult[p] = copyValue(viewerParams.PsizeMult[p]);
-		preset.color[p] = copyValue(viewerParams.Pcolors[p]);
-		preset.plotNmax[p] = copyValue(viewerParams.plotNmax[p]);
-
-		preset.showVel[p] = copyValue(viewerParams.showVel[p]);
-		preset.velType[p] = copyValue(viewerParams.velType[p]);
-		preset.velVectorWidth[p] = copyValue(viewerParams.velVectorWidth[p]);
-		preset.velGradient[p] = copyValue(viewerParams.velGradient[p]);
-		preset.animateVel[p] = copyValue(viewerParams.animateVel[p]);
-		preset.animateVelDt[p] = copyValue(viewerParams.animateVelDt[p]);
-		preset.animateVelTmax[p] = copyValue(viewerParams.animateVelTmax[p]);
-
-		preset.filterLims[p] = {};
-		preset.filterVals[p] = {};
-		preset.invertFilter[p] = {};
-		for (k=0; k<viewerParams.fkeys[p].length; k++){
-			var fkey = copyValue(viewerParams.fkeys[p][k]);
-			preset.filterLims[p][fkey] = copyValue(viewerParams.filterLims[p][fkey]);
-			preset.filterVals[p][fkey] = copyValue(viewerParams.filterVals[p][fkey]);
-			preset.invertFilter[p][fkey] = copyValue(viewerParams.invertFilter[p][fkey]);
-		}
-
-		preset.colormapLims[p] = {};
-		preset.colormapVals[p] = {};
-		for (k=0; k<viewerParams.ckeys[p].length; k++){
-			var ckey = copyValue(viewerParams.ckeys[p][k]);
-			preset.colormapLims[p][ckey] = copyValue(viewerParams.colormapLims[p][ckey]);
-			preset.colormapVals[p][ckey] = copyValue(viewerParams.colormapVals[p][ckey]);
-		}
-		preset.showColormap[p] = copyValue(viewerParams.showColormap[p]);
-		preset.colormap[p] = copyValue(viewerParams.colormap[p]);
-		preset.colormapVariable[p] = copyValue(viewerParams.colormapVariable[p]);	
-
-		preset.blendingMode[p] = copyValue(viewerParams.blendingMode[p]);	
-		preset.depthTest[p] = copyValue(viewerParams.depthTest[p]);	
-
-		preset.radiusVariable[p] = copyValue(viewerParams.radiusVariable[p]);
-	}// per particle options
-
 	preset.loaded = true;
 	return preset;
-
 }
 
 function savePreset(){
@@ -669,7 +588,7 @@ function setBlendingMode(args){
 	var blend = viewerParams.blendingOpts[mode];
 
 	viewerParams.partsMesh[p].forEach( function( m, j ) {
-		m.material.depthWrite = viewerParams.depthWrite[p];
+		m.material.depthWrite = viewerParams.depthTest[p];
 		m.material.depthTest = viewerParams.depthTest[p];
 		m.material.blending = blend;
 		m.material.uniforms.useDepth.value = +viewerParams.depthTest[p]
@@ -704,7 +623,6 @@ function setDepthMode(args){
 
 	// update the viewer params and rely on the render loop
 	//  to apply them.
-	viewerParams.depthWrite[p] = checked;
 	viewerParams.depthTest[p] = checked;
 }
 

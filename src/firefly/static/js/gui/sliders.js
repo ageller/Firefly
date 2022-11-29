@@ -127,7 +127,7 @@ function createSlider(slider, text, sliderArgs, varArgs, resetEnd=[null, 2], typ
 // create the individual sliders
 function createPsizeSlider(p){
 
-	var initialValue = parseFloat(GUIParams.PsizeMult[p]); //I don't *think* I need to update this in GUI; it's just the initial value that matters, right?
+	var initialValue = parseFloat(GUIParams.partsSizeMultipliers[p]); //I don't *think* I need to update this in GUI; it's just the initial value that matters, right?
 
 	var sliderArgs = {
 		start: [initialValue], 
@@ -145,7 +145,7 @@ function createPsizeSlider(p){
 
 	var slider = document.getElementById(p+'_PSlider');
 	var text = [document.getElementById(p+'_PMaxT')];
-	var varToSet = [initialValue, "PsizeMult",p];
+	var varToSet = [initialValue, "partsSizeMultipliers",p];
 	var varArgs = {'f':'setViewerParamByKey','v':varToSet};
 
 	createSlider(slider, text, sliderArgs, varArgs);

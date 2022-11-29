@@ -68,14 +68,13 @@ function createParticleGeometry(p, parts, start, end){
 function createParticleMaterial(p, color=null,minPointScale=null,maxPointScale=null){
 	//change the blending mode when showing the colormap (so we don't get summing to white colors)
 	var blend = viewerParams.blendingOpts[viewerParams.blendingMode[p]];
-	var dWrite = viewerParams.depthWrite[p];
 	var dTest = viewerParams.depthTest[p];
 	var transp = true;
 	if (!color) color = [
-		viewerParams.Pcolors[p][0],
-		viewerParams.Pcolors[p][1],
-		viewerParams.Pcolors[p][2],
-		viewerParams.Pcolors[p][3]];
+		viewerParams.partsColors[p][0],
+		viewerParams.partsColors[p][1],
+		viewerParams.partsColors[p][2],
+		viewerParams.partsColors[p][3]];
 
 	if (minPointScale == null) 	minPointScale = viewerParams.minPointScale;
 	if (maxPointScale == null) 	maxPointScale = viewerParams.maxPointScale;
@@ -86,7 +85,7 @@ function createParticleMaterial(p, color=null,minPointScale=null,maxPointScale=n
 		uniforms: { //add uniform variable here
 			color: {value: new THREE.Vector4(color[0],color[1],color[2],color[3])},
 			vID: {value: 0},
-			uVertexScale: {value: viewerParams.PsizeMult[p]},
+			uVertexScale: {value: viewerParams.partsSizeMultipliers[p]},
 			cameraY: {value: [0.,1.,0.]},
 			cameraX: {value: [1.,0.,0.]},
 			velType: {value: 0.},
@@ -108,7 +107,7 @@ function createParticleMaterial(p, color=null,minPointScale=null,maxPointScale=n
 
 		vertexShader: myVertexShader,
 		fragmentShader: myFragmentShader,
-		depthWrite:dWrite,
+		depthWrite:dTest,
 		depthTest: dTest,
 		transparent:transp,
 		alphaTest: false,

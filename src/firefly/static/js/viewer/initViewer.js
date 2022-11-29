@@ -112,14 +112,14 @@ function initInputData(){
 
 	//I think I need to wait a moment because sometimes this doesn't fire (?)
 	setTimeout(function(){
-		makeViewer(null, forGUIprepend, forGUIappend);
+		makeViewer(forGUIprepend, forGUIappend);
 		WebGLStart();
 	}, 1000);
 }
 
 //so that it can run locally also without using Flask
 // note that if allowVRControls == true, then you do not want to start in stereo (the VR button will do the work)
-function runLocal(useSockets=true, showGUI=true, allowVRControls=false, startStereo=false, pSize=null){
+function runLocal(useSockets=true, showGUI=true, allowVRControls=false, startStereo=false){
 	d3.select("#splashdiv5").text("Loading particle data...");
 	viewerParams.local = true;
 	viewerParams.usingSocket = useSockets;
@@ -137,7 +137,7 @@ function runLocal(useSockets=true, showGUI=true, allowVRControls=false, startSte
 	viewerParams.useStereo = false;
 
 	//both of these start setIntervals to wait for the proper variables to be set
-	makeViewer(pSize);
+	makeViewer();
 	if (showGUI) {
 		makeUI(local=true);
 	} else {
@@ -150,7 +150,7 @@ function runLocal(useSockets=true, showGUI=true, allowVRControls=false, startSte
 }
 
 //wait for all the input before loading
-function makeViewer(pSize=null, prepend=[], append=[]){
+function makeViewer(prepend=[], append=[]){
 	viewerParams.haveUI = false;
 	viewerParams.ready = false; 
 	console.log("Waiting for viewer init ...")
@@ -165,11 +165,6 @@ function makeViewer(pSize=null, prepend=[], append=[]){
 			viewerParams.parts.options_initial = createPreset(); //this might break things if the presets don't work...
 			//console.log("initial options", viewerParams.parts.options)
 
-			//to test
-			if (pSize) {
-				viewerParams.PsizeMult.Gas = pSize;
-				console.log('new Psize', pSize)
-			}
 			sendInitGUI(prepend=prepend, append=append);
 		}
 	}, 100);
@@ -238,6 +233,7 @@ function WebGLStart(){
 	if (viewerParams.parts.hasOwnProperty('options')){
 		if (viewerParams.parts.options.hasOwnProperty('title')){
 			window.document.title = viewerParams.parts.options.title
+			viewerParams.title = viewerParams.parts.options.title;
 		}
 	}
 
@@ -279,81 +275,48 @@ function initPVals(){
 			viewerParams.partsMesh[p] = [];
 		}
 
+		// copy the value from the default settings
+		//  into viewerParams using the same key. If the particle group
+		//  has other settings these will be overwritten in a later step.
+		Object.keys(viewerParams.defaultParticleSettings).forEach(function (key){
+			viewerParams[key][p] = copyValue(viewerParams.defaultParticleSettings[key]); 
+		});
+
 		// store the name inside the dictionary
 		viewerParams.parts[p].pkey = p;
 
-		//misc
 		if (!viewerParams.haveOctree[p]) viewerParams.plotNmax[p] = viewerParams.parts.count[p];
-		viewerParams.PsizeMult[p] = 1.;
-		viewerParams.showParts[p] = true;
-		viewerParams.updateOnOff[p] = false;
 
-		//filter
-		viewerParams.updateFilter[p] = false;
-		viewerParams.filterLims[p] = {};
-		viewerParams.filterVals[p] = {};
-		viewerParams.invertFilter[p] = {};
-		viewerParams.fkeys[p] = [];
-
-		//colormap
-		viewerParams.ckeys[p] = [];
-		viewerParams.colormapVariable[p] = 0;
-		viewerParams.colormap[p] = 4/256;
-		viewerParams.showColormap[p] = false;
-		viewerParams.updateColormapVariable[p] = false;
-		viewerParams.colormapVals[p] = {};
-		viewerParams.colormapLims[p] = {};
-
-		// radius scaling
-		viewerParams.radiusVariable[p] = 0; // corresponds to "None"
-		viewerParams.updateRadiusVariable[p] = false;
-		viewerParams.rkeys[p] = [];
-
-		//blending
-		viewerParams.blendingMode[p] = 'additive';
-		viewerParams.depthWrite[p] = false;
-		viewerParams.depthTest[p] = false;
+		// initialize all update variables to true for the first pass
+		viewerParams.updateOnOff[p] = true;
+		viewerParams.updateFilter[p] = true;
+		viewerParams.updateColormapVariable[p] = true;
+		viewerParams.updateRadiusVariable[p] = true;
 
 		//velocities
-		viewerParams.showVel[p] = false;
-		viewerParams.velVectorWidth[p] = 1.;
-		viewerParams.velGradient[p] = 0.; //0 == false, 1 == true
-		viewerParams.animateVel[p] = false;
-		viewerParams.animateVelDt[p] = 0.;
-		viewerParams.animateVelTmax[p] = 0.;
 		if (viewerParams.parts[p].Velocities_flat != null){
 			if (!viewerParams.reset){
 				calcVelVals(viewerParams.parts[p]);
 				if(!viewerParams.parts[p].hasOwnProperty("filterKeys")){
 					viewerParams.parts[p].filterKeys = [];
 				}
-			 
 			}
-			viewerParams.velType[p] = 'line';
 		}
 		
 		//filters
 		//in case there are no filter possibilities (but will be overwritten below)
-		viewerParams.fkeys[p] = ["None"];
-		viewerParams.filterLims[p]["None"] = [0,1];
-		viewerParams.filterVals[p]["None"] = [0,1]; 
 		var haveCurrentFilter = true;
 		if (viewerParams.parts[p].currentlyShownFilter == undefined) {
 			viewerParams.parts[p].currentlyShownFilter = ["None"];
 			haveCurrentFilter = false;
 		}
+
+		viewerParams.parts[p]['playbackTicks'] = 0;
+		viewerParams.parts[p]['playbackTickRate'] = 10;   
+
 		if (viewerParams.parts[p].hasOwnProperty("filterKeys")){
 			viewerParams.fkeys[p] = viewerParams.parts[p].filterKeys;
-			viewerParams.parts[p]['playbackTicks'] = 0;
-			viewerParams.parts[p]['playbackTickRate'] = 10;   
 			for (var k=0; k<viewerParams.fkeys[p].length; k++){
-				// TODO we should consider removing this "feature"
-				//  and just require users to pass in the mag velocity
-				//  as its own field-- or also radius and do radius/speed
-				//  flags or something
-				//if (viewerParams.fkeys[p][k] == "Velocities"){
-					//viewerParams.fkeys[p][k] = "magVelocities";
-				//}
 				var fkey = viewerParams.fkeys[p][k];
 				//calculate limits for the filters
 				if (viewerParams.parts[p][fkey] != null){
@@ -372,20 +335,10 @@ function initPVals(){
 		}
 		//colormap
 		//in case there are no colormap possibilities (but will be overwritten below)
-		viewerParams.ckeys[p] = ["None"];
-		viewerParams.colormapLims[p]["None"] = [0,1];
-		viewerParams.colormapVals[p]["None"] = [0,1];
 		if (viewerParams.parts[p].hasOwnProperty("colormapKeys")){
 			if (viewerParams.parts[p].colormapKeys.length > 0){
 				viewerParams.ckeys[p] = viewerParams.parts[p].colormapKeys;
 				for (var k=0; k<viewerParams.ckeys[p].length; k++){
-						// TODO we should consider removing this "feature"
-						//  and just require users to pass in the mag velocity
-						//  as its own field-- or also radius and do radius/speed
-						//  flags or something
-					//if (viewerParams.ckeys[p][k] == "Velocities"){
-						//viewerParams.ckeys[p][k] = "magVelocities";
-					//}
 					var ckey = viewerParams.ckeys[p][k];
 					viewerParams.colormapLims[p][ckey] = [0,1];
 					viewerParams.colormapVals[p][ckey] = [0,1];
@@ -406,7 +359,6 @@ function initPVals(){
 		}
 		// radius scaling
 		// None for no radius scaling radius possibilities
-		viewerParams.rkeys[p] = ["None"];
 		if (viewerParams.parts[p].hasOwnProperty("radiusKeys") &&
 			viewerParams.parts[p].radiusKeys.length > 0){
 				viewerParams.rkeys[p] = viewerParams.rkeys[p].concat(viewerParams.parts[p].radiusKeys);
@@ -525,13 +477,37 @@ function applyOptions(){
 
 	var options = viewerParams.parts.options;
 
+	// TODO compatability key matching, "color" and "sizeMult" are deprecated
+	if (options['partsColors'] == undefined && options['color'] != undefined) options['partsColors'] = options['color'];
+	if (options['partsSizeMultipliers'] == undefined && options['sizeMult'] != undefined) options['partsSizeMultipliers'] = options['sizeMult'];
+
 	var forGUI = [];
 
-	//modify the minimum z to show particles at (avoid having particles up in your face)
-	if (options.hasOwnProperty('zmin') && options.zmin != null) viewerParams.zmin = options.zmin;
+	var keys_to_avoid = [
+		"loaded",
+		"center", // values copied into a named array below
+		"camera", // values copied into a named array below
+		"cameraRotation", // values copied a named into array below
+		"cameraUp", // values copied into a named array below
+		"quaternion", // not used for input, only output as a preset
+		"useStereo", // changes the renderer and needs to update an element in the gui
+		"title", // handled in WebGLStart
+		// TODO: do we actually need to do this?
+		//  GUI creation initializes correctly from the values in GUIParams
+		//  can't we just send the values and then make a call to build the GUI?
+		"showVel", // needs to update an element in the gui
+		"velType", // needs to update an element in the gui
+		"animateVel" // needs to update an element in the gui
+	]
 
-	//modify the maximum z to show particles at (avoid having particles up way in the background)
-	if (options.hasOwnProperty('zmax') && options.zmax != null) viewerParams.zmax = options.zmax;
+	Object.keys(viewerParams.defaultSettings).forEach(function (key){
+		if (options.hasOwnProperty(key) && options[key] != null){
+			value = options[key];
+			if (key.includes("start")) return;
+			else if (keys_to_avoid.includes(key)) return;
+			else viewerParams[key] = options[key]; // copy the value into the same key
+		}
+	});
 
 	//initialize center
 	if (options.hasOwnProperty('center')){
@@ -577,11 +553,8 @@ function applyOptions(){
 		setTweenviewerParams();
 	}
 
-	//modify the initial friction
-	if (options.hasOwnProperty('friction') && options.friction != null) viewerParams.friction = options.friction;
-
 	//check if we are starting in Stereo
-	if (options.hasOwnProperty('stereo') && options.stereo){
+	if (options.hasOwnProperty('useStereo') && options.useStereo){
 		viewerParams.normalRenderer = viewerParams.renderer;
 		viewerParams.renderer = viewerParams.effect;
 		viewerParams.useStereo = true;
@@ -596,9 +569,6 @@ function applyOptions(){
 			viewerParams.effect.setEyeSeparation(viewerParams.stereoSep);
 	}
 
-	//modify the initial decimation
-	if (options.hasOwnProperty('decimate') && options.decimate != null) viewerParams.decimate = options.decimate;
-	
 	//maximum range in calculating the length the velocity vectors
 	if (options.hasOwnProperty("maxVrange") && options.maxVrange != null){
 		viewerParams.maxVrange = options.maxVrange; //maximum dynamic range for length of velocity vectors
@@ -608,80 +578,18 @@ function applyOptions(){
 				calcVelVals(viewerParams.parts[p]);     
 	} 	} 	}
 
-	//modify the minimum point scale factor
-	if (options.hasOwnProperty('minPointScale') && options.minPointScale != null) viewerParams.minPointScale = options.minPointScale;
-
-	//modify the maximum point scale factor
-	if (options.hasOwnProperty('maxPointScale') && options.maxPointScale != null) viewerParams.maxPointScale = options.maxPointScale;
-
     // add an annotation to the top if necessary
 	if (options.hasOwnProperty('annotation') && options.annotation != null){
 		elm = document.getElementById('annotate_container');
 		elm.innerHTML=options.annotation;
 		elm.style.display='block';
+		viewerParams.annotation = options.annotation;
     }
-
-	// flag to show fps in top right corner
-	if (options.hasOwnProperty('showFPS') && options.showFPS != null) viewerParams.showFPS = options.showFPS;
-
-	// flag to show memory usage in top right corner
-	if (options.hasOwnProperty('showMemoryUsage') && options.showMemoryUsage != null) viewerParams.showMemoryUsage = options.showMemoryUsage;
-
-	// change the memory limit for octrees, in bytes
-	if (options.hasOwnProperty('memoryLimit') && options.memoryLimit != null) viewerParams.memoryLimit = options.memoryLimit;
-	// flag to launch the app in a tween loop
-	if (viewerParams.parts.options.hasOwnProperty('start_tween')){
-		if (viewerParams.parts.options.start_tween){
-			viewerParams.updateTween = true	
-			setTweenviewerParams();
-		}
-	}
 
 	//  --------- column density options ----------- 
 
-	// flag to launch the app with the column density projection mode enabled
-	if (viewerParams.parts.options.hasOwnProperty(viewerParams.CDkey)){
-		if (viewerParams.parts.options.columnDensity != null){
-			viewerParams.columnDensity = viewerParams.parts.options.columnDensity;
-		}
-	}
-
-	// flag to renormalize column densities in logspace
-	if (viewerParams.parts.options.hasOwnProperty('CDlognorm')){
-		if (viewerParams.parts.options.CDlognorm != null){
-			viewerParams.CDlognorm = viewerParams.parts.options.CDlognorm;
-		}
-	}
-
-	// bottom of the column density renormalization
-	if (viewerParams.parts.options.hasOwnProperty('CDmin')){
-		if (viewerParams.parts.options.CDmin != null){
-			viewerParams.CDmin = viewerParams.parts.options.CDmin;
-		}
-	}
-
-	// top of the column density renormalization
-	if (viewerParams.parts.options.hasOwnProperty('CDmax')){
-		if (viewerParams.parts.options.CDmax != null){
-			viewerParams.CDmax = viewerParams.parts.options.CDmax;
-		}
-	}	
-
-	// disable GUI elements
-	if (viewerParams.parts.options.hasOwnProperty('GUIExcludeList')){
-		if (viewerParams.parts.options.GUIExcludeList != null){
-			viewerParams.GUIExcludeList = viewerParams.parts.options.GUIExcludeList;
-		}
-	}
-
-	if (viewerParams.parts.options.hasOwnProperty('collapseGUIAtStart')){
-		if (viewerParams.parts.options.collapseGUIAtStart != null){
-			viewerParams.collapseGUIAtStart = viewerParams.parts.options.collapseGUIAtStart;
-		}
-	}
-
-	//particle specific options
 	var options_keys = Object.keys(viewerParams.parts.options.showParts);
+	var xkeys; // x = c (color), f (filter), maybe r (radius) ?. field names.
 	for (var i=0; i<viewerParams.partsKeys.length; i++){
 		var viewer_p = viewerParams.partsKeys[i];
 		var p;
@@ -692,29 +600,35 @@ function applyOptions(){
 			}
 		}
 
-		//on/off
-		if (options.hasOwnProperty("showParts") && 
-			options.showParts != null && 
-			options.showParts.hasOwnProperty(p) && 
-			options.showParts[p] != null) viewerParams.showParts[viewer_p] = options.showParts[p];
+		// overwrite the default settings with what's in the passed settings dictionary
+		Object.keys(viewerParams.defaultParticleSettings).forEach(function (key){
+			if (
+				!keys_to_avoid.includes(key) && // some keys require extra attention, let's skip them
+				options.hasOwnProperty(key) &&  // some settings dictionaries don't have all keys
+				options[key] != null && // sometimes the dictionary might have a "use the default" value
+				options[key].hasOwnProperty(p) &&  // sometimes only some particle groups will be specified
+				options[key][p] != null){ // sometimes the dictionary might have a "use the default" value
 
-		//size
-		if (options.hasOwnProperty("sizeMult") && 
-			options.sizeMult != null && 
-			options.sizeMult.hasOwnProperty(p) && 
-			options.sizeMult[p] != null) viewerParams.PsizeMult[viewer_p] = options.sizeMult[p];
-
-		//color
-		if (options.hasOwnProperty("color") &&
-			options.color != null &&
-			options.color.hasOwnProperty(p) && 
-			options.color[p] != null) viewerParams.Pcolors[viewer_p] = options.color[p];
-
-		//maximum number of particles to plot
-		if (options.hasOwnProperty("plotNmax") &&
-			options.plotNmax != null &&
-			options.plotNmax.hasOwnProperty(p) &&
-			options.plotNmax[p] != null) viewerParams.plotNmax[viewer_p] = options.plotNmax[p];
+				value = options[key][p];
+				// passed a simple value we want to copy
+				if (value.constructor != Object) viewerParams[key][viewer_p] = copyValue(value); 
+				// passed an xkey dictionary (x=f or x=c most likely)
+				else { 
+					xkeys = Object.keys(value);
+					xkeys.forEach(function(xkey){
+						if (value[xkey] != null){ // check each xkey for null values
+							if (Array.isArray(value[xkey])){ // check each element of the array for null values
+								value[xkey].forEach(function(arr_value,index){
+									if (arr_value != null) viewerParams[key][viewer_p][xkey][index] = copyValue(arr_value);
+								});
+							}
+							// just a single value, e.g. invertFilter = fkey -> boolean
+							else viewerParams[key][viewer_p][xkey] = copyValue(value[xkey]);
+						} 
+					});
+				}
+			}
+		});
 
 		//start plotting the velocity vectors
 		if (options.hasOwnProperty("showVel") && 
@@ -738,18 +652,6 @@ function applyOptions(){
 				viewerParams.velType[viewer_p] = options.velType[p];
 		} 	}
 
-		//velocity vector width
-		if (options.hasOwnProperty("velVectorWidth") &&
-			options.velVectorWidth != null &&
-			options.velVectorWidth.hasOwnProperty(p) &&
-			options.velVectorWidth[p] != null) viewerParams.velVectorWidth[viewer_p] = options.velVectorWidth[p]; 
-
-		//velocity vector gradient
-		if (options.hasOwnProperty("velGradient") && 
-			options.velGradient != null && 
-			options.velGradient.hasOwnProperty(p) &&
-			options.velGradient[p] != null) viewerParams.velGradient[viewer_p] = +options.velGradient[p]; //convert from bool to int
-
 		//start showing the velocity animation
 		if (options.hasOwnProperty("animateVel") && 
 			options.animateVel != null &&
@@ -761,91 +663,6 @@ function applyOptions(){
 				var evalString = 'elm = document.getElementById("'+p+'velAnimateCheckBox"); elm.checked = true; elm.value = true;'
 				forGUI.push({'evalCommand':[evalString]})
 		} 	}
-
-		//animate velocity dt
-		if (options.hasOwnProperty("animateVelDt") &&
-			options.animateVelDt != null &&
-			options.animateVelDt.hasOwnProperty(p) &&
-			options.animateVelDt[p] != null) viewerParams.animateVelDt[viewer_p] = options.animateVelDt[p];
-
-		//animate velocity tmax
-		if (options.hasOwnProperty("animateVelTmax") &&
-			options.animateVelTmax != null &&
-			options.animateVelTmax.hasOwnProperty(p) &&
-			options.animateVelTmax[p] != null) viewerParams.animateVelTmax[viewer_p] = options.animateVelTmax[p];
-
-		//filter limits
-		if (options.hasOwnProperty("filterLims") &&
-			options.filterLims != null &&
-			options.filterLims.hasOwnProperty(p) &&
-			options.filterLims[p] != null){
-			viewerParams.updateFilter[viewer_p] = true
-
-			for (k=0; k<viewerParams.fkeys[viewer_p].length; k++){
-				var fkey = viewerParams.fkeys[viewer_p][k]
-				if (options.filterLims[p].hasOwnProperty(fkey)){
-					if (options.filterLims[p][fkey] != null){
-						viewerParams.filterLims[viewer_p][fkey] = []
-						viewerParams.filterLims[viewer_p][fkey].push(options.filterLims[p][fkey][0]);
-						viewerParams.filterLims[viewer_p][fkey].push(options.filterLims[p][fkey][1]);
-		} 	} 	} 	}
-
-		//filter values
-		if (options.hasOwnProperty("filterVals") &&
-			options.filterVals != null &&
-			options.filterVals.hasOwnProperty(p) &&
-			options.filterVals[p] != null){
-			viewerParams.updateFilter[viewer_p] = true
-
-			for (k=0; k<viewerParams.fkeys[viewer_p].length; k++){
-				var fkey = viewerParams.fkeys[viewer_p][k]
-				if (options.filterVals[p].hasOwnProperty(fkey)){
-					if (options.filterVals[p][fkey] != null){
-						viewerParams.filterVals[viewer_p][fkey] = []
-						viewerParams.filterVals[viewer_p][fkey].push(options.filterVals[p][fkey][0]);
-						viewerParams.filterVals[viewer_p][fkey].push(options.filterVals[p][fkey][1]);
-		} 	} 	} 	}
-
-		//filter invert
-		if (options.hasOwnProperty("invertFilter") &&
-			options.invertFilter != null &&
-			options.invertFilter.hasOwnProperty(p) &&
-			options.invertFilter[p] != null){
-			for (k=0; k<viewerParams.fkeys[viewer_p].length; k++){
-				var fkey = viewerParams.fkeys[viewer_p][k]
-				if (options.invertFilter[p].hasOwnProperty(fkey)){
-					if (options.invertFilter[p][fkey] != null){
-						viewerParams.invertFilter[viewer_p][fkey] = options.invertFilter[p][fkey];
-		} 	}	 } 	}
-
-		//colormap limits
-		if (options.hasOwnProperty("colormapLims") &&
-			options.colormapLims != null && 
-			options.colormapLims.hasOwnProperty(p) && 
-			options.colormapLims[p] != null){
-			for (k=0; k<viewerParams.ckeys[viewer_p].length; k++){
-				var ckey = viewerParams.ckeys[viewer_p][k]
-				if (options.colormapLims[p].hasOwnProperty(ckey)){
-					if (options.colormapLims[p][ckey] != null){
-						viewerParams.colormapLims[viewer_p][ckey] = []
-						viewerParams.colormapLims[viewer_p][ckey].push(options.colormapLims[p][ckey][0]);
-						viewerParams.colormapLims[viewer_p][ckey].push(options.colormapLims[p][ckey][1]);
-		} 	} 	} 	}
-
-		//colormap values
-		if (options.hasOwnProperty("colormapVals") &&
-			options.colormapVals != null &&
-			options.colormapVals.hasOwnProperty(p) &&
-			options.colormapVals[p] != null){
-
-			for (k=0; k<viewerParams.ckeys[viewer_p].length; k++){
-				var ckey = viewerParams.ckeys[viewer_p][k]
-				if (options.colormapVals[p].hasOwnProperty(ckey)){
-					if (options.colormapVals[p][ckey] != null){
-						viewerParams.colormapVals[viewer_p][ckey] = []
-						viewerParams.colormapVals[viewer_p][ckey].push(options.colormapVals[p][ckey][0]);
-						viewerParams.colormapVals[viewer_p][ckey].push(options.colormapVals[p][ckey][1]);
-		} 	} 	} 	}
 
 		//start plotting with a colormap
 		if (options.hasOwnProperty("showColormap") &&
@@ -859,42 +676,18 @@ function applyOptions(){
 				forGUI.push({'evalCommand':[evalString]})
 		} 	}
 
-		//choose which colormap to use
-		if (options.hasOwnProperty("colormap") && 
-			options.colormap != null &&
-			options.colormap.hasOwnProperty(p) && 
-			options.colormap[p] != null) viewerParams.colormap[viewer_p] = copyValue(options.colormap[p]);
-
-		//select the colormap variable to color by
-		if (options.hasOwnProperty("colormapVariable") && 
-			options.colormapVariable != null &&
-			options.colormapVariable.hasOwnProperty(p) && 
-			options.colormapVariable[p] != null) viewerParams.colormapVariable[viewer_p] = copyValue(options.colormapVariable[p]);
-
-		//select the radius variable to scale by
-		if (options.hasOwnProperty("radiusVariable") && 
-			options.radiusVariable != null &&
-			options.radiusVariable.hasOwnProperty(p) && 
-			options.radiusVariable[p] != null) viewerParams.radiusVariable[viewer_p] = copyValue(options.radiusVariable[p]);
-
-		if (options.hasOwnProperty("blendingMode") && 
-			options.blendingMode != null &&
-			options.blendingMode.hasOwnProperty(p) && 
-			options.blendingMode[p] != null) viewerParams.blendingMode[viewer_p] = copyValue(options.blendingMode[p]);
-			
 		if (options.hasOwnProperty("depthTest") && 
 			options.depthTest != null &&
 			options.depthTest.hasOwnProperty(p) && 
 			options.depthTest[p] != null){
+			if (viewerParams.haveUI){
 				viewerParams.depthTest[viewer_p] = copyValue(options.depthTest[p]);
-				viewerParams.depthWrite[viewer_p] = copyValue(options.depthTest[p]);
-				/*
-				var evalString =( 'elm = document.getElementById(' + p + '_depthCheckBox);'+
+				var evalString =( 'elm = document.getElementById("' + p + '_depthCheckBox");'+
 					'elm.checked = ' + options.depthTest[p] + ';'+
 					'elm.value = ' + options.depthTest[p]+';')
 				forGUI.push({'evalCommand':evalString});
-				*/
 			}
+		}
 			
 	}// particle specific options
 
@@ -903,7 +696,7 @@ function applyOptions(){
 	//  do it here so it happens in the presets too and load settings, etc...
 	viewerParams.showParts[viewerParams.CDkey] = viewerParams.partsKeys.some(
 		function (key){return viewerParams.showParts[key]});
-	viewerParams.colormap[viewerParams.CDkey] = 4/256
+	viewerParams.colormap[viewerParams.CDkey] = 4/256;
 	viewerParams.ckeys[viewerParams.CDkey] = [viewerParams.CDckey]
 	viewerParams.colormapLims[viewerParams.CDkey] = {}
 	viewerParams.colormapLims[viewerParams.CDkey][viewerParams.ckeys[viewerParams.CDkey][0]] = [viewerParams.CDmin,viewerParams.CDmax]
@@ -1026,7 +819,7 @@ function initColumnDensity(){
 // continuously check if viewerParams attributes that
 // should be initialized here are null, if so, keep waiting
 function confirmViewerInit(){
-	var keys = ["partsKeys", "PsizeMult", "plotNmax", "decimate", "stereoSepMax", "friction", "Pcolors", "showParts", "showVel", "animateVel", "velopts", "velType", "ckeys", "colormapVals", "colormapLims", "colormapVariable", "colormap", "showColormap", "fkeys", "filterVals", "filterLims", "renderer", "scene", "controls","camera","parts"];
+	var keys = ["partsKeys", "partsSizeMultipliers", "plotNmax", "decimate", "stereoSepMax", "friction", "partsColors", "showParts", "showVel", "animateVel", "velopts", "velType", "ckeys", "colormapVals", "colormapLims", "colormapVariable", "colormap", "showColormap", "fkeys", "filterVals", "filterLims", "renderer", "scene", "controls","camera","parts"];
 
 	var ready = true;
 	keys.forEach(function(k,i){
@@ -1056,26 +849,47 @@ function sendInitGUI(prepend=[], append=[]){
 
 	var forGUI = prepend;
 	forGUI.push({'setGUIParamByKey':[false,"GUIready"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.partsKeys, "partsKeys"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.PsizeMult, "PsizeMult"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.plotNmax, "plotNmax"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.decimate, "decimate"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.Pcolors, "Pcolors"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.showParts, "showParts"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.boxSize, "boxSize"]});
 
-	//for velocities
-	forGUI.push({'setGUIParamByKey':[viewerParams.showVel, "showVel"]});
+	// copy GUI settings
+	forGUI.push({'setGUIParamByKey':[viewerParams.GUIExcludeList,"GUIExcludeList"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.collapseGUIAtStart,"collapseGUIAtStart"]});
+
+	// copy any viewer settings the user is able to change to the GUIParams
+	Object.keys(viewerParams.defaultSettings).forEach(function (key){
+		if (viewerParams[key] != undefined) forGUI.push({'setGUIParamByKey':[viewerParams[key],key]});
+	});
+	Object.keys(viewerParams.defaultParticleSettings).forEach(function (key){
+		if (viewerParams[key] != undefined) forGUI.push({'setGUIParamByKey':[viewerParams[key],key]});
+	});
+
+	// copy viewer settings which the user can't change
+	forGUI.push({'setGUIParamByKey':[viewerParams.partsKeys, "partsKeys"]});
+	// TODO do we use boxSize anymore?
+	forGUI.push({'setGUIParamByKey':[viewerParams.boxSize, "boxSize"]}); 
+
 	forGUI.push({'setGUIParamByKey':[viewerParams.velopts, "velopts"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.velType, "velType"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.velVectorWidth, "velVectorWidth"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.velGradient, "velGradient"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.animateVel, "animateVel"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.animateVelDt, "animateVelDt"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.animateVelTmax, "animateVelTmax"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.blendingOpts, "blendingOpts"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.blendingMode, "blendingMode"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.depthTest, "depthTest"]});
+
+	// copy viewer settings related to the camera
+	forGUI.push({'setGUIParamByKey':[viewerParams.useTrackball, "useTrackball"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.renderWidth,"renderWidth"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.renderHeight,"renderHeight"]});
+
+	forGUI.push({'setGUIParamByKey':[viewerParams.reset,"reset"]});
+
+	var xx = new THREE.Vector3(0,0,0);
+	viewerParams.camera.getWorldDirection(xx);
+	forGUI.push({'setGUIParamByKey':[xx, "cameraDirection"]});
+	if (viewerParams.useTrackball) forGUI.push({'setGUIParamByKey':[viewerParams.controls.target, "controlsTarget"]});
+
+	forGUI.push({'updateUICenterText':null});
+	forGUI.push({'updateUICameraText':null});
+	forGUI.push({'updateUIRotText':null});
+
+	//if (viewerParams.usingSocket && !viewerParams.local) forGUI.push({'updateGUICamera':null});
+	if (viewerParams.usingSocket && !viewerParams.local) forGUI.push({'setGUIParamByKey':[true, "cameraNeedsUpdate"]});
+
+	// determine which particle groups have velocities and pass flags
 	var haveVelocities = {};
 	viewerParams.partsKeys.forEach(function(p){
 		haveVelocities[p] = false;
@@ -1085,34 +899,8 @@ function sendInitGUI(prepend=[], append=[]){
 	});
 	forGUI.push({'setGUIParamByKey':[haveVelocities,"haveVelocities"]});
 
-	//for colormap
-	forGUI.push({'setGUIParamByKey':[viewerParams.ckeys,"ckeys"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.colormapVals, "colormapVals"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.colormapLims, "colormapLims"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.colormapVariable, "colormapVariable"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.colormap, "colormap"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.showColormap, "showColormap"]});
-	var haveColormap = {};
-	var haveColormapSlider = {};
-	viewerParams.partsKeys.forEach(function(p){
-		haveColormap[p] = false;
-		haveColormapSlider[p] = {};
-		viewerParams.ckeys[p].forEach(function(ck){
-			haveColormapSlider[p][ck] = false;
-			if (viewerParams.parts[p][ck] != null){
-				haveColormap[p] = true;
-				haveColormapSlider[p][ck] = true;
-			}
-		});
-	});
-	forGUI.push({'setGUIParamByKey':[haveColormap,"haveColormap"]});
-	forGUI.push({'setGUIParamByKey':[haveColormapSlider,"haveColormapSlider"]});
-
-	//for filters
-	forGUI.push({'setGUIParamByKey':[viewerParams.fkeys,"fkeys"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.filterVals,"filterVals"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.filterLims,"filterLims"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.invertFilter,"invertFilter"]});
+	// determine which particle groups have filters and pass flags 
+	//  TODO: why are there two flags (what is haveFilterSlider for?)
 	var haveFilter = {};
 	var haveFilterSlider = {};
 	viewerParams.partsKeys.forEach(function(p){
@@ -1130,52 +918,32 @@ function sendInitGUI(prepend=[], append=[]){
 	forGUI.push({'setGUIParamByKey':[haveFilter,"haveFilter"]});
 	forGUI.push({'setGUIParamByKey':[haveFilterSlider,"haveFilterSlider"]});
 
+	// determine which particle groups have colormaps and pass flags 
+	//  TODO: why are there two flags (what is haveFilterSlider for?)
+	var haveColormap = {};
+	var haveColormapSlider = {};
+	viewerParams.partsKeys.forEach(function(p){
+		haveColormap[p] = false;
+		haveColormapSlider[p] = {};
+		viewerParams.ckeys[p].forEach(function(ck){
+			haveColormapSlider[p][ck] = false;
+			if (viewerParams.parts[p][ck] != null){
+				haveColormap[p] = true;
+				haveColormapSlider[p][ck] = true;
+			}
+		});
+	});
+	forGUI.push({'setGUIParamByKey':[haveColormap,"haveColormap"]});
+	forGUI.push({'setGUIParamByKey':[haveColormapSlider,"haveColormapSlider"]});
 
-	forGUI.push({'setGUIParamByKey':[viewerParams.rkeys,"rkeys"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.radiusVariable,"radiusVariable"]});
-
-
-	//for camera
-	forGUI.push({'setGUIParamByKey':[viewerParams.stereoSepMax, "stereoSepMax"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.friction, "friction"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.useTrackball, "useTrackball"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.useStereo, "useStereo"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.renderWidth,"renderWidth"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.renderHeight,"renderHeight"]});
-
-	forGUI.push({'setGUIParamByKey':[viewerParams.reset,"reset"]});
-
-	forGUI.push({'setGUIParamByKey':[viewerParams.camera.position, "cameraPosition"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.camera.rotation, "cameraRotation"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.camera.up, "cameraUp"]});
-	var xx = new THREE.Vector3(0,0,0);
-	viewerParams.camera.getWorldDirection(xx);
-	forGUI.push({'setGUIParamByKey':[xx, "cameraDirection"]});
-	if (viewerParams.useTrackball) forGUI.push({'setGUIParamByKey':[viewerParams.controls.target, "controlsTarget"]});
-
-	forGUI.push({'updateUICenterText':null});
-	forGUI.push({'updateUICameraText':null});
-	forGUI.push({'updateUIRotText':null});
-
-	//if (viewerParams.usingSocket && !viewerParams.local) forGUI.push({'updateGUICamera':null});
-	if (viewerParams.usingSocket && !viewerParams.local) forGUI.push({'setGUIParamByKey':[true, "cameraNeedsUpdate"]});
-
+	//octree
 	forGUI.push({'setGUIParamByKey':[viewerParams.haveOctree,"haveOctree"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.haveAnyOctree,"haveAnyOctree"]});
-	if (viewerParams.haveAnyOctree) {
-		forGUI.push({'setGUIParamByKey':[viewerParams.memoryLimit,"octreeMemoryLimit"]});
-		forGUI.push({'setGUIParamByKey':[viewerParams.octree.normCameraDistance,"octreeNormCameraDistance"]});
-		}
+	forGUI.push({'setGUIParamByKey':[viewerParams.memoryLimit,"octreeMemoryLimit"]});
 
-	forGUI.push({'setGUIParamByKey':[viewerParams.showFPS,"showFPS"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.showMemoryUsage,"showMemoryUsage"]});
 
 	forGUI.push({'setGUIParamByKey':[viewerParams.columnDensity,"columnDensity"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.CDmin,"CDmin"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.CDmax,"CDmax"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.CDkey,"CDkey"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.CDckey,"CDckey"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.CDlognorm,"CDlognorm"]});
 
 	//check if there is a tween file
 	viewerParams.haveTween = false;
@@ -1183,10 +951,7 @@ function sendInitGUI(prepend=[], append=[]){
 	forGUI.push({'setGUIParamByKey':[viewerParams.haveTween,"haveTween"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.inTween,"inTween"]});
 
-	forGUI.push({'setGUIParamByKey':[viewerParams.GUIExcludeList,"GUIExcludeList"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.collapseGUIAtStart,"collapseGUIAtStart"]});
-
-	// add any extra commands
+	// add any extra commands we were passed in the function call
 	append.forEach(function(x,i){
 		forGUI.push(x);
 	})
@@ -1416,7 +1181,6 @@ function compileFFLYData(data, p, callback, initialLoadFrac=0){
 			if (hasRgbaColors) this_parts.rgbaColors_flat = [];
 			this_parts.filterKeys = [];
 			this_parts.colormapKeys = [];
-			// TODO hook this up for choosing which variable to scale points by
 			this_parts.radiusKeys = [];
 			//this_parts.doSPHrad = Array(false);
 
