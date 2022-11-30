@@ -1240,6 +1240,7 @@ function createParticleColormapSelectorSegment(container,parent,name,p){
 		.attr('class','selectCMap')
 		.attr('id',p+'_SelectCMap')
 		.style('margin-left','4px')
+		.style('width','75px')
 		.on('change', selectColormap)
 
 	var options = selectCMap.selectAll('option')
