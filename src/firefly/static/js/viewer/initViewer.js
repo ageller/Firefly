@@ -696,15 +696,36 @@ function applyOptions(){
 	//  do it here so it happens in the presets too and load settings, etc...
 	viewerParams.showParts[viewerParams.CDkey] = viewerParams.partsKeys.some(
 		function (key){return viewerParams.showParts[key]});
-	viewerParams.colormap[viewerParams.CDkey] = 4/256;
 	viewerParams.ckeys[viewerParams.CDkey] = [viewerParams.CDckey]
-	viewerParams.colormapLims[viewerParams.CDkey] = {}
-	viewerParams.colormapLims[viewerParams.CDkey][viewerParams.ckeys[viewerParams.CDkey][0]] = [viewerParams.CDmin,viewerParams.CDmax]
-	viewerParams.colormapVals[viewerParams.CDkey] = {}
-	viewerParams.colormapVals[viewerParams.CDkey][viewerParams.ckeys[viewerParams.CDkey][0]] = [viewerParams.CDmin,viewerParams.CDmax]
-	viewerParams.colormapVariable[viewerParams.CDkey] = 0;
-	viewerParams.showColormap[viewerParams.CDkey] = false;
-	viewerParams.updateColormapVariable[viewerParams.CDkey] = false;
+	viewerParams.updateColormapVariable[viewerParams.CDkey] = true;
+
+	if (Object.keys(options.colormap).includes(viewerParams.CDkey)){
+		viewerParams.colormap[viewerParams.CDkey] = options["colormap"][viewerParams.CDkey]
+	}
+	else viewerParams.colormap[viewerParams.CDkey] = 4/256;
+
+	if (Object.keys(options.colormapLims).includes(viewerParams.CDkey)){
+		viewerParams.colormapLims[viewerParams.CDkey] = options["colormapLims"][viewerParams.CDkey]
+	}
+	else{
+		viewerParams.colormapLims[viewerParams.CDkey] = {}
+		viewerParams.colormapLims[viewerParams.CDkey][viewerParams.CDckey] = [viewerParams.CDmin,viewerParams.CDmax]
+	}
+	if (Object.keys(options.colormapVals).includes(viewerParams.CDkey)){
+		viewerParams.colormapVals[viewerParams.CDkey] = options["colormapVals"][viewerParams.CDkey]
+	}
+	else{
+		viewerParams.colormapVals[viewerParams.CDkey] = {}
+		viewerParams.colormapVals[viewerParams.CDkey][viewerParams.CDckey] = [viewerParams.CDmin,viewerParams.CDmax]
+	}
+	if (Object.keys(options.colormapVariable).includes(viewerParams.CDkey)){
+		viewerParams.colormapVariable[viewerParams.CDkey] = options["colormapVariable"][viewerParams.CDkey]
+	}
+	else viewerParams.colormapVariable[viewerParams.CDkey] = 0;
+	if (Object.keys(options.showColormap).includes(viewerParams.CDkey)){
+		viewerParams.showColormap[viewerParams.CDkey] = options["showColormap"][viewerParams.CDkey]
+	}
+	else viewerParams.showColormap[viewerParams.CDkey] = false;
 
 	sendToGUI(forGUI);
 }
