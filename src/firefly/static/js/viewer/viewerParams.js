@@ -4,6 +4,9 @@ var viewerParams;
 function setDefaultViewerParams(these_params){
 	d3.json("static/js/misc/defaultSettings.json", function(defaultSettings) {
 		viewerParams.defaultSettings = defaultSettings;
+		Object.keys(viewerParams.defaultSettings).forEach(function (key){
+			viewerParams[key] = defaultSettings[key];
+		});
 	})
 
 	// load the default particle settings
