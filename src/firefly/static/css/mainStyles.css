@@ -16,15 +16,15 @@ canvas{
 }
 
 #annotate_container{
-        position:absolute;
-        width:auto;
-        text-align:center;
-        color:black;
-        display:none;
-        margin-top:0px;
-        padding:3px;
-        transform: translate(-50%, 0%);
-        margin-left:50%;
+	position:absolute;
+	width:auto;
+	text-align:center;
+	color:black;
+	display:none;
+	margin-top:0px;
+	padding:3px;
+	transform: translate(-50%, 0%);
+	margin-left:50%;
 }
 
 
@@ -50,16 +50,16 @@ canvas{
 
 #UserMessage{
 	position:absolute; 
-    top:50%;
-    left:50%;
-    transform:translate(-50%,-50%);
-    color:white;
+	top:50%;
+	left:50%;
+	transform:translate(-50%,-50%);
+	color:white;
 	text-align: center;
 	font-size:10px;
 	font-size:5vmin;
 	background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
-    opacity:0;
-    padding:15px;
+	opacity:0;
+	padding:15px;
 }
 #splash{
 	position:absolute; 
@@ -220,4 +220,34 @@ a:visited {
 	position: absolute;
 	top: 0px;
 	left:  0px;
+}
+
+#flyExplainer{
+	background-color:#808080; 
+	color: black; 
+	position:fixed; 
+	bottom:0; 
+	left:0; 
+	padding:10px; 
+	font-size:14px; 
+	border-radius: 00px 10px 0px 0px;
+	/*z-index:100;*/
+	transform:  translate(0px, 0px);
+}
+#flyExplainerHider{
+	background-color:rgb(80,80,80); 
+	color: white; 
+	position:fixed; 
+	height: 20px;
+	bottom:0; 
+	left: 0px;
+	padding:2px; 
+	/*margin-bottom: 70px;*/
+	/*z-index:100;*/
+	border-radius: 10px 10px 0px 0px;
+	transform:  translate(0px, 0px);
+	cursor: pointer;
+}
+#flyExplainerHider:hover{
+	color: black;
 }

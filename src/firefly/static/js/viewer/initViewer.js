@@ -786,6 +786,13 @@ function initControls(updateGUI = true,force_fly=false){
 		forGUI.push({'evalCommand':evalString});
 	}
 
+	// the fly explainer
+	if (viewerParams.controlsName == 'FlyControls'){
+		showFlyExplainer();
+	} else {
+		removeFlyExplainer();
+	}
+
 	viewerParams.switchControls = false;
 	if (updateGUI) sendToGUI(forGUI);
 
