@@ -28,6 +28,7 @@ uniform float velTime;
 const float PI = 3.1415926535897932384626433832795;
 // vectors are substantially smaller (b.c. they're built by discarding) so we need to scale them 
 // to compensate, otherwise they are /tiny/
+// velVectorSizeFac = 100 empirically tested seems to match particle size
 const float velVectorSizeFac = 100.; 
 
 void main(void) {
@@ -35,13 +36,10 @@ void main(void) {
 	vAlpha = alpha;
 	vUv = uv;
 
-	//vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
 	vec4 mvPosition = modelViewMatrix * vec4( position + velVals.xyz*velTime, 1.0 );
 
 	float cameraDist = length(mvPosition.xyz);
-	float pointScale = 1./cameraDist * 2000.*uVertexScale;
-	//gl_PointSize = clamp(pointScale, minPointScale, maxPointScale)*radiusScale;
-	gl_PointSize = pointScale*radiusScale;
+	gl_PointSize = clamp(uVertexScale/cameraDist*2000., minPointScale, maxPointScale)*radiusScale;
 
 	// send colormap array to fragment shader
 	vColormapMag = clamp(((colormapField - colormapMin) / (colormapMax - colormapMin)), 0., 1.);
@@ -53,15 +51,11 @@ void main(void) {
 		float vSize = sqrt(vyc*vyc+vxc*vxc)/sqrt(dot(velVals.xyz,velVals.xyz))*velVals[3] * 0.5;
 		vTheta = atan(vyc,vxc);
 		if (vTheta<0.0) vTheta=vTheta+2.0*PI;
-		// velVectorSizeFac = 100 empirically tested seems to match particle size
-		//  when it's a fuzzy sphere.  the clamping ensures particles don't disappear when
-		//  you enable velocity vectors
-		gl_PointSize = clamp(
-			gl_PointSize*vSize*velVectorSizeFac,
-			minPointScale*velVectorSizeFac,
-			maxPointScale*velVectorSizeFac)*radiusScale;
+		gl_PointSize = gl_PointSize*vSize*velVectorSizeFac;
 	}
 
+	// uncomment to enforce that particles are always minimum 1 pixel
+	//gl_PointSize = max(gl_PointSize,1.0);
 	vPointSize = gl_PointSize;
 
 	vColor = rgbaColor;
