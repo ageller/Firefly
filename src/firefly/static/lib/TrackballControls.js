@@ -244,7 +244,7 @@
 
 						mouseChange.multiplyScalar( _eye.length() * scope.panSpeed );
 						pan.copy( _eye ).cross( scope.object.up ).setLength( mouseChange.x );
-						pan.add( objectUp.copy( scope.object.up ).setLength( mouseChange.y ) );
+						pan.add( objectUp.copy( _eye).cross(scope.object.up ).cross(_eye).setLength( mouseChange.y ) );
 						scope.object.position.add( pan );
 						scope.target.add( pan );
 						if ( scope.staticMoving ) {
