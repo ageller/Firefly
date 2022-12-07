@@ -137,9 +137,11 @@ window.addEventListener('resize', changeSnapSizes);
 
 // for the fly controls explainer tab
 
-function showFlyExplainer(){
+function showFlyExplainer(clicked=false){
 	var elem = d3.select('#flyExplainer');
 	if (elem.node()){
+		if (viewerParams.controlsName == 'FlyControls') elem.node().innerHTML = '<b>You are currently in "fly" controls.</b>  To move the camera in [direction] use the following "key" : [left] "a", [right]  "d", [forward] "w", [backward] "s", [down] "f", [up] "r".  Hold "shift" with any of these to reduce the speed.  Increase or decrease the default speed by pressing "+" or "-".  You can also use the mouse left-click + drag to control the camera pitch and yaw.  To switch to "trackball" controls and place the anchor rotation at the current camera location, hit the [space bar].';
+		else elem.node().innerHTML = '<b>You are currently in "trackball" controls.</b>  To rotate the camera, click and hold the [left mouse button] and drag the mouse.  To zoom in or out, [scroll up] or [scroll down] using the scroll wheel. To pan, click and hold the [right mouse button] and drag the mouse.  To switch to "fly" controls and change the rotation anchor point, hit the [space bar].'
 		var bbox = elem.node().getBoundingClientRect();
 		elem
 			.style('z-index', 3)
@@ -153,7 +155,12 @@ function showFlyExplainer(){
 				.style('transform', 'translate(0px,0px)')
 				.style('margin-bottom', parseFloat(bbox.height) + 'px');
 
-		d3.select('#flyExplainerHiderContent').transition().style('transform', 'rotate(0deg)');
+		// only auto-hide if the user didn't click to show
+		if (!clicked){
+			d3.select('#flyExplainerHiderContent').transition().style('transform', 'rotate(0deg)')
+				.transition().duration(viewerParams.controlsExplainerDelay_sec*1e3).on('end',hideFlyExplainer);
+		}
+		else d3.select('#flyExplainerHiderContent').transition().style('transform', 'rotate(0deg)');
 	}
 }
 
@@ -202,7 +209,7 @@ d3.select('#flyExplainerHider').on('click', function(){
 		if (elem.classed('flyExplainerShown')) {
 			hideFlyExplainer();
 		} else {
-			showFlyExplainer()
+			showFlyExplainer(true)
 		}
 	}
 	

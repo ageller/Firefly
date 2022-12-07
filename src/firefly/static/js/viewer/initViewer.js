@@ -787,7 +787,7 @@ function initControls(updateGUI = true,force_fly=false){
 	}
 
 	// the fly explainer
-	if (viewerParams.controlsName == 'FlyControls'){
+	if (viewerParams.controlsExplainerDelay_sec>0){
 		showFlyExplainer();
 	} else {
 		removeFlyExplainer();

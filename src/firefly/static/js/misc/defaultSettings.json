@@ -10,6 +10,7 @@
     "showSplashAtStartup": false,
 
     "annotation": null,
+    "controlsExplainerDelay_sec":5,
     "title": "Firefly",
 
     "center": null,

@@ -67,6 +67,9 @@ class Settings(object):
         :param annotation: text to include at the top of the
             Firefly window as an annotation, defaults to None
         :type annotation: str, optional
+        :param controlsExplainerDelay_sec: seconds before the controls explainer auto-hides. If <=0,
+            then the controls explainer is not shown, defaults to 5
+        :type controlsExplainerDelay_sec: int, optional
         :param showFPS: flag to display the FPS (frames per second) of the 
             Firefly scene, defaults to False
         :type showFPS: bool, optional
