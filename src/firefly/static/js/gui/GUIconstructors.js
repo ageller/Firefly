@@ -134,6 +134,7 @@ function createPresetSegment(container,parent,name){
 		.attr('id','savePresetButton')
 		.attr('class','button')
 		.style('width',(GUIParams.containerWidth - 10) + 'px')
+		.style('margin-left','0px') // TODO: padding is being double counted in main/general/data pane. RIP
 		.on('click',function(){
 			sendToViewer([{'savePreset':null}]);
 		})
@@ -149,6 +150,7 @@ function createResetSegment(container,parent,name){
 		.attr('id','resetButton')
 		.attr('class','button')
 		.style('width',(GUIParams.containerWidth - 10)/2. - 3 + 'px')
+		.style('margin-left','0px') // TODO: padding is being double counted in main/general/data pane. RIP
 		.on('click',function(){
 			sendToViewer([{'resetToOptions':null}]);
 		})
