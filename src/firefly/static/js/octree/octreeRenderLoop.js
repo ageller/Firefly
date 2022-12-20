@@ -17,7 +17,7 @@ function updateOctree(treewalk=false){
 	if (!octree || !viewerParams.showParts[pkey]) return updateOctreePindex();
 
 	// check if we're over the memory limit. if so, move the oldest mesh to the remove queue
-	if (viewerParams.memoryUsage > viewerParams.memoryLimit){
+	if (viewerParams.memoryUsage > viewerParams.octree.memoryLimit){
 		var i = 0;
 		var prefix_length = (pkey + '-').length
 
