@@ -106,7 +106,7 @@ function createDecimationSegment(container,parent,name){
 			.attr('class','pLabelDiv')
 			.style('width','135px')
 			.style('display','inline-block')
-			.text('Memory Limit (Gb)');
+			.text('Memory Limit (GB)');
 		mem.append('div')
 			.attr('class','NSliderClass')
 			.attr('id','MSlider')

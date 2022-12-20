@@ -332,7 +332,7 @@ function updateFPSContainer(){
 		txt += Math.round(GUIParams.FPS) + ' fps';
 		if (GUIParams.showMemoryUsage) txt += ', ';
 	}
-	if (GUIParams.memoryUsage > 0 && GUIParams.showMemoryUsage) txt+= (Math.round(GUIParams.memoryUsage/1e9*100.)/100.).toFixed(2) + ' Gb'
+	if (GUIParams.memoryUsage > 0 && GUIParams.showMemoryUsage) txt+= (Math.round(GUIParams.memoryUsage/1e9*100.)/100.).toFixed(2) + ' GB'
 	elm = document.getElementById("fps_container");
 	if (elm) elm.innerHTML = txt;
 	// hide the element if we're not showing anything
