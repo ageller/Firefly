@@ -332,7 +332,7 @@ ul.rig li p {
 
 ul.rig li .info{
 	position:relative;
-	background: rgba(29, 106, 154, 0.72);
+	background: rgba(26, 55, 73, 0.72);
 	visibility: hidden;
 	opacity: 0;
 	top:-7px;
@@ -341,6 +341,10 @@ ul.rig li .info{
 	transition: opacity .2s, visibility .2s;
 	aspect-ratio:1;
 	}
+
+ul.rig li a{
+	color:red;
+}
 
 ul.rig li a:hover + .info{
 	visibility: visible;
