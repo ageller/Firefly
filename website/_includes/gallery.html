@@ -1,6 +1,6 @@
 <div class='user-details'> 
   <h1> Gallery </h1> 
-  <p>Hover over a thumbnail for a description of each Firefly instance and click to try it out yourself!</p>
+  <p>Hover over a thumbnail for a description of each Firefly instance and click the title to try it out yourself!</p>
 </div>
 
 <div class='gallery'>
@@ -11,10 +11,14 @@
       <img alt="viz" src="{{"/assets/img/gallery/" | prepend: site.baseurl | append: entry.img }} ">
     </a>
       <div class="info"> 
-        <h3>{{ entry.title }}</h3> 
+        <a target="_blank" href="{{ entry.source }}" style="color:white">
+          <h3>{{ entry.title }}</h3> 
+        </a>
         <p> {{ entry.author}} </p>
+        {% if entry.blurb %}
         <hr style="width:80%">
         <div style="width:95%"> {{ entry.content}}</div>
+        {% endif %}
       </div>
   </li>
   {% endfor %}
