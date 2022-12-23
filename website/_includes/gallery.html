@@ -1,5 +1,7 @@
-<div class='user-details'> <h1> Gallery </h1> </div>
-
+<div class='user-details'> 
+  <h1> Gallery </h1> 
+  <p>Hover over a thumbnail for a description of each Firefly instance and click to try it out yourself!</p>
+</div>
 
 <div class='gallery'>
 <ul class="rig columns-3">
@@ -11,6 +13,8 @@
       <div class="info"> 
         <h3>{{ entry.title }}</h3> 
         <p> {{ entry.author}} </p>
+        <hr style="width:80%">
+        <p> {{ entry.content}} </p>
       </div>
   </li>
   {% endfor %}

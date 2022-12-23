@@ -331,15 +331,15 @@ ul.rig li p {
 }
 
 ul.rig li .info{
-	top:-80px;
 	position:relative;
 	background: rgba(29, 106, 154, 0.72);
 	visibility: hidden;
 	opacity: 0;
-
+	top:-7px;
+	margin-top:-100%;
 	/* transition effect. not necessary */
 	transition: opacity .2s, visibility .2s;
-	height:auto;
+	aspect-ratio:1;
 	}
 
 ul.rig li a:hover + .info{
