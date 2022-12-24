@@ -229,8 +229,8 @@ class ParticleGroup(object):
 
         ## start with the default
         self.settings_default = {
-            'color': np.append(np.random.random(3),[1]),
-            'sizeMult':.1,
+            'partsColors': np.append(np.random.random(3),[1]),
+            'partsSizeMultipliers':.1,
             'showParts':True,
             'filterVals':dict(),
             'filterLims':dict(),

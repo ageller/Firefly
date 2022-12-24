@@ -313,9 +313,11 @@ class Settings(object):
         if key not in default_settings.keys():
             closest_key,_ = find_closest_string(key,default_settings.keys()) 
             raise KeyError("Invalid settings key: '%s' (did you mean '%s'?)"%(key,closest_key))
-        
+         
         if value is not None:
-            default_value = default_settings[key]
+            if key in default_app_settings: default_value = default_settings[key]
+            ## TODO: would be nice to verify default_particle_settings
+            else: default_value = {}
             if type(value) != type(default_value): raise TypeError(
                 f"value type {type(value)} does not match default value type {type(default_value)}")
 
@@ -386,13 +388,19 @@ class Settings(object):
 
         ## transfer keys from particle group
         for key in [
-            'color','sizeMult','showParts','plotNmax','radiusVariable',
+            'partsColors','partsSizeMultipliers','showParts','plotNmax','radiusVariable',
             'filterVals','filterLims','invertFilter',
             'colormapVals','colormapLims',
             'showVel','velType','velVectorWidth','velGradient',
             'animateVel','animateVelDt','animateVelTmax',
             'colormap','colormapVariable','showColormap']:
-            self[key][particleGroup.UIname]=particleGroup.settings_default[key]
+
+            try: 
+                if key not in self.__settings_dict.keys(): self[key] = {}
+                self[key][particleGroup.UIname] = particleGroup.settings_default[key]
+            except: 
+                print(key)
+                raise
         
         if particleGroup.settings_default['GUIExcludeList'] is not None:
             self['GUIExcludeList'] += [
@@ -428,7 +436,8 @@ class Settings(object):
         ## copy the private dictionary to a new dictionary
         all_settings_dict = {**self.__settings_dict}
 
-        if ( all_settings_dict['GUIExcludeList'] is not None and 
+        if ( 'GUIExcludeList' in all_settings_dict.keys() and
+            all_settings_dict['GUIExcludeList'] is not None and 
             len(all_settings_dict['GUIExcludeList']) > 0): 
             self.validateGUIExcludeList(all_settings_dict['GUIExcludeList'])
         
