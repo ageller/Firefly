@@ -881,9 +881,13 @@ function sendInitGUI(prepend=[], append=[]){
 	forGUI.push({'setGUIParamByKey':[viewerParams.GUIExcludeList,"GUIExcludeList"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.collapseGUIAtStart,"collapseGUIAtStart"]});
 
+	var keys_to_avoid = [
+		"camera", // values copied into a named array below
+	];
+
 	// copy any viewer settings the user is able to change to the GUIParams
 	Object.keys(viewerParams.defaultSettings).forEach(function (key){
-		if (viewerParams[key] != undefined) forGUI.push({'setGUIParamByKey':[viewerParams[key],key]});
+		if (viewerParams[key] != undefined && !keys_to_avoid.includes(key)) forGUI.push({'setGUIParamByKey':[viewerParams[key],key]});
 	});
 	Object.keys(viewerParams.defaultParticleSettings).forEach(function (key){
 		if (viewerParams[key] != undefined) forGUI.push({'setGUIParamByKey':[viewerParams[key],key]});
@@ -907,6 +911,9 @@ function sendInitGUI(prepend=[], append=[]){
 	var xx = new THREE.Vector3(0,0,0);
 	viewerParams.camera.getWorldDirection(xx);
 	forGUI.push({'setGUIParamByKey':[xx, "cameraDirection"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.camera.position,"cameraPosition"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.camera.rotation,"cameraRotation"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.camera.up,"cameraUp"]});
 	if (viewerParams.useTrackball) forGUI.push({'setGUIParamByKey':[viewerParams.controls.target, "controlsTarget"]});
 
 	forGUI.push({'updateUICenterText':null});
@@ -986,6 +993,7 @@ function sendInitGUI(prepend=[], append=[]){
 	forGUI.push({'setGUIParamByKey':[true,"GUIready"]});
 
 
+	//forGUI.forEach(function (value){console.log(value.setGUIParamByKey)});
 	sendToGUI(forGUI);
 
 	//ready to create GUI

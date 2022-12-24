@@ -288,9 +288,18 @@ function sendCameraInfoToViewer(){
 
 function updateGUICamera(){
 	if (GUIParams.camera){
-		GUIParams.camera.position.set(GUIParams.cameraPosition.x, GUIParams.cameraPosition.y, GUIParams.cameraPosition.z);
-		GUIParams.camera.rotation.set(GUIParams.cameraRotation.x, GUIParams.cameraRotation.y, GUIParams.cameraRotation.z);
-		GUIParams.camera.up.set(GUIParams.cameraUp.x, GUIParams.cameraUp.y, GUIParams.cameraUp.z);
+		GUIParams.camera.position.set(
+			GUIParams.cameraPosition.x,
+			GUIParams.cameraPosition.y,
+			GUIParams.cameraPosition.z);
+		GUIParams.camera.rotation.set(
+			GUIParams.cameraRotation._x,
+			GUIParams.cameraRotation._y,
+			GUIParams.cameraRotation._z);
+		GUIParams.camera.up.set(
+			GUIParams.cameraUp.x,
+			GUIParams.cameraUp.y,
+			GUIParams.cameraUp.z);
 		GUIParams.controls.target = new THREE.Vector3(GUIParams.controlsTarget.x, GUIParams.controlsTarget.y, GUIParams.controlsTarget.z);
 		setCubePosition(GUIParams.controls.target);
 		GUIParams.cameraNeedsUpdate = false;
@@ -304,7 +313,6 @@ function setCubePosition(pos){
 
 function updateFriction(value){
 	if (GUIParams.useTrackball){
-		console.log(GUIParams)
 		GUIParams.controls.dynamicDampingFactor = value;
 	} else {
 		GUIParams.controls.movementSpeed = (1. - value)*GUIParams.flyffac;
