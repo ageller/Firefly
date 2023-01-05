@@ -287,7 +287,7 @@ class ParticleGroup(object):
         self.attached_settings = attached_settings
 
         ## add magnitude of velocity to fields
-        if self.velocities is not None and 'Velocity' not in self.field_names:
+        if self.velocities is not None:
             self.trackArray('Velocity',np.linalg.norm(self.velocities,axis=1),radius_flag=False)
         
     def trackArray(
@@ -368,6 +368,40 @@ class ParticleGroup(object):
 
             self.attached_settings['colormapLims'][self.UIname][field_name] = colormapLims
             self.attached_settings['colormapVals'][self.UIname][field_name] = colormapVals
+    
+    def untrackArray(self,field_name):
+        """ remove a field array that was previously added/tracked
+
+        :param field_name: name of the field to remove 
+        :type field_name: str
+        """
+
+        ## don't attempt to remove a field that isn't tracked
+        if field_name not in self.field_names: return
+
+        ## remove from the default settings
+        dictionaries = [
+            self.settings_default['filterLims'],
+            self.settings_default['filterVals'],
+            self.settings_default['colormapLims'],
+            self.settings_default['colormapVals']
+        ]
+
+        ## remove from the attached settings if they're already there
+        if self.attached_settings is not None:
+            dictionaries += [
+                self.attached_settings['filterLims'][self.UIname],
+                self.attached_settings['filterVals'][self.UIname],
+                self.attached_settings['colormapLims'][self.UIname],
+                self.attached_settings['colormapVals'][self.UIname]
+            ]
+
+        ## do the removing from the dictionaries
+        for dictionary in dictionaries: 
+            if field_name in dictionary: dictionary.pop(field_name)
+
+        ## remove the actual field data
+        self.field_arrays = self.field_arrays[np.array(self.field_names)!=field_name]
 
     def getDecimationIndexArray(self):
         """
@@ -488,6 +522,11 @@ class ParticleGroup(object):
                 'vy':self.velocities[:,1][self.dec_inds],
                 'vz':self.velocities[:,2][self.dec_inds]
             })
+        
+            ## remove Velocity as a tracked field, we don't want to 
+            ##  accumulate speed (norm of velocity). 
+            ##  It'll get added back in at the end
+            self.untrackArray('Velocity')
 
         if self.rgba_colors is not None:
             dictionary.update({
