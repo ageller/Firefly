@@ -741,6 +741,9 @@ class OctreeParticleGroup(Octree,ParticleGroup):
         if octree_format not in octree_formats: raise ValueError(
             f"Invalid extension {octree_format} must be one of {octree_formats}")
 
+        ## ignore this because we're an octree, we need a special file format
+        if 'file_extension' in kwargs: kwargs.pop('file_extension')
+
         ## call super to write "normal" particle data
         file_list,filenames_and_nparts = super().writeToDisk(
             target_directory,

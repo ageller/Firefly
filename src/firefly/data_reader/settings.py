@@ -318,7 +318,7 @@ class Settings(object):
             if key in default_app_settings: default_value = default_settings[key]
             ## TODO: would be nice to verify default_particle_settings
             else: default_value = {}
-            if type(value) != type(default_value): raise TypeError(
+            if (default_value is not None) and (type(value) != type(default_value)): raise TypeError(
                 f"value type {type(value)} does not match default value type {type(default_value)}")
 
         return True ## not used but you know one day maybe
