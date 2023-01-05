@@ -505,6 +505,9 @@ class Settings(object):
         ## export settings to a dictionary
         all_settings_dict = self.outputToDict()
 
+        ## add the "loaded" attribute which is checked to initialize the app
+        all_settings_dict['loaded'] = True
+
         if loud and not_reader:
             print("You will need to add this settings filename to"+
                 " filenames.json if this was not called by a Reader instance.")
