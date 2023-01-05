@@ -287,7 +287,7 @@ class ParticleGroup(object):
         self.attached_settings = attached_settings
 
         ## add magnitude of velocity to fields
-        if self.velocities is not None:
+        if self.velocities is not None and 'Velocity' not in self.field_names:
             self.trackArray('Velocity',np.linalg.norm(self.velocities,axis=1),radius_flag=False)
         
     def trackArray(
@@ -349,6 +349,7 @@ class ParticleGroup(object):
         self.field_radius_flags = np.append(
             self.field_radius_flags,
             [radius_flag],axis=0)
+        print(field_name)
 
         ## update the default settings with this array's filterVals/Lims
         if filter_flag: 
