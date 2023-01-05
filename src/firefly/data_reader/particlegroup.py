@@ -349,7 +349,6 @@ class ParticleGroup(object):
         self.field_radius_flags = np.append(
             self.field_radius_flags,
             [radius_flag],axis=0)
-        print(field_name)
 
         ## update the default settings with this array's filterVals/Lims
         if filter_flag: 
@@ -401,7 +400,8 @@ class ParticleGroup(object):
             if field_name in dictionary: dictionary.pop(field_name)
 
         ## remove the actual field data
-        self.field_arrays = self.field_arrays[np.array(self.field_names)!=field_name]
+        self.field_arrays = self.field_arrays[self.field_names!=field_name]
+        self.field_names = self.field_names[self.field_names!=field_name]
 
     def getDecimationIndexArray(self):
         """

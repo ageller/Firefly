@@ -1324,11 +1324,23 @@ function updateLoadingBar(){
 // initPVals -> 
 function calcMinMax(p,key, addFac = true){
 	var i=0;
-	min = viewerParams.parts[p][key][i];
-	max = viewerParams.parts[p][key][i];
-	for (i=0; i< viewerParams.parts[p][key].length; i++){
-		min = Math.min(min, viewerParams.parts[p][key][i]);
-		max = Math.max(max, viewerParams.parts[p][key][i]);
+	// lookup the octree min/max over the entire dataset
+	//  rather than calculate it from just the octree nodes
+	//  which will be a weird weighted average.
+	if (viewerParams.parts[p].hasOwnProperty('octree_mins') && 
+		viewerParams.parts[p].hasOwnProperty('octree_maxs') && 
+		viewerParams.parts[p]['octree_mins'].hasOwnProperty(key) && 
+		viewerParams.parts[p]['octree_maxs'].hasOwnProperty(key)){
+		min = viewerParams.parts[p]['octree_mins'][key];
+		max = viewerParams.parts[p]['octree_maxs'][key];
+	}
+	else{
+		min = viewerParams.parts[p][key][i];
+		max = viewerParams.parts[p][key][i];
+		for (i=0; i< viewerParams.parts[p][key].length; i++){
+			min = Math.min(min, viewerParams.parts[p][key][i]);
+			max = Math.max(max, viewerParams.parts[p][key][i]);
+		}
 	}
 	if (addFac){
 		//need to add a small factor here because of the precision of noUIslider
