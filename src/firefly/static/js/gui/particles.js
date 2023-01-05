@@ -39,10 +39,6 @@ function defineGUIParticleState(){
 							'id':'maxSlider',
 							'builder':createParticleMaxSliderSegment
 						},
-						'octreeCameraNorm':{
-							'id':'maxSlider',
-							'builder':createParticleOctreeCameraNormSliderSegment
-						},
 						'radiusVariableSelector':{
 							'id':'radiusVariableSelector',
 							'builder':createParticleRadiusVariableSelectorSegment

@@ -102,6 +102,12 @@ function createSlider(slider, text, sliderArgs, varArgs, resetEnd=[null, 2], typ
 			s.parent = slider;
 		})
 
+		if (isNaN(sliderArgs.range.min[0]) || 
+			isNaN(sliderArgs.range.max[0])){
+				console.log(text)
+				debugger
+			}
+
 		noUiSlider.create(slider, sliderArgs);
 
 		slider.noUiSlider.on('update', function(values, handle) {
