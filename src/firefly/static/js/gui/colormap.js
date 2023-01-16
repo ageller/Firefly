@@ -23,10 +23,13 @@ function selectColormap() {
 
 function showHideColormapFilter(p, selectValue){
 	for (var i=0; i<GUIParams.ckeys[p].length; i+=1){
-		d3.selectAll('#'+p+'_CK_'+GUIParams.ckeys[p][i]+'_END_CMap')
-			.style('display','none');
+		d3.selectAll('#'+p+'_CK_'+GUIParams.ckeys[p][i]+'_END_CMap').style('display','none');
+		d3.selectAll('#'+p+'_CK_'+GUIParams.ckeys[p][i]+'_cmapReversedCheckBoxContainer').style('display','none');
 	}
-	if (selectValue >=0 ) d3.selectAll('#'+p+'_CK_'+GUIParams.ckeys[p][selectValue]+'_END_CMap').style('display','block');
+	if (selectValue >=0 ) {
+		d3.selectAll('#'+p+'_CK_'+GUIParams.ckeys[p][selectValue]+'_END_CMap').style('display','block');
+		d3.selectAll('#'+p+'_CK_'+GUIParams.ckeys[p][selectValue]+'_cmapReversedCheckBoxContainer').style('display','block');
+	}
 }
 
 function selectColormapVariable() {

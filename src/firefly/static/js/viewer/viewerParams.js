@@ -185,6 +185,8 @@ function defineViewerParams(){
 		this.colormapVals = {};
 		// textbox limits for colormap
 		this.colormapLims = {};
+		// boolean for reversing colormap
+		this.colormapReversed = {};
 
 		//check if we need to update the colormap when rendering
 		this.updateColormapVariable = {};
@@ -210,6 +212,7 @@ function defineViewerParams(){
 		//render texture to show column density
 		this.textureCD = null;
 		this.columnDensity = false;
+		this.columnDensityCmapReversed = false;
 		this.materialCD = null;
 		this.sceneCD = null;
 		this.cameraCD = null;

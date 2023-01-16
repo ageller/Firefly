@@ -660,3 +660,19 @@ function setRadiusVariable(args){
 	viewerParams.updateRadiusVariable[p] = true;
 	//console.log(radiusVariable)
 }
+
+function setColumnDensityCmapReversed(args){
+	// placeholder to update the colormap order
+	viewerParams.columnDensityCmapReversed = args[0];
+	console.log('reversing column density colormap', args);
+}
+
+function setParticleCmapReversed(args){
+	// placeholder to update the colormap order
+	var p = args[0];
+	var ckey = args[1];
+	var checked = args[2];
+	
+	viewerParams.colormapReversed[p][ckey] = checked;
+	console.log('reversing particle colormap', args);
+}

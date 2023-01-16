@@ -126,6 +126,7 @@ function defineGUIParams(){
 
 		this.ckeys = null;
 		this.colormapVals = null;
+		this.colormapReversed = null;
 		this.colormapLims = null;
 		this.colormapVariable = null;
 		this.colormap = null;
@@ -138,6 +139,7 @@ function defineGUIParams(){
 		this.invertFilter = null;
 
 		this.columnDensity = false;
+		this.columnDensityCmapReversed = false;
 		this.CDmin = 1;
 		this.CDmax = 10;
 		this.CDlognorm = 0;

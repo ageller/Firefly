@@ -337,11 +337,14 @@ function initPVals(){
 		//in case there are no colormap possibilities (but will be overwritten below)
 		if (viewerParams.parts[p].hasOwnProperty("colormapKeys")){
 			if (viewerParams.parts[p].colormapKeys.length > 0){
+				// TODO will need to remove this after initializing elsewhere
+				viewerParams.colormapReversed[p] = {};
 				viewerParams.ckeys[p] = viewerParams.parts[p].colormapKeys;
 				for (var k=0; k<viewerParams.ckeys[p].length; k++){
 					var ckey = viewerParams.ckeys[p][k];
 					viewerParams.colormapLims[p][ckey] = [0,1];
 					viewerParams.colormapVals[p][ckey] = [0,1];
+					viewerParams.colormapReversed[p][ckey] = false;
 					if (viewerParams.parts[p][ckey] != null){
 						//could probably take results from filter to save time, but will do this again to be safe
 						var m = calcMinMax(p,ckey)
@@ -475,6 +478,8 @@ function initScene() {
 // apply any settings from options file
 function applyOptions(){
 
+	// TODO need to apply options for colormapReversed (?)
+	
 	var options = viewerParams.parts.options;
 
 	// TODO compatability key matching, "color" and "sizeMult" are deprecated
@@ -507,6 +512,7 @@ function applyOptions(){
 			else viewerParams[key] = options[key]; // copy the value into the same key
 		}
 	});
+
 
 	//initialize center
 	if (options.hasOwnProperty('center')){
@@ -846,7 +852,7 @@ function initColumnDensity(){
 // continuously check if viewerParams attributes that
 // should be initialized here are null, if so, keep waiting
 function confirmViewerInit(){
-	var keys = ["partsKeys", "partsSizeMultipliers", "plotNmax", "decimate", "stereoSepMax", "friction", "partsColors", "showParts", "showVel", "animateVel", "velopts", "velType", "ckeys", "colormapVals", "colormapLims", "colormapVariable", "colormap", "showColormap", "fkeys", "filterVals", "filterLims", "renderer", "scene", "controls","camera","parts"];
+	var keys = ["partsKeys", "partsSizeMultipliers", "plotNmax", "decimate", "stereoSepMax", "friction", "partsColors", "showParts", "showVel", "animateVel", "velopts", "velType", "ckeys", "colormapVals", "colormapLims", "colormapVariable", "colormap", "showColormap", "colormapReversed", "fkeys", "filterVals", "filterLims", "renderer", "scene", "controls","camera","parts"];
 
 	var ready = true;
 	keys.forEach(function(k,i){

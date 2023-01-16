@@ -93,6 +93,10 @@ function defineGUIParticleState(){
 					'builder':createParticleColormapVariableSelectorSegment
 				},
 				*/
+				'colormapReversers':{
+					'id':'colormapReversers',
+					'builder':createParticleColormapReversersSegment
+				},
 				'colormapSliders':{
 					'id':'colormapSliders',
 					'builder':createParticleColormapSlidersSegment

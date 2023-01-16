@@ -19,6 +19,7 @@
     "ckeys":["None"],
     "colormapLims":{"None":[0,1]},
     "colormapVals":{"None":[0,1]},
+    "colormapReversed":{"None":false},
     "colormapVariable":0,
     "rkeys":["None"],
     "radiusVariable":0,
