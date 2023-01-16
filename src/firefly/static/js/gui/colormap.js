@@ -230,7 +230,7 @@ function populateColormapImage(particle_group_UIname){
 	imgContainer.attr('clip-path', 'url(#colormapClipPath)')
 }
 
-function populateColormapAxis(particle_group_UIname){
+function populateColormapAxis(particle_group_UIname, reversed = false){
 
 	var color = getComputedStyle(document.body).getPropertyValue('--UI-extension-text-color');
 	var actualCbarWidth = GUIParams.colormapImageX/GUIParams.colormapList.length; //number of pixels for each colormap slice on the image, 
@@ -248,6 +248,7 @@ function populateColormapAxis(particle_group_UIname){
 
 	// set the range
 	var x = d3.scaleLinear().range([0, GUIParams.colormapImageY]).domain([xmax,xmin]);//.nice(); //because I'm rotating
+	if (reversed) x = d3.scaleLinear().range([0, GUIParams.colormapImageY]).domain([xmin,xmax]);
 
 	//get the axis and create the ticks
 	var axis = d3.select('#' + particle_group_UIname + 'colormapAxis');

@@ -661,18 +661,18 @@ function setRadiusVariable(args){
 	//console.log(radiusVariable)
 }
 
-function setColumnDensityCmapReversed(args){
-	// placeholder to update the colormap order
-	viewerParams.colormapReversed[viewerParams.CDkey] = args[0]
-	//console.log('reversing column density colormap', args);
-}
-
-function setParticleCmapReversed(args){
+function setCmapReversed(args){
 	// placeholder to update the colormap order
 	var p = args[0];
 	var ckey = args[1];
 	var checked = args[2];
 	
-	viewerParams.colormapReversed[p][ckey] = checked;
+	if (ckey) {
+		viewerParams.colormapReversed[p][ckey] = checked;
+	} else {
+		viewerParams.colormapReversed[p] = checked;
+	}
+	if (viewerParams.showColormap[p]) populateColormapAxis(p, checked)
+
 	//console.log('reversing particle colormap', args);
 }

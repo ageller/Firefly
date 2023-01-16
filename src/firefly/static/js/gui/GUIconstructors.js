@@ -810,7 +810,7 @@ function createColumnDensitySelectCmapSegment(container,parent,name){
 		.attr('type','checkbox')
 		.attr('autocomplete','off')
 		.on('change',function(){
-			sendToViewer([{'setColumnDensityCmapReversed':[this.checked]}]);
+			sendToViewer([{'setCmapReversed':[GUIParams.CDkey, null, this.checked]}]);
 			GUIParams.colormapReversed[GUIParams.CDkey] = this.checked;
 		})
 		.style('margin','8px 0px 0px 0px');
@@ -1318,7 +1318,7 @@ function createParticleColormapReversersSegment(container,parent,name,p){
 			.attr('type','checkbox')
 			.attr('autocomplete','off')
 			.on('change',function(){
-				sendToViewer([{'setParticleCmapReversed':[p, ck, this.checked]}]);
+				sendToViewer([{'setCmapReversed':[p, ck, this.checked]}]);
 				GUIParams.colormapReversed[p][ck] = this.checked;
 			})
 			.style('margin','8px 0px 0px 0px');
