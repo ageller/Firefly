@@ -281,7 +281,7 @@ def startFlaskServer(
     try:
         print(f"Launching Firefly at: http://localhost:{port}")
 
-        ## os.chdir(directory)
+        os.chdir(directory)
         if (directory is not None and directory != "None"):
             print(f"from directory {directory}")
             app.static_folder = os.path.join(directory, 'static')
