@@ -555,11 +555,43 @@ function capture(){
 	viewerParams.camera.updateProjectionMatrix();
 	
 	viewerParams.VideoCapture_frame += 1;
+
+	// update the capture progress bar
+	var frac_complete = viewerParams.VideoCapture_frame/(viewerParams.VideoCapture_FPS*viewerParams.VideoCapture_duration);
+	if (frac_complete < 0.5){
+		d3.select('#recordingCircle').style('background-image','linear-gradient(' + (90. + 360.*frac_complete) + 'deg, transparent 50%, white 50%), linear-gradient(90deg, white 50%, transparent 50%)');
+	} else {
+		d3.select('#recordingCircle').style('background-image','linear-gradient(' + (90. + 360.*(frac_complete - 0.5)) + 'deg, transparent 50%, ' + getComputedStyle(document.documentElement).getPropertyValue('--logo-color1') + ' 50%), linear-gradient(90deg, white 50%, transparent 50%)');
+	}
+
 	if (viewerParams.VideoCapture_frame >= viewerParams.VideoCapture_duration*viewerParams.VideoCapture_FPS || viewerParams.imageCaptureClicked){
+
+		// update the capture progress text
+		d3.select('#recordingText').text('Rendering...');
+
+		// animate the progress indicator (since I don't have a rendering percentage to work with)
+		d3.select('#recordingCircle').classed('shrinkGrow', true);
+
+		// stop and download
+		viewerParams.capturer.stop();
+		var ext = viewerParams.VideoCapture_formats[viewerParams.VideoCapture_format];
+		var fmt = ext.slice(1);
+		if (fmt != 'gif') ext = '.tar';
+		viewerParams.capturer.save(function(blob){ 
+			// this callback executes after the rendering is complete
+			d3.select('#recordingText').text('Done');
+			download(blob, viewerParams.VideoCapture_filename + ext, fmt);
+
+			//remove the recording progress indicator
+			d3.selectAll('#recordingProgress').remove();
+		});
+
 		// reset
 		viewerParams.captureCanvas = false;
 		viewerParams.VideoCapture_frame = 0;
 		viewerParams.imageCaptureClicked = false;
+
+
 	}
 }
 

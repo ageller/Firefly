@@ -184,6 +184,17 @@ canvas{
 	color: white;
 }
 
+.shrinkGrow{
+	-webkit-animation-name: grow; 
+	-webkit-animation-duration: 3s;
+	-webkit-animation-timing-function: ease-in-out;
+	-webkit-animation-iteration-count: infinite;
+	animation-name: grow;
+	animation-duration: 3s;
+	animation-timing-function: ease-in-out;
+	animation-iteration-count: infinite;
+}
+
 /* Add Animation */
 @-webkit-keyframes slideIn {
 	from {bottom: -300px; opacity: 0} 
@@ -203,6 +214,12 @@ canvas{
 @keyframes fadeIn {
 	from {opacity: 0} 
 	to {opacity: 1}
+}
+
+@keyframes grow {
+    0% { transform: scale(1); }
+    50% { transform: scale(0.75); }
+    100% { transform: scale(1); }
 }
 
 a{
