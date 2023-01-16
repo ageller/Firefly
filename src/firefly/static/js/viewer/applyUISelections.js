@@ -464,30 +464,32 @@ function renderImage() {
 
 function recordVideo(fps = null, duration = null){
 
-	// create a new div in the right corner of the screen to indicate progress
-	d3.selectAll('#recordingProgress').remove();
-	var progressContainer = d3.select('#contentContainer').append('div')
-		.attr('id','recordingProgress')
-		.style('position','absolute')
-		.style('right','10px')
-		.style('top','10px')
-		.style('z-index',0);
-	progressContainer.append('div')
-		.attr('id','recordingCircle')
-		.style('width','100px')
-		.style('height','100px')
-		.style('border-radius','100px')
-		.style('border','2px solid' + getComputedStyle(document.documentElement).getPropertyValue('--logo-color1'))
-		.style('background-color', getComputedStyle(document.documentElement).getPropertyValue('--logo-color1'));
-	progressContainer.append('div')
-		.attr('id','recordingText')
-		.style('color', 'white')
-		.style('padding-top','4px')
-		.style('text-align','center')
-		.text('Recording...');
-
 	if (!fps) fps = viewerParams.VideoCapture_FPS;
 	if (!duration) duration = viewerParams.VideoCapture_duration;
+
+	if (duration > 1){
+		// create a new div in the right corner of the screen to indicate progress
+		d3.selectAll('#recordingProgress').remove();
+		var progressContainer = d3.select('#contentContainer').append('div')
+			.attr('id','recordingProgress')
+			.style('position','absolute')
+			.style('right','10px')
+			.style('top','10px')
+			.style('z-index',0);
+		progressContainer.append('div')
+			.attr('id','recordingCircle')
+			.style('width','100px')
+			.style('height','100px')
+			.style('border-radius','100px')
+			.style('border','2px solid' + getComputedStyle(document.documentElement).getPropertyValue('--logo-color1'))
+			.style('background-color', getComputedStyle(document.documentElement).getPropertyValue('--logo-color1'));
+		progressContainer.append('div')
+			.attr('id','recordingText')
+			.style('color', 'white')
+			.style('padding-top','4px')
+			.style('text-align','center')
+			.text('Recording...');
+	}
 
 	// define the capture object.  
 	// In order to have a progress indicator that knows when the file downloads, we will not autoSave here
