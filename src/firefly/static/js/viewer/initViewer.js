@@ -338,6 +338,7 @@ function initPVals(){
 		if (viewerParams.parts[p].hasOwnProperty("colormapKeys")){
 			if (viewerParams.parts[p].colormapKeys.length > 0){
 				// TODO will need to remove this after initializing elsewhere
+				// also remove initialization with CDkey
 				viewerParams.colormapReversed[p] = {};
 				viewerParams.ckeys[p] = viewerParams.parts[p].colormapKeys;
 				for (var k=0; k<viewerParams.ckeys[p].length; k++){
@@ -479,7 +480,7 @@ function initScene() {
 function applyOptions(){
 
 	// TODO need to apply options for colormapReversed (?)
-	
+
 	var options = viewerParams.parts.options;
 
 	// TODO compatability key matching, "color" and "sizeMult" are deprecated
@@ -696,6 +697,9 @@ function applyOptions(){
 			
 	}// particle specific options
 
+	//TODO fix this initialization
+	viewerParams.colormapReversed[viewerParams.CDkey] = false;
+	
 	// initialize all the colormap stuff that columnDensity will need. Because it's
 	//  not a real particle group it won't get set in the loop above
 	//  do it here so it happens in the presets too and load settings, etc...
@@ -824,6 +828,7 @@ function initColumnDensity(){
 			tex: { value: viewerParams.textureCD.texture }, 
 			cmap: { type:'t', value: viewerParams.cmap },
 			colormap: {value: viewerParams.colormap[viewerParams.CDkey]},
+			colormapReversed: {value: viewerParams.colormapReversed[viewerParams.CDkey]},
 			CDmin: {value: viewerParams.colormapVals[viewerParams.CDkey][viewerParams.ckeys[viewerParams.CDkey][0]][0]}, // bottom of CD renormalization
 			CDmax: {value: viewerParams.colormapVals[viewerParams.CDkey][viewerParams.ckeys[viewerParams.CDkey][0]][1]}, // top of CD renormalization
 			lognorm: {value: viewerParams.CDlognorm}, // flag to normalize column densities in log space

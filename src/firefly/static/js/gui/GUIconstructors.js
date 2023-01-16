@@ -811,7 +811,7 @@ function createColumnDensitySelectCmapSegment(container,parent,name){
 		.attr('autocomplete','off')
 		.on('change',function(){
 			sendToViewer([{'setColumnDensityCmapReversed':[this.checked]}]);
-			GUIParams.columnDensityCmapReversed = this.checked;
+			GUIParams.colormapReversed[GUIParams.CDkey] = this.checked;
 		})
 		.style('margin','8px 0px 0px 0px');
 	

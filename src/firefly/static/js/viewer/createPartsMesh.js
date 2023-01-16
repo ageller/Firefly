@@ -92,6 +92,7 @@ function createParticleMaterial(p, color=null,minPointScale=null,maxPointScale=n
 			colormapTexture: {value: viewerParams.colormapTexture},
 			colormap: {value: viewerParams.colormap[p]},
 			showColormap: {value: viewerParams.showColormap[p]},
+			colormapReversed: {value: viewerParams.colormapReversed[p][viewerParams.ckeys[p][viewerParams.colormapVariable[p]]]},
 			colormapMin: {value: viewerParams.colormapVals[p][viewerParams.ckeys[p][viewerParams.colormapVariable[p]]][0]},
 			colormapMax: {value: viewerParams.colormapVals[p][viewerParams.ckeys[p][viewerParams.colormapVariable[p]]][1]},
 			columnDensity: {value: viewerParams.columnDensity},

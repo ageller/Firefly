@@ -139,7 +139,6 @@ function defineGUIParams(){
 		this.invertFilter = null;
 
 		this.columnDensity = false;
-		this.columnDensityCmapReversed = false;
 		this.CDmin = 1;
 		this.CDmax = 10;
 		this.CDlognorm = 0;

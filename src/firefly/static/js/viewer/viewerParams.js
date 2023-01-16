@@ -212,7 +212,6 @@ function defineViewerParams(){
 		//render texture to show column density
 		this.textureCD = null;
 		this.columnDensity = false;
-		this.columnDensityCmapReversed = false;
 		this.materialCD = null;
 		this.sceneCD = null;
 		this.cameraCD = null;
