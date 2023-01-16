@@ -153,6 +153,7 @@ function runLocal(useSockets=true, showGUI=true, allowVRControls=false, startSte
 function makeViewer(prepend=[], append=[]){
 	viewerParams.haveUI = false;
 	viewerParams.ready = false; 
+	console.log('testing !!!')
 	console.log("Waiting for viewer init ...")
 	clearInterval(viewerParams.waitForInit);
 	viewerParams.waitForInit = setInterval(function(){ 

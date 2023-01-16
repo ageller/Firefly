@@ -279,13 +279,16 @@ def startFlaskServer(
     if (directory is None or directory == "None"): directory = os.path.dirname(__file__)
     old_dir = os.getcwd()
     try:
-        os.chdir(directory)
+        # os.chdir(directory)
+        app.static_folder = os.path.join(directory, 'static')
+        app.template_folder = os.path.join(directory, 'templates')
+
         global fps, dec
 
         fps = frames_per_second
         dec = decimation_factor
 
-        print("Launching Firefly at: http://localhost:%d"%port)
+        print(f"Launching Firefly at: http://localhost:{port}\nfrom directory {directory}")
         socketio.run(app, host='0.0.0.0', port=port)#, use_reloader=True)
     except: raise
     finally: os.chdir(old_dir)
