@@ -362,3 +362,18 @@ function updateOctreeLoadingBarUI(input){
 		//d3.select('#' + input.p + 'octreeLoadingText').text(input.p + ' (' + Math.round(frac*100) + '%)');
 	}
 }
+
+function savePreset(){
+	var preset = createPreset();
+
+	//https://stackoverflow.com/questions/33780271/export-a-json-object-to-a-text-file
+	var str = JSON.stringify(preset)
+	//Save the file contents as a DataURI
+	var dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(str);
+
+	saveFile(dataUri,'preset.json');
+
+	// send to Flask
+	if (GUIParams.usingSocket) socketParams.socket.emit('send_settings', preset);
+
+}

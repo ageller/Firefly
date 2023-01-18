@@ -135,11 +135,9 @@ function createPresetSegment(container,parent,name){
 		.attr('class','button')
 		.style('width',(GUIParams.containerWidth - 10) + 'px')
 		.style('margin-left','0px') // TODO: padding is being double counted in main/general/data pane. RIP
-		.on('click',function(){
-			sendToViewer([{'savePreset':null}]);
-		})
+		.on('click',savePreset)
 		.append('span')
-		.text('Save Settings');
+			.text('Save Settings');
 	return segment_height;
 }
 function createResetSegment(container,parent,name){
@@ -182,6 +180,7 @@ function createLoadNewDataSegment(container,parent,name){
 			.attr('id','loadNewDataButton')
 			.attr('class','button')
 			.style('width',(GUIParams.containerWidth - 10) + 'px')
+			.style('margin-left','0px')
 			.on('click',function(){
 				sendToViewer([{'loadNewData':null}]);
 			})

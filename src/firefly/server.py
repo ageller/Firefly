@@ -49,6 +49,20 @@ dec = 1
 #check if the GUI is separated to see if we need to send a reload signal (currently not used)
 GUIseparated = False
 
+fireflySettings = [1,2,3]
+
+# create a class that will hold the settings and other data we want to return to Python
+def getFireflySettings():
+    global fireflySettings
+    return fireflySettings
+
+# receive presets from the  
+@socketio.on('send_settings', namespace=namespace)
+def send_settings(message):
+    global fireflySettings
+    fireflySettings = message
+    print("checking", fireflySettings)
+
 ####### setting the room (to keep each session distinct)
 @socketio.on('join', namespace=namespace)
 def on_join(message):
