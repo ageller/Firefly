@@ -30,15 +30,11 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app, async_mode=async_mode)
 
-
 namespace = '/Firefly'
 
 default_room = 'default_Firefly_AMG_ABG'
 
 rooms = {} #will be updated below
-
-#number of seconds between updates
-seconds = 0.01
 
 #for the stream
 fps = 30
@@ -49,27 +45,27 @@ dec = 1
 #check if the GUI is separated to see if we need to send a reload signal (currently not used)
 GUIseparated = False
 
-fireflySettings = [1,2,3]
+fireflyData = {}
 
-# create a class that will hold the settings and other data we want to return to Python
-def getFireflySettings():
-    global fireflySettings
-    return fireflySettings
 
 # receive presets from the  
 @socketio.on('send_settings', namespace=namespace)
 def send_settings(message):
-    global fireflySettings
-    fireflySettings = message
-    print("checking", fireflySettings)
+    global fireflyData
+    try:
+        fireflyData[rooms[request.sid]]['settings'] = message
+    except:
+        pass
+
 
 ####### setting the room (to keep each session distinct)
 @socketio.on('join', namespace=namespace)
 def on_join(message):
-    global rooms
+    global rooms, fireflyData
     # join the room
     room = message['room']
     rooms[request.sid] = room
+    fireflyData[room] = {}
     print('======= in room', room)
     join_room(room)
 
@@ -91,7 +87,6 @@ def disconnect():
 # will fire when user connects
 @socketio.on('connect', namespace=namespace)
 def connect():
-    # if there is a room defined, emit that.  If there is no room defined, then the client will be prompted to enter one before joining
     emit('room_check',{'room': default_room}, namespace=namespace)
 
 
@@ -255,6 +250,24 @@ def stream_input():
 
     return 'Done'
 
+@app.route('/settings_output', methods = ['GET'])
+def settings_output():
+    global fireflyData
+    print('======= received request for settings from user ...')
+
+    # I have not tested to make sure this works with passing a room
+    room = request.args.get('room')
+    if (not room):
+        room = default_room
+
+    try:
+        print('======= sending settings data')
+        return json.dumps(fireflyData[room]['settings'])
+        #return json.dumps(fireflyData[room]['settings'], default=lambda o: o.__dict__, indent=4)
+    except:
+        print('!!!!!!!!!!!!!!! ERROR IN DUMPING JSON')
+        return json.dumps({'result':'Error'})
+
 def reload():
     #currently not used
     if (GUIseparated):
@@ -337,7 +350,8 @@ def spawnFireflyServer(
     frames_per_second=30,
     decimation_factor=1,
     max_time=10,
-    multiple_rooms=False):
+    multiple_rooms=False,
+    dataObject=None):
     """ Starts a Firefly server as a background process. Close the server by calling
         :func:`firefly.server.quitAllFireflyServers`.
 
@@ -363,6 +377,9 @@ def spawnFireflyServer(
         a string to define the room for the given session (which would allow multiple users to interact with 
         separate Firefly instances on a server), defaults to False.
     :type multiple_rooms: bool, optional
+    :param dataObject: a fireflyData object that will store the settings and any other data that the user wants 
+        returned to Python
+    :type dataObject: object, optional
     :return: subprocess.Popen
     :rtype: subprocess handler
     :raises RuntimeError: if max_time elapses without a successful Firefly server being initialized.
@@ -379,6 +396,7 @@ def spawnFireflyServer(
         f"--directory={directory}"]
     if (multiple_rooms):
         args.append(f"--multiple_rooms")
+
 
     ## use this run_server.py (even if the other directory has one)
     ##  since it can be run remotely
