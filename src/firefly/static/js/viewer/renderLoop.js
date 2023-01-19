@@ -20,7 +20,7 @@ function animate(time) {
 
 		// get the memory usage
 		update_memory_usage();
-
+		
 		if (viewerParams.initialize_time){
 			//console.log(seconds-viewerParams.initialize_time + ' seconds to initialize');
 			//console.log(viewerParams.memoryUsage/1e9 + ' GB allocated');
@@ -94,6 +94,13 @@ function update(time){
 	// update particle mesh buffers with settings from UI
 	update_particle_groups(time);	
 
+	// check if we need to update the settings on the server
+	// for now we will just send this every viewerParams.data_to_flask_seconds
+	// if might be better if we had some way to check if anything in the preset is different (but would I want to do that every render pass?)
+	if (viewerParams.currentTime - viewerParams.data_to_flask_time > viewerParams.data_to_flask_seconds && viewerParams.usingSocket && viewerParams.drawPass > 10) {
+		viewerParams.data_to_flask_time = viewerParams.currentTime;
+		sendPreset();
+	}
 	// A couple of klugy fixes to allow for certain initial presets
 	// Firefly seems to behave well when initialized in trackball controls and without stereo.   
 	//    Otherwise, there are bugs of unknown origin.

@@ -49,11 +49,11 @@ fireflyData = {}
 
 
 # receive presets from the  
-@socketio.on('send_settings', namespace=namespace)
-def send_settings(message):
+@socketio.on('save_settings', namespace=namespace)
+def save_settings(message):
     global fireflyData
     try:
-        fireflyData[rooms[request.sid]]['settings'] = message
+        fireflyData[message['room']]['settings'] = message['settings']
     except:
         pass
 
@@ -263,7 +263,6 @@ def settings_output():
     try:
         print('======= sending settings data')
         return json.dumps(fireflyData[room]['settings'])
-        #return json.dumps(fireflyData[room]['settings'], default=lambda o: o.__dict__, indent=4)
     except:
         print('!!!!!!!!!!!!!!! ERROR IN DUMPING JSON')
         return json.dumps({'result':'Error'})

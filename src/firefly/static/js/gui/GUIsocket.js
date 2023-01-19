@@ -374,6 +374,14 @@ function savePreset(){
 	saveFile(dataUri,'preset.json');
 
 	// send to Flask
-	if (GUIParams.usingSocket) socketParams.socket.emit('send_settings', preset);
+	if (GUIParams.usingSocket) sendPreset(preset);
 
+}
+
+function sendPreset(preset = null){
+
+	if (!preset) preset = createPreset();
+
+	// send to Flask
+	socketParams.socket.emit('save_settings', {'settings':preset, 'room':socketParams.room});
 }
