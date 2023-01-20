@@ -47,7 +47,6 @@ function connectViewerSocket(){
 		});
 
 		socketParams.socket.on('input_data', function(msg) {
-			//only tested for local (GUI + viewer in one window)
 			console.log("======== have new data : ", Object.keys(msg));
 
 
@@ -87,6 +86,14 @@ function connectViewerSocket(){
 				}
 			}
 
+		});
+
+		socketParams.socket.on('input_settings', function(msg) {
+			//only tested for combined endpoint
+			console.log("======== have new settings : ", Object.keys(msg));
+			//for now, the user is required to pass the entire settings object (if we change that, this next line will probably break firefly)
+			viewerParams.parts.options = msg;
+			applyOptions();
 		});
 
 		socketParams.socket.on('update_streamer', function(msg) {

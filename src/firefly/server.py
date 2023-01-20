@@ -269,6 +269,27 @@ def settings_output():
         print('!!!!!!!!!!!!!!! ERROR IN DUMPING JSON')
         return json.dumps({'result':'Error'})
 
+@app.route('/settings_input', methods = ['POST'])
+def settings_input():
+    print('======= received settings from server ...')
+    jsondata = request.get_json()
+    data = json.loads(jsondata)
+    settings = data['settings']
+
+    if ('room' in data):
+        room = data['room']
+    else:
+        room = default_room
+
+    if (room):
+        print('settings', settings)
+        socketio.emit('input_settings', settings, namespace=namespace, to=room)
+        print('======= done')
+        return 'Done'
+    else:
+        print('User must specify a name for the websocket "room" connected to an active firefly instance.')
+        return 'Error'
+
 def reload():
     #currently not used
     if (GUIseparated):
