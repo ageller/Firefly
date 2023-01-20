@@ -94,6 +94,9 @@ function connectViewerSocket(){
 			//for now, the user is required to pass the entire settings object (if we change that, this next line will probably break firefly)
 			viewerParams.parts.options = msg;
 			applyOptions();
+
+			// do something here to update the GUI.  For now I will just remake it!
+			sendInitGUI(prepend=[], append=[{'makeUI':viewerParams.local}])
 		});
 
 		socketParams.socket.on('update_streamer', function(msg) {
