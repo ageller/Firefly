@@ -282,7 +282,6 @@ def settings_input():
         room = default_room
 
     if (room):
-        print('settings', settings)
         socketio.emit('input_settings', settings, namespace=namespace, to=room)
         print('======= done')
         return 'Done'
