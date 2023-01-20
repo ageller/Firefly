@@ -45,15 +45,17 @@ dec = 1
 #check if the GUI is separated to see if we need to send a reload signal (currently not used)
 GUIseparated = False
 
-fireflyData = {}
+# for passing data from JS to Python
+allow_python_data_passing = False
+firefly_data = {}
 
 
 # receive presets from the  
 @socketio.on('save_settings', namespace=namespace)
 def save_settings(message):
-    global fireflyData
+    global firefly_data
     try:
-        fireflyData[message['room']]['settings'] = message['settings']
+        firefly_data[message['room']]['settings'] = message['settings']
     except:
         pass
 
@@ -61,11 +63,11 @@ def save_settings(message):
 ####### setting the room (to keep each session distinct)
 @socketio.on('join', namespace=namespace)
 def on_join(message):
-    global rooms, fireflyData
+    global rooms, firefly_data
     # join the room
     room = message['room']
     rooms[request.sid] = room
-    fireflyData[room] = {}
+    firefly_data[room] = {}
     print('======= in room', room)
     join_room(room)
 
@@ -186,7 +188,7 @@ def default2():
 
 @app.route("/combined")
 def combined(): 
-    return render_template("combined.html")
+    return render_template("combined.html", input=json.dumps({'value':allow_python_data_passing}))
 
 @app.route("/VR")
 def cardboard(): 
@@ -252,7 +254,7 @@ def stream_input():
 
 @app.route('/settings_output', methods = ['GET'])
 def settings_output():
-    global fireflyData
+    global firefly_data
     print('======= received request for settings from user ...')
 
     # I have not tested to make sure this works with passing a room
@@ -262,7 +264,7 @@ def settings_output():
 
     try:
         print('======= sending settings data')
-        return json.dumps(fireflyData[room]['settings'])
+        return json.dumps(firefly_data[room]['settings'])
     except:
         print('!!!!!!!!!!!!!!! ERROR IN DUMPING JSON')
         return json.dumps({'result':'Error'})
@@ -281,7 +283,8 @@ def startFlaskServer(
     directory=None,
     frames_per_second=30,
     decimation_factor=1,
-    multiple_rooms=False):
+    multiple_rooms=False,
+    python_data_passing=False):
     """Creates a global interpreter locked process to host a Flask server
         that can be accessed via localhost:<port>. 
 
@@ -297,12 +300,18 @@ def startFlaskServer(
         a string to define the room for the given session (which would allow multiple users to interact with 
         separate Firefly instances on a server), defaults to False.
     :type multiple_rooms: bool, optional
+    :param python_data_passing: allow passing of data directly to/from Python? If True, Firefly will regularly 
+        send the settings back to the python interpretter and they will be accessible via /settings_output
+        endpoint.  Currently this feature is only implemented in the /combined endpoint.  defaults to False.
+    :type python_data_passing: bool, optional
     """
 
-    global default_room
-    if (multiple_rooms): default_room = None
+    global default_room, allow_python_data_passing
 
+    if (multiple_rooms): default_room = None
+    if (python_data_passing): allow_python_data_passing = python_data_passing
     if (directory is None or directory == "None"): directory = os.path.dirname(__file__)
+
     old_dir = os.getcwd()
     try:
         print(f"Launching Firefly at: http://localhost:{port}")
@@ -350,7 +359,7 @@ def spawnFireflyServer(
     decimation_factor=1,
     max_time=10,
     multiple_rooms=False,
-    dataObject=None):
+    python_data_passing=False):
     """ Starts a Firefly server as a background process. Close the server by calling
         :func:`firefly.server.quitAllFireflyServers`.
 
@@ -376,9 +385,11 @@ def spawnFireflyServer(
         a string to define the room for the given session (which would allow multiple users to interact with 
         separate Firefly instances on a server), defaults to False.
     :type multiple_rooms: bool, optional
-    :param dataObject: a fireflyData object that will store the settings and any other data that the user wants 
-        returned to Python
-    :type dataObject: object, optional
+    :param python_data_passing: allow passing of data directly to/from Python? If True, Firefly will regularly 
+        send the settings back to the python interpretter and they will be accessible via /settings_output
+        endpoint.  Currently this feature is only implemented in the /combined endpoint.  defaults to False.
+    :type python_data_passing: bool, optional
+
     :return: subprocess.Popen
     :rtype: subprocess handler
     :raises RuntimeError: if max_time elapses without a successful Firefly server being initialized.
@@ -395,7 +406,8 @@ def spawnFireflyServer(
         f"--directory={directory}"]
     if (multiple_rooms):
         args.append(f"--multiple_rooms")
-
+    if (python_data_passing):
+        args.append(f"--python_data_passing")
 
     ## use this run_server.py (even if the other directory has one)
     ##  since it can be run remotely

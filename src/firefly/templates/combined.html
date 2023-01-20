@@ -145,9 +145,12 @@
 
 		<script>
 			//called upon loading
+			input = JSON.parse({{ input|tojson|safe }});
+			console.log("input from flask",input);
 			connectGUISocket();
 			connectViewerSocket();
-			runLocal(true);
+			//function runLocal(useSockets=true, showGUI=true, allowVRControls=false, startStereo=false, sendDataToFlask=false){
+			runLocal(true, true, false, false, input['value']);
 		</script>
 
 	</body>

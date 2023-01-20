@@ -95,10 +95,10 @@ function update(time){
 	update_particle_groups(time);	
 
 	// check if we need to update the settings on the server
-	// for now we will just send this every viewerParams.data_to_flask_seconds
+	// for now we will just send this every viewerParams.dataToFlaskSeconds
 	// if might be better if we had some way to check if anything in the preset is different (but would I want to do that every render pass?)
-	if (viewerParams.currentTime - viewerParams.data_to_flask_time > viewerParams.data_to_flask_seconds && viewerParams.usingSocket && viewerParams.drawPass > 10) {
-		viewerParams.data_to_flask_time = viewerParams.currentTime;
+	if (viewerParams.sendDataToFlask && viewerParams.currentTime - viewerParams.dataToFlaskTime > viewerParams.dataToFlaskSeconds &&  viewerParams.usingSocket && viewerParams.drawPass > 10) {
+		viewerParams.dataToFlaskTime = viewerParams.currentTime;
 		sendPreset();
 	}
 	// A couple of klugy fixes to allow for certain initial presets
