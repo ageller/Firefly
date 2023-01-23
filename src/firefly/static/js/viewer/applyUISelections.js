@@ -664,15 +664,8 @@ function setRadiusVariable(args){
 function setCmapReversed(args){
 	// placeholder to update the colormap order
 	var p = args[0];
-	var ckey = args[1];
-	var checked = args[2];
+	var checked = args[1];
 	
-	if (ckey) {
-		viewerParams.colormapReversed[p][ckey] = checked;
-	} else {
-		viewerParams.colormapReversed[p] = checked;
-	}
-	if (viewerParams.showColormap[p]) populateColormapAxis(p, checked)
-
-	//console.log('reversing particle colormap', args);
+	viewerParams.colormapReversed[p] = checked;
+	if (viewerParams.showColormap[p]) populateColormapImage(p, checked)
 }
