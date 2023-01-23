@@ -810,7 +810,7 @@ function createColumnDensitySelectCmapSegment(container,parent,name){
 		.attr('type','checkbox')
 		.attr('autocomplete','off')
 		.on('change',function(){
-			sendToViewer([{'setCmapReversed':[GUIParams.CDkey, null, this.checked]}]);
+			sendToViewer([{'setCmapReversed':[GUIParams.CDkey, this.checked]}]);
 			GUIParams.colormapReversed[GUIParams.CDkey] = this.checked;
 		})
 		.style('margin','8px 0px 0px 0px');
@@ -1249,43 +1249,70 @@ function createParticleColormapCheckBoxSegment(container,parent,name,p){
 			if (GUIParams.showParts[p]) checkColormapBox(p, this.checked);
 			else this.checked = GUIParams.showColormap[p];
 		});
+
 	this_container.append('label')
 		.attr('for',p+'colorCheckBox')
-		.text('Colormap');
+		.text('Enable colormapping');	
 
-/*
 	return segment_height;
 }
 
 function createParticleColormapSelectorSegment(container,parent,name,p){
-	var segment_height = 0;
-*/
+	var segment_height = 30;
+
+	var this_container = container.append('div')
+		.attr('class','NdDiv');
+	
+	this_container.append('label')
+		.attr('for',p+'_SelectCMap')
+		.text('Select colormap :');
+
 	// dropdown to select colormap
 	var selectCMap = this_container.append('select')
 		.attr('class','selectCMap')
 		.attr('id',p+'_SelectCMap')
-		.style('margin-left','4px')
-		.style('width','75px')
+		.style('margin','0px 0px 0px 4px')
+		.style('width','70px')
 		.on('change', selectColormap);
 
 	var options = selectCMap.selectAll('option')
 		.data(GUIParams.colormapList).enter()
 		.append('option')
 			.attr('value',function(d,i){ return i; })
-			.text(function (d) { return d; });
+			.text(function (d) { return d; });	
 
-/*
+	this_container.append('label')
+		.attr('for',p + '_cmapReversedCheckBox')
+		.text('Reverse')
+		.style('margin-left','2px')
+		.style('float','right');
+
+	this_container.append('input')
+		.attr('id',p+'_cmapReversedCheckBox')
+		.attr('value',GUIParams.colormapReversed[p])
+		.attr('type','checkbox')
+		.attr('autocomplete','off')
+		.on('change',function(){
+			sendToViewer([{'setCmapReversed':[p, this.checked]}]);
+			GUIParams.colormapReversed[p] = this.checked;
+		})
+		.style('float','right')
+	
 	return segment_height;
 }
 
 function createParticleColormapVariableSelectorSegment(container,parent,name,p){
-	var segment_height = 0;
-*/
+	var segment_height = 30;
+
+	var this_container = container.append('div')
+		.attr('class','NdDiv');
+
 	// dropdown to select colormap variable
 	var selectCMapVar = this_container.append('select')
 		.attr('class','selectCMapVar')
 		.attr('id',p+'_SelectCMapVar')
-		.style('width', (GUIParams.containerWidth - 192) + 'px')
+		.style('width','135px')
+		.style('float','right')
 		.on('change',selectColormapVariable);
 
 	var options = selectCMapVar.selectAll('option')
@@ -1294,51 +1321,17 @@ function createParticleColormapVariableSelectorSegment(container,parent,name,p){
 			.attr('value',function(d,i){ return i; })
 			.text(function (d) { return d; });
 
-
-
-
-	return segment_height;
-}
-
-function createParticleColormapReversersSegment(container,parent,name,p){
-	var segment_height = 30;
-	// sliders for colormap limits
-	GUIParams.ckeys[p].forEach(function(ck){
-
-		// checkbox for reversing the colormap (maybe this should be in a separate function?)
-		var new_container = container.append('div')
-			.attr('id',p+'_CK_'+ck+'_cmapReversedCheckBoxContainer')
-			.style('padding-left','10px')
-			.style('margin-bottom','5px')
-			.style('display','none');
-
-		new_container.append('input')
-			.attr('id',p+'_CK_'+ck+'_cmapReversedCheckBox')
-			.attr('value',GUIParams.colormapReversed[p][ck])
-			.attr('type','checkbox')
-			.attr('autocomplete','off')
-			.on('change',function(){
-				sendToViewer([{'setCmapReversed':[p, ck, this.checked]}]);
-				GUIParams.colormapReversed[p][ck] = this.checked;
-			})
-			.style('margin','8px 0px 0px 0px');
-		
-		new_container.append('label')
-			.attr('for',p + '_cmapReversedCheckBox')
-			.text('Reverse colormap direction')
-			.style('margin-left','2px');
-
-	})
+	this_container.append('label')
+		.attr('for',p+'_SelectCMapVar')
+		.text('Colormap variable :');	
 
 	return segment_height;
-
 }
 
 function createParticleColormapSlidersSegment(container,parent,name,p){
 	var segment_height = 32;
 	// sliders for colormap limits
 	GUIParams.ckeys[p].forEach(function(ck){
-
 		//sliders
 		if (GUIParams.haveColormapSlider){
 			colormapsliders = container.append('div')
