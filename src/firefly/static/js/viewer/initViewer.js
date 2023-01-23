@@ -102,7 +102,10 @@ function connectViewerSocket(){
 			applyOptions();
 
 			// do something here to update the GUI.  For now I will just remake it!
-			sendInitGUI(prepend=[], append=[{'makeUI':viewerParams.local}])
+			var forGUIAppend = [];
+			// forGUIAppend.push({'setGUIParamByKey':[false,"collapseGUIAtStart"]});
+			forGUIAppend.push({'makeUI':viewerParams.local});
+			sendInitGUI(prepend=[], append=forGUIAppend)
 		});
 
 		socketParams.socket.on('update_streamer', function(msg) {
