@@ -260,11 +260,6 @@ function defineViewerParams(){
 		this.showfps = true;
 		this.fps_list = Array(30).fill(0);
 
-		// tracking time for sending data to flask
-		this.sendDataToFlask = false; // if true then settings data will be sent to flask every few seconds (defined below)
-		this.dataToFlaskSeconds = 3; //number of seconds between sending data to flask
-		this.dataToFlaskTime = 0.;
-
 		//for octree
 		this.haveOctree = {}; //will be initialized to false for each of the parts keys in loadData
 		this.haveAnyOctree = false; //must be a better way to do this!

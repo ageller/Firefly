@@ -383,5 +383,5 @@ function sendPreset(preset = null){
 	if (!preset) preset = createPreset();
 
 	// send to Flask
-	socketParams.socket.emit('save_settings', {'settings':preset, 'room':socketParams.room});
+	socketParams.socket.emit('send_settings', {'settings':preset, 'room':socketParams.room});
 }

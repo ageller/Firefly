@@ -11,8 +11,11 @@ import socketserver
 
 import numpy as np
 
-from flask import Flask, render_template, request, session, current_app
+from flask import Flask, Response, abort, render_template, request, session, current_app
 from flask_socketio import SocketIO, emit, join_room, leave_room
+
+from eventlet import event
+from eventlet.timeout import Timeout
 
 from firefly.data_reader import SimpleReader
 
@@ -45,17 +48,14 @@ dec = 1
 #check if the GUI is separated to see if we need to send a reload signal (currently not used)
 GUIseparated = False
 
-# for passing data from JS to Python
-allow_python_data_passing = False
-firefly_data = {}
+events = {}
 
-
-# receive presets from the  
-@socketio.on('save_settings', namespace=namespace)
-def save_settings(message):
-    global firefly_data
+# receive settings from JS and send it back via events to the GET location below  
+@socketio.on('send_settings', namespace=namespace)
+def send_settings(message):
     try:
-        firefly_data[message['room']]['settings'] = message['settings']
+        e = events[message['room']]
+        e.send(message['settings'])
     except:
         pass
 
@@ -63,11 +63,10 @@ def save_settings(message):
 ####### setting the room (to keep each session distinct)
 @socketio.on('join', namespace=namespace)
 def on_join(message):
-    global rooms, firefly_data
+    global rooms
     # join the room
     room = message['room']
     rooms[request.sid] = room
-    firefly_data[room] = {}
     print('======= in room', room)
     join_room(room)
 
@@ -188,7 +187,7 @@ def default2():
 
 @app.route("/combined")
 def combined(): 
-    return render_template("combined.html", input=json.dumps({'value':allow_python_data_passing}))
+    return render_template("combined.html")
 
 @app.route("/VR")
 def cardboard(): 
@@ -252,10 +251,10 @@ def stream_input():
 
     return 'Done'
 
-@app.route('/settings_output', methods = ['GET'])
-def settings_output():
-    global firefly_data
-    print('======= received request for settings from user ...')
+@app.route('/get_settings', methods = ['GET'])
+def get_settings():
+    global events
+    print('======= received request for settings from user')
 
     # I have not tested to make sure this works with passing a room
     room = request.args.get('room')
@@ -263,14 +262,31 @@ def settings_output():
         room = default_room
 
     try:
-        print('======= sending settings data')
-        return json.dumps(firefly_data[room]['settings'])
+        print('======= gettings settings data')
+        
+        # send a request to JS to return the settings
+        socketio.emit('output_settings', {'data':None}, namespace=namespace, to=room)
+
+        # wait up to 10 seconds for the settings to come back
+        timeout = Timeout(10)
+        try:
+            e = events[room] = event.Event()
+            resp = e.wait()
+        except Timeout:
+            print('!!!!!!!!!!!!!!! TIMEOUT')
+            abort(504)
+        finally:
+            events.pop(room, None)
+            timeout.cancel()
+
+        return json.dumps(resp)
+
     except:
-        print('!!!!!!!!!!!!!!! ERROR IN DUMPING JSON')
+        print('!!!!!!!!!!!!!!! ERROR')
         return json.dumps({'result':'Error'})
 
-@app.route('/settings_input', methods = ['POST'])
-def settings_input():
+@app.route('/post_settings', methods = ['POST'])
+def post_settings():
     print('======= received settings from server ...')
     jsondata = request.get_json()
     data = json.loads(jsondata)
@@ -303,8 +319,7 @@ def startFlaskServer(
     directory=None,
     frames_per_second=30,
     decimation_factor=1,
-    multiple_rooms=False,
-    python_data_passing=False):
+    multiple_rooms=False):
     """Creates a global interpreter locked process to host a Flask server
         that can be accessed via localhost:<port>. 
 
@@ -320,16 +335,11 @@ def startFlaskServer(
         a string to define the room for the given session (which would allow multiple users to interact with 
         separate Firefly instances on a server), defaults to False.
     :type multiple_rooms: bool, optional
-    :param python_data_passing: allow passing of data directly to/from Python? If True, Firefly will regularly 
-        send the settings back to the python interpretter and they will be accessible via /settings_output
-        endpoint.  Currently this feature is only implemented in the /combined endpoint.  defaults to False.
-    :type python_data_passing: bool, optional
     """
 
-    global default_room, allow_python_data_passing
+    global default_room
 
     if (multiple_rooms): default_room = None
-    if (python_data_passing): allow_python_data_passing = python_data_passing
     if (directory is None or directory == "None"): directory = os.path.dirname(__file__)
 
     old_dir = os.getcwd()
@@ -378,8 +388,7 @@ def spawnFireflyServer(
     frames_per_second=30,
     decimation_factor=1,
     max_time=10,
-    multiple_rooms=False,
-    python_data_passing=False):
+    multiple_rooms=False):
     """ Starts a Firefly server as a background process. Close the server by calling
         :func:`firefly.server.quitAllFireflyServers`.
 
@@ -405,10 +414,6 @@ def spawnFireflyServer(
         a string to define the room for the given session (which would allow multiple users to interact with 
         separate Firefly instances on a server), defaults to False.
     :type multiple_rooms: bool, optional
-    :param python_data_passing: allow passing of data directly to/from Python? If True, Firefly will regularly 
-        send the settings back to the python interpretter and they will be accessible via /settings_output
-        endpoint.  Currently this feature is only implemented in the /combined endpoint.  defaults to False.
-    :type python_data_passing: bool, optional
 
     :return: subprocess.Popen
     :rtype: subprocess handler
@@ -426,8 +431,6 @@ def spawnFireflyServer(
         f"--directory={directory}"]
     if (multiple_rooms):
         args.append(f"--multiple_rooms")
-    if (python_data_passing):
-        args.append(f"--python_data_passing")
 
     ## use this run_server.py (even if the other directory has one)
     ##  since it can be run remotely

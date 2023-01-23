@@ -18,8 +18,7 @@ def main(
     dec=1,
     fps=30,
     copy_source=False,
-    multiple_rooms=False,
-    python_data_passing=False):
+    multiple_rooms=False):
     """Creates a global interpreter locked process to host either a Flask 
         or HTTP server that can be accessed via localhost:<port>. 
 
@@ -45,10 +44,6 @@ def main(
         a string to define the room for the given session (which would allow multiple users to interact with 
         separate Firefly instances on a server), defaults to False.
     :type multiple_rooms: bool, optional
-    :param python_data_passing: allow passing of data directly to/from Python? If True, Firefly will regularly 
-        send the settings back to the python interpretter and they will be accessible via /settings_output
-        endpoint.  Currently this feature is only implemented in the /combined endpoint.  defaults to False.
-    :type python_data_passing: bool, optional
     """
 
     if copy_source:
@@ -61,7 +56,7 @@ def main(
         if method not in ['flask','http']: raise ValueError(
             f"method must be one of flask or http, not {method}")
 
-        if method == 'flask': startFlaskServer(port,directory,fps,dec,multiple_rooms,python_data_passing)
+        if method == 'flask': startFlaskServer(port,directory,fps,dec,multiple_rooms)
         else: startHTTPServer(port,directory)
 
 def define_parser():
@@ -79,9 +74,7 @@ def define_parser():
     parser.add_argument('--copy_source', action='store_true',
         help = 'Flag to tell the ``firefly`` command to copy the source files for Firefly into the directory specified by ``directory``. (If this flag is not supplied, the default behavior is to set copy_source=False).')
     parser.add_argument('--multiple_rooms', action='store_true',
-        help = 'flag to enable multiple rooms.  If set, the user will be prompted in the browser to enter a string to define the room for the given session, which would allow multiple users to interact with separate Firefly instances on a server. (If this flag is not supplied, the default behavior is to set multiple_rooms=False) ')    
-    parser.add_argument('--python_data_passing', action='store_true',
-        help = 'flag to enable passing data from javascript to python regularly.  If True, Firefly will regularly send the settings back to the python interpretter, and they will be accessible via /settings_output endpoint.  Currently this feature is only implemented in the /combined endpoint.  (If this flag is not supplied, the default behavior is to set multiple_rooms=False)) ')    
+        help = 'flag to enable multiple rooms.  If set, the user will be prompted in the browser to enter a string to define the room for the given session, which would allow multiple users to interact with separate Firefly instances on a server. (If this flag is not supplied, the default behavior is to set multiple_rooms=False) ')     
 
     return parser
 

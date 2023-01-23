@@ -88,6 +88,12 @@ function connectViewerSocket(){
 
 		});
 
+		socketParams.socket.on('output_settings', function(msg){
+			//only tested for combined endpoint
+			console.log("======== sending settings to server");
+			sendPreset();
+		});
+
 		socketParams.socket.on('input_settings', function(msg) {
 			//only tested for combined endpoint
 			console.log("======== have new settings : ", Object.keys(msg));
@@ -129,7 +135,7 @@ function initInputData(){
 
 //so that it can run locally also without using Flask
 // note that if allowVRControls == true, then you do not want to start in stereo (the VR button will do the work)
-function runLocal(useSockets=true, showGUI=true, allowVRControls=false, startStereo=false, sendDataToFlask=false){
+function runLocal(useSockets=true, showGUI=true, allowVRControls=false, startStereo=false){
 	d3.select("#splashdiv5").text("Loading particle data...");
 	viewerParams.local = true;
 	viewerParams.usingSocket = useSockets;
@@ -140,7 +146,6 @@ function runLocal(useSockets=true, showGUI=true, allowVRControls=false, startSte
 
 	viewerParams.initialStereo = startStereo;
 	viewerParams.allowVRControls = allowVRControls;
-	viewerParams.sendDataToFlask = sendDataToFlask;
 
 	// it appears that in order for Firefly to start correctly, it must be initialized to non-stereo and trackbacl
 	// I will re-initialize them to the proper values after the first render pass

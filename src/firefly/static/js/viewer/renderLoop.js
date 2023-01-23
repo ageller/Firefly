@@ -94,13 +94,6 @@ function update(time){
 	// update particle mesh buffers with settings from UI
 	update_particle_groups(time);	
 
-	// check if we need to update the settings on the server
-	// for now we will just send this every viewerParams.dataToFlaskSeconds
-	// if might be better if we had some way to check if anything in the preset is different (but would I want to do that every render pass?)
-	if (viewerParams.sendDataToFlask && viewerParams.currentTime - viewerParams.dataToFlaskTime > viewerParams.dataToFlaskSeconds &&  viewerParams.usingSocket && viewerParams.drawPass > 10) {
-		viewerParams.dataToFlaskTime = viewerParams.currentTime;
-		sendPreset();
-	}
 	// A couple of klugy fixes to allow for certain initial presets
 	// Firefly seems to behave well when initialized in trackball controls and without stereo.   
 	//    Otherwise, there are bugs of unknown origin.
