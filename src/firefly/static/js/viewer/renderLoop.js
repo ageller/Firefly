@@ -328,7 +328,7 @@ function update_particle_mesh_UI_values(p,m){
 	m.material.uniforms.colormapMax.value = viewerParams.colormapVals[p][viewerParams.ckeys[p][viewerParams.colormapVariable[p]]][1];
 	m.material.uniforms.colormap.value = viewerParams.colormap[p];
 	m.material.uniforms.showColormap.value = viewerParams.showColormap[p];
-	m.material.uniforms.colormapReversed.value = viewerParams.colormapReversed[p][viewerParams.ckeys[p][viewerParams.colormapVariable[p]]];
+	m.material.uniforms.colormapReversed.value = viewerParams.colormapReversed[p];
 
 
 	// update the material only if it doesn't match
