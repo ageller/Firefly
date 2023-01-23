@@ -328,6 +328,7 @@ function update_particle_mesh_UI_values(p,m){
 	m.material.uniforms.colormapMax.value = viewerParams.colormapVals[p][viewerParams.ckeys[p][viewerParams.colormapVariable[p]]][1];
 	m.material.uniforms.colormap.value = viewerParams.colormap[p];
 	m.material.uniforms.showColormap.value = viewerParams.showColormap[p];
+	m.material.uniforms.colormapReversed.value = viewerParams.colormapReversed[p];
 
 
 	// update the material only if it doesn't match
@@ -498,6 +499,7 @@ function render_column_density(){
 	//then back to the canvas
 	//for now, just use the colormap from the first particle group
 	viewerParams.quadCD.material.uniforms.colormap.value = viewerParams.colormap[viewerParams.CDkey];
+	viewerParams.quadCD.material.uniforms.colormapReversed.value = viewerParams.colormapReversed[viewerParams.CDkey];
 	viewerParams.quadCD.material.uniforms.CDmin.value = viewerParams.colormapVals[viewerParams.CDkey][viewerParams.ckeys[viewerParams.CDkey][0]][0];
 	viewerParams.quadCD.material.uniforms.CDmax.value = viewerParams.colormapVals[viewerParams.CDkey][viewerParams.ckeys[viewerParams.CDkey][0]][1];
 

@@ -126,6 +126,7 @@ function defineGUIParams(){
 
 		this.ckeys = null;
 		this.colormapVals = null;
+		this.colormapReversed = null;
 		this.colormapLims = null;
 		this.colormapVariable = null;
 		this.colormap = null;

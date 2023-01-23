@@ -83,7 +83,6 @@ function defineGUIParticleState(){
 					'id':'colormapCheckBox',
 					'builder':createParticleColormapCheckBoxSegment
 				},
-				/*
 				'colormapSelector':{
 					'id':'colormapSelector',
 					'builder':createParticleColormapSelectorSegment
@@ -92,7 +91,6 @@ function defineGUIParticleState(){
 					'id':'colormapVariableSelector',
 					'builder':createParticleColormapVariableSelectorSegment
 				},
-				*/
 				'colormapSliders':{
 					'id':'colormapSliders',
 					'builder':createParticleColormapSlidersSegment

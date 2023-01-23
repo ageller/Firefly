@@ -23,10 +23,11 @@ function selectColormap() {
 
 function showHideColormapFilter(p, selectValue){
 	for (var i=0; i<GUIParams.ckeys[p].length; i+=1){
-		d3.selectAll('#'+p+'_CK_'+GUIParams.ckeys[p][i]+'_END_CMap')
-			.style('display','none');
+		d3.selectAll('#'+p+'_CK_'+GUIParams.ckeys[p][i]+'_END_CMap').style('display','none');
 	}
-	if (selectValue >=0 ) d3.selectAll('#'+p+'_CK_'+GUIParams.ckeys[p][selectValue]+'_END_CMap').style('display','block');
+	if (selectValue >=0 ) {
+		d3.selectAll('#'+p+'_CK_'+GUIParams.ckeys[p][selectValue]+'_END_CMap').style('display','block');
+	}
 }
 
 function selectColormapVariable() {
@@ -201,7 +202,7 @@ function populateColormapImage(particle_group_UIname){
 
 	//get the colormap number
 	var n = GUIParams.colormapList.length;
-	var n_colormap = n*(1. - GUIParams.colormap[particle_group_UIname]) - 0.5
+	var n_colormap = n*(1. - GUIParams.colormap[particle_group_UIname]) + 0.5
 	var actualCbarWidth = GUIParams.colormapImageX/n; //number of pixels for each colormap slice on the image, 
 
 	//add the colormap image
@@ -211,8 +212,12 @@ function populateColormapImage(particle_group_UIname){
 		.attr('width', GUIParams.colormapImageY + 'px') 
 		.attr('height', GUIParams.colormapImageX + 'px') 
 		.attr('y',-(n_colormap*actualCbarWidth) + 'px') 
-		.attr('x',-(GUIParams.colormapImageX) + 'px') 
-		.style('transform','scaleX(-1)') // flip image so that colorbar is correct
+		.attr('x',-(GUIParams.colormapImageX) + 'px')
+	if (viewerParams.colormapReversed[particle_group_UIname]){
+		// 8px is necessary for some reason :| i don't like it but it works
+		img.style('translate',(GUIParams.colormapImageX) + 'px ' + (8) + 'px')
+	}
+	else img.style('transform','rotate(180deg)');
 
 	//add the clip path to only use the correct portion of the image
 	imgContainer.append('clipPath')

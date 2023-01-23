@@ -660,3 +660,12 @@ function setRadiusVariable(args){
 	viewerParams.updateRadiusVariable[p] = true;
 	//console.log(radiusVariable)
 }
+
+function setCmapReversed(args){
+	// placeholder to update the colormap order
+	var p = args[0];
+	var checked = args[1];
+	
+	viewerParams.colormapReversed[p] = checked;
+	if (viewerParams.showColormap[p]) populateColormapImage(p, checked)
+}

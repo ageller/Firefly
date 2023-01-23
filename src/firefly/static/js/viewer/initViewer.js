@@ -726,6 +726,12 @@ function applyOptions(){
 	}
 	else viewerParams.showColormap[viewerParams.CDkey] = false;
 
+	if (Object.keys(options).includes('colormapReversed') &&
+		Object.keys(options.colormapReversed).includes(viewerParams.CDkey)){
+		viewerParams.colormapReversed[viewerParams.CDkey] = options["colormapReversed"][viewerParams.CDkey]
+	}
+	else viewerParams.colormapReversed[viewerParams.CDkey] = false;
+
 	sendToGUI(forGUI);
 }
 
@@ -818,6 +824,7 @@ function initColumnDensity(){
 			tex: { value: viewerParams.textureCD.texture }, 
 			cmap: { type:'t', value: viewerParams.cmap },
 			colormap: {value: viewerParams.colormap[viewerParams.CDkey]},
+			colormapReversed: {value: viewerParams.colormapReversed[viewerParams.CDkey]},
 			CDmin: {value: viewerParams.colormapVals[viewerParams.CDkey][viewerParams.ckeys[viewerParams.CDkey][0]][0]}, // bottom of CD renormalization
 			CDmax: {value: viewerParams.colormapVals[viewerParams.CDkey][viewerParams.ckeys[viewerParams.CDkey][0]][1]}, // top of CD renormalization
 			lognorm: {value: viewerParams.CDlognorm}, // flag to normalize column densities in log space
@@ -846,7 +853,17 @@ function initColumnDensity(){
 // continuously check if viewerParams attributes that
 // should be initialized here are null, if so, keep waiting
 function confirmViewerInit(){
-	var keys = ["partsKeys", "partsSizeMultipliers", "plotNmax", "decimate", "stereoSepMax", "friction", "partsColors", "showParts", "showVel", "animateVel", "velopts", "velType", "ckeys", "colormapVals", "colormapLims", "colormapVariable", "colormap", "showColormap", "fkeys", "filterVals", "filterLims", "renderer", "scene", "controls","camera","parts"];
+	// TODO should loop through one or both of 
+	//  the default settings keys instead
+	var keys = [
+		"partsKeys", "partsSizeMultipliers", "plotNmax",
+		"decimate", "stereoSepMax", "friction", "partsColors",
+		"showParts", "showVel", "animateVel", "velopts",
+		"velType", "ckeys", "colormapVals", "colormapLims",
+		"colormapVariable", "colormap", "showColormap",
+		"colormapReversed", "fkeys", "filterVals", "filterLims",
+		"renderer", "scene", "controls","camera",
+		"parts"];
 
 	var ready = true;
 	keys.forEach(function(k,i){

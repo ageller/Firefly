@@ -185,6 +185,8 @@ function defineViewerParams(){
 		this.colormapVals = {};
 		// textbox limits for colormap
 		this.colormapLims = {};
+		// boolean for reversing colormap
+		this.colormapReversed = {};
 
 		//check if we need to update the colormap when rendering
 		this.updateColormapVariable = {};
