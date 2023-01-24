@@ -11,6 +11,8 @@ function makeUI(local=false){
 	console.log("waiting for GUI init...")
 	clearInterval(GUIParams.waitForInit);
 
+	GUIParams.GUItries = 0;
+
 	GUIParams.waitForInit = setInterval(function(){ 
 		var ready = confirmGUIInit();
 		if (ready){
@@ -19,6 +21,13 @@ function makeUI(local=false){
 	
 			if (GUIParams.cameraNeedsUpdate) updateGUICamera();
 			createUI();
+		}
+		// attempt to fix the issue where the GUI and viewer don't connect to the socket
+		// this might result in some infinite loop of reloads...
+		if (GUIParams.GUItries > 5){
+			console.log('ERROR IN CREATING GUI.  TRYING AGAIN.');
+			GUIParams.GUItries = 0;
+			location.reload();
 		}
 	}, 1000);
 
@@ -52,6 +61,7 @@ function confirmGUIInit(keys = ["partsKeys", "partsSizeMultipliers", "plotNmax",
 	var ready = keys.every(function(k,i){
 		if (GUIParams[k] == null) {
 			console.log("GUI missing ", k)
+			GUIParams.GUItries += 1;
 			return false;
 		}
 		return true;

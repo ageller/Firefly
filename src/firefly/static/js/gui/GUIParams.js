@@ -24,6 +24,7 @@ function defineGUIParams(){
 		//when ready the GUI will be created
 		this.waitForInit = null;
 		this.GUIready = true;
+		this.GUItries = 0;
 		this.GUIbuilt = false;
 		this.GUIWidth = 0; //will hold the width of the GUI as a check if it is completely built
 
