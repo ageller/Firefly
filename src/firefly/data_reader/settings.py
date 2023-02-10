@@ -635,11 +635,11 @@ particle_GUIurls = [url.lower() for url in particle_GUIurls]
 default_app_settings = load_from_json(
     os.path.abspath(os.path.join(
         os.path.dirname(__file__),
-        '../static/js/misc/DefaultSettings.json')))
+        '../static/js/misc/defaultSettings.json')))
 default_particle_settings = load_from_json(
     os.path.abspath(os.path.join(
         os.path.dirname(__file__),
-        '../static/js/misc/DefaultParticleSettings.json')))
+        '../static/js/misc/defaultParticleSettings.json')))
 default_settings = {**default_app_settings,**default_particle_settings}
 
 
