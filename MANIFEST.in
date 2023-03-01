@@ -5,7 +5,6 @@ recursive-include src/firefly/static/lib *
 recursive-include src/firefly/static/shaders *
 recursive-include src/firefly/static/textures *
 
-recursive-include src/firefly/static/data/FIREData_50 * 
 include src/firefly/static/data/startup.json
 
 recursive-include src/firefly/templates *
@@ -15,3 +14,5 @@ recursive-include src/firefly/ntbks *
 include src/firefly/index.html
 include src/firefly/firefly
 include src/firefly/bin/make_new_repo.sh
+
+global-exclude *.ffly
