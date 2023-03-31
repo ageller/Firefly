@@ -245,8 +245,22 @@ function callLoadData(args){
 	loadData(WebGLStart, prefix);
 }
 
+function getInputDataAttributes(){
+	// get the attributes that the user supplied with the data (before Firefly adds)
+	viewerParams.partsKeys.forEach(function(p){
+		viewerParams.inputDataAttributes[p] = [];
+		Object.keys(viewerParams.parts[p]).forEach(function(key){
+			if (!key.includes('Key')){
+				viewerParams.inputDataAttributes[p].push(key);
+			}
+		})
+	})
+	console.log('input data keys ... ', viewerParams.inputDataAttributes);
+}
+
 // launch the app control flow, >> ends in animate <<
 function WebGLStart(){
+	getInputDataAttributes();
 
 	//reset the window title
 	if (viewerParams.parts.hasOwnProperty('options')){

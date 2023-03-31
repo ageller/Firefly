@@ -328,6 +328,7 @@ function defineViewerParams(){
 			this.radius = 10.;
 			this.active = true;
 		}
+		this.inputDataAttributes = {};
 
 
 		setDefaultViewerParams(this);
