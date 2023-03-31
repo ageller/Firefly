@@ -493,6 +493,9 @@ function initScene() {
 	// var canvas = d3.select('canvas').node();
 	// var gl = canvas.getContext('webgl');
 	// console.log(gl.getParameter(gl.ALIASED_POINT_SIZE_RANGE), gl.getParameter(gl.POINT_SMOOTH));
+
+	// selector (temporary)
+	createSelector();
 }
 
 // apply any settings from options file

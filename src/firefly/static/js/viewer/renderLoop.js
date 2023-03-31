@@ -116,7 +116,10 @@ function update(time){
 			initControls(false);
 		}
 
+		if (viewerParams.selector.active) updateSelector()
+
 	}
+
 }
 
 function update_keypress(time){
@@ -680,6 +683,18 @@ function updatePlaybackFilter(p){
 	// and set it "dfilter"
 	var range = viewerParams.filterVals[p][fkey];
 	viewerParams.parts[p]['dfilter'] = range[1] - range[0];
+}
+
+function updateSelector(){
+	// update the center and send to the shader
+	viewerParams.selector.object3D.getWorldPosition(viewerParams.selector.center);
+	
+	viewerParams.partsKeys.forEach(function(p,i){
+		viewerParams.partsMesh[p].forEach(function(m, j){
+			m.material.uniforms.selectorCenter.value = [viewerParams.selector.center.x, viewerParams.selector.center.y, viewerParams.selector.center.z];
+			m.material.uniforms.selectorRadius.value = viewerParams.selector.radius;
+		})
+	})
 }
 
 // ABG: removed from above render_column_density() call

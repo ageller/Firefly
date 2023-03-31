@@ -319,6 +319,17 @@ function defineViewerParams(){
 
 		}
 
+		this.selector = new function() {
+			// settings for the selection region
+			// currently set as a sphere
+
+			this.object3D = null;
+			this.center = new THREE.Vector3(0,0,0);
+			this.radius = 10.;
+			this.active = true;
+		}
+
+
 		setDefaultViewerParams(this);
 	};
 }
