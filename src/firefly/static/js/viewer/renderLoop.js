@@ -706,6 +706,8 @@ function downloadSelection(){
 	// download the data that is physically inside the selector sphere
 	console.log('downloading selected data...');
 
+	// add some notification to the screen, maybe with a progress bar?
+
 	// find the data that is inside the selected region 
 	// is there a way to do this without looping through every particle?
 	// this actually runs much more quickly than I anticipated (at least on our default sample data)
@@ -744,7 +746,8 @@ function downloadSelection(){
 	console.log(selected);
 
 	// send to download and/or send to Flask so that I can pass to Python (to do)
-
+	// download
+	downloadObjectAsJson(selected, 'Firefly_data_selection');
 }
 
 // ABG: removed from above render_column_density() call
