@@ -23,7 +23,8 @@ function defineSocketParams(){
 			rememberTransport: false,
 			transports: ["websocket"],
 			forceNew: true,
-			reconnection: false,
+			reconnection: true,
+			maxHttpBufferSize: 1e9, //1Gb
 		});
 
 	}

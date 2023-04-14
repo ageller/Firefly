@@ -57,14 +57,6 @@ GUIseparated = False
 
 events = {}
 
-# receive settings from JS and send it back via events to the GET location below  
-@socketio.on('send_settings', namespace=namespace)
-def send_settings(message):
-    try:
-        e = events[message['room']]
-        e.send(message['settings'])
-    except:
-        pass
 
 
 ####### setting the room (to keep each session distinct)
@@ -262,6 +254,7 @@ def stream_input():
 @app.route('/get_settings', methods = ['GET'])
 def get_settings():
     global events
+    events = {}
     print('======= received request for settings from user')
 
     # I have not tested to make sure this works with passing a room
@@ -292,6 +285,16 @@ def get_settings():
     except:
         print('!!!!!!!!!!!!!!! ERROR')
         return json.dumps({'result':'Error'})
+    
+# receive settings from JS and send it back via events to the GET location below  
+@socketio.on('send_settings', namespace=namespace)
+def send_settings(message):
+    try:
+        e = events[message['room']]
+        e.send(message['settings'])
+    except:
+        pass
+
 
 @app.route('/post_settings', methods = ['POST'])
 def post_settings():
@@ -313,6 +316,51 @@ def post_settings():
         print('User must specify a name for the websocket "room" connected to an active firefly instance.')
         return 'Error'
 
+@app.route('/get_selected_data', methods = ['GET'])
+def get_selected_data():
+    global events
+    events = {}
+    print('======= received request for selected data from user')
+
+    # I have not tested to make sure this works with passing a room
+    room = request.args.get('room')
+    if (not room):
+        room = default_room
+
+    try:
+        print('======= gettings selected data')
+        
+        # send a request to JS to return the settings
+        socketio.emit('output_selected_data', {'data':None}, namespace=namespace, to=room)
+
+        # wait up to 10 seconds for the settings to come back
+        timeout = Timeout(10)
+        try:
+            e = events[room] = event.Event()
+            resp = e.wait()
+        except Timeout:
+            print('!!!!!!!!!!!!!!! TIMEOUT')
+            abort(504)
+        finally:
+            events.pop(room, None)
+            timeout.cancel()
+
+        return json.dumps(resp)
+
+    except:
+        print('!!!!!!!!!!!!!!! ERROR')
+        return json.dumps({'result':'Error'})
+    
+# receive selecte data from JS and send it back via events to the GET location below  
+@socketio.on('send_selected_data', namespace=namespace)
+def send_selected_data(message):
+    print('have data')
+    try:
+        e = events[message['room']]
+        e.send(message['data'])
+    except:
+        pass  
+      
 def reload():
     #currently not used
     if (GUIseparated):

@@ -14,6 +14,9 @@ function connectViewerSocket(){
 			console.log("sending connection from viewer")
 			socketParams.socket.emit('connection_test', {data: 'Viewer connected!'});
 		});
+		socketParams.socket.on('disconnect', function(message) {
+			console.log("viewer is disconnected", message)
+		});
 		// socketParams.socket.on('connection_response', function(msg) {
 		// 	console.log('connection response', msg);
 		// });     
@@ -107,6 +110,12 @@ function connectViewerSocket(){
 			// forGUIAppend.push({'setGUIParamByKey':[false,"collapseGUIAtStart"]});
 			forGUIAppend.push({'makeUI':viewerParams.local});
 			sendInitGUI(prepend=[], append=forGUIAppend)
+		});
+
+		socketParams.socket.on('output_selected_data', function(msg){
+			//only tested for combined endpoint
+			console.log("======== sending selected data to server");
+			sendSelectedData();
 		});
 
 		socketParams.socket.on('update_streamer', function(msg) {
@@ -597,14 +606,13 @@ function applyOptions(){
 	}
 
 	//check if we are starting in Stereo
-	if (options.hasOwnProperty('useStereo') && options.useStereo){
-		viewerParams.normalRenderer = viewerParams.renderer;
-		viewerParams.renderer = viewerParams.effect;
-		viewerParams.useStereo = true;
+	if (options.hasOwnProperty('useStereo')){
+		checkStereoLock(options.useStereo)
 		if (viewerParams.haveUI){
-			var evalString = 'elm = document.getElementById("StereoCheckBox"); elm.checked = true; elm.value = true;'
+			var evalString = 'elm = document.getElementById("StereoCheckBox"); elm.checked = ' + options.useStereo + '; elm.value = ' + options.useStereo + ';'
 			forGUI.push({'evalCommand':[evalString]})
-	} 	}
+		} 
+	} 
 
 	//modify the initial stereo separation
 	if (options.hasOwnProperty('stereoSep') && options.stereoSep != null){

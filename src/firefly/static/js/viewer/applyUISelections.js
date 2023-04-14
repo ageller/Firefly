@@ -565,7 +565,30 @@ function createPreset(){
 	preset.startTween = copyValue(viewerParams.updateTween);
 
 	preset.loaded = true;
+
 	return preset;
+}
+
+function savePresetViewer(){
+	preset = creatPreset();
+
+	//https://stackoverflow.com/questions/33780271/export-a-json-object-to-a-text-file
+	var str = JSON.stringify(GUIparams.preset)
+	//Save the file contents as a DataURI
+	var dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(str);
+
+	saveFile(dataUri,'preset.json');
+
+	// send to Flask
+	if (viewerParams.usingSocket) sendPreset(preset);
+}
+
+function sendPreset(preset = null){
+
+	if (!preset) preset = createPreset();
+
+	// send to Flask
+	socketParams.socket.emit('send_settings', {'settings':preset, 'room':socketParams.room});
 }
 
 function updateFriction(value){

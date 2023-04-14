@@ -365,24 +365,10 @@ function updateOctreeLoadingBarUI(input){
 }
 
 function savePreset(){
-	var preset = createPreset();
-
-	//https://stackoverflow.com/questions/33780271/export-a-json-object-to-a-text-file
-	var str = JSON.stringify(preset)
-	//Save the file contents as a DataURI
-	var dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(str);
-
-	saveFile(dataUri,'preset.json');
-
-	// send to Flask
-	if (GUIParams.usingSocket) sendPreset(preset);
-
+	// NOTE: AMG moved this to the viewer side because all the other functions are on that side.
+	// But in a split screen mode, it is probably better for the download to happen on the GUI side...
+	sendToGUI([{'savePresetViewer':null}]);
 }
 
-function sendPreset(preset = null){
 
-	if (!preset) preset = createPreset();
 
-	// send to Flask
-	socketParams.socket.emit('send_settings', {'settings':preset, 'room':socketParams.room});
-}
