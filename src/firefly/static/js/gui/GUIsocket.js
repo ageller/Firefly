@@ -11,6 +11,7 @@ function connectGUISocket(){
 		// this happens when the server connects.
 		// all other functions below here are executed when the server emits to that name.
 		socketParams.socket.on('connect', function() {
+			console.log('sending connection from gui')
 			socketParams.socket.emit('connection_test', {data: 'GUI connected!'});
 		});
 		// socketParams.socket.on('connection_response', function(msg) {
@@ -30,7 +31,7 @@ function connectGUISocket(){
 
 
 		socketParams.socket.on('update_GUIParams', function(msg) {
-			//console.log('===have commands from viewer', msg)
+			// console.log('===have commands from viewer', msg)
 			setParams(msg); 
 		});
 

@@ -11,6 +11,7 @@ function connectViewerSocket(){
 		// this happens when the server connects.
 		// all other functions below here are executed when the server emits to that name.
 		socketParams.socket.on('connect', function() {
+			console.log("sending connection from viewer")
 			socketParams.socket.emit('connection_test', {data: 'Viewer connected!'});
 		});
 		// socketParams.socket.on('connection_response', function(msg) {

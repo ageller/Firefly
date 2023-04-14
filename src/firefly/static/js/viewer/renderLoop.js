@@ -648,7 +648,7 @@ function update_framerate(seconds,time){
 	//  and put in a weirdly high value (like >100 fps) that biases the mean high
 	viewerParams.FPS = viewerParams.fps_list.slice().sort(function(a, b){return a-b})[15]
 
-	if ((viewerParams.drawPass % Math.min(Math.round(viewerParams.FPS),60)) == 0){
+	if ((viewerParams.drawPass % Math.min(Math.round(viewerParams.FPS),60)) == 0 && viewerParams.haveUI){
 		// only send this if the parameters have changed (to avoid clogging the socket)
 		if (Math.abs(viewerParams.FPS - viewerParams.FPS0) > 0.1 || Math.abs(viewerParams.memoryUsage - viewerParams.memoryUsage0) > 1e7){
 			viewerParams.FPS0 = viewerParams.FPS;
@@ -746,6 +746,8 @@ function downloadSelection(){
 	console.log(selected);
 
 	// send to download and/or send to Flask so that I can pass to Python (to do)
+	// we will need some way for the user to specify whether they want to download a file or send it 
+	// directly to flask and be available in Python (or both?)
 	// download
 	downloadObjectAsJson(selected, 'Firefly_data_selection');
 }

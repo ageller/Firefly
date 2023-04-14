@@ -1,3 +1,10 @@
+# to run locally for development
+# Note: if you have installed the pypi version of firefly previously, you must uninstall it first 
+#   (and/or create a new conda env)
+# $ pip install -e .
+# $ firefly --method="flask" --directory="/foo/bar/Firefly/src/firefly"
+
+
 import os
 import sys
 import json
@@ -88,6 +95,7 @@ def disconnect():
 # will fire when user connects
 @socketio.on('connect', namespace=namespace)
 def connect():
+    print("======= socket connected")
     emit('room_check',{'room': default_room}, namespace=namespace)
 
 
@@ -100,14 +108,14 @@ def connection_test(message):
 
 
 ######for viewer
-#will receive data from viewer 
+#will receive data for viewer 
 @socketio.on('viewer_input', namespace=namespace)
 def viewer_input(message):
     if (request.sid in rooms):
         socketio.emit('update_viewerParams', message, namespace=namespace, to=rooms[request.sid])
 
 #######for GUI
-#will receive data from gui
+#will receive data for gui
 @socketio.on('gui_input', namespace=namespace)
 def gui_input(message):
     if (request.sid in rooms):
@@ -357,7 +365,7 @@ def startFlaskServer(
         fps = frames_per_second
         dec = decimation_factor
 
-        socketio.run(app, host='0.0.0.0', port=port)#, use_reloader=True)
+        socketio.run(app, host='0.0.0.0', port=port, use_reloader=True)
     except: raise
     finally: os.chdir(old_dir)
 
