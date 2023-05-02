@@ -5,19 +5,19 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="firefly",
-    version="3.2.1",
+    version="3.2.2",
     author = 'Alex Gurvich, Aaron Geller',
-    author_email = 'agurvich@u.northwestern.edu, ageller@northwestern.edu',
+    author_email = 'agurvich@u.northwestern.edu, a-geller@northwestern.edu',
     description="A browser-based particle visualization platform",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://alexbgurvi.ch/Firefly",
+    url="http://www.firefly-viz.com/",
     project_urls={
         "Bug Tracker": "https://github.com/ageller/Firefly/issues",
     },
     classifiers=[
         "Programming Language :: Python :: 3",
-        "License :: OSI Approved :: MIT License",
+        "License :: OSI Approved :: AGPL-3.0 license",
         "Operating System :: OS Independent",
     ],
     package_dir={"": "src"},
