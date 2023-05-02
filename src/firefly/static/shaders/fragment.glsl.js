@@ -148,7 +148,7 @@ void main(void) {
 		gl_FragColor.a *= vAlpha;
 
 		// gl_FragColor = vec4(10./vDistFromSelectorCenter, 0., 0., 1.);
-		if (vInsideSelector > 0.) gl_FragColor = vec4(1., 0., 0., 1.);
+		if (vInsideSelector > 0.) gl_FragColor = vec4(vec3(1.) - gl_FragColor.rgb, 1.);
 		// if (vInsideSelector < 1.) discard;
 	}
 }
