@@ -55,7 +55,6 @@ function createDecimationSegment(container,parent,name){
 	var segment = container.append('div')
 		.attr('id', name+'Div')
 		.style('width',(GUIParams.containerWidth - 10) + 'px')
-		.style('margin-left','5px')
 		.style('margin-top','10px')
 		.style('display','inline-block')
 	segment.append('div')
@@ -191,6 +190,61 @@ function createLoadNewDataSegment(container,parent,name){
 	return segment_height;
 }
 
+function createDataSelectorSegment(container, parent, name){
+	var segment_height = 25;
+	if (GUIParams.usingSocket){
+        // on/off checkbox
+        var new_container = container.append('div')
+		    .attr('id','dataSelectorCheckBoxContainer');
+
+        var checkbox = new_container.append('input')
+            .attr('id',name+'Elm')
+            .attr('value',GUIParams.dataSelectorEnabled)
+            .attr('type','checkbox')
+            .attr('autocomplete','off')
+            .on('change',function(){
+                sendToViewer([{'toggleDataSelector':this.checked}]);
+                GUIParams.dataSelectorEnabled = this.checked;
+            })
+            .style('margin','8px 0px 0px 0px')
+            
+        if (GUIParams.dataSelectorEnabled) checkbox.attr('checked',true);
+
+        new_container.append('label')
+            .attr('for','dataSelectorCheckBoxContainer')
+            .text('Enable data selector sphere')
+            .style('margin-left','10px')
+
+        segment_height += 35;
+
+        // radius slider
+        var segment = container.append('div')
+            .attr('id', name+'Div')
+            .style('width',(GUIParams.containerWidth - 10) + 'px')
+            .style('margin-top','10px')
+            .style('display','inline-block')
+        segment.append('div')
+            .attr('class','pLabelDiv')
+            .style('width','50px')
+            .style('display','inline-block')
+            .text('Radius');
+        segment.append('div')
+            .attr('class','NSliderClass')
+            .attr('id','DSRSlider')
+            .style('margin-left','6px')
+            .style('width',(GUIParams.containerWidth - 110) + 'px');
+        segment.append('input')
+            .attr('class','NMaxTClass')
+            .attr('id','DSRMaxT')
+            .attr('type','text')
+            .style('left',(GUIParams.containerWidth - 45) + 'px')
+            .style('width','40px');
+        createDataSelectorSlider();
+
+    }
+
+    return segment_height;
+}
 
 function createCenterTextBoxesSegment(container,parent,name){
 	// TODO disabling the lock checkbox is tied disabling the center text box

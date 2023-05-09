@@ -687,3 +687,21 @@ function setCmapReversed(args){
 
 	//console.log('reversing particle colormap', args);
 }
+
+
+function toggleDataSelector(value){
+    //turn the data selector sphere on/off
+    viewerParams.selector.active = value;
+    viewerParams.selector.object3D.visible = value;
+
+    // turn off the selection in the shader by setting the radius to zero
+    if (!value){
+        viewerParams.partsKeys.forEach(function(p,i){
+            viewerParams.partsMesh[p].forEach(function(m, j){
+                m.material.uniforms.selectorRadius.value = 0.;
+            })
+        })
+    }
+
+    // console.log('data selector ', viewerParams.selector.active);
+}

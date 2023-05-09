@@ -114,8 +114,12 @@ function connectViewerSocket(){
 
 		socketParams.socket.on('output_selected_data', function(msg){
 			//only tested for combined endpoint
-			console.log("======== sending selected data to server");
-			sendSelectedData();
+            if (viewerParams.selector.active){
+			    console.log("======== sending selected data to server");
+			    sendSelectedData();
+            } else {
+                console.log("======== data selector not active")
+            }
 		});
 
 		socketParams.socket.on('update_streamer', function(msg) {
@@ -1047,6 +1051,10 @@ function sendInitGUI(prepend=[], append=[]){
 	})
 
 	forGUI.push({'setGUIParamByKey':[true,"GUIready"]});
+
+    // for the data selector
+    forGUI.push({'setGUIParamByKey':[viewerParams.selector.active,"dataSelectorEnabled"]});
+    forGUI.push({'setGUIParamByKey':[viewerParams.selector.radius,"dataSelectorRadius"]});
 
 
 	//forGUI.forEach(function (value){console.log(value.setGUIParamByKey)});

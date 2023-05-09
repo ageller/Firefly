@@ -156,7 +156,7 @@ function update_keypress(time){
 	}
 
 	// for now if user presses return it will download the selected stars
-	if (viewerParams.keyboard.down("enter")){
+	if (viewerParams.keyboard.down("enter") && viewerParams.selector.active){
 		downloadSelection();
 	}
 

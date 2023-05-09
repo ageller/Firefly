@@ -28,6 +28,8 @@ function createSelector(){
     viewerParams.selector.object3D = group;
     //viewerParams.scene.add( sphere );
 
+    viewerParams.selector.object3D.visible = viewerParams.selector.active;
+
 }
 
 function updateSelector(){
