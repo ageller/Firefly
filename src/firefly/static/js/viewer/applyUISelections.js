@@ -696,6 +696,7 @@ function toggleDataSelector(value){
 
     // turn off the selection in the shader by setting the radius to zero
     if (!value){
+        viewerParams.selector.object3D.scale.set(0,0,0);
         viewerParams.partsKeys.forEach(function(p,i){
             viewerParams.partsMesh[p].forEach(function(m, j){
                 m.material.uniforms.selectorRadius.value = 0.;

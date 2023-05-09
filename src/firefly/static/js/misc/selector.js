@@ -1,6 +1,6 @@
 function createSelector(){
     // wireframe sphere on front half
-    const geometry1 = new THREE.SphereGeometry(viewerParams.selector.radius, 16, 16, 0, Math.PI, 0, Math.PI);
+    const geometry1 = new THREE.SphereGeometry(1, 16, 16, 0, Math.PI, 0, Math.PI);
     const wireframe = new THREE.WireframeGeometry(geometry1);
     const line = new THREE.LineSegments(wireframe);
     line.material.depthTest = true;
@@ -8,10 +8,10 @@ function createSelector(){
     line.material.transparent = true;
 
     // back half of sphere filled in
-    const geometry2 = new THREE.SphereGeometry(viewerParams.selector.radius, 16, 16, Math.PI, Math.PI, 0, Math.PI);
-    const material = new THREE.MeshBasicMaterial({ color: "green" });
+    const geometry2 = new THREE.SphereGeometry(1, 16, 16, Math.PI, Math.PI, 0, Math.PI);
+    const material = new THREE.MeshBasicMaterial({ color: "black" });
     material.depthTest = true;
-    material.opacity = 0.9;
+    material.opacity = 0.7;
     material.transparent = true;   
     material.side = THREE.DoubleSide;
     const sphere = new THREE.Mesh(geometry2, material);
@@ -26,16 +26,18 @@ function createSelector(){
     group.position.set(0,0,-100);
 
     viewerParams.selector.object3D = group;
-    //viewerParams.scene.add( sphere );
+    viewerParams.selector.object3D.scale.set(viewerParams.selector.radius, viewerParams.selector.radius, viewerParams.selector.radius);
 
-    viewerParams.selector.object3D.visible = viewerParams.selector.active;
+    // run this later (in WebGLStart) so that the particles are created first
+    // toggleDataSelector(viewerParams.selector.active);
 
 }
 
 function updateSelector(){
-	// update the center and send to the shader
+	// update the center, radius and send to the shader
 	viewerParams.selector.object3D.getWorldPosition(viewerParams.selector.center);
-	
+    viewerParams.selector.object3D.scale.set(viewerParams.selector.radius, viewerParams.selector.radius, viewerParams.selector.radius);
+
 	viewerParams.partsKeys.forEach(function(p,i){
 		viewerParams.partsMesh[p].forEach(function(m, j){
 			m.material.uniforms.selectorCenter.value = [viewerParams.selector.center.x, viewerParams.selector.center.y, viewerParams.selector.center.z];

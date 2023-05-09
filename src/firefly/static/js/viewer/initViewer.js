@@ -297,7 +297,9 @@ function WebGLStart(){
 	Promise.all([
 		createPartsMesh(),
 	]).then(function(){
-		
+        
+        toggleDataSelector(viewerParams.selector.active);
+
 		//begin the animation
 		// keep track of runtime for crashing the app rather than the computer
 		var currentTime = new Date();
