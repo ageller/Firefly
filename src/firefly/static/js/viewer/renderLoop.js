@@ -155,11 +155,6 @@ function update_keypress(time){
 		console.log('fly speed', viewerParams.flyffac)
 	}
 
-	// for now if user presses return it will download the selected stars
-	if (viewerParams.keyboard.down("enter") && viewerParams.selector.active){
-		downloadSelection();
-	}
-
 }
 
 function update_particle_groups(time){

@@ -23,7 +23,7 @@ function createSelector(){
 
     // for now I will place the selector to be right in front of the camera
     viewerParams.camera.add(group);
-    group.position.set(0,0,-100);
+    group.position.set(0, 0, -viewerParams.selector.distance);
 
     viewerParams.selector.object3D = group;
     viewerParams.selector.object3D.scale.set(viewerParams.selector.radius, viewerParams.selector.radius, viewerParams.selector.radius);
@@ -37,6 +37,7 @@ function updateSelector(){
 	// update the center, radius and send to the shader
 	viewerParams.selector.object3D.getWorldPosition(viewerParams.selector.center);
     viewerParams.selector.object3D.scale.set(viewerParams.selector.radius, viewerParams.selector.radius, viewerParams.selector.radius);
+    viewerParams.selector.object3D.position.set(0, 0, -viewerParams.selector.distance);
 
 	viewerParams.partsKeys.forEach(function(p,i){
 		viewerParams.partsMesh[p].forEach(function(m, j){

@@ -326,6 +326,7 @@ function defineViewerParams(){
 			this.object3D = null;
 			this.center = new THREE.Vector3(0,0,0);
 			this.radius = 10.;
+            this.distance = 100.;
 			this.active = false;
 		}
 		this.inputDataAttributes = {};

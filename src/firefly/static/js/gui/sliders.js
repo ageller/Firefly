@@ -511,8 +511,8 @@ function createFilterSliders(p){
 
 }
 
-function createDataSelectorSlider(p){
-    var initialValue = parseFloat(GUIParams.dataSelectorRadius); 
+function createDataSelectorRadiusSlider(){
+    var initialValue = parseFloat(GUIParams.selector.radius); 
 
     var sliderArgs = {
         start: [initialValue], 
@@ -538,5 +538,33 @@ function createDataSelectorSlider(p){
     //reformat
     w = parseInt(d3.select("#DSRSlider").style("width").slice(0,-2));
 	d3.select("#DSRSlider").select('.noUi-base').style('width',w-10+"px");
+}
 
+function createDataSelectorDistanceSlider(){
+    var initialValue = parseFloat(GUIParams.selector.distance); 
+
+    var sliderArgs = {
+        start: [initialValue], 
+        connect: [true, false],
+        tooltips: false,
+        steps: [0.01],
+        range: { 
+            'min': [0],
+            'max': [initialValue]
+        },
+        format: wNumb({
+            decimals: 2
+        })
+    }
+
+    var slider = document.getElementById('DSZSlider');
+	var text = [document.getElementById('DSZMaxT')];
+	var varToSet = [initialValue, "selector", "distance"]
+	var varArgs = {'f':'setViewerParamByKey','v':varToSet};
+
+	createSlider(slider, text, sliderArgs, varArgs, [null, 1]);
+
+    //reformat
+    w = parseInt(d3.select("#DSRSlider").style("width").slice(0,-2));
+	d3.select("#DSRSlider").select('.noUi-base').style('width',w-10+"px");
 }

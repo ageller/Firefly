@@ -297,7 +297,7 @@ function WebGLStart(){
 	Promise.all([
 		createPartsMesh(),
 	]).then(function(){
-        
+
         toggleDataSelector(viewerParams.selector.active);
 
 		//begin the animation
@@ -1055,8 +1055,9 @@ function sendInitGUI(prepend=[], append=[]){
 	forGUI.push({'setGUIParamByKey':[true,"GUIready"]});
 
     // for the data selector
-    forGUI.push({'setGUIParamByKey':[viewerParams.selector.active,"dataSelectorEnabled"]});
-    forGUI.push({'setGUIParamByKey':[viewerParams.selector.radius,"dataSelectorRadius"]});
+    forGUI.push({'setGUIParamByKey':[viewerParams.selector.active,"selector","active"]});
+    forGUI.push({'setGUIParamByKey':[viewerParams.selector.radius,"selector","radius"]});
+    forGUI.push({'setGUIParamByKey':[viewerParams.selector.distance,"selector","distance"]});
 
 
 	//forGUI.forEach(function (value){console.log(value.setGUIParamByKey)});

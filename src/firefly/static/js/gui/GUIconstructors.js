@@ -192,34 +192,34 @@ function createLoadNewDataSegment(container,parent,name){
 
 function createDataSelectorSegment(container, parent, name){
 	var segment_height = 25;
-    
+
     // on/off checkbox
     var new_container = container.append('div')
         .attr('id','dataSelectorCheckBoxContainer');
 
     var checkbox = new_container.append('input')
         .attr('id',name+'Elm')
-        .attr('value',GUIParams.dataSelectorEnabled)
+        .attr('value',GUIParams.selector.active)
         .attr('type','checkbox')
         .attr('autocomplete','off')
         .on('change',function(){
             sendToViewer([{'toggleDataSelector':this.checked}]);
-            GUIParams.dataSelectorEnabled = this.checked;
+            GUIParams.selector.active = this.checked;
         })
         .style('margin','8px 0px 0px 0px')
         
-    if (GUIParams.dataSelectorEnabled) checkbox.attr('checked',true);
+    if (GUIParams.selector.active) checkbox.attr('checked',true);
 
     new_container.append('label')
         .attr('for','dataSelectorCheckBoxContainer')
         .text('Enable data selector sphere')
         .style('margin-left','10px')
 
+    // radius slider
     segment_height += 35;
 
-    // radius slider
     var segment = container.append('div')
-        .attr('id', name+'Div')
+        .attr('id', name+'RsliderDiv')
         .style('width',(GUIParams.containerWidth - 10) + 'px')
         .style('margin-top','10px')
         .style('display','inline-block')
@@ -239,8 +239,49 @@ function createDataSelectorSegment(container, parent, name){
         .attr('type','text')
         .style('left',(GUIParams.containerWidth - 45) + 'px')
         .style('width','40px');
-    createDataSelectorSlider();
+    createDataSelectorRadiusSlider();
 
+    // z distance slider
+    segment_height += 35;
+
+    var segment = container.append('div')
+        .attr('id', name+'DsliderDiv')
+        .style('width',(GUIParams.containerWidth - 10) + 'px')
+        .style('margin-top','10px')
+        .style('display','inline-block')
+    segment.append('div')
+        .attr('class','pLabelDiv')
+        .style('width','62px')
+        .style('display','inline-block')
+        .text('Distance');
+    segment.append('div')
+        .attr('class','NSliderClass')
+        .attr('id','DSZSlider')
+        .style('margin-left','18px')
+        .style('width',(GUIParams.containerWidth - 132) + 'px');
+    segment.append('input')
+        .attr('class','NMaxTClass')
+        .attr('id','DSZMaxT')
+        .attr('type','text')
+        .style('left',(GUIParams.containerWidth - 45) + 'px')
+        .style('width','40px');
+    createDataSelectorDistanceSlider();
+
+    // download button
+    segment_height += 35;
+
+	//save preset button
+	container.append('div').attr('id','downloadSelectedDataDiv')
+		.append('button')
+		.attr('id','downloadSelectedDatatButton')
+		.attr('class','button')
+		.style('width',(GUIParams.containerWidth - 10) + 'px')
+		.style('margin-left','0px') 
+		.on('click',function(){
+            if (GUIParams.selector.active) downloadSelection(); // should there be a warning if the selector is not enabled?
+        })
+		.append('span')
+			.text('Download selected data');
 
     return segment_height;
 }
