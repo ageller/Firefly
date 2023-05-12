@@ -380,14 +380,14 @@ selectedData = {}
 @socketio.on('send_selected_data', namespace=namespace)
 def send_selected_data(message):
     global selectedData
-    print('have', message['pass'], message['keyList'], message['done'])
+    # print('have', message['pass'], message['keyList'], message['done'])
     try:
         e = events[message['room']]
 
         # the first pass should be for the data structure
         if (message['pass'] == 'structure'):
             selectedData = message['data']
-            print('data structure = ', data)
+            # print('data structure = ', data)
         
         if (message['pass'] == 'data'):
             try:
