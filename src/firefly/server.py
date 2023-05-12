@@ -334,7 +334,7 @@ def get_selected_data():
         socketio.emit('output_selected_data', {'data':None}, namespace=namespace, to=room)
 
         # wait up to 10 seconds for the settings to come back
-        timeout = Timeout(10)
+        timeout = Timeout(60)
         try:
             e = events[room] = event.Event()
             resp = e.wait()
@@ -350,14 +350,42 @@ def get_selected_data():
     except:
         print('!!!!!!!!!!!!!!! ERROR')
         return json.dumps({'result':'Error'})
+
+def compileData(current, new, keyList):
+
+    def getPath(dataDict, path):
+        # https://stackoverflow.com/questions/59323310/python-get-pointer-to-an-item-in-a-nested-dictionary-list-combination-based-on-a
+        insertPosition = dataDict
+        for k in path:
+            insertPosition = insertPosition[k]
+        return insertPosition
     
+    getPath(current, keyList).extend(new)
+
+    return current
+
+
 # receive selecte data from JS and send it back via events to the GET location below  
+selectedData = {}
 @socketio.on('send_selected_data', namespace=namespace)
 def send_selected_data(message):
-    print('have data')
+    global selectedData
+    print('have', message['pass'], message['keyList'], message['done'])
     try:
         e = events[message['room']]
-        e.send(message['data'])
+
+        # the first pass should be for the data structure
+        if (message['pass'] == 'structure'):
+            selectedData = message['data']
+            print('data structure = ', data)
+        
+        if (message['pass'] == 'data'):
+            try:
+                selectedData = compileData(selectedData, message['data'], message['keyList'])
+            except:
+                print('error compiling data', message['keyList'], message['done'])
+        if (message['done']):
+            e.send(selectedData)
     except:
         pass  
       

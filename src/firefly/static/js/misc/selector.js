@@ -54,13 +54,16 @@ function gatherSelectedData(){
 	// is there a way to do this without looping through every particle?
 	// this actually runs much more quickly than I anticipated (at least on our default sample data)
 	var selected  = {};
+    var structure = {};
 	viewerParams.partsKeys.forEach(function(p,i){
 		var j = 0;
 		
 		// create the arrays to hold the output
 		selected[p] = {};
+		structure[p] = {};
 		viewerParams.inputDataAttributes[p].forEach(function(key){
 			selected[p][key] = [];
+			structure[p][key] = [];
 		})
 
 		while (j < viewerParams.parts[p].Coordinates_flat.length){
@@ -85,25 +88,77 @@ function gatherSelectedData(){
 			if (key.includes('flat')) selected[p][key] = selected[p][key].flat();
 		})
 	})
-	console.log(selected);
+	console.log({'selected':selected, 'structure':structure});
 
-	return selected;
+	return {'selected':selected, 'structure':structure}
 }
 
-function downloadSelection(selected = null){
+function downloadSelection(selection = null){
 	// download the data that is physically inside the selector sphere
 	console.log('downloading selected data...');
-	if (!selected) selected = gatherSelectedData()
+	if (!selection) selection = gatherSelectedData()
 
-	downloadObjectAsJson(selected, 'Firefly_data_selection');
+	downloadObjectAsJson(selection.selected, 'Firefly_data_selection');
 }
 
-function sendSelectedData(selection = null){
+
+function sendSelectedData(selection = null, sizeLimit = 5e4){
+    // the sizeLimit is in bytes.  I am not sure what that limit should be.  
+    // It is not clear how this is propagated through sockets to flask, and there may also a timeout component that I am unclear about.
+    // but 5e4 bytes seems to work
+
 	console.log('sending selected data to flask...');
 	if (!selection) selection = gatherSelectedData();
+    var size = roughSizeOfObject(selection.selected);
+    console.log('size of object (bytes) = ', size);
 
 	// send to Flask
-	socketParams.socket.emit('send_selected_data', {'data':selection, 'room':socketParams.room});
+    // chunk the data into pieces to avoid cutting off the connection
+    var done = false;
+
+    // first send only the data structure, excluding any lists
+    socketParams.socket.emit('send_selected_data', {'data':selection.structure, 'room':socketParams.room, 'keyList':null, 'pass':'structure', 'done': done});
+
+
+    // set the list of times (doesn't appear to be a good way to do this inside the sendData loop below)
+    var times = [];
+    var totalCount = 0;
+    Object.keys(selection.selected).forEach(function(k1, i){
+        Object.keys(selection.selected[k1]).forEach(function(k2, j){
+            var data = selection.selected[k1][k2];
+            var size = roughSizeOfObject(data);
+            var nchunks = Math.ceil(size/sizeLimit);
+            for (let k = 0; k < nchunks; k += 1){
+                totalCount += 1;
+                times.push(50*totalCount);
+            }
+        })
+    })
+
+
+    // send the data to flask
+    var count = 0;
+    var keys1 = Object.keys(selection.selected); 
+    keys1.forEach(function(k1, i){
+        var keys2 = Object.keys(selection.selected[k1]); 
+        keys2.forEach(function(k2, j){
+            var data = selection.selected[k1][k2]; 
+            var size = roughSizeOfObject(data);
+            var nchunks = Math.ceil(size/sizeLimit);
+            for (let k = 0; k < nchunks; k+= 1){
+                setTimeout(function(){
+                    count += 1;
+                    console.log('count, size (bytes), keys = ', totalCount-count, size, [k1, k2]);
+                    if (count >= totalCount) done = true;
+                    socketParams.socket.emit('send_selected_data', {'data':data.slice(nchunks*k, nchunks*k + sizeLimit), 'room':socketParams.room, 'keyList':[k1, k2], 'pass':'data', 'done': done});
+                },times.shift())
+            }
+        })
+
+    })
+
+
+
 
 }
 

@@ -565,6 +565,6 @@ function createDataSelectorDistanceSlider(){
 	createSlider(slider, text, sliderArgs, varArgs, [null, 1]);
 
     //reformat
-    w = parseInt(d3.select("#DSRSlider").style("width").slice(0,-2));
-	d3.select("#DSRSlider").select('.noUi-base').style('width',w-10+"px");
+    w = parseInt(d3.select("#DSZSlider").style("width").slice(0,-2));
+	d3.select("#DSZSlider").select('.noUi-base').style('width',w-10+"px");
 }

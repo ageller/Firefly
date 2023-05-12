@@ -225,14 +225,14 @@ function createDataSelectorSegment(container, parent, name){
         .style('display','inline-block')
     segment.append('div')
         .attr('class','pLabelDiv')
-        .style('width','50px')
+        .style('width','62px')
         .style('display','inline-block')
         .text('Radius');
     segment.append('div')
         .attr('class','NSliderClass')
         .attr('id','DSRSlider')
-        .style('margin-left','6px')
-        .style('width',(GUIParams.containerWidth - 110) + 'px');
+        .style('margin-left','18px')
+        .style('width',(GUIParams.containerWidth - 122) + 'px');
     segment.append('input')
         .attr('class','NMaxTClass')
         .attr('id','DSRMaxT')
@@ -258,7 +258,7 @@ function createDataSelectorSegment(container, parent, name){
         .attr('class','NSliderClass')
         .attr('id','DSZSlider')
         .style('margin-left','18px')
-        .style('width',(GUIParams.containerWidth - 132) + 'px');
+        .style('width',(GUIParams.containerWidth - 122) + 'px');
     segment.append('input')
         .attr('class','NMaxTClass')
         .attr('id','DSZMaxT')

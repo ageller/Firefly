@@ -24,8 +24,11 @@ function defineSocketParams(){
 			transports: ["websocket"],
 			forceNew: true,
 			reconnection: true,
-			maxHttpBufferSize: 1e9, //1Gb
+			maxHttpBufferSize: 1e9, //1Gb, but I'm not sure this actually sets the limit
+            pingTimeout: 1e7,
 		});
+
+        // this.socket.io._timeout = 1e9;
 
 	}
 }
