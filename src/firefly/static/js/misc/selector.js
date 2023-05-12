@@ -106,6 +106,7 @@ function sendSelectedData(selection = null, sizeLimit = 5e4){
     // the sizeLimit is in bytes.  I am not sure what that limit should be.  
     // It is not clear how this is propagated through sockets to flask, and there may also a timeout component that I am unclear about.
     // but 5e4 bytes seems to work
+    viewerParams.selector.sendingData = true;
 
 	console.log('sending selected data to flask...');
 	if (!selection) selection = gatherSelectedData();
@@ -135,6 +136,9 @@ function sendSelectedData(selection = null, sizeLimit = 5e4){
         })
     })
 
+    // draw the loading bar
+    viewerParams.loadfrac = 0;
+    drawLoadingBar('ContentContainer', "z-index:3; position:absolute; bottom:15vh", 'Sending data to Python ...');
 
     // send the data to flask
     var count = 0;
@@ -148,9 +152,16 @@ function sendSelectedData(selection = null, sizeLimit = 5e4){
             for (let k = 0; k < nchunks; k+= 1){
                 setTimeout(function(){
                     count += 1;
-                    console.log('count, size (bytes), keys = ', totalCount-count, size, [k1, k2]);
+                    // console.log('count, size (bytes), keys = ', totalCount-count, size, [k1, k2]);
                     if (count >= totalCount) done = true;
                     socketParams.socket.emit('send_selected_data', {'data':data.slice(nchunks*k, nchunks*k + sizeLimit), 'room':socketParams.room, 'keyList':[k1, k2], 'pass':'data', 'done': done});
+                    // update the loading bar
+                    viewerParams.loadfrac = count/totalCount;
+                    updateLoadingBar();
+                    if (done){
+                        viewerParams.selector.sendingData = false;
+                        d3.select('#ContentContainer').selectAll('#loaderContainer').remove();
+                    }
                 },times.shift())
             }
         })

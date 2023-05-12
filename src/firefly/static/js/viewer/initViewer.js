@@ -1333,25 +1333,29 @@ function countParts(){
 }
 
 // callLoadData -> , connectViewerSocket ->
-function drawLoadingBar(){
+function drawLoadingBar(containerID = 'splashdivLoader', styles = '', textContent = null){
 	d3.select('#loadDataButton').style('display','none');
 	d3.select('#selectStartupButton').style('display','none');
 
 	var screenWidth = parseFloat(window.innerWidth);
 
 	//Make an SVG Container
-	var splash = d3.select("#splashdivLoader")
+    var parent = document.getElementById(containerID);
+    d3.select(parent).selectAll('#loaderContainer').remove();
+    var elem = document.createElement('div');
+    elem.style.cssText = 'width:100%;' + styles;
+    elem.id = 'loaderContainer';
+    parent.appendChild(elem);
 
-	splash.selectAll('svg').remove();
-
-	var svg = splash.append("svg")
+	var svg = d3.select(elem).append("svg")
+        .attr('id','loadingBar')
 		.attr("width", screenWidth)
 		.attr("height", viewerParams.loadingSizeY);
 
-	viewerParams.svgContainer = svg.append("g")
+	var svgContainer = svg.append("g")
 
 
-	viewerParams.svgContainer.append("rect")
+	svgContainer.append("rect")
 		.attr('id','loadingRectOutline')
 		.attr("x", (screenWidth - viewerParams.loadingSizeX)/2)
 		.attr("y", 0)
@@ -1361,7 +1365,7 @@ function drawLoadingBar(){
 		.attr('stroke','var(--logo-color1)')
 		.attr('stroke-width', '3')
 
-	viewerParams.svgContainer.append("rect")
+	svgContainer.append("rect")
 		.attr('id','loadingRect')
 		.attr("x", (screenWidth - viewerParams.loadingSizeX)/2)
 		.attr("y", 0)//(screenHeight - sizeY)/2)
@@ -1369,6 +1373,8 @@ function drawLoadingBar(){
 		.attr('fill','var(--logo-color1)')
 		.attr("width",viewerParams.loadingSizeX*viewerParams.loadfrac);
 
+    if (textContent) d3.select(elem).append('div').attr('class','loaderText').text(textContent);
+    
 
 	window.addEventListener('resize', moveLoadingBar);
 
@@ -1377,8 +1383,13 @@ function drawLoadingBar(){
 // drawLoadingBar ->
 function moveLoadingBar(){
 	var screenWidth = parseFloat(window.innerWidth);
-	d3.selectAll('#loadingRectOutline').attr('x', (screenWidth - viewerParams.loadingSizeX)/2);
-	d3.selectAll('#loadingRect').attr('x', (screenWidth - viewerParams.loadingSizeX)/2);
+    viewerParams.loadingSizeX = 0.9*screenWidth;
+	d3.selectAll('#loadingRectOutline')
+        .attr('width', viewerParams.loadingSizeX)
+        .attr('x', (screenWidth - viewerParams.loadingSizeX)/2);
+	d3.selectAll('#loadingRect')
+        .attr("width",viewerParams.loadingSizeX*viewerParams.loadfrac)
+        .attr('x', (screenWidth - viewerParams.loadingSizeX)/2);
 }
 
 // compileJSONData ->

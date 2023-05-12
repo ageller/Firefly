@@ -110,13 +110,14 @@ canvas{
 	padding-left: 50%;
 	margin-left:-20%;
 	width:40%;
+    margin-bottom:5vmin;
 }
 #splashdiv5 {
 	font-size:10px;
 	font-size:2vmin;
 	margin:0;
 	padding:0;
-	padding-top:15vmin;
+	padding-top:10vmin;
 }
 #splashdivLoader {
 	margin:0;
@@ -267,4 +268,13 @@ a:visited {
 }
 #flyExplainerHider:hover{
 	color: black;
+}
+.loaderText{
+    text-align:center;
+    color:white;
+	font-size:20px;
+	margin:0;
+	padding:0;
+	padding-top:10px;
+    width:100%
 }

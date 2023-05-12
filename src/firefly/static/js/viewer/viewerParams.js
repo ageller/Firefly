@@ -151,11 +151,10 @@ function defineViewerParams(){
 		//for the loading bar
 		var screenWidth = window.innerWidth;
 		var screenHeight = window.innerHeight;
-		this.loadingSizeX = screenWidth*0.5;
-		this.loadingSizeY = screenHeight*0.1;
+		this.loadingSizeX = screenWidth*0.9;
+		this.loadingSizeY = screenHeight*0.05;
 		this.loadfrac = 0.;
 		this.drawfrac = 0.;
-		this.svgContainer = null;
 
 		//the startup file
 		this.startup = "data/startup.json";
@@ -328,6 +327,7 @@ function defineViewerParams(){
 			this.radius = 10.;
             this.distance = 100.;
 			this.active = false;
+            this.sendingData = false;
 		}
 		this.inputDataAttributes = {};
 

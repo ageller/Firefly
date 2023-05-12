@@ -262,20 +262,25 @@ def get_settings():
     if (not room):
         room = default_room
 
+    waitTime = request.args.get('timeout')
+    if (not waitTime):
+        waitTime = 10 #seconds
+
     try:
         print('======= gettings settings data')
         
         # send a request to JS to return the settings
         socketio.emit('output_settings', {'data':None}, namespace=namespace, to=room)
 
-        # wait up to 10 seconds for the settings to come back
-        timeout = Timeout(10)
+        # wait for the settings to come back
+        timeout = Timeout(waitTime)
         try:
             e = events[room] = event.Event()
             resp = e.wait()
         except Timeout:
             print('!!!!!!!!!!!!!!! TIMEOUT')
-            abort(504)
+            return Response('Timeout.  Please increase the waitTime using the params keyword', status = 504)
+            # abort(504)
         finally:
             events.pop(room, None)
             timeout.cancel()
@@ -284,7 +289,7 @@ def get_settings():
 
     except:
         print('!!!!!!!!!!!!!!! ERROR')
-        return json.dumps({'result':'Error'})
+        return Response('Unknown error.  Please try again', status = 500)
     
 # receive settings from JS and send it back via events to the GET location below  
 @socketio.on('send_settings', namespace=namespace)
@@ -326,21 +331,26 @@ def get_selected_data():
     room = request.args.get('room')
     if (not room):
         room = default_room
+    
+    waitTime = request.args.get('waitTime')
+    if (not waitTime):
+        waitTime = 10 #seconds
 
     try:
-        print('======= gettings selected data')
+        print(f'======= gettings selected data, waiting {waitTime}s')
         
         # send a request to JS to return the settings
         socketio.emit('output_selected_data', {'data':None}, namespace=namespace, to=room)
 
-        # wait up to 10 seconds for the settings to come back
-        timeout = Timeout(60)
+        # wait for all the data to come back
+        timeout = Timeout(int(waitTime))
         try:
             e = events[room] = event.Event()
             resp = e.wait()
         except Timeout:
             print('!!!!!!!!!!!!!!! TIMEOUT')
-            abort(504)
+            return Response('Timeout.  Please increase the waitTime using the params keyword', status = 504)
+            # abort(504)
         finally:
             events.pop(room, None)
             timeout.cancel()
@@ -349,7 +359,7 @@ def get_selected_data():
 
     except:
         print('!!!!!!!!!!!!!!! ERROR')
-        return json.dumps({'result':'Error'})
+        return Response('Unknown error.  Please try again', status = 500)
 
 def compileData(current, new, keyList):
 

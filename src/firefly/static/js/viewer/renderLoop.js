@@ -627,7 +627,7 @@ function update_memory_usage(){
 
 function update_framerate(seconds,time){
 	// if we spent more than 1.5 seconds drawing the last frame, send the app to sleep
-	if ( viewerParams.sleepTimeout != null && (seconds-viewerParams.currentTime) > viewerParams.sleepTimeout){
+	if ( viewerParams.sleepTimeout != null && (seconds-viewerParams.currentTime) > viewerParams.sleepTimeout && (!viewerParams.selector.sendingData)){
 		console.log("Putting the app to sleep, taking too long!",(seconds-viewerParams.currentTime));
 		viewerParams.pauseAnimation=true;
 		showSleep();
