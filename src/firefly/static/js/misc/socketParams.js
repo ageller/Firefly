@@ -18,10 +18,15 @@ function defineSocketParams(){
 		// Connect to the Socket.IO server.
 		// The connection URL has the following format:
 		//     http[s]://<domain>:<port>[/<namespace>]
-		this.socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + this.namespace);//, {
-		// 	'reconnectionDelay': 10000,
-		// 	'reconnectionDelayMax': 20000,
-		// });
+		this.socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + this.namespace, 
+		{
+			rememberTransport: false,
+			transports: ["websocket"],
+			forceNew: true,
+			reconnection: true,
+			maxHttpBufferSize: 1e9, //1Gb, but I'm not sure this actually sets the limit
+            pingTimeout: 1e7,
+		});		
 
 	}
 }
