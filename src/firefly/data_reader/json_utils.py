@@ -1,5 +1,6 @@
 import pandas as pd
 import os
+import json
 
 def write_to_json(dictionary,path=None):
     """Simple utility function to write a dictionary to a path as :code:`.json` file.
@@ -25,7 +26,9 @@ def load_from_json(path):
     :return: dictionary
     :rtype: dict
     """
-    if os.path.isfile(path):
-        with open(path,'r') as handle:
-            dictionary=pd.io.json.loads(''.join(handle.readlines()))
+    if not os.path.isfile(path):
+        raise FileNotFoundError(path)
+
+    with open(path,'r') as handle:
+        dictionary = json.load(handle)
     return dictionary
