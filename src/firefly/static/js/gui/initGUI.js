@@ -22,13 +22,13 @@ function makeUI(local=false){
 			if (GUIParams.cameraNeedsUpdate) updateGUICamera();
 			createUI();
 		}
-		// attempt to fix the issue where the GUI and viewer don't connect to the socket
-		// this might result in some infinite loop of reloads...
-		if (GUIParams.GUItries > 5 && GUIparams.usingSocket){
-			console.log('ERROR IN CREATING GUI.  TRYING AGAIN.');
-			GUIParams.GUItries = 0;
-			location.reload();
-		}
+		// // attempt to fix the issue where the GUI and viewer don't connect to the socket
+		// // this might result in some infinite loop of reloads...
+		// if (GUIParams.GUItries > 5 && GUIParams.usingSocket){
+		// 	console.log('ERROR IN CREATING GUI.  TRYING AGAIN.');
+		// 	GUIParams.GUItries = 0;
+		// 	location.reload();
+		// }
 	}, 1000);
 
 
