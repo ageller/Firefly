@@ -12,6 +12,9 @@ varying float vColormapMag;
 varying float vAlpha;
 varying float vPointSize;
 varying vec4 vColor;
+varying float vInsideSelector;
+varying float vDistFromSelectorCenter;
+varying vec3 vSelectorCenter;
 
 varying vec2 vUv; //for the column density 
 
@@ -24,6 +27,9 @@ uniform float maxPointScale;
 uniform float uVertexScale; //from the GUI
 
 uniform float velTime;
+
+uniform vec3 selectorCenter;
+uniform float selectorRadius;
 
 const float PI = 3.1415926535897932384626433832795;
 // vectors are substantially smaller (b.c. they're built by discarding) so we need to scale them 
@@ -62,6 +68,16 @@ void main(void) {
 
 	gl_Position = projectionMatrix * mvPosition;
 
+	// check if point is inside the sphere selector
+	float distFromSelectorCenter = length(position.xyz - selectorCenter.xyz);
+	// float distFromSelectorCenter = length(position.xyz - vec3(20));
+	//float distFromSelectorCenter = length(position.xyz);
+	vDistFromSelectorCenter = distFromSelectorCenter;
+	vSelectorCenter = selectorCenter;
+	vInsideSelector = 0.;
+	if (distFromSelectorCenter <= selectorRadius) {
+		vInsideSelector = 1.;
+	}
 }
 
 `;

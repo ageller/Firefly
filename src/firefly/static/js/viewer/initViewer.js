@@ -11,7 +11,11 @@ function connectViewerSocket(){
 		// this happens when the server connects.
 		// all other functions below here are executed when the server emits to that name.
 		socketParams.socket.on('connect', function() {
+			console.log("sending connection from viewer")
 			socketParams.socket.emit('connection_test', {data: 'Viewer connected!'});
+		});
+		socketParams.socket.on('disconnect', function(message) {
+			console.log("viewer is disconnected", message)
 		});
 		// socketParams.socket.on('connection_response', function(msg) {
 		// 	console.log('connection response', msg);
@@ -47,7 +51,6 @@ function connectViewerSocket(){
 		});
 
 		socketParams.socket.on('input_data', function(msg) {
-			//only tested for local (GUI + viewer in one window)
 			console.log("======== have new data : ", Object.keys(msg));
 
 
@@ -87,6 +90,36 @@ function connectViewerSocket(){
 				}
 			}
 
+		});
+
+		socketParams.socket.on('output_settings', function(msg){
+			//only tested for combined endpoint
+			console.log("======== sending settings to server");
+			sendPreset();
+		});
+
+		socketParams.socket.on('input_settings', function(msg) {
+			//only tested for combined endpoint
+			console.log("======== have new settings : ", Object.keys(msg));
+			//for now, the user is required to pass the entire settings object (if we change that, this next line will probably break firefly)
+			viewerParams.parts.options = msg;
+			applyOptions();
+
+			// do something here to update the GUI.  For now I will just remake it!
+			var forGUIAppend = [];
+			// forGUIAppend.push({'setGUIParamByKey':[false,"collapseGUIAtStart"]});
+			forGUIAppend.push({'makeUI':viewerParams.local});
+			sendInitGUI(prepend=[], append=forGUIAppend)
+		});
+
+		socketParams.socket.on('output_selected_data', function(msg){
+			//only tested for combined endpoint
+            if (viewerParams.selector.active){
+			    console.log("======== sending selected data to server");
+			    sendSelectedData();
+            } else {
+                console.log("======== data selector not active")
+            }
 		});
 
 		socketParams.socket.on('update_streamer', function(msg) {
@@ -226,8 +259,22 @@ function callLoadData(args){
 	loadData(WebGLStart, prefix);
 }
 
+function getInputDataAttributes(){
+	// get the attributes that the user supplied with the data (before Firefly adds)
+	viewerParams.partsKeys.forEach(function(p){
+		viewerParams.inputDataAttributes[p] = [];
+		Object.keys(viewerParams.parts[p]).forEach(function(key){
+			if (!key.includes('Key')){
+				viewerParams.inputDataAttributes[p].push(key);
+			}
+		})
+	})
+	console.log('input data keys ... ', viewerParams.inputDataAttributes);
+}
+
 // launch the app control flow, >> ends in animate <<
 function WebGLStart(){
+	getInputDataAttributes();
 
 	//reset the window title
 	if (viewerParams.parts.hasOwnProperty('options')){
@@ -250,7 +297,9 @@ function WebGLStart(){
 	Promise.all([
 		createPartsMesh(),
 	]).then(function(){
-		
+
+        toggleDataSelector(viewerParams.selector.active);
+
 		//begin the animation
 		// keep track of runtime for crashing the app rather than the computer
 		var currentTime = new Date();
@@ -470,6 +519,9 @@ function initScene() {
 	// var canvas = d3.select('canvas').node();
 	// var gl = canvas.getContext('webgl');
 	// console.log(gl.getParameter(gl.ALIASED_POINT_SIZE_RANGE), gl.getParameter(gl.POINT_SMOOTH));
+
+	// selector (temporary)
+	createSelector();
 }
 
 // apply any settings from options file
@@ -553,14 +605,13 @@ function applyOptions(){
 	}
 
 	//check if we are starting in Stereo
-	if (options.hasOwnProperty('useStereo') && options.useStereo){
-		viewerParams.normalRenderer = viewerParams.renderer;
-		viewerParams.renderer = viewerParams.effect;
-		viewerParams.useStereo = true;
+	if (options.hasOwnProperty('useStereo')){
+		checkStereoLock(options.useStereo)
 		if (viewerParams.haveUI){
-			var evalString = 'elm = document.getElementById("StereoCheckBox"); elm.checked = true; elm.value = true;'
+			var evalString = 'elm = document.getElementById("StereoCheckBox"); elm.checked = ' + options.useStereo + '; elm.value = ' + options.useStereo + ';'
 			forGUI.push({'evalCommand':[evalString]})
-	} 	}
+		} 
+	} 
 
 	//modify the initial stereo separation
 	if (options.hasOwnProperty('stereoSep') && options.stereoSep != null){
@@ -1007,8 +1058,12 @@ function sendInitGUI(prepend=[], append=[]){
 		forGUI.push(x);
 	})
 
-	forGUI.push({'setGUIParamByKey':[true,"GUIready"]});
+    // for the data selector
+    forGUI.push({'setGUIParamByKey':[viewerParams.selector.active,"selector","active"]});
+    forGUI.push({'setGUIParamByKey':[viewerParams.selector.radius,"selector","radius"]});
+    forGUI.push({'setGUIParamByKey':[viewerParams.selector.distance,"selector","distance"]});
 
+	forGUI.push({'setGUIParamByKey':[true,"GUIready"]});
 
 	//forGUI.forEach(function (value){console.log(value.setGUIParamByKey)});
 	sendToGUI(forGUI);
@@ -1283,25 +1338,29 @@ function countParts(){
 }
 
 // callLoadData -> , connectViewerSocket ->
-function drawLoadingBar(){
+function drawLoadingBar(containerID = 'splashdivLoader', styles = '', textContent = null){
 	d3.select('#loadDataButton').style('display','none');
 	d3.select('#selectStartupButton').style('display','none');
 
 	var screenWidth = parseFloat(window.innerWidth);
 
 	//Make an SVG Container
-	var splash = d3.select("#splashdivLoader")
+    var parent = document.getElementById(containerID);
+    d3.select(parent).selectAll('#loaderContainer').remove();
+    var elem = document.createElement('div');
+    elem.style.cssText = 'width:100%;' + styles;
+    elem.id = 'loaderContainer';
+    parent.appendChild(elem);
 
-	splash.selectAll('svg').remove();
-
-	var svg = splash.append("svg")
+	var svg = d3.select(elem).append("svg")
+        .attr('id','loadingBar')
 		.attr("width", screenWidth)
 		.attr("height", viewerParams.loadingSizeY);
 
-	viewerParams.svgContainer = svg.append("g")
+	var svgContainer = svg.append("g")
 
 
-	viewerParams.svgContainer.append("rect")
+	svgContainer.append("rect")
 		.attr('id','loadingRectOutline')
 		.attr("x", (screenWidth - viewerParams.loadingSizeX)/2)
 		.attr("y", 0)
@@ -1311,7 +1370,7 @@ function drawLoadingBar(){
 		.attr('stroke','var(--logo-color1)')
 		.attr('stroke-width', '3')
 
-	viewerParams.svgContainer.append("rect")
+	svgContainer.append("rect")
 		.attr('id','loadingRect')
 		.attr("x", (screenWidth - viewerParams.loadingSizeX)/2)
 		.attr("y", 0)//(screenHeight - sizeY)/2)
@@ -1319,6 +1378,8 @@ function drawLoadingBar(){
 		.attr('fill','var(--logo-color1)')
 		.attr("width",viewerParams.loadingSizeX*viewerParams.loadfrac);
 
+    if (textContent) d3.select(elem).append('div').attr('class','loaderText').text(textContent);
+    
 
 	window.addEventListener('resize', moveLoadingBar);
 
@@ -1327,8 +1388,13 @@ function drawLoadingBar(){
 // drawLoadingBar ->
 function moveLoadingBar(){
 	var screenWidth = parseFloat(window.innerWidth);
-	d3.selectAll('#loadingRectOutline').attr('x', (screenWidth - viewerParams.loadingSizeX)/2);
-	d3.selectAll('#loadingRect').attr('x', (screenWidth - viewerParams.loadingSizeX)/2);
+    viewerParams.loadingSizeX = 0.9*screenWidth;
+	d3.selectAll('#loadingRectOutline')
+        .attr('width', viewerParams.loadingSizeX)
+        .attr('x', (screenWidth - viewerParams.loadingSizeX)/2);
+	d3.selectAll('#loadingRect')
+        .attr("width",viewerParams.loadingSizeX*viewerParams.loadfrac)
+        .attr('x', (screenWidth - viewerParams.loadingSizeX)/2);
 }
 
 // compileJSONData ->

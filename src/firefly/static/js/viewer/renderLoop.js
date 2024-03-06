@@ -20,7 +20,7 @@ function animate(time) {
 
 		// get the memory usage
 		update_memory_usage();
-
+		
 		if (viewerParams.initialize_time){
 			//console.log(seconds-viewerParams.initialize_time + ' seconds to initialize');
 			//console.log(viewerParams.memoryUsage/1e9 + ' GB allocated');
@@ -116,7 +116,10 @@ function update(time){
 			initControls(false);
 		}
 
+		if (viewerParams.selector.active) updateSelector()
+
 	}
+
 }
 
 function update_keypress(time){
@@ -624,7 +627,7 @@ function update_memory_usage(){
 
 function update_framerate(seconds,time){
 	// if we spent more than 1.5 seconds drawing the last frame, send the app to sleep
-	if ( viewerParams.sleepTimeout != null && (seconds-viewerParams.currentTime) > viewerParams.sleepTimeout){
+	if ( viewerParams.sleepTimeout != null && (seconds-viewerParams.currentTime) > viewerParams.sleepTimeout && (!viewerParams.selector.sendingData)){
 		console.log("Putting the app to sleep, taking too long!",(seconds-viewerParams.currentTime));
 		viewerParams.pauseAnimation=true;
 		showSleep();
@@ -640,7 +643,7 @@ function update_framerate(seconds,time){
 	//  and put in a weirdly high value (like >100 fps) that biases the mean high
 	viewerParams.FPS = viewerParams.fps_list.slice().sort(function(a, b){return a-b})[15]
 
-	if ((viewerParams.drawPass % Math.min(Math.round(viewerParams.FPS),60)) == 0){
+	if ((viewerParams.drawPass % Math.min(Math.round(viewerParams.FPS),60)) == 0 && viewerParams.haveUI){
 		// only send this if the parameters have changed (to avoid clogging the socket)
 		if (Math.abs(viewerParams.FPS - viewerParams.FPS0) > 0.1 || Math.abs(viewerParams.memoryUsage - viewerParams.memoryUsage0) > 1e7){
 			viewerParams.FPS0 = viewerParams.FPS;

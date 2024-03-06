@@ -565,19 +565,30 @@ function createPreset(){
 	preset.startTween = copyValue(viewerParams.updateTween);
 
 	preset.loaded = true;
+
 	return preset;
 }
 
-function savePreset(){
-	var preset = createPreset();
+function savePresetViewer(){
+	preset = creatPreset();
 
 	//https://stackoverflow.com/questions/33780271/export-a-json-object-to-a-text-file
-	var str = JSON.stringify(preset)
+	var str = JSON.stringify(GUIparams.preset)
 	//Save the file contents as a DataURI
 	var dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(str);
 
 	saveFile(dataUri,'preset.json');
 
+	// send to Flask
+	if (viewerParams.usingSocket) sendPreset(preset);
+}
+
+function sendPreset(preset = null){
+
+	if (!preset) preset = createPreset();
+
+	// send to Flask
+	socketParams.socket.emit('send_settings', {'settings':preset, 'room':socketParams.room});
 }
 
 function updateFriction(value){
@@ -666,6 +677,31 @@ function setCmapReversed(args){
 	var p = args[0];
 	var checked = args[1];
 	
-	viewerParams.colormapReversed[p] = checked;
-	if (viewerParams.showColormap[p]) populateColormapImage(p, checked)
+	if (ckey) {
+		viewerParams.colormapReversed[p][ckey] = checked;
+	} else {
+		viewerParams.colormapReversed[p] = checked;
+	}
+	if (viewerParams.showColormap[p]) populateColormapAxis(p, checked)
+
+	//console.log('reversing particle colormap', args);
+}
+
+
+function toggleDataSelector(value){
+    //turn the data selector sphere on/off
+    viewerParams.selector.active = value;
+    viewerParams.selector.object3D.visible = value;
+
+    // turn off the selection in the shader by setting the radius to zero
+    if (!value){
+        viewerParams.selector.object3D.scale.set(0,0,0);
+        viewerParams.partsKeys.forEach(function(p,i){
+            viewerParams.partsMesh[p].forEach(function(m, j){
+                m.material.uniforms.selectorRadius.value = 0.;
+            })
+        })
+    }
+
+    // console.log('data selector ', viewerParams.selector.active);
 }

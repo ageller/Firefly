@@ -103,6 +103,8 @@ function createParticleMaterial(p, color=null,minPointScale=null,maxPointScale=n
 			velVectorWidth: {value: viewerParams.velVectorWidth[p]},
 			velGradient: {value: viewerParams.velGradient[p]},
 			useDepth: {value: +viewerParams.depthTest[p]},
+			selectorCenter: {value: [viewerParams.selector.center.x, viewerParams.selector.center.y, viewerParams.selector.center.z]},
+			selectorRadius: {value: viewerParams.selector.radius}
 
 		},
 

@@ -1,3 +1,10 @@
+# to run locally for development
+# Note: if you have installed the pypi version of firefly previously, you must uninstall it first 
+#   (and/or create a new conda env)
+# $ pip install -e .
+# $ firefly --method="flask" --directory="/foo/bar/Firefly/src/firefly"
+
+
 import os
 import sys
 import json
@@ -11,8 +18,11 @@ import socketserver
 
 import numpy as np
 
-from flask import Flask, render_template, request, session, current_app
+from flask import Flask, Response, abort, render_template, request, session, current_app
 from flask_socketio import SocketIO, emit, join_room, leave_room
+
+from eventlet import event
+from eventlet.timeout import Timeout
 
 from firefly.data_reader import SimpleReader
 
@@ -30,15 +40,11 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app, async_mode=async_mode)
 
-
 namespace = '/Firefly'
 
 default_room = 'default_Firefly_AMG_ABG'
 
 rooms = {} #will be updated below
-
-#number of seconds between updates
-seconds = 0.01
 
 #for the stream
 fps = 30
@@ -48,6 +54,10 @@ dec = 1
 
 #check if the GUI is separated to see if we need to send a reload signal (currently not used)
 GUIseparated = False
+
+events = {}
+
+
 
 ####### setting the room (to keep each session distinct)
 @socketio.on('join', namespace=namespace)
@@ -77,7 +87,7 @@ def disconnect():
 # will fire when user connects
 @socketio.on('connect', namespace=namespace)
 def connect():
-    # if there is a room defined, emit that.  If there is no room defined, then the client will be prompted to enter one before joining
+    print("======= socket connected")
     emit('room_check',{'room': default_room}, namespace=namespace)
 
 
@@ -90,14 +100,14 @@ def connection_test(message):
 
 
 ######for viewer
-#will receive data from viewer 
+#will receive data for viewer 
 @socketio.on('viewer_input', namespace=namespace)
 def viewer_input(message):
     if (request.sid in rooms):
         socketio.emit('update_viewerParams', message, namespace=namespace, to=rooms[request.sid])
 
 #######for GUI
-#will receive data from gui
+#will receive data for gui
 @socketio.on('gui_input', namespace=namespace)
 def gui_input(message):
     if (request.sid in rooms):
@@ -241,6 +251,154 @@ def stream_input():
 
     return 'Done'
 
+@app.route('/get_settings', methods = ['GET'])
+def get_settings():
+    global events
+    events = {}
+    print('======= received request for settings from user')
+
+    # I have not tested to make sure this works with passing a room
+    room = request.args.get('room')
+    if (not room):
+        room = default_room
+
+    waitTime = request.args.get('timeout')
+    if (not waitTime):
+        waitTime = 10 #seconds
+
+    try:
+        print('======= gettings settings data')
+        
+        # send a request to JS to return the settings
+        socketio.emit('output_settings', {'data':None}, namespace=namespace, to=room)
+
+        # wait for the settings to come back
+        timeout = Timeout(waitTime)
+        try:
+            e = events[room] = event.Event()
+            resp = e.wait()
+        except Timeout:
+            print('!!!!!!!!!!!!!!! TIMEOUT')
+            return Response('Timeout.  Please increase the waitTime using the params keyword', status = 504)
+            # abort(504)
+        finally:
+            events.pop(room, None)
+            timeout.cancel()
+
+        return json.dumps(resp)
+
+    except:
+        print('!!!!!!!!!!!!!!! ERROR')
+        return Response('Unknown error.  Please try again', status = 500)
+    
+# receive settings from JS and send it back via events to the GET location below  
+@socketio.on('send_settings', namespace=namespace)
+def send_settings(message):
+    try:
+        e = events[message['room']]
+        e.send(message['settings'])
+    except:
+        pass
+
+
+@app.route('/post_settings', methods = ['POST'])
+def post_settings():
+    print('======= received settings from server ...')
+    jsondata = request.get_json()
+    data = json.loads(jsondata)
+    settings = data['settings']
+
+    if ('room' in data):
+        room = data['room']
+    else:
+        room = default_room
+
+    if (room):
+        socketio.emit('input_settings', settings, namespace=namespace, to=room)
+        print('======= done')
+        return 'Done'
+    else:
+        print('User must specify a name for the websocket "room" connected to an active firefly instance.')
+        return 'Error'
+
+@app.route('/get_selected_data', methods = ['GET'])
+def get_selected_data():
+    global events
+    events = {}
+    print('======= received request for selected data from user')
+
+    # I have not tested to make sure this works with passing a room
+    room = request.args.get('room')
+    if (not room):
+        room = default_room
+    
+    waitTime = request.args.get('waitTime')
+    if (not waitTime):
+        waitTime = 10 #seconds
+
+    try:
+        print(f'======= gettings selected data, waiting {waitTime}s')
+        
+        # send a request to JS to return the settings
+        socketio.emit('output_selected_data', {'data':None}, namespace=namespace, to=room)
+
+        # wait for all the data to come back
+        timeout = Timeout(int(waitTime))
+        try:
+            e = events[room] = event.Event()
+            resp = e.wait()
+        except Timeout:
+            print('!!!!!!!!!!!!!!! TIMEOUT')
+            return Response('Timeout.  Please increase the waitTime using the params keyword', status = 504)
+            # abort(504)
+        finally:
+            events.pop(room, None)
+            timeout.cancel()
+
+        return json.dumps(resp)
+
+    except:
+        print('!!!!!!!!!!!!!!! ERROR')
+        return Response('Unknown error.  Please try again', status = 500)
+
+def compileData(current, new, keyList):
+
+    def getPath(dataDict, path):
+        # https://stackoverflow.com/questions/59323310/python-get-pointer-to-an-item-in-a-nested-dictionary-list-combination-based-on-a
+        insertPosition = dataDict
+        for k in path:
+            insertPosition = insertPosition[k]
+        return insertPosition
+    
+    getPath(current, keyList).extend(new)
+
+    return current
+
+
+# receive selecte data from JS and send it back via events to the GET location below  
+selectedData = {}
+@socketio.on('send_selected_data', namespace=namespace)
+def send_selected_data(message):
+    global selectedData
+    # print('have', message['pass'], message['keyList'], message['done'])
+    try:
+        e = events[message['room']]
+
+        # the first pass should be for the data structure
+        if (message['pass'] == 'structure'):
+            selectedData = message['data']
+            # print('data structure = ', data)
+        
+        if (message['pass'] == 'data'):
+            try:
+                selectedData = compileData(selectedData, message['data'], message['keyList'])
+            except:
+                print('error compiling data', message['keyList'], message['done'])
+        if (message['done']):
+            e.send(selectedData)
+    except:
+        pass  
+      
 def reload():
     #currently not used
     if (GUIseparated):
@@ -274,9 +432,10 @@ def startFlaskServer(
     """
 
     global default_room
-    if (multiple_rooms): default_room = None
 
+    if (multiple_rooms): default_room = None
     if (directory is None or directory == "None"): directory = os.path.dirname(__file__)
+
     old_dir = os.getcwd()
     try:
         print(f"Launching Firefly at: http://localhost:{port}")
@@ -292,7 +451,7 @@ def startFlaskServer(
         fps = frames_per_second
         dec = decimation_factor
 
-        socketio.run(app, host='0.0.0.0', port=port)#, use_reloader=True)
+        socketio.run(app, host='0.0.0.0', port=port, use_reloader=True)
     except: raise
     finally: os.chdir(old_dir)
 
@@ -349,6 +508,7 @@ def spawnFireflyServer(
         a string to define the room for the given session (which would allow multiple users to interact with 
         separate Firefly instances on a server), defaults to False.
     :type multiple_rooms: bool, optional
+
     :return: subprocess.Popen
     :rtype: subprocess handler
     :raises RuntimeError: if max_time elapses without a successful Firefly server being initialized.

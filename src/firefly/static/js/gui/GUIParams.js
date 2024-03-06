@@ -187,6 +187,12 @@ function defineGUIParams(){
 		this.VideoCapture_format = 0; // index of format
 		this.VideoCapture_formats = ['.gif','.png','.jpg']//,'.webm'] // webm doesn't seem to be working :\
 		
+        // I could change this to match how this is defined in viewerParams...
+        this.selector = new function() {
+			this.radius = 10.;
+            this.distance = 100.;
+			this.active = false;
+		}
 
 		this.GUIState_variables = [
 			'built','current','id','name','builder','parent','children','url','button','segments','d3Element'
@@ -222,6 +228,10 @@ function defineGUIParams(){
 						'loadNewData':{
 							'id':'loadNewData',
 							'builder':createLoadNewDataSegment
+						},
+                        'dataSelector':{
+							'id':'dataSelector',
+							'builder':createDataSelectorSegment
 						}
 					},
 					'camera':{

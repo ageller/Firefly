@@ -74,7 +74,7 @@ def define_parser():
     parser.add_argument('--copy_source', action='store_true',
         help = 'Flag to tell the ``firefly`` command to copy the source files for Firefly into the directory specified by ``directory``. (If this flag is not supplied, the default behavior is to set copy_source=False).')
     parser.add_argument('--multiple_rooms', action='store_true',
-        help = 'flag to enable multiple rooms.  If set, the user will be prompted in the browser to enter a string to define the room for the given session, which would allow multiple users to interact with separate Firefly instances on a server. (if this flag is not supplied, the default behavior is to set multiple_rooms=False) ')    
+        help = 'flag to enable multiple rooms.  If set, the user will be prompted in the browser to enter a string to define the room for the given session, which would allow multiple users to interact with separate Firefly instances on a server. (If this flag is not supplied, the default behavior is to set multiple_rooms=False) ')     
 
     return parser
 
