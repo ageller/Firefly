@@ -1052,13 +1052,12 @@ function sendInitGUI(prepend=[], append=[]){
 		forGUI.push(x);
 	})
 
-	forGUI.push({'setGUIParamByKey':[true,"GUIready"]});
-
     // for the data selector
     forGUI.push({'setGUIParamByKey':[viewerParams.selector.active,"selector","active"]});
     forGUI.push({'setGUIParamByKey':[viewerParams.selector.radius,"selector","radius"]});
     forGUI.push({'setGUIParamByKey':[viewerParams.selector.distance,"selector","distance"]});
 
+	forGUI.push({'setGUIParamByKey':[true,"GUIready"]});
 
 	//forGUI.forEach(function (value){console.log(value.setGUIParamByKey)});
 	sendToGUI(forGUI);
