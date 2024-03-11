@@ -8,13 +8,13 @@
 
 
 Firefly is an interactive viewer for any particle-based data. A live example is available [here](https://ageller.github.io/Firefly/)
-or if you're ready to get started creating your own interactive viewer, [click here](http://www.firefly-viz.com/docs/data_reader).
+or if you're ready to get started creating your own interactive viewer, [click here](https://firefly.rcs.northwestern.edu/docs/data_reader).
 
 If you use Firefly, please cite our [ApJS paper](https://ui.adsabs.harvard.edu/abs/2023ApJS..265...38G/abstract) and our [entry in the Astrophysics Source Code Library (ASCL)](http://adsabs.harvard.edu/abs/2018ascl.soft10021G).
 
 ## Additional Docs
 
-Comprehensive documentation is available [here](http://www.firefly-viz.com/docs).
+Comprehensive documentation is available [here](https://firefly.rcs.northwestern.edu/docs).
 
 ## Contributors 
 ### Primary Developers

@@ -11,7 +11,7 @@ setuptools.setup(
     description="A browser-based particle visualization platform",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="http://www.firefly-viz.com/",
+    url="https://firefly.rcs.northwestern.edu/",
     project_urls={
         "Bug Tracker": "https://github.com/ageller/Firefly/issues",
     },
