@@ -16,7 +16,7 @@ If you use Firefly, please cite our [ApJS paper](https://ui.adsabs.harvard.edu/a
 
 Comprehensive documentation is available [here](https://firefly.rcs.northwestern.edu/docs).
 
-*Note: currently Firefly requires numpy versions<2.0.* 
+*Note: currently Firefly requires numpy version<2.0.  This may not be the default version of numpy installed via `pip install firefly`.* 
 
 ## Contributors 
 ### Primary Developers
