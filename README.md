@@ -16,6 +16,8 @@ If you use Firefly, please cite our [ApJS paper](https://ui.adsabs.harvard.edu/a
 
 Comprehensive documentation is available [here](https://firefly.rcs.northwestern.edu/docs).
 
+*Note: currently Firefly requires numpy versions<2.0.* 
+
 ## Contributors 
 ### Primary Developers
 * Aaron Geller
