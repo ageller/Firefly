@@ -21,6 +21,9 @@ function defineSocketParams(){
 
 		this.socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port + this.namespace, 
 		{
+			query: {
+				nocache: Date.now()  // Add a unique query parameter to bypass caching
+			},
 			rememberTransport: false,
 			transports: ["websocket"],
 			forceNew: true,
