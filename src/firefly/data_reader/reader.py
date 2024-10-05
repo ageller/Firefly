@@ -7,6 +7,11 @@ import requests
 import numpy as np
 import time
 
+## numpy 1.X
+try: AxisError = np.AxisError
+## numpy 2.X
+except: from numpy.exceptions import AxisError
+
 from .settings import Settings,default_settings
 from .tween import TweenParams
 from .particlegroup import ParticleGroup
@@ -720,11 +725,11 @@ class ArrayReader(Reader):
         :type write_to_disk: bool, optional
         :param loud: flag to print status information to the console, defaults to False
         :type loud: bool, optional
-        :raises np.AxisError: if the coordinate data cannot be interpreted
+        :raises AxisError: if the coordinate data cannot be interpreted
         :raises ValueError: if the number of particle groups does not match the number of
             coordinate arrays
-        :raises np.AxisError: if the field data cannot be interpreted
-        :raises np.AxisError: if the field names cannot be interpreted
+        :raises AxisError: if the field data cannot be interpreted
+        :raises AxisError: if the field names cannot be interpreted
         """
 
         super().__init__(**kwargs)
@@ -740,14 +745,14 @@ class ArrayReader(Reader):
             ## passed a jagged array of different coordinates
             pass
         else:
-            raise np.AxisError("Uninterpretable coordinate array, either pass a single (N,3) array"+ 
+            raise AxisError("Uninterpretable coordinate array, either pass a single (N,3) array"+ 
                 " or a jagged list of 'shape' (M,N_m,3)")
 
         ngroups = len(coordinates)
         npartss = np.array([len(coords) for coords in coordinates])
         
         ## check fields and wrap a single field for a single particle group
-        fielderror = np.AxisError("Uninterpretable field array, either pass a single N array"
+        fielderror = AxisError("Uninterpretable field array, either pass a single N array"
                         " or a jagged list of 'shape' (M,N_fm,N_pm)")
         if fields is not None:
             ## special case and want to allow convenient/inconsistent syntax,
@@ -784,7 +789,7 @@ class ArrayReader(Reader):
             nfieldss = [len(this_fields) for this_fields in fields]
 
         ## check field names and generate them if necessary
-        fieldnameerror = np.AxisError("Uninterpretable field array, either pass a single N array"+
+        fieldnameerror = AxisError("Uninterpretable field array, either pass a single N array"+
             " or a jagged list of 'shape' (M,N_fm,N_pm)")
 
         if field_names is not None: 
@@ -1006,7 +1011,7 @@ class SimpleReader(ArrayReader):
         :param coordinates: existing coordinate array that should be appended to, defaults to None
         :type coordinates: np.ndarray, optional
         :raises TypeError: if :code:`coordinates` is not of type :code:`np.ndarray`
-        :raises np.AxisError: if :code:`coordinates` does not have shape (N,3)
+        :raises AxisError: if :code:`coordinates` does not have shape (N,3)
         :return: coordinates, the opened coordinate array from :code:`fname`
         :rtype: np.ndarray
         """
@@ -1018,7 +1023,7 @@ class SimpleReader(ArrayReader):
             elif type(coordinates)!= np.ndarray:
                 raise TypeError("Existing coordinate array must be of type np.ndarry")
             if np.shape(coordinates)[-1] != 3:
-                raise np.AxisError("Last axis of existing coordinate array must be of size 3")
+                raise AxisError("Last axis of existing coordinate array must be of size 3")
 
             ## open the hdf5 group
             if particle_group is not None:
