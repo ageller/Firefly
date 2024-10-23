@@ -568,7 +568,7 @@ def quitAllFireflyServers(pid=None):
     print("Server output:")
     print("--------------")
     ## quit indiscriminately
-    if pid is None: return_code = os.system("ps aux | grep 'run_server.py' | awk '{print $2}' | xargs kill")
+    if pid is None: return_code = os.system("ps aux | grep firefly | grep port | awk '{print $2}' | xargs kill")
     ## quit only the pid we were passed, ideally from the subprocess.Popen().pid but
     ##  you know I don't judge.  
     else: return_code = os.kill(pid,signal.SIGINT)
