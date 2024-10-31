@@ -56,7 +56,9 @@ function loadNewData(){
 	viewerParams.controls.dispose();
 
 	// reset to default options
-	defineViewerParams()
+	var localSave = viewerParams.local;
+	defineViewerParams();
+	viewerParams.local = localSave;
 	// rebuild the viewer with new options
 	makeViewer();
 	//if (viewerParams.local) makeUI(local=true);

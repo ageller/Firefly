@@ -31,7 +31,6 @@ function makeUI(local=false){
 		// }
 	}, 1000);
 
-
 	// check that all the expected DOM elements exist in the GUI
 	GUIParams.waitForBuild = setInterval(function(){
 		var ready = confirmGUIBuild(GUIParams.GUIState);
@@ -256,54 +255,165 @@ function selectFromStartup(prefix=""){
 /////////////////////
 //this is an input file that will fire if there is no startup.json in the data directory
 d3.select('#loadDataButton').on('click', function(){
-	document.getElementById("inputFilenames").click();
+	// document.getElementById("inputFilenames").click();
+	showFilepathModal();
+});
+
+// Create a modal overlay that will hold the input box and button
+d3.select("body")
+	.append("div")
+	.attr("id", "filepath-modal-overlay")
+	.style("position", "fixed")
+	.style("top", "0")
+	.style("left", "0")
+	.style("width", "100%")
+	.style("height", "100%")
+	.style("background-color", "rgba(0, 0, 0, 0.5)")
+	.style("display", "flex")
+	.style("align-items", "center")
+	.style("justify-content", "center")
+	.style("z-index", "1000")
+	.style("visibility", "hidden");  // Hide initially
+
+// Create a container for the input and button with a modal-like appearance
+const filepathModal = d3.select("#filepath-modal-overlay")
+	.append("div")
+	.attr("id", "filepath-modal-content")
+	.style("background-color", "#555555")
+	.style("padding", "20px")
+	.style("border-radius", "8px")
+	.style("box-shadow", "0px 4px 8px rgba(0, 0, 0, 0.2)")
+	.style("text-align", "center")
+	.style("max-width", "300px")
+	.style("width", "80%");
+
+// Append a text input field
+filepathModal.append("input")
+  .attr("type", "text")
+  .attr("id", "filepath-user-input")
+  .attr("placeholder", "Enter the path to your data directory")
+  .style("margin-bottom", "10px")
+  .style("width", "100%")
+  .style("padding", "8px")
+  .style("box-sizing", "border-box");
+
+// Append a dropdown to select the file type
+filetypeDropdown = filepathModal.append("select")
+  .attr("id", "filetype-dropdown-menu")
+  .style("margin-bottom", "10px")
+  .style("width", "100%")
+  .style("padding", "8px")
+  .style("box-sizing", "border-box")
+
+  // Add the placeholder option
+filetypeDropdown.append("option")
+  .attr("value", "")
+  .attr("disabled", true)
+  .attr("selected", true)
+  .text("Select the file type");
+
+  filetypeDropdown.selectAll("option.options")
+  .data(["Firefly json", "hdf5", "csv"]).enter()
+	.append("option")
+	.text(d => d);
+
+// Append a submit button
+filepathModal.append("button")
+  .attr("id", "filepath-submit-button")
+  .attr("class", "button")
+  .text("Submit")
+  .style("padding", "8px 16px")
+  .style("margin-top", "10px");
+
+// Show the modal
+function showFilepathModal() {
+  d3.select("#filepath-modal-overlay").style("visibility", "visible");
+}
+
+// Hide the modal
+function hideFilepathModal() {
+  d3.select("#filepath-modal-overlay").style("visibility", "hidden");
+}
+
+// Add event listener for the button
+d3.select("#filepath-submit-button").on("click", function () {
+	// Hide the modal after submitting
+	hideFilepathModal();
+	
+	// Get the value from the input field
+	const filepath = d3.select("#filepath-user-input").property("value");
+	const filetype = d3.select("#filetype-dropdown-menu").property("value");
+	console.log("User filepath:", filepath);
+	console.log("data type:", filetype);
+
+	if (filepath == "" | filetype == "Select the file type"){
+		alert("Cannot load data. Please try again.");
+	}
+
+	// process the data as needed
+	if (filetype == "Firefly json"){
+		var f = filepath + '/filenames.json';
+		d3.json(f,  function(files) {
+			if (files != null){
+				console.log('==loading data', files, prefix)
+				sendToViewer([{'callLoadData':[files, prefix]}])
+			} else {
+				alert("Cannot load data. Please try again.");
+			}
+		});
+	}
+	if (filetype == 'hdf5' || filetype == 'csv'){
+		socketParams.socket.emit('input_otherType', filepath);
+	}
+
+
 });
 
 
-d3.select('body').append('input')
-	.attr('type','file')
-	.attr('id','inputFilenames')
-	.attr('webkitdirectory', true)
-	.attr('directory', true)
-	.attr('mozdirectory', true)
-	.attr('msdirectory', true)
-	.attr('odirectory', true)
-	.attr('multiple', true)
-	.on('change', function(e){
-		var foundFile = false;
-		// search for a filenames.json, if one exists then use it
-		for (i=0; i<this.files.length; i++){
-			if (this.files[i].name == "filenames.json" && !foundFile){
-				foundFile = true;
-				var file = this.files[i];
-				var reader = new FileReader();
-				reader.readAsText(file, 'UTF-8');
-				reader.onload = function(){
-					var foo = JSON.parse(this.result);
-					if (foo != null){
-						return sendToViewer([{'callLoadData':[foo, 'static/']}])
-					} else {
-						alert("Cannot load data. Please select another directory.");
-					}
-				}
-			}
-		}
-		// okay, no filenames.json, but maybe there are just csv or hdf5 files then? 
-		// NOTE: we don't need to support just .ffly files because those would only exist if 
-		// they had used a reader which would've made a filenames.json file. just JSON files
-		//  would be weird but they can do that with filenames.json so yeah they should make 1 more .json 
-		for (i=0; i<this.files.length; i++){
-			if ((this.files[i].name.includes('.hdf5') || this.files[i].name.includes('.csv')) && !foundFile){
-				if (GUIParams.usingSocket){
-					foundFile = true;
-					var dir = this.files[i].webkitRelativePath.replace(this.files[i].name,'');
-					console.log('have hdf5 or csv file', dir);
-					socketParams.socket.emit('input_otherType', dir);
-				}
-			}
-		}
-		if (i == this.files.length && !foundFile){
-			alert("Cannot load data. Please select another directory.");
-		}
-	})
-	.style('display','None');
+// d3.select('body').append('input')
+// 	.attr('type','file')
+// 	.attr('id','inputFilenames')
+// 	.attr('webkitdirectory', true)
+// 	.attr('directory', true)
+// 	.attr('mozdirectory', true)
+// 	.attr('msdirectory', true)
+// 	.attr('odirectory', true)
+// 	.attr('multiple', true)
+// 	.on('change', function(e){
+// 		var foundFile = false;
+// 		// search for a filenames.json, if one exists then use it
+// 		for (i=0; i<this.files.length; i++){
+// 			if (this.files[i].name == "filenames.json" && !foundFile){
+// 				foundFile = true;
+// 				var file = this.files[i];
+// 				var reader = new FileReader();
+// 				reader.readAsText(file, 'UTF-8');
+// 				reader.onload = function(){
+// 					var foo = JSON.parse(this.result);
+// 					if (foo != null){
+// 						return sendToViewer([{'callLoadData':[foo, 'static/']}])
+// 					} else {
+// 						alert("Cannot load data. Please select another directory.");
+// 					}
+// 				}
+// 			}
+// 		}
+// 		// okay, no filenames.json, but maybe there are just csv or hdf5 files then? 
+// 		// NOTE: we don't need to support just .ffly files because those would only exist if 
+// 		// they had used a reader which would've made a filenames.json file. just JSON files
+// 		//  would be weird but they can do that with filenames.json so yeah they should make 1 more .json 
+// 		for (i=0; i<this.files.length; i++){
+// 			if ((this.files[i].name.includes('.hdf5') || this.files[i].name.includes('.csv')) && !foundFile){
+// 				if (GUIParams.usingSocket){
+// 					foundFile = true;
+// 					var dir = this.files[i].webkitRelativePath.replace(this.files[i].name,'');
+// 					console.log('have hdf5 or csv file', dir);
+// 					socketParams.socket.emit('input_otherType', dir);
+// 				}
+// 			}
+// 		}
+// 		if (i == this.files.length && !foundFile){
+// 			alert("Cannot load data. Please select another directory.");
+// 		}
+// 	})
+// 	.style('display','None');

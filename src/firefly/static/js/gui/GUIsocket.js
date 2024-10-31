@@ -39,6 +39,11 @@ function connectGUISocket(){
 			console.log('!!! reloading GUI');
 			location.reload();
 		});
+
+		socketParams.socket.on('cannot_load_data', function(msg) {
+			console.log('!!! cannot load data');
+			alert("Cannot load data. Please try again.");
+		});
 	});
 }
 

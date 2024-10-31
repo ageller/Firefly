@@ -38,7 +38,7 @@ async_mode = "eventlet" #"eventlet" is WAY better than "threading"
 
 app = Flask(__name__) 
 app.config['SECRET_KEY'] = 'secret!'
-socketio = SocketIO(app, async_mode=async_mode)
+socketio = SocketIO(app, async_mode=async_mode)#, max_http_buffer_size=10**9)
 
 namespace = '/Firefly'
 
@@ -134,7 +134,9 @@ def input_otherType(filedir):
     socketio.emit('show_loader', None, namespace=namespace, to=rooms[request.sid])
     socketio.sleep(0.1) #to make sure that the above emit is executed
 
-    fdir = os.path.join(os.getcwd(),'static','data',filedir)
+    # fdir = os.path.join(os.getcwd(),'static','data',filedir)
+    fdir = filedir.strip()
+    # try:
     #check the file types
     ftype = '.hdf5'
     try:
@@ -162,6 +164,8 @@ def input_otherType(filedir):
     socketio.sleep(0.1) #to make sure that the above emit is executed
 
     print('======= done')
+    # except:
+    #     socketio.emit('cannot_load_data', None, namespace=namespace, to=rooms[request.sid])
 
 
 ##############

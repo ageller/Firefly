@@ -137,6 +137,7 @@ class Reader(object):
 
         settings_kwargs,self.particlegroup_kwargs = split_kwargs(kwargs)
 
+        
         if settings is not None:
             if settings.__class__.__name__ != 'Settings':
                 ## fun fact, assert isinstance(settings,Settings) won't work with jupyter notebooks
@@ -144,7 +145,6 @@ class Reader(object):
                 raise TypeError("Make sure you use a Settings instance to specify firefly settings.")
         ## we'll use the default ones then
         else: settings = Settings(**settings_kwargs)
-
         self.settings_path = os.path.join(
             self.static_data_dir,
             os.path.basename(datadir),
@@ -408,7 +408,7 @@ class Reader(object):
                         {"0":startup_path},
                         startup_file if write_to_disk else None))] ## None -> returns JSON string
 
-        if not write_to_disk and file_extension.lower() == '.json':
+        if not write_to_disk:# and file_extension.lower() == '.json':
             ## create a single "big JSON" with all the data in it in case
             ##  we want to send dataViaFlask
             JSON_dict = dict(file_array)
@@ -819,12 +819,11 @@ class ArrayReader(Reader):
 
         ## loop through each of the particle groups
         for i,(coords,UIname) in enumerate(zip(coordinates,UInames)):
-
             ## initialize a firefly particle group instance
             firefly_particleGroup = ParticleGroup(
                 UIname,
                 coords,
-                velocities[i],
+                None if velocities is None else velocities[i],
                 decimation_factor=decimation_factor,
                 field_arrays=None if fields is None else fields[i],
                 field_names=None if field_names is None else field_names[i],
@@ -943,7 +942,7 @@ class SimpleReader(ArrayReader):
             write_to_disk=write_to_disk,
             loud=loud,
             **kwargs)
-
+        
     def __getCSVCoordinates(self,fname,csv_sep=','):
         """Simple parser for opening a CSV file and extracting
             its coordinates.
