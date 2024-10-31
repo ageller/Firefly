@@ -735,15 +735,20 @@ class ArrayReader(Reader):
         super().__init__(**kwargs)
 
         ## wrap coordinate array if necessary
-        if len(np.shape(coordinates))==2 and np.shape(coordinates)[-1]==3:
-            ## passed a single list of coordinates, prepend an axis for the single group
-            coordinates = [coordinates]
-            velocities = [velocities]
-            if UInames is not None: UInames = [UInames]
-            if fields is not None: fields = [fields]
-        elif len(np.shape(coordinates[0]))==2 and np.shape(coordinates[0])[-1]==3:
-            ## passed a jagged array of different coordinates
-            pass
+        shapes_check = []
+        for i, coords in enumerate(coordinates):
+            if len(np.shape(coords))==2 and np.shape(coords)[-1]==3:
+                shapes_check.append(True)
+            else:
+                shapes_check.append(False)
+        if (np.all(shapes_check)):
+            if (len(shapes_check) == 1):
+                if len(np.shape(coordinates))==2 and np.shape(coordinates)[-1]==3:
+                    ## passed a single list of coordinates, prepend an axis for the single group
+                    coordinates = [coordinates]
+                    velocities = [velocities]
+                    if UInames is not None: UInames = [UInames]
+                    if fields is not None: fields = [fields]
         else:
             raise AxisError("Uninterpretable coordinate array, either pass a single (N,3) array"+ 
                 " or a jagged list of 'shape' (M,N_m,3)")
