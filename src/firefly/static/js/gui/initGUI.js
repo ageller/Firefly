@@ -313,7 +313,7 @@ filetypeDropdown.append("option")
   .text("Select the file type");
 
   filetypeDropdown.selectAll("option.options")
-  .data(["Firefly json", "hdf5", "csv"]).enter()
+  .data(["Firefly .json", ".hdf5", ".csv"]).enter()
 	.append("option")
 	.text(d => d);
 
@@ -351,20 +351,7 @@ d3.select("#filepath-submit-button").on("click", function () {
 	}
 
 	// process the data as needed
-	if (filetype == "Firefly json"){
-		var f = filepath + '/filenames.json';
-		d3.json(f,  function(files) {
-			if (files != null){
-				console.log('==loading data', files, prefix)
-				sendToViewer([{'callLoadData':[files, prefix]}])
-			} else {
-				alert("Cannot load data. Please try again.");
-			}
-		});
-	}
-	if (filetype == 'hdf5' || filetype == 'csv'){
-		socketParams.socket.emit('input_otherType', filepath);
-	}
+	socketParams.socket.emit('input_otherType', {"filepath":filepath,"filetype":filetype});
 
 
 });

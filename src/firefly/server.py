@@ -6,6 +6,7 @@
 
 
 import os
+import glob
 import sys
 import json
 import time
@@ -129,39 +130,43 @@ def separate_GUI():
 
 ########reading in a directory of hdf5 or csv files
 @socketio.on('input_otherType', namespace=namespace)
-def input_otherType(filedir):
+def input_otherType(fileinfo):
     print('======= showing loader')
     socketio.emit('show_loader', None, namespace=namespace, to=rooms[request.sid])
     socketio.sleep(0.1) #to make sure that the above emit is executed
 
     # fdir = os.path.join(os.getcwd(),'static','data',filedir)
-    fdir = filedir.strip()
+    fdir = fileinfo['filepath'].strip()
+    ftype = fileinfo['filetype']
     # try:
-    #check the file types
-    ftype = '.hdf5'
-    try:
-        for f in os.listdir(fdir):
-            if ('.csv' in f):
-                ftype = '.csv'
-            if ('.hdf5' in f):
-                ftype = '.hdf5'
-    except:
-        pass
 
     print('======= have input '+ftype+' data file(s) in', fdir)
-    reader = SimpleReader(fdir, write_to_disk=False, extension=ftype, decimation_factor=dec)
-    data = json.loads(reader.JSON)
-
-    print('======= have data from file(s), sending to viewer ...')
-    socketio.emit('input_data', {'status':'start', 'length':len(data)}, namespace=namespace, to=rooms[request.sid])
-    socketio.sleep(0.1) #to make sure that the above emit is executed
-    for fname in data:
-        print(fname, len(data[fname]))
-        output = {fname:data[fname], 'status':'data'}
-        socketio.emit('input_data', output, namespace=namespace, to=rooms[request.sid])
+    if (ftype == '.csv' or ftype == '.hdf5'):
+        reader = SimpleReader(fdir, write_to_disk=False, extension=ftype, decimation_factor=dec)
+        data = json.loads(reader.JSON)
+        print('======= have data from file(s), sending to viewer ...')
+        socketio.emit('input_data', {'status':'start', 'length':len(data)}, namespace=namespace, to=rooms[request.sid])
         socketio.sleep(0.1) #to make sure that the above emit is executed
-    socketio.emit('input_data', {'status':'done'}, namespace=namespace, to=rooms[request.sid])
-    socketio.sleep(0.1) #to make sure that the above emit is executed
+        for fname in data:
+            print(fname, len(data[fname]))
+            output = {fname:data[fname], 'status':'data'}
+            socketio.emit('input_data', output, namespace=namespace, to=rooms[request.sid])
+            socketio.sleep(0.1) #to make sure that the above emit is executed
+        socketio.emit('input_data', {'status':'done'}, namespace=namespace, to=rooms[request.sid])
+        socketio.sleep(0.1) #to make sure that the above emit is executed
+    else:
+        # firefly .json create a symlink
+        dirend =  os.path.basename(os.path.normpath(fdir))
+        datadir = os.path.join(os.getcwd(),'static','data',dirend)
+        print(dirend, datadir)
+        if os.path.islink(datadir):
+            print(f"'======= Symlink '{datadir}' exists. Replacing it with the new target.")
+            os.remove(datadir)  # Remove the existing symlink
+        os.symlink(fdir,datadir)
+        output = {"filepath":os.path.relpath(datadir, os.getcwd())}
+        socketio.emit('load_ffly_data', output, namespace=namespace, to=rooms[request.sid])
+        socketio.sleep(0.1) #to make sure that the above emit is executed
+
 
     print('======= done')
     # except:

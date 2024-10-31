@@ -92,6 +92,18 @@ function connectViewerSocket(){
 
 		});
 
+		socketParams.socket.on('load_ffly_data', function(msg) {
+			console.log("======== have new data : ", msg.filepath);
+			d3.json(msg.filepath + "/filenames.json",  function(files) {
+				if (files != null){
+					callLoadData([files, prefix]);
+				} else {
+					sendToGUI([{'showLoadingButton':'#loadDataButton'}]);
+					alert("Cannot load data. Please select another directory.");
+				}
+			});
+		});
+
 		socketParams.socket.on('output_settings', function(msg){
 			//only tested for combined endpoint
 			console.log("======== sending settings to server");
