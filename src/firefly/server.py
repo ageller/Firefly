@@ -138,39 +138,39 @@ def input_otherType(fileinfo):
     # fdir = os.path.join(os.getcwd(),'static','data',filedir)
     fdir = fileinfo['filepath'].strip()
     ftype = fileinfo['filetype']
-    # try:
+    try:
 
-    print('======= have input '+ftype+' data file(s) in', fdir)
-    if (ftype == '.csv' or ftype == '.hdf5'):
-        reader = SimpleReader(fdir, write_to_disk=False, extension=ftype, decimation_factor=dec)
-        data = json.loads(reader.JSON)
-        print('======= have data from file(s), sending to viewer ...')
-        socketio.emit('input_data', {'status':'start', 'length':len(data)}, namespace=namespace, to=rooms[request.sid])
-        socketio.sleep(0.1) #to make sure that the above emit is executed
-        for fname in data:
-            print(fname, len(data[fname]))
-            output = {fname:data[fname], 'status':'data'}
-            socketio.emit('input_data', output, namespace=namespace, to=rooms[request.sid])
+        print('======= have input '+ftype+' data file(s) in', fdir)
+        if (ftype == '.csv' or ftype == '.hdf5'):
+            reader = SimpleReader(fdir, write_to_disk=False, extension=ftype, decimation_factor=dec)
+            data = json.loads(reader.JSON)
+            print('======= have data from file(s), sending to viewer ...')
+            socketio.emit('input_data', {'status':'start', 'length':len(data)}, namespace=namespace, to=rooms[request.sid])
             socketio.sleep(0.1) #to make sure that the above emit is executed
-        socketio.emit('input_data', {'status':'done'}, namespace=namespace, to=rooms[request.sid])
-        socketio.sleep(0.1) #to make sure that the above emit is executed
-    else:
-        # firefly .json create a symlink
-        dirend =  os.path.basename(os.path.normpath(fdir))
-        datadir = os.path.join(os.getcwd(),'static','data',dirend)
-        print(dirend, datadir)
-        if os.path.islink(datadir):
-            print(f"'======= Symlink '{datadir}' exists. Replacing it with the new target.")
-            os.remove(datadir)  # Remove the existing symlink
-        os.symlink(fdir,datadir)
-        output = {"filepath":os.path.relpath(datadir, os.getcwd())}
-        socketio.emit('load_ffly_data', output, namespace=namespace, to=rooms[request.sid])
-        socketio.sleep(0.1) #to make sure that the above emit is executed
+            for fname in data:
+                print(fname, len(data[fname]))
+                output = {fname:data[fname], 'status':'data'}
+                socketio.emit('input_data', output, namespace=namespace, to=rooms[request.sid])
+                socketio.sleep(0.1) #to make sure that the above emit is executed
+            socketio.emit('input_data', {'status':'done'}, namespace=namespace, to=rooms[request.sid])
+            socketio.sleep(0.1) #to make sure that the above emit is executed
+        else:
+            # firefly .json create a symlink
+            dirend =  os.path.basename(os.path.normpath(fdir))
+            datadir = os.path.join(os.getcwd(),'static','data',dirend)
+            print(dirend, datadir)
+            if os.path.islink(datadir):
+                print(f"'======= Symlink '{datadir}' exists. Replacing it with the new target.")
+                os.remove(datadir)  # Remove the existing symlink
+            os.symlink(fdir,datadir)
+            output = {"filepath":os.path.relpath(datadir, os.getcwd())}
+            socketio.emit('load_ffly_data', output, namespace=namespace, to=rooms[request.sid])
+            socketio.sleep(0.1) #to make sure that the above emit is executed
 
 
-    print('======= done')
-    # except:
-    #     socketio.emit('cannot_load_data', None, namespace=namespace, to=rooms[request.sid])
+        print('======= done')
+    except:
+        socketio.emit('cannot_load_data', None, namespace=namespace, to=rooms[request.sid])
 
 
 ##############
