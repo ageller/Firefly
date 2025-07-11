@@ -49,3 +49,4 @@ dist/*.tar.gz
 ####################
 electron-app/resources
 electron-app/node_modules
+!electron-app/*.json
