@@ -1,13 +1,27 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow,ipcMain, dialog } = require('electron');
 const { spawn } = require('child_process');
 const path = require('path');
 const http = require('http');
 const isDev = require('electron-is-dev');
 const kill = require('tree-kill');
+const { } = require('electron');
+
 
 let pyProc = null;
 let mainWindow = null;
 let jupyterProc = null;
+
+
+// enable the system file browser
+ipcMain.handle('dialog:selectDirectory', async () => {
+    const result = await dialog.showOpenDialog({
+        properties: ['openDirectory']
+    });
+
+    if (result.canceled) return null;
+    return result.filePaths[0]; // absolute path to selected folder
+});
+
 
 function createWindow () {
     mainWindow = new BrowserWindow({
@@ -36,7 +50,8 @@ function startPythonBackend() {
 
     pyProc = spawn('firefly', ['--method=flask', `--directory=${fireflyDir}`], { 
         shell: true,
-        detach: true
+        detach: true,
+        env: { ...process.env, PYTHONUNBUFFERED: '1' }
     });
 
     pyProc.stdout.on('data', (data) => {

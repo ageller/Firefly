@@ -10,14 +10,17 @@
         <div id="container" style="display: flex; height: 100vh; width: 100vw">
             <div id="sidebar">
                 <div class="sidebar-icon-wrapper">
-                    <button onclick="toggleView(this, 'jupyter')" class="shown"><img width="60px" src="icons/jupyter-icon.png"></button>
+                    <button onclick="toggleView(this, 'firefly')" class="shown"><img width="60px" src="icons/firefly-icon.png"></button>
                 </div>
                 <div class="sidebar-icon-wrapper">
-                    <button onclick="toggleView(this, 'firefly')" class="shown"><img width="60px" src="icons/firefly-icon.png"></button>
+                    <button onclick="toggleView(this, 'jupyter')"><img width="60px" src="icons/jupyter-icon.png"></button>
+                </div>
+                <div class="sidebar-icon-wrapper">
+                    <button onclick="loadFireflyData()"><img width="60px" src="icons/Google_Design_folder_upload_icon.png"></button>
                 </div>
             </div>
             <div id="panels">
-                <webview src="http://localhost:8888/lab/tree/minimal_example_electron.ipynb" id="jupyter" class="panel" partition="persist:jupyter"></webview>
+                <webview src="http://localhost:8888/lab/tree/minimal_example_electron.ipynb" id="jupyter" class="panel hidden" partition="persist:jupyter"></webview>
                 <div class="divider"></div>
                 <webview src="http://localhost:5500/combined" id="firefly" class="panel" partition="persist:firefly"></webview>
              </div>

@@ -120,6 +120,42 @@ function toggleView(button, panelId) {
     normalizePanelFlex(reset=true);
 }
 
+// use the system file loader to send data to Firefly
+window.loadFireflyData = async function (){
+    const folderPath = await window.electronAPI.selectDirectory();
+
+    if (!folderPath) return;
+
+    // I want to use a similar procedure as in the Firefly loader to access input_otherType in server.py
+    // this input_otherType is a socket, so I will need to emit from the webview
+      
+    const webview = document.getElementById('firefly');
+    // for debugging
+    webview.openDevTools(); 
+
+    // Escape the string properly (not sure this is necessary, but was suggested by ChatGPT)
+    const escapedPath = folderPath.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+    console.log('comparing paths', folderPath,escapedPath)
+
+    // input_otherType is built to work with hdf5, csv and json files.  I should eventually build that too
+    const fileinfo = {
+        filepath:escapedPath,
+        filetype:'ffly'
+    }    
+    console.log('checking', fileinfo)
+
+    webview.executeJavaScript(`
+        if (window.socketParams.socket) {
+            window.socketParams.socket.emit('input_otherType', ${JSON.stringify(fileinfo)});
+            console.log('Emitted input_otherType with fileinfo: ${JSON.stringify(fileinfo)}');
+        } else {
+            console.error('Socket not initialized in webview.');
+        }
+    `);
+    
+}
+
+
 window.addEventListener('DOMContentLoaded', () => {
     normalizePanelFlex(reset=true);
     const webviews = document.querySelectorAll('webview');
@@ -133,3 +169,4 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+
