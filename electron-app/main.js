@@ -44,6 +44,7 @@ function createWindow () {
 
 function startPythonBackend() {
     // this will launch the flask version of firefly, and assumes that firefly has been pip installed
+    // eventually I may want to package this fully inside electron so I can keep the firefly executable AND server.py in here
     const fireflyDir = isDev
         ? path.join(__dirname, 'resources', 'firefly') // dev mode
         : path.join(process.resourcesPath, 'firefly'); // packaged app

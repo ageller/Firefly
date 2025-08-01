@@ -158,8 +158,9 @@ def input_otherType(fileinfo):
             socketio.emit('input_data', {'status':'done'}, namespace=namespace, to=rooms[request.sid])
             socketio.sleep(0.1) #to make sure that the above emit is executed
         else:
-            # firefly .json create a symlink
             # this will only work on systems that allow symlinks.
+            # firefly .json create a symlink
+            #
             # dirend =  os.path.basename(os.path.normpath(fdir))
             # datadir = os.path.join(os.getcwd(),'static','data',dirend)
             # print(dirend, datadir)
@@ -172,20 +173,11 @@ def input_otherType(fileinfo):
             # socketio.sleep(0.1) #to make sure that the above emit is executed
 
 
-########### LEFT OFF HERE ##############
-# the idea is to serve the actual file path in flask (see below in serve_user_file)
-# I have a thread going with ChatGPT on this, but ran out of time
-# I suspect there is an error using the request.sid for the key and the url (since it can have strange characters)
-# ChatGPT did recommend that I use uuid to normalize the characters...  I may need to try that.
-# I have not tested things well enough to determine where the failuer point is
-#
-# copy this to the active directory
-# cp src/firefly/server.py /home/ageller/miniforge3/envs/firefly-wsl/lib/python3.12/site-packages/firefly/server.py
-# 
+
             # try serving the data via flask in the user's directory
             room = rooms[request.sid]
-            user_data_dir[room] = data['filepath'] 
-            output = {"filepath": f"userdata/{room}"}
+            user_data_dir[room] = os.path.dirname(fdir)
+            output = {"filepath": f"userdata/{room}/data/{os.path.basename(fdir)}", "prefix":f"userdata/{room}/"}
             socketio.emit('load_ffly_data', output, namespace=namespace, to=room)
             
         print('======= done')
@@ -392,15 +384,14 @@ def get_selected_data():
 
 
 # serve data that is outside of the firefly path (used in input_otherType)
-@app.route('/userdata/<session_id>/<path:filename>')
-def serve_user_file(session_id, filename):
+@app.route('/userdata/<room>/data/<path:filename>')
+def serve_user_file(room, filename):
     global user_data_dir
-    if session_id not in user_data_dir:
-        return "Session not found", 404
+    if room not in user_data_dir:
+        return "room not found", 404
     if user_data_dir is None:
         return "No data directory selected", 400
     
-    room = rooms[session_id]
     data_dir = user_data_dir[room] 
 
     # Prevent path traversal
