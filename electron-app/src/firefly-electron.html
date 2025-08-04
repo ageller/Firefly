@@ -15,13 +15,23 @@
                 <div class="sidebar-icon-wrapper">
                     <button onclick="toggleView(this, 'jupyter')"><img width="60px" src="icons/jupyter-icon.png"></button>
                 </div>
-                <div class="sidebar-icon-wrapper">
-                    <button onclick="loadFireflyData()"><img width="60px" src="icons/Google_Design_folder_upload_icon.png"></button>
+                <div class="sidebar-icon-wrapper" id="loadDataButton">
+                    <button onclick="enableDataTypeSelection()"><img width="60px" src="icons/Google_Design_folder_upload_icon.png"></button>
                 </div>
+            </div>
+            <!-- Hidden dropdown for selecting the file type -->
+            <div id="dataTypeDropdown" >
+                <label>Select File Type:</label>
+                <select id="dataTypeSelect">
+                    <option value=".ffly">FFLY</option>
+                    <option value=".hdf5">HDF5</option>
+                    <option value=".csv">CSV</option>
+                </select>
+                <button id="dataTypeConfirm" onclick="getFireflyFilePath()">Next</button>
             </div>
             <div id="panels">
                 <webview src="http://localhost:8888/lab/tree/minimal_example_electron.ipynb" id="jupyter" class="panel hidden" partition="persist:jupyter"></webview>
-                <div class="divider"></div>
+                <div class="divider hidden"></div>
                 <webview src="http://localhost:5500/combined" id="firefly" class="panel" partition="persist:firefly"></webview>
              </div>
         </div>

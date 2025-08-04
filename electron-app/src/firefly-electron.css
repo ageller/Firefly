@@ -20,6 +20,7 @@ body {
     padding-top: 2px;
     height: 100vh;
     flex-shrink: 0;
+    z-index:10;
 }
 #sidebar button {
     background: none;
@@ -36,8 +37,23 @@ body {
     background-color:gray;
 }
 #sidebar .sidebar-icon-wrapper {
-  position: relative;
-  display: inline-block;
+    position: relative;
+    display: inline-block;
+}
+#dataTypeDropdown{
+    position:absolute;
+    left:80px;
+    background-color: #aeaeae;
+    padding:20px;
+    transform: translateX(-500px);  /* Start off-screen to the left */
+    transition: transform 0.5s ease;
+    z-index: 9;
+}
+#dataTypeDropdown.visible {
+    transform: translateX(0);  /* Slide in */
+}
+#dataTypeDropdown.hidden {
+    pointer-events: none;  /* prevent interaction while hidden */
 }
 #panels {
     display: flex;
@@ -53,6 +69,7 @@ body {
     border: none;
     /* display: block; */
     height:100%;
+    z-index:1;
 }
 .divider {
     width: 5px;

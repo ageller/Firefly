@@ -141,6 +141,7 @@ def input_otherType(fileinfo):
     # fdir = os.path.join(os.getcwd(),'static','data',filedir)
     fdir = fileinfo['filepath'].strip()
     ftype = fileinfo['filetype']
+    
     try:
 
         print('======= have input '+ftype+' data file(s) in', fdir)
@@ -158,23 +159,7 @@ def input_otherType(fileinfo):
             socketio.emit('input_data', {'status':'done'}, namespace=namespace, to=rooms[request.sid])
             socketio.sleep(0.1) #to make sure that the above emit is executed
         else:
-            # this will only work on systems that allow symlinks.
-            # firefly .json create a symlink
-            #
-            # dirend =  os.path.basename(os.path.normpath(fdir))
-            # datadir = os.path.join(os.getcwd(),'static','data',dirend)
-            # print(dirend, datadir)
-            # if os.path.islink(datadir):
-            #     print(f"'======= Symlink '{datadir}' exists. Replacing it with the new target.")
-            #     os.remove(datadir)  # Remove the existing symlink
-            # os.symlink(fdir,datadir)
-            # output = {"filepath":os.path.relpath(datadir, os.getcwd())}
-            # socketio.emit('load_ffly_data', output, namespace=namespace, to=rooms[request.sid])
-            # socketio.sleep(0.1) #to make sure that the above emit is executed
-
-
-
-            # try serving the data via flask in the user's directory
+            # since the ffly files need to be read via javascript (is there a python way?), serve the data via flask in the user's directory
             room = rooms[request.sid]
             user_data_dir[room] = os.path.dirname(fdir)
             output = {"filepath": f"userdata/{room}/data/{os.path.basename(fdir)}", "prefix":f"userdata/{room}/"}

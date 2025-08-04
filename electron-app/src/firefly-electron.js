@@ -120,8 +120,24 @@ function toggleView(button, panelId) {
     normalizePanelFlex(reset=true);
 }
 
+// these two functions handle the data loading
+function enableDataTypeSelection(){
+    // show the dataType dropdown
+    const dropdown = document.getElementById('dataTypeDropdown');
+    if (dropdown.classList.contains('visible')) {
+        dropdown.classList.remove('visible');
+    } else {
+        const rect = document.getElementById('loadDataButton').getBoundingClientRect();
+        dropdown.style.top = (rect.top + 10) + 'px';
+        dropdown.classList.add('visible');
+    }
+}
 // use the system file loader to send data to Firefly
-window.loadFireflyData = async function (){
+window.getFireflyFilePath = async function (){
+    // hide the dataType dropdown
+    const dropdown = document.getElementById('dataTypeDropdown');
+    dropdown.classList.remove('visible');
+
     const folderPath = await window.electronAPI.selectDirectory();
 
     if (!folderPath) return;
@@ -131,7 +147,7 @@ window.loadFireflyData = async function (){
       
     const webview = document.getElementById('firefly');
     // for debugging
-    webview.openDevTools(); 
+    // webview.openDevTools(); 
 
     // Escape the string properly (not sure this is necessary, but was suggested by ChatGPT)
     const escapedPath = folderPath.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
@@ -140,7 +156,7 @@ window.loadFireflyData = async function (){
     // input_otherType is built to work with hdf5, csv and json files.  I should eventually build that too
     const fileinfo = {
         filepath:escapedPath,
-        filetype:'ffly'
+        filetype:document.getElementById('dataTypeSelect').value
     }    
     console.log('checking', fileinfo)
 
