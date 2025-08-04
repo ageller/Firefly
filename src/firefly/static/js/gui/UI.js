@@ -1,5 +1,6 @@
 //GLOBAL_arrow = '&#129044;';
-GLOBAL_arrow = '&#11104;';
+//GLOBAL_arrow = '&#11104;';
+GLOBAL_arrow = '&larr;';
 
 // while the window is resizing, I don't want transitions in the size of the GUI
 // execute a function after resize is finished
@@ -143,7 +144,8 @@ function createUI(){
 		.append('div')
 			.attr('class','pLabelDiv')
 			.style('font-size','30px')
-			.style('line-height','14px')
+			// .style('line-height','14px')
+			.style('line-height','0px')
 			.style('color',getComputedStyle(document.body).getPropertyValue('--UI-character-background-color'))
 			.html(GLOBAL_arrow)
 			//.text('Back')

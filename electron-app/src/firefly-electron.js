@@ -8,6 +8,7 @@ let rightPanel = null;
 let leftStartWidth = 0;
 let rightStartWidth = 0;
 
+const fireflyWebview = document.getElementById('firefly');
 
 // keep panel sizing consistent
 function normalizePanelFlex(reset=false) {
@@ -145,10 +146,6 @@ window.getFireflyFilePath = async function (){
     // I want to use a similar procedure as in the Firefly loader to access input_otherType in server.py
     // this input_otherType is a socket, so I will need to emit from the webview
       
-    const webview = document.getElementById('firefly');
-    // for debugging
-    // webview.openDevTools(); 
-
     // Escape the string properly (not sure this is necessary, but was suggested by ChatGPT)
     const escapedPath = folderPath.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
     console.log('comparing paths', folderPath,escapedPath)
@@ -160,7 +157,7 @@ window.getFireflyFilePath = async function (){
     }    
     console.log('checking', fileinfo)
 
-    webview.executeJavaScript(`
+    fireflyWebview.executeJavaScript(`
         if (window.socketParams.socket) {
             window.socketParams.socket.emit('input_otherType', ${JSON.stringify(fileinfo)});
             console.log('Emitted input_otherType with fileinfo: ${JSON.stringify(fileinfo)}');
@@ -184,5 +181,24 @@ window.addEventListener('DOMContentLoaded', () => {
             } 
         }
     });
+
+
 });
 
+
+fireflyWebview.addEventListener('did-finish-load', () => {
+    // for debugging
+    fireflyWebview.openDevTools(); 
+    // hide the load data button (since I build my own in electron)
+    fireflyWebview.executeJavaScript(`
+        const loadDataFixInterval = setInterval(() => {
+            const el = document.querySelector('#loadNewDataDiv');
+            if (el) {
+                el.style.display = 'none';
+                clearInterval(loadDataFixInterval);
+                console.log("Load new data element found and hidden");
+            }
+        }, 300); 
+    `);
+
+});
