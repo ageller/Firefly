@@ -50,3 +50,8 @@ dist/*.tar.gz
 electron-app/resources
 electron-app/node_modules
 !electron-app/*.json
+
+# pyinstaller #
+#####################
+build/firefly_pyinstaller
+dist/firefly
