@@ -7,19 +7,19 @@
 
 
 # to run:
-# pyinstaller firefly_pyinstaller.spec --clean -y
+# pyinstaller firefly.spec --clean -y
 
 from PyInstaller.utils.hooks import collect_all, collect_submodules
 
 
 a = Analysis(
-    ['src/firefly/bin/firefly'],
-    pathex=['src'],
+    ['../../src/firefly/bin/firefly'],
+    pathex=['../../src'],
     datas=[
-        ('src/firefly/data_reader', 'firefly/data_reader'),
-        ('src/firefly/ntbks', 'firefly/ntbks'),
-        ('src/firefly/static', 'firefly/static'),
-        ('src/firefly/templates', 'firefly/templates'),
+        ('../../src/firefly', 'firefly'),
+        ('../../src/firefly/data_reader', 'firefly/data_reader'),
+        ('../../src/firefly/static', 'firefly/static'),
+        ('../../src/firefly/templates', 'firefly/templates'),
     ],
     hiddenimports=( 
         collect_submodules('firefly') + 
