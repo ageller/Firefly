@@ -4,7 +4,7 @@
     "main": "main.js",
     "scripts": {
         "start": "electron .",
-        "prepare": "rm -rf resources/firefly/* && cp -r ../src/firefly/static resources/firefly/static && cp -r ../src/firefly/templates resources/firefly/templates && cp -r ../src/firefly/ntbks resources/firefly/ntbks"
+        "prepare": "bash scripts/prepare.sh"
     },
     "build": {
         "appId": "com.firefly",

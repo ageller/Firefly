@@ -42,17 +42,34 @@ function createWindow () {
     mainWindow.loadFile('src/firefly-electron.html');
 }
 
-function startPythonBackend() {
-    // this will launch the flask version of firefly, and assumes that firefly has been pip installed
-    // eventually I may want to package this fully inside electron so I can keep the firefly executable AND server.py in here
-    const fireflyDir = isDev
-        ? path.join(__dirname, 'resources', 'firefly') // dev mode
-        : path.join(process.resourcesPath, 'firefly'); // packaged app
 
-    pyProc = spawn('firefly', ['--method=flask', `--directory=${fireflyDir}`], { 
+const getPythonPath = () => {
+    const pythonDir = isDev
+        ? path.join(__dirname, 'bundle', 'python')
+        : path.join(process.resourcesPath, 'bundle', 'python');
+
+    return process.platform === 'win32'
+        ? path.join(pythonDir, 'python.exe')
+        : path.join(pythonDir, 'bin', 'python');
+};
+
+function startPythonBackend() {
+    // this will launch the flask version of firefly bundled with the app
+    const pythonPath = getPythonPath();
+
+    const fireflyArgs = [
+        '-m', 'firefly',
+        '--method=flask',
+    ];
+
+    pyProc = spawn(pythonPath, fireflyArgs, {
+        env: {
+            ...process.env,
+            PATH: `${path.dirname(pythonPath)}:${process.env.PATH}`,
+            PYTHONUNBUFFERED: '1'
+        },
         shell: true,
         detach: true,
-        env: { ...process.env, PYTHONUNBUFFERED: '1' }
     });
 
     pyProc.stdout.on('data', (data) => {
@@ -74,24 +91,31 @@ function stopPythonBackend() {
 
 
 function startJupyter() {
-    // this will launch the jupyter lab
-    const notebookDir = path.join(__dirname, 'resources', 'firefly', 'ntbks');
+    // this will launch the jupyter lab (using the bundled python)
+    const notebookDir = path.join(__dirname, 'bundle', 'ntbks');
 
-    jupyterProc = spawn('jupyter', [
-        'lab', 
-        '--no-browser', 
+    const pythonPath = getPythonPath();
+    const jupyterArgs = [
+        '-m', 'jupyter',
+        'lab',
+        '--no-browser',
         '--port=8888',
         '--NotebookApp.token=""',
         `--notebook-dir=${notebookDir}`
-    ], {
+    ];
+
+    jupyterProc = spawn(pythonPath, jupyterArgs, {
         shell: true,
-        detached: true
+        detached: true,
+        env: {
+            ...process.env,
+            PATH: `${path.dirname(pythonPath)}:${process.env.PATH}`
+        }
     });
 
     jupyterProc.stdout.on('data', (data) => {
         console.log(`[JUPYTER]: ${data}`);
     });
-
     jupyterProc.stderr.on('data', (data) => {
         console.error(`[JUPYTER STDERR]: ${data}`);
     });
