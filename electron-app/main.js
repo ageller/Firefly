@@ -1,7 +1,9 @@
 const { app, BrowserWindow,ipcMain, dialog } = require('electron');
 const { spawn } = require('child_process');
 const path = require('path');
+const detect = require('detect-port').default || require('detect-port');
 const http = require('http');
+const { URL } = require('url');
 const isDev = require('electron-is-dev');
 const kill = require('tree-kill');
 const { } = require('electron');
@@ -23,7 +25,7 @@ ipcMain.handle('dialog:selectDirectory', async () => {
 });
 
 
-function createWindow () {
+function createWindow (fireflyPort, jupyterPort) {
     mainWindow = new BrowserWindow({
         width: 2400,
         height: 1200,
@@ -38,8 +40,12 @@ function createWindow () {
         }
     });
 
-    // Load the app
-    mainWindow.loadFile('src/firefly-electron.html');
+    // Load the app, sending the correct ports
+    const filePath = path.join(__dirname, 'src', 'firefly-electron.html');
+    const urlWithParams = new URL(`file://${filePath}`);
+    urlWithParams.searchParams.append('fireflyPort', fireflyPort);
+    urlWithParams.searchParams.append('jupyterPort', jupyterPort);
+    mainWindow.loadURL(urlWithParams.toString());
 }
 
 
@@ -53,13 +59,24 @@ const getPythonPath = () => {
         : path.join(pythonDir, 'bin', 'python');
 };
 
-function startPythonBackend() {
+async function startPythonBackend() {
     // this will launch the flask version of firefly bundled with the app
     const pythonPath = getPythonPath();
+
+    // check for an available port
+    const defaultPort = 5500;
+    const port = await detect(defaultPort);
+
+    if (port !== defaultPort) {
+        console.log(`Port ${defaultPort} is in use, switching firefly to port ${port}`);
+    } else {
+        console.log(`Port ${defaultPort} is free, launching firefly there.`);
+    }
 
     const fireflyArgs = [
         '-m', 'firefly',
         '--method=flask',
+        `--port=${port}`,
     ];
 
     pyProc = spawn(pythonPath, fireflyArgs, {
@@ -78,6 +95,8 @@ function startPythonBackend() {
     pyProc.stderr.on('data', (data) => {
         console.error(`[PYTHON STDERR]: ${data}`);
     });
+
+    return port;
 }
 
 function stopPythonBackend() {
@@ -89,23 +108,31 @@ function stopPythonBackend() {
     }
 }
 
-
-function startJupyter() {
+async function startJupyter() {
     // this will launch the jupyter lab (using the bundled python)
     const notebookPath = path.join(__dirname, 'bundle', 'ntbks');
     const jupyterPath = path.join(__dirname, 'bundle', 'python', 'bin', 'jupyter');
-
     const pythonPath = getPythonPath();
+
+    // check for an available port
+    const defaultPort = 8888;
+    const port = await detect(defaultPort);
+
+    if (port !== defaultPort) {
+        console.log(`Port ${defaultPort} is in use, switching jupyter to port ${port}`);
+    } else {
+        console.log(`Port ${defaultPort} is free, launching Jupyter there.`);
+    }
 
     const jupyterArgs = [
         'lab',
         '--no-browser',
-        '--port=8888',
+        `--port=${port}`,
         '--NotebookApp.token=""',
         `--notebook-dir=${notebookPath}`
     ];
 
-    console.log('CHECKING', pythonPath, jupyterPath)
+
     jupyterProc = spawn(jupyterPath, jupyterArgs, {
         shell: true,
         detached: true,
@@ -121,6 +148,8 @@ function startJupyter() {
     jupyterProc.stderr.on('data', (data) => {
         console.error(`[JUPYTER STDERR]: ${data}`);
     });
+
+    return port;
 }
 
 function stopJupyter(){
@@ -141,7 +170,7 @@ function waitForLoading(ports, callback) {
             console.log(`Port ${port} is ready.`);
             pending.delete(port);
             if (pending.size === 0) {
-                callback(); // all ports are ready
+                callback(...ports); // all ports are ready
             }
             }).on('error', () => {
             console.log(`Waiting for port ${port}...`);
@@ -153,16 +182,16 @@ function waitForLoading(ports, callback) {
 }
 
 
-app.whenReady().then(() => {
+app.whenReady().then(async() => {
     // console.log("GPU Feature Status:");
     // console.log(app.getGPUFeatureStatus());
 
-    startPythonBackend();
-    startJupyter();
-    waitForLoading([5500,8888], createWindow);
+    const fireflyPort = await startPythonBackend();
+    const jupyterPort = await startJupyter();
+    waitForLoading([fireflyPort, jupyterPort], createWindow);
 
     app.on('activate', function () {
-        if (BrowserWindow.getAllWindows().length === 0) createWindow();
+        if (BrowserWindow.getAllWindows().length === 0) createWindow(fireflyPort, jupyterPort);
     });
 });
 

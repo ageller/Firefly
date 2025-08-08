@@ -3,7 +3,7 @@
     "version": "0.1.0",
     "main": "main.js",
     "scripts": {
-        "start": "electron --enable-logging --log-level=1 .",
+        "start": "electron .",
         "prepare": "bash scripts/prepare.sh"
     },
     "build": {
@@ -34,6 +34,7 @@
         "electron": "^37.2.1"
     },
     "dependencies": {
+        "detect-port": "^2.1.0",
         "electron-is-dev": "^3.0.1",
         "tree-kill": "^1.2.2"
     }

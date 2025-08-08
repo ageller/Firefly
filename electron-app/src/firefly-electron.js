@@ -9,6 +9,7 @@ let leftStartWidth = 0;
 let rightStartWidth = 0;
 
 const fireflyWebview = document.getElementById('firefly');
+const jupyterWebview = document.getElementById('jupyter');
 
 // keep panel sizing consistent
 function normalizePanelFlex(reset=false) {
@@ -182,14 +183,21 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     });
 
+    // get the ports for firefly and jupyter and define the src locations
+    const urlParams = new URLSearchParams(window.location.search);
+    const fireflyPort =  urlParams.get('fireflyPort') || '5500'; 
+    const jupyterPort =  urlParams.get('jupyterPort') || '8888'; 
+
+    fireflyWebview.src = `http://localhost:${fireflyPort}/combined`;    
+    jupyterWebview.src = `http://localhost:${jupyterPort}/lab/tree/minimal_example_electron.ipynb`;
 
 });
 
 
 fireflyWebview.addEventListener('did-finish-load', () => {
     // for debugging
-    // fireflyWebview.openDevTools(); 
-    
+    fireflyWebview.openDevTools(); 
+
     // hide the load data button (since I build my own in electron)
     fireflyWebview.executeJavaScript(`
         const loadDataFixInterval = setInterval(() => {
@@ -203,3 +211,18 @@ fireflyWebview.addEventListener('did-finish-load', () => {
     `);
 
 });
+
+
+// Parse query param from window.location
+function getJupyterPort() {
+  const urlParams = new URLSearchParams(window.location.search);
+  return urlParams.get('jupyter_port') || '8888'; // fallback to 8888 if missing
+}
+
+const port = getJupyterPort();
+
+const webview = document.getElementById('jupyter-webview');
+if (webview) {
+    webview.src="http://localhost:8888/lab/tree/minimal_example_electron.ipynb" 
+  webview.src = `http://localhost:${port}/lab`;
+}
