@@ -34,7 +34,7 @@ function createWindow () {
             preload: path.join(__dirname, 'preload.js'),
             contextIsolation: true,
             webviewTag: true, 
-
+            webgl: true,
         }
     });
 
@@ -92,24 +92,26 @@ function stopPythonBackend() {
 
 function startJupyter() {
     // this will launch the jupyter lab (using the bundled python)
-    const notebookDir = path.join(__dirname, 'bundle', 'ntbks');
+    const notebookPath = path.join(__dirname, 'bundle', 'ntbks');
+    const jupyterPath = path.join(__dirname, 'bundle', 'python', 'bin', 'jupyter');
 
     const pythonPath = getPythonPath();
+
     const jupyterArgs = [
-        '-m', 'jupyter',
         'lab',
         '--no-browser',
         '--port=8888',
         '--NotebookApp.token=""',
-        `--notebook-dir=${notebookDir}`
+        `--notebook-dir=${notebookPath}`
     ];
 
-    jupyterProc = spawn(pythonPath, jupyterArgs, {
+    console.log('CHECKING', pythonPath, jupyterPath)
+    jupyterProc = spawn(jupyterPath, jupyterArgs, {
         shell: true,
         detached: true,
         env: {
             ...process.env,
-            PATH: `${path.dirname(pythonPath)}:${process.env.PATH}`
+            PATH: `${path.dirname(pythonPath)}:${process.env.PATH}`,
         }
     });
 
@@ -150,7 +152,11 @@ function waitForLoading(ports, callback) {
     ports.forEach(port => checkPort(port));
 }
 
+
 app.whenReady().then(() => {
+    // console.log("GPU Feature Status:");
+    // console.log(app.getGPUFeatureStatus());
+
     startPythonBackend();
     startJupyter();
     waitForLoading([5500,8888], createWindow);

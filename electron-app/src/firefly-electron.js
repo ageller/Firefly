@@ -188,7 +188,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
 fireflyWebview.addEventListener('did-finish-load', () => {
     // for debugging
-    fireflyWebview.openDevTools(); 
+    // fireflyWebview.openDevTools(); 
+    
     // hide the load data button (since I build my own in electron)
     fireflyWebview.executeJavaScript(`
         const loadDataFixInterval = setInterval(() => {
