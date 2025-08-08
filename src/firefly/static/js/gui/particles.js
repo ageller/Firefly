@@ -304,7 +304,7 @@ function createParticleDropdown(container,this_pane,name,p){
 		.append('div')
 			.attr('class','pLabelDiv')
 			.style('font-size','30px')
-			.style('line-height','14px')
+			.style('line-height','0px')
 			.style('color',getComputedStyle(document.body).getPropertyValue('--UI-character-background-color'))
 			.html(GLOBAL_arrow);
 			//.text('Back')
