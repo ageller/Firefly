@@ -215,8 +215,8 @@ fireflyWebview.addEventListener('did-finish-load', () => {
 
 // Parse query param from window.location
 function getJupyterPort() {
-  const urlParams = new URLSearchParams(window.location.search);
-  return urlParams.get('jupyter_port') || '8888'; // fallback to 8888 if missing
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('jupyter_port') || '8888'; // fallback to 8888 if missing
 }
 
 const port = getJupyterPort();
@@ -224,5 +224,5 @@ const port = getJupyterPort();
 const webview = document.getElementById('jupyter-webview');
 if (webview) {
     webview.src="http://localhost:8888/lab/tree/minimal_example_electron.ipynb" 
-  webview.src = `http://localhost:${port}/lab`;
+    webview.src = `http://localhost:${port}/lab`;
 }
