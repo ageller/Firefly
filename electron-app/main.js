@@ -59,6 +59,16 @@ const getPythonPath = () => {
         : path.join(pythonDir, 'bin', 'python');
 };
 
+const getJupyterPath = () => {
+    const jupyterPath = isDev
+        ? path.join(__dirname, 'bundle', 'python')
+        : path.join(process.resourcesPath, 'bundle', 'python');
+
+    return process.platform === 'win32'
+        ? path.join(jupyterPath, 'Scripts','jupyter.exe')
+        : path.join(jupyterPath, 'bin', 'jupyter');
+}; 
+
 async function startPythonBackend() {
     // this will launch the flask version of firefly bundled with the app
     const pythonPath = getPythonPath();
@@ -111,9 +121,11 @@ function stopPythonBackend() {
 async function startJupyter() {
     // this will launch the jupyter lab (using the bundled python)
     const notebookPath = path.join(__dirname, 'bundle', 'ntbks');
-    const jupyterPath = path.join(__dirname, 'bundle', 'python', 'bin', 'jupyter');
+    const jupyterPath = getJupyterPath();
     const pythonPath = getPythonPath();
 
+    console.log('JUPYTER PATH:', jupyterPath);
+    
     // check for an available port
     const defaultPort = 8888;
     const port = await detect(defaultPort);
