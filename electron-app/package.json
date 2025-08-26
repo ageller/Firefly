@@ -4,22 +4,28 @@
     "main": "main.js",
     "scripts": {
         "start": "electron .",
-        "prepare": "bash scripts/prepare.sh"
+        "prepare": "bash scripts/prepare.sh",
+        "dist": "electron-builder"
     },
     "build": {
         "appId": "com.firefly",
         "productName": "Firefly",
         "win": {
-            "target": [
-                "nsis",
-                "portable"
-            ],
-            "icon": "src/icons/app-icon.ico"
+            "target": "nsis",
+            "icon": "src/icons/firefly-icon.ico"
         },
+        "nsis": {
+            "oneClick": false,
+            "allowToChangeInstallationDirectory": true
+        },
+        "files": [
+            "**/*",
+            "bundle/**/*"
+        ],
         "extraResources": [
             {
-                "from": "resources/firefly",
-                "to": "firefly",
+                "from": "bundle/",
+                "to": "bundle",
                 "filter": [
                     "**/*"
                 ]
@@ -31,7 +37,8 @@
     "license": "GNU Affero General Public License v3.0",
     "description": "An electron wrapper for the Firefly visualization app",
     "devDependencies": {
-        "electron": "^37.2.1"
+        "electron": "^37.2.1",
+        "electron-builder": "^26.0.12"
     },
     "dependencies": {
         "detect-port": "^2.1.0",
