@@ -5,7 +5,7 @@
     "scripts": {
         "start": "electron .",
         "prepare": "bash scripts/prepare.sh",
-        "dist": "electron-builder"
+        "build": "electron-builder"
     },
     "build": {
         "appId": "com.firefly",
