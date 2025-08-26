@@ -123,8 +123,6 @@ async function startJupyter() {
     const notebookPath = path.join(__dirname, 'bundle', 'ntbks');
     const jupyterPath = getJupyterPath();
     const pythonPath = getPythonPath();
-
-    console.log('JUPYTER PATH:', jupyterPath);
     
     // check for an available port
     const defaultPort = 8888;
