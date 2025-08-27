@@ -1,17 +1,55 @@
 const { app, BrowserWindow,ipcMain, dialog } = require('electron');
 const { spawn } = require('child_process');
 const path = require('path');
+const fs = require('fs');
 const detect = require('detect-port').default || require('detect-port');
 const http = require('http');
 const { URL } = require('url');
-const isDev = require('electron-is-dev');
 const kill = require('tree-kill');
-const { } = require('electron');
+//const { } = require('electron');
 
+const rawIsDev  = require('electron-is-dev');
+const isDev = (rawIsDev && typeof rawIsDev === 'object' && 'default' in rawIsDev)
+  ? rawIsDev.default
+  : rawIsDev;
 
 let pyProc = null;
 let mainWindow = null;
 let jupyterProc = null;
+
+// for logging
+const logFile = path.join(app.getPath('userData'),  'Firefly-log.txt');
+fs.mkdirSync(path.dirname(logFile), { recursive: true }); // create the file if needed
+fs.writeFileSync(logFile, '', { encoding: 'utf8' });  // clear the file (could remove/adjust if history needed)
+console.log("LOGFILE:", logFile)
+function writeToLogFile(level, args) {
+    const timestamp = new Date().toISOString();
+    const message = (args && args.length > 0)
+        ? args.map(arg =>
+            typeof arg === 'string' ? arg : JSON.stringify(arg, null, 2)
+        ).join(' ')
+        : ''; // handle empty console.log()
+    const line = `[${timestamp}] [${level.toUpperCase()}] ${message}\n`;
+
+    // Append to file
+    fs.appendFileSync(logFile, line, { encoding: 'utf8' });
+
+    // Still print to console (so you see logs in `npm start`)
+    if (level === 'error') {
+        process.stderr.write(line);
+    } else {
+        process.stdout.write(line);
+    }
+}
+
+// Monkey-patch console
+['log', 'info', 'warn', 'error'].forEach(level => {
+    const orig = console[level];
+    console[level] = (...args) => {
+        writeToLogFile(level, args);
+        //orig.apply(console, args); // keep default behavior too
+    };
+});
 
 
 // enable the system file browser
@@ -46,6 +84,10 @@ function createWindow (fireflyPort, jupyterPort) {
     urlWithParams.searchParams.append('fireflyPort', fireflyPort);
     urlWithParams.searchParams.append('jupyterPort', jupyterPort);
     mainWindow.loadURL(urlWithParams.toString());
+
+//remove later
+mainWindow.webContents.openDevTools(); 
+
 }
 
 
@@ -72,6 +114,7 @@ const getJupyterPath = () => {
 async function startPythonBackend() {
     // this will launch the flask version of firefly bundled with the app
     const pythonPath = getPythonPath();
+    console.log("PYTHON PATH = ", pythonPath);
 
     // check for an available port
     const defaultPort = 5500;
@@ -124,6 +167,8 @@ async function startJupyter() {
     const jupyterPath = getJupyterPath();
     const pythonPath = getPythonPath();
     
+    console.log("JUPYTER PATH = ", jupyterPath);
+
     // check for an available port
     const defaultPort = 8888;
     const port = await detect(defaultPort);
@@ -196,13 +241,21 @@ app.whenReady().then(async() => {
     // console.log("GPU Feature Status:");
     // console.log(app.getGPUFeatureStatus());
 
-    const fireflyPort = await startPythonBackend();
-    const jupyterPort = await startJupyter();
-    waitForLoading([fireflyPort, jupyterPort], createWindow);
+    writeToLogFile("App is starting...");
+    try {
 
-    app.on('activate', function () {
-        if (BrowserWindow.getAllWindows().length === 0) createWindow(fireflyPort, jupyterPort);
-    });
+        const fireflyPort = await startPythonBackend();
+        const jupyterPort = await startJupyter();
+        waitForLoading([fireflyPort, jupyterPort], createWindow);
+
+        app.on('activate', function () {
+            if (BrowserWindow.getAllWindows().length === 0) createWindow(fireflyPort, jupyterPort);
+        });
+
+    } catch (e) {
+        writeToLogFile("Error: " + e.stack);
+    }
+
 });
 
 app.on('window-all-closed', () => {
@@ -217,3 +270,4 @@ app.on('before-quit', () => {
     stopPythonBackend();
     stopJupyter();
 });
+

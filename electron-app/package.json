@@ -1,11 +1,11 @@
 {
     "name": "firefly-electron",
-    "version": "0.1.0",
+    "version": "1.0.0",
     "main": "main.js",
     "scripts": {
         "start": "electron .",
         "prepare": "bash scripts/prepare.sh",
-        "build": "electron-builder"
+        "build": "electron-builder --dir"
     },
     "build": {
         "appId": "com.firefly",
@@ -16,11 +16,14 @@
         },
         "nsis": {
             "oneClick": false,
-            "allowToChangeInstallationDirectory": true
+            "allowToChangeInstallationDirectory": true,
+            "perMachine": false,
+            "include": "scripts/installer.nsh"
         },
         "files": [
             "**/*",
-            "bundle/**/*"
+            "bundle/**/*",
+            "!node_modules/.cache/**"
         ],
         "extraResources": [
             {
