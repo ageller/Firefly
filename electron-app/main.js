@@ -85,12 +85,9 @@ function createWindow (fireflyPort, jupyterPort) {
     urlWithParams.searchParams.append('jupyterPort', jupyterPort);
     mainWindow.loadURL(urlWithParams.toString());
 
-//remove later
-mainWindow.webContents.openDevTools(); 
-
 }
 
-
+// get the paths (different for dev vs build)
 const getPythonPath = () => {
     const pythonDir = isDev
         ? path.join(__dirname, 'bundle', 'python')
@@ -111,11 +108,24 @@ const getJupyterPath = () => {
         : path.join(jupyterPath, 'bin', 'jupyter');
 }; 
 
+const getNotebookPath = () => {
+    return isDev
+        ? path.join(__dirname, 'bundle', 'ntbks')
+        : path.join(process.resourcesPath, 'bundle', 'ntbks');
+}; 
+
+const notebookPath = getNotebookPath();
+const jupyterPath = getJupyterPath();
+const pythonPath = getPythonPath();
+
+console.log("PYTHON PATH = ", pythonPath);
+console.log("JUPYTER PATH = ", jupyterPath);
+console.log("NOTEBOOK PATH = ", notebookPath);
+
+
 async function startPythonBackend() {
     // this will launch the flask version of firefly bundled with the app
-    const pythonPath = getPythonPath();
-    console.log("PYTHON PATH = ", pythonPath);
-
+    
     // check for an available port
     const defaultPort = 5500;
     const port = await detect(defaultPort);
@@ -163,11 +173,6 @@ function stopPythonBackend() {
 
 async function startJupyter() {
     // this will launch the jupyter lab (using the bundled python)
-    const notebookPath = path.join(__dirname, 'bundle', 'ntbks');
-    const jupyterPath = getJupyterPath();
-    const pythonPath = getPythonPath();
-    
-    console.log("JUPYTER PATH = ", jupyterPath);
 
     // check for an available port
     const defaultPort = 8888;
