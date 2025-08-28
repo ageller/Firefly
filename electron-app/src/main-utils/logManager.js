@@ -1,0 +1,125 @@
+
+// for logging
+ 
+const path = require('path');
+const fs = require('fs');
+const { app, BrowserWindow } = require('electron');
+
+const state = require('./state');
+
+const logFile = path.join(app.getPath('userData'),  'Firefly-log.txt');
+const asciiFile = path.join(__dirname, '..','icons','firefly-icon-ascii.txt');
+
+console.log("LOGFILE:", logFile)
+
+
+
+function initLogFile() {
+    // add a fun ascii art to the top of the logfile
+    // this will clear the file (could remove/adjust if history needed)
+    
+    fs.mkdirSync(path.dirname(logFile), { recursive: true }); // create the file if needed
+    
+    let header = '';
+    if (fs.existsSync(asciiFile)) {
+        header = fs.readFileSync(asciiFile, 'utf8') + '\n';
+    }
+    fs.writeFileSync(logFile, header);
+
+}
+
+
+function writeToLogFile(level, args) {
+    const timestamp = new Date().toISOString();
+    const message = (args && args.length > 0)
+        ? args.map(arg =>
+            typeof arg === 'string' ? arg : JSON.stringify(arg, null, 2)
+        ).join(' ')
+        : ''; // handle empty console.log()
+    const line = `[${timestamp}] [${level.toUpperCase()}] ${message}\n`;
+
+    // Append to file
+    fs.appendFileSync(logFile, line, { encoding: 'utf8' });
+
+    // Still print to console (so you see logs in `npm start`)
+    if (level === 'error') {
+        process.stderr.write(line);
+    } else {
+        process.stdout.write(line);
+    }
+}
+
+// Monkey-patch console
+['log', 'info', 'warn', 'error'].forEach(level => {
+    const orig = console[level];
+    console[level] = (...args) => {
+        writeToLogFile(level, args);
+        //orig.apply(console, args); // keep default behavior too
+    };
+});
+
+function createLogWindow() {
+    state.logWindow = new BrowserWindow({
+        width: 800,
+        height: 900,
+        webPreferences: {
+            nodeIntegration: true, // needed to read file in renderer
+            contextIsolation: false,
+        },
+    });
+
+
+    loadLogContent();
+
+    // Watch the log file for changes
+    let logWatcher = fs.watch(logFile, { encoding: 'utf8' }, () => {
+        loadLogContent();
+    });
+
+    state.logWindow.on('closed', () => {
+        state.logWindow = null; // remove reference
+        // stop watching the file
+        if (logWatcher) logWatcher.close();
+    });
+
+    return state.logWindow;
+
+}
+
+// Reads the log file and updates the window content
+// a bit clunky because it recreates the full html file each time the log is updated...
+function loadLogContent() {
+    if (!state.logWindow) return;
+
+    const logText = fs.existsSync(logFile)
+    ? fs.readFileSync(logFile, 'utf8')
+    : 'Log is empty';
+
+    const html = `
+        <html>
+            <head>
+                <title>App Log</title>
+                <style>
+                    body {
+                        background: #111;
+                        color: #eee;
+                        font-family: monospace;
+                        white-space: pre-wrap;
+                        padding: 10px;
+                    }
+                </style>
+            </head>
+            <body>
+                ${logText}
+            <script>
+                window.scrollTo(0, document.body.scrollHeight);
+            </script>
+            </body>
+        </html>
+    `;
+
+    state.logWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`);
+}
+
+
+module.exports = { initLogFile, createLogWindow, writeToLogFile };
