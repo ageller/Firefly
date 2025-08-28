@@ -1,11 +1,13 @@
 const { app, BrowserWindow,ipcMain, dialog } = require('electron');
-const { spawn } = require('child_process');
+const { spawn, exec } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 const detect = require('detect-port').default || require('detect-port');
 const http = require('http');
 const { URL } = require('url');
 const kill = require('tree-kill');
+const os = require('os');
+const find = require('find-process');
 //const { } = require('electron');
 
 const rawIsDev  = require('electron-is-dev');
@@ -14,8 +16,13 @@ const isDev = (rawIsDev && typeof rawIsDev === 'object' && 'default' in rawIsDev
   : rawIsDev;
 
 let pyProc = null;
+let fireflyPort = null;
 let mainWindow = null;
+let splash = null;
 let jupyterProc = null;
+let jupyterPort = null;
+let logWindow = null;
+
 
 // for logging
 const logFile = path.join(app.getPath('userData'),  'Firefly-log.txt');
@@ -51,6 +58,85 @@ function writeToLogFile(level, args) {
     };
 });
 
+function createLogWindow() {
+    logWindow = new BrowserWindow({
+        width: 600,
+        height: 800,
+        webPreferences: {
+            nodeIntegration: true, // needed to read file in renderer
+            contextIsolation: false,
+        },
+    });
+
+    loadLogContent();
+
+    // Watch the log file for changes
+    fs.watch(logFile, { encoding: 'utf8' }, () => {
+        loadLogContent();
+    });
+}
+
+// Reads the log file and updates the window content
+function loadLogContent() {
+    if (!logWindow) return;
+
+    const logText = fs.existsSync(logFile)
+    ? fs.readFileSync(logFile, 'utf8')
+    : 'Log is empty';
+
+    const html = `
+        <html>
+            <head>
+                <title>App Log</title>
+                <style>
+                    body {
+                        background: #111;
+                        color: #eee;
+                        font-family: monospace;
+                        white-space: pre-wrap;
+                        padding: 10px;
+                    }
+                </style>
+            </head>
+            <body>
+                ${logText}
+            <script>
+                window.scrollTo(0, document.body.scrollHeight);
+            </script>
+            </body>
+        </html>
+    `;
+
+    logWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(html)}`);
+}
+
+// keep track of processes that this app spawned (to make sure they are killed)
+const pidFile = path.join(app.getPath('userData'),  'Firefly-pid.txt');
+fs.mkdirSync(path.dirname(pidFile), { recursive: true }); // create the file if needed
+console.log("PIDFILE:", pidFile)
+function writePidFile(pid, port, name) {
+    const timestamp = new Date().toISOString();
+    let entries = [];
+    if (fs.existsSync(pidFile)) {
+        try {
+            const content = fs.readFileSync(pidFile, 'utf8').trim();
+            if (content) {
+                entries = JSON.parse(content);
+                if (!Array.isArray(entries)) entries = [];
+            }
+        } catch (err) {
+            console.warn('PID file corrupted, resetting.', err);
+            entries = [];
+        }
+    }
+
+    // Append the new entry
+    entries.push({ pid, port, name, timestamp });
+
+    // Write the updated array back to the file
+    fs.writeFileSync(pidFile, JSON.stringify(entries, null, 2));
+
+}
 
 // enable the system file browser
 ipcMain.handle('dialog:selectDirectory', async () => {
@@ -62,8 +148,20 @@ ipcMain.handle('dialog:selectDirectory', async () => {
     return result.filePaths[0]; // absolute path to selected folder
 });
 
+function createSplash(){
+    // Create splash screen
+    splash = new BrowserWindow({
+        width: 800,
+        height: 300,
+        frame: false,
+        alwaysOnTop: true,
+        transparent: true,
+        center: true
+    });
+    splash.loadFile(path.join(__dirname, 'src', 'splash.html'));
+}
 
-function createWindow (fireflyPort, jupyterPort) {
+function createMainWindow (fPort, jPort) {
     mainWindow = new BrowserWindow({
         width: 2400,
         height: 1200,
@@ -81,10 +179,18 @@ function createWindow (fireflyPort, jupyterPort) {
     // Load the app, sending the correct ports
     const filePath = path.join(__dirname, 'src', 'firefly-electron.html');
     const urlWithParams = new URL(`file://${filePath}`);
-    urlWithParams.searchParams.append('fireflyPort', fireflyPort);
-    urlWithParams.searchParams.append('jupyterPort', jupyterPort);
+    urlWithParams.searchParams.append('fireflyPort', fPort);
+    urlWithParams.searchParams.append('jupyterPort', jPort);
     mainWindow.loadURL(urlWithParams.toString());
 
+
+    // Once the main window is ready, show it and close splash
+    mainWindow.once('ready-to-show', () => {
+        if (splash) {
+            splash.close();
+        }
+        mainWindow.show();
+    });
 }
 
 // get the paths (different for dev vs build)
@@ -143,13 +249,15 @@ async function startPythonBackend() {
     ];
 
     pyProc = spawn(pythonPath, fireflyArgs, {
+        shell: true,
+        detach: true,
+        windowsHide: true,
         env: {
             ...process.env,
             PATH: `${path.dirname(pythonPath)}:${process.env.PATH}`,
             PYTHONUNBUFFERED: '1'
         },
-        shell: true,
-        detach: true,
+
     });
 
     pyProc.stdout.on('data', (data) => {
@@ -159,16 +267,13 @@ async function startPythonBackend() {
         console.error(`[PYTHON STDERR]: ${data}`);
     });
 
-    return port;
-}
+    pyProc.on('exit', (code, signal) => {
+        console.log(`Firefly python backend exited with code ${code}, signal ${signal}`);
+    });
 
-function stopPythonBackend() {
-    if (pyProc && pyProc.pid) {
-        kill(pyProc.pid, 'SIGTERM', err => {
-            if (err) console.error('Failed to kill Python process:', err);
-            else console.log('Python process killed.');
-        });
-    }
+    writePidFile(pyProc.pid, port, 'Firefly Python backend');
+
+    return port;
 }
 
 async function startJupyter() {
@@ -194,8 +299,9 @@ async function startJupyter() {
 
 
     jupyterProc = spawn(jupyterPath, jupyterArgs, {
-        shell: true,
+        shell: false,
         detached: true,
+        windowsHide: true,
         env: {
             ...process.env,
             PATH: `${path.dirname(pythonPath)}:${process.env.PATH}`,
@@ -209,36 +315,35 @@ async function startJupyter() {
         console.error(`[JUPYTER STDERR]: ${data}`);
     });
 
+    jupyterProc.on('exit', (code, signal) => {
+        console.log(`Jupyter exited with code ${code}, signal ${signal}`);
+    });
+
+    writePidFile(jupyterProc.pid, port, 'Jupyter');
+
     return port;
 }
 
-function stopJupyter(){
-    if (jupyterProc && jupyterProc.pid) {
-        kill(jupyterProc.pid, 'SIGTERM', err => {
-            if (err) console.error('Failed to kill Jupyter:', err);
-            else console.log('Jupyter killed.');
-        });
-    }
-}
 
 
 function waitForLoading(ports, callback) {
     const pending = new Set(ports);
 
-    const checkPort = (port) => {
-        http.get({ host: 'localhost', port }, () => {
-            console.log(`Port ${port} is ready.`);
-            pending.delete(port);
-            if (pending.size === 0) {
-                callback(...ports); // all ports are ready
-            }
-            }).on('error', () => {
-            console.log(`Waiting for port ${port}...`);
-            setTimeout(() => checkPort(port), 500);
-        });
-    };
+    const interval = setInterval(() => {
+        for (const port of [...pending]) {
+            http.get({ host: 'localhost', port }, () => {
+                console.log(`Port ${port} is ready.`);
+                pending.delete(port);
 
-    ports.forEach(port => checkPort(port));
+                if (pending.size === 0) {
+                    clearInterval(interval); 
+                    callback(...ports);
+                }
+            }).on('error', () => {
+                console.log(`Waiting for port ${port}...`);
+            });
+        }
+    }, 500);
 }
 
 
@@ -249,13 +354,17 @@ app.whenReady().then(async() => {
     writeToLogFile("App is starting...");
     try {
 
-        const fireflyPort = await startPythonBackend();
-        const jupyterPort = await startJupyter();
-        waitForLoading([fireflyPort, jupyterPort], createWindow);
+        createSplash();
+        //createLogWindow(); <-- causing errors (come back to this)
+        await checkAndKillExistingProcess();
+        fireflyPort = await startPythonBackend();
+        jupyterPort = await startJupyter();
+        waitForLoading([fireflyPort, jupyterPort], createMainWindow);
 
         app.on('activate', function () {
-            if (BrowserWindow.getAllWindows().length === 0) createWindow(fireflyPort, jupyterPort);
+            if (BrowserWindow.getAllWindows().length === 0) createMainWindow(fireflyPort, jupyterPort);
         });
+
 
     } catch (e) {
         writeToLogFile("Error: " + e.stack);
@@ -263,16 +372,129 @@ app.whenReady().then(async() => {
 
 });
 
+// cleanup on close
+async function killProcessTree(pid, name = 'process', port = null) {
+    return new Promise((resolve) => {
+        if (!pid && !port) return resolve();
+
+        const attemptPortKill = async () => {
+            if (!port) return resolve();
+            try {
+                // find-process works across platforms
+                const list = await find('port', port);
+                if (list.length > 0) {
+                    const p = list[0];
+                    console.warn(`${name}: port ${port} still in use by PID ${p.pid}, force killing...`);
+                    try {
+                        process.kill(p.pid, 'SIGKILL');
+                        console.log(`${name}: killed PID ${p.pid} via port fallback.`);
+                    } catch (e) {
+                        console.error(`${name}: failed to kill PID ${p.pid} via port fallback:`, e);
+                    }
+                } else {
+                    console.log(`${name}: port ${port} is free.`);
+                }
+            } catch (err) {
+                console.error(`${name}: failed to query port ${port}:`, err);
+            }
+            resolve();
+        };
+
+        if (pid) {
+            kill(pid, 'SIGTERM', (err) => {
+                if (!err) {
+                    console.log(`${name} (pid ${pid}) killed via tree-kill.`);
+                    return attemptPortKill();
+                }
+
+                console.warn(`tree-kill failed for ${name} (pid ${pid}):`, err);
+
+                if (os.platform() === 'win32') {
+                    exec(`taskkill /PID ${pid} /T /F`, (error, stdout, stderr) => {
+                        if (error) {
+                            console.error(`taskkill failed for ${name} (pid ${pid}):`, stderr);
+                        } else {
+                            console.log(`${name} (pid ${pid}) killed via taskkill.`);
+                        }
+                        attemptPortKill();
+                    });
+                } else {
+                    try {
+                        process.kill(-pid, 'SIGKILL');
+                        console.log(`${name} (pid ${pid}) killed via process group kill.`);
+                    } catch (e) {
+                        console.error(`process.kill failed for ${name} (pid ${pid}):`, e);
+                    }
+                    attemptPortKill();
+                }
+            });
+        } else {
+            attemptPortKill();
+        }
+    });
+}
+
+async function checkAndKillExistingProcess() {
+    if (!fs.existsSync(pidFile)) return;
+
+    try {
+        const entries = JSON.parse(fs.readFileSync(pidFile, 'utf8'));
+        const remaining = [];
+        if (!entries) return;
+        for (const {pid, port, name} of entries) {
+
+            console.log('CHECKING', pid, port, name)
+            try {
+                console.log(`Found existing process PID ${pid} on port ${port}, attempting to kill...`);
+                await killProcessTree(pid, name, port);
+                console.log(`Process ${name} PID ${pid} killed.`);
+            } catch (err) {
+                console.error(`Failed to kill ${name} PID ${pid}:`, err);
+                remaining.push({ pid, port, name });
+            }
+        }
+
+        // Write back remaining PIDs or remove file if empty
+        if (remaining.length) {
+            fs.writeFileSync(pidFile, JSON.stringify(remaining, null, 2));
+        } else {
+            fs.unlinkSync(pidFile);
+        }
+
+    } catch (err) {
+        console.error('Failed to read or parse PID file:', err);
+    } 
+}
+
+app.on('will-quit', async (event) => {
+    event.preventDefault(); // stop default quit
+
+    console.log('Cleaning up before quit...');
+    await checkAndKillExistingProcess();
+    await killProcessTree(pyProc?.pid, 'Firefly Python backend', fireflyPort);
+    await killProcessTree(jupyterProc?.pid, 'Jupyter',jupyterPort);
+
+    console.log('All cleaned up. Now exiting.');
+    process.exit(0);
+});
+
 app.on('window-all-closed', () => {
-    stopPythonBackend();
-    stopJupyter();
     if (process.platform !== 'darwin') {
         app.quit();
     }
 });
 
-app.on('before-quit', () => {
-    stopPythonBackend();
-    stopJupyter();
-});
+// force only a single instance of the app
+const gotTheLock = app.requestSingleInstanceLock();
 
+if (!gotTheLock) {
+    app.quit();
+} else {
+    app.on('second-instance', () => {
+    // Someone tried to open a 2nd instance → focus existing window instead
+        if (mainWindow) {
+            if (mainWindow.isMinimized()) mainWindow.restore();
+            mainWindow.focus();
+        }
+    });
+}

@@ -45,6 +45,7 @@
     "dependencies": {
         "detect-port": "^2.1.0",
         "electron-is-dev": "^3.0.1",
+        "find-process": "^2.0.0",
         "tree-kill": "^1.2.2"
     }
 }

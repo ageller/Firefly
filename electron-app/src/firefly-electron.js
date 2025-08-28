@@ -10,6 +10,7 @@ let rightStartWidth = 0;
 
 const fireflyWebview = document.getElementById('firefly');
 const jupyterWebview = document.getElementById('jupyter');
+const logsWebview = document.getElementById('logs');
 
 // keep panel sizing consistent
 function normalizePanelFlex(reset=false) {
@@ -190,7 +191,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
     fireflyWebview.src = `http://localhost:${fireflyPort}/combined`;    
     jupyterWebview.src = `http://localhost:${jupyterPort}/lab/tree/minimal_example_electron.ipynb`;
-
+    logsWebview.src = "https://www.google.com";
 });
 
 

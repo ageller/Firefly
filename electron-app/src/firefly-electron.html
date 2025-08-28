@@ -13,11 +13,15 @@
                     <button onclick="toggleView(this, 'firefly')" class="shown"><img width="60px" src="icons/firefly-icon.png"></button>
                 </div>
                 <div class="sidebar-icon-wrapper">
-                    <button onclick="toggleView(this, 'jupyter')"><img width="60px" src="icons/jupyter-icon.png"></button>
+                    <button onclick="toggleView(this, 'jupyter')" class="shown"><img width="60px" src="icons/jupyter-icon.png"></button>
                 </div>
                 <div class="sidebar-icon-wrapper" id="loadDataButton">
                     <button onclick="enableDataTypeSelection()"><img width="60px" src="icons/Google_Design_folder_upload_icon.png"></button>
                 </div>
+                <div class="sidebar-icon-wrapper">
+                    <button onclick="toggleView(this, 'logs')"><img width="60px" src="icons/Google_Design_overview_icon.png"></button>
+                </div>
+
             </div>
             <!-- Hidden dropdown for selecting the file type -->
             <div id="dataTypeDropdown" >
