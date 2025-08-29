@@ -11,4 +11,5 @@ module.exports = {
     jupyterProc: null,
     jupyterPort: null,
     logFile:null,
+    pidFile:null,
 };

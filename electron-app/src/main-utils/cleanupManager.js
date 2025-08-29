@@ -7,19 +7,18 @@ const kill = require('tree-kill');
 const os = require('os');
 const find = require('find-process');
 const { exec } = require('child_process');
+const state = require('./state');
 
-const pidFile = path.join(app.getPath('userData'),  'Firefly-pid.txt');
+state.pidFile = path.join(app.getPath('userData'),  'Firefly-pid.txt');
 
-fs.mkdirSync(path.dirname(pidFile), { recursive: true }); // create the file if needed
-
-console.log("PIDFILE:", pidFile)
+fs.mkdirSync(path.dirname(state.pidFile), { recursive: true }); // create the file if needed
 
 function writePidFile(pid, port, name) {
     const timestamp = new Date().toISOString();
     let entries = [];
-    if (fs.existsSync(pidFile)) {
+    if (fs.existsSync(state.pidFile)) {
         try {
-            const content = fs.readFileSync(pidFile, 'utf8').trim();
+            const content = fs.readFileSync(state.pidFile, 'utf8').trim();
             if (content) {
                 entries = JSON.parse(content);
                 if (!Array.isArray(entries)) entries = [];
@@ -34,7 +33,7 @@ function writePidFile(pid, port, name) {
     entries.push({ pid, port, name, timestamp });
 
     // Write the updated array back to the file
-    fs.writeFileSync(pidFile, JSON.stringify(entries, null, 2));
+    fs.writeFileSync(state.pidFile, JSON.stringify(entries, null, 2));
 
 }
 
@@ -101,15 +100,13 @@ async function killProcessTree(pid, name = 'process', port = null) {
 }
 
 async function checkAndKillExistingProcess() {
-    if (!fs.existsSync(pidFile)) return;
+    if (!fs.existsSync(state.pidFile)) return;
 
     try {
-        const entries = JSON.parse(fs.readFileSync(pidFile, 'utf8'));
+        const entries = JSON.parse(fs.readFileSync(state.pidFile, 'utf8'));
         const remaining = [];
         if (!entries) return;
         for (const {pid, port, name} of entries) {
-
-            console.log('CHECKING', pid, port, name)
             try {
                 console.log(`Found existing process PID ${pid} on port ${port}, attempting to kill...`);
                 await killProcessTree(pid, name, port);
@@ -122,9 +119,9 @@ async function checkAndKillExistingProcess() {
 
         // Write back remaining PIDs or remove file if empty
         if (remaining.length) {
-            fs.writeFileSync(pidFile, JSON.stringify(remaining, null, 2));
+            fs.writeFileSync(state.pidFile, JSON.stringify(remaining, null, 2));
         } else {
-            fs.unlinkSync(pidFile);
+            fs.unlinkSync(state.pidFile);
         }
 
     } catch (err) {

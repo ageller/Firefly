@@ -3,7 +3,7 @@ const { app, BrowserWindow, ipcMain } = require('electron');
 
 // my scripts
 const state = require('./src/main-utils/state');
-const { initLogFile, writeToLogFile } = require('./src/main-utils/logManager');
+const { initLogFile } = require('./src/main-utils/logManager');
 const { killProcessTree, checkAndKillExistingProcess } = require('./src/main-utils/cleanupManager');
 const { createMainWindow, createSplash, toggleLogWindow } = require('./src/main-utils/windowManager');
 const { startPythonBackend, startJupyter, waitForLoading } = require('./src/main-utils/processManager');
@@ -32,7 +32,7 @@ app.whenReady().then(async() => {
     // console.log(app.getGPUFeatureStatus());
     
     initLogFile();
-    writeToLogFile("Firefly is starting...");
+    console.log("Firefly is starting...");
     try {
 
         createSplash();

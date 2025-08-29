@@ -7,12 +7,19 @@ const { app } = require('electron');
 
 const state = require('./state');
 
+
+// Monkey-patch console
+['log', 'info', 'warn', 'error'].forEach(level => {
+    const orig = console[level];
+    console[level] = (...args) => {
+        writeToLogFile(level, args);
+        //orig.apply(console, args); // keep default behavior too
+    };
+});
+
+
 state.logFile = path.join(app.getPath('userData'),  'Firefly-log.txt');
 const asciiFile = path.join(__dirname, '..','icons','firefly-icon-ascii.txt');
-
-console.log("LOGFILE:", state.logFile)
-
-
 
 function initLogFile() {
     // add a fun ascii art to the top of the logfile
@@ -26,8 +33,12 @@ function initLogFile() {
     }
     fs.writeFileSync(state.logFile, header);
 
+    console.log("LOGFILE :", state.logFile)
+    console.log("PIDFILE :", state.pidFile)
+    console.log("PYTHON PATH : ", state.pythonPath);
+    console.log("JUPYTER PATH : ", state.jupyterPath);
+    console.log("NOTEBOOK PATH : ", state.notebookPath);
 }
-
 
 function writeToLogFile(level, args) {
     const timestamp = new Date().toISOString();
@@ -48,16 +59,6 @@ function writeToLogFile(level, args) {
         process.stdout.write(line);
     }
 }
-
-// Monkey-patch console
-['log', 'info', 'warn', 'error'].forEach(level => {
-    const orig = console[level];
-    console[level] = (...args) => {
-        writeToLogFile(level, args);
-        //orig.apply(console, args); // keep default behavior too
-    };
-});
-
 
 
 // Reads the log file and updates the window content

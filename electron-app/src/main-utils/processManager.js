@@ -11,9 +11,6 @@ const state = require('./state');
 const pythonPath = state.pythonPath || initPythonPath();
 const jupyterPath = state.jupyterPath || initJupyterPath();
 const notebookPath = state.notebookPath || initNotebookPath();
-console.log("PYTHON PATH = ", pythonPath);
-console.log("JUPYTER PATH = ", jupyterPath);
-console.log("NOTEBOOK PATH = ", notebookPath);
 
 async function startPythonBackend() {
     // this will launch the flask version of firefly bundled with the app
