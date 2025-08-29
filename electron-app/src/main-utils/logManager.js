@@ -3,14 +3,14 @@
  
 const path = require('path');
 const fs = require('fs');
-const { app, BrowserWindow } = require('electron');
+const { app } = require('electron');
 
 const state = require('./state');
 
-const logFile = path.join(app.getPath('userData'),  'Firefly-log.txt');
+state.logFile = path.join(app.getPath('userData'),  'Firefly-log.txt');
 const asciiFile = path.join(__dirname, '..','icons','firefly-icon-ascii.txt');
 
-console.log("LOGFILE:", logFile)
+console.log("LOGFILE:", state.logFile)
 
 
 
@@ -18,13 +18,13 @@ function initLogFile() {
     // add a fun ascii art to the top of the logfile
     // this will clear the file (could remove/adjust if history needed)
     
-    fs.mkdirSync(path.dirname(logFile), { recursive: true }); // create the file if needed
+    fs.mkdirSync(path.dirname(state.logFile), { recursive: true }); // create the file if needed
     
     let header = '';
     if (fs.existsSync(asciiFile)) {
         header = fs.readFileSync(asciiFile, 'utf8') + '\n';
     }
-    fs.writeFileSync(logFile, header);
+    fs.writeFileSync(state.logFile, header);
 
 }
 
@@ -39,7 +39,7 @@ function writeToLogFile(level, args) {
     const line = `[${timestamp}] [${level.toUpperCase()}] ${message}\n`;
 
     // Append to file
-    fs.appendFileSync(logFile, line, { encoding: 'utf8' });
+    fs.appendFileSync(state.logFile, line, { encoding: 'utf8' });
 
     // Still print to console (so you see logs in `npm start`)
     if (level === 'error') {
@@ -58,41 +58,15 @@ function writeToLogFile(level, args) {
     };
 });
 
-function createLogWindow() {
-    state.logWindow = new BrowserWindow({
-        width: 800,
-        height: 900,
-        webPreferences: {
-            nodeIntegration: true, // needed to read file in renderer
-            contextIsolation: false,
-        },
-    });
 
-
-    loadLogContent();
-
-    // Watch the log file for changes
-    let logWatcher = fs.watch(logFile, { encoding: 'utf8' }, () => {
-        loadLogContent();
-    });
-
-    state.logWindow.on('closed', () => {
-        state.logWindow = null; // remove reference
-        // stop watching the file
-        if (logWatcher) logWatcher.close();
-    });
-
-    return state.logWindow;
-
-}
 
 // Reads the log file and updates the window content
 // a bit clunky because it recreates the full html file each time the log is updated...
 function loadLogContent() {
     if (!state.logWindow) return;
 
-    const logText = fs.existsSync(logFile)
-    ? fs.readFileSync(logFile, 'utf8')
+    const logText = fs.existsSync(state.logFile)
+    ? fs.readFileSync(state.logFile, 'utf8')
     : 'Log is empty';
 
     const html = `
@@ -122,4 +96,4 @@ function loadLogContent() {
 }
 
 
-module.exports = { initLogFile, createLogWindow, writeToLogFile };
+module.exports = { initLogFile, writeToLogFile, loadLogContent };

@@ -191,7 +191,6 @@ window.addEventListener('DOMContentLoaded', () => {
 
     fireflyWebview.src = `http://localhost:${fireflyPort}/combined`;    
     jupyterWebview.src = `http://localhost:${jupyterPort}/lab/tree/minimal_example_electron.ipynb`;
-    logsWebview.src = "https://www.google.com";
 });
 
 

@@ -10,4 +10,5 @@ module.exports = {
     fireflyPort: null,
     jupyterProc: null,
     jupyterPort: null,
+    logFile:null,
 };

@@ -79,7 +79,7 @@ async function startJupyter() {
         'lab',
         '--no-browser',
         `--port=${port}`,
-        '--NotebookApp.token=""',
+        '--IdentityProvider.token=""',
         `--notebook-dir=${notebookPath}`
     ];
 

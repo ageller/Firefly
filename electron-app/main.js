@@ -1,11 +1,11 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, ipcMain } = require('electron');
 
 
 // my scripts
 const state = require('./src/main-utils/state');
-const { initLogFile, createLogWindow, writeToLogFile } = require('./src/main-utils/logManager');
+const { initLogFile, writeToLogFile } = require('./src/main-utils/logManager');
 const { killProcessTree, checkAndKillExistingProcess } = require('./src/main-utils/cleanupManager');
-const { createMainWindow, createSplash } = require('./src/main-utils/windowManager');
+const { createMainWindow, createSplash, toggleLogWindow } = require('./src/main-utils/windowManager');
 const { startPythonBackend, startJupyter, waitForLoading } = require('./src/main-utils/processManager');
 
 
@@ -36,7 +36,6 @@ app.whenReady().then(async() => {
     try {
 
         createSplash();
-        createLogWindow(); 
         await checkAndKillExistingProcess();
         state.fireflyPort = await startPythonBackend();
         state.jupyterPort = await startJupyter();
@@ -51,6 +50,11 @@ app.whenReady().then(async() => {
         writeToLogFile("Error: " + e.stack);
     }
 
+});
+
+// on messages from the mainWindow, open the log viewer
+ipcMain.on('open-log-viewer', () => {
+    toggleLogWindow();
 });
 
 // gracefully exit

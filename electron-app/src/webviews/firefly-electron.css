@@ -39,6 +39,24 @@ body {
 #sidebar .sidebar-icon-wrapper {
     position: relative;
     display: inline-block;
+
+}
+#sidebar .sidebar-icon-label{
+    text-align:center;
+    color: #6d00b8;
+    display: block;
+    margin-top: -14px;
+    font-size: 14px;
+}
+#sidebar hr {
+    display: block;
+    height: 1px;
+    border: 0;
+    border-top: 1px solid #333;
+    margin: 0;
+    margin-top: 1em;
+    padding: 0;
+    width: 90%;
 }
 #dataTypeDropdown{
     position:absolute;
@@ -122,3 +140,4 @@ webview::part(iframe) {
     height: 100% !important;
     width: 100% !important;
 }
+
