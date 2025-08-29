@@ -9,14 +9,14 @@ Some pre-made installation scripts are already available in the `dist` directory
 
 ## For development and testing
 
-If you need to build the app for your specific operating system and/or you would like to modify the app, you will first need to clone this repo to your machine.  You will also need to have `node`, `npm` and `conda` (e.g., miniforge) installed on your machine.
+If you need to build the app for your specific operating system and/or you would like to modify the app, you will first need to clone this repo to your machine.  You will also need to have `node`, `npm` and `python >3.10`  installed on your machine.
 
 Then within this directory you should run:
 ```
 npm install
 npm run prepare
 ```
-These commands will install the necessary node dependencies and create a version of Python and other necessary components bundled for the Firefly electron app to access.  The prepare step assumes that you have `conda` available within your `PATH`.  You only need to run these commands once.
+These commands will install the necessary node dependencies and create a version of Python and other necessary components bundled for the Firefly electron app to access.  The prepare step assumes that you have `python >3.10` available within your `PATH`.  You only need to run these commands once.
 
 Then to run a development version (without building):
 ```

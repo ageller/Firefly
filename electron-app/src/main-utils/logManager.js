@@ -36,7 +36,6 @@ function initLogFile() {
     console.log("LOGFILE :", state.logFile)
     console.log("PIDFILE :", state.pidFile)
     console.log("PYTHON PATH : ", state.pythonPath);
-    console.log("JUPYTER PATH : ", state.jupyterPath);
     console.log("NOTEBOOK PATH : ", state.notebookPath);
 }
 

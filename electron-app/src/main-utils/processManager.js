@@ -4,12 +4,11 @@ const detect = require('detect-port').default || require('detect-port');
 const http = require('http');
 
 const { writePidFile } = require('./cleanupManager');
-const { initPythonPath, initJupyterPath, initNotebookPath } = require('./pathManager')
+const { initPythonPath, initNotebookPath } = require('./pathManager')
 const state = require('./state');
 
 // define the paths
 const pythonPath = state.pythonPath || initPythonPath();
-const jupyterPath = state.jupyterPath || initJupyterPath();
 const notebookPath = state.notebookPath || initNotebookPath();
 
 async function startPythonBackend() {
@@ -32,7 +31,7 @@ async function startPythonBackend() {
     ];
 
     state.pyProc = spawn(pythonPath, fireflyArgs, {
-        shell: true,
+        // shell: true,
         detach: true,
         windowsHide: true,
         env: {
@@ -73,16 +72,15 @@ async function startJupyter() {
     }
 
     const jupyterArgs = [
-        'lab',
+        '-m', 'jupyter', 'lab',
         '--no-browser',
         `--port=${port}`,
         '--IdentityProvider.token=""',
         `--notebook-dir=${notebookPath}`
     ];
 
-
-    state.jupyterProc = spawn(jupyterPath, jupyterArgs, {
-        shell: false,
+    state.jupyterProc = spawn(pythonPath, jupyterArgs, {
+        // shell: true,
         detached: true,
         windowsHide: true,
         env: {

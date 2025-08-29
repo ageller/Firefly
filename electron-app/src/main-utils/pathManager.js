@@ -13,30 +13,16 @@ const getPythonPath = () => {
         : path.join(process.resourcesPath, 'bundle', 'python');
 
     return process.platform === 'win32'
-        ? path.join(pythonDir, 'python.exe')
+        ? path.join(pythonDir, 'Scripts', 'python.exe')
         : path.join(pythonDir, 'bin', 'python');
 };
 
-const getJupyterPath = () => {
-    const jupyterPath = isDev
-        ? path.join(__dirname, '..', '..', 'bundle', 'python')
-        : path.join(process.resourcesPath, 'bundle', 'python');
-
-    return process.platform === 'win32'
-        ? path.join(jupyterPath, 'Scripts','jupyter.exe')
-        : path.join(jupyterPath, 'bin', 'jupyter');
-}; 
 
 const getNotebookPath = () => {
     return isDev
         ? path.join(__dirname, '..', '..', 'bundle', 'ntbks')
         : path.join(process.resourcesPath, 'bundle', 'ntbks');
 }; 
-
-function initJupyterPath() {
-    state.jupyterPath = getJupyterPath();
-    return state.jupyterPath;
-}
 
 function initPythonPath() {
     state.pythonPath = getPythonPath();
@@ -50,4 +36,4 @@ function initNotebookPath() {
 
 
 
-module.exports = { initPythonPath, initJupyterPath, initNotebookPath };
+module.exports = { initPythonPath, initNotebookPath };
