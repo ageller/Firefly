@@ -145,25 +145,6 @@ function createUserKernel(){
         console.log(`Installing firefly-electron jupyter kernel ...`);
         execSync(`${pythonPath} -m ipykernel install --user --name firefly-electron --display-name "firefly-electron-py3 \(ipykernel\)"`);
     } 
-
-    // const kernelArgs = [
-    //     '-m', 'ipykernel', 'install',
-    //     '--user',
-    //     '--name=firefly-electron',
-    //     '--display-name=firefly-electron-py3 \(ipykernel\)'
-    // ];
-
-    // kernelProc = spawn(pythonPath, kernelArgs, {
-    //     // shell: true,
-    //     detach: true,
-    //     windowsHide: true,
-    //     env: {
-    //         ...process.env,
-    //         PATH: `${path.dirname(pythonPath)}:${process.env.PATH}`,
-    //         PYTHONUNBUFFERED: '1'
-    //     },
-
-    // });
 }
 
 module.exports = { startPythonBackend, startJupyter, waitForLoading, createUserKernel };
