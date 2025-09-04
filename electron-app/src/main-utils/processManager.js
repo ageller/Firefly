@@ -142,7 +142,7 @@ function createUserKernel(){
     }
 
     if (!("firefly-electron" in kernelspecs)) {
-        console.log(`Installing firefly-electron jupyter kernel ...`);
+        console.log("Installing firefly-electron jupyter kernel ...");
         execSync(`${pythonPath} -m ipykernel install --user --name firefly-electron --display-name "firefly-electron-py3 \(ipykernel\)"`);
     } 
 }
