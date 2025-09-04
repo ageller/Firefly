@@ -29,5 +29,4 @@ npm run build
 ```
 This will create a setup executable file within your `dist` directory
 
-
 (More information on these steps can be found in `package.json`.)

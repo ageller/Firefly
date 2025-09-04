@@ -59,7 +59,11 @@ function createMainWindow (fPort, jPort) {
         if (state.splash) {
             state.splash.close();
         }
-        state.mainWindow.show();
+        // make sure the mainWindow is in front
+        state.mainWindow.focus();
+        state.mainWindow.show(); 
+        state.mainWindow.setAlwaysOnTop(true);
+        state.mainWindow.setAlwaysOnTop(false);
     });
 
     state.mainWindow.on('closed', () => {
