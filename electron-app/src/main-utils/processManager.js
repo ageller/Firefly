@@ -1,13 +1,14 @@
-const { spawn } = require('child_process');
+const { spawn, execSync } = require('child_process');
 const path = require('path');
 const detect = require('detect-port').default || require('detect-port');
 const http = require('http');
 
 const { writePidFile } = require('./cleanupManager');
-const { initPythonPath, initNotebookPath } = require('./pathManager')
+const { initBundlePath, initPythonPath, initNotebookPath } = require('./pathManager')
 const state = require('./state');
 
 // define the paths
+const bundlePath = state.bundlePath || initBundlePath();
 const pythonPath = state.pythonPath || initPythonPath();
 const notebookPath = state.notebookPath || initNotebookPath();
 
@@ -76,7 +77,7 @@ async function startJupyter() {
         '--no-browser',
         `--port=${port}`,
         '--IdentityProvider.token=""',
-        `--notebook-dir=${notebookPath}`
+        `--notebook-dir=${notebookPath}`,
     ];
 
     state.jupyterProc = spawn(pythonPath, jupyterArgs, {
@@ -86,6 +87,7 @@ async function startJupyter() {
         env: {
             ...process.env,
             PATH: `${path.dirname(pythonPath)}:${process.env.PATH}`,
+            JUPYTER_CONFIG_DIR: path.join(bundlePath,'python')
         }
     });
 
@@ -127,4 +129,41 @@ function waitForLoading(ports, callback) {
     }, 500);
 }
 
-module.exports = { startPythonBackend, startJupyter, waitForLoading };
+
+function createUserKernel(){
+
+    let kernelspecs;
+    try {
+        const out = execSync(`${pythonPath} -m jupyter kernelspec list --json`, { encoding: 'utf-8' });
+        kernelspecs = JSON.parse(out).kernelspecs;
+    } catch (err) {
+        console.error("Couldn't query kernelspecs:", err);
+        kernelspecs = {};
+    }
+
+    if (!("firefly-electron" in kernelspecs)) {
+        console.log(`Installing firefly-electron jupyter kernel ...`);
+        execSync(`${pythonPath} -m ipykernel install --user --name firefly-electron --display-name "firefly-electron-py3 \(ipykernel\)"`);
+    } 
+
+    // const kernelArgs = [
+    //     '-m', 'ipykernel', 'install',
+    //     '--user',
+    //     '--name=firefly-electron',
+    //     '--display-name=firefly-electron-py3 \(ipykernel\)'
+    // ];
+
+    // kernelProc = spawn(pythonPath, kernelArgs, {
+    //     // shell: true,
+    //     detach: true,
+    //     windowsHide: true,
+    //     env: {
+    //         ...process.env,
+    //         PATH: `${path.dirname(pythonPath)}:${process.env.PATH}`,
+    //         PYTHONUNBUFFERED: '1'
+    //     },
+
+    // });
+}
+
+module.exports = { startPythonBackend, startJupyter, waitForLoading, createUserKernel };

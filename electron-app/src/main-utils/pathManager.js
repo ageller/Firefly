@@ -7,27 +7,36 @@ const isDev = (rawIsDev && typeof rawIsDev === 'object' && 'default' in rawIsDev
 
 const state = require('./state');
 
+const getBundlePath = () => {
+    return isDev
+        ? path.join(__dirname, '..', '..', 'bundle')
+        : path.join(process.resourcesPath, 'bundle');
+
+};
+
 const getPythonPath = () => {
-    const pythonDir = isDev
-        ? path.join(__dirname, '..', '..', 'bundle', 'python')
-        : path.join(process.resourcesPath, 'bundle', 'python');
+    const pythonDir = path.join(getBundlePath(), 'python');
 
     return process.platform === 'win32'
         ? path.join(pythonDir, 'Scripts', 'python.exe')
         : path.join(pythonDir, 'bin', 'python');
 };
 
-
 const getNotebookPath = () => {
-    return isDev
-        ? path.join(__dirname, '..', '..', 'bundle', 'ntbks')
-        : path.join(process.resourcesPath, 'bundle', 'ntbks');
+    return path.join(getBundlePath(), 'ntbks');
 }; 
+
+function initBundlePath(){
+    state.bundlePath = getBundlePath();
+    return state.bundlePath;
+
+}
 
 function initPythonPath() {
     state.pythonPath = getPythonPath();
     return state.pythonPath;
 }
+
 
 function initNotebookPath() {
     state.notebookPath = getNotebookPath();
@@ -36,4 +45,4 @@ function initNotebookPath() {
 
 
 
-module.exports = { initPythonPath, initNotebookPath };
+module.exports = { initBundlePath, initPythonPath, initNotebookPath };

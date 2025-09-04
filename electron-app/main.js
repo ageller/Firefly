@@ -6,7 +6,7 @@ const state = require('./src/main-utils/state');
 const { initLogFile } = require('./src/main-utils/logManager');
 const { killProcessTree, checkAndKillExistingProcess } = require('./src/main-utils/cleanupManager');
 const { createMainWindow, createSplash, toggleLogWindow } = require('./src/main-utils/windowManager');
-const { startPythonBackend, startJupyter, waitForLoading } = require('./src/main-utils/processManager');
+const { startPythonBackend, startJupyter, waitForLoading, createUserKernel } = require('./src/main-utils/processManager');
 
 
 
@@ -36,6 +36,7 @@ app.whenReady().then(async() => {
     try {
 
         createSplash();
+        createUserKernel();
         await checkAndKillExistingProcess();
         state.fireflyPort = await startPythonBackend();
         state.jupyterPort = await startJupyter();

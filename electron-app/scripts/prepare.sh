@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# exit if an error occurs
+set -e
+
 # create the bundled python venv, install firefly (via this repo) and jupyter
 
 # ---- Configuration ----
@@ -65,6 +68,12 @@ python -m pip install --upgrade pip
 echo "=== Installing Firefly and dependencies..."
 python -m pip install --force-reinstall ../ jupyter jupyterlab
 python -m jupyter lab build --dev-build=False --minimize=True
+
+# write the jupyter config file
+cat > "$BUNDLE_DIR/jupyter_server_config.py" <<'EOF'
+c.MappingKernelManager.default_kernel_name = "firefly-electron"
+c.KernelSpecManager.allowed_kernelspecs = {"firefly-electron"}
+EOF
 
 echo "=== Python venv with dependencies created at $BUNDLE_DIR"
 

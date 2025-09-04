@@ -1,8 +1,8 @@
 // state variables that will be shared
 module.exports = {
     logWindow: null,
+    bundlePath: null,
     notebookPath: null,
-    jupyterPath: null,
     pythonPath: null,
     mainWindow: null,
     splash: null,
