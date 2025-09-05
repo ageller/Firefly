@@ -208,6 +208,14 @@ fireflyWebview.addEventListener('did-finish-load', () => {
                 console.log("Load new data element found and hidden");
             }
         }, 300); 
+
+        const guiParamsInterval = setInterval(() => {
+            if (window.GUIParams) {
+                window.GUIParams.allowAutoReload = true;
+                console.log('GUIParams.allowAutoReload updated:', window.GUIParams.allowAutoReload);
+                clearInterval(guiParamsInterval);
+            }
+        }, 300); 
     `);
 
 });
