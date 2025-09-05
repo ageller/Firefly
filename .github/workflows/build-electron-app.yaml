@@ -29,6 +29,19 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Update package.json version
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          node -e "
+            const fs = require('fs');
+            const path = 'electron-app/package.json';
+            const pkg = JSON.parse(fs.readFileSync(path, 'utf8'));
+            pkg.version = process.env.VERSION;
+            fs.writeFileSync(path, JSON.stringify(pkg, null, 2));
+          "
+        env:
+          VERSION: ${{ github.ref_name }}        
+
       - name: Install dependencies
         run: npm install
         working-directory: electron-app
