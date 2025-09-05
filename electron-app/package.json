@@ -20,6 +20,7 @@
             "perMachine": false
         },
         "files": [
+            "**/*",
             "dist/**/*",
             "src/**/*",
             "bundle/**/*",
