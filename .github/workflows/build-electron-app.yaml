@@ -24,12 +24,15 @@ jobs:
 
       - name: Install dependencies
         run: npm install
+        working-directory: electron-app
 
       - name: Build with electron-builder
         run: npx electron-builder --${{ matrix.os == 'ubuntu-latest' && 'linux' || (matrix.os == 'windows-latest' && 'win' || 'mac') }} --x64
+        working-directory: electron-app
 
       - name: Make build directory
         run: mkdir build
+        working-directory: electron-app
 
       - name: Rename and move artifacts
         shell: bash
@@ -45,9 +48,10 @@ jobs:
           elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
             mv dist/*.dmg build/${APP}-mac-x64.dmg || true
           fi
+        working-directory: electron-app
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.os }}-build
-          path: build/*
+          path: electron-app/build/*
