@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <title>Firefly</title>
+        <link rel="stylesheet" href="firefly-electron.css">
+    </head>
+    <body>
+        <div id="drag-overlay"></div>
+        <div id="container" style="display: flex; height: 100vh; width: 100vw">
+            <div id="sidebar">
+                <div class="sidebar-icon-wrapper">
+                    <button onclick="toggleView(this, 'firefly')" class="shown"><img width="60px" src="../images/firefly-icon-60px.png"></button>
+                </div>
+                <div class="sidebar-icon-wrapper">
+                    <button onclick="toggleView(this, 'jupyter')" class="shown"><img width="60px" src="../images/jupyter-icon-60px.png"></button>
+                </div>
+                <hr />
+                <div class="sidebar-icon-wrapper" id="loadDataButton">
+                    <button onclick="enableDataTypeSelection()"><img width="60px" src="../images/google-design-folder-upload-icon.png"></button>
+                    <div class="sidebar-icon-label">Load new data</div>
+                </div>
+                <div class="sidebar-icon-wrapper">
+                    <button onclick="window.electronAPI.openLogViewer()"><img width="60px" src="../images/google-design-overview-icon.png"></button>
+                    <div class="sidebar-icon-label">View logfile</div>
+                </div>
+
+            </div>
+            <!-- Hidden dropdown for selecting the file type -->
+            <div id="dataTypeDropdown" >
+                <label>Select File Type:</label>
+                <select id="dataTypeSelect">
+                    <option value=".ffly">FFLY</option>
+                    <option value=".hdf5">HDF5</option>
+                    <option value=".csv">CSV</option>
+                </select>
+                <button id="dataTypeConfirm" onclick="getFireflyFilePath()">Next</button>
+            </div>
+            <div id="panels">
+                <webview id="jupyter" class="panel" partition="persist:jupyter"></webview>
+                <div class="divider"></div>
+                <webview id="firefly" class="panel" partition="persist:firefly"></webview>
+             </div>
+        </div>
+
+        <script type="text/javascript" src="firefly-electron.js"></script>  
+
+    </body>
+</html>

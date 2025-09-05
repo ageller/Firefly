@@ -1,0 +1,102 @@
+name: Build Firefly Electron App
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'   # e.g. v1.0.0
+  release:
+    types: [published]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
+
+      - name: Update package.json version
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          node -e "
+            const fs = require('fs');
+            const path = 'electron-app/package.json';
+            const pkg = JSON.parse(fs.readFileSync(path, 'utf8'));
+            pkg.version = process.env.VERSION;
+            fs.writeFileSync(path, JSON.stringify(pkg, null, 2));
+          "
+        env:
+          VERSION: ${{ github.ref_name }}        
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: electron-app
+
+      - name: Build with electron-builder
+        run: npx electron-builder --${{ matrix.os == 'ubuntu-latest' && 'linux' || (matrix.os == 'windows-latest' && 'win' || 'mac') }} --x64
+        working-directory: electron-app
+
+      - name: Make build directory
+        run: mkdir build
+        working-directory: electron-app
+
+      - name: List dist contents
+        run: ls dist
+        working-directory: electron-app
+
+      - name: Rename and move artifacts
+        shell: bash
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/}
+          else
+            VERSION="v0.0.0-test"
+          fi
+          APP="firefly-electron-${VERSION}"
+
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            if compgen -G "dist/*.exe" > /dev/null; then
+              mv dist/*.exe build/${APP}-win-x64-installer.exe
+            fi
+          elif [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
+            if compgen -G "dist/*.AppImage" > /dev/null; then
+              mv dist/*.AppImage build/${APP}-linux-x64-installer.AppImage
+            fi
+            if compgen -G "dist/*.deb" > /dev/null; then
+              mv dist/*.deb build/${APP}-linux-amd64.deb
+            fi
+          elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
+            if compgen -G "dist/*.dmg" > /dev/null; then
+              mv dist/*.dmg build/${APP}-mac-x64.dmg
+            fi
+          fi
+        working-directory: electron-app
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.os }}-build
+          path: electron-app/build/*
+
+      - name: Create Release
+        if: github.event_name == 'release'
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: electron-app/build/**  # all files in build folder
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

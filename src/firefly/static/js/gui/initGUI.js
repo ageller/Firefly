@@ -22,13 +22,13 @@ function makeUI(local=false){
 			if (GUIParams.cameraNeedsUpdate) updateGUICamera();
 			createUI();
 		}
-		// // attempt to fix the issue where the GUI and viewer don't connect to the socket
-		// // this might result in some infinite loop of reloads...
-		// if (GUIParams.GUItries > 5 && GUIParams.usingSocket){
-		// 	console.log('ERROR IN CREATING GUI.  TRYING AGAIN.');
-		// 	GUIParams.GUItries = 0;
-		// 	location.reload();
-		// }
+		// attempt to fix the issue where the GUI and viewer don't connect to the socket
+		// this might result in some infinite loop of reloads...
+		if (GUIParams.GUItries > 10 && GUIParams.usingSocket && GUIParams.allowAutoReload){
+			console.log('ERROR IN CREATING GUI.  TRYING AGAIN.');
+			GUIParams.GUItries = 0;
+			location.reload();
+		}
 	}, 1000);
 
 	// check that all the expected DOM elements exist in the GUI
@@ -59,8 +59,8 @@ function confirmGUIInit(keys = ["partsKeys", "partsSizeMultipliers", "plotNmax",
 
 	var ready = keys.every(function(k,i){
 		if (GUIParams[k] == null) {
-			console.log("GUI missing ", k)
 			GUIParams.GUItries += 1;
+			console.log(`Try ${GUIParams.GUItries}: GUI missing ${k}`);
 			return false;
 		}
 		return true;

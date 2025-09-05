@@ -93,10 +93,12 @@ function connectViewerSocket(){
 		});
 
 		socketParams.socket.on('load_ffly_data', function(msg) {
+            if ("prefix" in msg) prefix = msg.prefix;
 			console.log("======== have new data : ", msg.filepath);
 			d3.json(msg.filepath + "/filenames.json",  function(files) {
 				if (files != null){
 					callLoadData([files, prefix]);
+                    sendToGUI([{'makeUI':viewerParams.local}]);
 				} else {
 					sendToGUI([{'showLoadingButton':'#loadDataButton'}]);
 					alert("Cannot load data. Please select another directory.");
@@ -1103,7 +1105,6 @@ function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
 	viewerParams.parts.totalSize = 0.;
 	viewerParams.parts.count = {};
 
-
 	viewerParams.partsKeys = Object.keys(viewerParams.filenames);
 	// count how many particles we need to load
 	viewerParams.partsKeys.forEach( function(p, i) {
@@ -1159,7 +1160,6 @@ function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
 					//  which reference .fftree files. Those are loaded
 					//  separately on demand.)
 					if (readf.toLowerCase().includes('.json')){
-						//console.log(prefix+readf)
 						d3.json(prefix+readf, function(foo) {
 							compileJSONData(foo, sanitary_p, callback, initialLoadFrac);
 						});

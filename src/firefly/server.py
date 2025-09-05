@@ -6,7 +6,6 @@
 
 
 import os
-import glob
 import sys
 import json
 import time
@@ -19,7 +18,7 @@ import socketserver
 
 import numpy as np
 
-from flask import Flask, Response, abort, render_template, request, session, current_app
+from flask import Flask, Response, abort, render_template, request, session, current_app, send_from_directory
 from flask_socketio import SocketIO, emit, join_room, leave_room
 
 from eventlet import event
@@ -46,6 +45,8 @@ namespace = '/Firefly'
 default_room = 'default_Firefly_AMG_ABG'
 
 rooms = {} #will be updated below
+
+user_data_dir = {} # will be populated when the room is defined
 
 #for the stream
 fps = 30
@@ -128,9 +129,11 @@ def separate_GUI():
 #     socketio.emit('update_streamer', blob, namespace=namespace)
 
 
-########reading in a directory of hdf5 or csv files
+########reading in a directory of hdf5, csv or ffly files
 @socketio.on('input_otherType', namespace=namespace)
 def input_otherType(fileinfo):
+    global user_data_dir
+
     print('======= showing loader')
     socketio.emit('show_loader', None, namespace=namespace, to=rooms[request.sid])
     socketio.sleep(0.1) #to make sure that the above emit is executed
@@ -138,6 +141,7 @@ def input_otherType(fileinfo):
     # fdir = os.path.join(os.getcwd(),'static','data',filedir)
     fdir = fileinfo['filepath'].strip()
     ftype = fileinfo['filetype']
+    
     try:
 
         print('======= have input '+ftype+' data file(s) in', fdir)
@@ -155,19 +159,12 @@ def input_otherType(fileinfo):
             socketio.emit('input_data', {'status':'done'}, namespace=namespace, to=rooms[request.sid])
             socketio.sleep(0.1) #to make sure that the above emit is executed
         else:
-            # firefly .json create a symlink
-            dirend =  os.path.basename(os.path.normpath(fdir))
-            datadir = os.path.join(os.getcwd(),'static','data',dirend)
-            print(dirend, datadir)
-            if os.path.islink(datadir):
-                print(f"'======= Symlink '{datadir}' exists. Replacing it with the new target.")
-                os.remove(datadir)  # Remove the existing symlink
-            os.symlink(fdir,datadir)
-            output = {"filepath":os.path.relpath(datadir, os.getcwd())}
-            socketio.emit('load_ffly_data', output, namespace=namespace, to=rooms[request.sid])
-            socketio.sleep(0.1) #to make sure that the above emit is executed
-
-
+            # since the ffly files need to be read via javascript (is there a python way?), serve the data via flask in the user's directory
+            room = rooms[request.sid]
+            user_data_dir[room] = os.path.dirname(fdir)
+            output = {"filepath": f"userdata/{room}/data/{os.path.basename(fdir)}", "prefix":f"userdata/{room}/"}
+            socketio.emit('load_ffly_data', output, namespace=namespace, to=room)
+            
         print('======= done')
     except:
         socketio.emit('cannot_load_data', None, namespace=namespace, to=rooms[request.sid])
@@ -369,6 +366,27 @@ def get_selected_data():
     except:
         print('!!!!!!!!!!!!!!! ERROR')
         return Response('Unknown error.  Please try again', status = 500)
+
+
+# serve data that is outside of the firefly path (used in input_otherType)
+@app.route('/userdata/<room>/data/<path:filename>')
+def serve_user_file(room, filename):
+    global user_data_dir
+    if room not in user_data_dir:
+        return "room not found", 404
+    if user_data_dir is None:
+        return "No data directory selected", 400
+    
+    data_dir = user_data_dir[room] 
+
+    # Prevent path traversal
+    safe_path = os.path.abspath(os.path.join(data_dir, filename))
+    if not safe_path.startswith(os.path.abspath(data_dir)):
+        return "Access denied", 403
+    
+    return send_from_directory(data_dir, filename)
+    
+
 
 def compileData(current, new, keyList):
 

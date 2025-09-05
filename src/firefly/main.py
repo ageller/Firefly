@@ -1,0 +1,89 @@
+import sys
+import os
+import argparse
+from firefly.data_reader.reader import Reader
+
+## make sure we are importing from wherever this file is, rather than the system 
+##  installation of Firefly. Saves us devs a lot of confusion and is equivalent 
+##  if you're only using a pip installed version
+sys.path.insert(0,os.path.abspath(os.path.join(os.getcwd(),'..')))
+from firefly.server import startHTTPServer, startFlaskServer
+
+def main(
+    port=5500,
+    method='http',
+    directory=None,
+    dec=1,
+    fps=30,
+    copy_source=False,
+    multiple_rooms=False):
+    """Creates a global interpreter locked process to host either a Flask 
+        or HTTP server that can be accessed via localhost:<port>. 
+
+    :param port: port number to serve the :code:`.html` files on, defaults to 5500
+    :type port: int, optional
+    :param method: what sort of Firefly server to open, a Flask ("flask") server 
+        or an HTTP ("http"), defaults to "http"
+    :type method: str, optional
+    :param directory: the directory of the Firefly source files to be served, 
+        if None, uses `os.dirname(__file__)` i.e. the directory of the `firefly`
+        python distribution, defaults to None
+    :type directory: str, optional
+    :param fps: enforced FPS for stream quality, used only if
+		localhost:<port>/stream is accessed, defaults to 30
+    :type fps: int, optional
+    :param dec: factor to decimate data that is being passed through
+		localhost:<port>/data_input, defaults to 1
+    :type dec: int, optional
+    :param copy_source: flag to tell the ``firefly`` command to copy the source files for Firefly into 
+        the directory specified by ``directory``, defaults to ``False``
+    :type copy_source: bool, optional
+    :param multiple_rooms: allow multiple rooms? If True, the user will be prompted in the browser to enter 
+        a string to define the room for the given session (which would allow multiple users to interact with 
+        separate Firefly instances on a server), defaults to False.
+    :type multiple_rooms: bool, optional
+    """
+
+    if copy_source:
+        if directory is None: raise IOError("Must pass --directory= when --copy_source=True")
+        else:
+            reader = Reader(datadir=os.path.join(os.path.dirname(__file__),'..','static','data','dummy'))
+            reader.copyFireflySourceToTarget(os.path.abspath(directory),dump_data=False,overwrite=False)
+
+    else:
+        if method not in ['flask','http']: raise ValueError(
+            f"method must be one of flask or http, not {method}")
+
+        if method == 'flask': startFlaskServer(port,directory,fps,dec,multiple_rooms)
+        else: startHTTPServer(port,directory)
+
+def define_parser():
+    parser = argparse.ArgumentParser(description = 'Firefly')
+    parser.add_argument('--method', default = 'http', type = str,
+        help = 'What sort of Firefly server to open, a Flask ("flask") server or an HTTP ("http"), defaults to "http".')
+    parser.add_argument('--port', default = 5500, type = int,
+        help = 'Port number for the server, defaults to 5500')
+    parser.add_argument('--directory', default = None, type = str,
+        help = 'The directory of the Firefly source files to be served; if None, uses `os.dirname(__file__)`, i.e., the directory of the `firefly` Python distribution, defaults to None.')
+    parser.add_argument('--dec', default = 1, type = int,
+        help = 'Factor to decimate data that is being passed through localhost:<port>/data_input, defaults to 1.')
+    parser.add_argument('--fps', default = 30, type = int,
+        help = 'Enforced FPS for stream quality, used only if localhost:<port>/stream is accessed, defaults to 30.')    
+    parser.add_argument('--copy_source', action='store_true',
+        help = 'Flag to tell the ``firefly`` command to copy the source files for Firefly into the directory specified by ``directory``. (If this flag is not supplied, the default behavior is to set copy_source=False).')
+    parser.add_argument('--multiple_rooms', action='store_true',
+        help = 'flag to enable multiple rooms.  If set, the user will be prompted in the browser to enter a string to define the room for the given session, which would allow multiple users to interact with separate Firefly instances on a server. (If this flag is not supplied, the default behavior is to set multiple_rooms=False) ')     
+
+    return parser
+
+def cli():
+    parser = define_parser()
+    args = parser.parse_args()
+    opts = vars(args)
+    # not sure why this is necessary, but I can't seem to send opts to main as is (though these both have type == dict)
+    options = {k : opts[k] for k in opts}
+    main(**options)
+
+if __name__ == '__main__':
+    cli()
+

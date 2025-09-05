@@ -1,0 +1,143 @@
+html{
+    height:100%;
+    margin:0
+}
+body {
+    margin: 0;
+    display: flex;
+    flex-direction: row;
+    height: 100vh;
+    overflow: hidden;
+    font-family: sans-serif;
+    background-color:black;
+}
+#sidebar {
+    width: 80px;
+    background-color: #aeaeae;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 2px;
+    height: 100vh;
+    flex-shrink: 0;
+    z-index:10;
+}
+#sidebar button {
+    background: none;
+    border: none;
+    color: gray;
+    margin: 2px 0;
+    font-size: 20px;
+    width:80px;
+    height:80px;
+    font-weight: bold;
+    cursor: pointer;
+}
+#sidebar .shown{
+    background-color:gray;
+}
+#sidebar .sidebar-icon-wrapper {
+    position: relative;
+    display: inline-block;
+
+}
+#sidebar .sidebar-icon-label{
+    text-align:center;
+    color: #6d00b8;
+    display: block;
+    margin-top: -14px;
+    font-size: 14px;
+}
+#sidebar hr {
+    display: block;
+    height: 1px;
+    border: 0;
+    border-top: 1px solid #333;
+    margin: 0;
+    margin-top: 1em;
+    padding: 0;
+    width: 90%;
+}
+#dataTypeDropdown{
+    position:absolute;
+    left:80px;
+    background-color: #aeaeae;
+    padding:20px;
+    transform: translateX(-500px);  /* Start off-screen to the left */
+    transition: transform 0.5s ease;
+    z-index: 9;
+}
+#dataTypeDropdown.visible {
+    transform: translateX(0);  /* Slide in */
+}
+#dataTypeDropdown.hidden {
+    pointer-events: none;  /* prevent interaction while hidden */
+}
+#panels {
+    display: flex;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+}
+.panel {
+    flex-grow: 1;
+    flex-shrink: 1;
+    flex-basis: 0;
+    min-width: 100px;
+    border: none;
+    /* display: block; */
+    height:100%;
+    z-index:1;
+}
+.divider {
+    width: 5px;
+    background-color: #333;
+    cursor: col-resize;
+    z-index: 10;
+    position:relative;
+}
+.divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 5px;
+    height: 10px;
+    transform: translate(-50%, -50%);
+    background-image: repeating-linear-gradient(
+        to bottom,
+        #666,
+        #666 2px,
+        transparent 2px,
+        transparent 4px
+    );
+    background-repeat: no-repeat;
+}
+.divider:hover{
+    background-color: #555
+}
+#drag-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    cursor: col-resize;
+    z-index: 10000;
+    display: none;
+}
+.hidden {
+    display: none !important;
+}
+webview {
+    flex: 1;
+    border: none;
+    height:100%;
+    display: block;
+}
+
+webview::part(iframe) {
+    height: 100% !important;
+    width: 100% !important;
+}
+
