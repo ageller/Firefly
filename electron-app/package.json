@@ -10,15 +10,6 @@
     "build": {
         "appId": "com.firefly",
         "productName": "Firefly",
-        "win": {
-            "target": "nsis",
-            "icon": "src/images/firefly-icon.ico"
-        },
-        "nsis": {
-            "oneClick": false,
-            "allowToChangeInstallationDirectory": true,
-            "perMachine": false
-        },
         "files": [
             "**/*",
             "dist/**/*",
@@ -34,7 +25,42 @@
                     "**/*"
                 ]
             }
-        ]
+        ],
+        // Windows
+        "win": {
+            "target": "nsis",
+            "icon": "src/images/firefly-icon.ico"
+        },
+        "nsis": {
+            "oneClick": false,
+            "allowToChangeInstallationDirectory": true,
+            "perMachine": false
+        },
+        // macOS
+        "mac": {
+            "target": ["dmg", "zip"],
+            "category": "public.app-category.education",
+            "icon": "src/images/firefly-icon.icns",
+            "hardenedRuntime": true,
+            "gatekeeperAssess": false
+        },
+        "dmg": {
+            "icon": "src/images/firefly-icon.icns",
+            "contents": [
+                { "x": 130, "y": 220, "type": "file" },
+                { "x": 410, "y": 220, "type": "link", "path": "/Applications" }
+            ]
+        },
+        // Linux
+        "linux": {
+            "target": ["AppImage", "deb"],
+            "category": "Education",
+            "icon": "src/images/firefly-icon.png",
+            "desktop": {
+                "Name": "Firefly",
+                "Comment": "An electron wrapper for the Firefly visualization app"
+            }
+        }
     },
     "keywords": [],
     "author": "Aaron M. Geller & Alex B. Gurvich",
