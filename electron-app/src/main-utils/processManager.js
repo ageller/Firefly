@@ -34,8 +34,8 @@ async function startPythonBackend() {
 
     state.pyProc = spawn(pythonPath, fireflyArgs, {
         // shell: true,
-        detach: true,
-        windowsHide: true,
+        // detach: true,
+        // windowsHide: true,
         env: {
             ...process.env,
             PATH: `${path.dirname(pythonPath)}:${process.env.PATH}`,
@@ -84,8 +84,8 @@ async function startJupyter() {
 
     state.jupyterProc = spawn(pythonPath, jupyterArgs, {
         // shell: true,
-        detached: true,
-        windowsHide: true,
+        // detached: true,
+        // windowsHide: true,
         env: {
             ...process.env,
             PATH: `${path.dirname(pythonPath)}:${process.env.PATH}`,
