@@ -50,12 +50,12 @@ jobs:
         run: npx electron-builder --${{ matrix.os == 'ubuntu-latest' && 'linux' || (matrix.os == 'windows-latest' && 'win' || 'mac') }} --x64
         working-directory: electron-app
 
-      - name: Make build directory
-        run: mkdir build
-        working-directory: electron-app
-
       - name: List dist contents
         run: ls dist
+        working-directory: electron-app
+
+      - name: Make build directory
+        run: mkdir build
         working-directory: electron-app
 
       - name: Rename and move artifacts
