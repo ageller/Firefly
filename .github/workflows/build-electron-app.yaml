@@ -1,0 +1,53 @@
+name: Build Firefly Electron App
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'   # e.g. v1.0.0
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build with electron-builder
+        run: npx electron-builder --${{ matrix.os == 'ubuntu-latest' && 'linux' || (matrix.os == 'windows-latest' && 'win' || 'mac') }} --x64
+
+      - name: Make build directory
+        run: mkdir build
+
+      - name: Rename and move artifacts
+        shell: bash
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/}
+          APP="Firefly-electron-${VERSION}"
+
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            mv dist/*.exe build/${APP}-win-x64-installer.exe
+          elif [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
+            mv dist/*.AppImage build/${APP}-linux-x64-installer.AppImage || true
+            mv dist/*.deb build/${APP}-linux-amd64.deb || true
+          elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
+            mv dist/*.dmg build/${APP}-mac-x64.dmg || true
+          fi
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.os }}-build
+          path: build/*
