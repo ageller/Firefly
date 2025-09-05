@@ -14,9 +14,8 @@ If you need to build the app for your specific operating system and/or you would
 Then within this directory you should run:
 ```
 npm install
-npm run prepare
 ```
-These commands will install the necessary node dependencies and create a version of Python and other necessary components bundled for the Firefly electron app to access.  The prepare step assumes that you have `python >3.10` available within your `PATH`.  You only need to run these commands once.
+This commands will install the necessary node dependencies and create a version of Python and other necessary components bundled for the Firefly electron app to access (using the script is `scripts/prepare.sh`).  The prepare step assumes that you have `python >3.10` available within your `PATH`.  You only need to run these commands once.   If you don't see `pip` install information in your terminal, then you may need to manually run the perpare step using the command `npm run prepare`.
 
 Then to run a development version (without building):
 ```

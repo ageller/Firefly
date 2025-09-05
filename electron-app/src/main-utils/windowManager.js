@@ -27,7 +27,8 @@ function createSplash(){
         transparent: true,
         center: true
     });
-    state.splash.loadFile(path.join(__dirname, '..', 'webviews', 'splash.html'));
+    const filePath = path.join(__dirname, '..', 'webviews', 'splash.html');
+    state.splash.loadURL(`file://${filePath}`);
 }
 
 function createMainWindow (fPort, jPort) {
