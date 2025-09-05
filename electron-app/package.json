@@ -26,7 +26,6 @@
                 ]
             }
         ],
-        // Windows
         "win": {
             "target": "nsis",
             "icon": "src/images/firefly-icon.ico"
@@ -36,7 +35,6 @@
             "allowToChangeInstallationDirectory": true,
             "perMachine": false
         },
-        // macOS
         "mac": {
             "target": ["dmg", "zip"],
             "category": "public.app-category.education",
@@ -51,7 +49,6 @@
                 { "x": 410, "y": 220, "type": "link", "path": "/Applications" }
             ]
         },
-        // Linux
         "linux": {
             "target": ["AppImage", "deb"],
             "category": "Education",
