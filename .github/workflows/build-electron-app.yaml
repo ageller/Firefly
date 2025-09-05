@@ -22,6 +22,10 @@ jobs:
         with:
           node-version: 20
 
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12"
       - name: Install dependencies
         run: npm install
         working-directory: electron-app
