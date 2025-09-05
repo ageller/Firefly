@@ -50,7 +50,7 @@
             ]
         },
         "linux": {
-            "target": ["AppImage", "deb"],
+            "target": "AppImage",
             "category": "Education",
             "icon": "src/images/firefly-icon.png"
         }
