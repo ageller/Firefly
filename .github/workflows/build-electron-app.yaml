@@ -26,7 +26,7 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: "3.12"
-          
+
       - name: Install dependencies
         run: npm install
         working-directory: electron-app
@@ -39,19 +39,35 @@ jobs:
         run: mkdir build
         working-directory: electron-app
 
+      - name: List dist contents
+        run: ls -la dist
+        working-directory: electron-app
+
       - name: Rename and move artifacts
         shell: bash
         run: |
-          VERSION=${GITHUB_REF#refs/tags/}
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/}
+          else
+            VERSION="0.0.0-test"
+          fi
           APP="Firefly-electron-${VERSION}"
 
           if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
-            mv dist/*.exe build/${APP}-win-x64-installer.exe
+            if compgen -G "dist/*.exe" > /dev/null; then
+              mv dist/*.exe build/${APP}-win-x64-installer.exe
+            fi
           elif [[ "${{ matrix.os }}" == "ubuntu-latest" ]]; then
-            mv dist/*.AppImage build/${APP}-linux-x64-installer.AppImage || true
-            mv dist/*.deb build/${APP}-linux-amd64.deb || true
+            if compgen -G "dist/*.AppImage" > /dev/null; then
+              mv dist/*.AppImage build/${APP}-linux-x64-installer.AppImage
+            fi
+            if compgen -G "dist/*.deb" > /dev/null; then
+              mv dist/*.deb build/${APP}-linux-amd64.deb
+            fi
           elif [[ "${{ matrix.os }}" == "macos-latest" ]]; then
-            mv dist/*.dmg build/${APP}-mac-x64.dmg || true
+            if compgen -G "dist/*.dmg" > /dev/null; then
+              mv dist/*.dmg build/${APP}-mac-x64.dmg
+            fi
           fi
         working-directory: electron-app
 
