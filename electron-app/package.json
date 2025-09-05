@@ -12,7 +12,7 @@
         "productName": "Firefly",
         "win": {
             "target": "nsis",
-            "icon": "src/icons/firefly-icon.ico"
+            "icon": "src/images/firefly-icon.ico"
         },
         "nsis": {
             "oneClick": false,

@@ -19,7 +19,7 @@ const state = require('./state');
 
 
 state.logFile = path.join(app.getPath('userData'),  'Firefly-log.txt');
-const asciiFile = path.join(__dirname, '..','icons','firefly-icon-ascii.txt');
+const asciiFile = path.join(__dirname, '..','images','firefly-icon-ascii.txt');
 
 function initLogFile() {
     // add a fun ascii art to the top of the logfile
