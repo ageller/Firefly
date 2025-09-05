@@ -12,8 +12,6 @@
         "productName": "Firefly",
         "files": [
             "**/*",
-            "dist/**/*",
-            "src/**/*",
             "bundle/**/*",
             "!node_modules/.cache/**"
         ],
