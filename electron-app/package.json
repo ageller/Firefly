@@ -52,11 +52,7 @@
         "linux": {
             "target": ["AppImage", "deb"],
             "category": "Education",
-            "icon": "src/images/firefly-icon.png",
-            "desktop": {
-                "Name": "Firefly",
-                "Comment": "An electron wrapper for the Firefly visualization app"
-            }
+            "icon": "src/images/firefly-icon.png"
         }
     },
     "keywords": [],
