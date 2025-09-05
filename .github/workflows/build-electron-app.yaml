@@ -64,7 +64,7 @@ jobs:
           if [[ "$GITHUB_REF" == refs/tags/* ]]; then
             VERSION=${GITHUB_REF#refs/tags/}
           else
-            VERSION="0.0.0-test"
+            VERSION="v0.0.0-test"
           fi
           APP="firefly-electron-${VERSION}"
 
