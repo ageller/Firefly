@@ -5,6 +5,8 @@ on:
   push:
     tags:
       - 'v*'   # e.g. v1.0.0
+  release:
+    types: [published]
 
 jobs:
   build:
@@ -82,3 +84,12 @@ jobs:
         with:
           name: ${{ matrix.os }}-build
           path: electron-app/build/*
+
+      - name: Create Release
+        if: github.event_name == 'release'
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: electron-app/build/**  # all files in build folder
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
