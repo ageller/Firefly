@@ -40,7 +40,13 @@ jobs:
         working-directory: electron-app
 
       - name: List dist contents
-        run: ls -la dist
+        run: |
+          echo "Listing dist folder contents:"
+          if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+            powershell -Command "Get-ChildItem -Path dist"
+          else
+            ls -la dist
+          fi
         working-directory: electron-app
 
       - name: Rename and move artifacts
