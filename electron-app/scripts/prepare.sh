@@ -4,19 +4,20 @@
 set -e
 
 # create the bundled python virtual env, install firefly (via this repo) and jupyter
-BUNDLE_DIR="bundle/python"
-NTBKS_DIR="bundle/ntbks"
+BUNDLE_DIR="bundle"
+PYTHON_DIR=$BUNDLE_DIR"/python"
+NTBKS_DIR=$BUNDLE_DIR"/ntbks"
 PYTHON_VERSION="3.12.10"
 PYTHON_ZIP="python-$PYTHON_VERSION-embed-amd64.zip"
 
 echo "=== Starting Firefly prepare.sh script"
 echo "=== Python version: $PYTHON_VERSION"
-echo "=== Bundle directory: $BUNDLE_DIR"
+echo "=== Bundle directory: $PYTHON_DIR"
 
 # ---- start fresh ----
 rm -rf "$BUNDLE_DIR"
-rm -rf "$NTBKS_DIR"
 mkdir "$BUNDLE_DIR"
+mkdir "$PYTHON_DIR"
 mkdir "$NTBKS_DIR"
 
 # ---- Download miniforge to have a standard python executable ----
@@ -24,7 +25,7 @@ mkdir "$NTBKS_DIR"
 if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; then
     PLATFORM="Windows"
     MINIFORGE_INSTALLER="Miniforge3-Windows-x86_64.exe"
-    PYTHON_BIN=$BUNDLE_DIR"/python.exe"
+    PYTHON_BIN=$PYTHON_DIR"/python.exe"
 elif [[ "$OSTYPE" == "darwin"* ]]; then
     PLATFORM="macOS"
     if [[ $(uname -m) == "arm64" ]]; then
@@ -32,7 +33,7 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
     else
         MINIFORGE_INSTALLER="Miniforge3-MacOSX-x86_64.sh"
     fi
-    PYTHON_BIN=$BUNDLE_DIR"/bin/python"
+    PYTHON_BIN=$PYTHON_DIR"/bin/python"
 elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
     PLATFORM="Linux"
     if [[ $(uname -m) == "aarch64" ]]; then
@@ -40,7 +41,7 @@ elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
     else
         MINIFORGE_INSTALLER="Miniforge3-Linux-x86_64.sh"
     fi
-    PYTHON_BIN=$BUNDLE_DIR"/bin/python"
+    PYTHON_BIN=$PYTHON_DIR"/bin/python"
 else
     echo "=== Unsupported platform: $OSTYPE"
     exit 1
@@ -61,7 +62,7 @@ fi
 # Install based on platform
 if [[ "$PLATFORM" == "Windows" ]]; then
     # Windows installation
-    WIN_TARGET_DIR=$(cygpath -w "$(pwd)/$BUNDLE_DIR")
+    WIN_TARGET_DIR=$(cygpath -w "$(pwd)/$PYTHON_DIR")
     echo "=== Installing Miniforge to $WIN_TARGET_DIR "
     echo "=== (this may take a few minutes)..."
 
@@ -101,9 +102,9 @@ if [[ "$PLATFORM" == "Windows" ]]; then
 else
     # macOS/Linux installation
     chmod +x "$MINIFORGE_INSTALLER"
-    echo "=== Installing Miniforge to $(pwd)/$BUNDLE_DIR..."
+    echo "=== Installing Miniforge to $(pwd)/$PYTHON_DIR..."
     
-    if ! ./"$MINIFORGE_INSTALLER" -b -p "$(pwd)/$BUNDLE_DIR"; then
+    if ! ./"$MINIFORGE_INSTALLER" -b -p "$(pwd)/$PYTHON_DIR"; then
         echo "=== Installation failed"
         exit 1
     fi
@@ -115,7 +116,7 @@ rm -f "$MINIFORGE_INSTALLER"
 # Verify installation
 if [ ! -f "$PYTHON_BIN" ]; then
     echo "=== Python executable not found after installation: $PYTHON_BIN"
-    ls -la "$BUNDLE_DIR"
+    ls -la "$PYTHON_DIR"
     exit 1
 fi
 
@@ -151,12 +152,12 @@ echo "=== Installing Firefly and dependencies..."
 "$PYTHON_BIN" -m jupyter lab build --dev-build=False --minimize=True
 
 # write the jupyter config file
-cat > "$BUNDLE_DIR/jupyter_server_config.py" <<'EOF'
+cat > "$PYTHON_DIR/jupyter_server_config.py" <<'EOF'
 c.MappingKernelManager.default_kernel_name = "firefly-electron"
 c.KernelSpecManager.allowed_kernelspecs = {"firefly-electron"}
 EOF
 
-echo "=== Python virtual env with dependencies created at $BUNDLE_DIR"
+echo "=== Python virtual env with dependencies created at $PYTHON_DIR"
 
 echo "=== Copying Firefly data and notebooks..."
 
