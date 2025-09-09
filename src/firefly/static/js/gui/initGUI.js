@@ -24,7 +24,7 @@ function makeUI(local=false){
 		}
 		// attempt to fix the issue where the GUI and viewer don't connect to the socket
 		// this might result in some infinite loop of reloads...
-		if (GUIParams.GUItries > 10 && GUIParams.usingSocket && GUIParams.allowAutoReload){
+		if (GUIParams.GUItries > GUIParams.autoReloadCount && GUIParams.usingSocket && GUIParams.allowAutoReload){
 			console.log('ERROR IN CREATING GUI.  TRYING AGAIN.');
 			GUIParams.GUItries = 0;
 			location.reload();
