@@ -27,6 +27,7 @@ if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; t
     PLATFORM="Windows"
     MINIFORGE_INSTALLER="Miniforge3-Windows-x86_64.exe"
     PYTHON_BIN=$PYTHON_DIR"/python.exe"
+    CONDA_BIN=$PYTHON_DIR"/Scripts/conda.exe"
 elif [[ "$OSTYPE" == "darwin"* ]]; then
     PLATFORM="macOS"
     if [[ $(uname -m) == "arm64" ]]; then
@@ -35,6 +36,7 @@ elif [[ "$OSTYPE" == "darwin"* ]]; then
         MINIFORGE_INSTALLER="Miniforge3-MacOSX-x86_64.sh"
     fi
     PYTHON_BIN=$PYTHON_DIR"/bin/python"
+    CONDA_BIN=$PYTHON_DIR"/bin/conda"
 elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
     PLATFORM="Linux"
     if [[ $(uname -m) == "aarch64" ]]; then
@@ -43,6 +45,7 @@ elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
         MINIFORGE_INSTALLER="Miniforge3-Linux-x86_64.sh"
     fi
     PYTHON_BIN=$PYTHON_DIR"/bin/python"
+    CONDA_BIN=$PYTHON_DIR"/bin/conda"
 else
     echo "=== Unsupported platform: $OSTYPE"
     exit 1
@@ -114,6 +117,12 @@ fi
 # Clean up installer
 rm -f "$MINIFORGE_INSTALLER"
 
+# try to remove unnecessary bloat to reduce bundled file size
+echo "=== Slimming down miniforge installation..."
+KEEP_LIST="python|pip|conda|setuptools|wheel|conda-package-handling|pyyaml|ruamel.yaml.clib"
+$CONDA_BIN remove -y --force $( $CONDA_BIN list | awk '{print $1}' | grep -vE "^($KEEP_LIST)$" | grep -v "^#"  )
+
+
 # Verify installation
 if [ ! -f "$PYTHON_BIN" ]; then
     echo "=== Python executable not found after installation: $PYTHON_BIN"
@@ -146,10 +155,10 @@ $PYTHON_BIN -V
 
 # ---- Install dependencies ----
 echo "=== Upgrading pip..."
-"$PYTHON_BIN" -m pip install --upgrade pip --no-warn-script-location
+"$PYTHON_BIN" -m pip install --upgrade pip --no-warn-script-location --no-cache-dir --prefer-binary
 
 echo "=== Installing Firefly and dependencies..."
-"$PYTHON_BIN" -m pip install --force-reinstall ../ jupyter jupyterlab --no-warn-script-location
+"$PYTHON_BIN" -m pip install --force-reinstall ../ jupyter jupyterlab --no-warn-script-location --no-cache-dir --prefer-binary
 "$PYTHON_BIN" -m jupyter lab build --dev-build=False --minimize=True
 
 # write the jupyter config file
