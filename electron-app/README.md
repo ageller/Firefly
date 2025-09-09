@@ -1,21 +1,18 @@
 # Firefly electron app
 
-This directory contains file needed for the electron-based Firefly app.  The goal here is to include all the necessary files (including Python) and bundle this as a (double-clickable) executable to install Firefly and enable the user to run Firefly without needing any other installations or using the command line.
+This directory contains file needed for the electron-based Firefly app.  The goal here is to include all the necessary files (including Python) and bundle everything as a (double-clickable) executable to install Firefly and enable the user to run Firefly without needing any other installations or using the command line.
 
 I am bundling Python along with this installation using miniforge, see `scripts/prepare.sh `
 
-Some pre-made installation scripts are already available in the `dist` directory.  Use the correct one for your operating system to install this app on your machine.  
-
-
 ## For development and testing
 
-If you need to build the app for your specific operating system and/or you would like to modify the app, you will first need to clone this repo to your machine.  You will also need to have `node`, `npm` and `python >3.10`  installed on your machine.
+If you need to build the app for your specific operating system and/or you would like to modify the app, you will first need to clone this repo to your machine.  You will also need to have `node` and `npm` installed on your machine.
 
 Then within this directory you should run:
 ```
 npm install
 ```
-This commands will install the necessary node dependencies and create a version of Python and other necessary components bundled for the Firefly electron app to access (using the script is `scripts/prepare.sh`).  The prepare step assumes that you have `python >3.10` available within your `PATH`.  You only need to run these commands once.   If you don't see `pip` install information in your terminal, then you may need to manually run the perpare step using the command `npm run prepare`.
+This command will install the necessary dependencies (first for `node` then for `python` via `scripts/prepare.sh` ) and bundle the necessary components into the `bundle/` directory for the Firefly electron app to access.  The prepare step will install `python` via `miniforge`.  You should only need to run this install command once.  If you see any error messages and/or you don't see `pip` install information in your terminal during this step, you may need to manually debug and run the prepare step using the command `npm run prepare`.
 
 Then to run a development version (without building):
 ```

@@ -12,6 +12,7 @@ const state = require('./state');
 const bundlePath = state.bundlePath || initBundlePath();
 const pythonPath = state.pythonPath || initPythonPath();
 const notebookPath = state.notebookPath || initNotebookPath();
+const pathSep = path.delimiter;
 
 async function startPythonBackend() {
     // this will launch the flask version of firefly bundled with the app
@@ -38,8 +39,10 @@ async function startPythonBackend() {
         // windowsHide: true,
         env: {
             ...process.env,
-            PATH: `${path.dirname(pythonPath)}:${process.env.PATH}`,
-            PYTHONUNBUFFERED: '1'
+            PATH: `${path.dirname(pythonPath)}${pathSep}${process.env.PATH}`,
+            PYTHONUNBUFFERED: '1',
+            PYTHONUTF8: '1',
+            PYTHONNOUSERSITE: '1'
         },
 
     });
@@ -88,8 +91,11 @@ async function startJupyter() {
         // windowsHide: true,
         env: {
             ...process.env,
-            PATH: `${path.dirname(pythonPath)}:${process.env.PATH}`,
-            JUPYTER_CONFIG_DIR: path.join(bundlePath,'python')
+            PATH: `${path.dirname(pythonPath)}${pathSep}${process.env.PATH}`,
+            JUPYTER_CONFIG_DIR: path.join(bundlePath,'python'),
+            PYTHONUNBUFFERED: '1',
+            PYTHONUTF8: '1',
+            PYTHONNOUSERSITE: '1'
         }
     });
 

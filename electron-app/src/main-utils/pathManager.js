@@ -18,7 +18,7 @@ const getPythonPath = () => {
     const pythonDir = path.join(getBundlePath(), 'python');
 
     return process.platform === 'win32'
-        ? path.join(pythonDir, 'Scripts', 'python.exe')
+        ? path.join(pythonDir, 'python.exe')
         : path.join(pythonDir, 'bin', 'python');
 };
 
