@@ -158,7 +158,7 @@ c.MappingKernelManager.default_kernel_name = "firefly-electron"
 c.KernelSpecManager.allowed_kernelspecs = {"firefly-electron"}
 EOF
 
-echo "=== Python virtual env with dependencies created at $PYTHON_DIR"
+echo "=== Python env with dependencies created at $PYTHON_DIR"
 
 echo "=== Copying Firefly data and notebooks..."
 
