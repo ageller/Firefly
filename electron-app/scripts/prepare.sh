@@ -12,12 +12,13 @@ PYTHON_ZIP="python-$PYTHON_VERSION-embed-amd64.zip"
 
 echo "=== Starting Firefly prepare.sh script"
 echo "=== Python version: $PYTHON_VERSION"
-echo "=== Bundle directory: $PYTHON_DIR"
+echo "=== Bundle directory: $BUNDLE_DIR"
+echo "=== Bundled Python directory: $PYTHON_DIR"
 
 # ---- start fresh ----
 rm -rf "$BUNDLE_DIR"
 mkdir "$BUNDLE_DIR"
-mkdir "$PYTHON_DIR"
+#mkdir "$PYTHON_DIR"
 mkdir "$NTBKS_DIR"
 
 # ---- Download miniforge to have a standard python executable ----
