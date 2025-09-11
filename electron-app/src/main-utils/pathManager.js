@@ -9,8 +9,8 @@ const state = require('./state');
 
 const getBundlePath = () => {
     return isDev
-        ? path.join(__dirname, '..', '..', 'bundle')
-        : path.join(process.resourcesPath, 'bundle');
+        ? path.join(__dirname, '..', '..', 'resources')
+        : process.resourcesPath;
 
 };
 

@@ -3,23 +3,34 @@
 # exit if an error occurs
 set -e
 
-# create the bundled python virtual env, install firefly (via this repo) and jupyter
-BUNDLE_DIR="bundle"
-PYTHON_DIR=$BUNDLE_DIR"/python"
-NTBKS_DIR=$BUNDLE_DIR"/ntbks"
-PYTHON_VERSION="3.12.10"
-PYTHON_ZIP="python-$PYTHON_VERSION-embed-amd64.zip"
-
 echo "=== Starting Firefly prepare.sh script"
-echo "=== Python version: $PYTHON_VERSION"
-echo "=== Bundle directory: $BUNDLE_DIR"
-echo "=== Bundled Python directory: $PYTHON_DIR"
+
+INSTALL_DIR="${1:-$(pwd)}"
+STARTING_PWD=$(pwd)
+cd $INSTALL_DIR
+
+# create the bundled python virtual env, install firefly (via this repo) and jupyter
+BUNDLE_DIR="resources"
 
 # ---- start fresh ----
 rm -rf "$BUNDLE_DIR"
-mkdir "$BUNDLE_DIR"
+mkdir -p "$BUNDLE_DIR"
+
+cd $BUNDLE_DIR
+
+PYTHON_DIR="python"
+NTBKS_DIR="ntbks"
+PYTHON_VERSION="3.12.10"
+PYTHON_ZIP="python-$PYTHON_VERSION-embed-amd64.zip"
+
+echo "=== Working in directory: "$INSTALL_DIR
+echo "=== Creating bundle root directory: $BUNDLE_DIR"
+echo "=== Creating bundled Python subdirectory: $PYTHON_DIR"
+echo "=== Python version: $PYTHON_VERSION"
+
+
 #mkdir "$PYTHON_DIR"
-mkdir "$NTBKS_DIR"
+mkdir -p "$NTBKS_DIR"
 
 # ---- Download miniforge to have a standard python executable ----
 # Detect platform
@@ -102,7 +113,6 @@ if [[ "$PLATFORM" == "Windows" ]]; then
         echo "=== Installation failed with exit code: $INSTALL_EXIT_CODE"
         exit 1
     fi
-    
 else
     # macOS/Linux installation
     chmod +x "$MINIFORGE_INSTALLER"
@@ -114,18 +124,24 @@ else
     fi
 fi
 
+
+
 # Clean up installer
 rm -f "$MINIFORGE_INSTALLER"
 
-# try to remove unnecessary bloat to reduce bundled file size
-echo "=== Slimming down miniforge installation..."
+# remove unnecessary bloat to reduce bundled file size
 KEEP_LIST="python|pip|conda|setuptools|wheel|conda-package-handling|pyyaml|ruamel.yaml.clib"
-$CONDA_BIN remove -y --force $( $CONDA_BIN list | awk '{print $1}' | grep -vE "^($KEEP_LIST)$" | grep -v "^#"  )
-
+mapfile -t TO_REMOVE < <(
+    $CONDA_BIN list | awk '{print $1}' | grep -vE "^($KEEP_LIST)$" | grep -v "^#"
+)
+if (( ${#TO_REMOVE[@]} > 0 )); then
+    echo "=== Slimming down miniforge installation..."
+    $CONDA_BIN remove -y --force $TO_REMOVE
+fi
 
 # Verify installation
 if [ ! -f "$PYTHON_BIN" ]; then
-    echo "=== Python executable not found after installation: $PYTHON_BIN"
+    echo "=== Python executable not found after installation: $INSTALL_DIR/$BUNDLE_DIR/$PYTHON_BIN"
     ls -la "$PYTHON_DIR"
     exit 1
 fi
@@ -150,7 +166,7 @@ if ! version_ge "$PY_VER" "$PYTHON_VERSION"; then
     exit 1
 fi
 
-echo "=== Using Python: $PYTHON_BIN"
+echo "=== Using Python: $INSTALL_DIR/$BUNDLE_DIR/$PYTHON_BIN"
 $PYTHON_BIN -V
 
 # ---- Install dependencies ----
@@ -158,7 +174,8 @@ echo "=== Upgrading pip..."
 "$PYTHON_BIN" -m pip install --upgrade pip --no-warn-script-location --no-cache-dir --prefer-binary
 
 echo "=== Installing Firefly and dependencies..."
-"$PYTHON_BIN" -m pip install --force-reinstall ../ jupyter jupyterlab --no-warn-script-location --no-cache-dir --prefer-binary
+######### I NEED TO UPDATE THE FIREFLY PIP SO I CAN INSTALL FROM THERE
+"$PYTHON_BIN" -m pip install --force-reinstall ../../ jupyter jupyterlab --no-warn-script-location --no-cache-dir --prefer-binary
 "$PYTHON_BIN" -m jupyter lab build --dev-build=False --minimize=True
 
 # write the jupyter config file
@@ -167,15 +184,21 @@ c.MappingKernelManager.default_kernel_name = "firefly-electron"
 c.KernelSpecManager.allowed_kernelspecs = {"firefly-electron"}
 EOF
 
-echo "=== Python env with dependencies created at $PYTHON_DIR"
+echo "=== Python env with dependencies created at $INSTALL_DIR/$BUNDLE_DIR/$PYTHON_DIR"
 
 echo "=== Copying Firefly data and notebooks..."
 
-# copy the Firefly data to the bundle so that it loads by default
+# data
 FIRE_DIR=$("$PYTHON_BIN" -c "import firefly; print(firefly.__path__[0])")
-cp -r ../src/firefly/static/data/FIRESampleData "$FIRE_DIR/static/data/"
+FIRE_DATA_DIR="${FIRE_DIR}/static/data/"
+$PYTHON_BIN ../scripts/downloadFromGitHub.py $FIRE_DATA_DIR ageller Firefly "src/firefly/static/data" main
 
-# copy the notebooks to the bundle specifically so the user isn't working inside the site-packages dir
-cp -r ../src/firefly/ntbks/* "$NTBKS_DIR"
+# notebooks
+#svn export https://github.com/ageller/Firefly/tree/main/src/firefly/ntbks "$NTBKS_DIR"
+$PYTHON_BIN ../scripts/downloadFromGitHub.py $NTBKS_DIR ageller Firefly "src/firefly/ntbks/" main
+
+
+# back to the starting point (might not be necessary)
+cd $STARTING_PWD
 
 echo "=== Preparation complete!"

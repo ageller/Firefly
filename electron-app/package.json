@@ -17,8 +17,8 @@
         ],
         "extraResources": [
             {
-                "from": "bundle/",
-                "to": "bundle",
+                "from": "scripts/",
+                "to": "scripts",
                 "filter": [
                     "**/*"
                 ]
@@ -31,7 +31,8 @@
         "nsis": {
             "oneClick": false,
             "allowToChangeInstallationDirectory": true,
-            "perMachine": false
+            "perMachine": false,
+            "include": "scripts/installer.nsh"
         },
         "mac": {
             "target": ["dmg", "zip"],
