@@ -1,4 +1,4 @@
-name: Publish Firefly Python distribution to PyPI
+name: Publish Firefly to PyPI
 
 on:
   workflow_dispatch:
