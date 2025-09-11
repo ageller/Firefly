@@ -80,7 +80,7 @@ jobs:
 
       - name: Publish package to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          # For Trusted Publishing: omit username/password (action will use OIDC)
+        # with:
+          # action will use OIDC
           # If not using Trusted Publishing, uncomment the line below:
           # password: ${{ secrets.PYPI_API_TOKEN }}
