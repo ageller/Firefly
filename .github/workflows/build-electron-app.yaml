@@ -97,10 +97,11 @@ jobs:
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
-        retention-days: 7
         with:
           name: ${{ matrix.os }}-build
           path: electron-app/build/*
+          retention-days: 7
+
 
       - name: Create Release
         if: github.event_name == 'release'

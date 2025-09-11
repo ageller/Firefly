@@ -53,10 +53,10 @@ jobs:
 
       - name: Upload dists as artifact
         uses: actions/upload-artifact@v4
-        retention-days: 7
         with:
           name: python-package-distributions
           path: dist/
+          retention-days: 7
 
   publish-to-pypi:
     name: Publish to PyPI
