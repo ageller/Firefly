@@ -16,3 +16,5 @@ include src/firefly/firefly
 include src/firefly/bin/make_new_repo.sh
 
 global-exclude *.ffly
+
+exclude electron-app/*
