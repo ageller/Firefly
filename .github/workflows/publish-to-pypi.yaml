@@ -1,0 +1,86 @@
+name: Publish Firefly Python distribution to PyPI
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version number to release (e.g., 3.3.3)"
+        required: true
+  push:
+    tags:
+      - 'v*'   # e.g. v1.0.0
+  release:
+    types: [published]
+
+# build job: produce dists and store as an artifact
+jobs:
+  build:
+    name: Build dists
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (full history so tags are available)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set version variable
+        id: vars
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+            VERSION=${VERSION#v}  # strip leading v if present
+            echo "VERSION=$VERSION" >> $GITHUB_ENV
+          else
+            # Strip leading 'v' from tag name
+            VERSION=${GITHUB_REF#refs/tags/v}
+            echo "VERSION=$VERSION" >> $GITHUB_ENV
+          fi
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Install build tool
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install build setuptools setuptools-scm wheel
+
+      - name: Build sdist and wheel
+        run: python -m build --sdist --wheel
+        env:
+          SETUPTOOLS_SCM_PRETEND_VERSION: ${{ env.VERSION }}
+
+      - name: Upload dists as artifact
+        uses: actions/upload-artifact@v4
+        retention-days: 7
+        with:
+          name: python-package-distributions
+          path: dist/
+
+  publish-to-pypi:
+    name: Publish to PyPI
+    needs: build
+    runs-on: ubuntu-latest
+    if: >
+      github.event_name == 'release' ||
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/'))
+    environment:
+      name: pypi
+      url: https://pypi.org/project/firefly
+    permissions:
+      id-token: write   # required for Trusted Publishing
+    steps:
+      - name: Download built dists
+        uses: actions/download-artifact@v4
+        with:
+          name: python-package-distributions
+          path: dist/
+
+      - name: Publish package to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          # For Trusted Publishing: omit username/password (action will use OIDC)
+          # If not using Trusted Publishing, uncomment the line below:
+          # password: ${{ secrets.PYPI_API_TOKEN }}

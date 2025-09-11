@@ -5,7 +5,6 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="firefly",
-    version="3.3.2",
     author = 'Alex Gurvich, Aaron Geller',
     author_email = 'alex.b.gurvich@gmail.com, a-geller@northwestern.edu',
     description="A browser-based particle visualization platform",
@@ -34,6 +33,8 @@ setuptools.setup(
           'abg_python>=1.1.1'
       ],
     include_package_data=True,
-    scripts=["src/firefly/bin/firefly"]
+    scripts=["src/firefly/bin/firefly"],
+    use_scm_version=True,
+    setup_requires=["setuptools>=61", "setuptools_scm"]
 )
 

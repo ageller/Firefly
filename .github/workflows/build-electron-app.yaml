@@ -2,6 +2,10 @@ name: Build Firefly Electron App
 
 on:
   workflow_dispatch:
+    inputs:
+      version:
+        description: "Version number to release (e.g., 3.3.3)"
+        required: true
   push:
     tags:
       - 'v*'   # e.g. v1.0.0
@@ -19,6 +23,19 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Set version variable
+        id: vars
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+            VERSION=${VERSION#v}  # strip leading v if present
+            echo "VERSION=$VERSION" >> $GITHUB_ENV
+          else
+            # Strip leading 'v' from tag name
+            VERSION=${GITHUB_REF#refs/tags/v}
+            echo "VERSION=$VERSION" >> $GITHUB_ENV
+          fi
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -31,11 +48,13 @@ jobs:
             const fs = require('fs');
             const path = 'electron-app/package.json';
             const pkg = JSON.parse(fs.readFileSync(path, 'utf8'));
-            pkg.version = process.env.VERSION;
+            let version = process.env.VERSION;
+            if (version.startsWith('v')) version = version.slice(1);
+            pkg.version = version;
             fs.writeFileSync(path, JSON.stringify(pkg, null, 2));
           "
         env:
-          VERSION: ${{ github.ref_name }}        
+          VERSION: ${{ env.VERSION }}        
 
       - name: Install dependencies
         run: npm install
@@ -56,12 +75,7 @@ jobs:
       - name: Rename and move artifacts
         shell: bash
         run: |
-          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
-            VERSION=${GITHUB_REF#refs/tags/}
-          else
-            VERSION="v0.0.0-test"
-          fi
-          APP="firefly-electron-${VERSION}"
+          APP="firefly-electron-v${{ env.VERSION }}"
 
           if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
             if compgen -G "dist/*.exe" > /dev/null; then
@@ -83,6 +97,7 @@ jobs:
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
+        retention-days: 7
         with:
           name: ${{ matrix.os }}-build
           path: electron-app/build/*
