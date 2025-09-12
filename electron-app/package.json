@@ -31,8 +31,7 @@
         "nsis": {
             "oneClick": false,
             "allowToChangeInstallationDirectory": true,
-            "perMachine": false,
-            "runAfterFinish": false
+            "perMachine": false
         },
         "mac": {
             "target": "pkg",
