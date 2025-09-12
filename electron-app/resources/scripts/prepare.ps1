@@ -111,7 +111,7 @@ Write-Host "=== Using Python: $PYTHON_BIN"
 Write-Host "=== Upgrading pip..."
 & $PYTHON_BIN -m pip install --upgrade pip --no-warn-script-location --no-cache-dir --prefer-binary
 
-Write-Host "=== Installing Firefly and dependencies..."
+Write-Host "=== Installing Firefly and dependencies (this may a while)..."
 & $PYTHON_BIN -m pip install --force-reinstall firefly jupyter jupyterlab --no-warn-script-location --no-cache-dir --prefer-binary
 & $PYTHON_BIN -m jupyter lab build --dev-build=False --minimize=True
 

@@ -25,7 +25,7 @@ echo "=== Creating bundled Python subdirectory: $PYTHON_DIR"
 echo "=== Python version: $PYTHON_VERSION"
 
 # ---- Download miniforge to have a standard python executable ----
-# Detect platform
+# Detect platform (note that currently I am not using this script for windows)
 if [[ "$OSTYPE" == "msys" || "$OSTYPE" == "cygwin" || "$OSTYPE" == "win32" ]]; then
     PLATFORM="Windows"
     MINIFORGE_INSTALLER="Miniforge3-Windows-x86_64.exe"
@@ -163,7 +163,7 @@ if [[ "$FULL_INSTALL" == 1 ]]; then
     echo "=== Upgrading pip..."
     "$PYTHON_BIN" -m pip install --upgrade pip --no-warn-script-location --no-cache-dir --prefer-binary
 
-    echo "=== Installing Firefly and dependencies..."
+    echo "=== Installing Firefly and dependencies (this may a while)..."
     "$PYTHON_BIN" -m pip install --force-reinstall firefly jupyter jupyterlab --no-warn-script-location --no-cache-dir --prefer-binary
     "$PYTHON_BIN" -m jupyter lab build --dev-build=False --minimize=True
 
