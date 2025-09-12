@@ -58,7 +58,6 @@ fi
 if [[ "$FULL_INSTALL" == 1 ]]; then
     # ---- start fresh ----
     rm -rf "$PYTHON_DIR"
-    mkdir -p "$PYTHON_DIR"
     rm -rf "$NTBKS_DIR"
     mkdir -p "$NTBKS_DIR"
 
@@ -76,6 +75,8 @@ if [[ "$FULL_INSTALL" == 1 ]]; then
 
     # Install based on platform
     if [[ "$PLATFORM" == "Windows" ]]; then
+        mkdir -p "$PYTHON_DIR"
+
         # Windows installation
         WIN_TARGET_DIR=$(cygpath -w "$(pwd)/$PYTHON_DIR")
         echo "=== Installing Miniforge to $WIN_TARGET_DIR "
