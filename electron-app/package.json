@@ -50,7 +50,11 @@
         }
     },
     "keywords": [],
-    "author": "Aaron M. Geller & Alex B. Gurvich",
+    "author": {
+        "name": "Aaron M. Geller & Alex B. Gurvich",
+        "email": "a.geller@northwestern.edu"
+    },
+    "homepage": "https://firefly.rcs.northwestern.edu/",
     "license": "GNU Affero General Public License v3.0",
     "description": "An electron wrapper for the Firefly visualization app",
     "devDependencies": {
