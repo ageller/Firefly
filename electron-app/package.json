@@ -47,7 +47,7 @@
             "target": "deb",
             "category": "Education",
             "icon": "src/images/firefly-icon.png",
-            "maintainer": "Aaron M. Geller <a.geller@northwestern.edu>",
+            "maintainer": "Aaron M. Geller <a.geller@northwestern.edu>"
         }
     },
     "keywords": [],
