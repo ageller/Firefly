@@ -6,7 +6,7 @@
 #>
 
 param(
-    [string]$INSTALL_DIR = (Get-Location)
+    [string]$BUNDLE_DIR = (Get-Location)
 )
 # (above) Get installation directory or default to current
 # Exit on any error
@@ -14,11 +14,9 @@ $ErrorActionPreference = "Stop"
 
 Write-Host "=== Starting Firefly prepare.ps1 script"
 
-$STARTING_PWD = Get-Location
-Set-Location $INSTALL_DIR
+Set-Location $BUNDLE_DIR
 
 # Create bundle directory
-$BUNDLE_DIR = "resources"
 $PYTHON_DIR = "python"
 $NTBKS_DIR = "ntbks"
 $PYTHON_VERSION = "3.12.10"
@@ -126,8 +124,5 @@ $FIRE_DIR = & $PYTHON_BIN -c "import firefly; print(firefly.__path__[0])"
 $FIRE_DATA_DIR = Join-Path $FIRE_DIR "static\data"
 & $PYTHON_BIN scripts/downloadFromGitHub.py $FIRE_DATA_DIR ageller Firefly "src/firefly/static/data" main
 & $PYTHON_BIN scripts/downloadFromGitHub.py $NTBKS_DIR ageller Firefly "src/firefly/ntbks/" main
-
-# Return to starting directory
-Set-Location $STARTING_PWD
 
 Write-Host "=== Preparation complete!"

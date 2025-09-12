@@ -1,4 +1,4 @@
-const { spawn, execSync } = require('child_process');
+const { spawn } = require('child_process');
 const path = require('path');
 const detect = require('detect-port').default || require('detect-port');
 const http = require('http');
@@ -139,44 +139,5 @@ function waitForLoading(ports, callback) {
 }
 
 
-function createUserKernel(){
-    // I should check if the kernel has the correct python path
 
-    let kernelspecs;
-    try {
-        const out = execSync(`${pythonPath} -m jupyter kernelspec list --json`, { encoding: 'utf-8' });
-        kernelspecs = JSON.parse(out).kernelspecs;
-    } catch (err) {
-        console.error("Couldn't query kernelspecs:", err);
-        kernelspecs = {};
-    }
-
-    const kernelName = "firefly-electron";
-    let needInstall = true;
-
-    if (kernelName in kernelspecs) {
-        try {
-            // kernelspecs[kernelName].resource_dir points to the kernel directory
-            const kernelJsonPath = path.join(kernelspecs[kernelName].resource_dir, 'kernel.json');
-            const kernelJson = JSON.parse(fs.readFileSync(kernelJsonPath, 'utf-8'));
-
-            // Check if the python path matches
-            if (kernelJson.argv && kernelJson.argv[0] === pythonPath) {
-                console.log("Jupyter kernel exists and has correct Python path.");
-                needInstall = false;
-            } else {
-                console.log("Jupyter kernel exists but Python path is different. Reinstalling kernel...");
-            }
-        } catch (err) {
-            console.error("Failed to read kernel.json:", err);
-            console.log("Will reinstall Jupyter kernel...");
-        }
-    }
-
-    if (needInstall) {
-        console.log("Installing firefly-electron jupyter kernel ...");
-        execSync(`${pythonPath} -m ipykernel install --user --name firefly-electron --display-name "firefly-electron-py3 \(ipykernel\)"`);
-    } 
-}
-
-module.exports = { startPythonBackend, startJupyter, waitForLoading, createUserKernel };
+module.exports = { startPythonBackend, startJupyter, waitForLoading };

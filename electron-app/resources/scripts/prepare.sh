@@ -5,20 +5,15 @@ set -e
 
 echo "=== Starting Firefly prepare.sh script"
 
-INSTALL_DIR="${1:-$(pwd)}"
-STARTING_PWD=$(pwd)
-cd $INSTALL_DIR
+BUNDLE_DIR="${1:-$(pwd)}"
+cd $BUNDLE_DIR
 
 # create the bundled python virtual env, install firefly (via this repo) and jupyter
-BUNDLE_DIR="resources/"
 PYTHON_DIR="python"
 NTBKS_DIR="ntbks"
 PYTHON_VERSION="3.12.10"
 FULL_INSTALL=1
 
-cd $BUNDLE_DIR
-
-echo "=== Working in directory: "$INSTALL_DIR
 echo "=== Creating bundle root directory: $BUNDLE_DIR"
 echo "=== Creating bundled Python subdirectory: $PYTHON_DIR"
 echo "=== Python version: $PYTHON_VERSION"
@@ -190,9 +185,5 @@ $PYTHON_BIN scripts/downloadFromGitHub.py $FIRE_DATA_DIR ageller Firefly "src/fi
 # notebooks
 #svn export https://github.com/ageller/Firefly/tree/main/src/firefly/ntbks "$NTBKS_DIR"
 $PYTHON_BIN scripts/downloadFromGitHub.py $NTBKS_DIR ageller Firefly "src/firefly/ntbks/" main
-
-
-# back to the starting point (might not be necessary)
-cd $STARTING_PWD
 
 echo "=== Preparation complete!"

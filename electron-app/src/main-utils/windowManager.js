@@ -25,10 +25,15 @@ function createSplash(){
         frame: false,
         alwaysOnTop: true,
         transparent: true,
-        center: true
+        center: true,
+        webPreferences: {
+            preload: path.join(__dirname, 'preload.js'),
+        }
     });
     const filePath = path.join(__dirname, '..', 'webviews', 'splash.html');
     state.splash.loadURL(`file://${filePath}`);
+
+    return state.splash;
 }
 
 function createMainWindow (fPort, jPort) {
