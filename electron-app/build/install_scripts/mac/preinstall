@@ -3,7 +3,6 @@
 # the pkg installer expects a file named preinstall (or postinstall)
 set -e
 INSTALL_DIR="$1"
-SCRIPT_DIR="$(dirname "$0")"
 
 echo "Running macOS prepare.sh preinstall script..."
-bash "$SCRIPT_DIR/prepare.sh" "$INSTALL_DIR"
+bash "$INSTALL_DIR/resources/scripts/prepare.sh" "$INSTALL_DIR"

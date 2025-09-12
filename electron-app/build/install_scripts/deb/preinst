@@ -3,7 +3,6 @@
 # the deb installer expects a file named preinst
 set -e
 INSTALL_DIR="$1"
-SCRIPT_DIR="$(dirname "$0")"
 
 echo "Running Linux prepare.sh preinst script..."
-bash "$SCRIPT_DIR/prepare.sh" "$INSTALL_DIR"
+bash "$INSTALL_DIR/resources/scripts/prepare.sh" "$INSTALL_DIR"

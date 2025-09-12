@@ -34,22 +34,20 @@
             "allowToChangeInstallationDirectory": true,
             "perMachine": false,
             "runAfterFinish": false,
-            "include": "resources/scripts/preinstall-windows.nsh"
+            "include": "build/install_scripts/win/install.nsh"
         },
         "mac": {
             "target": "pkg",
             "category": "public.app-category.education",
             "icon": "src/images/firefly-icon.icns",
             "hardenedRuntime": true,
-            "gatekeeperAssess": false,
-            "scripts": "resources/scripts"
+            "gatekeeperAssess": false
         },
         "linux": {
             "target": "deb",
             "category": "Education",
             "icon": "src/images/firefly-icon.png",
-            "maintainer": "Aaron M. Geller <a.geller@northwestern.edu>",
-            "scripts": "resources/scripts"
+            "maintainer": "Aaron M. Geller <a.geller@northwestern.edu>"
         }
     },
     "keywords": [],
