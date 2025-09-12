@@ -51,7 +51,8 @@ electron-app/node_modules
 electron-app/firefly_pyinstaller/build/
 electron-app/firefly_pyinstaller/dist/
 electron-app/bundle
-electron-app/resources
+electron-app/resources/ntbks
+electron-app/resources/python
 electron-app/dist
 !electron-app/*.json
 

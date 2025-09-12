@@ -4,7 +4,7 @@
     "main": "main.js",
     "scripts": {
         "start": "electron .",
-        "prepare": "bash scripts/prepare.sh",
+        "prepare": "bash resources/scripts/prepare.sh",
         "build": "electron-builder"
     },
     "build": {
@@ -17,7 +17,7 @@
         ],
         "extraResources": [
             {
-                "from": "scripts/",
+                "from": "resources/scripts/",
                 "to": "scripts",
                 "filter": [
                     "**/*"
@@ -32,24 +32,18 @@
             "oneClick": false,
             "allowToChangeInstallationDirectory": true,
             "perMachine": false,
-            "include": "scripts/installer.nsh"
+            "runAfterFinish": false,
+            "include": "resources/scripts/preinstall-windows.nsh"
         },
         "mac": {
-            "target": ["dmg", "zip"],
+            "target": "pkg",
             "category": "public.app-category.education",
             "icon": "src/images/firefly-icon.icns",
             "hardenedRuntime": true,
             "gatekeeperAssess": false
         },
-        "dmg": {
-            "icon": "src/images/firefly-icon.icns",
-            "contents": [
-                { "x": 130, "y": 220, "type": "file" },
-                { "x": 410, "y": 220, "type": "link", "path": "/Applications" }
-            ]
-        },
         "linux": {
-            "target": "AppImage",
+            "target": "deb",
             "category": "Education",
             "icon": "src/images/firefly-icon.png"
         }
