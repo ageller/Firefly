@@ -41,13 +41,15 @@
             "category": "public.app-category.education",
             "icon": "src/images/firefly-icon.icns",
             "hardenedRuntime": true,
-            "gatekeeperAssess": false
+            "gatekeeperAssess": false,
+            "scripts": "resources/scripts"
         },
         "linux": {
             "target": "deb",
             "category": "Education",
             "icon": "src/images/firefly-icon.png",
-            "maintainer": "Aaron M. Geller <a.geller@northwestern.edu>"
+            "maintainer": "Aaron M. Geller <a.geller@northwestern.edu>",
+            "scripts": "resources/scripts"
         }
     },
     "keywords": [],
