@@ -5,6 +5,8 @@ set -e
 
 echo "=== Starting Firefly prepare.sh script"
 
+RESOURCE_DIR="${1:-$(pwd)}"
+
 BUNDLE_DIR=$HOME"/.firefly"
 
 # if needed
@@ -184,10 +186,11 @@ echo "=== Copying Firefly data and notebooks..."
 # data
 FIRE_DIR=$("$PYTHON_BIN" -c "import firefly; print(firefly.__path__[0])")
 FIRE_DATA_DIR="${FIRE_DIR}/static/data/"
-$PYTHON_BIN scripts/downloadFromGitHub.py $FIRE_DATA_DIR ageller Firefly "src/firefly/static/data" main
+GETTER=$RESOURCE_DIR"/scripts/downloadFromGitHub.py"
+$PYTHON_BIN $GETTER $FIRE_DATA_DIR ageller Firefly "src/firefly/static/data" main
 
 # notebooks
 #svn export https://github.com/ageller/Firefly/tree/main/src/firefly/ntbks "$NTBKS_DIR"
-$PYTHON_BIN scripts/downloadFromGitHub.py $NTBKS_DIR ageller Firefly "src/firefly/ntbks/" main
+$PYTHON_BIN $GETTER $NTBKS_DIR ageller Firefly "src/firefly/ntbks/" main
 
 echo "=== Preparation complete!"

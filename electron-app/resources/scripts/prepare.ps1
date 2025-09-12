@@ -4,6 +4,9 @@
   Called by NSIS installer during setup
   powershell.exe -ExecutionPolicy Bypass -File "resources\\scripts\\prepare.ps1" 
 #>
+param(
+    [string]$RESOURCE_DIR = (Get-Location)
+)
 
 # Exit on any error
 $ErrorActionPreference = "Stop"
@@ -124,7 +127,8 @@ Write-Host "=== Python env with dependencies created at $INSTALL_DIR/$BUNDLE_DIR
 # Copy Firefly data and notebooks
 $FIRE_DIR = & $PYTHON_BIN -c "import firefly; print(firefly.__path__[0])"
 $FIRE_DATA_DIR = Join-Path $FIRE_DIR "static\data"
-& $PYTHON_BIN scripts/downloadFromGitHub.py $FIRE_DATA_DIR ageller Firefly "src/firefly/static/data" main
-& $PYTHON_BIN scripts/downloadFromGitHub.py $NTBKS_DIR ageller Firefly "src/firefly/ntbks/" main
+$GETTER = Join-Path $RESOURCE_DIR "scripts\downloadFromGitHub.py"
+& $PYTHON_BIN $GETTER $FIRE_DATA_DIR ageller Firefly "src/firefly/static/data" main
+& $PYTHON_BIN $GETTER $NTBKS_DIR ageller Firefly "src/firefly/ntbks/" main
 
 Write-Host "=== Preparation complete!"

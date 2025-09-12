@@ -8,11 +8,7 @@ const { killProcessTree, checkAndKillExistingProcess } = require('./src/main-uti
 const { createMainWindow, createSplash, toggleLogWindow } = require('./src/main-utils/windowManager');
 const { startPythonBackend, startJupyter, waitForLoading } = require('./src/main-utils/processManager');
 const { runPrepareAsync, createUserKernel } = require('./src/main-utils/prepare');
-const { getBundlePath, getPythonPath } = require('./src/main-utils/pathManager')
 
-
-const bundlePath = getBundlePath();
-const pythonPath = getPythonPath();
 
 // force only a single instance of the app
 const gotTheLock = app.requestSingleInstanceLock();
@@ -40,7 +36,7 @@ app.whenReady().then(async() => {
     const splash = createSplash();
 
     try {
-        await runPrepareAsync(bundlePath, splash); 
+        await runPrepareAsync(splash); 
         console.log("Prepare finished, now continuing Electron startup...");
     } catch (err) {
         console.error("Prepare failed:", err.message); 
@@ -49,7 +45,7 @@ app.whenReady().then(async() => {
     }
 
     try {
-        createUserKernel(pythonPath);
+        createUserKernel();
         await checkAndKillExistingProcess();
         state.fireflyPort = await startPythonBackend();
         state.jupyterPort = await startJupyter();

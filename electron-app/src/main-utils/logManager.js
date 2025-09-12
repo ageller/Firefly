@@ -28,7 +28,7 @@ function initLogFile() {
     // this will clear the file (could remove/adjust if history needed)
     
     console.log('checking',path.dirname(state.logFile))
-    fs.mkdirSync(path.dirname(state.logFile), { recursive: true }); // create the file if needed
+    fs.mkdirSync(path.dirname(state.logFile), { recursive: true }); // create the directory if needed
     
     let header = '';
     if (fs.existsSync(asciiFile)) {

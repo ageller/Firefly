@@ -11,8 +11,7 @@ const state = require('./state');
 const { getBundlePath } = require('./pathManager')
 
 state.pidFile = path.join(getBundlePath(),  'Firefly-pid.txt');
-
-fs.mkdirSync(path.dirname(state.pidFile), { recursive: true }); // create the file if needed
+fs.mkdirSync(path.dirname(state.pidFile), { recursive: true }); // create the directory if needed
 
 function writePidFile(pid, port, name) {
     const timestamp = new Date().toISOString();

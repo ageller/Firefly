@@ -3,13 +3,14 @@ const { app } = require("electron");
 const path = require("path");
 const fs = require("fs");
 
-const { getResourcePath } = require('./pathManager')
+const { getResourcePath, getPythonPath, getBundlePath } = require('./pathManager')
 const resourcePath = getResourcePath();
+const bundlePath = getBundlePath();
+const pythonPath = getPythonPath();
 
-function runPrepareAsync(bundlePath, splash) {
+function runPrepareAsync(splash) {
 
-    const userData = app.getPath("userData");
-    const flagFile = path.join(userData, ".firefly_prepared");
+    const flagFile = path.join(bundlePath, ".firefly_prepared");
 
     // Skip if already run
     if (fs.existsSync(flagFile)) {
@@ -32,7 +33,7 @@ function runPrepareAsync(bundlePath, splash) {
                 reject(new Error(`Windows prepare script not found: ${scriptPath}`));
             }
             cmd = "powershell.exe";
-            args = ["-ExecutionPolicy", "Bypass", "-File", scriptPath, bundlePath];
+            args = ["-ExecutionPolicy", "Bypass", "-File", scriptPath, resourcePath];
 
         } else {
             scriptPath = path.join(resourcePath, "scripts", "prepare.sh");
@@ -41,7 +42,7 @@ function runPrepareAsync(bundlePath, splash) {
                 reject(new Error(`Unix prepare script not found: ${scriptPath}`));
             }
             cmd = "bash";
-            args = [scriptPath, bundlePath];
+            args = [scriptPath, resourcePath];
         }
 
         console.log(`Running prepare script: ${cmd} ${args.join(" ")}`);
@@ -76,7 +77,7 @@ function runPrepareAsync(bundlePath, splash) {
 
 }
 
-function createUserKernel(pythonPath){
+function createUserKernel(){
     // I should check if the kernel has the correct python path
 
     let kernelspecs;
