@@ -12,7 +12,8 @@
         "productName": "Firefly",
         "files": [
             "**/*",
-            "bundle/**/*",
+            "!resources/python/**",
+            "!resources/ntbks/**",
             "!node_modules/.cache/**"
         ],
         "extraResources": [
