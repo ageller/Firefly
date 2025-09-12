@@ -1,8 +1,0 @@
-#!/bin/bash
-# Preinstall script for linux deb
-# the deb installer expects a file named preinst
-set -e
-INSTALL_DIR="$1"
-
-echo "Installing dependencies (this may take a while) ..."
-bash "$INSTALL_DIR/resources/scripts/prepare.sh" "$INSTALL_DIR"

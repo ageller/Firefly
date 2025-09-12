@@ -1,8 +1,0 @@
-#!/bin/bash
-# Preinstall script for macOS pkg
-# the pkg installer expects a file named preinstall (or postinstall)
-set -e
-INSTALL_DIR="$1"
-
-echo "Installing dependencies (this may take a while) ..."
-bash "$INSTALL_DIR/resources/scripts/prepare.sh" "$INSTALL_DIR"
