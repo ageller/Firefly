@@ -4,5 +4,5 @@
 set -e
 INSTALL_DIR="$1"
 
-echo "Running Linux prepare.sh preinst script..."
+echo "Installing dependencies (this may take a while) ..."
 bash "$INSTALL_DIR/resources/scripts/prepare.sh" "$INSTALL_DIR"
