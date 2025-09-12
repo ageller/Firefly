@@ -3,6 +3,8 @@ const { app } = require("electron");
 const path = require("path");
 const fs = require("fs");
 
+const { getResourcePath } = require('./pathManager')
+const resourcePath = getResourcePath();
 
 function runPrepareAsync(bundlePath, splash) {
 
@@ -24,7 +26,7 @@ function runPrepareAsync(bundlePath, splash) {
         let scriptPath, cmd, args;
 
         if (platform === "win32") {
-            scriptPath = path.join(bundlePath, "scripts", "prepare.ps1");
+            scriptPath = path.join(resourcePath, "scripts", "prepare.ps1");
             if (!fs.existsSync(scriptPath)) {
                 console.error(`Windows prepare script not found: ${scriptPath}`);
                 reject(new Error(`Windows prepare script not found: ${scriptPath}`));
@@ -33,7 +35,7 @@ function runPrepareAsync(bundlePath, splash) {
             args = ["-ExecutionPolicy", "Bypass", "-File", scriptPath, bundlePath];
 
         } else {
-            scriptPath = path.join(bundlePath, "scripts", "prepare.sh");
+            scriptPath = path.join(resourcePath, "scripts", "prepare.sh");
             if (!fs.existsSync(scriptPath)) {
                 console.error(`Unix prepare script not found: ${scriptPath}`);
                 reject(new Error(`Unix prepare script not found: ${scriptPath}`));

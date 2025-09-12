@@ -1,4 +1,5 @@
 // get the paths (different for dev vs build)
+const { app } = require('electron');
 const path = require('path');
 const rawIsDev  = require('electron-is-dev');
 const isDev = (rawIsDev && typeof rawIsDev === 'object' && 'default' in rawIsDev)
@@ -7,11 +8,14 @@ const isDev = (rawIsDev && typeof rawIsDev === 'object' && 'default' in rawIsDev
 
 const state = require('./state');
 
-const getBundlePath = () => {
+const getResourcePath = () => {
     return isDev
         ? path.join(__dirname, '..', '..', 'resources')
         : process.resourcesPath;
+};
 
+const getBundlePath = () => {
+    return path.join(app.getPath("home"), ".firefly");
 };
 
 const getPythonPath = () => {
@@ -26,23 +30,4 @@ const getNotebookPath = () => {
     return path.join(getBundlePath(), 'ntbks');
 }; 
 
-function initBundlePath(){
-    state.bundlePath = getBundlePath();
-    return state.bundlePath;
-
-}
-
-function initPythonPath() {
-    state.pythonPath = getPythonPath();
-    return state.pythonPath;
-}
-
-
-function initNotebookPath() {
-    state.notebookPath = getNotebookPath();
-    return state.notebookPath;
-}
-
-
-
-module.exports = { initBundlePath, initPythonPath, initNotebookPath };
+module.exports = { getBundlePath, getPythonPath, getNotebookPath, getResourcePath };

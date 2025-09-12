@@ -6,10 +6,12 @@ const fs = require('fs');
 const { app } = require('electron');
 
 const state = require('./state');
+const { getBundlePath, getPythonPath, getNotebookPath } = require('./pathManager')
 
 
 // Monkey-patch console
-['log', 'info', 'warn', 'error'].forEach(level => {
+const levels = ['log', 'info', 'warn', 'error'];
+levels.forEach(level => {
     const orig = console[level];
     console[level] = (...args) => {
         writeToLogFile(level, args);
@@ -18,13 +20,14 @@ const state = require('./state');
 });
 
 
-state.logFile = path.join(app.getPath('userData'),  'Firefly-log.txt');
+state.logFile = path.join(getBundlePath(),  'Firefly-log.txt');
 const asciiFile = path.join(__dirname, '..','images','firefly-icon-ascii.txt');
 
 function initLogFile() {
     // add a fun ascii art to the top of the logfile
     // this will clear the file (could remove/adjust if history needed)
     
+    console.log('checking',path.dirname(state.logFile))
     fs.mkdirSync(path.dirname(state.logFile), { recursive: true }); // create the file if needed
     
     let header = '';
@@ -35,8 +38,8 @@ function initLogFile() {
 
     console.log("LOGFILE :", state.logFile)
     console.log("PIDFILE :", state.pidFile)
-    console.log("PYTHON PATH : ", state.pythonPath);
-    console.log("NOTEBOOK PATH : ", state.notebookPath);
+    console.log("PYTHON PATH : ", getPythonPath());
+    console.log("NOTEBOOK PATH : ", getNotebookPath());
 }
 
 function writeToLogFile(level, args) {

@@ -8,8 +8,9 @@ const os = require('os');
 const find = require('find-process');
 const { exec } = require('child_process');
 const state = require('./state');
+const { getBundlePath } = require('./pathManager')
 
-state.pidFile = path.join(app.getPath('userData'),  'Firefly-pid.txt');
+state.pidFile = path.join(getBundlePath(),  'Firefly-pid.txt');
 
 fs.mkdirSync(path.dirname(state.pidFile), { recursive: true }); // create the file if needed
 

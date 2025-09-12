@@ -5,14 +5,16 @@
   powershell.exe -ExecutionPolicy Bypass -File "resources\\scripts\\prepare.ps1" 
 #>
 
-param(
-    [string]$BUNDLE_DIR = (Get-Location)
-)
-# (above) Get installation directory or default to current
 # Exit on any error
 $ErrorActionPreference = "Stop"
 
 Write-Host "=== Starting Firefly prepare.ps1 script"
+
+# Set bundle directory in user home
+$BUNDLE_DIR = Join-Path $HOME ".firefly"
+
+# Create the directory
+New-Item -ItemType Directory -Path $BUNDLE_DIR -Force | Out-Null
 
 Set-Location $BUNDLE_DIR
 
@@ -52,7 +54,7 @@ Invoke-WebRequest -Uri $MINIFORGE_INSTALLER_URL -OutFile $MINIFORGE_INSTALLER
 
 # Install Miniforge silently
 $WIN_TARGET_DIR = (Resolve-Path $PYTHON_DIR).Path
-Write-Host "=== Installing Miniforge to $WIN_TARGET_DIR (this may take a few minutes)..."
+Write-Host "=== Installing Miniforge to $WIN_TARGET_DIR (this may a while)..."
 
 $InstallerProcess = Start-Process -FilePath ".\$MINIFORGE_INSTALLER" -ArgumentList "/S /InstallationType=JustMe /RegisterPython=0 /AddToPath=0 /D=$WIN_TARGET_DIR" -PassThru
 Write-Host "Installation started (PID: $($InstallerProcess.Id)), monitoring progress..."

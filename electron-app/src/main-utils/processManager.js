@@ -5,13 +5,13 @@ const http = require('http');
 const fs = require('fs');
 
 const { writePidFile } = require('./cleanupManager');
-const { initBundlePath, initPythonPath, initNotebookPath } = require('./pathManager')
+const { getBundlePath, getPythonPath, getNotebookPath } = require('./pathManager')
 const state = require('./state');
 
 // define the paths
-const bundlePath = state.bundlePath || initBundlePath();
-const pythonPath = state.pythonPath || initPythonPath();
-const notebookPath = state.notebookPath || initNotebookPath();
+const bundlePath = getBundlePath();
+const pythonPath = getPythonPath();
+const notebookPath = getNotebookPath();
 const pathSep = path.delimiter;
 
 async function startPythonBackend() {

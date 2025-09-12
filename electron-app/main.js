@@ -8,11 +8,11 @@ const { killProcessTree, checkAndKillExistingProcess } = require('./src/main-uti
 const { createMainWindow, createSplash, toggleLogWindow } = require('./src/main-utils/windowManager');
 const { startPythonBackend, startJupyter, waitForLoading } = require('./src/main-utils/processManager');
 const { runPrepareAsync, createUserKernel } = require('./src/main-utils/prepare');
-const { initBundlePath, initPythonPath } = require('./src/main-utils/pathManager')
+const { getBundlePath, getPythonPath } = require('./src/main-utils/pathManager')
 
 
-const bundlePath = state.bundlePath || initBundlePath();
-const pythonPath = state.pythonPath || initPythonPath();
+const bundlePath = getBundlePath();
+const pythonPath = getPythonPath();
 
 // force only a single instance of the app
 const gotTheLock = app.requestSingleInstanceLock();

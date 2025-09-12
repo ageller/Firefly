@@ -4,7 +4,6 @@
     "main": "main.js",
     "scripts": {
         "start": "electron .",
-        "prepare": "bash resources/scripts/prepare.sh",
         "build": "electron-builder"
     },
     "build": {
@@ -43,10 +42,9 @@
             "gatekeeperAssess": false
         },
         "linux": {
-            "target": "deb",
+            "target": "AppImage",
             "category": "Education",
-            "icon": "src/images/firefly-icon.png",
-            "maintainer": "Aaron M. Geller <a.geller@northwestern.edu>"
+            "icon": "src/images/firefly-icon.png"
         }
     },
     "keywords": [],

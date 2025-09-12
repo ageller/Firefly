@@ -5,7 +5,11 @@ set -e
 
 echo "=== Starting Firefly prepare.sh script"
 
-BUNDLE_DIR="${1:-$(pwd)}"
+BUNDLE_DIR=$HOME"/.firefly"
+
+# if needed
+mkdir -p $BUNDLE_DIR
+
 cd $BUNDLE_DIR
 
 # create the bundled python virtual env, install firefly (via this repo) and jupyter
@@ -75,7 +79,7 @@ if [[ "$FULL_INSTALL" == 1 ]]; then
         # Windows installation
         WIN_TARGET_DIR=$(cygpath -w "$(pwd)/$PYTHON_DIR")
         echo "=== Installing Miniforge to $WIN_TARGET_DIR "
-        echo "=== (this may take a few minutes)..."
+        echo "=== (this may take a while)..."
 
         # Start installer in background
         ./"$MINIFORGE_INSTALLER" //S //InstallationType=JustMe //RegisterPython=0 //AddToPath=0 /D="$WIN_TARGET_DIR" &
