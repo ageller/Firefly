@@ -47,5 +47,8 @@
         "electron-is-dev": "^3.0.1",
         "find-process": "^2.0.0",
         "tree-kill": "^1.2.2"
+    },
+    "overrides": {
+        "minimatch": "^10.2.3"
     }
 }
