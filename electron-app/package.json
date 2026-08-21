@@ -55,7 +55,7 @@
     "license": "GNU Affero General Public License v3.0",
     "description": "An electron wrapper for the Firefly visualization app",
     "devDependencies": {
-        "electron": "^39.8.5",
+        "electron": "^39.8.10",
         "electron-builder": "^26.15.3"
     },
     "dependencies": {
