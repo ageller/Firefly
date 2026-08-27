@@ -9,12 +9,18 @@ import os
 import sys
 import json
 import time
+import atexit
 import subprocess
 import signal
 import socket
 import requests
 import http.server
 import socketserver
+
+try:
+    import fcntl # used to lock the PID file against concurrent writers; POSIX only
+except ImportError:
+    fcntl = None
 
 import numpy as np
 
@@ -443,6 +449,58 @@ def add_header(response):
     response.headers['Expires'] = '0'
     return response
 
+######## PID tracking, so quitAllFireflyServers can find every Firefly
+######## server process regardless of how it was launched (CLI or
+######## spawnFireflyServer), including both the Werkzeug reloader's
+######## supervisor process and its worker child.
+PID_FILE = os.path.join(os.path.expanduser('~'), '.firefly', 'server_pids.json')
+
+def _with_pid_file_lock(fn):
+    # guards against the reloader's parent + child (or multiple servers)
+    # registering/deregistering at nearly the same time
+    os.makedirs(os.path.dirname(PID_FILE), exist_ok=True)
+    if fcntl is None: return fn()
+    with open(PID_FILE + '.lock', 'w') as lockfile:
+        fcntl.flock(lockfile, fcntl.LOCK_EX)
+        try: return fn()
+        finally: fcntl.flock(lockfile, fcntl.LOCK_UN)
+
+def _read_pid_entries():
+    if not os.path.exists(PID_FILE): return []
+    try:
+        with open(PID_FILE, 'r') as f: return json.load(f)
+    except (json.JSONDecodeError, OSError): return []
+
+def _write_pid_entries(entries):
+    os.makedirs(os.path.dirname(PID_FILE), exist_ok=True)
+    with open(PID_FILE, 'w') as f: json.dump(entries, f)
+
+def _is_firefly_process(pid):
+    # confirm the pid is alive and still looks like a Firefly server, so a
+    # stale/reused pid never gets treated as one of ours
+    if not isinstance(pid, int): return False
+    try: os.kill(pid, 0)
+    except OSError: return False
+    try:
+        with open(f'/proc/{pid}/cmdline', 'rb') as f:
+            return b'firefly' in f.read().lower()
+    except OSError:
+        return True # non-Linux: no /proc, fall back to the liveness check alone
+
+def _register_server_pid(port):
+    def register():
+        entries = _read_pid_entries()
+        entries.append({'pid': os.getpid(), 'port': port, 'started': time.time()})
+        _write_pid_entries(entries)
+    _with_pid_file_lock(register)
+
+    def deregister():
+        def _remove():
+            remaining = [e for e in _read_pid_entries() if e.get('pid') != os.getpid()]
+            _write_pid_entries(remaining)
+        _with_pid_file_lock(_remove)
+    atexit.register(deregister)
+
 # Helper functions to start/stop the server
 def startFlaskServer(
     port=5500,
@@ -468,6 +526,8 @@ def startFlaskServer(
     """
 
     global default_room
+
+    _register_server_pid(port)
 
     if (multiple_rooms): default_room = None
     if (directory is None or directory == "None"): directory = os.path.dirname(__file__)
@@ -502,6 +562,8 @@ def startHTTPServer(port=5500,directory=None):
         python distribution, defaults to None
     :type directory: str, optional
     """
+
+    _register_server_pid(port)
 
     if directory is None: directory = os.path.dirname(__file__)
     Handler = http.server.SimpleHTTPRequestHandler
@@ -587,18 +649,58 @@ def spawnFireflyServer(
     return process
 
 def quitAllFireflyServers(pid=None):
-    """Quit python processes associated with hosting Flask web-servers.
+    """Quit python processes associated with hosting Firefly web-servers.
 
-    :param pid: process id to quit, defaults to None, quitting all processes
+    Reads the pids that Firefly servers register with themselves in
+    ``PID_FILE`` when they start (covers every launch method -- the ``firefly``
+    CLI or :func:`spawnFireflyServer` -- and both the Werkzeug reloader's
+    supervisor process and its worker child), confirms each one is still alive
+    and still actually looks like a Firefly process, then terminates it
+    (escalating to SIGKILL if it doesn't exit promptly).
+
+    :param pid: process id to quit, defaults to None, quitting all registered
+        Firefly server processes. If given, only this pid is quit, and only
+        after confirming it is a live, registered Firefly process.
     :type pid: int, optional
-    :return: return_code
-    :rtype: int 
+    :return: the pids that were actually signaled
+    :rtype: list
     """
     print("Server output:")
     print("--------------")
-    ## quit indiscriminately
-    if pid is None: return_code = os.system("ps aux | grep firefly | grep port | awk '{print $2}' | xargs kill")
-    ## quit only the pid we were passed, ideally from the subprocess.Popen().pid but
-    ##  you know I don't judge.  
-    else: return_code = os.kill(pid,signal.SIGINT)
-    return return_code
+
+    entries = _read_pid_entries()
+    targets = entries if pid is None else [e for e in entries if e.get('pid') == pid]
+
+    killed = []
+    for entry in targets:
+        target_pid = entry.get('pid')
+        if target_pid is None or not _is_firefly_process(target_pid):
+            continue
+
+        print(f"Stopping Firefly server (pid {target_pid}, port {entry.get('port')})")
+        try:
+            os.kill(target_pid, signal.SIGTERM)
+        except OSError:
+            continue
+
+        # give it a moment to shut down gracefully before escalating
+        for _ in range(10):
+            if not _is_firefly_process(target_pid): break
+            time.sleep(0.2)
+        else:
+            try: os.kill(target_pid, signal.SIGKILL)
+            except OSError: pass
+
+        killed.append(target_pid)
+
+    # sweep the whole file (not just what this call targeted) and drop any
+    # entry whose pid is no longer alive or no longer looks like a Firefly
+    # process -- covers processes that died/were killed some other way
+    # (e.g. SIGKILL, a crash) and never got to deregister themselves
+    def _prune():
+        remaining = [e for e in _read_pid_entries() if _is_firefly_process(e.get('pid'))]
+        _write_pid_entries(remaining)
+    _with_pid_file_lock(_prune)
+
+    if not killed: print("No running Firefly server processes found.")
+    return killed
