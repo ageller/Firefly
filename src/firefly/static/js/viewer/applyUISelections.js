@@ -679,11 +679,7 @@ function setCmapReversed(args){
 	var p = args[0];
 	var checked = args[1];
 	
-	if (ckey) {
-		viewerParams.colormapReversed[p][ckey] = checked;
-	} else {
-		viewerParams.colormapReversed[p] = checked;
-	}
+	viewerParams.colormapReversed[p] = checked;
 	if (viewerParams.showColormap[p]) populateColormapAxis(p, checked)
 
 	//console.log('reversing particle colormap', args);
