@@ -115,11 +115,6 @@ function sendSelectedData(selection = null, sizeLimit = 5e4){
 
 	// send to Flask
     // chunk the data into pieces to avoid cutting off the connection
-    var done = false;
-
-    // first send only the data structure, excluding any lists
-    socketParams.socket.emit('send_selected_data', {'data':selection.structure, 'room':socketParams.room, 'keyList':null, 'pass':'structure', 'done': done});
-
 
     // set the list of times (doesn't appear to be a good way to do this inside the sendData loop below)
     var times = [];
@@ -135,6 +130,17 @@ function sendSelectedData(selection = null, sizeLimit = 5e4){
             }
         })
     })
+
+    // first send only the data structure, excluding any lists.
+    // if there is no data to chunk (e.g. the selector sphere contained no particles),
+    // mark this message done immediately so the waiting request doesn't hang until timeout
+    var done = (totalCount === 0);
+    socketParams.socket.emit('send_selected_data', {'data':selection.structure, 'room':socketParams.room, 'keyList':null, 'pass':'structure', 'done': done});
+
+    if (done){
+        viewerParams.selector.sendingData = false;
+        return;
+    }
 
     // draw the loading bar
     viewerParams.loadfrac = 0;

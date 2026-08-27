@@ -355,8 +355,10 @@ def get_selected_data():
             resp = e.wait()
         except Timeout:
             print('!!!!!!!!!!!!!!! TIMEOUT')
-            return Response('Timeout.  Please increase the waitTime using the params keyword', status = 504)
-            # abort(504)
+            resp = selectedData
+            if isinstance(resp, dict):
+                resp['warning'] = (f'Timeout reached after {waitTime}s before all selected data arrived; '
+                                    'returning partial data. Increase the waitTime parameter to receive the full dataset.')
         finally:
             events.pop(room, None)
             timeout.cancel()

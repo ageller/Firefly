@@ -132,7 +132,8 @@ function connectViewerSocket(){
 			    console.log("======== sending selected data to server");
 			    sendSelectedData();
             } else {
-                console.log("======== data selector not active")
+                console.log("======== data selector not active, returning empty selection");
+                socketParams.socket.emit('send_selected_data', {'data':{'warning':'Data selector was not active; no data was selected.'}, 'room':socketParams.room, 'keyList':null, 'pass':'structure', 'done':true});
             }
 		});
 
