@@ -870,48 +870,72 @@ function initControls(updateGUI = true,force_fly=false){
 
 }
 
-// create CD texture buffers and parameters
+// create (or, on a later call, recreate) the CD texture buffer and parameters.
+//  the render target and plane geometry are fixed-resolution at creation time, so
+//  this needs to be called again on window resize or the column density image
+//  stays pinned at whatever size the window happened to be at startup and gets
+//  stretched (and pixelated) to fill a larger window (see GitHub issue #170)
 function initColumnDensity(){
 	//following this example: https://threejs.org/examples/webgl_rtt.html
 	var screenWidth = window.innerWidth;
 	var screenHeight = window.innerHeight;
-	var aspect = screenWidth / screenHeight;
+
+	// dispose of the previous render target/geometry (if any) so repeated calls
+	//  (e.g. on every resize) don't leak GPU memory
+	if (viewerParams.textureCD) viewerParams.textureCD.dispose();
+	if (viewerParams.quadCD) viewerParams.quadCD.geometry.dispose();
 
 	//render texture
 	viewerParams.textureCD = new THREE.WebGLRenderTarget( screenWidth, screenHeight, {
-		minFilter: THREE.LinearFilter, 
-		magFilter: THREE.NearestFilter, 
-		format: THREE.RGBAFormat 
+		minFilter: THREE.LinearFilter,
+		magFilter: THREE.NearestFilter,
+		format: THREE.RGBAFormat
 	} );
 
-	//for now, just use the first colormap
-	viewerParams.materialCD = new THREE.ShaderMaterial( {
-		uniforms: { 
-			tex: { value: viewerParams.textureCD.texture }, 
-			cmap: { type:'t', value: viewerParams.cmap },
-			colormap: {value: viewerParams.colormap[viewerParams.CDkey]},
-			colormapReversed: {value: viewerParams.colormapReversed[viewerParams.CDkey]},
-			CDmin: {value: viewerParams.colormapVals[viewerParams.CDkey][viewerParams.ckeys[viewerParams.CDkey][0]][0]}, // bottom of CD renormalization
-			CDmax: {value: viewerParams.colormapVals[viewerParams.CDkey][viewerParams.ckeys[viewerParams.CDkey][0]][1]}, // top of CD renormalization
-			lognorm: {value: viewerParams.CDlognorm}, // flag to normalize column densities in log space
-			scaleCD: {value: viewerParams.scaleCD},
-		},
-		vertexShader: myVertexShader,
-		fragmentShader: myFragmentShader_pass2,
-		depthWrite: false
-	} );
 	var plane = new THREE.PlaneBufferGeometry( screenWidth, screenHeight );
-	viewerParams.quadCD = new THREE.Mesh( plane, viewerParams.materialCD );
-	viewerParams.quadCD.position.z = -100;
-	viewerParams.sceneCD = new THREE.Scene();
-	viewerParams.sceneCD.add( viewerParams.quadCD );
 
-	// camera
-	viewerParams.cameraCD = new THREE.OrthographicCamera( screenWidth/-2, screenWidth/2, screenHeight/2, screenHeight/-2, -10000, 10000 );
-	//viewerParams.cameraCD = new THREE.PerspectiveCamera( viewerParams.fov, aspect, viewerParams.zmin, viewerParams.zmax);
-	viewerParams.cameraCD.position.z = 100;
-	viewerParams.cameraCD.up.set(0, -1, 0);
-	viewerParams.sceneCD.add(viewerParams.cameraCD);  
+	if (viewerParams.materialCD){
+		// already created on a previous call -- just repoint it at the new
+		//  render target's texture and swap in the newly sized plane
+		viewerParams.materialCD.uniforms.tex.value = viewerParams.textureCD.texture;
+		viewerParams.quadCD.geometry = plane;
+	} else {
+		//for now, just use the first colormap
+		viewerParams.materialCD = new THREE.ShaderMaterial( {
+			uniforms: {
+				tex: { value: viewerParams.textureCD.texture },
+				cmap: { type:'t', value: viewerParams.cmap },
+				colormap: {value: viewerParams.colormap[viewerParams.CDkey]},
+				colormapReversed: {value: viewerParams.colormapReversed[viewerParams.CDkey]},
+				CDmin: {value: viewerParams.colormapVals[viewerParams.CDkey][viewerParams.ckeys[viewerParams.CDkey][0]][0]}, // bottom of CD renormalization
+				CDmax: {value: viewerParams.colormapVals[viewerParams.CDkey][viewerParams.ckeys[viewerParams.CDkey][0]][1]}, // top of CD renormalization
+				lognorm: {value: viewerParams.CDlognorm}, // flag to normalize column densities in log space
+				scaleCD: {value: viewerParams.scaleCD},
+			},
+			vertexShader: myVertexShader,
+			fragmentShader: myFragmentShader_pass2,
+			depthWrite: false
+		} );
+		viewerParams.quadCD = new THREE.Mesh( plane, viewerParams.materialCD );
+		viewerParams.quadCD.position.z = -100;
+		viewerParams.sceneCD = new THREE.Scene();
+		viewerParams.sceneCD.add( viewerParams.quadCD );
+	}
+
+	// camera -- update the existing one in place if we already have one so we
+	//  don't need to re-add it (or the quad) to sceneCD
+	if (viewerParams.cameraCD){
+		viewerParams.cameraCD.left = screenWidth/-2;
+		viewerParams.cameraCD.right = screenWidth/2;
+		viewerParams.cameraCD.top = screenHeight/2;
+		viewerParams.cameraCD.bottom = screenHeight/-2;
+		viewerParams.cameraCD.updateProjectionMatrix();
+	} else {
+		viewerParams.cameraCD = new THREE.OrthographicCamera( screenWidth/-2, screenWidth/2, screenHeight/2, screenHeight/-2, -10000, 10000 );
+		viewerParams.cameraCD.position.z = 100;
+		viewerParams.cameraCD.up.set(0, -1, 0);
+		viewerParams.sceneCD.add(viewerParams.cameraCD);
+	}
 }
 
 /* HELPER FUNCTIONS */

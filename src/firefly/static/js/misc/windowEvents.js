@@ -137,6 +137,15 @@ function changeSnapSizes(){
 }
 window.addEventListener('resize', changeSnapSizes);
 
+// rebuild the column density render target to match the new window size --
+//  it's a fixed resolution at creation time otherwise, so the image stays
+//  pinned at the startup size and gets stretched (pixelated) after the window
+//  is resized larger (see GitHub issue #170). Guarded on textureCD already
+//  existing so this can't fire before initColumnDensity()'s first (startup) call.
+window.addEventListener('resize', function(){
+	if (typeof viewerParams !== 'undefined' && viewerParams.textureCD) initColumnDensity();
+});
+
 
 // for the fly controls explainer tab
 
