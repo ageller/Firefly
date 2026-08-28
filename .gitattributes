@@ -1,7 +1,7 @@
 # Store text files with LF in the repository regardless of the checkout platform.
 #  Without this a Windows clone commits CRLF, and every line of an otherwise
 #  unchanged file shows as modified -- which makes diffs and merges against
-#  downstream forks (e.g. the FireflyGaiaDR3 deployment repo) unusable.
+#  downstream deployment repos unusable.
 * text=auto eol=lf
 
 # vendored third-party libraries: keep byte-for-byte as shipped

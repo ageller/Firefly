@@ -16,6 +16,67 @@ If you use Firefly, please cite our [ApJS paper](https://ui.adsabs.harvard.edu/a
 
 Comprehensive documentation is available [here](https://firefly.rcs.northwestern.edu/docs).
 
+## Keeping a Deployment Copy in Sync
+
+If you host Firefly on a server from your own repository — a fork of this one carrying
+site-specific settings, data and launch scripts — keep it as a **fork** and merge from
+here, rather than copying files across. A copy script has to overwrite everything from
+upstream while preserving your local edits; that is exactly what a merge already does,
+and it does it correctly.
+
+Run the merge on your own machine. The server only ever pulls.
+
+**One-time setup**, in your local clone of the deployment repository:
+
+```bash
+git remote add upstream https://github.com/ageller/Firefly.git
+git fetch upstream
+```
+
+If that repository was ever cloned on Windows it may have CRLF line endings committed,
+which makes every line of a file look modified and turns every merge into a conflict.
+Fix it once, before the first merge, by copying this repository's `.gitattributes` into
+yours and running:
+
+```bash
+git add --renormalize .
+git commit -m "normalize line endings to LF"
+```
+
+**To pick up a new Firefly release**, still in your local clone of the deployment
+repository:
+
+```bash
+git checkout -b sync-upstream     # work on a branch, not on the default one
+git fetch upstream
+git merge upstream/main           # resolve any conflicts, then commit
+```
+
+Test locally, then merge the branch into your default branch and push it.
+
+**On the server**, in the deployment repository:
+
+```bash
+git pull
+```
+
+then restart whatever serves the app (for example, the gunicorn service).
+
+### Keeping the merges painless
+
+Merges stay clean for as long as your customizations live in files this repository
+never touches. Some ways to arrange that:
+
+- Put site-specific choices in your dataset's settings `.json` instead of in code.
+  GUI panels can be hidden with `GUIExcludeList`, a list of GUI paths such as
+  `"main/general/data/loadNewData"`, so hiding a control needs no source change.
+- Put extra markup in a template of its own and pull it in with a one-line
+  `{% include "yourfile.html" ignore missing %}`, rather than editing the shared
+  templates.
+- Keep server-specific launch scripts in their own files.
+- Leave packaged files you don't need in place rather than deleting them; deletions
+  become modify/delete conflicts every time upstream edits them.
+
 ## Contributors 
 ### Primary Developers
 * Aaron Geller
