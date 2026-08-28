@@ -265,11 +265,11 @@ function defineViewerParams(){
 		this.haveAnyOctree = false; //must be a better way to do this!
 		this.FPS = 30; //will be upated in the octree render loop
 		this.FPS0 = 30; //save the previous to check if we need to update the GUI
-		this.memoryUsage = 0; //if using Chrome, we can track the memory usage and try to avoid crashes
+		this.memoryUsage = 0; //bytes we've allocated for buffers (see update_memory_usage)
 		this.memoryUsage0 = 0; //save the previous to check if we need to update the GUI
 		this.drawPass = 0;
-		this.totalParticlesInMemory = 0; //try to hold the total number of particles in memory
 		this.memoryLimit = 2*1e9; //bytes, maximum memory allowed -- for now this is more like a target
+		this.baseMemoryUsage = 0; //bytes held by the non-octree meshes, set in createPartsMesh
 
 		//default min/max particles sizes
 		this.minPointScale = .01;
@@ -295,6 +295,20 @@ function defineViewerParams(){
 			this.loadingCount = {}; //will contain an array for each particle type that has the total inView and the total drawn to adjust the loading bar
 
 			this.showCoMParticles = false;
+
+			// bytes held by the node buffers we've loaded
+			this.bytesInMemory = {}; //per particle key, initialized in initOctree
+			this.totalBytesInMemory = 0;
+
+			// at the memory limit we stop queueing new nodes until usage falls back
+			//  below memoryResumeFraction*limit; the gap keeps us from freeing and
+			//  reloading a node every frame
+			this.memoryLimitReached = false;
+			this.memoryResumeFraction = 0.9;
+			this.maxEvictionsPerPass = 20; //cap so freeing back down to the limit can't stall a frame
+
+			// per particle key, set by the clear/pause/resume buttons in the GUI
+			this.loadingPaused = {};
 
 
 			/*

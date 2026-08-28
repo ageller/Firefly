@@ -172,6 +172,8 @@ function defineGUIParams(){
 		this.haveOctree = {}; //will be initialized to false for each of the parts keys in loadData
 		this.haveAnyOctree = false;
 		this.octreeMemoryLimit = 0;
+		this.octreeMemoryLimitReached = false; //viewer has stopped streaming new nodes
+		this.octreeLoadingPaused = {}; //per particle key; set by the pause/clear buttons
 		this.octreeNormCameraDistance = {};
 
 		//only need to pass the controls target?

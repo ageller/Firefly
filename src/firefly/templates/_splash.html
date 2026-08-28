@@ -66,11 +66,14 @@
            so toggling it doesn't also dismiss the splash. -->
       <details class="ff-controls__details" open onclick="event.stopPropagation();">
         <summary class="ff-controls__title">How to navigate inside the viewer</summary>
+        <!-- which of these two is the startup default depends on the "startFly"
+             setting, which arrives with the data rather than with this template,
+             so the two badges below are filled in by updateSplashControls() -->
         <div class="ff-controls__panel">
           <div class="ff-controls__group">
             <div class="ff-controls__head">
               <span class="ff-controls__name">Trackball</span>
-              <span class="ff-controls__mode">default</span>
+              <span id="splashTrackballBadge" class="ff-controls__mode">default</span>
             </div>
             <div class="ff-controls__keys">
               <div class="ff-key"><kbd>left&#8209;click + drag</kbd><span>rotate</span></div>
@@ -83,7 +86,7 @@
           <div class="ff-controls__group">
             <div class="ff-controls__head">
               <span class="ff-controls__name">Fly</span>
-              <span class="ff-controls__hint">press space</span>
+              <span id="splashFlyBadge" class="ff-controls__hint">press space</span>
             </div>
             <div class="ff-controls__keys">
               <div class="ff-key"><kbd>w a s d</kbd><span>move the camera</span></div>

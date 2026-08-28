@@ -10,6 +10,13 @@ function clearPartsMesh(pClear = viewerParams.partsKeys) {
 
 		viewerParams.partsMesh[p] = [];
 
+		// every mesh for this group is gone, so its memory accounting resets
+		if (viewerParams.octree.bytesInMemory.hasOwnProperty(p)){
+			viewerParams.octree.totalBytesInMemory = Math.max(0,
+				viewerParams.octree.totalBytesInMemory - viewerParams.octree.bytesInMemory[p]);
+			viewerParams.octree.bytesInMemory[p] = 0;
+		}
+
 	}
 }
 
@@ -63,6 +70,36 @@ function createParticleGeometry(p, parts, start, end){
 	//  get it back later for filtering, etc... !
 	geo.userData = parts;
 	return geo;
+}
+
+// bytes held by a set of particle arrays (Coordinates_flat, the scalar fields, ...).
+//  kaitai hands these back as plain Arrays of Numbers, so count 8 bytes an element
+//  unless we actually got a typed array.
+function computeParticleDataBytes(parts){
+	var bytes = 0;
+	Object.keys(parts).forEach(function(key){
+		var arr = parts[key];
+		if (!arr) return;
+		if (arr.byteLength) bytes += arr.byteLength;
+		else if (Array.isArray(arr)) bytes += arr.length*8;
+	});
+	return bytes;
+}
+
+// bytes held by a geometry: its attribute buffers plus the raw particle data
+//  hanging off of it in userData. the unit of our memory accounting.
+function computeGeometryBytes(geo){
+	var bytes = 0;
+	if (!geo) return bytes;
+
+	Object.keys(geo.attributes).forEach(function(key){
+		var arr = geo.attributes[key].array;
+		if (arr && arr.byteLength) bytes += arr.byteLength;
+	});
+
+	if (geo.userData) bytes += computeParticleDataBytes(geo.userData);
+
+	return bytes;
 }
 
 function createParticleMaterial(p, color=null,minPointScale=null,maxPointScale=null){
@@ -166,6 +203,15 @@ function createPartsMesh(pdraw = viewerParams.partsKeys, node=null){
 				octree);
 		}
 	}
+
+	// baseline for the memory readout. partsMesh[p][0] is the "Standard" mesh
+	//  created above and lives as long as the dataset does; octree node meshes are
+	//  appended after it and accounted in viewerParams.octree.bytesInMemory.
+	viewerParams.baseMemoryUsage = 0;
+	viewerParams.partsKeys.forEach(function(p){
+		if (!viewerParams.partsMesh[p] || !viewerParams.partsMesh[p][0]) return;
+		viewerParams.baseMemoryUsage += computeGeometryBytes(viewerParams.partsMesh[p][0].geometry);
+	});
 
 	//this will not be printed if you change the N value in the slider, and therefore only redraw one particle type
 	//because ndraw will not be large enough, but I don't think this will cause a problem

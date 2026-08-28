@@ -77,9 +77,9 @@ function createDecimationSegment(container,parent,name){
 		.style('width','40px');
 	if (GUIParams.haveAnyOctree){
 		segment_height += 57;
-		//text to show the memory-imposed decimation
+		//live readout of how much memory the octree is holding vs. the limit
 		container.append('div')
-			.attr('id', 'decimationOctreeDiv')
+			.attr('id', 'octreeMemoryStatusDiv')
 			.style('width',(GUIParams.containerWidth - 10) + 'px')
 			.style('margin-left','5px')
 			.style('margin-top','10px')
@@ -89,10 +89,13 @@ function createDecimationSegment(container,parent,name){
 				.style('width',(GUIParams.containerWidth - 10) + 'px')
 				.style('display','inline-block')
 				.style('font-size','12px')
-				.text('Octree memory-imposed decimation = ')
+				//keep this on one line; wrapping would push the pane past its height
+				.style('white-space','nowrap')
+				.style('overflow','hidden')
+				.style('text-overflow','ellipsis')
 				.append('span')
-					.attr('id','decimationOctreeSpan')
-					.text('1.0');
+					.attr('id','octreeMemoryStatusSpan')
+					.text('Octree memory: --');
 
 		//slider to controls the memory limit
 		var mem = container.append('div')
@@ -109,8 +112,10 @@ function createDecimationSegment(container,parent,name){
 		mem.append('div')
 			.attr('class','NSliderClass')
 			.attr('id','MSlider')
-			.style('margin-left','90px')
-			.style('width',(GUIParams.containerWidth - 195) + 'px');
+			//"Memory Limit (GB)" nearly fills its 135px label, so this needs more
+			//  clearance than the decimation slider to leave a comparable gap
+			.style('margin-left','105px')
+			.style('width',(GUIParams.containerWidth - 210) + 'px');
 		mem.append('input')
 			.attr('class','NMaxTClass')
 			.attr('id','MMaxT')
@@ -1020,19 +1025,49 @@ function createParticleControlsWindow(container,parent,name,p){
 //////////////
 function createParticleClearOctreeMemorySegment(container,parent,name,p){
 	var segment_height = 0;
-	// for octree add a button to dispose of the nodes from memory
+	// for octree, controls for what this group holds in memory: "Clear" frees every
+	//  loaded node and pauses streaming so it stays cleared; "Pause"/"Resume"
+	//  toggles streaming without freeing anything.
 	if (GUIParams.haveOctree[p]) {
 
 		var clearMem = container.append('div')
 			.attr('id',p+'_disposer')
-		var b = clearMem.append('button')
+
+		// .button/.centerButton are content-box and bring their own padding, so the
+		//  space each button takes is width + padding + margins. Solve for the width
+		//  that fits two on one line, or they wrap and overflow the pane. The left
+		//  inset matches .NdDiv's padding so these line up with the text below them.
+		var padding = 4; // 2px either side, from .centerButton
+		var inset = 5;   // matches .NdDiv
+		var gap = 4;
+		var buttonWidth = (GUIParams.containerWidth - inset - gap - 2*padding)/2.;
+
+		clearMem.append('button')
+			.attr('id',p+'_clearMemoryButton')
 			.attr('class','button centerButton')
-			.style('margin','4px')
-			.style('width',(GUIParams.containerWidth - 12) + 'px')
+			.style('width',buttonWidth + 'px')
+			.style('margin','5px 0px 0px ' + inset + 'px')
 			.on('click',function(){
-				sendToViewer([{'disposeOctreeNodes':[p]}]);
+				sendToViewer([{'clearOctreeMemory':[p]}]);
+				// the viewer echoes this back, but set it here so the button
+				//  relabels immediately
+				GUIParams.octreeLoadingPaused[p] = true;
+				updateOctreeMemoryButtonsUI();
 			})
-		b.append('span').text('Clear from memory')
+			.append('span').text('Clear');
+
+		clearMem.append('button')
+			.attr('id',p+'_pauseLoadingButton')
+			.attr('class','button centerButton')
+			.style('width',buttonWidth + 'px')
+			.style('margin','5px 0px 0px ' + gap + 'px')
+			.on('click',function(){
+				var paused = !GUIParams.octreeLoadingPaused[p];
+				sendToViewer([{'setOctreeLoadingPaused':[p, paused]}]);
+				GUIParams.octreeLoadingPaused[p] = paused;
+				updateOctreeMemoryButtonsUI();
+			})
+			.append('span').text(GUIParams.octreeLoadingPaused[p] ? 'Resume' : 'Pause');
 
 		segment_height += 34;
 
@@ -1695,18 +1730,40 @@ function createOctreeLoadingBar(container){
 
 
 	var height = 16;
-	var width = GUIParams.containerWidth - GUIParams.longestPartLabelLen - 50;
 	var offset = 5;
 	var margin = 10;
+	var fontSize = 0.75*height;
+
+	//keep the whole thing inside the GUI container
+	var svgWidth = GUIParams.containerWidth - margin;
 
 	var svg = elem.append('svg')
 		.attr('id','octreeLoadingBars')
 		// .style('position','absolute')
 		// .style('left','0px')
 		// .style('bottom','0px')
-		.attr('width', (width + 2*margin + 120) + 'px')
+		.attr('width', svgWidth + 'px')
 		.attr('height', height + 'px') //will be adjusted below
-		//.style('transform', 'translate(2px,2px)')
+
+	// All the bars share one width, set by the widest count label any of them has
+	//  to show. That width isn't knowable up front -- the denominator is nodes
+	//  drawn plus nodes queued, which never approaches the total node count -- so
+	//  start from a typical four-digit label and let resizeOctreeLoadingBars() give
+	//  the text more room the first time something longer turns up.
+	var labelWidth = 0;
+	GUIParams.partsKeys.forEach(function(p){
+		if (!GUIParams.haveOctree[p]) return;
+		labelWidth = Math.max(labelWidth, measureOctreeLoadingLabel(p + ' (0000/0000)', fontSize));
+	})
+
+	//don't let a long label collapse the bar entirely
+	var width = Math.max(60, svgWidth - margin - 2*offset - labelWidth);
+
+	//shared by resizeOctreeLoadingBars() so it can recompute this same layout
+	GUIParams.octreeBarGeometry = {
+		'svgWidth':svgWidth, 'margin':margin, 'offset':offset,
+		'fontSize':fontSize, 'labelWidth':labelWidth, 'width':width
+	};
 
 	//count to get the full size of the SVG
 	var nRects = 0;
@@ -1715,7 +1772,7 @@ function createOctreeLoadingBar(container){
 
 			svg.append('rect')
 				.attr('id',p + 'octreeLoadingOutline')
-				.attr('x', '10px')
+				.attr('x', margin + 'px')
 				.attr('y', (nRects*(height + offset) + margin) + 'px')
 				.attr('width',width + 'px')
 				.attr('height',height + 'px')
@@ -1725,7 +1782,7 @@ function createOctreeLoadingBar(container){
 			svg.append('rect')
 				.attr('id',p + 'octreeLoadingFill')
 				.attr('class','octreeLoadingFill')
-				.attr('x', '10px')
+				.attr('x', margin + 'px')
 				.attr('y', (nRects*(height + offset) + margin) + 'px')
 				.attr('width','0px') //will be updated
 				.attr('height',height + 'px')
@@ -1733,10 +1790,10 @@ function createOctreeLoadingBar(container){
 			svg.append('text')
 				.attr('id',p + 'octreeLoadingText')
 				.attr('class','octreeLoadingText')
-				.attr('x', (width + margin + offset) + 'px')
-				.attr('y', (nRects*(height + offset) + margin + 0.75*height) + 'px')
+				.attr('x', (margin + width + offset) + 'px')
+				.attr('y', (nRects*(height + offset) + margin + fontSize) + 'px')
 				.attr('fill','rgb(' + (255*GUIParams.partsColors[p][0]) + ',' + (255*GUIParams.partsColors[p][1]) + ',' + (255*GUIParams.partsColors[p][2]) + ')')
-				.style('font-size', (0.75*height) + 'px')
+				.style('font-size', fontSize + 'px')
 				.text(p + ' (0/0)')				
 			nRects += 1;
 		}

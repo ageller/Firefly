@@ -353,18 +353,84 @@ function updateFPSContainer(){
 	if (!GUIParams.showFPS && !GUIParams.showMemoryUsage && elm) elm.style.display='none';
 }
 
+// live "x.xx / y.yy GB" readout under the memory slider
+function updateOctreeMemoryStatusUI(){
+	var elm = d3.select('#octreeMemoryStatusSpan');
+	if (elm.size() < 1) return;
+
+	var used = GUIParams.memoryUsage/1e9;
+	var limit = GUIParams.octreeMemoryLimit/1e9;
+
+	var txt = 'Octree memory: ' + used.toFixed(2) + ' / ' + limit.toFixed(2) + ' GB';
+	if (GUIParams.octreeMemoryLimitReached) txt += ' - loading paused';
+
+	elm.text(txt)
+		.style('color', GUIParams.octreeMemoryLimitReached ? '#ffaa00' : null);
+}
+
+// keep the Pause/Resume buttons labelled to match the viewer's state, which can
+//  change without a click (Clear also pauses)
+function updateOctreeMemoryButtonsUI(){
+	if (!GUIParams.partsKeys) return;
+	GUIParams.partsKeys.forEach(function(p){
+		if (!GUIParams.haveOctree[p]) return;
+		var btn = d3.select('#' + p + '_pauseLoadingButton').select('span');
+		if (btn.size() < 1) return;
+		btn.text(GUIParams.octreeLoadingPaused[p] ? 'Resume' : 'Pause');
+	});
+}
+
+// measure a loading bar label. done in a throwaway svg on the body because the UI
+//  container is hidden while the GUI is built, and a hidden element measures as 0.
+function measureOctreeLoadingLabel(label, fontSize){
+	var probe = d3.select('body').append('svg')
+		.style('position','absolute')
+		.style('left','-9999px')
+		.style('top','0px');
+	var text = probe.append('text').style('font-size', fontSize + 'px').text(label);
+	var w = text.node().getComputedTextLength();
+	probe.remove();
+	//fall back to an estimate if we still couldn't measure it
+	if (!w) w = 0.6*fontSize*label.length;
+	return w;
+}
+
+// give the count labels more room when a longer one appears, and shrink every bar
+//  to match so they stay a uniform width. Only ever grows the label allowance, so
+//  this converges after the first pass or two instead of oscillating.
+function resizeOctreeLoadingBars(labelWidth){
+	var geo = GUIParams.octreeBarGeometry;
+	if (!geo || labelWidth <= geo.labelWidth) return;
+
+	geo.labelWidth = labelWidth;
+	geo.width = Math.max(60, geo.svgWidth - geo.margin - 2*geo.offset - labelWidth);
+
+	GUIParams.partsKeys.forEach(function(p){
+		if (!GUIParams.haveOctree[p]) return;
+		d3.select('#' + p + 'octreeLoadingOutline').attr('width', geo.width + 'px');
+		d3.select('#' + p + 'octreeLoadingText').attr('x', (geo.margin + geo.width + geo.offset) + 'px');
+	});
+}
+
 function updateOctreeLoadingBarUI(input){
 	var id = '#' + input.p + 'octreeLoadingOutline';
 	var selection = d3.select(id)
 	// size checks if the selection caught anything
 	if (selection.size() < 1) return
-	var width = parseFloat(selection.attr('width'));
 	if (input.denominator > 0){
+		var textElm = d3.select('#' + input.p + 'octreeLoadingText');
+		textElm.text(input.p + ' (' + input.numerator + '/' + input.denominator + ')');
+
+		//make room if this label is wider than anything we've shown so far
+		var geo = GUIParams.octreeBarGeometry;
+		if (geo) resizeOctreeLoadingBars(textElm.node().getComputedTextLength());
+
+		//read the width back after any resize so the fill matches the outline
+		var width = parseFloat(selection.attr('width'));
 		var frac = THREE.Math.clamp(input.parts_numerator/input.parts_denominator, 0, 1);
 		//var frac = Math.max(viewerParams.octree.loadingCount[p][1]/viewerParams.octree.loadingCount[p][0], 0);
 		//console.log('loading',p, width,viewerParams.octree.loadingCount[p], frac)
 		d3.select('#' + input.p + 'octreeLoadingFill').transition().attr('width', (width*frac) + 'px');
-		d3.select('#' + input.p + 'octreeLoadingText').text(input.p + ' (' + input.numerator + '/' + input.denominator + ')');
 		//d3.select('#' + input.p + 'octreeLoadingText').text(input.p + ' (' + Math.round(frac*100) + '%)');
 	}
 }

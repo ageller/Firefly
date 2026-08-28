@@ -604,25 +604,11 @@ function capture(){
 }
 
 function update_memory_usage(){
-	//get the actual memory usage
-	if (window.performance.memory) { //works for Chrome
-		viewerParams.memoryUsage = window.performance.memory.totalJSHeapSize;
-	} else {
-		//check the total number of particles rendered
-		if (viewerParams.drawPass % 100 == 0 && viewerParams.drawPass > viewerParams.partsKeys.length){
-			viewerParams.totalParticlesInMemory = 0.;
-			viewerParams.partsKeys.forEach(function(p){
-				if (viewerParams.haveOctree[p]){
-					viewerParams.partsMesh[p].forEach( function (m){
-						viewerParams.totalParticlesInMemory += m.geometry.userData['Coordinates_flat'].length/3
-					});
-				}
-				else viewerParams.totalParticlesInMemory += viewerParams.parts.count[p];
-			});
-		}
-		//calculated from a previous test using the octree mode
-		viewerParams.memoryUsage = 2.03964119e+02*viewerParams.totalParticlesInMemory + 1.64869925e+08; 
-	}
+	// our own accounting of the buffers we've allocated: the baseline (non-octree)
+	//  meshes plus every octree node buffer currently loaded. unlike
+	//  performance.memory this drops as soon as a node is disposed, which is what
+	//  the memory limit is enforced against.
+	viewerParams.memoryUsage = viewerParams.baseMemoryUsage + viewerParams.octree.totalBytesInMemory;
 }
 
 function update_framerate(seconds,time){
@@ -653,6 +639,10 @@ function update_framerate(seconds,time){
 			forGUI.push({'setGUIParamByKey':[viewerParams.FPS, "FPS"]});
 			forGUI.push({'setGUIParamByKey':[viewerParams.memoryUsage, "memoryUsage"]});
 			forGUI.push({'updateFPSContainer':[]});
+			if (viewerParams.haveAnyOctree){
+				forGUI.push({'setGUIParamByKey':[viewerParams.octree.memoryLimitReached, "octreeMemoryLimitReached"]});
+				forGUI.push({'updateOctreeMemoryStatusUI':[]});
+			}
 			sendToGUI(forGUI);
 		}
 	}

@@ -521,6 +521,10 @@ function initScene() {
 	// controls
 	initControls();
 
+	// now that startFly has been applied, the splash can say which controls we
+	//  actually started in
+	updateSplashControls();
+
 	// add button to enable VR
 	if (viewerParams.allowVRControls) {
 		document.body.appendChild( VRButton.createButton( viewerParams.renderer ) );
@@ -1081,6 +1085,8 @@ function sendInitGUI(prepend=[], append=[]){
 	forGUI.push({'setGUIParamByKey':[viewerParams.haveOctree,"haveOctree"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.haveAnyOctree,"haveAnyOctree"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.memoryLimit,"octreeMemoryLimit"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.octree.loadingPaused,"octreeLoadingPaused"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.octree.memoryLimitReached,"octreeMemoryLimitReached"]});
 
 
 	forGUI.push({'setGUIParamByKey':[viewerParams.columnDensity,"columnDensity"]});

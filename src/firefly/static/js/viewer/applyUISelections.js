@@ -46,7 +46,8 @@ function loadNewData(){
 
 	viewerParams.partsKeys.forEach(
 		function (pkey){
-		if (viewerParams.parts[pkey].hasOwnProperty('octree')) disposeOctreeNodes(pkey);
+		// tearing the whole dataset down, so don't leave the group flagged as paused
+		if (viewerParams.parts[pkey].hasOwnProperty('octree')) disposeOctreeNodes(pkey, false);
 	});
 
 
@@ -609,10 +610,15 @@ function updateStereoSep(value){
 }
 
 function updateMemoryLimit(value){
-	viewerParams.octree.memoryLimit = parseFloat(value*1e9);
-	viewerParams.octree.NParticleMemoryModifierFac = 1.;
-	viewerParams.octree.NParticleMemoryModifier = THREE.Math.clamp(viewerParams.octree.NParticleMemoryModifierFac*viewerParams.octree.memoryLimit/viewerParams.memoryUsage, 0., 1.);
-	updateOctreeDecimationSpan();
+	viewerParams.memoryLimit = parseFloat(value*1e9);
+
+	// re-evaluate the gate now so raising the limit resumes loading without
+	//  waiting for memory usage itself to change
+	if (viewerParams.memoryUsage < viewerParams.octree.memoryResumeFraction*viewerParams.memoryLimit){
+		viewerParams.octree.memoryLimitReached = false;
+	}
+
+	sendOctreeMemoryToGUI();
 }
 
 function updateNormCameraDistance(vals){

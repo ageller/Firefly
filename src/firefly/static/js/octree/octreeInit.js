@@ -17,6 +17,10 @@ function initOctree(pkey,data){
 	//for loading bar
 	viewerParams.octree.loadingCount[pkey] = [0,0];
 
+	//memory accounting and the clear/pause/resume state for this group
+	viewerParams.octree.bytesInMemory[pkey] = 0;
+	viewerParams.octree.loadingPaused[pkey] = false;
+
 	//this will be used as a percentage value in the GUI
 	viewerParams.plotNmax[pkey] = 100;
 
@@ -201,10 +205,24 @@ function createOctBox(node){
 	return obj;
 }
 
-function updateOctreeDecimationSpan(){
-	var num = (1./viewerParams.octree.NParticleMemoryModifier).toFixed(2);
-	if (num > 10000) num = '> 10,000'
-	d3.select('#decimationOctreeSpan').text(num)
+// push the current memory accounting to the GUI. call this whenever memory
+//  changes discontinuously (clear, pause, resume, moving the limit slider) so the
+//  readout responds immediately rather than waiting for the throttled update in
+//  update_framerate.
+function sendOctreeMemoryToGUI(){
+	if (!viewerParams.haveUI) return;
+
+	update_memory_usage();
+
+	var forGUI = [];
+	forGUI.push({'setGUIParamByKey':[viewerParams.memoryUsage, 'memoryUsage']});
+	forGUI.push({'setGUIParamByKey':[viewerParams.memoryLimit, 'octreeMemoryLimit']});
+	forGUI.push({'setGUIParamByKey':[viewerParams.octree.memoryLimitReached, 'octreeMemoryLimitReached']});
+	forGUI.push({'setGUIParamByKey':[viewerParams.octree.loadingPaused, 'octreeLoadingPaused']});
+	forGUI.push({'updateFPSContainer':[]});
+	forGUI.push({'updateOctreeMemoryStatusUI':[]});
+	forGUI.push({'updateOctreeMemoryButtonsUI':[]});
+	sendToGUI(forGUI);
 }
 
 function evaluateFunctionOnOctreeNodes(node_function,node,octree,max_refinement=null){

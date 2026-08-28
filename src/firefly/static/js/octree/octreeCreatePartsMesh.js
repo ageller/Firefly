@@ -1,5 +1,27 @@
+// add this node's buffers to the memory accounting. the byte count is stashed on
+//  the node so releaseNodeMemory subtracts exactly what was added, rather than
+//  recomputing from a geometry that may already be disposed.
+function accountNodeMemory(node,geo){
+	if (!viewerParams.octree.bytesInMemory[node.pkey]) viewerParams.octree.bytesInMemory[node.pkey] = 0;
+
+	node.bytes_in_memory = computeGeometryBytes(geo);
+	viewerParams.octree.bytesInMemory[node.pkey] += node.bytes_in_memory;
+	viewerParams.octree.totalBytesInMemory += node.bytes_in_memory;
+}
+
+// take this node's buffers back out of the memory accounting. clamped at zero
+//  because clearPartsMesh can reset a group's total out from under us.
+function releaseNodeMemory(node){
+	if (!node.bytes_in_memory) return;
+	viewerParams.octree.bytesInMemory[node.pkey] = Math.max(0,
+		viewerParams.octree.bytesInMemory[node.pkey] - node.bytes_in_memory);
+	viewerParams.octree.totalBytesInMemory = Math.max(0,
+		viewerParams.octree.totalBytesInMemory - node.bytes_in_memory);
+	node.bytes_in_memory = 0;
+}
+
 function addOctreeParticlesToScene(
-	node, 
+	node,
 	start, end){
 
 	//I can use the start and end values to define how many particles to add to the mesh,
@@ -17,7 +39,10 @@ function addOctreeParticlesToScene(
 		//  particles. We'll assume that the new particles are appended to the back of the list and we'll 
 		//  replace the geometry in the mesh with this new expanded geometry.)
 		if (node.mesh) {
-			node.mesh.geometry = geo; 
+			// free the buffers we're replacing before swapping the new ones in
+			releaseNodeMemory(node);
+			node.mesh.geometry.dispose();
+			node.mesh.geometry = geo;
 			node.mesh.geometry.needsUpdate = true;}
 		// have to create a whole mesh for this geometry
 		else {
@@ -35,6 +60,8 @@ function addOctreeParticlesToScene(
 			viewerParams.partsMesh[node.pkey].push(mesh);
 			node.mesh = mesh;
 		}
+
+		accountNodeMemory(node,geo);
 	}
 
 	// finish up, make a record of the draw, free up the queue to draw again
@@ -132,6 +159,8 @@ function drawOctreeNode(node, callback){
 
 function removeOctreeNode(node,callback){
 	if (node.mesh){
+		releaseNodeMemory(node);
+
 		node.mesh.geometry.dispose();
 		node.mesh.material.dispose();
 		viewerParams.scene.remove(node.mesh);
@@ -148,33 +177,95 @@ function removeOctreeNode(node,callback){
 			}
 		)
 
-		// remove from partsMesh
-		if (match_index)viewerParams.partsMesh[node.pkey].splice(match_index,1);
+		// remove from partsMesh (index 0 is a valid match, so compare to null)
+		if (match_index != null) viewerParams.partsMesh[node.pkey].splice(match_index,1);
 		node.mesh=null;
 		node.drawn=false;
 
 		// unreference buffer data by deleting the .particles attribute
 		delete node.particles;
-		
+
 		viewerParams.octree.loadingCount[node.pkey][0]-=1
 		viewerParams.octree.loadingCount[node.pkey][1]-=node.buffer_size;//1
-		viewerParams.octree.waitingToRemove = false;
 		updateOctreeLoadingBar();
 	}
+	// released unconditionally so a node without a mesh can't stall the remove queue
+	viewerParams.octree.waitingToRemove = false;
 	return callback(node);
 }
 
-function disposeOctreeNodes(p){
+// drop everything queued for a particle group. node.queue has to be cleared too
+//  or checkInQueue keeps believing these nodes are still enqueued.
+function clearOctreeDrawQueue(p){
+	viewerParams.octree.toDraw[p].forEach(function (tuple){tuple[0].queue = null});
+	viewerParams.octree.toDraw[p] = [];
+}
+
+function clearOctreeRemoveQueue(p){
+	viewerParams.octree.toRemove = viewerParams.octree.toRemove.filter(function (tuple){
+		if (tuple[0].pkey != p) return true;
+		tuple[0].queue = null;
+		return false;
+	});
+}
+
+// free every loaded node for this particle group.
+//
+// pauseLoading also stops streaming, so the group stays cleared: otherwise the
+//  next tree walk sees the same camera and pulls everything straight back off
+//  disk. Callers tearing the dataset down entirely pass false.
+function disposeOctreeNodes(p, pauseLoading=true){
 	console.log('disposing of all nodes ', p);
+
+	// empty the queues first, or anything already waiting gets drawn right back
+	clearOctreeDrawQueue(p);
+	clearOctreeRemoveQueue(p);
 
 	var this_octree = viewerParams.parts[p].octree;
 	evaluateFunctionOnOctreeNodes(
-		function (node){removeOctreeNode(node, function (node){true})},
+		function (node){
+			removeOctreeNode(node, function (node){true});
+			node.queue = null;
+			// 'remove' also catches nodes whose fetch is still in flight:
+			//  drawOctreeNode rechecks current_state in its callback and drops the
+			//  data instead of adding a mesh after we've cleared
+			node.current_state = 'remove';
+			// that in-flight node skipped removeOctreeNode's `if (node.mesh)`
+			//  branch, so clear drawn here or load_buffer won't requeue it on resume
+			node.drawn = false;
+		},
 		this_octree[''],
 		this_octree);
+
+	viewerParams.octree.loadingCount[p] = [0,0];
 
 	//I think I should reset this just in case
 	viewerParams.octree.waitingToDraw = false;
 	viewerParams.octree.waitingToReduce = false;
 	viewerParams.octree.waitingToRemove = false;
+
+	if (pauseLoading) viewerParams.octree.loadingPaused[p] = true;
+
+	updateOctreeLoadingBar();
+	sendOctreeMemoryToGUI();
+}
+
+// pause/resume streaming for one particle group, leaving whatever is already
+//  loaded on screen
+function setOctreeLoadingPaused(args){
+	var p = args[0];
+	var paused = args[1];
+
+	viewerParams.octree.loadingPaused[p] = paused;
+
+	// on resume, drop the stale queue so nodes are re-evaluated against where the
+	//  camera is now
+	if (!paused) clearOctreeDrawQueue(p);
+
+	sendOctreeMemoryToGUI();
+}
+
+function clearOctreeMemory(args){
+	var p = args[0];
+	disposeOctreeNodes(p, true);
 }

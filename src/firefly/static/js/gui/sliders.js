@@ -318,16 +318,25 @@ function createDecimationSlider(){
 
 function createMemorySlider(){
 
-	var initialValue = parseFloat(GUIParams.octreeMemoryLimit/1e9); 
+	var initialValue = parseFloat(GUIParams.octreeMemoryLimit/1e9);
+	// fall back to the viewer's default so the handle can't disagree with the
+	//  limit actually in force
+	if (!initialValue) initialValue = 2.;
+
+	// headroom above the default so the limit can be raised as well as lowered,
+	//  and a floor so it can't be dragged to 0 GB (which would stop the octree
+	//  loading anything at all)
+	var maxValue = Math.max(8, 4*initialValue);
+	var minValue = 0.25;
 
 	var sliderArgs = {
-		start: [initialValue], 
+		start: [Math.min(Math.max(initialValue, minValue), maxValue)],
 		connect: [true, false],
 		tooltips: false,
 		steps: [0.01],
-		range: { 
-			'min': [0],
-			'max': [initialValue]
+		range: {
+			'min': [minValue],
+			'max': [maxValue]
 		},
 		format: wNumb({
 			decimals: 2

@@ -36,6 +36,30 @@ function handleMouseDown(event) {
 
 }
 
+// mark whichever camera controls the viewer starts in as the default on the
+//  splash screen, and label the other one with the key that switches to it.
+//  driven by the "startFly" setting, so this can only be resolved once the data's
+//  settings have been applied.
+function updateSplashControls(){
+	var trackball = d3.select('#splashTrackballBadge');
+	var fly = d3.select('#splashFlyBadge');
+	if (!trackball.node() || !fly.node()) return;
+
+	// trackball unless something tells us otherwise
+	var trackballIsDefault = true;
+	if (typeof viewerParams !== 'undefined' && viewerParams != null && viewerParams.useTrackball != null) trackballIsDefault = viewerParams.useTrackball;
+	else if (typeof GUIParams !== 'undefined' && GUIParams != null && GUIParams.useTrackball != null) trackballIsDefault = GUIParams.useTrackball;
+
+	// ff-controls__mode is the highlighted "default" badge, ff-controls__hint the
+	//  dimmer "press space" one
+	var setBadge = function(elm, isDefault){
+		elm.text(isDefault ? 'default' : 'press space')
+			.attr('class', isDefault ? 'ff-controls__mode' : 'ff-controls__hint');
+	}
+	setBadge(trackball, trackballIsDefault);
+	setBadge(fly, !trackballIsDefault);
+}
+
 //hide the splash screen
 function showSplash(show=true){
 
