@@ -45,7 +45,10 @@ function showSplash(show=true){
 			var x = event.clientX;
 			var y = event.clientY;
 			var elementMouseIsOver = document.elementFromPoint(x, y);
-			if (!elementMouseIsOver.id.includes("splash")) show = true;		
+			// was the click anywhere inside the splash overlay itself? (not just an element
+			// whose own id happens to contain "splash" -- the splash markup has several
+			// unlabeled wrapper divs now, so check ancestry instead)
+			if (!elementMouseIsOver.closest('#splash')) show = true;
 		}
 	}
 

@@ -160,13 +160,11 @@ function finalizeGUIInitialization(){
 	console.log('GUI built.')
 }
 
-// show the button on the splash screen
+// show the button on the splash screen, in place of the loading bar (no data
+// directory has been chosen yet, so there's nothing to show progress for)
 function showLoadingButton(id){
-	var screenWidth = parseFloat(window.innerWidth);
-	var width = parseFloat(d3.select(id).style('width'));
-	d3.select(id)
-		.style('display','inline')
-		.style('margin-left',(screenWidth - width)/2);
+	d3.select(id).style('display', null); // let .ff-splash__loaderbtns (flex) lay it out
+	d3.select('.ff-loader__bar').style('display', 'none');
 }
 
 // for loading and reading a startup file with multiple entries
@@ -243,7 +241,7 @@ function selectFromStartup(prefix=""){
 		d3.json(f,  function(files) {
 			if (files != null){
 				console.log('==loading data', files, prefix)
-				sendToViewer([{'callLoadData':[files, prefix]}])
+				sendToViewer([{'callLoadData':[files, prefix, selection.value]}])
 			} else {
 				alert("Cannot load data. Please select another directory.");
 			}

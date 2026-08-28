@@ -1,6 +1,7 @@
 import sys
 import os
 import argparse
+from importlib.metadata import version as _pkg_version, PackageNotFoundError
 from firefly.data_reader.reader import Reader
 
 ## make sure we are importing from wherever this file is, rather than the system 
@@ -59,6 +60,9 @@ def main(
 
 def define_parser():
     parser = argparse.ArgumentParser(description = 'Firefly')
+    try: firefly_version = _pkg_version('firefly')
+    except PackageNotFoundError: firefly_version = 'unknown'
+    parser.add_argument('--version', action='version', version=f"firefly {firefly_version}")
     parser.add_argument('--method', default = 'http', type = str,
         help = 'What sort of Firefly server to open, a Flask ("flask") server or an HTTP ("http"), defaults to "http".')
     parser.add_argument('--port', default = 5500, type = int,

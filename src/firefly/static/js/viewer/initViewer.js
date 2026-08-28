@@ -38,14 +38,13 @@ function connectViewerSocket(){
 		});
 
 		socketParams.socket.on('show_loader', function(msg) {
-			d3.select("#splashdivLoader").selectAll('svg').remove();
-			d3.select("#splashdiv5").text("Loading particle data...");
 			d3.select("#loader").style("display","visible");
 			viewerParams.loaded = false;
 			viewerParams.pauseAnimation = true;
 
-			viewerParams.loadfrac = 0.;
-			drawLoadingBar();
+			// no directory/dataset name is known for data pushed over the socket
+			viewerParams.datasetName = null;
+			resetSplashProgress();
 
 			showSplash();
 		});
@@ -73,8 +72,7 @@ function connectViewerSocket(){
 				if (msg.status == 'data') {
 					viewerParams.newInternalData.count += 1;
 					//I will update the loading bar here, but I'm not sure what fraction of the time this should take (using 0.8 for now)
-					viewerParams.loadfrac = (viewerParams.newInternalData.count/viewerParams.newInternalData.len)*0.8; 
-					updateLoadingBar();
+					updateSplashProgress((viewerParams.newInternalData.count/viewerParams.newInternalData.len)*0.8);
 					Object.keys(msg).forEach(function(key,i){
 						if (key != 'status'){
 							viewerParams.newInternalData.data[key] = JSON.parse(msg[key]);
@@ -97,7 +95,7 @@ function connectViewerSocket(){
 			console.log("======== have new data : ", msg.filepath);
 			d3.json(msg.filepath + "/filenames.json",  function(files) {
 				if (files != null){
-					callLoadData([files, prefix]);
+					callLoadData([files, prefix, msg.filepath]);
                     sendToGUI([{'makeUI':viewerParams.local}]);
 				} else {
 					sendToGUI([{'showLoadingButton':'#loadDataButton'}]);
@@ -168,7 +166,6 @@ function initInputData(){
 //so that it can run locally also without using Flask
 // note that if allowVRControls == true, then you do not want to start in stereo (the VR button will do the work)
 function runLocal(useSockets=true, showGUI=true, allowVRControls=false, startStereo=false){
-	d3.select("#splashdiv5").text("Loading particle data...");
 	viewerParams.local = true;
 	viewerParams.usingSocket = useSockets;
 	forGUI = [];
@@ -242,7 +239,7 @@ function getFilenames(prefix=""){
 			if (i != null && i < Object.keys(viewerParams.dir).length){
 				d3.json(prefix+viewerParams.dir[i] + "/filenames.json",  function(files) {
 					if (files != null){
-						callLoadData([files, prefix]);
+						callLoadData([files, prefix, viewerParams.dir[i]]);
 					} else {
 						sendToGUI([{'showLoadingButton':'#loadDataButton'}]);
 						alert("Cannot load data. Please select another directory.");
@@ -255,11 +252,12 @@ function getFilenames(prefix=""){
 	});
 }
 
-//once a data directory is identified, this will define the parameters, draw the loading bar and, load in the data
+//once a data directory is identified, this will define the parameters, reset the splash loading bar and, load in the data
 function callLoadData(args){
 	var files = args[0];
 	var prefix = "";
 	if (args.length > 0) prefix = args[1];
+	var datasetPath = args.length > 2 ? args[2] : null;
 
 	var dir = {};
 	if (viewerParams.hasOwnProperty('dir')){
@@ -268,7 +266,9 @@ function callLoadData(args){
 	viewerParams.dir = dir;
 	sendToGUI([{'setGUIParamByKey':[viewerParams.dir, "dir"]}]);
 
-	drawLoadingBar();
+	viewerParams.datasetName = datasetNameFromPath(datasetPath);
+	resetSplashProgress();
+
 	viewerParams.filenames = files;
 	//console.log("loading new data", files)
 	loadData(WebGLStart, prefix);
@@ -1236,8 +1236,7 @@ function countPartsForLoadingBar(initialLoadFrac=0){
 		var loadfrac = frac*(1. - initialLoadFrac) + initialLoadFrac;
 		//some if statment like this seems necessary.  Otherwise the loading bar doesn't update (I suppose from too many calls)
 		if (loadfrac - viewerParams.loadfrac > 0.1 || loadfrac == 1){
-			viewerParams.loadfrac = loadfrac;
-			updateLoadingBar();
+			updateSplashProgress(loadfrac);
 		}
 	}
 }
@@ -1415,6 +1414,39 @@ function updateLoadingBar(){
 	//console.log(viewerParams.loadfrac, viewerParams.loadingSizeX*viewerParams.loadfrac)
 	d3.selectAll('#loadingRect').transition().attr("width", viewerParams.loadingSizeX*viewerParams.loadfrac);
 
+}
+
+// the splash screen's loading bar (#splashProgressFill/#splashProgressPct) is plain
+// CSS-width markup, always present in the DOM -- unlike drawLoadingBar()/updateLoadingBar()
+// above (which build an SVG bar on demand, still used for the "sending data to Python"
+// progress bar in selector.js), it just needs its width/text set directly.
+function updateSplashProgress(frac){
+	viewerParams.loadfrac = frac;
+	var pct = Math.round(frac*100);
+	d3.select('#splashProgressFill').style('width', pct + '%');
+	d3.select('#splashProgressPct').text(pct + '%');
+}
+
+// called whenever a new load begins, once any known dataset name (viewerParams.datasetName)
+// has been set by the caller
+function resetSplashProgress(){
+	d3.select('#loadDataButton').style('display','none');
+	d3.select('#selectStartupButton').style('display','none');
+	d3.select('.ff-loader__bar').style('display', null); // undo showLoadingButton()'s hide, now that a directory is chosen
+
+	var label = 'Loading...';
+	if (viewerParams.datasetName) label = 'LOADING · ' + viewerParams.datasetName;
+	d3.select('#splashdiv5').text(label);
+
+	updateSplashProgress(0);
+}
+
+// derive a short display name for the splash screen from a data directory path
+// (e.g. "data/FIRESampleData" -> "FIRESampleData"); returns null if none is known
+function datasetNameFromPath(path){
+	if (!path) return null;
+	var parts = path.split('/').filter(function(s){ return s.length > 0; });
+	return parts.length ? parts[parts.length-1] : null;
 }
 
 // initPVals -> 

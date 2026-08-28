@@ -71,8 +71,10 @@ function loadNewData(){
 	//AMG: should this be moved to the GUI (generally we won't have these in the viewer window...)
 	d3.select('#stateContainer').html("");
 	d3.select('.UIcontainer').html("");
-	d3.select("#splashdivLoader").selectAll('svg').remove();
-	d3.select("#splashdiv5").text("Loading particle data...");
+	// don't hide the data-picker buttons here (unlike resetSplashProgress()) -- this
+	// function's whole job is to prompt the user to pick a new dataset
+	viewerParams.datasetName = null;
+	d3.select("#splashdiv5").text("Loading...");
 	if (Object.keys(viewerParams.dir).length > 1){
 		forGUI.push({'showLoadingButton':'#selectStartupButton'});
 	} else {
@@ -81,7 +83,7 @@ function loadNewData(){
 	sendToGUI(forGUI);
 
 	d3.select("#loader").style("display","visible");
-	viewerParams.loadfrac = 0.;
+	updateSplashProgress(0);
 	viewerParams.haveUI = false;
 	showSplash(true);
 

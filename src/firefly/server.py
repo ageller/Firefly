@@ -16,6 +16,7 @@ import socket
 import requests
 import http.server
 import socketserver
+from importlib.metadata import version as _pkg_version, PackageNotFoundError
 
 try:
     import fcntl # used to lock the PID file against concurrent writers; POSIX only
@@ -42,9 +43,12 @@ app = Flask(__name__)
 # the best option based on installed packages.
 async_mode = "eventlet" #"eventlet" is WAY better than "threading"
 
-app = Flask(__name__) 
+app = Flask(__name__)
 app.config['SECRET_KEY'] = 'secret!'
 socketio = SocketIO(app, async_mode=async_mode)#, max_http_buffer_size=10**9)
+
+try: FIREFLY_VERSION = _pkg_version('firefly')
+except PackageNotFoundError: FIREFLY_VERSION = 'unknown'
 
 namespace = '/Firefly'
 
@@ -180,30 +184,30 @@ def input_otherType(fileinfo):
 
 #flask stuff
 @app.route("/viewer")
-def viewer():  
-    return render_template("viewer.html")
+def viewer():
+    return render_template("viewer.html", version=FIREFLY_VERSION)
 
 @app.route("/gui")
-def gui(): 
-    return render_template("gui.html")
+def gui():
+    return render_template("gui.html", version=FIREFLY_VERSION)
 
 @app.route("/")
-def default(): 
-    return render_template("default.html")
+def default():
+    return render_template("default.html", version=FIREFLY_VERSION)
 @app.route("/default")
-def default1(): 
-    return render_template("default.html")
+def default1():
+    return render_template("default.html", version=FIREFLY_VERSION)
 @app.route("/index")
-def default2(): 
-    return render_template("default.html")
+def default2():
+    return render_template("default.html", version=FIREFLY_VERSION)
 
 @app.route("/combined")
-def combined(): 
-    return render_template("combined.html")
+def combined():
+    return render_template("combined.html", version=FIREFLY_VERSION)
 
 @app.route("/VR")
-def cardboard(): 
-    return render_template("VR.html")
+def cardboard():
+    return render_template("VR.html", version=FIREFLY_VERSION)
 
 @app.route('/data_input', methods = ['POST'])
 def data_input():
@@ -246,8 +250,8 @@ def data_input():
         return 'Error'
 
 @app.route("/stream")
-def streamer():  
-    return render_template("streamer.html", input=json.dumps({'fps':fps}))
+def streamer():
+    return render_template("streamer.html", input=json.dumps({'fps':fps}), version=FIREFLY_VERSION)
 
 @app.route('/stream_input', methods = ['GET','POST'])
 def stream_input():

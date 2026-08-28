@@ -155,6 +155,7 @@ function defineViewerParams(){
 		this.loadingSizeY = screenHeight*0.05;
 		this.loadfrac = 0.;
 		this.drawfrac = 0.;
+		this.datasetName = null; //shown on the splash screen, when known (see resetSplashProgress())
 
 		//the startup file
 		this.startup = "data/startup.json";

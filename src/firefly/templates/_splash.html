@@ -1,0 +1,127 @@
+<!--
+  Firefly splash / landing overlay, shared by viewer.html, combined.html,
+  VR.html, default.html and streamer.html (gui.html keeps its own minimal
+  splash and is not included here).
+
+  IDs read by static/js:
+    #splash            click-to-dismiss root (showSplash(false)), unless
+                       splash_dismissable is set to false before the include
+    #splashimg         logo <img>
+    #splashdiv1..5      the five original content slots
+    #splashdivLoader   holds #loadDataButton / #selectStartupButton
+    #splashProgressFill / #splashProgressPct  loading-bar hooks (see
+                       updateSplashProgress()/resetSplashProgress() in
+                       initViewer.js)
+-->
+<div id="splash" class="ff-splash"{% if splash_dismissable|default(true) %} onclick="showSplash(false)"{% endif %} style="z-index: 5;">
+
+  <!-- top-right: external links + version -->
+  <nav class="ff-splash__links" aria-label="Firefly resources">
+    <span class="ff-version">FIREFLY v{{ version|default('') }}</span>
+    <a class="ff-iconlink" href="https://firefly.rcs.northwestern.edu/" target="_blank" rel="noopener"
+       data-tip="Firefly homepage" aria-label="Firefly homepage" onclick="event.stopPropagation();">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M3 11.5 12 4l9 7.5"/>
+        <path d="M5.5 9.8V19a1 1 0 0 0 1 1H9.5v-5.5a1 1 0 0 1 1-1h3a1 1 0 0 1 1 1V20h3a1 1 0 0 0 1-1V9.8"/>
+      </svg>
+    </a>
+    <a class="ff-iconlink" href="https://firefly.rcs.northwestern.edu/docs" target="_blank" rel="noopener"
+       data-tip="Documentation" aria-label="Documentation" onclick="event.stopPropagation();">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M4 5.5C4 4.67 4.67 4 5.5 4H12v16H5.5A1.5 1.5 0 0 1 4 18.5v-13Z"/>
+        <path d="M20 5.5C20 4.67 19.33 4 18.5 4H12v16h6.5a1.5 1.5 0 0 0 1.5-1.5v-13Z"/>
+      </svg>
+    </a>
+    <a class="ff-iconlink" href="https://github.com/ageller/Firefly" target="_blank" rel="noopener"
+       data-tip="Source on GitHub" aria-label="Source on GitHub" onclick="event.stopPropagation();">
+      <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+        <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/>
+      </svg>
+    </a>
+    <a class="ff-iconlink" href="https://ui.adsabs.harvard.edu/abs/2023ApJS..265...38G/abstract" target="_blank" rel="noopener"
+       data-tip="Read the paper" aria-label="Read the paper" onclick="event.stopPropagation();">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M6 3h8l4 4v14a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/>
+        <path d="M14 3v4h4"/>
+        <path d="M8 12h8M8 15.5h8M8 8.5h3"/>
+      </svg>
+    </a>
+  </nav>
+
+  <!-- main stack: logo, tagline, authors, controls -->
+  <div class="ff-splash__stack">
+
+    <div id="splashdiv1" class="ff-splash__logo">
+      <img id="splashimg" src="static/docs/FIREFLY-02_trimmed.png" alt="Firefly">
+    </div>
+
+    <div class="ff-splash__intro">
+      <div id="splashdiv2" class="ff-tagline">A WebGL tool to explore particle&#8209;based data</div>
+      <div id="splashdiv3" class="ff-authors">Aaron Geller &nbsp;/&nbsp; Alex Gurvich &nbsp;/&nbsp; Northwestern</div>
+    </div>
+
+    <div id="splashdiv4" class="ff-controls">
+      <!-- collapsible so it can be tucked away to reclaim vertical space on a short
+           window; open by default so the normal look is unchanged. stopPropagation
+           so toggling it doesn't also dismiss the splash. -->
+      <details class="ff-controls__details" open onclick="event.stopPropagation();">
+        <summary class="ff-controls__title">How to navigate inside the viewer</summary>
+        <div class="ff-controls__panel">
+          <div class="ff-controls__group">
+            <div class="ff-controls__head">
+              <span class="ff-controls__name">Trackball</span>
+              <span class="ff-controls__mode">default</span>
+            </div>
+            <div class="ff-controls__keys">
+              <div class="ff-key"><kbd>right&#8209;drag</kbd><span>rotate</span></div>
+              <div class="ff-key"><kbd>scroll</kbd><span>zoom</span></div>
+            </div>
+          </div>
+
+          <div class="ff-controls__rule" aria-hidden="true"></div>
+
+          <div class="ff-controls__group">
+            <div class="ff-controls__head">
+              <span class="ff-controls__name">Fly</span>
+              <span class="ff-controls__hint">press space</span>
+            </div>
+            <div class="ff-controls__keys">
+              <div class="ff-key"><kbd>w a s d</kbd><span>move the camera</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ff-notes">
+          <span>More instructions for the controls are in the panel at the bottom of the viewer.</span>
+          <span>Press <kbd class="ff-kbd-inline">h</kbd> to bring this screen back at any time.</span>
+        </div>
+      </details>
+    </div>
+
+  </div>
+
+  <!-- bottom: full-width loading bar, always in this same pinned slot. Before a
+       data directory is chosen, the data-picker buttons take its place instead
+       (showLoadingButton()/resetSplashProgress() in initGUI.js/initViewer.js
+       toggle which of the two is shown). -->
+  <div class="ff-loader">
+    <!-- python / startup-file entry points; hidden by default, JS unhides -->
+    <div id="splashdivLoader" class="ff-splash__loaderbtns">
+      <button id="loadDataButton" class="button ff-button" style="display:none;" onclick="event.stopPropagation();">
+        <span>Click here to select a data directory</span>
+      </button>
+      <button id="selectStartupButton" class="button ff-button" style="display:none;" onclick="event.stopPropagation();">
+        <span>Click here to select a directory from your startup file</span>
+      </button>
+    </div>
+    <div class="ff-loader__bar">
+      <div class="ff-loader__row">
+        <div id="splashdiv5" class="ff-loader__label">Loading...</div>
+        <div id="splashProgressPct" class="ff-loader__pct">0%</div>
+      </div>
+      <div class="ff-loader__track">
+        <div id="splashProgressFill" class="ff-loader__fill"></div>
+      </div>
+    </div>
+  </div>
+</div>
