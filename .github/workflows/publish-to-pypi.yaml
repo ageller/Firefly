@@ -6,9 +6,9 @@ on:
       version:
         description: "Version number to release (e.g., 3.3.3)"
         required: true
-  push:
-    tags:
-      - 'v*'   # e.g. v1.0.0
+  # NOTE: only the release event, deliberately. Publishing a release also creates
+  #  (or pushes) the tag, so also listening for `push: tags: v*` fired this whole
+  #  workflow a second time for the same release.
   release:
     types: [published]
 
@@ -29,13 +29,11 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
             VERSION="${{ github.event.inputs.version }}"
-            VERSION=${VERSION#v}  # strip leading v if present
-            echo "VERSION=$VERSION" >> $GITHUB_ENV
           else
-            # Strip leading 'v' from tag name
-            VERSION=${GITHUB_REF#refs/tags/v}
-            echo "VERSION=$VERSION" >> $GITHUB_ENV
+            VERSION="${{ github.event.release.tag_name }}"
           fi
+          VERSION=${VERSION#v}  # strip leading v if present
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -63,10 +61,6 @@ jobs:
     name: Publish to PyPI
     needs: build
     runs-on: ubuntu-latest
-    if: >
-      github.event_name == 'release' ||
-      github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/'))
     environment:
       name: pypi
       url: https://pypi.org/project/firefly

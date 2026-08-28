@@ -6,9 +6,9 @@ on:
       version:
         description: "Version number to release (e.g., 3.3.3)"
         required: true
-  push:
-    tags:
-      - 'v*'   # e.g. v1.0.0
+  # NOTE: only the release event, deliberately. Publishing a release also creates
+  #  (or pushes) the tag, so also listening for `push: tags: v*` fired this whole
+  #  matrix a second time for the same release.
   release:
     types: [published]
 
@@ -29,21 +29,21 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
             VERSION="${{ github.event.inputs.version }}"
-            VERSION=${VERSION#v}  # strip leading v if present
-            echo "VERSION=$VERSION" >> $GITHUB_ENV
           else
-            # Strip leading 'v' from tag name
-            VERSION=${GITHUB_REF#refs/tags/v}
-            echo "VERSION=$VERSION" >> $GITHUB_ENV
+            VERSION="${{ github.event.release.tag_name }}"
           fi
+          VERSION=${VERSION#v}  # strip leading v if present
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
 
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
+      # gate on VERSION rather than the ref: a workflow_dispatch run happens on a
+      #  branch, so a refs/tags/ check would skip this and ship the stale version
       - name: Update package.json version
-        if: startsWith(github.ref, 'refs/tags/')
+        if: env.VERSION != ''
         run: |
           node -e "
             const fs = require('fs');
