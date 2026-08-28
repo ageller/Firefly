@@ -843,7 +843,7 @@ function createColumnDensityCheckBoxSegment(container,parent,name){
 	var new_container = container.append('div')
 		.attr('id','columnDensityCheckBoxContainer');
 
-	new_container.append('input')
+	var checkboxElm = new_container.append('input')
 		.attr('id',name+'Elm')
 		.attr('value',GUIParams.columnDensity)
 		.attr('type','checkbox')
@@ -855,10 +855,20 @@ function createColumnDensityCheckBoxSegment(container,parent,name){
 		})
 		.style('margin','8px 0px 0px 0px')
 
+	// a checkbox's checked state is controlled by the "checked" attribute, not "value";
+	// setting only .attr('value', ...) above left this box unchecked even when
+	// GUIParams.columnDensity (e.g. from startColumnDensity) was already true
+	if (GUIParams.columnDensity) checkboxElm.attr('checked',true);
+
 	new_container.append('label')
 		.attr('for','columnDensityCheckBox')
 		.text('Enable column density projection')
 		.style('margin-left','10px')
+
+	// checkColormapBox is otherwise only triggered by this checkbox's change event,
+	// so if column density is already enabled at startup the colormap needs to be
+	// shown explicitly here
+	if (GUIParams.columnDensity) checkColormapBox(GUIParams.CDkey, true);
 
 	return segment_height;
 }
