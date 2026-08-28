@@ -76,7 +76,7 @@ function createDecimationSegment(container,parent,name){
 		.style('left',(GUIParams.containerWidth - 45) + 'px')
 		.style('width','40px');
 	if (GUIParams.haveAnyOctree){
-		segment_height += 50;
+		segment_height += 57;
 		//text to show the memory-imposed decimation
 		container.append('div')
 			.attr('id', 'decimationOctreeDiv')
