@@ -264,23 +264,22 @@ function toggleVelocityGradient(args){
 
 
 function changeBlendingForColormap(args){
-	var pkey_to_colormap = args[0];
+	var p = args[0];
 	var checked = args[1];
 
-	// update the blending mode for all particles
-	//  (otherwise non-colormapped particles will blend with colormapped particles)
-	viewerParams.partsKeys.forEach(function (p,i){
-
-		if ( viewerParams.showColormap[p]){
-			viewerParams.blendingMode[p] = 'normal';
-			viewerParams.depthTest[p] = true;
-		}
-		else {
-			// update the blending mode for the whole particle group (kind of wasteful)
-			viewerParams.blendingMode[p] = 'additive';
-			viewerParams.depthTest[p] = false;
-		}
-	})
+	// only update the blending mode/depth test for the particle group whose colormap
+	//  checkbox was just toggled -- other particle groups may have been set to a
+	//  deliberately non-standard combination (e.g. via the settings file) and
+	//  shouldn't be silently overwritten just because a different group's colormap
+	//  was toggled (see GitHub issue #123)
+	if (checked){
+		viewerParams.blendingMode[p] = 'normal';
+		viewerParams.depthTest[p] = true;
+	}
+	else {
+		viewerParams.blendingMode[p] = 'additive';
+		viewerParams.depthTest[p] = false;
+	}
 }
 
 //turn on/off the invert filter option

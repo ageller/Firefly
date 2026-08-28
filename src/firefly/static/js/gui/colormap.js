@@ -55,7 +55,11 @@ function selectColormapVariable() {
 }
 
 //turn on/off the colormap
-function checkColormapBox(p, checked){
+// resetBlending controls whether the blending mode/depth test for p get forced to
+// the standard normal/additive contract -- pass false when just re-showing the
+// colormap for a particle group that's been toggled back on, so any custom
+// blending/depth the user had before turning it off is preserved (see GitHub issue #123)
+function checkColormapBox(p, checked, resetBlending=true){
 	if (excluded('colorbarcontainer')) return;
 	GUIParams.showColormap[p] = checked;
 	if (GUIParams.showColormap[p]) {
@@ -69,9 +73,10 @@ function checkColormapBox(p, checked){
 	forViewer = [];
 	forViewer.push({'setViewerParamByKey':[GUIParams.showColormap[p], 'showColormap', p]});
 	// don't change blending for column density
-	if (p!= GUIParams.CDkey) forViewer.push({'changeBlendingForColormap':[p, checked]});
+	if (resetBlending && p!= GUIParams.CDkey) forViewer.push({'changeBlendingForColormap':[p, checked]});
 	sendToViewer(forViewer);
-	updateUIBlending([p,checked]);
+	if (resetBlending) updateUIBlending([p,checked]);
+	checkBlendingConsistency();
 }
 
 function removeColorbar(p){

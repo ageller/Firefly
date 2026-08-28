@@ -284,6 +284,20 @@ class ParticleGroup(object):
             else:
                 raise KeyError("Invalid settings kwarg %s"%settings_kwarg)
 
+        ## blendingMode/depthTest are deliberately *not* accepted as settings_kwargs
+        ##  above (they're added to settings_default only now, after that loop) --
+        ##  they should always follow from showColormap rather than be set
+        ##  independently, so that a particle group with showColormap=True doesn't
+        ##  start out with a mismatched blending mode/depth test that renders
+        ##  incorrectly (see GitHub issue #123). Anyone who needs a non-standard
+        ##  combination can still set these directly through the Settings object.
+        if self.settings_default['showColormap']:
+            self.settings_default['blendingMode'] = 'normal'
+            self.settings_default['depthTest'] = True
+        else:
+            self.settings_default['blendingMode'] = None ## use default set in javascript
+            self.settings_default['depthTest'] = None ## use default set in javascript
+
         self.attached_settings = attached_settings
 
         ## add magnitude of velocity to fields

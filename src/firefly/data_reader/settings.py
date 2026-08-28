@@ -393,7 +393,8 @@ class Settings(object):
             'colormapVals','colormapLims',
             'showVel','velType','velVectorWidth','velGradient',
             'animateVel','animateVelDt','animateVelTmax',
-            'colormap','colormapVariable','showColormap']:
+            'colormap','colormapVariable','showColormap',
+            'blendingMode','depthTest']:
 
             try: 
                 if key not in self.__settings_dict.keys(): self[key] = {}

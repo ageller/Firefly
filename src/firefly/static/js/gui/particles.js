@@ -193,7 +193,10 @@ function createParticleOnOffSegment(container,parent,name,p){
 			GUIParams.showParts[GUIParams.CDkey] = any_shown;
 
 			if (!this.checked && GUIParams.showColormap[p]) removeColorbar(p);
-			else if (this.checked && GUIParams.showColormap[p]) checkColormapBox(p,this.checked);
+			// resetBlending=false: just re-show the colormap, don't reset blending/depth
+			// for this (or any other) particle group -- retain whatever custom state
+			// was set before this group was toggled off (see GitHub issue #123)
+			else if (this.checked && GUIParams.showColormap[p]) checkColormapBox(p,this.checked,false);
 
 			// need to determine if we should show/hide the colorbar container
 			//  for column density b.c. if we turn off all the particles it should disappear

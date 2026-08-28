@@ -208,6 +208,11 @@ function createUI(){
 	// bind the children here again so that we can look for them in GUI built
 	GUIParams.GUIState.children = Object.keys(GUIParams.GUIState).filter(function(key){return !GUIParams.GUIState_variables.includes(key)});
 
+	// warn if the settings file loaded us into a non-standard colormap/blending/depth
+	// combination for any particle group (see GitHub issue #123)
+	createBlendingWarningDiv();
+	checkBlendingConsistency();
+
 }
 
 function getCurrentLevel(obj, state = null){
@@ -663,6 +668,8 @@ function selectBlendingMode() {
 
 	var p = this.id.slice(0,-19)
 	sendToViewer([{'setBlendingMode':[selectValue, p]}]);
+	GUIParams.blendingMode[p] = selectValue;
+	checkBlendingConsistency();
 }
 
 function selectRadiusVariable(){
@@ -996,6 +1003,62 @@ function updateUIBlending(args){
 		elm.checked = dTest;
 		elm.value = dTest;
 	}
+
+	// keep GUIParams in sync with what's now displayed/applied, so later
+	// consistency checks (checkBlendingConsistency) have accurate values to read
+	GUIParams.blendingMode[p] = mode;
+	GUIParams.depthTest[p] = dTest;
+}
+
+// one-time creation of the (initially hidden) banner warning about a non-standard
+// blending mode / depth test / colormap combination; fixed to the viewport rather
+// than nested in the UI panel so it doesn't disturb the panel's hand-tuned,
+// explicitly-summed segment heights (see GitHub issue #152 for why that matters here)
+function createBlendingWarningDiv(){
+	if (!d3.select('#blendingWarningContainer').empty()) return;
+
+	var warn = d3.select('body').append('div')
+		.attr('id','blendingWarningContainer')
+		.style('display','none')
+		.style('position','fixed')
+		.style('top','10px')
+		.style('right','10px')
+		.style('max-width','320px')
+		.style('background-color','#8a1f1f')
+		.style('color','white')
+		.style('font-size','12px')
+		.style('line-height','1.4')
+		.style('padding','8px 26px 8px 10px')
+		.style('z-index',1000)
+		.style('border-radius','4px')
+		.style('box-shadow','0px 0px 8px black');
+
+	warn.append('span')
+		.text('One or more particle groups have a non-standard combination of '+
+			'colormap, blending mode, and depth test, which can cause particles to '+
+			'render incorrectly. Consider resetting blending mode/depth to additive/off '+
+			'for particle groups without a colormap shown, and normal/on for those with one.');
+
+	warn.append('div')
+		.text('✕')
+		.style('position','absolute')
+		.style('top','4px')
+		.style('right','8px')
+		.style('cursor','pointer')
+		.on('click',function(){ d3.select('#blendingWarningContainer').style('display','none'); });
+}
+
+// show/hide the warning banner based on whether any particle group's blending mode
+// or depth test doesn't match what its own showColormap flag would normally imply
+function checkBlendingConsistency(){
+	var nonstandard = false;
+	GUIParams.partsKeys.forEach(function(p){
+		if (p == GUIParams.CDkey) return;
+		var expectedMode = GUIParams.showColormap[p] ? 'normal' : 'additive';
+		var expectedDepth = GUIParams.showColormap[p] ? true : false;
+		if (GUIParams.blendingMode[p] != expectedMode || GUIParams.depthTest[p] != expectedDepth) nonstandard = true;
+	});
+	d3.select('#blendingWarningContainer').style('display', nonstandard ? 'block' : 'none');
 }
 
 //////////////////////////////////////////

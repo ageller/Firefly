@@ -1076,11 +1076,18 @@ function createParticleBlendingModeSelectorsSegment(container,parent,name,p){
 	depthCheck.append('input')
 		.attr('id',p+'_depthCheckBox')
 		.attr('value',GUIParams.depthTest[p])
-		.attr('checked',GUIParams.depthTest[p])
+		// d3's .attr() sets the literal "checked" attribute, and its mere presence
+		// (even as the string "false") makes a checkbox render checked -- so a
+		// falsy value must be passed as null (which removes the attribute) rather
+		// than as GUIParams.depthTest[p] directly, or this box shows checked even
+		// when depth test is really off (see GitHub issue #123)
+		.attr('checked',GUIParams.depthTest[p] || null)
 		.attr('type','checkbox')
 		.attr('autocomplete','off')
 		.on('change',function(){
 			sendToViewer([{'setDepthMode':[p, this.checked]}]);
+			GUIParams.depthTest[p] = this.checked;
+			checkBlendingConsistency();
 		})
 
 	 return segment_height;
