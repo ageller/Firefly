@@ -53,7 +53,14 @@ function makeUI(local=false){
 			document.getElementById('UIcontainer').style.visibility = 'visible'
 			// handle detached socket case, draw a cube
 			if (!local) {
-				createCube();
+				// the cube is decoration; don't let a failure here stop us from
+				//  telling the viewer we're done (it waits on that to drop its
+				//  splash and mark itself loaded)
+				try {
+					createCube();
+				} catch (err) {
+					console.error('Could not create the GUI cube:', err);
+				}
 				sendToViewer([{'clearloading':true}]);
 				showSplash(false);
 			}

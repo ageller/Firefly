@@ -6,6 +6,8 @@ function defineGUIParams(){
 
 		//for the cube
 		this.cube = null;
+		this.cubeWorldSize = null; //fixed once, see cubeWorldSize()
+		this.cubeFlyAnchor = null; //world point the cube sits at in fly controls
 		this.scene = null;
 		this.renderer = null;
 		this.container = null;
@@ -28,6 +30,7 @@ function defineGUIParams(){
         this.allowAutoReload = false;
         this.autoReloadCount = 10;
 		this.GUIbuilt = false;
+		this.loopErrorLogged = false; //so a repeating render loop error is reported once
 		this.GUIWidth = 0; //will hold the width of the GUI as a check if it is completely built
 
 		//will hold the GUI width as a check if it's done building

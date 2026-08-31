@@ -19,10 +19,20 @@ function startAnimation(){
 	function loop(time){
 		// a newer loop has taken over, or we were stopped
 		if (myGeneration != viewerLoopGeneration) return;
-		animate(time);
-		if (myGeneration != viewerLoopGeneration) return;
+
+		// queue the next frame before doing the work, so an exception in animate()
+		//  can't kill the render loop outright
 		if (viewerParams.allowVRControls) viewerParams.renderer.setAnimationLoop( loop );
 		else requestAnimationFrame( loop );
+
+		try {
+			animate(time);
+		} catch (err) {
+			if (!viewerParams.loopErrorLogged){
+				viewerParams.loopErrorLogged = true;
+				console.error('Error in the viewer render loop:', err);
+			}
+		}
 	}
 	loop();
 }

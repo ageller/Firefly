@@ -85,6 +85,7 @@ function defineViewerParams(){
 		// guards WebGLStart against building the scene twice (checkDone can call
 		//  it more than once, and it retries while the defaults are in flight)
 		this.webGLStarted = false;
+		this.loopErrorLogged = false; //so a repeating render loop error is reported once
 
 		// for disabling GUI elements
 		this.GUIExcludeList = []

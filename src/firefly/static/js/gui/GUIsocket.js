@@ -121,15 +121,48 @@ function initGUIScene(){
 	initGUIControls(initial=true)
 }
 
-function initGUIControls(initial=false){
+// GUIParams.useTrackball changes after initGUIScene() has already built controls:
+//  the viewer sends it with the initial params (a dataset with startFly set) and
+//  again whenever controls are toggled on the viewer side. Nothing rebuilt the
+//  controls to match, so the GUI could report fly while still holding a
+//  TrackballControls -- whose default keys are A/S/D, so pressing them drove
+//  trackball gestures instead of flying, and the fly listeners below were never
+//  attached. That needed a space-space toggle to sort itself out.
+function syncGUIControlsToParams(){
+	if (!GUIParams.controls) return;
+
+	var wanted = GUIParams.useTrackball ? 'TrackballControls' : 'FlyControls';
+	if (GUIParams.controlsName == wanted) return;
+
+	console.log('rebuilding GUI controls as', wanted);
+	//  don't notify the viewer: we're catching up to what it already told us
+	initGUIControls(false, false);
+}
+
+// named so they can actually be removed again; the previous version passed fresh
+//  anonymous functions to removeEventListener, which never match, so every switch
+//  into fly controls left another copy attached (and mousemove emits to the viewer)
+function onGUIMouseDown(){ GUIParams.mouseDown = true; }
+function onGUIMouseUp(){ GUIParams.mouseDown = false; }
+function onGUIMouseMove(){ if (GUIParams.mouseDown) sendCameraInfoToViewer(); }
+
+function initGUIControls(initial=false, notifyViewer=true){
 	console.log("initializing controls", GUIParams.useTrackball)
 	var forViewer = [];
 
+	// let the outgoing controls go before replacing them, so their listeners
+	//  don't stay on the canvas competing with the new ones
+	if (GUIParams.controls && GUIParams.controls.dispose) GUIParams.controls.dispose();
+
+	// the anchor, and so the viewing distance, changes with the controls, so
+	//  let the initial cube size be worked out again for this mode
+	GUIParams.cubeWorldSize = null;
+
 	d3.select('#WebGLContainer').node().removeEventListener("keydown", sendCameraInfoToViewer,true);//for fly controls
 	d3.select('#WebGLContainer').node().removeEventListener("keyup", sendCameraInfoToViewer,true);//for fly controls
-	d3.select('#WebGLContainer').node().removeEventListener("mousedown", function(){GUIParams.mouseDown = true;},true);//for fly controls
-	d3.select('#WebGLContainer').node().removeEventListener("mouseup", function(){GUIParams.mouseDown = false;},true);//for fly controls
-	d3.select('#WebGLContainer').node().removeEventListener("mousemove", function(){if (GUIParams.mouseDown) sendCameraInfoToViewer()},true);//for fly controls
+	d3.select('#WebGLContainer').node().removeEventListener("mousedown", onGUIMouseDown,true);//for fly controls
+	d3.select('#WebGLContainer').node().removeEventListener("mouseup", onGUIMouseUp,true);//for fly controls
+	d3.select('#WebGLContainer').node().removeEventListener("mousemove", onGUIMouseMove,true);//for fly controls
 
 
 	if (!initial) {
@@ -144,7 +177,7 @@ function initGUIControls(initial=false){
 		GUIParams.controls = new THREE.TrackballControls( GUIParams.camera, GUIParams.renderer.domElement );
 		if (!initial) GUIParams.controls.target = new THREE.Vector3(GUIParams.camera.position.x + xx.x, GUIParams.camera.position.y + xx.y, GUIParams.camera.position.z + xx.z);
 		
-		setCubePosition(GUIParams.controls.target);
+		updateCube();
 
 		if (GUIParams.cameraNeedsUpdate) updateGUICamera();
 
@@ -169,9 +202,13 @@ function initGUIControls(initial=false){
 
 		d3.select('#WebGLContainer').node().addEventListener("keydown", sendCameraInfoToViewer,true);//for fly controls
 		d3.select('#WebGLContainer').node().addEventListener("keyup", sendCameraInfoToViewer,true);//for fly controls
-		d3.select('#WebGLContainer').node().addEventListener("mousedown", function(){GUIParams.mouseDown = true;},true);//for fly controls
-		d3.select('#WebGLContainer').node().addEventListener("mouseup", function(){GUIParams.mouseDown = false;},true);//for fly controls
-		d3.select('#WebGLContainer').node().addEventListener("mousemove", function(){if (GUIParams.mouseDown) sendCameraInfoToViewer()},true);//for fly controls
+		d3.select('#WebGLContainer').node().addEventListener("mousedown", onGUIMouseDown,true);//for fly controls
+		d3.select('#WebGLContainer').node().addEventListener("mouseup", onGUIMouseUp,true);//for fly controls
+		d3.select('#WebGLContainer').node().addEventListener("mousemove", onGUIMouseMove,true);//for fly controls
+
+		// no target in fly controls: re-capture an anchor ahead of the camera
+		GUIParams.cubeFlyAnchor = null;
+		updateCube();
 	}
 
 	var elm = document.getElementById("CenterCheckBox")
@@ -181,16 +218,107 @@ function initGUIControls(initial=false){
 	}
 
 	//GUIParams.switchControls = false;
-	// send signal to viewer that we're done here, if there was information 
+	// send signal to viewer that we're done here, if there was information
 	// to transmit that'll get sent too.
-	sendToViewer(forViewer);
+	if (notifyViewer && forViewer.length) sendToViewer(forViewer);
 }
 
 // create a Cube object
+// The cube is a world-space stand-in for the data: you orbit it in trackball and
+//  fly past it in fly controls. It keeps its original boxSize/100 size, and this
+//  is how much of the viewport width it may take up before being capped.
+var cubeViewportFraction = 0.25;
+
+// The GUI camera is built in initGUIScene() from GUIParams.zmin/zmax, which at
+//  that point are still the defaults (zmin 1) because the dataset's values
+//  haven't arrived yet -- and nothing ever updated the camera afterwards. A near
+//  plane one dataset-unit out clips anything placed close to the camera, which is
+//  exactly where the trackball target (camera + a *unit* view vector) puts the
+//  cube. That's what made it invisible until you zoomed a long way out.
+function syncGUICameraPlanes(){
+	if (!GUIParams.camera) return;
+	if (GUIParams.camera.near == GUIParams.zmin && GUIParams.camera.far == GUIParams.zmax) return;
+
+	GUIParams.camera.near = GUIParams.zmin;
+	GUIParams.camera.far = GUIParams.zmax;
+	GUIParams.camera.updateProjectionMatrix();
+}
+
+// width of the visible region at distance d from the camera
+function visibleWidthAt(d){
+	var aspect = window.innerWidth/window.innerHeight;
+	return 2*d*Math.tan(GUIParams.fov*Math.PI/360)*aspect;
+}
+
+// the cube's world size, as it always was
+function cubeNaturalSize(){
+	var s = GUIParams.boxSize/100.;
+	if (!s || !isFinite(s) || s <= 0) s = 1.;
+	return s;
+}
+
+// FlyControls has no target to anchor to. Capture a world point ahead of the
+//  camera once, at the distance where the cube fills about cubeViewportFraction
+//  of the view, then leave it there -- so flying moves us relative to the cube
+//  rather than dragging it along with the camera.
+function flyCubeAnchor(){
+	if (GUIParams.cubeFlyAnchor) return GUIParams.cubeFlyAnchor;
+
+	// invert visibleWidthAt(): the distance at which the cube looks right
+	var aspect = window.innerWidth/window.innerHeight;
+	var d = cubeNaturalSize()/(2*cubeViewportFraction*Math.tan(GUIParams.fov*Math.PI/360)*aspect);
+
+	// and keep it clear of both clipping planes
+	var near = GUIParams.camera.near || 0.01;
+	var far = GUIParams.camera.far || 1.e10;
+	if (!d || !isFinite(d)) d = 10*near;
+	d = Math.min(Math.max(d, 10*near), far/10.);
+
+	var dir = new THREE.Vector3(0,0,0);
+	GUIParams.camera.getWorldDirection(dir);
+	GUIParams.cubeFlyAnchor = dir.multiplyScalar(d).add(GUIParams.camera.position);
+
+	return GUIParams.cubeFlyAnchor;
+}
+
+// Where the cube belongs. Keyed off useTrackball rather than the presence of
+//  .target, because updateGUICamera() assigns a .target onto whatever controls
+//  object it finds, FlyControls included.
+function cubeAnchorPosition(){
+	if (GUIParams.useTrackball && GUIParams.controls && GUIParams.controls.target){
+		return GUIParams.controls.target;
+	}
+	return flyCubeAnchor();
+}
+
+// The cube's world size: boxSize/100, shrunk only if that would fill more than
+//  cubeViewportFraction of the view from where we first see it. Worked out once
+//  and then kept -- the cap is on the *initial* size only, so zooming in still
+//  lets the cube grow as large as it likes.
+function cubeWorldSize(){
+	if (GUIParams.cubeWorldSize) return GUIParams.cubeWorldSize;
+
+	var size = cubeNaturalSize();
+
+	var d = GUIParams.camera.position.distanceTo(cubeAnchorPosition());
+	if (d && isFinite(d)) size = Math.min(size, cubeViewportFraction*visibleWidthAt(d));
+
+	GUIParams.cubeWorldSize = size;
+	return size;
+}
+
+// keep the cube at its anchor. size is fixed in world units (see cubeWorldSize),
+//  so it grows and shrinks with distance like any other object in the scene.
+function updateCube(){
+	if (!GUIParams.cube || !GUIParams.camera) return;
+	setCubePosition(cubeAnchorPosition());
+	GUIParams.cube.scale.setScalar(cubeWorldSize());
+}
+
 function createCube(){
-	var size = GUIParams.boxSize/100.;
-	// CUBE
-	var geometry = new THREE.BoxGeometry(size, size, size);
+	// unit cube, scaled by updateCube() below, so the size can be re-evaluated
+	//  whenever the view changes
+	var geometry = new THREE.BoxGeometry(1, 1, 1);
 	var cubeMaterials = [ 
 		new THREE.MeshBasicMaterial({color:"yellow", side: THREE.DoubleSide}),
 		new THREE.MeshBasicMaterial({color:"orange", side: THREE.DoubleSide}), 
@@ -202,7 +330,7 @@ function createCube(){
 	// Create a MeshFaceMaterial, which allows the cube to have different materials on each face 
 	var cubeMaterial = cubeMaterials;
 	GUIParams.cube = new THREE.Mesh(geometry, cubeMaterial);
-	setCubePosition(GUIParams.controls.target);
+	updateCube();
 
 	GUIParams.scene.add( GUIParams.cube );
 }
@@ -222,8 +350,20 @@ function animateGUI(time) {
 	function loop(t){
 		// a newer loop has taken over
 		if (myGeneration != GUILoopGeneration) return;
-		animateGUIupdate();
+
+		// queue the next frame before doing the work, as the original did: an
+		//  exception in animateGUIupdate() must not be able to kill the loop
+		//  and leave the GUI's scene frozen
 		requestAnimationFrame( loop );
+
+		try {
+			animateGUIupdate();
+		} catch (err) {
+			if (!GUIParams.loopErrorLogged){
+				GUIParams.loopErrorLogged = true;
+				console.error('Error in the GUI render loop:', err);
+			}
+		}
 	}
 	loop(time);
 
@@ -243,7 +383,17 @@ function animateGUI(time) {
 }
 
 function animateGUIupdate(){
+	// the dataset's zmin/zmax arrive after the camera was built
+	syncGUICameraPlanes();
+
+	// make sure the controls we're holding are the kind GUIParams says we are
+	syncGUIControlsToParams();
+
 	if (GUIParams.controls) GUIParams.controls.update();
+
+	// cheap, and keeps the cube correct no matter what order the viewer's
+	//  camera/centre/boxSize params arrived in
+	updateCube();
 
 	if (GUIParams.keyboard){
 		GUIParams.keyboard.update();
@@ -345,14 +495,20 @@ function updateGUICamera(){
 			GUIParams.cameraUp.y,
 			GUIParams.cameraUp.z);
 		GUIParams.controls.target = new THREE.Vector3(GUIParams.controlsTarget.x, GUIParams.controlsTarget.y, GUIParams.controlsTarget.z);
-		setCubePosition(GUIParams.controls.target);
+		// camera and target both just moved; re-establish the initial cube size
+		GUIParams.cubeWorldSize = null;
+		updateCube();
 		GUIParams.cameraNeedsUpdate = false;
 	}
 }
 
 // move the cube to a specific position
 function setCubePosition(pos){
-	if (GUIParams.cube) GUIParams.cube.position.set(pos.x, pos.y, pos.z);
+	if (!GUIParams.cube) return;
+	// callers in fly controls pass GUIParams.controls.target, which doesn't exist
+	//  there; fall back to the anchor rather than throwing on pos.x
+	if (!pos) pos = cubeAnchorPosition();
+	GUIParams.cube.position.set(pos.x, pos.y, pos.z);
 }
 
 function updateFriction(value){

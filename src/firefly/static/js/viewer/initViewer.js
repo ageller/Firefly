@@ -930,7 +930,15 @@ function initControls(updateGUI = true,force_fly=false){
 		viewerParams.controlsTarget = viewerParams.controls.target;
 		viewerParams.controls.dynamicDampingFactor = viewerParams.friction;
 		viewerParams.controls.addEventListener('change', sendCameraInfoToGUI);
-		if (!viewerParams.useTrackball) return initControls(updateGUI,true); 
+		if (!viewerParams.useTrackball) {
+			// we only built these to satisfy the "always initialize in trackball"
+			//  kluge above and are about to replace them with fly controls. let
+			//  them go properly: otherwise their pointer listeners stay on the
+			//  canvas and compete with the fly controls' mouse handling.
+			viewerParams.controls.removeEventListener('change', sendCameraInfoToGUI);
+			viewerParams.controls.dispose();
+			return initControls(updateGUI,true);
+		}
 	} else {
 		console.log('initializing FlyControls')
 		viewerParams.controlsName = 'FlyControls';
@@ -1681,8 +1689,22 @@ function sendCameraInfoToGUI(foo, updateCam=false){
 	sendToGUI(forGUI);
 }
 
-//for fly controls
-document.addEventListener("keydown", sendCameraInfoToGUI);
+//for fly controls. holding a movement key auto-repeats keydown ~30x/second, and
+// each of these is a socket round trip (plus three DOM text updates in the GUI)
+// when the GUI has its own window, so throttle it. keyup sends once more so the
+// readout settles on the true camera position when the key is released.
+var lastCameraInfoToGUI = 0;
+var cameraInfoToGUIInterval = 100; //ms
+document.addEventListener("keydown", function(event){
+	var now = performance.now();
+	if ((now - lastCameraInfoToGUI) < cameraInfoToGUIInterval) return;
+	lastCameraInfoToGUI = now;
+	sendCameraInfoToGUI();
+});
+document.addEventListener("keyup", function(event){
+	lastCameraInfoToGUI = performance.now();
+	sendCameraInfoToGUI();
+});
 
 // called numerous times outside this file
 //check if the data is loaded
