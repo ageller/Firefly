@@ -70,6 +70,7 @@ function defineViewerParams(){
 		this.controls = null
 		this.effect = null;
 		this.normalRenderer = null;
+		this.windowResize = null; //THREEx.WindowResize handle, so its listener can be released
 
 		this.title = null;
 		this.annotation = null;

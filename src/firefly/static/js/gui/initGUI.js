@@ -9,7 +9,11 @@ function makeUI(local=false){
 	}
 	
 	console.log("waiting for GUI init...")
+	// both intervals, or the previous waitForBuild keeps running forever: only
+	//  the newest handle is stored, so an orphaned one can never clear itself
+	//  and would go on re-running finalizeGUIInitialization()
 	clearInterval(GUIParams.waitForInit);
+	clearInterval(GUIParams.waitForBuild);
 
 	GUIParams.GUItries = 0;
 
@@ -167,6 +171,15 @@ function showLoadingButton(id){
 	d3.select('.ff-loader__bar').style('display', 'none');
 }
 
+// is a dataset already showing in the viewer? when the GUI runs in its own
+//  window there is no viewerParams here, so fall back to the partsKeys the
+//  viewer sends us (null until sendInitGUI runs, and reset by defineGUIParams
+//  when a dataset is torn down)
+function viewerHasData(){
+	if (typeof viewerParams !== 'undefined' && viewerParams != null) return !!viewerParams.loaded;
+	return GUIParams.partsKeys != null;
+}
+
 // for loading and reading a startup file with multiple entries. Builds an
 // inline picker (dropdown + Load, and Cancel once data is already loaded)
 // into #splashdivLoader, in the same slot the loading bar occupies -- shown
@@ -208,7 +221,7 @@ function selectFromStartup(prefix=""){
 	picker.append('button')
 		.attr('id','cancelStartupSelection')
 		.attr('class', 'button ff-button ff-button--secondary')
-		.style('display', viewerParams.loaded ? null : 'none')
+		.style('display', viewerHasData() ? null : 'none')
 		.append('span')
 			.text('Cancel');
 
@@ -225,13 +238,17 @@ function selectFromStartup(prefix=""){
 		// data is already loaded (this is a reselect via H, not the first-time
 		// choice) -- tear it all down first so the new load starts clean
 		// instead of layering on top of the old octree/GUI state
-		var reselecting = viewerParams.loaded;
+		var reselecting = viewerHasData();
 		var f = prefix + selection.value+'/filenames.json';
 		d3.json(f,  function(files) {
 			if (files != null){
 				console.log('==loading data', files, prefix)
-				if (reselecting) sendToViewer([{'resetViewerToInitialState':true}]);
-				sendToViewer([{'callLoadData':[files, prefix, selection.value]}])
+				// one message, so the reset and the load can't be split across
+				//  two socket round trips when the viewer is in its own window
+				var forViewer = [];
+				if (reselecting) forViewer.push({'resetViewerToInitialState':true});
+				forViewer.push({'callLoadData':[files, prefix, selection.value]});
+				sendToViewer(forViewer);
 			} else {
 				pickerNode.style.display = '';
 				alert("Cannot load data. Please select another directory.");

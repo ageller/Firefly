@@ -64,6 +64,20 @@ function resetViewerToInitialState(keepStartupChooser=false){
 	viewerParams.boxSize = 0;
 	viewerParams.controls.dispose();
 
+	// release the resize listener and the WebGL context belonging to the old
+	//  renderer. initScene() builds a new renderer per dataset and browsers cap
+	//  how many live contexts a page may hold, so without this a long session of
+	//  switching datasets eventually runs out.
+	try {
+		if (viewerParams.windowResize) viewerParams.windowResize.stop();
+		if (viewerParams.renderer){
+			viewerParams.renderer.forceContextLoss();
+			viewerParams.renderer.dispose();
+		}
+	} catch (err) {
+		console.warn('Could not fully release the previous renderer:', err);
+	}
+
 	// reset to default options, keeping the session-level state that isn't
 	// tied to any one dataset
 	var localSave = viewerParams.local;

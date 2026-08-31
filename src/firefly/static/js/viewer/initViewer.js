@@ -544,8 +544,11 @@ function initScene() {
 
 	viewerParams.frustum = new THREE.Frustum();
 
-	// events
-	THREEx.WindowResize(viewerParams.renderer, viewerParams.camera);
+	// events -- keep the handle so the listener can be released when the viewer
+	//  is torn down, otherwise each dataset switch leaves one behind pointing at
+	//  a renderer we've disposed
+	if (viewerParams.windowResize) viewerParams.windowResize.stop();
+	viewerParams.windowResize = THREEx.WindowResize(viewerParams.renderer, viewerParams.camera);
 	//THREEx.FullScreen.bindKey({ charCode : 'm'.charCodeAt(0) });
 
 	//viewerParams.useTrackball = true;
@@ -1182,8 +1185,10 @@ function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
 	// count how many particles we need to load
 	viewerParams.partsKeys.forEach( function(p, i) {
 		// replace any special characters
+		//  keyed by the sanitized name, since that's what partsKeys ends up
+		//  holding and what every reader of parts.count indexes with
 		var sanitary_p = removeSpecialChars(p);
-		viewerParams.parts.count[p] = 0;
+		viewerParams.parts.count[sanitary_p] = 0;
 		viewerParams.filenames[p].forEach( function(f, j) {
 			var amt = 0;
 			if (f.constructor == Array) amt = parseFloat(f[1]);
@@ -1191,8 +1196,8 @@ function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
 
 			if (amt > 0) {
 				viewerParams.parts.totalSize += amt;
-				viewerParams.parts.count[p] += amt;
-			} 
+				viewerParams.parts.count[sanitary_p] += amt;
+			}
 		});
 	});
 
@@ -1246,8 +1251,11 @@ function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
 				}
 			}
 		});
-		// replace the parts key with the sanitary_p
-		if (i < viewerParams.partsKeys.length-1) viewerParams.partsKeys[i] = sanitary_p;
+		// replace the parts key with the sanitary_p.
+		//  every key, including the last: viewerParams.parts is keyed by the
+		//  sanitized name, so leaving one raw makes parts[p] undefined and
+		//  sendInitGUI throws on it
+		viewerParams.partsKeys[i] = sanitary_p;
 	});
 }
 

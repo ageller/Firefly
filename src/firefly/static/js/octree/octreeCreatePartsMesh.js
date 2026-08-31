@@ -20,6 +20,16 @@ function releaseNodeMemory(node){
 	node.bytes_in_memory = 0;
 }
 
+// true once this node's particle group is gone from viewerParams: the dataset
+//  was switched out (resetViewerToInitialState) while the node's buffer fetch
+//  was still in flight. compileFFTREEData and the hideCoM/showCoM callbacks all
+//  index by pkey, so a late fetch has to bail rather than throw.
+function octreeNodeIsStale(node){
+	return !viewerParams.parts ||
+		!viewerParams.parts[node.pkey] ||
+		!viewerParams.partsMesh[node.pkey];
+}
+
 function addOctreeParticlesToScene(
 	node,
 	start, end){
@@ -28,46 +38,50 @@ function addOctreeParticlesToScene(
 	//  but first I want to try limitting this in the shader with maxToRender.  That may be quicker than add/removing meshes.
 
 	viewerParams.octree.drawStartTime = new Date().getTime()/1000;
-	if (end - start > 0){
+	try {
+		if (end - start > 0){
 
-		// create a geometry very eager like. might attach to a mesh
-		//  that exists, might make a whole new mesh, who can say.
-		var geo = createParticleGeometry(node.pkey, node.particles, start, end);
+			// create a geometry very eager like. might attach to a mesh
+			//  that exists, might make a whole new mesh, who can say.
+			var geo = createParticleGeometry(node.pkey, node.particles, start, end);
 
-		// replace the geometry in the existing mesh, we'd want to do this if we've loaded additional
-		//  particles since last drawing this node (in the case where we are only drawing a subset of the 
-		//  particles. We'll assume that the new particles are appended to the back of the list and we'll 
-		//  replace the geometry in the mesh with this new expanded geometry.)
-		if (node.mesh) {
-			// free the buffers we're replacing before swapping the new ones in
-			releaseNodeMemory(node);
-			node.mesh.geometry.dispose();
-			node.mesh.geometry = geo;
-			node.mesh.geometry.needsUpdate = true;}
-		// have to create a whole mesh for this geometry
-		else {
-	
-			// var she blows, a brand new mesh
-			var material = createParticleMaterial(node.pkey);
-			var mesh = new THREE.Points(geo, material);
-			// name this bad larry so we can find it later using scene.getObjectByName
-			mesh.name = node.obj_name;
-			mesh.position.set(0,0,0); //  <--- what is this? 
+			// replace the geometry in the existing mesh, we'd want to do this if we've loaded additional
+			//  particles since last drawing this node (in the case where we are only drawing a subset of the
+			//  particles. We'll assume that the new particles are appended to the back of the list and we'll
+			//  replace the geometry in the mesh with this new expanded geometry.)
+			if (node.mesh) {
+				// free the buffers we're replacing before swapping the new ones in
+				releaseNodeMemory(node);
+				node.mesh.geometry.dispose();
+				node.mesh.geometry = geo;
+				node.mesh.geometry.needsUpdate = true;}
+			// have to create a whole mesh for this geometry
+			else {
 
-			// add to the scene and keep track in the partsMesh array
-			//  and in the node
-			viewerParams.scene.add(mesh);
-			viewerParams.partsMesh[node.pkey].push(mesh);
-			node.mesh = mesh;
+				// var she blows, a brand new mesh
+				var material = createParticleMaterial(node.pkey);
+				var mesh = new THREE.Points(geo, material);
+				// name this bad larry so we can find it later using scene.getObjectByName
+				mesh.name = node.obj_name;
+				mesh.position.set(0,0,0); //  <--- what is this?
+
+				// add to the scene and keep track in the partsMesh array
+				//  and in the node
+				viewerParams.scene.add(mesh);
+				viewerParams.partsMesh[node.pkey].push(mesh);
+				node.mesh = mesh;
+			}
+
+			accountNodeMemory(node,geo);
 		}
-
-		accountNodeMemory(node,geo);
+	} finally {
+		// always free up the queue to draw again: if anything above throws and
+		//  this is skipped, the octree draw queue stalls for good
+		viewerParams.octree.drawCount += 1;
+		viewerParams.octree.waitingToDraw = false;
 	}
 
-	// finish up, make a record of the draw, free up the queue to draw again
-	//  and increment the loading bar
-	viewerParams.octree.drawCount += 1;
-	viewerParams.octree.waitingToDraw = false;
+	// and increment the loading bar
 	updateOctreeLoadingBar();
 
 }
@@ -121,6 +135,13 @@ function drawOctreeNode(node, callback){
 	//read in the file, and then draw the particles
 	return loadFFTREEKaitai( node,
 	function (kaitai_format,node){
+		// dataset was replaced while this fetch was in flight -- release the
+		//  draw gate and stop. don't run the callback: it indexes by pkey too.
+		if (octreeNodeIsStale(node)){
+			viewerParams.octree.waitingToDraw = false;
+			return;
+		}
+
 		// fill node with formatted data
 		compileFFTREEData(kaitai_format,node);
 

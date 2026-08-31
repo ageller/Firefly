@@ -218,7 +218,7 @@ function populateColormapImage(particle_group_UIname){
 		.attr('height', GUIParams.colormapImageX + 'px') 
 		.attr('y',-(n_colormap*actualCbarWidth) + 'px') 
 		.attr('x',-(GUIParams.colormapImageX) + 'px')
-	if (viewerParams.colormapReversed[particle_group_UIname]){
+	if (GUIParams.colormapReversed[particle_group_UIname]){
 		// 8px is necessary for some reason :| i don't like it but it works
 		img.style('translate',(GUIParams.colormapImageX) + 'px ' + (8) + 'px')
 	}
