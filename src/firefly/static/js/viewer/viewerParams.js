@@ -1,17 +1,49 @@
 //all "global" variables are contained within params object
 var viewerParams;
 
+// the two defaults files never change, so parse them once and reuse the result.
+//  that lets defineViewerParams() apply them synchronously on every later call
+//  (e.g. when the user switches datasets from the splash), so the data load can
+//  never get ahead of them.
+var cachedDefaultSettings = null;
+var cachedDefaultParticleSettings = null;
+
+// self-contained deep copy: copyValue() lives in applyUISelections.js, which
+//  hasn't loaded yet the first time defineViewerParams() runs
+function copyDefaultValue(a){
+	if (a == null || typeof a != 'object') return a;
+	return JSON.parse(JSON.stringify(a));
+}
+
+// copy the cached defaults onto the params object being built. values are
+//  copied rather than shared so later edits can't corrupt the cache. both
+//  defaults objects are attached together, so anything downstream can gate on
+//  either one being set (see WebGLStart and confirmViewerInit).
+function applyDefaultViewerParams(these_params){
+	these_params.defaultSettings = cachedDefaultSettings;
+	these_params.defaultParticleSettings = cachedDefaultParticleSettings;
+	Object.keys(cachedDefaultSettings).forEach(function (key){
+		these_params[key] = copyDefaultValue(cachedDefaultSettings[key]);
+	});
+}
+
 function setDefaultViewerParams(these_params){
+	// already fetched: apply now, so nothing downstream can race us
+	if (cachedDefaultSettings && cachedDefaultParticleSettings){
+		applyDefaultViewerParams(these_params);
+		return;
+	}
+
+	// first load: fetch both, and apply only once both have arrived
 	d3.json("static/js/misc/defaultSettings.json", function(defaultSettings) {
-		viewerParams.defaultSettings = defaultSettings;
-		Object.keys(viewerParams.defaultSettings).forEach(function (key){
-			viewerParams[key] = defaultSettings[key];
-		});
+		cachedDefaultSettings = defaultSettings;
+		if (cachedDefaultParticleSettings) applyDefaultViewerParams(these_params);
 	})
 
 	// load the default particle settings
 	d3.json("static/js/misc/defaultParticleSettings.json", function(defaultParticleSettings) {
-		viewerParams.defaultParticleSettings = defaultParticleSettings;
+		cachedDefaultParticleSettings = defaultParticleSettings;
+		if (cachedDefaultSettings) applyDefaultViewerParams(these_params);
 	});
 
 
@@ -49,6 +81,9 @@ function defineViewerParams(){
 		this.partsMesh = {};
 
 		this.loaded = false;
+		// guards WebGLStart against building the scene twice (checkDone can call
+		//  it more than once, and it retries while the defaults are in flight)
+		this.webGLStarted = false;
 
 		// for disabling GUI elements
 		this.GUIExcludeList = []

@@ -1,3 +1,32 @@
+// bumped whenever the viewer is torn down or a new render loop starts. each
+//  loop remembers the value it began with (see startAnimation) and stops
+//  re-queueing itself once that goes stale, so switching datasets can't leave
+//  two loops running against the same octree queues.
+var viewerLoopGeneration = 0;
+
+// retire the current render loop; call before tearing the viewer down
+function stopAnimation(){
+	viewerLoopGeneration += 1;
+	if (typeof viewerParams !== 'undefined' && viewerParams) viewerParams.animating = false;
+}
+
+// start a fresh render loop, retiring any loop still running
+function startAnimation(){
+	viewerLoopGeneration += 1;
+	var myGeneration = viewerLoopGeneration;
+	viewerParams.animating = true;
+
+	function loop(time){
+		// a newer loop has taken over, or we were stopped
+		if (myGeneration != viewerLoopGeneration) return;
+		animate(time);
+		if (myGeneration != viewerLoopGeneration) return;
+		if (viewerParams.allowVRControls) viewerParams.renderer.setAnimationLoop( loop );
+		else requestAnimationFrame( loop );
+	}
+	loop();
+}
+
 function animate(time) {
 	viewerParams.animating = true;
 
@@ -69,12 +98,7 @@ function animate(time) {
 
 	}
 
-	// recursively loop this function
-	if (viewerParams.allowVRControls){
-		viewerParams.renderer.setAnimationLoop( animate );
-	} else {
-		requestAnimationFrame( animate );
-	}
+	// the loop itself is re-queued by startAnimation()
 }
 
 function update(time){

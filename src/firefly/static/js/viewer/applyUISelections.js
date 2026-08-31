@@ -44,6 +44,10 @@ function resetToOptions(){
 // (both normally wiped by defineViewerParams()) so a picker-driven reselect
 // can still offer the picker again afterwards.
 function resetViewerToInitialState(keepStartupChooser=false){
+	// retire the render loop first, so it can't keep drawing against the
+	//  half-torn-down state below (and so we don't end up with two loops)
+	stopAnimation();
+
 	var forGUI = [];
 	forGUI.push({'clearGUIinterval':null});
 	forGUI.push({'defineGUIParams':null});

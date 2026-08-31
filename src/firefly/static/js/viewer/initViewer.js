@@ -60,6 +60,8 @@ function connectViewerSocket(){
 					var localCheck = viewerParams.local;
 					//in case it's already waiting, which will happen if loading an hdf5 file from the gui
 					clearInterval(viewerParams.waitForInit);
+					// retire the old render loop before replacing viewerParams
+					stopAnimation();
 					defineViewerParams();
 					viewerParams.pauseAnimation = true;
 					viewerParams.usingSocket = socketCheck; 
@@ -200,18 +202,30 @@ function makeViewer(prepend=[], append=[]){
 	viewerParams.ready = false; 
 	console.log("Waiting for viewer init ...")
 	clearInterval(viewerParams.waitForInit);
-	viewerParams.waitForInit = setInterval(function(){ 
+	var initFailures = 0;
+	viewerParams.waitForInit = setInterval(function(){
 		var ready = confirmViewerInit();
-		if (ready){
-			console.log("Viewer ready.")
-			clearInterval(viewerParams.waitForInit);
-			viewerParams.ready = true;
-			viewerParams.pauseAnimation = false;
+		if (!ready) return;
+
+		// do the work *before* clearing the interval: if any of it throws we
+		//  retry on the next tick, rather than leaving the GUI waiting forever
+		//  on params that never get sent ("GUI missing partsKeys")
+		try {
 			viewerParams.parts.options_initial = createPreset(); //this might break things if the presets don't work...
 			//console.log("initial options", viewerParams.parts.options)
 
 			sendInitGUI(prepend=prepend, append=append);
+		} catch (err) {
+			// report the first failure, then throttle so a persistent one
+			//  doesn't bury the console
+			if (!(initFailures++ % 20)) console.error('Viewer init incomplete, retrying:', err);
+			return;
 		}
+
+		console.log("Viewer ready.")
+		clearInterval(viewerParams.waitForInit);
+		viewerParams.ready = true;
+		viewerParams.pauseAnimation = false;
 	}, 100);
 }
 
@@ -288,25 +302,49 @@ function getInputDataAttributes(){
 }
 
 // launch the app control flow, >> ends in animate <<
-function WebGLStart(){
-	getInputDataAttributes();
-
-	//reset the window title
-	if (viewerParams.parts.hasOwnProperty('options')){
-		if (viewerParams.parts.options.hasOwnProperty('title')){
-			window.document.title = viewerParams.parts.options.title
-			viewerParams.title = viewerParams.parts.options.title;
-		}
+function WebGLStart(attempt = 0){
+	// on the very first load the defaults files are still in flight (see
+	//  setDefaultViewerParams); initPVals and applyOptions below both index into
+	//  them, so wait instead of throwing on an undefined lookup
+	if (!viewerParams.defaultSettings || !viewerParams.defaultParticleSettings){
+		// shouldn't take more than a moment; say so if it does rather than
+		//  spinning here silently
+		if (attempt && !(attempt % 100)) console.warn('Still waiting on defaultSettings.json / defaultParticleSettings.json after ' + (attempt*50/1000) + 's.');
+		setTimeout(function(){ WebGLStart(attempt + 1) }, 50);
+		return;
 	}
 
-	document.addEventListener('mousedown', handleMouseDown);
+	// checkDone can fire this more than once, and the wait above re-enters it
+	if (viewerParams.webGLStarted) return;
+	viewerParams.webGLStarted = true;
 
-	//initialize various values for the parts dict from the input data file, 
-	initPVals();
+	try {
+		getInputDataAttributes();
 
-	initScene();
-	
-	initColumnDensity();
+		//reset the window title
+		if (viewerParams.parts.hasOwnProperty('options')){
+			if (viewerParams.parts.options.hasOwnProperty('title')){
+				window.document.title = viewerParams.parts.options.title
+				viewerParams.title = viewerParams.parts.options.title;
+			}
+		}
+
+		document.addEventListener('mousedown', handleMouseDown);
+
+		//initialize various values for the parts dict from the input data file,
+		initPVals();
+
+		initScene();
+
+		initColumnDensity();
+	} catch (err) {
+		// never fail silently here: if this throws, initScene never finishes, so
+		//  confirmViewerInit never passes and the GUI waits forever on params
+		//  that are never sent ("GUI missing partsKeys")
+		console.error('Firefly could not start the viewer:', err);
+		viewerParams.webGLStarted = false;
+		return;
+	}
 
 	//draw everything
 	Promise.all([
@@ -322,8 +360,10 @@ function WebGLStart(){
 		viewerParams.currentTime = seconds;
 
 		viewerParams.pauseAnimation = false;
-		animate();
+		startAnimation();
 
+	}).catch(function(err){
+		console.error('Firefly could not draw the particles:', err);
 	})
 
 
@@ -957,7 +997,9 @@ function confirmViewerInit(){
 		"colormapVariable", "colormap", "showColormap",
 		"colormapReversed", "fkeys", "filterVals", "filterLims",
 		"renderer", "scene", "controls","camera",
-		"parts"];
+		"parts",
+		// createPreset() and sendInitGUI() both iterate these
+		"defaultSettings", "defaultParticleSettings"];
 
 	var ready = true;
 	keys.forEach(function(k,i){
