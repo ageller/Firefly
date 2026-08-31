@@ -10,6 +10,7 @@ import sys
 import json
 import time
 import atexit
+import functools
 import subprocess
 import signal
 import socket
@@ -53,6 +54,30 @@ except PackageNotFoundError: FIREFLY_VERSION = 'unknown'
 namespace = '/Firefly'
 
 default_room = 'default_Firefly_AMG_ABG'
+
+## Public mode. A handful of endpoints below accept data or settings from whoever
+##  can reach them and push it straight into a live viewer session, which is fine
+##  for a local instance driven by the python API but not for a site on the open
+##  internet. Turning public mode on refuses those endpoints and keeps a single
+##  fixed room so visitors are never prompted for a session name.
+##
+##  Set FIREFLY_PUBLIC=1 in the environment (this is the one that works for a
+##  gunicorn/wsgi deployment, where none of the start* helpers below ever run),
+##  or pass --public to the firefly command.
+def _env_flag(name):
+    return os.environ.get(name,'').strip().lower() in ('1','true','yes','on')
+
+public_mode = _env_flag('FIREFLY_PUBLIC')
+
+def private_endpoint(fn):
+    """Refuses the wrapped endpoint while the server is in public mode."""
+    @functools.wraps(fn)
+    def wrapper(*args,**kwargs):
+        if public_mode:
+            return (f'This Firefly server is running in public mode; '
+                    f'the {request.path} endpoint is disabled.'), 403
+        return fn(*args,**kwargs)
+    return wrapper
 
 rooms = {} #will be updated below
 
@@ -210,6 +235,7 @@ def cardboard():
     return render_template("VR.html", version=FIREFLY_VERSION)
 
 @app.route('/data_input', methods = ['POST'])
+@private_endpoint
 def data_input():
     print('======= receiving data from server ...')
     jsondata = request.get_json()
@@ -254,6 +280,7 @@ def streamer():
     return render_template("streamer.html", input=json.dumps({'fps':fps}), version=FIREFLY_VERSION)
 
 @app.route('/stream_input', methods = ['GET','POST'])
+@private_endpoint
 def stream_input():
     # get the image
     blob = request.files['image']  
@@ -268,6 +295,7 @@ def stream_input():
     return 'Done'
 
 @app.route('/get_settings', methods = ['GET'])
+@private_endpoint
 def get_settings():
     global events
     events = {}
@@ -318,6 +346,7 @@ def send_settings(message):
 
 
 @app.route('/post_settings', methods = ['POST'])
+@private_endpoint
 def post_settings():
     print('======= received settings from server ...')
     jsondata = request.get_json()
@@ -338,6 +367,7 @@ def post_settings():
         return 'Error'
 
 @app.route('/get_selected_data', methods = ['GET'])
+@private_endpoint
 def get_selected_data():
     global events
     events = {}
@@ -511,7 +541,8 @@ def startFlaskServer(
     directory=None,
     frames_per_second=30,
     decimation_factor=1,
-    multiple_rooms=False):
+    multiple_rooms=False,
+    public=False):
     """Creates a global interpreter locked process to host a Flask server
         that can be accessed via localhost:<port>. 
 
@@ -527,11 +558,23 @@ def startFlaskServer(
         a string to define the room for the given session (which would allow multiple users to interact with 
         separate Firefly instances on a server), defaults to False.
     :type multiple_rooms: bool, optional
+    :param public: run in public mode, which disables the endpoints that accept
+        data or settings for a live session and keeps a single fixed room so that
+        visitors are never prompted for a session name. Equivalent to setting
+        FIREFLY_PUBLIC=1 in the environment, defaults to False.
+    :type public: bool, optional
     """
 
-    global default_room
+    global default_room, public_mode
 
     _register_server_pid(port)
+
+    if public: public_mode = True
+
+    if (public_mode and multiple_rooms):
+        print('======= ignoring multiple_rooms: public mode keeps one fixed room so '
+              'visitors are never prompted for a session name')
+        multiple_rooms = False
 
     if (multiple_rooms): default_room = None
     if (directory is None or directory == "None"): directory = os.path.dirname(__file__)
@@ -584,7 +627,8 @@ def spawnFireflyServer(
     frames_per_second=30,
     decimation_factor=1,
     max_time=10,
-    multiple_rooms=False):
+    multiple_rooms=False,
+    public=False):
     """ Starts a Firefly server as a background process. Close the server by calling
         :func:`firefly.server.quitAllFireflyServers`.
 
@@ -610,6 +654,9 @@ def spawnFireflyServer(
         a string to define the room for the given session (which would allow multiple users to interact with 
         separate Firefly instances on a server), defaults to False.
     :type multiple_rooms: bool, optional
+    :param public: run the server in public mode, see :func:`startFlaskServer`,
+        defaults to False
+    :type public: bool, optional
 
     :return: subprocess.Popen
     :rtype: subprocess handler
@@ -627,6 +674,8 @@ def spawnFireflyServer(
         f"--directory={directory}"]
     if (multiple_rooms):
         args.append(f"--multiple_rooms")
+    if (public):
+        args.append(f"--public")
 
     ## use this run_server.py (even if the other directory has one)
     ##  since it can be run remotely

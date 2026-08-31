@@ -17,7 +17,8 @@ def main(
     dec=1,
     fps=30,
     copy_source=False,
-    multiple_rooms=False):
+    multiple_rooms=False,
+    public=False):
     """Creates a global interpreter locked process to host either a Flask 
         or HTTP server that can be accessed via localhost:<port>. 
 
@@ -43,6 +44,10 @@ def main(
         a string to define the room for the given session (which would allow multiple users to interact with 
         separate Firefly instances on a server), defaults to False.
     :type multiple_rooms: bool, optional
+    :param public: run in public mode, which disables the endpoints that accept data
+        or settings for a live session and keeps a single fixed room so visitors are
+        never prompted for a session name, defaults to False.
+    :type public: bool, optional
     """
 
     if copy_source:
@@ -55,7 +60,7 @@ def main(
         if method not in ['flask','http']: raise ValueError(
             f"method must be one of flask or http, not {method}")
 
-        if method == 'flask': startFlaskServer(port,directory,fps,dec,multiple_rooms)
+        if method == 'flask': startFlaskServer(port,directory,fps,dec,multiple_rooms,public)
         else: startHTTPServer(port,directory)
 
 def define_parser():
@@ -77,6 +82,8 @@ def define_parser():
         help = 'Flag to tell the ``firefly`` command to copy the source files for Firefly into the directory specified by ``directory``. (If this flag is not supplied, the default behavior is to set copy_source=False).')
     parser.add_argument('--multiple_rooms', action='store_true',
         help = 'flag to enable multiple rooms.  If set, the user will be prompted in the browser to enter a string to define the room for the given session, which would allow multiple users to interact with separate Firefly instances on a server. (If this flag is not supplied, the default behavior is to set multiple_rooms=False) ')     
+    parser.add_argument('--public', action='store_true',
+        help = 'Flag to run the server in public mode, for an instance exposed on the open internet. Disables the endpoints that accept data or settings for a live viewer session, and keeps a single fixed room so that visitors are never prompted for a session name. Equivalent to setting FIREFLY_PUBLIC=1 in the environment. (If this flag is not supplied, the default behavior is to set public=False)')
 
     return parser
 
