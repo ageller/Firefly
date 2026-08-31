@@ -54,6 +54,12 @@ git merge upstream/main           # resolve any conflicts, then commit
 
 Test locally, then merge the branch into your default branch and push it.
 
+```bash
+git checkout main
+git merge --ff-only sync-upstream
+git push origin main
+```
+
 **On the server**, in the deployment repository:
 
 ```bash
