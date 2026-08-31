@@ -1227,9 +1227,14 @@ function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
 	viewerParams.parts.totalSize = 0.;
 	viewerParams.parts.count = {};
 
-	viewerParams.partsKeys = Object.keys(viewerParams.filenames);
+	// the raw keys index viewerParams.filenames, but partsKeys itself holds only
+	//  the sanitized names, since that's how viewerParams.parts is keyed.
+	//  build it up front: checkDone below splices options/tweenParams out of
+	//  partsKeys while we're still looping, so it can't be written to by index here
+	var rawPartsKeys = Object.keys(viewerParams.filenames);
+	viewerParams.partsKeys = rawPartsKeys.map(function(p){ return removeSpecialChars(p); });
 	// count how many particles we need to load
-	viewerParams.partsKeys.forEach( function(p, i) {
+	rawPartsKeys.forEach( function(p, i) {
 		// replace any special characters
 		//  keyed by the sanitized name, since that's what partsKeys ends up
 		//  holding and what every reader of parts.count indexes with
@@ -1247,7 +1252,7 @@ function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
 		});
 	});
 
-	viewerParams.partsKeys.forEach( function(p, i) {
+	rawPartsKeys.forEach( function(p, i) {
 		// replace any special characters
 		var sanitary_p = removeSpecialChars(p);
 		// initialize this particle dictionary
@@ -1266,7 +1271,7 @@ function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
 					// TODO should handle passing binary data
 					if (key.includes(f[0])) compileJSONData(internalData[key], sanitary_p, callback, initialLoadFrac)
 				})
-				if (internalData && i == viewerParams.partsKeys.length - 1 && j == viewerParams.filenames[p].length - 1) viewerParams.newInternalData = {};
+				if (internalData && i == rawPartsKeys.length - 1 && j == viewerParams.filenames[p].length - 1) viewerParams.newInternalData = {};
 
 			} 
 			// passed an actual file, let's read it
@@ -1297,11 +1302,6 @@ function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
 				}
 			}
 		});
-		// replace the parts key with the sanitary_p.
-		//  every key, including the last: viewerParams.parts is keyed by the
-		//  sanitized name, so leaving one raw makes parts[p] undefined and
-		//  sendInitGUI throws on it
-		viewerParams.partsKeys[i] = sanitary_p;
 	});
 }
 
