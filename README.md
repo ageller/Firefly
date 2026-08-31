@@ -70,9 +70,14 @@ never touches. Some ways to arrange that:
 - Put site-specific choices in your dataset's settings `.json` instead of in code.
   GUI panels can be hidden with `GUIExcludeList`, a list of GUI paths such as
   `"main/general/data/loadNewData"`, so hiding a control needs no source change.
-- Put extra markup in a template of its own and pull it in with a one-line
-  `{% include "yourfile.html" ignore missing %}`, rather than editing the shared
-  templates.
+- To add markup to the `<head>` of every page — an analytics tag, extra meta tags —
+  drop a `templates/_extra_head.html` into your repository. Every template already
+  includes it if it exists, so you never have to edit the shared templates.
+- If the instance is exposed on the open internet, run it in **public mode**: set
+  `FIREFLY_PUBLIC=1` in the server's environment (this is the one that works under
+  gunicorn/wsgi) or pass `--public` to the `firefly` command. That refuses the
+  endpoints which accept data or settings for a live viewer session, and keeps a
+  single fixed room so visitors are never prompted for a session name.
 - Keep server-specific launch scripts in their own files.
 - Leave packaged files you don't need in place rather than deleting them; deletions
   become modify/delete conflicts every time upstream edits them.
