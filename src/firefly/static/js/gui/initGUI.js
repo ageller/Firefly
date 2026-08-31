@@ -167,88 +167,81 @@ function showLoadingButton(id){
 	d3.select('.ff-loader__bar').style('display', 'none');
 }
 
-// for loading and reading a startup file with multiple entries
+// for loading and reading a startup file with multiple entries. Builds an
+// inline picker (dropdown + Load, and Cancel once data is already loaded)
+// into #splashdivLoader, in the same slot the loading bar occupies -- shown
+// immediately in place of it, no intermediate button to click through.
 function selectFromStartup(prefix=""){
-	var screenWidth = parseFloat(window.innerWidth);
-
 	var dirs = [];
 	Object.keys(GUIParams.dir).forEach(function(d, i) {
 		dirs.push(GUIParams.dir[i]);
 	});
 
-//https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dialog
-//https://www.w3schools.com/howto/howto_css_modals.asp
-	var dialog = d3.select('#splashdivLoader').append('div');
-	dialog.attr('id','startupModal').attr('class','modal');
+	var loaderDiv = d3.select('#splashdivLoader');
+	loaderDiv.selectAll('#startupPicker').remove();
+	d3.select('.ff-loader__bar').style('display', 'none');
 
-	var form = dialog.append('div')
-		.attr('class','modal-content')
+	var picker = loaderDiv.append('div')
+		.attr('id','startupPicker')
+		.attr('class','ff-splash__picker')
+		.on('click', function(){ if (d3.event) d3.event.stopPropagation(); });
 
-	var section = form.append('div')
-	section.append('div')
-		.attr('class','modal-header')
-		.html('Select the startup directory : <br />');
+	var select = picker.append('select')
+		.attr('id','selectedStartup')
+		.attr('class','ff-select');
 
-	var mid = section.append('div')
-		.attr('class','modal-body')
-		.style('height','20px')
-
-	var select = mid.append('select')
-		.attr('id','selectedStartup');
-
-	var options = select.selectAll('option')
+	select.selectAll('option')
 		.data(dirs).enter()
 			.append('option')
+				.attr('value', function (d) { return d; })
 				.text(function (d) { return d; });
 
-	var menu = form.append('div').attr('class','modal-footer');
-	menu.append('button')
-		.attr('id','cancelSelection')
-		.attr('class', 'button')
-		.style('width','100px')
+	picker.append('button')
+		.attr('id','confirmStartupSelection')
+		.attr('class', 'button ff-button')
+		.append('span')
+			.text('Load');
+
+	// only shown once data is already in the viewer (i.e. the picker was
+	// reopened via H, not the first-time selection) so the user can back out
+	// without forcing a reload
+	picker.append('button')
+		.attr('id','cancelStartupSelection')
+		.attr('class', 'button ff-button ff-button--secondary')
+		.style('display', viewerParams.loaded ? null : 'none')
 		.append('span')
 			.text('Cancel');
-	menu.append('button')
-		.attr('id','submitSelection')
-		.attr('class', 'button')
-		.style('width','100px')
-		.append('span')
-			.text('Confirm');
 
-	var updateButton = document.getElementById('selectStartupButton');
-	var cancelButton = document.getElementById('cancelSelection');
-	var submitButton = document.getElementById('submitSelection');
-	var startupModal = document.getElementById('startupModal');
+	var pickerNode = document.getElementById('startupPicker');
+	var confirmButton = document.getElementById('confirmStartupSelection');
+	var cancelButton = document.getElementById('cancelStartupSelection');
 	var selection = document.getElementById('selectedStartup');
 
-	selection.value = dirs[0]
-	selection.defaultValue = dirs[0]
+	selection.value = dirs[0];
+	selection.defaultValue = dirs[0];
 
-	// Update button opens a modal dialog
-	updateButton.addEventListener('click', function() {
-		startupModal.style.display = "block";
-	});
-
-	// Form cancel button closes the modal box
-	cancelButton.addEventListener('click', function() {
-		startupModal.style.display = "none";
-	});
-
-	// submit fires the loader
-	submitButton.addEventListener('click', function() {
-		startupModal.style.display = "none";
+	confirmButton.addEventListener('click', function(){
+		pickerNode.style.display = 'none';
+		// data is already loaded (this is a reselect via H, not the first-time
+		// choice) -- tear it all down first so the new load starts clean
+		// instead of layering on top of the old octree/GUI state
+		var reselecting = viewerParams.loaded;
 		var f = prefix + selection.value+'/filenames.json';
 		d3.json(f,  function(files) {
 			if (files != null){
 				console.log('==loading data', files, prefix)
+				if (reselecting) sendToViewer([{'resetViewerToInitialState':true}]);
 				sendToViewer([{'callLoadData':[files, prefix, selection.value]}])
 			} else {
+				pickerNode.style.display = '';
 				alert("Cannot load data. Please select another directory.");
 			}
 		});
-
 	});
 
+	cancelButton.addEventListener('click', function(){
+		showSplash(false);
+	});
 }
 /////////////////////
 //this is an input file that will fire if there is no startup.json in the data directory

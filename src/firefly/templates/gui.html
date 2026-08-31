@@ -5,9 +5,12 @@
 		<title>Firefly GUI</title>		
 		<link rel="icon" href="static/docs/icon.png">
 
-		<!-- this small, minimal splash is unique to the separated GUI window, so its
-		     styling lives here rather than in the shared splashStyles.css used by the
-		     other templates' full splash screen -->
+		<!-- this small, minimal splash frame is unique to the separated GUI window,
+		     so its own layout lives here rather than in the shared splashStyles.css
+		     used by the other templates' full splash screen. splashStyles.css is
+		     still loaded below though, so the loader button and the startup.json
+		     picker (built by selectFromStartup(), initGUI.js) look the same here
+		     as they do there. -->
 		<style>
 			#splash{
 				position:absolute;
@@ -55,11 +58,8 @@
 				<div id="splashdiv1">Waiting for Viewer... </div>
 
 				<div id="splashdivLoader">
-					<button id='loadDataButton' class='button' style='display:none; font-size:24px; width:415px; height:50px'>
+					<button id='loadDataButton' class='button ff-button' style='display:none;'>
 						<span>Click here to select a data directory</span>
-					</button>
-					<button id='selectStartupButton' class='button' style='display:none; font-size:24px; width:600px; height:50px'>
-						<span>Click here to select a directory from your startup file</span>
 					</button>
 				</div>
 			</div>
@@ -106,6 +106,7 @@
 		<!-- the main attraction -->
 		<link rel="stylesheet" type="text/css" href="static/css/UIStyles.css" />
 		<link rel="stylesheet" type="text/css" href="static/css/mainStyles.css" />
+		<link rel="stylesheet" type="text/css" href="static/css/splashStyles.css" />
 		<script src="static/js/misc/socketParams.js"></script>
 		<script src="static/js/gui/GUIconstructors.js"></script>
 		<script src="static/js/gui/GUIParams.js"></script>

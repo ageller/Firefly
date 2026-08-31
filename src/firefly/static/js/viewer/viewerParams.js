@@ -158,6 +158,10 @@ function defineViewerParams(){
 		this.loadfrac = 0.;
 		this.drawfrac = 0.;
 		this.datasetName = null; //shown on the splash screen, when known (see resetSplashProgress())
+		// true once a startup.json with multiple entries has offered its picker
+		// (see getFilenames() and selectFromStartup()); lets showSplash() know
+		// to bring the picker's button back instead of the stale loading bar
+		this.startupChooserActive = false;
 
 		//the startup file
 		this.startup = "data/startup.json";

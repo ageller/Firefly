@@ -80,6 +80,17 @@ function showSplash(show=true){
 	//only hide if the data is loaded
 	if (typeof viewerParams !== 'undefined') if (!viewerParams.loaded) show = true;
 
+	// reopening the splash (e.g. pressing H) after data from a multi-entry
+	// startup.json is already in the viewer: bring back the picker (with its
+	// Cancel button) instead of leaving the (now-complete) loading bar in its
+	// place, so the user can pick another dataset, or cancel back out
+	// without a reload.
+	if (show && typeof viewerParams !== 'undefined' && viewerParams.loaded && viewerParams.startupChooserActive){
+		d3.select('.ff-loader__bar').style('display','none');
+		d3.select('#startupPicker').style('display', null);
+		d3.select('#cancelStartupSelection').style('display', null);
+	}
+
 	var fdur = 700.;
 
 	var splash = d3.select("#splash");

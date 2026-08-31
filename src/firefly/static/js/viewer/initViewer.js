@@ -229,9 +229,9 @@ function getFilenames(prefix=""){
 				else i = null;
 				if (i == null){
 					console.log("multiple file options in startup:", Object.keys(viewerParams.dir).length, viewerParams.dir);
+					viewerParams.startupChooserActive = true;
 					var forGUI = [];
 					forGUI.push({'setGUIParamByKey':[viewerParams.dir, "dir"]});
-					forGUI.push({'showLoadingButton':'#selectStartupButton'});
 					forGUI.push({'selectFromStartup':prefix});
 					sendToGUI(forGUI);
 				}
@@ -1382,7 +1382,7 @@ function countParts(){
 // callLoadData -> , connectViewerSocket ->
 function drawLoadingBar(containerID = 'splashdivLoader', styles = '', textContent = null){
 	d3.select('#loadDataButton').style('display','none');
-	d3.select('#selectStartupButton').style('display','none');
+	d3.select('#startupPicker').style('display','none');
 
 	var screenWidth = parseFloat(window.innerWidth);
 
@@ -1461,7 +1461,7 @@ function updateSplashProgress(frac){
 // has been set by the caller
 function resetSplashProgress(){
 	d3.select('#loadDataButton').style('display','none');
-	d3.select('#selectStartupButton').style('display','none');
+	d3.select('#startupPicker').style('display','none');
 	d3.select('.ff-loader__bar').style('display', null); // undo showLoadingButton()'s hide, now that a directory is chosen
 
 	var label = 'Loading...';

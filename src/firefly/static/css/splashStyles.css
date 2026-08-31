@@ -342,6 +342,44 @@
 }
 #splash .ff-button:hover { background: oklch(0.72 0.19 300); opacity: 1; }
 
+/* outline variant, used for the picker's "Cancel" -- a way back to the
+   viewer, so it shouldn't compete visually with the primary action */
+#splash .ff-button--secondary {
+  background: transparent;
+  color: var(--ff-fg-70);
+  border: 1px solid var(--ff-hairline);
+}
+#splash .ff-button--secondary:hover { background: var(--ff-glass); color: var(--ff-fg); opacity: 1; }
+
+/* startup.json dropdown picker (built in selectFromStartup(), initGUI.js) --
+   sits in the same slot the loading bar occupies until a choice is made */
+.ff-splash__picker {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: clamp(10px, 1vw, 16px);
+}
+
+.ff-select {
+  font-family: var(--ff-sans);
+  font-size: var(--ff-fs-mono-md);
+  font-weight: 500;
+  color: var(--ff-fg);
+  background: var(--ff-glass);
+  border: 1px solid var(--ff-hairline);
+  border-radius: 5px;
+  padding: 0.75em 1em;
+  cursor: pointer;
+}
+.ff-select:focus { outline: 1px solid var(--ff-accent); }
+/* the popup option list ignores .ff-select's background (native chrome), so
+   without this it's the browser's default white -- which combined with the
+   white text color above is unreadable */
+.ff-select option {
+  background: #17171a;
+  color: var(--ff-fg);
+}
+
 /* ---------- bottom loading bar ----------------------------------------- */
 .ff-loader {
   margin-top: auto;                  /* pins the bar (or the buttons above) to the bottom */

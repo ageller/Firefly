@@ -8,7 +8,9 @@
                        splash_dismissable is set to false before the include
     #splashimg         logo <img>
     #splashdiv1..5      the five original content slots
-    #splashdivLoader   holds #loadDataButton / #selectStartupButton
+    #splashdivLoader   holds #loadDataButton / #startupPicker (built in
+                       selectFromStartup(), initGUI.js, for a startup.json
+                       with multiple entries)
     #splashProgressFill / #splashProgressPct  loading-bar hooks (see
                        updateSplashProgress()/resetSplashProgress() in
                        initViewer.js)
@@ -112,9 +114,6 @@
     <div id="splashdivLoader" class="ff-splash__loaderbtns">
       <button id="loadDataButton" class="button ff-button" style="display:none;" onclick="event.stopPropagation();">
         <span>Click here to select a data directory</span>
-      </button>
-      <button id="selectStartupButton" class="button ff-button" style="display:none;" onclick="event.stopPropagation();">
-        <span>Click here to select a directory from your startup file</span>
       </button>
     </div>
     <div class="ff-loader__bar">

@@ -33,12 +33,17 @@ function resetToOptions(){
 	resetViewer();
 }
 
-//to load in a new data set
-function loadNewData(){
-	//sendInitGUI([],[{'makeUI':!viewerParams.usingSocket}]);
-	
-	//reset a few variables and remake the UI
-	//sendToGUI({'setGUIParamByKey':[null, "partsKeys"]})
+// tear down the current dataset and rebuild the viewer as if the page had
+// just been loaded, so a subsequent callLoadData() -- new data, or the same
+// data picked again -- starts from a clean slate instead of layering new
+// meshes/octree state on top of what's already there. Used by loadNewData()
+// below, and by the splash's startup.json picker (selectFromStartup(),
+// initGUI.js) when it's reopened via H after data is already in the viewer.
+//
+// keepStartupChooser preserves dir/startupChooserActive across the reset
+// (both normally wiped by defineViewerParams()) so a picker-driven reselect
+// can still offer the picker again afterwards.
+function resetViewerToInitialState(keepStartupChooser=false){
 	var forGUI = [];
 	forGUI.push({'clearGUIinterval':null});
 	forGUI.push({'defineGUIParams':null});
@@ -50,31 +55,52 @@ function loadNewData(){
 		if (viewerParams.parts[pkey].hasOwnProperty('octree')) disposeOctreeNodes(pkey, false);
 	});
 
-
 	viewerParams.parts = null;
 	viewerParams.camera = null;
 	viewerParams.boxSize = 0;
 	viewerParams.controls.dispose();
 
-	// reset to default options
+	// reset to default options, keeping the session-level state that isn't
+	// tied to any one dataset
 	var localSave = viewerParams.local;
+	var usingSocketSave = viewerParams.usingSocket;
+	var dirSave = viewerParams.dir;
+	var startupChooserActiveSave = viewerParams.startupChooserActive;
 	defineViewerParams();
 	viewerParams.local = localSave;
+	viewerParams.usingSocket = usingSocketSave;
+	if (keepStartupChooser){
+		viewerParams.dir = dirSave;
+		viewerParams.startupChooserActive = startupChooserActiveSave;
+	}
 	// rebuild the viewer with new options
 	makeViewer();
-	//if (viewerParams.local) makeUI(local=true);
-	forGUI = [{'makeUI':viewerParams.local}];
+
+	d3.select('#stateContainer').html("");
+	d3.select('.UIcontainer').html("");
+	// rebuild the GUI panel too, so it reflects the (now-empty) reset state
+	// rather than staying bound to the old dataset's structure
+	sendToGUI([{'makeUI':viewerParams.local}]);
+
+	viewerParams.datasetName = null;
+	viewerParams.haveUI = false;
+	viewerParams.loaded = false;
+	viewerParams.pauseAnimation = true;
+}
+
+//to load in a new data set
+function loadNewData(){
+	resetViewerToInitialState();
+
+	var forGUI = [];
 	if (!viewerParams.local) {
 		forGUI.push({'setGUIParamByKey':[false,"GUIready"]});
 		forGUI.push({'showSplash':true});
 	}
 
 	//AMG: should this be moved to the GUI (generally we won't have these in the viewer window...)
-	d3.select('#stateContainer').html("");
-	d3.select('.UIcontainer').html("");
 	// don't hide the data-picker buttons here (unlike resetSplashProgress()) -- this
 	// function's whole job is to prompt the user to pick a new dataset
-	viewerParams.datasetName = null;
 	d3.select("#splashdiv5").text("Loading...");
 	if (Object.keys(viewerParams.dir).length > 1){
 		forGUI.push({'showLoadingButton':'#selectStartupButton'});
@@ -85,11 +111,7 @@ function loadNewData(){
 
 	d3.select("#loader").style("display","visible");
 	updateSplashProgress(0);
-	viewerParams.haveUI = false;
 	showSplash(true);
-
-	viewerParams.loaded = false;
-	viewerParams.pauseAnimation = true;
 
 	//document.getElementById("inputFilenames").click();
 }
