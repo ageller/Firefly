@@ -27,6 +27,12 @@ function connectGUISocket(){
 			while (!socketParams.room) socketParams.room = prompt("Please enter a session name.  This should be a unique string that you will use for all connections to this session.  Do not include any spaces.");
 			console.log('joining room', socketParams.room)
 			socketParams.socket.emit('join', {room: socketParams.room});
+			flushPendingSocketMessages();
+
+			// tell the viewer we're here. if it loaded data (or put up a data
+			//  picker) before this window existed, those messages went nowhere,
+			//  so it replays them for us -- see onGUIConnected() in initViewer.js
+			if (socketParams.isSeparateGUI) socketParams.socket.emit('gui_connected');
 		});
 
 
@@ -50,12 +56,30 @@ function connectGUISocket(){
 ///////////////////////
 // animate the cube for the detached GUI scene
 ///////////////////////
+// kept outside GUIParams so they survive defineGUIParams(), which is how the GUI
+//  gets reset -- otherwise we'd lose the handles and leak the context
+var previousGUIRenderer = null;
+var previousGUIWindowResize = null;
+
 //this initializes everything needed for the scene
 function initGUIScene(){
 
 	var screenWidth = window.innerWidth;
 	var screenHeight = window.innerHeight;
 	var aspect = screenWidth / screenHeight;
+
+	// this runs again every time the GUI is rebuilt (new dataset, or a viewer
+	//  reconnect), so release the previous renderer and its resize listener;
+	//  browsers cap how many live WebGL contexts a page may hold
+	try {
+		if (previousGUIWindowResize) previousGUIWindowResize.stop();
+		if (previousGUIRenderer){
+			previousGUIRenderer.forceContextLoss();
+			previousGUIRenderer.dispose();
+		}
+	} catch (err) {
+		console.warn('Could not fully release the previous GUI renderer:', err);
+	}
 
 	// create a renderer for the cube
 	if ( Detector.webgl ) {
@@ -90,7 +114,8 @@ function initGUIScene(){
 	GUIParams.scene.add(GUIParams.camera);  
 
 	// events
-	THREEx.WindowResize(GUIParams.renderer, GUIParams.camera);
+	previousGUIRenderer = GUIParams.renderer;
+	previousGUIWindowResize = THREEx.WindowResize(GUIParams.renderer, GUIParams.camera);
 
 	// initialize controls for GUI
 	initGUIControls(initial=true)
@@ -183,11 +208,24 @@ function createCube(){
 }
 
 
+// bumped each time a new cube loop starts. defineGUIParams() resets
+//  GUIParams.animating, so makeUI()'s "if (!animating)" guard isn't enough on
+//  its own to stop a second loop -- each loop checks its own generation instead.
+var GUILoopGeneration = 0;
+
 //this is the animation loop
 function animateGUI(time) {
+	GUILoopGeneration += 1;
+	var myGeneration = GUILoopGeneration;
 	GUIParams.animating = true;
-	requestAnimationFrame( animateGUI );
-	animateGUIupdate();
+
+	function loop(t){
+		// a newer loop has taken over
+		if (myGeneration != GUILoopGeneration) return;
+		animateGUIupdate();
+		requestAnimationFrame( loop );
+	}
+	loop(time);
 
 
 	// //send the camera info back to the flask app, and then on to the viewer

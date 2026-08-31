@@ -12,6 +12,10 @@ function updateOctree(treewalk=false){
 	if (viewerParams.memoryUsage >= viewerParams.memoryLimit) viewerParams.octree.memoryLimitReached = true;
 	else if (viewerParams.memoryUsage < viewerParams.octree.memoryResumeFraction*viewerParams.memoryLimit) viewerParams.octree.memoryLimitReached = false;
 
+	// push out any pending loading bar refresh. above the short circuit below so
+	//  it keeps ticking on passes where this particle group is hidden.
+	flushOctreeLoadingBar();
+
 	var pkey = viewerParams.partsKeys[viewerParams.octree.pIndex];
 
 	//rather than a for loop to go through the particles, I am going to manually iterate so that I can draw from one each draw pass

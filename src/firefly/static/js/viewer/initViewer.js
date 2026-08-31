@@ -30,6 +30,13 @@ function connectViewerSocket(){
 			while (!socketParams.room) socketParams.room = prompt("Please enter a session name.  This should be a unique string that you will use for all connections to this session.  Do not include any spaces.");
 			console.log('joining room', socketParams.room)
 			socketParams.socket.emit('join', {room: socketParams.room});
+			flushPendingSocketMessages();
+		});
+
+		// a separate GUI window connected or reloaded; bring it up to date
+		socketParams.socket.on('gui_connected', function(msg) {
+			console.log('======== a GUI window connected, resending our state');
+			onGUIConnected();
 		});
 
 		//updates from GUI
@@ -244,26 +251,57 @@ function getFilenames(prefix=""){
 				if (i == null){
 					console.log("multiple file options in startup:", Object.keys(viewerParams.dir).length, viewerParams.dir);
 					viewerParams.startupChooserActive = true;
-					var forGUI = [];
-					forGUI.push({'setGUIParamByKey':[viewerParams.dir, "dir"]});
-					forGUI.push({'selectFromStartup':prefix});
-					sendToGUI(forGUI);
+					viewerParams.dataPickerState = 'startupPicker';
+					viewerParams.startupPrefix = prefix;
+					sendToGUI(offerStartupPicker());
 				}
-			} 
+			}
 			if (i != null && i < Object.keys(viewerParams.dir).length){
 				d3.json(prefix+viewerParams.dir[i] + "/filenames.json",  function(files) {
 					if (files != null){
 						callLoadData([files, prefix, viewerParams.dir[i]]);
 					} else {
+						viewerParams.dataPickerState = 'loadDataButton';
 						sendToGUI([{'showLoadingButton':'#loadDataButton'}]);
 						alert("Cannot load data. Please select another directory.");
 					}
 				});
 			}
 		} else {
+			viewerParams.dataPickerState = 'loadDataButton';
 			sendToGUI([{'showLoadingButton':'#loadDataButton'}]);
 		}
 	});
+}
+
+// the GUI commands that put up the startup.json picker, so they can be sent
+//  again if a GUI window appears after we first sent them
+function offerStartupPicker(){
+	return [
+		{'setGUIParamByKey':[viewerParams.dir, "dir"]},
+		{'selectFromStartup':viewerParams.startupPrefix}];
+}
+
+// a separate GUI window connected or reloaded. anything we sent before it was
+//  listening went nowhere (socket.io has no replay for late joiners), so bring
+//  it up to date from whatever state we're in now.
+function onGUIConnected(){
+	if (typeof viewerParams === 'undefined' || !viewerParams) return;
+
+	// note: not viewerParams.loaded -- that only becomes true once a GUI has
+	//  finished building, which is exactly what hasn't happened yet here.
+	//  .ready means we have a dataset and have already sent init once.
+	if (viewerParams.ready){
+		// rebuild the GUI from scratch against the dataset we already have
+		sendInitGUI([{'clearGUIinterval':null},{'defineGUIParams':null}],
+			[{'makeUI':viewerParams.local}]);
+	} else if (viewerParams.dataPickerState == 'startupPicker'){
+		sendToGUI(offerStartupPicker());
+	} else if (viewerParams.dataPickerState == 'loadDataButton'){
+		sendToGUI([{'showLoadingButton':'#loadDataButton'}]);
+	}
+	// mid-load with nothing to offer: the normal sendInitGUI will reach the GUI
+	//  once the load finishes
 }
 
 //once a data directory is identified, this will define the parameters, reset the splash loading bar and, load in the data
@@ -1687,7 +1725,25 @@ function blankCallback(){
 	console.log('blank callback')
 }
 
+// ask for a loading bar refresh. called on every node draw/remove, so the work
+//  itself is deferred to flushOctreeLoadingBar() below
+function requestOctreeLoadingBarUpdate(){
+	viewerParams.octree.loadingBarDirty = true;
+}
+
+// send at most one refresh per loadingBarInterval; called once per render pass
+//  from updateOctree(). time-based so it doesn't scale with the frame rate.
+function flushOctreeLoadingBar(){
+	if (!viewerParams.octree.loadingBarDirty) return;
+	if ((performance.now() - viewerParams.octree.loadingBarLastSent) < viewerParams.octree.loadingBarInterval) return;
+	updateOctreeLoadingBar();
+}
+
 function updateOctreeLoadingBar(){
+	// a direct call satisfies any pending request, and restarts the interval
+	viewerParams.octree.loadingBarDirty = false;
+	viewerParams.octree.loadingBarLastSent = performance.now();
+
 	var forGUI = [];
 	viewerParams.partsKeys.forEach(function(p){
 		if (viewerParams.haveOctree[p]) {

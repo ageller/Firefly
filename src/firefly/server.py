@@ -156,6 +156,15 @@ def separate_GUI():
     global GUIseparated
     GUIseparated = True
 
+# a GUI running in its own window announced itself after joining the room. it may
+#  have connected after the viewer already loaded data, in which case everything
+#  the viewer sent went nowhere; pass this on so the viewer can resend it.
+@socketio.on('gui_connected', namespace=namespace)
+def gui_connected():
+    if (request.sid in rooms):
+        print('======= GUI connected in room', rooms[request.sid])
+        socketio.emit('gui_connected', {}, namespace=namespace, to=rooms[request.sid])
+
 #######for Streamer
 #passing the rendered texture
 #trying with post below because this only seems to work when on the same localhost

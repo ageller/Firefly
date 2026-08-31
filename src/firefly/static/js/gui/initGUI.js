@@ -3,6 +3,10 @@
 ///////////////////////////
 function makeUI(local=false){
 	document.getElementById('UIcontainer').style.visibility = 'hidden';
+
+	// same function reference every time, so repeat calls don't stack listeners
+	document.addEventListener('keydown', GUIKeyDown);
+
 	if (!local){
 		initGUIScene();
 		if (!GUIParams.animating) animateGUI();
@@ -171,6 +175,36 @@ function showLoadingButton(id){
 	d3.select('.ff-loader__bar').style('display', 'none');
 }
 
+// re-show the GUI's own splash with the startup.json picker on it. does nothing
+//  if there was never a picker (a single-entry startup file).
+function showStartupPickerInGUI(){
+	var picker = d3.select('#startupPicker');
+	if (!picker.node()) return;
+
+	// this splash normally just reads "Waiting for Viewer...", which isn't what
+	//  we're doing here
+	d3.select('#splashdiv1').style('display','none');
+	picker.style('display', null);
+	d3.select('#cancelStartupSelection').style('display', null);
+	showSplash(true);
+}
+
+// in a GUI-only window nothing is watching the keyboard -- update_keypress lives
+//  in the viewer's render loop -- so handle "h" here to bring the data picker
+//  back. gated to that window: anywhere the viewer shares the page, its own
+//  handler already has this key.
+function GUIKeyDown(event){
+	if (typeof viewerParams !== 'undefined') return;
+	if (event.key != 'h' && event.key != 'H') return;
+	if (event.metaKey || event.ctrlKey || event.altKey) return;
+
+	// don't hijack the key while the user is typing into the GUI
+	var t = event.target;
+	if (t && (t.isContentEditable || ['INPUT','TEXTAREA','SELECT'].indexOf(t.tagName) >= 0)) return;
+
+	showStartupPickerInGUI();
+}
+
 // is a dataset already showing in the viewer? when the GUI runs in its own
 //  window there is no viewerParams here, so fall back to the partsKeys the
 //  viewer sends us (null until sendInitGUI runs, and reset by defineGUIParams
@@ -235,6 +269,9 @@ function selectFromStartup(prefix=""){
 
 	confirmButton.addEventListener('click', function(){
 		pickerNode.style.display = 'none';
+		// undo showStartupPickerInGUI()'s hide; a no-op in the viewer's splash,
+		//  which never hides it
+		d3.select('#splashdiv1').style('display', null);
 		// data is already loaded (this is a reselect via H, not the first-time
 		// choice) -- tear it all down first so the new load starts clean
 		// instead of layering on top of the old octree/GUI state
@@ -257,6 +294,7 @@ function selectFromStartup(prefix=""){
 	});
 
 	cancelButton.addEventListener('click', function(){
+		d3.select('#splashdiv1').style('display', null);
 		showSplash(false);
 	});
 }

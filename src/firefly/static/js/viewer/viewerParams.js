@@ -198,6 +198,11 @@ function defineViewerParams(){
 		// (see getFilenames() and selectFromStartup()); lets showSplash() know
 		// to bring the picker's button back instead of the stale loading bar
 		this.startupChooserActive = false;
+		// what the splash is offering while no data is loaded: 'startupPicker',
+		// 'loadDataButton', or null. replayed to a GUI window that connects after
+		// we already decided (see onGUIConnected()).
+		this.dataPickerState = null;
+		this.startupPrefix = "";
 
 		//the startup file
 		this.startup = "data/startup.json";
@@ -335,6 +340,13 @@ function defineViewerParams(){
 			this.boxSize = 0; //will be set based on the root node
 
 			this.loadingCount = {}; //will contain an array for each particle type that has the total inView and the total drawn to adjust the loading bar
+
+			// the loading bar is refreshed from the render loop rather than on
+			//  every node draw/remove: each refresh walks the whole draw queue
+			//  and, with the GUI in its own window, costs a socket round trip
+			this.loadingBarDirty = false;
+			this.loadingBarLastSent = 0;
+			this.loadingBarInterval = 200; //ms between refreshes
 
 			this.showCoMParticles = false;
 

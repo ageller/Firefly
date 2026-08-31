@@ -13,7 +13,18 @@ function defineSocketParams(){
 		this.namespace = '/Firefly';
 
 		//room will be set by the user with a prompt.  This will allow different sessions of e.g., gui+viewer to connect at the same time without confusing messages
-		this.room = null; 
+		this.room = null;
+
+		// the server routes messages by room, and silently drops anything from a
+		//  client that hasn't joined yet. so hold outgoing messages until the
+		//  join is confirmed (see flushPendingSocketMessages in utils.js).
+		this.joined = false;
+		this.pendingGUI = [];
+		this.pendingViewer = [];
+
+		// set by gui.html only: this window is a GUI on its own, so it announces
+		//  itself to the viewer, which may have loaded data before we existed
+		this.isSeparateGUI = false;
 		
 		// Connect to the Socket.IO server.
 		// The connection URL has the following format:

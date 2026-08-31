@@ -127,6 +127,9 @@
 
 		<script>
 			//called upon loading
+			// this GUI is on its own, so announce ourselves to the viewer once we've
+			// joined the room -- it may already have data loaded (see onGUIConnected)
+			socketParams.isSeparateGUI = true;
 			connectGUISocket();
 			socketParams.socket.emit('separate_GUI');
 			makeUI();

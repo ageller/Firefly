@@ -81,8 +81,8 @@ function addOctreeParticlesToScene(
 		viewerParams.octree.waitingToDraw = false;
 	}
 
-	// and increment the loading bar
-	updateOctreeLoadingBar();
+	// and increment the loading bar (coalesced; see requestOctreeLoadingBarUpdate)
+	requestOctreeLoadingBarUpdate();
 
 }
 
@@ -208,7 +208,7 @@ function removeOctreeNode(node,callback){
 
 		viewerParams.octree.loadingCount[node.pkey][0]-=1
 		viewerParams.octree.loadingCount[node.pkey][1]-=node.buffer_size;//1
-		updateOctreeLoadingBar();
+		requestOctreeLoadingBarUpdate();
 	}
 	// released unconditionally so a node without a mesh can't stall the remove queue
 	viewerParams.octree.waitingToRemove = false;
