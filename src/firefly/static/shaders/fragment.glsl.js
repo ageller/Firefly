@@ -25,6 +25,7 @@ uniform float scaleCD;
 uniform float velVectorWidth;
 uniform float velGradient;
 uniform float useDepth;
+uniform float brightCenterFraction;
 
 //http://www.neilmendoza.com/glsl-rotation-about-an-arbitrary-axis/
 mat4 rotationMatrix(vec3 axis, float angle)
@@ -88,7 +89,10 @@ void main(void) {
 					gl_FragColor.a *= alpha_SPH;
 				} 
 				else {
-					if (vPointSize > 1.) gl_FragColor.a *= dMax - dist;
+					// hold the innermost brightCenterFraction of the point at full alpha and
+					//  only fade beyond it, which leaves a bright core (nice for stars).
+					//  at 0 the fade starts from the centre, i.e. a plain linear falloff.
+					if (vPointSize > 1. && dist >= brightCenterFraction*dMax) gl_FragColor.a *= dMax - dist;
 					//if (dist > dMax){ discard; }
 				}
 			}

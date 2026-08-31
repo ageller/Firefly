@@ -249,6 +249,7 @@ class ParticleGroup(object):
             'animateVelDt':None, ## use default set in javascript
             'animateVelTmax':None, ## use default set in javascript
             'radiusVariable':0, 
+            'brightCenterFraction':None, ## use default set in javascript
             'GUIExcludeList':None
         }
         

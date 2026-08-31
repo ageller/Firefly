@@ -24,5 +24,6 @@
     "rkeys":["None"],
     "radiusVariable":0,
     "blendingMode":"additive",
-    "depthTest":false
+    "depthTest":false,
+    "brightCenterFraction":0
 }

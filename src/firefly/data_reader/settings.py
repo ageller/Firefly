@@ -274,6 +274,12 @@ class Settings(object):
             This is a dict with keys of the particle UInames mapped to bools,
             (e.g. {'Gas':False, 'Stars':False}), defaults to False
         :type depthTest: dict of UIname:bool, optional
+        :param brightCenterFraction: fraction of each point's radius that is held at
+            full opacity before it fades out to the edge, for each particle group.
+            0 (the default) fades from the centre outwards; a small value such as 0.2
+            leaves a bright core, which reads well for stars,
+            defaults to None (which uses the default set in the javascript)
+        :type brightCenterFraction: dict of UIname:float, optional
         """
     
     def __getitem__(self,key):
@@ -394,7 +400,7 @@ class Settings(object):
             'showVel','velType','velVectorWidth','velGradient',
             'animateVel','animateVelDt','animateVelTmax',
             'colormap','colormapVariable','showColormap',
-            'blendingMode','depthTest']:
+            'blendingMode','depthTest','brightCenterFraction']:
 
             try: 
                 if key not in self.__settings_dict.keys(): self[key] = {}

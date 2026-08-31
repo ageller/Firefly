@@ -126,6 +126,7 @@ function defineGUIParams(){
 
 		this.blendingOpts = null; 
 		this.blendingMode = null; 
+		this.brightCenterFraction = null;
 
 		this.ckeys = null;
 		this.colormapVals = null;

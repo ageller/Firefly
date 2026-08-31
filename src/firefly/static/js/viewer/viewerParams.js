@@ -126,6 +126,8 @@ function defineViewerParams(){
 							 'multiply':THREE.MultiplyBlending, 
 							 'none':THREE.NoBlending};
 		this.blendingMode = {};
+		//fraction of a point's radius held at full alpha before it fades to the edge
+		this.brightCenterFraction = {};
 		this.depthTest = {};
 
 		//for deciding whether to animate the velocities
