@@ -404,8 +404,7 @@
 }
 
 .ff-browser__bar,
-.ff-browser__shortcuts,
-.ff-browser__foot {
+.ff-browser__shortcuts {
   display: flex;
   align-items: center;
   flex-wrap: wrap;

@@ -189,12 +189,15 @@ function defineViewerParams(){
 		this.drawfrac = 0.;
 		this.datasetName = null; //shown on the splash screen, when known (see resetSplashProgress())
 		// true once a startup.json with multiple entries has offered its picker
-		// (see getFilenames(), and dataPicker.js); lets loadNewData() know which
-		// picker to offer when the user asks for new data
+		// (see getFilenames(), and dataPicker.js); says which picker the splash
+		// falls back to once a visit to the data picker ends (dataPickerClosed())
 		this.startupChooserActive = false;
-		// what the splash is offering while no data is loaded: 'startupPicker',
-		// 'pathPicker', or null. replayed to a GUI window that connects after
-		// we already decided (see onGUIConnected()).
+		// what the splash is offering: 'startupPicker' (startup.json's entries),
+		// 'pathPicker' (a path on the server, for want of a startup.json),
+		// 'newDataPicker' (a path, because the GUI's "Load New Data" asked for
+		// one) or null. Read by the GUI's pickerMode() when the two share a
+		// window, and replayed to a GUI window that connects after we decided
+		// (see onGUIConnected()).
 		this.dataPickerState = null;
 		this.startupPrefix = "";
 		// where the current dataset is served from: "static/" for anything under

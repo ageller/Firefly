@@ -9,8 +9,8 @@
     #splashimg         logo <img>
     #splashdiv1..5      the five original content slots
     #splashdivLoader   holds #dataPicker, the data-selection panel built in
-                       static/js/gui/dataPicker.js (a startup.json dropdown,
-                       a path on the server, or both)
+                       static/js/gui/dataPicker.js (either a startup.json
+                       dropdown or a path on the server, never both)
     #splashProgressFill / #splashProgressPct  loading-bar hooks (see
                        updateSplashProgress()/resetSplashProgress() in
                        initViewer.js)
@@ -107,8 +107,9 @@
 
   <!-- bottom: full-width loading bar, always in this same pinned slot. Before a
        data directory is chosen, the data picker takes its place instead
-       (showDataPicker()/resetSplashProgress() in dataPicker.js/initViewer.js
-       toggle which of the two is shown). -->
+       (buildDataPicker()/hideDataPicker() in dataPicker.js, and
+       resetSplashProgress() in initViewer.js, toggle which of the two is
+       shown). -->
   <div class="ff-loader">
     <!-- #dataPicker is built in here by dataPicker.js when there is data to choose -->
     <div id="splashdivLoader" class="ff-splash__loaderbtns"></div>

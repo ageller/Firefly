@@ -36,9 +36,10 @@ function resetToOptions(){
 // tear down the current dataset and rebuild the viewer as if the page had
 // just been loaded, so a subsequent callLoadData() -- new data, or the same
 // data picked again -- starts from a clean slate instead of layering new
-// meshes/octree state on top of what's already there. Used by loadNewData()
-// below, and by the splash's data picker (static/js/gui/dataPicker.js) when it's
-// reopened via H after data is already in the viewer.
+// meshes/octree state on top of what's already there. Used whenever a new dataset
+// replaces the one on screen: by the splash's data picker
+// (static/js/gui/dataPicker.js) for a startup.json entry, and by the
+// load_ffly_data/input_data handlers for a path (initViewer.js).
 //
 // keepStartupChooser preserves dir/startupChooserActive/startupPrefix across the
 // reset (all normally wiped by defineViewerParams()) so a picker-driven reselect
@@ -117,31 +118,19 @@ function resetViewerToInitialState(keepStartupChooser=false){
 
 //to load in a new data set ("Load New Data" in the GUI)
 function loadNewData(){
-	// keep dir/startupChooserActive: they say which picker to offer below, and
-	// defineViewerParams() inside the reset would otherwise wipe them
-	resetViewerToInitialState(true);
+	// nothing is torn down here, and the splash is only laid over the viewer as
+	// it stands: the picker's Cancel has to be able to put the user straight back
+	// into it. The dataset is torn down later, by whichever route actually
+	// chooses something (see resetViewerToInitialState() above).
+	viewerParams.dataPickerState = 'newDataPicker';
 
-	var forGUI = [];
-	if (!viewerParams.local) {
-		forGUI.push({'setGUIParamByKey':[false,"GUIready"]});
-		forGUI.push({'showSplash':true});
-	}
-
-	//AMG: should this be moved to the GUI (generally we won't have these in the viewer window...)
-	// don't hide the data-picker here (unlike resetSplashProgress()) -- this
-	// function's whole job is to prompt the user to pick a new dataset
-	d3.select("#splashdiv5").text("Loading...");
-	if (Object.keys(viewerParams.dir).length > 1){
-		viewerParams.dataPickerState = 'startupPicker';
-		offerStartupPicker().forEach(function(c){ forGUI.push(c); });
-	} else {
-		viewerParams.dataPickerState = 'pathPicker';
-		offerPathPicker().forEach(function(c){ forGUI.push(c); });
-	}
+	// startup.json's entries are deliberately not offered here -- this route is
+	// only ever the path picker (see pickerMode() in dataPicker.js)
+	var forGUI = [{'openDataPickerForNewData':null}];
+	// a GUI in its own window has a splash of its own to raise
+	if (!viewerParams.local) forGUI.push({'showSplash':true});
 	sendToGUI(forGUI);
 
-	d3.select("#loader").style("display","visible");
-	updateSplashProgress(0);
 	showSplash(true);
 }
 

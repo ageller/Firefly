@@ -188,6 +188,11 @@ function GUIKeyDown(event){
 	var t = event.target;
 	if (t && (t.isContentEditable || ['INPUT','TEXTAREA','SELECT'].indexOf(t.tagName) >= 0)) return;
 
-	showDataPickerAgain();
+	// toggle, so the same key takes the splash back down again. The viewer's
+	//  handler has viewerParams.helpMessage to track that; here the splash
+	//  itself is the only record of whether it is up (see showSplash()).
+	var splash = document.getElementById('splash');
+	var up = !!splash && !splash.classList.contains('hidden') && getComputedStyle(splash).opacity > 0.5;
+	showSplash(!up);
 }
 

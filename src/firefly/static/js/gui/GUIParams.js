@@ -86,8 +86,12 @@ function defineGUIParams(){
 		// this.dir above, and the rest is re-established when the panel is next
 		// built or the directory browser next opened.
 		this.dataPicker = {
+			stage: 'menu',          //'menu', 'browse' or 'manual' -- which face of the picker
+			newDataRequested: false,//did the GUI's "Load New Data" button ask for it?
+			startupFailed: false,   //the dataset startup.json named would not load
 			browsePath: null,       //directory the browser panel is showing
 			lastPath: '',           //what was typed, kept across panel rebuilds
+			lastListing: null,      //the browser's last listing, to rebuild the panel from
 			nativeAvailable: false, //can the server open its own folder dialog?
 		};
 

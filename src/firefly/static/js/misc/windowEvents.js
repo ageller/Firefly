@@ -80,11 +80,20 @@ function showSplash(show=true){
 	//only hide if the data is loaded
 	if (typeof viewerParams !== 'undefined') if (!viewerParams.loaded) show = true;
 
+	// keep the H toggle in step with what is actually on screen: dismissing the
+	// splash any other way (a click, the picker's Cancel) would otherwise leave
+	// helpMessage saying it is still up, and the next H would toggle it to false
+	// and do nothing (see update_keypress() in viewer/renderLoop.js)
+	if (typeof viewerParams !== 'undefined' && viewerParams != null) viewerParams.helpMessage = show;
+
 	// reopening the splash (e.g. pressing H) over a dataset that is already
 	// loaded: bring the data picker back (with its Cancel button) instead of
-	// leaving the long-finished loading bar sitting in its slot. Not loaded in
-	// the standalone viewer window, which has no picker of its own.
+	// leaving the long-finished loading bar sitting in its slot. And when the
+	// splash goes down, however it was dismissed, that visit to the picker is
+	// over. Neither is loaded in the standalone viewer window, which has no
+	// picker of its own.
 	if (show && typeof restoreDataPickerOnSplash === 'function') restoreDataPickerOnSplash();
+	if (!show && typeof endPickerVisit === 'function') endPickerVisit();
 
 	var fdur = 700.;
 

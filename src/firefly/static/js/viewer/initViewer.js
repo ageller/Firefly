@@ -69,6 +69,14 @@ function connectViewerSocket(){
 			if (msg.status == 'start') {
 				var socketCheck = viewerParams.usingSocket;
 				var localCheck = viewerParams.local;
+				// startup.json's entries, and where they are read from. This is
+				//  what the splash comes back to (see pickerMode() in
+				//  gui/dataPicker.js), so losing it to defineViewerParams() below
+				//  would leave no way back to them once data arrived this way --
+				//  which is every csv/hdf5 load, and sendDataViaFlask.
+				var dirSave = viewerParams.dir;
+				var startupChooserActiveSave = viewerParams.startupChooserActive;
+				var startupPrefixSave = viewerParams.startupPrefix;
 				//in case it's already waiting, which will happen if loading an hdf5 file from the gui
 				clearInterval(viewerParams.waitForInit);
 				// retire the old render loop before replacing viewerParams
@@ -77,6 +85,12 @@ function connectViewerSocket(){
 				viewerParams.pauseAnimation = true;
 				viewerParams.usingSocket = socketCheck; 
 				viewerParams.local = localCheck; 
+				viewerParams.dir = dirSave;
+				viewerParams.startupChooserActive = startupChooserActiveSave;
+				viewerParams.startupPrefix = startupPrefixSave;
+				// a dataset has been chosen, so whatever the picker was offering
+				//  is done with (callLoadData does the same for the other routes)
+				dataPickerClosed();
 
 				viewerParams.newInternalData.data = {};
 				viewerParams.newInternalData.len = msg.length;
@@ -189,6 +203,10 @@ function initInputData(){
 	var forGUIappend = [];
 	forGUIappend.push({'setGUIParamByKey':[viewerParams.usingSocket, "usingSocket"]});
 	forGUIappend.push({'setGUIParamByKey':[viewerParams.local, "local"]});
+	// startup.json's entries: defineGUIParams above wipes the GUI's copy, and
+	//  this route has no callLoadData to put it back
+	forGUIappend.push({'setGUIParamByKey':[viewerParams.dir, "dir"]});
+	forGUIappend.push({'setGUIParamByKey':[viewerParams.startupPrefix, "startupPrefix"]});
 	forGUIappend.push({'makeUI':viewerParams.local});
 
 	//I think I need to wait a moment because sometimes this doesn't fire (?)
@@ -306,9 +324,19 @@ function getFilenames(prefix=""){
 //  in the GUI, so send the message there rather than raising an alert here (the
 //  viewer window may not even be the one the user is looking at).
 function dataLoadFailed(message){
-	viewerParams.dataPickerState = viewerParams.startupChooserActive ? 'startupPicker' : 'pathPicker';
+	// 'newDataPicker' stays: the user asked for the path picker, and the failure
+	//  belongs on that rather than sending them back to startup.json's entries
+	if (viewerParams.dataPickerState != 'newDataPicker') dataPickerClosed();
 	resetSplashProgress();
 	sendToGUI([{'dataPickerError':message}]);
+}
+
+// the splash's picker is finished with -- dismissed, or having chosen something
+// to load. Forget that the GUI asked for the path picker, so the next splash
+// offers whatever startup.json holds again (see pickerMode() in dataPicker.js).
+// Called from the GUI when the splash goes down, and by callLoadData() below.
+function dataPickerClosed(){
+	viewerParams.dataPickerState = viewerParams.startupChooserActive ? 'startupPicker' : 'pathPicker';
 }
 
 // do we currently have a dataset loaded (as opposed to waiting for our first one)?
@@ -341,9 +369,12 @@ function onGUIConnected(){
 	//  finished building, which is exactly what hasn't happened yet here.
 	//  .ready means we have a dataset and have already sent init once.
 	if (viewerParams.ready){
+		var append = [{'makeUI':viewerParams.local}];
+		// the user was sitting on the picker asking for new data when this window
+		//  appeared, so put that back once the GUI has rebuilt
+		if (viewerParams.dataPickerState == 'newDataPicker') append.push({'openDataPickerForNewData':null});
 		// rebuild the GUI from scratch against the dataset we already have
-		sendInitGUI([{'clearGUIinterval':null},{'defineGUIParams':null}],
-			[{'makeUI':viewerParams.local}]);
+		sendInitGUI([{'clearGUIinterval':null},{'defineGUIParams':null}], append);
 	} else if (viewerParams.dataPickerState == 'startupPicker'){
 		sendToGUI(offerStartupPicker());
 	} else if (viewerParams.dataPickerState == 'pathPicker'){
@@ -368,6 +399,9 @@ function callLoadData(args){
 	sendToGUI([
 		{'setGUIParamByKey':[viewerParams.dir, "dir"]},
 		{'setGUIParamByKey':[viewerParams.startupPrefix, "startupPrefix"]}]);
+
+	// a dataset has been chosen, so whatever the picker was offering is done with
+	dataPickerClosed();
 
 	viewerParams.datasetName = datasetNameFromPath(datasetPath);
 	// octree nodes are fetched later, outside loadData(), and need to know where
