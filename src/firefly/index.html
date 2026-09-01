@@ -107,16 +107,11 @@
 				</div>
 
 				<!-- bottom: full-width loading bar, or (before a data directory is chosen)
-				     the data-picker buttons in the same pinned slot -->
+				     the data picker in the same pinned slot. This page is served
+				     without flask (see startHTTPServer), so there are no sockets and
+				     no server to resolve a path: the picker can only say so. -->
 				<div class="ff-loader">
-					<div id="splashdivLoader" class="ff-splash__loaderbtns">
-						<button id="loadDataButton" class="button ff-button" style="display:none;" onclick="event.stopPropagation();">
-							<span>Click here to select a data directory</span>
-						</button>
-						<button id="selectStartupButton" class="button ff-button" style="display:none;" onclick="event.stopPropagation();">
-							<span>Click here to select a directory from your startup file</span>
-						</button>
-					</div>
+					<div id="splashdivLoader" class="ff-splash__loaderbtns"></div>
 					<div class="ff-loader__bar">
 						<div class="ff-loader__row">
 							<div id="splashdiv5" class="ff-loader__label">Loading...</div>
@@ -202,6 +197,7 @@
 		<script src="static/js/misc/selector.js"></script>
 		<script src="static/js/gui/GUIsocket.js"></script>
 		<script src="static/js/gui/initGUI.js"></script>
+		<script src="static/js/gui/dataPicker.js"></script>
 		<script src="static/js/gui/sliders.js"></script>
 		<script src="static/js/gui/colormap.js"></script>
 		<script src="static/js/gui/particles.js"></script>

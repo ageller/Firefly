@@ -37,11 +37,11 @@ function resetToOptions(){
 // just been loaded, so a subsequent callLoadData() -- new data, or the same
 // data picked again -- starts from a clean slate instead of layering new
 // meshes/octree state on top of what's already there. Used by loadNewData()
-// below, and by the splash's startup.json picker (selectFromStartup(),
-// initGUI.js) when it's reopened via H after data is already in the viewer.
+// below, and by the splash's data picker (static/js/gui/dataPicker.js) when it's
+// reopened via H after data is already in the viewer.
 //
-// keepStartupChooser preserves dir/startupChooserActive across the reset
-// (both normally wiped by defineViewerParams()) so a picker-driven reselect
+// keepStartupChooser preserves dir/startupChooserActive/startupPrefix across the
+// reset (all normally wiped by defineViewerParams()) so a picker-driven reselect
 // can still offer the picker again afterwards.
 function resetViewerToInitialState(keepStartupChooser=false){
 	// retire the render loop first, so it can't keep drawing against the
@@ -84,12 +84,15 @@ function resetViewerToInitialState(keepStartupChooser=false){
 	var usingSocketSave = viewerParams.usingSocket;
 	var dirSave = viewerParams.dir;
 	var startupChooserActiveSave = viewerParams.startupChooserActive;
+	var startupPrefixSave = viewerParams.startupPrefix;
 	defineViewerParams();
 	viewerParams.local = localSave;
 	viewerParams.usingSocket = usingSocketSave;
 	if (keepStartupChooser){
 		viewerParams.dir = dirSave;
 		viewerParams.startupChooserActive = startupChooserActiveSave;
+		// the picker needs this to build the path it reads filenames.json from
+		viewerParams.startupPrefix = startupPrefixSave;
 	}
 	// rebuild the viewer with new options
 	makeViewer();
@@ -106,9 +109,11 @@ function resetViewerToInitialState(keepStartupChooser=false){
 	viewerParams.pauseAnimation = true;
 }
 
-//to load in a new data set
+//to load in a new data set ("Load New Data" in the GUI)
 function loadNewData(){
-	resetViewerToInitialState();
+	// keep dir/startupChooserActive: they say which picker to offer below, and
+	// defineViewerParams() inside the reset would otherwise wipe them
+	resetViewerToInitialState(true);
 
 	var forGUI = [];
 	if (!viewerParams.local) {
@@ -117,21 +122,21 @@ function loadNewData(){
 	}
 
 	//AMG: should this be moved to the GUI (generally we won't have these in the viewer window...)
-	// don't hide the data-picker buttons here (unlike resetSplashProgress()) -- this
+	// don't hide the data-picker here (unlike resetSplashProgress()) -- this
 	// function's whole job is to prompt the user to pick a new dataset
 	d3.select("#splashdiv5").text("Loading...");
 	if (Object.keys(viewerParams.dir).length > 1){
-		forGUI.push({'showLoadingButton':'#selectStartupButton'});
+		viewerParams.dataPickerState = 'startupPicker';
+		offerStartupPicker().forEach(function(c){ forGUI.push(c); });
 	} else {
-		forGUI.push({'showLoadingButton':'#loadDataButton'});
+		viewerParams.dataPickerState = 'pathPicker';
+		offerPathPicker().forEach(function(c){ forGUI.push(c); });
 	}
 	sendToGUI(forGUI);
 
 	d3.select("#loader").style("display","visible");
 	updateSplashProgress(0);
 	showSplash(true);
-
-	//document.getElementById("inputFilenames").click();
 }
 
 

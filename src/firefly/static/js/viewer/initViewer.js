@@ -5,153 +5,179 @@
 
 //https://github.com/miguelgrinberg/Flask-SocketIO
 function connectViewerSocket(){
-	//$(document).ready(function() {
-	document.addEventListener("DOMContentLoaded", function(event) { 
+	// registered as soon as this is called (from the inline script at the end
+	//  of each template's body, so the DOM is already parsed). NOT deferred to
+	//  DOMContentLoaded: the socket is created and starts connecting when
+	//  socketParams.js is parsed, so on a slow-loading page 'connect' and
+	//  'room_check' can both fire before that event -- and socket.io does not
+	//  replay them, leaving the window connected but never joined to a room.
 
-		// this happens when the server connects.
-		// all other functions below here are executed when the server emits to that name.
-		socketParams.socket.on('connect', function() {
-			console.log("sending connection from viewer")
-			socketParams.socket.emit('connection_test', {data: 'Viewer connected!'});
-		});
-		socketParams.socket.on('disconnect', function(message) {
-			console.log("viewer is disconnected", message)
-		});
-		// socketParams.socket.on('connection_response', function(msg) {
-		// 	console.log('connection response', msg);
-		// });     
+	// this happens when the server connects.
+	// all other functions below here are executed when the server emits to that name.
+	socketParams.socket.on('connect', function() {
+		console.log("sending connection from viewer")
+		socketParams.socket.emit('connection_test', {data: 'Viewer connected!'});
+	});
+	socketParams.socket.on('disconnect', function(message) {
+		console.log("viewer is disconnected", message)
+	});
+	// socketParams.socket.on('connection_response', function(msg) {
+	// 	console.log('connection response', msg);
+	// });     
 
-		// get the room from the server if the user specified on the command line.  Otherwise prompt the user here for a room.  Then join.
-		socketParams.socket.on('room_check', function(msg) {
-			console.log('!!!!!!!!! received message about rooms', msg)
-			if (!socketParams.room) socketParams.room = msg.room;
-			
-			// get the room name
-			while (!socketParams.room) socketParams.room = prompt("Please enter a session name.  This should be a unique string that you will use for all connections to this session.  Do not include any spaces.");
-			console.log('joining room', socketParams.room)
-			socketParams.socket.emit('join', {room: socketParams.room});
-			flushPendingSocketMessages();
-		});
+	// get the room from the server if the user specified on the command line.  Otherwise prompt the user here for a room.  Then join.
+	socketParams.socket.on('room_check', function(msg) {
+		console.log('!!!!!!!!! received message about rooms', msg)
+		if (!socketParams.room) socketParams.room = msg.room;
+		
+		// get the room name
+		while (!socketParams.room) socketParams.room = prompt("Please enter a session name.  This should be a unique string that you will use for all connections to this session.  Do not include any spaces.");
+		console.log('joining room', socketParams.room)
+		socketParams.socket.emit('join', {room: socketParams.room});
+		flushPendingSocketMessages();
+	});
 
-		// a separate GUI window connected or reloaded; bring it up to date
-		socketParams.socket.on('gui_connected', function(msg) {
-			console.log('======== a GUI window connected, resending our state');
-			onGUIConnected();
-		});
+	// a separate GUI window connected or reloaded; bring it up to date
+	socketParams.socket.on('gui_connected', function(msg) {
+		console.log('======== a GUI window connected, resending our state');
+		onGUIConnected();
+	});
 
-		//updates from GUI
-		socketParams.socket.on('update_viewerParams', function(msg) {
-			setParams(msg);
-		});
+	//updates from GUI
+	socketParams.socket.on('update_viewerParams', function(msg) {
+		setParams(msg);
+	});
 
-		socketParams.socket.on('show_loader', function(msg) {
-			d3.select("#loader").style("display","visible");
-			viewerParams.loaded = false;
-			viewerParams.pauseAnimation = true;
+	socketParams.socket.on('show_loader', function(msg) {
+		d3.select("#loader").style("display","visible");
+		viewerParams.loaded = false;
+		viewerParams.pauseAnimation = true;
 
-			// no directory/dataset name is known for data pushed over the socket
-			viewerParams.datasetName = null;
-			resetSplashProgress();
+		// no directory/dataset name is known for data pushed over the socket
+		viewerParams.datasetName = null;
+		resetSplashProgress();
 
-			showSplash();
-		});
+		showSplash();
+	});
 
-		socketParams.socket.on('input_data', function(msg) {
-			console.log("======== have new data : ", Object.keys(msg));
+	socketParams.socket.on('input_data', function(msg) {
+		console.log("======== have new data : ", Object.keys(msg));
 
 
-			//first compile the data from multiple calls
-			if ('status' in msg){
-				if (msg.status == 'start') {
-					var socketCheck = viewerParams.usingSocket;
-					var localCheck = viewerParams.local;
-					//in case it's already waiting, which will happen if loading an hdf5 file from the gui
-					clearInterval(viewerParams.waitForInit);
-					// retire the old render loop before replacing viewerParams
-					stopAnimation();
-					defineViewerParams();
-					viewerParams.pauseAnimation = true;
-					viewerParams.usingSocket = socketCheck; 
-					viewerParams.local = localCheck; 
+		//first compile the data from multiple calls
+		if ('status' in msg){
+			if (msg.status == 'start') {
+				var socketCheck = viewerParams.usingSocket;
+				var localCheck = viewerParams.local;
+				//in case it's already waiting, which will happen if loading an hdf5 file from the gui
+				clearInterval(viewerParams.waitForInit);
+				// retire the old render loop before replacing viewerParams
+				stopAnimation();
+				defineViewerParams();
+				viewerParams.pauseAnimation = true;
+				viewerParams.usingSocket = socketCheck; 
+				viewerParams.local = localCheck; 
 
-					viewerParams.newInternalData.data = {};
-					viewerParams.newInternalData.len = msg.length;
-					viewerParams.newInternalData.count = 0;
-				}
-				if (msg.status == 'data') {
-					viewerParams.newInternalData.count += 1;
-					//I will update the loading bar here, but I'm not sure what fraction of the time this should take (using 0.8 for now)
-					updateSplashProgress((viewerParams.newInternalData.count/viewerParams.newInternalData.len)*0.8);
-					Object.keys(msg).forEach(function(key,i){
-						if (key != 'status'){
-							viewerParams.newInternalData.data[key] = JSON.parse(msg[key]);
-							if (key.includes('filenames.json')){
-								viewerParams.filenames = JSON.parse(msg[key]);
-							}
-						}
-					})
-				}
-				if (msg.status == 'done'){
-					console.log('======== have all data', viewerParams.newInternalData, viewerParams.filenames);
-					loadData(initInputData, prefix='', internalData=viewerParams.newInternalData.data, initialLoadFrac=viewerParams.loadfrac)
-				}
+				viewerParams.newInternalData.data = {};
+				viewerParams.newInternalData.len = msg.length;
+				viewerParams.newInternalData.count = 0;
 			}
+			if (msg.status == 'data') {
+				viewerParams.newInternalData.count += 1;
+				//I will update the loading bar here, but I'm not sure what fraction of the time this should take (using 0.8 for now)
+				updateSplashProgress((viewerParams.newInternalData.count/viewerParams.newInternalData.len)*0.8);
+				Object.keys(msg).forEach(function(key,i){
+					if (key != 'status'){
+						viewerParams.newInternalData.data[key] = JSON.parse(msg[key]);
+						if (key.includes('filenames.json')){
+							viewerParams.filenames = JSON.parse(msg[key]);
+						}
+					}
+				})
+			}
+			if (msg.status == 'done'){
+				console.log('======== have all data', viewerParams.newInternalData, viewerParams.filenames);
+				loadData(initInputData, prefix='', internalData=viewerParams.newInternalData.data, initialLoadFrac=viewerParams.loadfrac)
+			}
+		}
 
+	});
+
+	socketParams.socket.on('load_ffly_data', function(msg) {
+		var prefix = msg.prefix || "";
+		console.log("======== have new data : ", msg.filepath);
+
+		// a dataset is already showing: tear it down before the new one
+		//  arrives, or the two end up layered on top of each other
+		var replacing = viewerHasDataset();
+		if (replacing) resetViewerToInitialState(true);
+
+		function load(files){
+			callLoadData([files, prefix, msg.filepath]);
+			if (!replacing) sendToGUI([{'makeUI':viewerParams.local}]);
+		}
+
+		// the server builds the manifest itself for a directory that has no
+		//  filenames.json of its own
+		if (msg.filenames) return load(msg.filenames);
+
+		d3.json(msg.filepath + "/filenames.json",  function(files) {
+			if (files != null) load(files);
+			else dataLoadFailed("Could not read " + msg.filepath + "/filenames.json.");
 		});
+	});
 
-		socketParams.socket.on('load_ffly_data', function(msg) {
-            if ("prefix" in msg) prefix = msg.prefix;
-			console.log("======== have new data : ", msg.filepath);
-			d3.json(msg.filepath + "/filenames.json",  function(files) {
-				if (files != null){
-					callLoadData([files, prefix, msg.filepath]);
-                    sendToGUI([{'makeUI':viewerParams.local}]);
-				} else {
-					sendToGUI([{'showLoadingButton':'#loadDataButton'}]);
-					alert("Cannot load data. Please select another directory.");
-				}
-			});
-		});
+	// the server could not load what it was asked for. it puts the message on
+	//  the GUI's picker, so leave that alone here (resetSplashProgress() would
+	//  hide it, and showSplash() would rebuild it without the message) and
+	//  just stop showing a loading bar that is never going to fill.
+	socketParams.socket.on('data_error', function(msg) {
+		console.log('!!! data error:', msg && msg.message);
+		updateSplashProgress(0);
+		d3.select('#splashdiv5').text('Waiting for data...');
+		if (!viewerParams.loaded) showSplash(true);
+	});
 
-		socketParams.socket.on('output_settings', function(msg){
-			//only tested for combined endpoint
-			console.log("======== sending settings to server");
-			sendPreset();
-		});
+	socketParams.socket.on('output_settings', function(msg){
+		//only tested for combined endpoint
+		console.log("======== sending settings to server");
+		sendPreset();
+	});
 
-		socketParams.socket.on('input_settings', function(msg) {
-			//only tested for combined endpoint
-			console.log("======== have new settings : ", Object.keys(msg));
-			//for now, the user is required to pass the entire settings object (if we change that, this next line will probably break firefly)
-			viewerParams.parts.options = msg;
-			applyOptions();
+	socketParams.socket.on('input_settings', function(msg) {
+		//only tested for combined endpoint
+		console.log("======== have new settings : ", Object.keys(msg));
+		//for now, the user is required to pass the entire settings object (if we change that, this next line will probably break firefly)
+		viewerParams.parts.options = msg;
+		applyOptions();
 
-			// do something here to update the GUI.  For now I will just remake it!
-			var forGUIAppend = [];
-			// forGUIAppend.push({'setGUIParamByKey':[false,"collapseGUIAtStart"]});
-			forGUIAppend.push({'makeUI':viewerParams.local});
-			sendInitGUI(prepend=[], append=forGUIAppend)
-		});
+		// do something here to update the GUI.  For now I will just remake it!
+		var forGUIAppend = [];
+		// forGUIAppend.push({'setGUIParamByKey':[false,"collapseGUIAtStart"]});
+		forGUIAppend.push({'makeUI':viewerParams.local});
+		sendInitGUI(prepend=[], append=forGUIAppend)
+	});
 
-		socketParams.socket.on('output_selected_data', function(msg){
-			//only tested for combined endpoint
+	socketParams.socket.on('output_selected_data', function(msg){
+		//only tested for combined endpoint
             if (viewerParams.selector.active){
-			    console.log("======== sending selected data to server");
-			    sendSelectedData();
+		    console.log("======== sending selected data to server");
+		    sendSelectedData();
             } else {
                 console.log("======== data selector not active, returning empty selection");
                 socketParams.socket.emit('send_selected_data', {'data':{'warning':'Data selector was not active; no data was selected.'}, 'room':socketParams.room, 'keyList':null, 'pass':'structure', 'done':true});
             }
-		});
-
-		socketParams.socket.on('update_streamer', function(msg) {
-			viewerParams.streamReady = true;
-		});
-		socketParams.socket.on('reload_viewer', function(msg) {
-			console.log('!!! reloading viewer');
-			location.reload();
-		});
 	});
+
+	socketParams.socket.on('update_streamer', function(msg) {
+		viewerParams.streamReady = true;
+	});
+	socketParams.socket.on('reload_viewer', function(msg) {
+		console.log('!!! reloading viewer');
+		location.reload();
+	});
+
+	connectFireflySocket();
 }
 
 function initInputData(){
@@ -261,25 +287,44 @@ function getFilenames(prefix=""){
 					if (files != null){
 						callLoadData([files, prefix, viewerParams.dir[i]]);
 					} else {
-						viewerParams.dataPickerState = 'loadDataButton';
-						sendToGUI([{'showLoadingButton':'#loadDataButton'}]);
-						alert("Cannot load data. Please select another directory.");
+						dataLoadFailed("Could not read " + prefix + viewerParams.dir[i] + "/filenames.json.");
 					}
 				});
 			}
 		} else {
-			viewerParams.dataPickerState = 'loadDataButton';
-			sendToGUI([{'showLoadingButton':'#loadDataButton'}]);
+			// no startup.json at all: the only way in is a path (or the python API)
+			viewerParams.dataPickerState = 'pathPicker';
+			sendToGUI(offerPathPicker());
 		}
 	});
 }
 
-// the GUI commands that put up the startup.json picker, so they can be sent
-//  again if a GUI window appears after we first sent them
+// something we were told to load turned out not to be loadable. the picker lives
+//  in the GUI, so send the message there rather than raising an alert here (the
+//  viewer window may not even be the one the user is looking at).
+function dataLoadFailed(message){
+	viewerParams.dataPickerState = viewerParams.startupChooserActive ? 'startupPicker' : 'pathPicker';
+	resetSplashProgress();
+	sendToGUI([{'dataPickerError':message}]);
+}
+
+// do we currently have a dataset loaded (as opposed to waiting for our first one)?
+function viewerHasDataset(){
+	return (viewerParams.parts != null &&
+		viewerParams.partsKeys != null &&
+		viewerParams.partsKeys.length > 0);
+}
+
+// the GUI commands that put up the data picker, so they can be sent again if a
+//  GUI window appears after we first sent them
 function offerStartupPicker(){
 	return [
 		{'setGUIParamByKey':[viewerParams.dir, "dir"]},
 		{'selectFromStartup':viewerParams.startupPrefix}];
+}
+
+function offerPathPicker(){
+	return [{'showDataPicker':null}];
 }
 
 // a separate GUI window connected or reloaded. anything we sent before it was
@@ -297,8 +342,8 @@ function onGUIConnected(){
 			[{'makeUI':viewerParams.local}]);
 	} else if (viewerParams.dataPickerState == 'startupPicker'){
 		sendToGUI(offerStartupPicker());
-	} else if (viewerParams.dataPickerState == 'loadDataButton'){
-		sendToGUI([{'showLoadingButton':'#loadDataButton'}]);
+	} else if (viewerParams.dataPickerState == 'pathPicker'){
+		sendToGUI(offerPathPicker());
 	}
 	// mid-load with nothing to offer: the normal sendInitGUI will reach the GUI
 	//  once the load finishes
@@ -319,6 +364,9 @@ function callLoadData(args){
 	sendToGUI([{'setGUIParamByKey':[viewerParams.dir, "dir"]}]);
 
 	viewerParams.datasetName = datasetNameFromPath(datasetPath);
+	// octree nodes are fetched later, outside loadData(), and need to know where
+	//  this dataset is being served from ("static/", or userdata/<room>/)
+	viewerParams.prefix = prefix;
 	resetSplashProgress();
 
 	viewerParams.filenames = files;
@@ -427,7 +475,12 @@ function initPVals(){
 		// store the name inside the dictionary
 		viewerParams.parts[p].pkey = p;
 
+		// the loop above has just overwritten whatever initOctree() set with the
+		//  default (null), and a null in the settings file won't restore it
+		//  (applyOptions skips nulls) -- so put the octree's percentage back, or
+		//  the GUI builds a slider on NaN and gives up partway through
 		if (!viewerParams.haveOctree[p]) viewerParams.plotNmax[p] = viewerParams.parts.count[p];
+		else viewerParams.plotNmax[p] = 100; //a percentage for octree groups, see initOctree()
 
 		// initialize all update variables to true for the first pass
 		viewerParams.updateOnOff[p] = true;
@@ -1477,8 +1530,7 @@ function countParts(){
 
 // callLoadData -> , connectViewerSocket ->
 function drawLoadingBar(containerID = 'splashdivLoader', styles = '', textContent = null){
-	d3.select('#loadDataButton').style('display','none');
-	d3.select('#startupPicker').style('display','none');
+	d3.select('#dataPicker').style('display','none');
 
 	var screenWidth = parseFloat(window.innerWidth);
 
@@ -1556,9 +1608,8 @@ function updateSplashProgress(frac){
 // called whenever a new load begins, once any known dataset name (viewerParams.datasetName)
 // has been set by the caller
 function resetSplashProgress(){
-	d3.select('#loadDataButton').style('display','none');
-	d3.select('#startupPicker').style('display','none');
-	d3.select('.ff-loader__bar').style('display', null); // undo showLoadingButton()'s hide, now that a directory is chosen
+	d3.select('#dataPicker').style('display','none');
+	d3.select('.ff-loader__bar').style('display', null); // undo the data picker's hide, now that a directory is chosen
 
 	var label = 'Loading...';
 	if (viewerParams.datasetName) label = 'LOADING · ' + viewerParams.datasetName;

@@ -624,7 +624,11 @@ class ParticleGroup(object):
             print("Writing:",self,"files to %s"%target_directory)
 
         ## do we want to delete any existing files here?
-        if clean_datadir:
+        ##  only when we're actually writing: with write_to_disk=False the data is
+        ##  only converted to a string (SimpleReader's flask path does this), and
+        ##  target_directory then defaults to firefly/static/data/<file_prefix>,
+        ##  whose contents have nothing to do with what we were asked to read
+        if clean_datadir and write_to_disk:
             #print("Removing old ffly files from %s"%target_directory)
             for fname in os.listdir(target_directory):
                 if (".ffly" in fname or

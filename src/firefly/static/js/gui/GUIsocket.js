@@ -5,52 +5,63 @@
 // https://github.com/miguelgrinberg/Flask-SocketIO
 //////////////
 function connectGUISocket(){
-	//$(document).ready(function() {
-	document.addEventListener("DOMContentLoaded", function(event) { 
+	// registered as soon as this is called (from the inline script at the end
+	//  of each template's body, so the DOM is already parsed). NOT deferred to
+	//  DOMContentLoaded: the socket is created and starts connecting when
+	//  socketParams.js is parsed, so on a slow-loading page 'connect' and
+	//  'room_check' can both fire before that event -- and socket.io does not
+	//  replay them, leaving the window connected but never joined to a room.
 
-		// this happens when the server connects.
-		// all other functions below here are executed when the server emits to that name.
-		socketParams.socket.on('connect', function() {
-			console.log('sending connection from gui')
-			socketParams.socket.emit('connection_test', {data: 'GUI connected!'});
-		});
-		// socketParams.socket.on('connection_response', function(msg) {
-		// 	console.log('connection response', msg);
-		// });
-
-		// get the room from the server if the user specified on the command line.  Otherwise prompt the user here for a room.  Then join.
-		socketParams.socket.on('room_check', function(msg) {
-			console.log('!!!!!!!!! received message about rooms', msg)
-			if (!socketParams.room) socketParams.room = msg.room;
-			
-			// get the room name
-			while (!socketParams.room) socketParams.room = prompt("Please enter a session name.  This should be a unique string that you will use for all connections to this session.  Do not include any spaces.");
-			console.log('joining room', socketParams.room)
-			socketParams.socket.emit('join', {room: socketParams.room});
-			flushPendingSocketMessages();
-
-			// tell the viewer we're here. if it loaded data (or put up a data
-			//  picker) before this window existed, those messages went nowhere,
-			//  so it replays them for us -- see onGUIConnected() in initViewer.js
-			if (socketParams.isSeparateGUI) socketParams.socket.emit('gui_connected');
-		});
-
-
-		socketParams.socket.on('update_GUIParams', function(msg) {
-			// console.log('===have commands from viewer', msg)
-			setParams(msg); 
-		});
-
-		socketParams.socket.on('reload_GUI', function(msg) {
-			console.log('!!! reloading GUI');
-			location.reload();
-		});
-
-		socketParams.socket.on('cannot_load_data', function(msg) {
-			console.log('!!! cannot load data');
-			alert("Cannot load data. Please try again.");
-		});
+	// this happens when the server connects.
+	// all other functions below here are executed when the server emits to that name.
+	socketParams.socket.on('connect', function() {
+		console.log('sending connection from gui')
+		socketParams.socket.emit('connection_test', {data: 'GUI connected!'});
 	});
+	// socketParams.socket.on('connection_response', function(msg) {
+	// 	console.log('connection response', msg);
+	// });
+
+	// get the room from the server if the user specified on the command line.  Otherwise prompt the user here for a room.  Then join.
+	socketParams.socket.on('room_check', function(msg) {
+		console.log('!!!!!!!!! received message about rooms', msg)
+		if (!socketParams.room) socketParams.room = msg.room;
+		
+		// get the room name
+		while (!socketParams.room) socketParams.room = prompt("Please enter a session name.  This should be a unique string that you will use for all connections to this session.  Do not include any spaces.");
+		console.log('joining room', socketParams.room)
+		socketParams.socket.emit('join', {room: socketParams.room});
+		flushPendingSocketMessages();
+
+		// tell the viewer we're here. if it loaded data (or put up a data
+		//  picker) before this window existed, those messages went nowhere,
+		//  so it replays them for us -- see onGUIConnected() in initViewer.js
+		if (socketParams.isSeparateGUI) socketParams.socket.emit('gui_connected');
+	});
+
+
+	socketParams.socket.on('update_GUIParams', function(msg) {
+		// console.log('===have commands from viewer', msg)
+		setParams(msg); 
+	});
+
+	socketParams.socket.on('reload_GUI', function(msg) {
+		console.log('!!! reloading GUI');
+		location.reload();
+	});
+
+	// the server could not read the path it was given; say why, on the picker
+	//  the user is already looking at
+	socketParams.socket.on('data_error', function(msg) {
+		dataPickerError((msg && msg.message) || 'Cannot load data. Please try again.');
+	});
+
+	// the OS folder dialog on the server came back with a directory
+	socketParams.socket.on('native_browse_result', function(msg) {
+		if (msg && msg.path) nativeBrowseResult(msg.path);
+	});
+
+	connectFireflySocket();
 }
 
 ///////////////////////

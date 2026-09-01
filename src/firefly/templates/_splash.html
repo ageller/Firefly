@@ -8,9 +8,9 @@
                        splash_dismissable is set to false before the include
     #splashimg         logo <img>
     #splashdiv1..5      the five original content slots
-    #splashdivLoader   holds #loadDataButton / #startupPicker (built in
-                       selectFromStartup(), initGUI.js, for a startup.json
-                       with multiple entries)
+    #splashdivLoader   holds #dataPicker, the data-selection panel built in
+                       static/js/gui/dataPicker.js (a startup.json dropdown,
+                       a path on the server, or both)
     #splashProgressFill / #splashProgressPct  loading-bar hooks (see
                        updateSplashProgress()/resetSplashProgress() in
                        initViewer.js)
@@ -106,16 +106,12 @@
   </div>
 
   <!-- bottom: full-width loading bar, always in this same pinned slot. Before a
-       data directory is chosen, the data-picker buttons take its place instead
-       (showLoadingButton()/resetSplashProgress() in initGUI.js/initViewer.js
+       data directory is chosen, the data picker takes its place instead
+       (showDataPicker()/resetSplashProgress() in dataPicker.js/initViewer.js
        toggle which of the two is shown). -->
   <div class="ff-loader">
-    <!-- python / startup-file entry points; hidden by default, JS unhides -->
-    <div id="splashdivLoader" class="ff-splash__loaderbtns">
-      <button id="loadDataButton" class="button ff-button" style="display:none;" onclick="event.stopPropagation();">
-        <span>Click here to select a data directory</span>
-      </button>
-    </div>
+    <!-- #dataPicker is built in here by dataPicker.js when there is data to choose -->
+    <div id="splashdivLoader" class="ff-splash__loaderbtns"></div>
     <div class="ff-loader__bar">
       <div class="ff-loader__row">
         <div id="splashdiv5" class="ff-loader__label">Loading...</div>

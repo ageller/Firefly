@@ -843,6 +843,68 @@ class ArrayReader(Reader):
             write_to_disk=write_to_disk,
             loud=loud and write_to_disk)
 
+## the same format, two conventional names
+HDF5_EXTENSIONS = ('.hdf5','.h5')
+
+## pass this as SimpleReader's field_names to take every scalar in the file
+ALL_FIELDS = 'all'
+
+## keys/columns that hold positions rather than a field to plot
+COORDINATE_KEYS = ('Coordinates','x','y','z')
+
+def hdf5_field_names(fnames,particle_groups):
+    """Every per-particle scalar in these particle groups that isn't a
+        coordinate, in the order the file lists them.
+
+    :param fnames: paths to the :code:`.hdf5` files to inspect
+    :type fnames: list of str
+    :param particle_groups: :code:`group_name`s within those files
+    :type particle_groups: list of str
+    :return: field names, suitable for :class:`firefly.data_reader.SimpleReader`
+    :rtype: list of str
+    """
+    field_names = []
+    for fname in fnames:
+        with h5py.File(fname,'r') as handle:
+            for particle_group in particle_groups:
+                if particle_group not in handle: continue
+                group = handle[particle_group]
+                for key in group.keys():
+                    if key in COORDINATE_KEYS or key in field_names: continue
+                    ## one value per particle only: a vector field like
+                    ##  Velocities (N,3) is not something we can colormap
+                    if getattr(group[key],'ndim',None) != 1: continue
+                    field_names.append(key)
+    return field_names
+
+def csv_field_names(fnames,csv_sep=','):
+    """Every numeric column in these files that isn't a coordinate.
+
+        Coordinates are the columns named x, y and z, or the first three columns
+        if they aren't named that -- matching how the coordinates themselves are
+        read (see SimpleReader.__getCSVCoordinates).
+
+    :param fnames: paths to the :code:`.csv` files to inspect
+    :type fnames: list of str
+    :param csv_sep: separator between values in the csv, defaults to ','
+    :type csv_sep: str, optional
+    :return: field names, suitable for :class:`firefly.data_reader.SimpleReader`
+    :rtype: list of str
+    """
+    field_names = []
+    for fname in fnames:
+        ## a single row is enough for the column names and their types
+        frame = pd.read_csv(fname,sep=csv_sep,nrows=1)
+        columns = list(frame.columns)
+        named_xyz = all(key in columns for key in ('x','y','z'))
+        for i,column in enumerate(columns):
+            if named_xyz and column in ('x','y','z'): continue
+            if not named_xyz and i < 3: continue
+            if column in field_names: continue
+            if not pd.api.types.is_numeric_dtype(frame[column]): continue
+            field_names.append(column)
+    return field_names
+
 class SimpleReader(ArrayReader):
     """ A wrapper to :class:`firefly.data_reader.ArrayReader` that attempts to 
         flexibily open generically formatetd data with minimal interaction from the user.
@@ -866,10 +928,12 @@ class SimpleReader(ArrayReader):
 
         :param path_to_data: path to .hdf5/csv file(s; can be a directory)
         :type path_to_data: str 
-        :param field_names: strings to try and extract from .hdf5 file. If file format is .csv then there must be a header row
-        :type field_names: list of strs
+        :param field_names: strings to try and extract from .hdf5 file. If file format is .csv then there must be a header row.
+            Pass :code:`'all'` (:code:`firefly.data_reader.reader.ALL_FIELDS`) to take every per-particle scalar
+            in the file that isn't a coordinate, defaults to None (no fields)
+        :type field_names: list of strs or str
         :param extension: file extension to attempt to open. 
-            Accepts only :code:`'.hdf5'` or :code:`'.csv'`, defaults to '.hdf5'
+            Accepts only :code:`'.hdf5'`, :code:`'.h5'` or :code:`'.csv'`, defaults to '.hdf5'
         :type extension: str, optional
         :param loud: flag to print status information to the console, defaults to False
         :type loud: bool, optional
@@ -878,7 +942,7 @@ class SimpleReader(ArrayReader):
         :raises ValueError: if :code:`path_to_data` is not a directory or doesn't contain
             :code:`extension`
         :raises ValueError: if :code:`extension` is passed anything either 
-            than :code:`'.hdf5'` or :code:`'.csv'`
+            than :code:`'.hdf5'`, :code:`'.h5'` or :code:`'.csv'`
         :raises ValueError: if particle_groups is not None, extension = .csv, and 
             len(particle_groups) != len(detected filenames in path_to_data)
         """
@@ -900,7 +964,10 @@ class SimpleReader(ArrayReader):
                 "%s needs to point to an %s file or "%(path_to_data,extension)+
                 "a directory containing %s files."%extension)
 
-        if extension == '.hdf5':
+        ## .h5 and .hdf5 are the same format under two conventional names
+        is_hdf5 = extension in HDF5_EXTENSIONS
+
+        if is_hdf5:
             ## take the contents of the "first" file to define particle groups and keys
             with h5py.File(fnames[0],'r') as handle:
                 particle_groups = list(handle.keys())
@@ -912,7 +979,14 @@ class SimpleReader(ArrayReader):
         elif extension == '.csv':
             particle_groups = [fname.replace(extension,'').split(os.sep)[-1] for fname in fnames]
         else:
-            raise ValueError("Invalid extension %s, must be .hdf5 or .csv"%extension) 
+            raise ValueError("Invalid extension %s, must be one of %s or .csv"%(
+                extension,', '.join(HDF5_EXTENSIONS))) 
+
+        ## asked to work out the fields for ourselves
+        if isinstance(field_names,str) and field_names.lower() == ALL_FIELDS:
+            field_names = (hdf5_field_names(fnames,particle_groups) if is_hdf5
+                else csv_field_names(fnames,csv_sep))
+            print("Detected %d field(s): %s"%(len(field_names),', '.join(field_names)))
 
         print("Opening %d files and %d particle types..."%(len(fnames),len(particle_groups)))
 
@@ -924,7 +998,7 @@ class SimpleReader(ArrayReader):
         for i,particle_group in enumerate(particle_groups):
             coordinates = None
             fieldss = {}
-            if extension == '.hdf5':
+            if is_hdf5:
                 ## need to loop through each file and get the matching coordinates, 
                 ##  concatenating them.
                 for fname in fnames:
@@ -935,7 +1009,8 @@ class SimpleReader(ArrayReader):
                 coordinates = self.__getCSVCoordinates(fnames[i],csv_sep) 
                 fieldss = self.__getCSVFields(fnames[i],field_names,csv_sep) 
             else:
-                raise ValueError("Invalid extension %s, must be .hdf5 or .csv"%extension) 
+                raise ValueError("Invalid extension %s, must be one of %s or .csv"%(
+                    extension,', '.join(HDF5_EXTENSIONS))) 
             coordss.append(coordinates)
             if fieldsss is not None: fieldsss.append(fieldss)
 
@@ -1088,9 +1163,11 @@ class SimpleReader(ArrayReader):
                 if field_name in this_group.keys():
                     if field_name in fieldss:
                         ## if it's already there append it
-                        fieldss[field_name] = np.append(fieldss[field_name],this_group[field_name])
-                    ## initialize it otherwise
-                    else: fieldss[field_name] = this_group[field_name]
+                        fieldss[field_name] = np.append(fieldss[field_name],this_group[field_name][()])
+                    ## initialize it otherwise. read the values out ([()]) rather
+                    ##  than keeping the h5py Dataset: the file is closed below and
+                    ##  the dataset is unreadable after that
+                    else: fieldss[field_name] = this_group[field_name][()]
         return fieldss
 
 def split_kwargs(kwargs):

@@ -318,7 +318,7 @@
 /* ---------- python / startup-file buttons ------------------------------- */
 /* lives in the same bottom-pinned slot as the loading bar (see .ff-loader
    below) -- only one of the two is ever shown at a time */
-.ff-splash__loaderbtns { display: flex; flex-wrap: wrap; gap: clamp(10px, 1vw, 16px); }
+.ff-splash__loaderbtns { display: flex; flex-direction: column; gap: clamp(10px, 1vw, 16px); }
 
 /* `.ff-button` shares these buttons with the legacy `.button` class from
    UIStyles.css (fixed size, square corners, the old pink accent), which is
@@ -351,13 +351,118 @@
 }
 #splash .ff-button--secondary:hover { background: var(--ff-glass); color: var(--ff-fg); opacity: 1; }
 
-/* startup.json dropdown picker (built in selectFromStartup(), initGUI.js) --
+/* ---------- the data picker (static/js/gui/dataPicker.js) --------------
    sits in the same slot the loading bar occupies until a choice is made */
-.ff-splash__picker {
+.ff-picker {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(8px, 1.2vh, 14px);
+  cursor: default;
+  text-align: left;
+}
+
+.ff-picker__row {
   display: flex;
   align-items: center;
   flex-wrap: wrap;
   gap: clamp(10px, 1vw, 16px);
+}
+
+.ff-picker__note,
+.ff-picker__msg {
+  font-family: var(--ff-sans);
+  font-size: var(--ff-fs-note);
+  color: var(--ff-fg-70);
+  max-width: 70ch;
+}
+.ff-picker__msg--error { color: oklch(0.72 0.17 25); }
+
+/* the path field grows to fill the row; the buttons beside it don't */
+.ff-input {
+  flex: 1 1 22ch;
+  min-width: 0;
+  font-family: var(--ff-mono);
+  font-size: var(--ff-fs-mono-md);
+  color: var(--ff-fg);
+  background: var(--ff-glass);
+  border: 1px solid var(--ff-hairline);
+  border-radius: 5px;
+  padding: 0.75em 1em;
+}
+.ff-input::placeholder { color: var(--ff-fg-40); }
+.ff-input:focus { outline: 1px solid var(--ff-accent); }
+
+/* ---------- the server-side directory browser --------------------------- */
+.ff-browser {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(5px, 0.8vh, 9px);
+  border: 1px solid var(--ff-hairline);
+  border-radius: 6px;
+  padding: clamp(8px, 1.2vh, 14px);
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.ff-browser__bar,
+.ff-browser__shortcuts,
+.ff-browser__foot {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ff-browser__btn {
+  font-family: var(--ff-sans);
+  font-size: var(--ff-fs-mono-sm);
+  color: var(--ff-fg-70);
+  background: var(--ff-glass);
+  border: 1px solid var(--ff-hairline);
+  border-radius: 4px;
+  padding: 0.35em 0.7em;
+  cursor: pointer;
+}
+.ff-browser__btn:hover:enabled { color: var(--ff-fg); background: rgba(244, 241, 236, 0.12); }
+.ff-browser__btn:disabled { opacity: 0.35; cursor: default; }
+
+.ff-browser__path {
+  font-family: var(--ff-mono);
+  font-size: var(--ff-fs-mono-sm);
+  color: var(--ff-fg-55);
+  word-break: break-all;
+}
+
+/* the only scrolling region on the splash: long directories stay inside it
+   rather than pushing the loading bar off the bottom of the screen */
+.ff-browser__list {
+  max-height: min(34vh, 300px);
+  overflow-y: auto;
+  border-top: 1px solid var(--ff-hairline);
+  border-bottom: 1px solid var(--ff-hairline);
+}
+
+.ff-browser__item {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 0.4em 0.6em;
+  font-family: var(--ff-mono);
+  font-size: var(--ff-fs-mono-sm);
+  color: var(--ff-fg-70);
+  cursor: pointer;
+}
+.ff-browser__item:hover { background: var(--ff-glass); color: var(--ff-fg); }
+.ff-browser__item--data { color: var(--ff-fg); }
+.ff-browser__item--file { font-style: italic; }
+.ff-browser__item--empty { color: var(--ff-fg-40); cursor: default; }
+.ff-browser__item--empty:hover { background: none; }
+.ff-browser__name { word-break: break-all; }
+.ff-browser__tag {
+  flex-shrink: 0;
+  font-family: var(--ff-sans);
+  color: var(--ff-accent-text);
+  letter-spacing: 0.06em;
 }
 
 .ff-select {

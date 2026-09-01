@@ -14,6 +14,7 @@ import functools
 import subprocess
 import signal
 import socket
+import shutil
 import requests
 import http.server
 import socketserver
@@ -33,6 +34,7 @@ from eventlet import event
 from eventlet.timeout import Timeout
 
 from firefly.data_reader import SimpleReader
+from firefly.data_reader.reader import ALL_FIELDS
 
 #in principle, we could read in the data here...
 
@@ -78,6 +80,32 @@ def private_endpoint(fn):
                     f'the {request.path} endpoint is disabled.'), 403
         return fn(*args,**kwargs)
     return wrapper
+
+def private_event(fn):
+    """The socket-event counterpart of private_endpoint: reports back to the
+        browser instead of returning an HTTP status."""
+    @functools.wraps(fn)
+    def wrapper(*args,**kwargs):
+        if public_mode:
+            emit_data_error('This Firefly server is running in public mode, so it '
+                'will not read data from a path on the server.')
+            return
+        return fn(*args,**kwargs)
+    return wrapper
+
+def emit_data_error(message):
+    """Tell the browser why we could not load what it asked for. Anything that
+        leaves the splash up needs to say so here, or the user is left watching a
+        loading bar that will never move."""
+    print('======= data error:',message)
+    if request.sid not in rooms: return
+    socketio.emit('data_error', {'message':str(message)},
+        namespace=namespace, to=rooms[request.sid])
+
+def _is_local_request():
+    """Is whoever is asking on the same machine as this server? Used to decide
+        whether opening a dialog on the server's own display could be seen."""
+    return request.remote_addr in ('127.0.0.1','::1','localhost')
 
 rooms = {} #will be updated below
 
@@ -173,45 +201,442 @@ def gui_connected():
 #     socketio.emit('update_streamer', blob, namespace=namespace)
 
 
-########reading in a directory of hdf5, csv or ffly files
-@socketio.on('input_otherType', namespace=namespace)
-def input_otherType(fileinfo):
+########reading data from a path on the machine running this server
+##  the browser can never hand us an absolute path (no browser API exposes one),
+##  so the paths below always come from either the text field, the /browse
+##  listing or the native dialog -- all three of which resolve here.
+
+class DataSourceError(Exception):
+    """A path we could not make sense of, with a message meant for the user."""
+    pass
+
+class NoParticleData(DataSourceError):
+    """Nothing in this directory turned out to be particle data. Distinct so that
+        detect_data_source can go on to try something else, where a directory that
+        does hold data but is missing something reports that instead."""
+    pass
+
+## what SimpleReader can open, and the extension to hand it (see HDF5_EXTENSIONS
+##  in data_reader/reader.py -- .h5 and .hdf5 are the same format)
+READER_EXTENSIONS = {'.hdf5':'.hdf5', '.h5':'.h5', '.csv':'.csv'}
+
+FIREFLY_PARTICLE_EXTENSIONS = ('.ffly','.json')
+
+USE_A_READER = ("Use one of the python readers (e.g. firefly.data_reader.SimpleReader "
+    "or ArrayReader) to write a Firefly-formatted directory, then load that.")
+
+def _ffly_npart(fname):
+    """Particle count from a .ffly header: u4 header_size, u1 has_velocities,
+        u1 has_rgba_colors, u4 npart (see data_reader/binary_writer.py)."""
+    import struct
+    with open(fname,'rb') as handle: head = handle.read(14)
+    if len(head) < 14: raise DataSourceError(f'{os.path.basename(fname)} is not a readable .ffly file.')
+    return struct.unpack('<IBBI',head[:10])[3]
+
+def _json_npart(fname):
+    """Particle count from a Firefly .json particle file."""
+    with open(fname,'r') as handle: data = json.load(handle)
+    if 'Coordinates_flat' not in data: raise DataSourceError(
+        f'{os.path.basename(fname)} has no Coordinates_flat, so it is not a Firefly particle file.')
+    return len(data['Coordinates_flat'])//3
+
+def _group_name_from_filename(fname):
+    """Reader output is named <file_prefix><UIname><index>.<ext>, and nothing in
+        the file says where the prefix ends, so the whole stem (less the index)
+        becomes the group name."""
+    stem = os.path.splitext(os.path.basename(fname))[0]
+    return stem.rstrip('0123456789') or stem
+
+## a settings file is not optional: applyOptions() in the viewer is what sets up
+##  the column density colormap keys, among other things, and nothing else does
+SETTINGS_KEYS = ('partsColors','plotNmax','colormapVals','showParts')
+
+def _looks_like_settings(fname):
+    """Is this .json the dataset's settings file (Settings.json, whatever prefix
+        the reader gave it) rather than particle data?"""
+    try:
+        with open(fname,'r') as handle: data = json.load(handle)
+    except Exception: return False
+    return isinstance(data,dict) and any(key in data for key in SETTINGS_KEYS)
+
+def synthesize_manifest(datadir):
+    """Build the equivalent of a filenames.json for a directory of bare Firefly
+        particle files that has none. Returned to the browser in the socket
+        message rather than written to disk -- we never modify the user's data."""
+    basename = os.path.basename(datadir)
+    manifest = {}
+    settings = None
+    for fname in sorted(os.listdir(datadir)):
+        ext = os.path.splitext(fname)[1].lower()
+        if ext not in FIREFLY_PARTICLE_EXTENSIONS: continue
+        full = os.path.join(datadir,fname)
+        if not os.path.isfile(full): continue
+        try:
+            npart = _ffly_npart(full) if ext == '.ffly' else _json_npart(full)
+        except DataSourceError:
+            ## no coordinates: the settings file, or something we don't want
+            if settings is None and _looks_like_settings(full):
+                settings = os.path.join(basename,fname)
+            continue
+        except Exception: continue
+        if not npart: continue
+        group = _group_name_from_filename(fname)
+        manifest.setdefault(group,[]).append([os.path.join(basename,fname),npart])
+
+    if not manifest: raise NoParticleData(
+        f'No Firefly particle data found in {datadir}. ' + USE_A_READER)
+
+    if settings is None: raise DataSourceError(
+        f'{datadir} has particle files but no settings file (Settings.json), which '
+        f'Firefly needs to display them. ' + USE_A_READER)
+    manifest['options'] = [[settings,0]]
+
+    print('======= synthesized a manifest for',datadir,
+        {k:sum(e[1] for e in v) for k,v in manifest.items() if k != 'options'})
+    return manifest
+
+def _first_buffer_filename(fname,max_bytes=int(8e6)):
+    """The first buffer_filename in an octree's .json, without parsing the whole
+        file (they can be large). None if there isn't one."""
+    import re
+    pattern = re.compile(r'"buffer_filename"\s*:\s*"([^"]+)"')
+    tail = ''
+    with open(fname,'r') as handle:
+        read = 0
+        while read < max_bytes:
+            chunk = handle.read(1 << 20)
+            if not chunk: break
+            read += len(chunk)
+            match = pattern.search(tail + chunk)
+            if match: return match.group(1)
+            tail = chunk[-256:] ## in case a match straddles the boundary
+    return None
+
+def _holds_an_octree(datadir):
+    """Cheap test for octree data, so we don't go scanning the particle files of
+        every ordinary .json dataset looking for node filenames."""
+    for name in os.listdir(datadir):
+        if name == 'octree.json': return True
+        if name.endswith('fftree') and os.path.isdir(os.path.join(datadir,name)): return True
+    return False
+
+def _check_octree_paths(datadir,manifest):
+    """Octree node filenames are written relative to static/data and so begin
+        with the dataset directory's name as it was when the octree was built.
+        If the directory has been renamed since, every node fetch 404s and the
+        viewer waits forever, so refuse it up front with an explanation."""
+    if not _holds_an_octree(datadir): return
+
+    basename = os.path.basename(datadir)
+    for entries in manifest.values():
+        for entry in entries:
+            fname = entry[0] if isinstance(entry,(list,tuple)) else entry
+            if not fname.lower().endswith('.json'): continue
+            full = os.path.join(os.path.dirname(datadir),fname)
+            if not os.path.isfile(full): continue
+            buffer_filename = _first_buffer_filename(full)
+            if buffer_filename is None: continue
+            expected = buffer_filename.replace('\\','/').split('/')[0]
+            if expected != basename: raise DataSourceError(
+                f'This octree was built in a directory named "{expected}" but is now '
+                f'in "{basename}", and its node filenames still point at the old name. '
+                f'Rename the directory back to "{expected}", or rebuild it: ' + USE_A_READER)
+            return ## one node filename is enough to know the directory is intact
+
+def detect_data_source(path):
+    """Work out how to load whatever is at path, so the user doesn't have to tell
+        us. Returns ('firefly',datadir,manifest_or_None) for data a reader has
+        already written (.json/.ffly/octree, served over the /userdata route) or
+        ('reader',path,extension) for raw .hdf5/.csv that SimpleReader can open.
+
+        Raises DataSourceError with a message for the user if neither applies."""
+
+    path = path.strip()
+    if not path: raise DataSourceError('No path was given.')
+    path = os.path.abspath(os.path.expanduser(path))
+
+    if not os.path.exists(path): raise DataSourceError(f'There is no file or directory at {path}.')
+
+    if os.path.isfile(path):
+        ext = os.path.splitext(path)[1].lower()
+        if ext in READER_EXTENSIONS: return ('reader',path,READER_EXTENSIONS[ext])
+        ## a manifest itself is a reasonable thing to pick, so accept it
+        if os.path.basename(path) == 'filenames.json': return detect_data_source(os.path.dirname(path))
+        raise DataSourceError(
+            f'Firefly does not know how to read {os.path.basename(path)}. Pick a '
+            f'.hdf5 or .csv file, or a directory of Firefly data. ' + USE_A_READER)
+
+    if not os.access(path,os.R_OK): raise DataSourceError(f'Cannot read {path} (permission denied).')
+
+    contents = os.listdir(path)
+
+    ## already Firefly-formatted: a manifest tells us the groups and counts
+    if 'filenames.json' in contents:
+        with open(os.path.join(path,'filenames.json'),'r') as handle: manifest = json.load(handle)
+        _check_octree_paths(path,manifest)
+        return ('firefly',path,None)
+
+    ## a startup.json names one or more dataset directories relative to itself
+    if 'startup.json' in contents:
+        with open(os.path.join(path,'startup.json'),'r') as handle: startup = json.load(handle)
+        dirs = [str(v) for v in startup.values()]
+        if len(dirs) == 1:
+            ## entries are relative to firefly/static, hence the leading 'data/'
+            return detect_data_source(os.path.join(path,os.path.basename(dirs[0].rstrip('/'))))
+        raise DataSourceError(
+            f'{path} holds a startup.json listing {len(dirs)} datasets. Pick one of '
+            f'its dataset directories instead: ' + ', '.join(sorted(dirs)))
+
+    ## raw data files a reader can open
+    for ext,reader_ext in READER_EXTENSIONS.items():
+        if any(f.lower().endswith(ext) for f in contents): return ('reader',path,reader_ext)
+
+    ## Firefly particle files with no manifest -- we can rebuild one
+    if any(os.path.splitext(f)[1].lower() in FIREFLY_PARTICLE_EXTENSIONS for f in contents):
+        try:
+            manifest = synthesize_manifest(path)
+        except NoParticleData:
+            manifest = None  ## .json files, but none of them particle data
+        if manifest is not None:
+            _check_octree_paths(path,manifest)
+            return ('firefly',path,manifest)
+
+    ## a common near-miss: they picked the directory that holds their datasets
+    ##  rather than one of the datasets
+    datasets = sorted(name for name in contents
+        if os.path.isdir(os.path.join(path,name))
+        and os.path.isfile(os.path.join(path,name,'filenames.json')))
+    if datasets: raise DataSourceError(
+        f'{path} is not itself a dataset, but it contains {len(datasets)}. '
+        f'Pick one of: ' + ', '.join(datasets[:12]) + (', ...' if len(datasets) > 12 else ''))
+
+    raise DataSourceError(
+        f'Found nothing Firefly can read in {path} (no filenames.json, and no '
+        f'.hdf5, .csv or .ffly files). ' + USE_A_READER)
+
+@socketio.on('load_data_path', namespace=namespace)
+@private_event
+def load_data_path(message):
     global user_data_dir
 
+    if request.sid not in rooms: return
+    room = rooms[request.sid]
+
+    try: kind,path,extra = detect_data_source(message.get('path',''))
+    except DataSourceError as error: return emit_data_error(error)
+    except Exception as error: return emit_data_error(f'Could not read that path: {error}')
+
     print('======= showing loader')
-    socketio.emit('show_loader', None, namespace=namespace, to=rooms[request.sid])
+    socketio.emit('show_loader', None, namespace=namespace, to=room)
     socketio.sleep(0.1) #to make sure that the above emit is executed
 
-    # fdir = os.path.join(os.getcwd(),'static','data',filedir)
-    fdir = fileinfo['filepath'].strip()
-    ftype = fileinfo['filetype']
-    
     try:
-
-        print('======= have input '+ftype+' data file(s) in', fdir)
-        if (ftype == '.csv' or ftype == '.hdf5'):
-            reader = SimpleReader(fdir, write_to_disk=False, extension=ftype, decimation_factor=dec)
+        if kind == 'reader':
+            print(f'======= reading {extra} data from',path)
+            ## ALL_FIELDS: whatever scalars the file happens to carry become
+            ##  colormap/filter options, since the user never told us what to look for
+            reader = SimpleReader(path, write_to_disk=False, extension=extra,
+                field_names=ALL_FIELDS, decimation_factor=dec)
             data = json.loads(reader.JSON)
             print('======= have data from file(s), sending to viewer ...')
-            socketio.emit('input_data', {'status':'start', 'length':len(data)}, namespace=namespace, to=rooms[request.sid])
+            socketio.emit('input_data', {'status':'start', 'length':len(data)}, namespace=namespace, to=room)
             socketio.sleep(0.1) #to make sure that the above emit is executed
             for fname in data:
                 print(fname, len(data[fname]))
                 output = {fname:data[fname], 'status':'data'}
-                socketio.emit('input_data', output, namespace=namespace, to=rooms[request.sid])
+                socketio.emit('input_data', output, namespace=namespace, to=room)
                 socketio.sleep(0.1) #to make sure that the above emit is executed
-            socketio.emit('input_data', {'status':'done'}, namespace=namespace, to=rooms[request.sid])
+            socketio.emit('input_data', {'status':'done'}, namespace=namespace, to=room)
             socketio.sleep(0.1) #to make sure that the above emit is executed
         else:
-            # since the ffly files need to be read via javascript (is there a python way?), serve the data via flask in the user's directory
-            room = rooms[request.sid]
-            user_data_dir[room] = os.path.dirname(fdir)
-            output = {"filepath": f"userdata/{room}/data/{os.path.basename(fdir)}", "prefix":f"userdata/{room}/"}
+            # .ffly and .fftree files are read in javascript, so rather than load
+            #  them here we serve the user's directory through flask (see
+            #  serve_user_file below) and let the viewer fetch them
+            user_data_dir[room] = os.path.dirname(path)
+            output = {
+                'filepath': f'userdata/{room}/data/{os.path.basename(path)}',
+                'prefix': f'userdata/{room}/'}
+            ## a directory with no filenames.json of its own; send the one we built
+            if extra is not None: output['filenames'] = extra
+            print('======= serving',path,'as',output['filepath'])
             socketio.emit('load_ffly_data', output, namespace=namespace, to=room)
-            
+
         print('======= done')
-    except:
-        socketio.emit('cannot_load_data', None, namespace=namespace, to=rooms[request.sid])
+    except Exception as error:
+        emit_data_error(f'Could not load {path}: {error}')
+
+
+########browsing the server's filesystem, so the user can pick a directory
+##  without typing its path. the browser cannot do this for us: no browser API
+##  reveals an absolute path, by design.
+
+def _browse_shortcuts():
+    """A few places worth starting from, plus the drives on Windows."""
+    shortcuts = []
+    home = os.path.expanduser('~')
+    if os.path.isdir(home): shortcuts.append({'label':'Home','path':home})
+    cwd = os.getcwd()
+    if os.path.isdir(cwd) and cwd != home: shortcuts.append({'label':'Firefly','path':cwd})
+    if sys.platform == 'win32':
+        for letter in 'CDEFGHIJKLMNOPQRSTUVWXYZ':
+            drive = f'{letter}:\\'
+            if os.path.isdir(drive): shortcuts.append({'label':drive,'path':drive})
+    return shortcuts
+
+## a directory listing this long is more likely to be a data dump than somewhere
+##  the user meant to browse, so stop describing its contents in detail
+BROWSE_HINT_LIMIT = 300
+
+def _browse_hint(path,name):
+    """Mark the entries worth clicking on, so a data directory is recognizable
+        in a long list."""
+    full = os.path.join(path,name)
+    try: contents = os.listdir(full)
+    except OSError: return None
+    if 'filenames.json' in contents: return 'firefly'
+    if 'startup.json' in contents: return 'startup'
+    for entry in contents:
+        ext = os.path.splitext(entry)[1].lower()
+        if ext in READER_EXTENSIONS or ext == '.ffly': return 'data'
+    return None
+
+@app.route('/browse')
+@private_endpoint
+def browse():
+    path = request.args.get('path','')
+    path = os.path.abspath(os.path.expanduser(path)) if path.strip() else os.path.expanduser('~')
+
+    response = {
+        'shortcuts':_browse_shortcuts(),
+        'native':_native_dialog_available() and _is_local_request()}
+
+    if not os.path.isdir(path):
+        response['path'] = ''
+        response['error'] = f'{path} is not a directory.'
+        return json.dumps(response)
+
+    try: contents = sorted(os.listdir(path),key=lambda x: x.lower())
+    except OSError as error:
+        response['path'] = ''
+        response['error'] = f'Cannot open {path}: {error.strerror or error}.'
+        return json.dumps(response)
+
+    dirs = [name for name in contents
+        if not name.startswith('.') and os.path.isdir(os.path.join(path,name))]
+    files = [name for name in contents
+        if os.path.splitext(name)[1].lower() in READER_EXTENSIONS]
+
+    parent = os.path.dirname(path.rstrip(os.sep)) or None
+    if parent == path: parent = None
+
+    response['path'] = path
+    response['parent'] = parent
+    response['files'] = files
+    response['dirs'] = [{'name':name,
+            'hint':_browse_hint(path,name) if len(dirs) <= BROWSE_HINT_LIMIT else None}
+        for name in dirs]
+    ## does the directory we're looking at hold data itself?
+    response['self_hint'] = ('firefly' if 'filenames.json' in contents else
+        ('data' if files or any(f.lower().endswith('.ffly') for f in contents) else None))
+    return json.dumps(response)
+
+
+########the OS's own folder dialog, opened on the machine running this server
+##  only useful when that is also the machine looking at the browser, so the
+##  /browse listing above stays available as the fallback everywhere else.
+
+def _native_dialog_candidates():
+    """Ways to raise a folder dialog, best first. Each is a (name,argv) pair
+        whose command prints the chosen directory on stdout and nothing (or a
+        non-zero status) if the user cancels."""
+    candidates = []
+
+    if sys.platform == 'darwin':
+        candidates.append(('osascript',['osascript','-e',
+            'POSIX path of (choose folder with prompt "Choose a Firefly data directory")']))
+    elif sys.platform == 'win32':
+        candidates.append(('powershell',['powershell','-NoProfile','-STA','-Command',
+            'Add-Type -AssemblyName System.Windows.Forms;'
+            '$d = New-Object System.Windows.Forms.FolderBrowserDialog;'
+            '$d.Description = "Choose a Firefly data directory";'
+            'if ($d.ShowDialog() -eq "OK") { Write-Output $d.SelectedPath }']))
+
+    ## tkinter is in the standard library and works on all three platforms; on
+    ##  Linux it needs a display, which is also what zenity/kdialog need
+    if sys.platform in ('darwin','win32') or os.environ.get('DISPLAY') or os.environ.get('WAYLAND_DISPLAY'):
+        candidates.append(('tkinter',[sys.executable,'-c',
+            'import tkinter,tkinter.filedialog as fd;'
+            'r = tkinter.Tk(); r.withdraw();'
+            'print(fd.askdirectory(title="Choose a Firefly data directory") or "");'
+            'r.destroy()']))
+        for tool,argv in (
+            ('zenity',['zenity','--file-selection','--directory',
+                '--title=Choose a Firefly data directory']),
+            ('kdialog',['kdialog','--getexistingdirectory','.'])):
+            if shutil.which(tool): candidates.append((tool,argv))
+
+    return [(name,argv) for name,argv in candidates
+        if name != 'tkinter' or _have_tkinter()]
+
+_tkinter_ok = None
+def _have_tkinter():
+    global _tkinter_ok
+    if _tkinter_ok is None:
+        try:
+            import tkinter
+            _tkinter_ok = True
+        except ImportError: _tkinter_ok = False
+    return _tkinter_ok
+
+def _native_dialog_available():
+    return len(_native_dialog_candidates()) > 0
+
+## how long to leave a dialog open before giving up on it
+NATIVE_DIALOG_TIMEOUT = 300 #seconds
+
+def _run_native_dialog():
+    """Open the first dialog that works and return the chosen path, or None.
+
+        The dialog blocks for as long as the user takes to answer, so it runs in
+        a subprocess we poll through socketio.sleep() -- calling wait() here
+        would stall eventlet's single thread and freeze the whole server."""
+    for name,argv in _native_dialog_candidates():
+        print('======= opening a folder dialog with',name)
+        try:
+            process = subprocess.Popen(argv,stdout=subprocess.PIPE,stderr=subprocess.DEVNULL)
+        except OSError as error:
+            print('======= could not start',name,error)
+            continue
+
+        start = time.time()
+        while process.poll() is None:
+            if (time.time() - start) > NATIVE_DIALOG_TIMEOUT:
+                print('======= folder dialog timed out')
+                process.kill()
+                return None
+            socketio.sleep(0.1)
+
+        out = process.stdout.read().decode('utf-8','replace').strip()
+        if process.returncode == 0 and out: return out
+        ## returned nothing: either the user cancelled or this tool doesn't work
+        if process.returncode == 0: return None
+    return None
+
+@socketio.on('native_browse', namespace=namespace)
+@private_event
+def native_browse():
+    if request.sid not in rooms: return
+    room = rooms[request.sid]
+
+    if not _is_local_request():
+        return emit_data_error('A folder dialog would open on the machine running '
+            'the Firefly server, which is not this one. Use the directory list instead.')
+
+    try: path = _run_native_dialog()
+    except Exception as error: return emit_data_error(f'Could not open a folder dialog: {error}')
+
+    if not path: return   ## cancelled; nothing to report
+    socketio.emit('native_browse_result', {'path':path}, namespace=namespace, to=room)
 
 
 ##############
@@ -419,8 +844,9 @@ def get_selected_data():
         return Response('Unknown error.  Please try again', status = 500)
 
 
-# serve data that is outside of the firefly path (used in input_otherType)
+# serve data that is outside of the firefly path (used by load_data_path)
 @app.route('/userdata/<room>/data/<path:filename>')
+@private_endpoint
 def serve_user_file(room, filename):
     global user_data_dir
     if room not in user_data_dir:

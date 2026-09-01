@@ -8,9 +8,8 @@
 		<!-- this small, minimal splash frame is unique to the separated GUI window,
 		     so its own layout lives here rather than in the shared splashStyles.css
 		     used by the other templates' full splash screen. splashStyles.css is
-		     still loaded below though, so the loader button and the startup.json
-		     picker (built by selectFromStartup(), initGUI.js) look the same here
-		     as they do there. -->
+		     still loaded below though, so the data picker (built by
+		     dataPicker.js) looks the same here as it does there. -->
 		<style>
 			#splash{
 				position:absolute;
@@ -39,9 +38,15 @@
 			}
 			#splashdivLoader {
 				margin:0;
-				padding:0;
+				padding:1em;
+				box-sizing:border-box;
 				position:absolute;
 				left:0;
+				right:0;
+				bottom:0;
+				font-size:16px;
+				text-align:left;
+				cursor:default;
 			}
 		</style>
 
@@ -57,11 +62,8 @@
 			<div id="splash" style="z-index: 5;">
 				<div id="splashdiv1">Waiting for Viewer... </div>
 
-				<div id="splashdivLoader">
-					<button id='loadDataButton' class='button ff-button' style='display:none;'>
-						<span>Click here to select a data directory</span>
-					</button>
-				</div>
+				<!-- #dataPicker is built in here by dataPicker.js -->
+				<div id="splashdivLoader"></div>
 			</div>
 
 			<div id="UIcontainer" class="hidden" style="height:0; width:0"></div>
@@ -120,6 +122,7 @@
 		<script src="static/js/misc/windowEvents.js"></script>
 		<script src="static/js/gui/GUIsocket.js"></script>
 		<script src="static/js/gui/initGUI.js"></script>
+		<script src="static/js/gui/dataPicker.js"></script>
 		<script src="static/js/gui/sliders.js"></script>
 		<script src="static/js/gui/colormap.js"></script>
 		<script src="static/js/gui/particles.js"></script>

@@ -196,14 +196,19 @@ function defineViewerParams(){
 		this.drawfrac = 0.;
 		this.datasetName = null; //shown on the splash screen, when known (see resetSplashProgress())
 		// true once a startup.json with multiple entries has offered its picker
-		// (see getFilenames() and selectFromStartup()); lets showSplash() know
-		// to bring the picker's button back instead of the stale loading bar
+		// (see getFilenames(), and dataPicker.js); lets loadNewData() know which
+		// picker to offer when the user asks for new data
 		this.startupChooserActive = false;
 		// what the splash is offering while no data is loaded: 'startupPicker',
-		// 'loadDataButton', or null. replayed to a GUI window that connects after
+		// 'pathPicker', or null. replayed to a GUI window that connects after
 		// we already decided (see onGUIConnected()).
 		this.dataPickerState = null;
 		this.startupPrefix = "";
+		// where the current dataset is served from: "static/" for anything under
+		// firefly/static/data, "userdata/<room>/" for a directory of the user's
+		// own (see load_data_path in server.py). octree node files are fetched
+		// outside loadData() and so can't be handed the prefix directly.
+		this.prefix = "static/";
 
 		//the startup file
 		this.startup = "data/startup.json";
