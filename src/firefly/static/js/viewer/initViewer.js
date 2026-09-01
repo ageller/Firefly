@@ -269,6 +269,10 @@ function getFilenames(prefix=""){
 		if (dir != null){
 			var i = 0;
 			viewerParams.dir = dir;
+			// the picker builds its dropdown's paths from this, and it needs it
+			//  whether or not we are the ones who put the picker up (?startup=N
+			//  skips the picker, but H can still bring it back afterwards)
+			viewerParams.startupPrefix = prefix;
 			if (Object.keys(viewerParams.dir).length > 1){
 				if (viewerParams.url.searchParams.has("startup") && 
 					viewerParams.url.searchParams.get("startup") < Object.keys(viewerParams.dir).length){
@@ -278,7 +282,6 @@ function getFilenames(prefix=""){
 					console.log("multiple file options in startup:", Object.keys(viewerParams.dir).length, viewerParams.dir);
 					viewerParams.startupChooserActive = true;
 					viewerParams.dataPickerState = 'startupPicker';
-					viewerParams.startupPrefix = prefix;
 					sendToGUI(offerStartupPicker());
 				}
 			}
@@ -323,6 +326,7 @@ function offerStartupPicker(){
 		{'selectFromStartup':viewerParams.startupPrefix}];
 }
 
+// same, for a viewer with no startup.json to offer: only a path will do
 function offerPathPicker(){
 	return [{'showDataPicker':null}];
 }
@@ -361,7 +365,9 @@ function callLoadData(args){
 		dir = viewerParams.dir;
 	}
 	viewerParams.dir = dir;
-	sendToGUI([{'setGUIParamByKey':[viewerParams.dir, "dir"]}]);
+	sendToGUI([
+		{'setGUIParamByKey':[viewerParams.dir, "dir"]},
+		{'setGUIParamByKey':[viewerParams.startupPrefix, "startupPrefix"]}]);
 
 	viewerParams.datasetName = datasetNameFromPath(datasetPath);
 	// octree nodes are fetched later, outside loadData(), and need to know where
@@ -1744,16 +1750,14 @@ function sendCameraInfoToGUI(foo, updateCam=false){
 // each of these is a socket round trip (plus three DOM text updates in the GUI)
 // when the GUI has its own window, so throttle it. keyup sends once more so the
 // readout settles on the true camera position when the key is released.
-var lastCameraInfoToGUI = 0;
-var cameraInfoToGUIInterval = 100; //ms
 document.addEventListener("keydown", function(event){
 	var now = performance.now();
-	if ((now - lastCameraInfoToGUI) < cameraInfoToGUIInterval) return;
-	lastCameraInfoToGUI = now;
+	if ((now - viewerParams.lastCameraInfoToGUI) < viewerParams.cameraInfoToGUIInterval) return;
+	viewerParams.lastCameraInfoToGUI = now;
 	sendCameraInfoToGUI();
 });
 document.addEventListener("keyup", function(event){
-	lastCameraInfoToGUI = performance.now();
+	viewerParams.lastCameraInfoToGUI = performance.now();
 	sendCameraInfoToGUI();
 });
 

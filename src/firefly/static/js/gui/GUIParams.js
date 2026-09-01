@@ -7,6 +7,9 @@ function defineGUIParams(){
 		//for the cube
 		this.cube = null;
 		this.cubeWorldSize = null; //fixed once, see cubeWorldSize()
+		// how much of the view width the cube fills when it is first placed
+		//  (see cubeWorldSize()/flyCubeAnchor() in GUIsocket.js)
+		this.cubeViewportFraction = 0.25;
 		this.cubeFlyAnchor = null; //world point the cube sits at in fly controls
 		this.scene = null;
 		this.renderer = null;
@@ -74,6 +77,19 @@ function defineGUIParams(){
 		this.startup = "data/startup.json";
 		this.filenames = null;
 		this.dir = {};
+		// path prefix the startup.json entries in this.dir are relative to
+		// ("static/"), sent by the viewer along with dir itself
+		this.startupPrefix = "";
+
+		// the splash's data picker (static/js/gui/dataPicker.js). Nothing here
+		// needs to outlive a dataset switch: the startup entries come from
+		// this.dir above, and the rest is re-established when the panel is next
+		// built or the directory browser next opened.
+		this.dataPicker = {
+			browsePath: null,       //directory the browser panel is showing
+			lastPath: '',           //what was typed, kept across panel rebuilds
+			nativeAvailable: false, //can the server open its own folder dialog?
+		};
 
 
 		//for setting the width

@@ -67,11 +67,6 @@ function connectGUISocket(){
 ///////////////////////
 // animate the cube for the detached GUI scene
 ///////////////////////
-// kept outside GUIParams so they survive defineGUIParams(), which is how the GUI
-//  gets reset -- otherwise we'd lose the handles and leak the context
-var previousGUIRenderer = null;
-var previousGUIWindowResize = null;
-
 //this initializes everything needed for the scene
 function initGUIScene(){
 
@@ -83,10 +78,10 @@ function initGUIScene(){
 	//  reconnect), so release the previous renderer and its resize listener;
 	//  browsers cap how many live WebGL contexts a page may hold
 	try {
-		if (previousGUIWindowResize) previousGUIWindowResize.stop();
-		if (previousGUIRenderer){
-			previousGUIRenderer.forceContextLoss();
-			previousGUIRenderer.dispose();
+		if (persistentParams.previousGUIWindowResize) persistentParams.previousGUIWindowResize.stop();
+		if (persistentParams.previousGUIRenderer){
+			persistentParams.previousGUIRenderer.forceContextLoss();
+			persistentParams.previousGUIRenderer.dispose();
 		}
 	} catch (err) {
 		console.warn('Could not fully release the previous GUI renderer:', err);
@@ -125,8 +120,8 @@ function initGUIScene(){
 	GUIParams.scene.add(GUIParams.camera);  
 
 	// events
-	previousGUIRenderer = GUIParams.renderer;
-	previousGUIWindowResize = THREEx.WindowResize(GUIParams.renderer, GUIParams.camera);
+	persistentParams.previousGUIRenderer = GUIParams.renderer;
+	persistentParams.previousGUIWindowResize = THREEx.WindowResize(GUIParams.renderer, GUIParams.camera);
 
 	// initialize controls for GUI
 	initGUIControls(initial=true)
@@ -238,8 +233,6 @@ function initGUIControls(initial=false, notifyViewer=true){
 // The cube is a world-space stand-in for the data: you orbit it in trackball and
 //  fly past it in fly controls. It keeps its original boxSize/100 size, and this
 //  is how much of the viewport width it may take up before being capped.
-var cubeViewportFraction = 0.25;
-
 // The GUI camera is built in initGUIScene() from GUIParams.zmin/zmax, which at
 //  that point are still the defaults (zmin 1) because the dataset's values
 //  haven't arrived yet -- and nothing ever updated the camera afterwards. A near
@@ -269,7 +262,7 @@ function cubeNaturalSize(){
 }
 
 // FlyControls has no target to anchor to. Capture a world point ahead of the
-//  camera once, at the distance where the cube fills about cubeViewportFraction
+//  camera once, at the distance where the cube fills about GUIParams.cubeViewportFraction
 //  of the view, then leave it there -- so flying moves us relative to the cube
 //  rather than dragging it along with the camera.
 function flyCubeAnchor(){
@@ -277,7 +270,7 @@ function flyCubeAnchor(){
 
 	// invert visibleWidthAt(): the distance at which the cube looks right
 	var aspect = window.innerWidth/window.innerHeight;
-	var d = cubeNaturalSize()/(2*cubeViewportFraction*Math.tan(GUIParams.fov*Math.PI/360)*aspect);
+	var d = cubeNaturalSize()/(2*GUIParams.cubeViewportFraction*Math.tan(GUIParams.fov*Math.PI/360)*aspect);
 
 	// and keep it clear of both clipping planes
 	var near = GUIParams.camera.near || 0.01;
@@ -303,7 +296,7 @@ function cubeAnchorPosition(){
 }
 
 // The cube's world size: boxSize/100, shrunk only if that would fill more than
-//  cubeViewportFraction of the view from where we first see it. Worked out once
+//  GUIParams.cubeViewportFraction of the view from where we first see it. Worked out once
 //  and then kept -- the cap is on the *initial* size only, so zooming in still
 //  lets the cube grow as large as it likes.
 function cubeWorldSize(){
@@ -312,7 +305,7 @@ function cubeWorldSize(){
 	var size = cubeNaturalSize();
 
 	var d = GUIParams.camera.position.distanceTo(cubeAnchorPosition());
-	if (d && isFinite(d)) size = Math.min(size, cubeViewportFraction*visibleWidthAt(d));
+	if (d && isFinite(d)) size = Math.min(size, GUIParams.cubeViewportFraction*visibleWidthAt(d));
 
 	GUIParams.cubeWorldSize = size;
 	return size;
@@ -347,20 +340,15 @@ function createCube(){
 }
 
 
-// bumped each time a new cube loop starts. defineGUIParams() resets
-//  GUIParams.animating, so makeUI()'s "if (!animating)" guard isn't enough on
-//  its own to stop a second loop -- each loop checks its own generation instead.
-var GUILoopGeneration = 0;
-
 //this is the animation loop
 function animateGUI(time) {
-	GUILoopGeneration += 1;
-	var myGeneration = GUILoopGeneration;
+	persistentParams.GUILoopGeneration += 1;
+	var myGeneration = persistentParams.GUILoopGeneration;
 	GUIParams.animating = true;
 
 	function loop(t){
 		// a newer loop has taken over
-		if (myGeneration != GUILoopGeneration) return;
+		if (myGeneration != persistentParams.GUILoopGeneration) return;
 
 		// queue the next frame before doing the work, as the original did: an
 		//  exception in animateGUIupdate() must not be able to kill the loop

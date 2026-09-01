@@ -1,24 +1,18 @@
-// bumped whenever the viewer is torn down or a new render loop starts. each
-//  loop remembers the value it began with (see startAnimation) and stops
-//  re-queueing itself once that goes stale, so switching datasets can't leave
-//  two loops running against the same octree queues.
-var viewerLoopGeneration = 0;
-
 // retire the current render loop; call before tearing the viewer down
 function stopAnimation(){
-	viewerLoopGeneration += 1;
+	persistentParams.viewerLoopGeneration += 1;
 	if (typeof viewerParams !== 'undefined' && viewerParams) viewerParams.animating = false;
 }
 
 // start a fresh render loop, retiring any loop still running
 function startAnimation(){
-	viewerLoopGeneration += 1;
-	var myGeneration = viewerLoopGeneration;
+	persistentParams.viewerLoopGeneration += 1;
+	var myGeneration = persistentParams.viewerLoopGeneration;
 	viewerParams.animating = true;
 
 	function loop(time){
 		// a newer loop has taken over, or we were stopped
-		if (myGeneration != viewerLoopGeneration) return;
+		if (myGeneration != persistentParams.viewerLoopGeneration) return;
 
 		// queue the next frame before doing the work, so an exception in animate()
 		//  can't kill the render loop outright

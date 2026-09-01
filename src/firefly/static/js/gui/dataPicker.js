@@ -14,15 +14,6 @@
 // dialog (native_browse).
 ///////////////////////////////////////////////////////////////////////////////
 
-var dataPicker = {
-	prefix: '',            // path prefix for startup.json entries ("static/")
-	dirs: null,            // startup.json entries, if there are several
-	browsePath: null,      // directory the browser panel is showing
-	lastPath: '',          // what was typed, kept across rebuilds of the panel
-	nativeAvailable: false,// can the server open its own folder dialog?
-	visible: false,
-};
-
 // is a dataset already showing in the viewer? when the GUI runs in its own
 // window there is no viewerParams here, so fall back to the partsKeys the
 // viewer sends us (null until sendInitGUI runs, and reset by defineGUIParams
@@ -55,11 +46,28 @@ function dataPickerContainer(){
 function hideDataPicker(){
 	d3.select('#dataPicker').style('display', 'none');
 	d3.select('.ff-loader__bar').style('display', null);
-	dataPicker.visible = false;
+}
+
+// resetSplashProgress() (initViewer.js) hides the panel too, so read the DOM
+// rather than tracking a flag of our own that it would leave stale
+function dataPickerShowing(){
+	var picker = document.getElementById('dataPicker');
+	return !!picker && getComputedStyle(picker).display != 'none';
+}
+
+// the datasets a multi-entry startup.json offered, in the order it listed them.
+// GUIParams.dir is sent by the viewer whenever it loads data or offers the
+// picker, so this survives a dataset switch (which rebuilds GUIParams) without
+// the picker having to hold a copy of its own.
+function startupDirs(){
+	if (GUIParams.dir == null) return [];
+	var keys = Object.keys(GUIParams.dir);
+	if (keys.length < 2) return [];  //a single entry is loaded without asking
+	return keys.map(function(k, i){ return GUIParams.dir[i]; });
 }
 
 function hasStartupDirs(){
-	return dataPicker.dirs != null && dataPicker.dirs.length > 0;
+	return startupDirs().length > 0;
 }
 
 // bring the splash back up with the picker on it, however it was last configured
@@ -81,14 +89,14 @@ function restoreDataPickerOnSplash(){
 
 // startup.json listed several datasets: offer them, plus a path of the user's own
 function selectFromStartup(prefix=""){
-	dataPicker.prefix = prefix;
-	dataPicker.dirs = Object.keys(GUIParams.dir).map(function(k, i){ return GUIParams.dir[i]; });
+	GUIParams.startupPrefix = prefix;
 	buildDataPicker();
 }
 
-// no startup.json, or none that named a dataset: a path is all we can offer
+// no startup.json that named a dataset: a path is all there is to offer. (the
+// dropdown appears anyway if GUIParams.dir turns out to hold several datasets,
+// which is what we want -- both routes stay open)
 function showDataPicker(){
-	dataPicker.dirs = null;
 	buildDataPicker();
 }
 
@@ -128,7 +136,6 @@ function buildDataPicker(){
 				.text('Cancel');
 	}
 
-	dataPicker.visible = true;
 }
 
 /////////////////////////////
@@ -137,18 +144,19 @@ function buildDataPicker(){
 
 function buildStartupRow(picker){
 	var row = picker.append('div').attr('class', 'ff-picker__row');
+	var dirs = startupDirs();
 
 	var select = row.append('select')
 		.attr('id', 'selectedStartup')
 		.attr('class', 'ff-select');
 
 	select.selectAll('option')
-		.data(dataPicker.dirs).enter()
+		.data(dirs).enter()
 			.append('option')
 				.attr('value', function(d){ return d; })
 				.text(function(d){ return d; });
 
-	select.node().value = dataPicker.dirs[0];
+	select.node().value = dirs[0];
 
 	row.append('button')
 		.attr('id', 'confirmStartupSelection')
@@ -161,12 +169,12 @@ function buildStartupRow(picker){
 function loadStartupSelection(dir){
 	// these datasets are served out of firefly/static, so the GUI can read the
 	//  manifest itself and hand the viewer everything it needs in one message
-	d3.json(dataPicker.prefix + dir + '/filenames.json', function(files){
+	d3.json(GUIParams.startupPrefix + dir + '/filenames.json', function(files){
 		if (files == null) return dataPickerError('Could not read '
-			+ dataPicker.prefix + dir + '/filenames.json.');
+			+ GUIParams.startupPrefix + dir + '/filenames.json.');
 
-		console.log('==loading data', files, dataPicker.prefix);
-		sendDataLoadToViewer([{'callLoadData':[files, dataPicker.prefix, dir]}]);
+		console.log('==loading data', files, GUIParams.startupPrefix);
+		sendDataLoadToViewer([{'callLoadData':[files, GUIParams.startupPrefix, dir]}]);
 	});
 }
 
@@ -201,9 +209,9 @@ function buildPathRow(picker){
 			// "h" and the like belong in the box, not to the splash
 			if (d3.event) d3.event.stopPropagation();
 		})
-		.on('input', function(){ dataPicker.lastPath = this.value; });
+		.on('input', function(){ GUIParams.dataPicker.lastPath = this.value; });
 
-	input.node().value = dataPicker.lastPath;
+	input.node().value = GUIParams.dataPicker.lastPath;
 
 	row.append('button')
 		.attr('id', 'dataPathBrowse')
@@ -228,7 +236,7 @@ function submitDataPath(path){
 	if (!GUIParams.usingSocket) return dataPickerError(
 		'This Firefly page has no connection to the server, so it cannot read a path.');
 
-	dataPicker.lastPath = path.trim();
+	GUIParams.dataPicker.lastPath = path.trim();
 	dataPickerMessage('Looking for data in ' + path.trim() + ' ...');
 
 	// the server replies straight to the viewer (load_ffly_data / input_data),
@@ -261,7 +269,7 @@ function buildDataBrowser(picker){
 	foot.append('button')
 		.attr('id', 'dataBrowserUse')
 		.attr('class', 'button ff-button')
-		.on('click', function(){ if (dataPicker.browsePath) submitDataPath(dataPicker.browsePath); })
+		.on('click', function(){ if (GUIParams.dataPicker.browsePath) submitDataPath(GUIParams.dataPicker.browsePath); })
 		.append('span')
 			.text('Use this folder');
 	// only offered when the server says a dialog of its own could be seen from here
@@ -286,7 +294,7 @@ function buildDataBrowser(picker){
 function openDataBrowser(){
 	d3.select('#dataBrowser').style('display', null);
 	var typed = d3.select('#dataPathInput');
-	requestBrowse(dataPicker.browsePath || (typed.node() ? typed.node().value : ''));
+	requestBrowse(GUIParams.dataPicker.browsePath || (typed.node() ? typed.node().value : ''));
 }
 
 function requestBrowse(path){
@@ -304,7 +312,7 @@ function requestBrowse(path){
 }
 
 function renderBrowse(data){
-	dataPicker.nativeAvailable = !!data.native;
+	GUIParams.dataPicker.nativeAvailable = !!data.native;
 	d3.select('#dataBrowserNative').style('display', data.native ? null : 'none');
 
 	if (data.error){
@@ -312,7 +320,7 @@ function renderBrowse(data){
 		if (!data.path) return;
 	}
 
-	dataPicker.browsePath = data.path;
+	GUIParams.dataPicker.browsePath = data.path;
 	d3.select('#dataBrowserPath').text(data.path);
 	d3.select('#dataBrowserUse').property('disabled', !data.path);
 
@@ -346,7 +354,7 @@ function renderBrowse(data){
 	all.classed('ff-browser__item--file', function(d){ return !d.isdir; })
 		.classed('ff-browser__item--data', function(d){ return !!d.hint; })
 		.on('click', function(d){
-			var full = joinBrowsePath(dataPicker.browsePath, d.name);
+			var full = joinBrowsePath(GUIParams.dataPicker.browsePath, d.name);
 			// a file is a choice in itself; a directory is somewhere to look
 			if (d.isdir) requestBrowse(full);
 			else submitDataPath(full);
@@ -374,7 +382,7 @@ function joinBrowsePath(base, name){
 
 // the OS dialog came back with a directory
 function nativeBrowseResult(path){
-	dataPicker.browsePath = path;
+	GUIParams.dataPicker.browsePath = path;
 	var input = d3.select('#dataPathInput');
 	if (input.node()) input.node().value = path;
 	submitDataPath(path);
@@ -400,10 +408,9 @@ function dataPickerError(message){
 	// raise the splash first: showSplash() rebuilds the picker (see
 	//  restoreDataPickerOnSplash), which would wipe the message if it ran after
 	showSplash(true);
-	if (!dataPicker.visible) buildDataPicker();
+	if (!dataPickerShowing()) buildDataPicker();
 	d3.select('#dataPicker').style('display', null);
 	d3.select('.ff-loader__bar').style('display', 'none');
-	dataPicker.visible = true;
 	dataPickerMessage(message, true);
 }
 

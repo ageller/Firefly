@@ -1,13 +1,6 @@
 //all "global" variables are contained within params object
 var viewerParams;
 
-// the two defaults files never change, so parse them once and reuse the result.
-//  that lets defineViewerParams() apply them synchronously on every later call
-//  (e.g. when the user switches datasets from the splash), so the data load can
-//  never get ahead of them.
-var cachedDefaultSettings = null;
-var cachedDefaultParticleSettings = null;
-
 // self-contained deep copy: copyValue() lives in applyUISelections.js, which
 //  hasn't loaded yet the first time defineViewerParams() runs
 function copyDefaultValue(a){
@@ -20,30 +13,30 @@ function copyDefaultValue(a){
 //  defaults objects are attached together, so anything downstream can gate on
 //  either one being set (see WebGLStart and confirmViewerInit).
 function applyDefaultViewerParams(these_params){
-	these_params.defaultSettings = cachedDefaultSettings;
-	these_params.defaultParticleSettings = cachedDefaultParticleSettings;
-	Object.keys(cachedDefaultSettings).forEach(function (key){
-		these_params[key] = copyDefaultValue(cachedDefaultSettings[key]);
+	these_params.defaultSettings = persistentParams.cachedDefaultSettings;
+	these_params.defaultParticleSettings = persistentParams.cachedDefaultParticleSettings;
+	Object.keys(persistentParams.cachedDefaultSettings).forEach(function (key){
+		these_params[key] = copyDefaultValue(persistentParams.cachedDefaultSettings[key]);
 	});
 }
 
 function setDefaultViewerParams(these_params){
 	// already fetched: apply now, so nothing downstream can race us
-	if (cachedDefaultSettings && cachedDefaultParticleSettings){
+	if (persistentParams.cachedDefaultSettings && persistentParams.cachedDefaultParticleSettings){
 		applyDefaultViewerParams(these_params);
 		return;
 	}
 
 	// first load: fetch both, and apply only once both have arrived
 	d3.json("static/js/misc/defaultSettings.json", function(defaultSettings) {
-		cachedDefaultSettings = defaultSettings;
-		if (cachedDefaultParticleSettings) applyDefaultViewerParams(these_params);
+		persistentParams.cachedDefaultSettings = defaultSettings;
+		if (persistentParams.cachedDefaultParticleSettings) applyDefaultViewerParams(these_params);
 	})
 
 	// load the default particle settings
 	d3.json("static/js/misc/defaultParticleSettings.json", function(defaultParticleSettings) {
-		cachedDefaultParticleSettings = defaultParticleSettings;
-		if (cachedDefaultSettings) applyDefaultViewerParams(these_params);
+		persistentParams.cachedDefaultParticleSettings = defaultParticleSettings;
+		if (persistentParams.cachedDefaultSettings) applyDefaultViewerParams(these_params);
 	});
 
 
@@ -214,6 +207,11 @@ function defineViewerParams(){
 		this.startup = "data/startup.json";
 		this.filenames = null;
 		this.dir = {};
+
+		// throttle for the camera readout we push to the GUI while a movement key
+		// is held down (see the keydown listener at the end of initViewer.js)
+		this.lastCameraInfoToGUI = 0;
+		this.cameraInfoToGUIInterval = 100; //ms
 
 		//animation
 		this.pauseAnimation = false;
