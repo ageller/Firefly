@@ -19,6 +19,7 @@ Thumbs.db
 *.ffraw
 *.ffly
 *.fftree
+src/firefly/static/data/*
 
 # pip #
 ###################
