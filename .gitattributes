@@ -12,3 +12,7 @@ src/firefly/static/lib/** -text
 *.fftree binary
 *.ffraw  binary
 *.hdf5   binary
+
+# Windows batch helper for building the docs: cmd.exe wants CRLF, and checking
+#  it out with LF would rewrite the file in every deployment clone for no reason.
+docs/make.bat text eol=crlf
