@@ -92,6 +92,11 @@ function initGUIScene(){
 		GUIParams.renderer = new THREE.WebGLRenderer( {
 			antialias:true,
 		} );
+		// paint it black before it goes into the page: this canvas is opaque
+		//  (no alpha), and until something is rendered into it the browser has
+		//  nothing to composite and shows a white flash instead
+		GUIParams.renderer.setClearColor(0x000000, 1);
+		GUIParams.renderer.clear();
 	} 
 	else {
 		//Canvas Renderer has been removed, and I can't get the old version to work now

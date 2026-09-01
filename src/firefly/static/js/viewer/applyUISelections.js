@@ -74,6 +74,12 @@ function resetViewerToInitialState(keepStartupChooser=false){
 			viewerParams.renderer.forceContextLoss();
 			viewerParams.renderer.dispose();
 		}
+		// and take it out of the page. the renderer is created without alpha, so
+		//  the canvas is opaque, and an opaque canvas whose context has just been
+		//  lost has nothing to composite -- which the browser paints as a white
+		//  flash until initScene() puts a live one back. Removing it lets the
+		//  black body show instead, so the splash fades in over black.
+		d3.select('#WebGLContainer').selectAll('canvas').remove();
 	} catch (err) {
 		console.warn('Could not fully release the previous renderer:', err);
 	}
