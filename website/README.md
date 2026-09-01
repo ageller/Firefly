@@ -1,75 +1,92 @@
-# Particle Jekyll Theme
+# Firefly homepage
 
-![](./particle.jpg)
+The Jekyll source for <https://firefly.rcs.northwestern.edu/>.
 
-This is a simple and minimalist template for Jekyll designed for developers that want to show of their portfolio.
+Plain Jekyll: no `Gemfile`, no theme, no plugins, no node/npm step. The
+stylesheet is hand-written CSS that Jekyll copies through untouched, and the
+whole page is about 40 lines of vanilla JavaScript. `jekyll build` is the entire
+toolchain.
 
-The Theme features:
+The built output, `_site/`, is **committed**, because nginx serves that directory
+directly and the server never builds anything. A change that was never built is a
+change that never appears.
 
-- Gulp
-- SASS
-- Sweet Scroll
-- Particle.js
-- BrowserSync
-- Font Awesome and Devicon icons
-- Google Analytics
-- Info Customization
+## Layout
 
-## Basic Setup
+| path | what it is |
+|---|---|
+| `index.html` | front matter only; the page is assembled from the includes below |
+| `_layouts/default.html` | nav → hero → about → gallery → footer |
+| `_includes/` | one file per section: `head`, `nav`, `hero`, `about`, `gallery`, `footer` |
+| `_gallery/` | one `.md` per gallery entry — the gallery is data-driven, see below |
+| `assets/css/main.css` | the whole stylesheet, tokens at the top |
+| `assets/js/main.js` | launches and closes the in-page demo; nothing else |
+| `assets/img/` | wordmark, hero poster, favicon |
+| `assets/img/gallery/` | thumbnails, one `.webp` and one `.png` per entry |
+| `_config.yml` | site metadata, and `links:` — the off-site URLs, kept in one place |
+| `_site/` | build output. Committed. Never hand-edit. |
 
-1. [Install Jekyll](http://jekyllrb.com)
-2. Clone the particle theme: `git clone https://github.com/nrandecker/particle.git`
-3. Edit `_config.yml` to personalize your site.
+## Building
 
-## Site and User Settings
+From this directory, with a Jekyll install on `PATH`:
 
-You have to fill some informations on `_config.yml` to customize your site.
-
-```
-# Site settings
-description: A blog about lorem ipsum dolor sit amet
-baseurl: "" # the subpath of your site, e.g. /blog/
-url: "http://localhost:3000" # the base hostname & protocol for your site
-
-# User settings
-username: Lorem Ipsum
-user_description: Anon Developer at Lorem Ipsum Dolor
-user_title: Anon Developer
-email: anon@anon.com
-twitter_username: lorem_ipsum
-github_username:  lorem_ipsum
-gplus_username:  lorem_ipsum
+```bash
+jekyll build                  # writes _site
+jekyll serve --livereload     # preview on http://127.0.0.1:4000
 ```
 
-**Don't forget to change your url before you deploy your site!**
+Installing Jekyll into a conda environment has one trap worth knowing about; see
+*Building the homepage* in the repository-root `README.md`.
 
-## Color and Particle Customization
-- Color Customization
-  - Edit the sass variables
-- Particle Customization
-  - Edit the json data in particle function in app.js
-  - Refer to [Particle.js](https://github.com/VincentGarreau/particles.js/) for help
+Local previews will 404 on `/docs` and `/GaiaDR3`. Those are served by nginx from
+elsewhere on the same host and only resolve in production.
 
-## Running the blog in local
+## Adding a gallery entry
 
-In order to compile the assets and run Jekyll on local you need to follow those steps:
+Drop a `.md` into `_gallery/`. The numeric filename prefix sets the display
+order.
 
-- Install [NodeJS](https://nodejs.org/)
-- Install [Jekyll](https://jekyllrb.com): `sudo gem install bundler jekyll`
-- Install [Yarn](https://yarnpkg.com/): `npm install -g yarn`
-- Install dependencies: `yarn`
-- Run: `gulp`
+```yaml
+---
+title: Low-res FIRE example
+source: https://www.alexbgurvi.ch/Firefly/index.html   # or a local path like /GaiaDR3
+img: FIRE-lowres-thumb.png
+author: Alex Gurvich
+---
+The body is the blurb shown on hover.  Markdown, so it may contain links.
+```
 
-## Questions
+Exactly one entry may add `featured: true`, which pulls it out of the grid and
+into the full-width card at the top. That entry may also set `stat` and
+`stat_label` (currently `1.5B` / `points, streamed`).
 
-Having any issues file a [GitHub Issue](https://github.com/nrandecker/particle/issues/new).
+Thumbnails are served as WebP with the PNG as a fallback. The template derives
+the WebP name from `img` by swapping the extension, so **both files must exist**:
 
-## License
+```bash
+python3 -c "
+from PIL import Image
+im = Image.open('assets/img/gallery/NEW-thumb.png').convert('RGB')
+im.thumbnail((800, 800), Image.LANCZOS)
+im.save('assets/img/gallery/NEW-thumb.webp', 'WEBP', quality=82, method=6)"
+```
 
-This theme is free and open source software, distributed under the The MIT License. So feel free to use this Jekyll theme anyway you want.
+800px is the cap because the widest a grid card ever gets is ~400 CSS px, and
+the source images are square while the cards are 4:3 — the top and bottom of
+each thumbnail are cropped by `object-fit: cover`.
 
-## Credits
+## The hero demo
 
-This theme was partially designed with the inspiration from these fine folks
-- [Willian Justen](https://github.com/willianjusten/will-jekyll-template)
-- [Vincent Garreau](https://github.com/VincentGarreau/particles.js/)
+*Launch live demo* swaps the hero for an iframe of
+`https://ageller.github.io/Firefly/src/firefly/index.html` — GitHub Pages serving
+the repo root of `main`, so it really is the current build, and it ships
+`FIRESampleData`. Nothing is fetched until the button is pressed, and *Close*
+resets the iframe to `about:blank` to release the WebGL context.
+
+Two things to know about it:
+
+- It is cross-origin, so the viewer's keyboard shortcuts only fire while the
+  iframe has focus, and if GitHub ever sends `X-Frame-Options` or a CSP
+  `frame-ancestors` on Pages responses the embed breaks. *Open in new tab* is the
+  fallback. Worth re-checking after any deploy that matters.
+- Below 700px wide it opens in a new tab instead of in the page.

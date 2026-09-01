@@ -1,8 +1,13 @@
-<footer class="footer">
-    <p>&copy; Alex Gurvich and Aaron Geller, 2021 </p>
-    <p>Build with Jekyll and <span class="love">❤</span> using a template by <a href="https://github.com/nrandecker">Nathan Randecker</a></p>
+<footer>
+  <div class="foot">
+    <div>&#169; 2021&#8211;present Alex Gurvich and Aaron Geller</div>
+    <div class="foot-links">
+      <a href="{{ site.links.github }}" target="_blank" rel="noopener">GitHub</a>
+      <a href="{{ site.links.issues }}" target="_blank" rel="noopener">Issues</a>
+      <a href="{{ '/docs' | relative_url }}" target="_blank" rel="noopener">Docs</a>
+    </div>
+    <div>Built with Jekyll</div>
+  </div>
 </footer>
-<script src="//cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
-<script src="{{ "/assets/js/sweet-scroll.min.js" | prepend: site.baseurl }}"></script>
-<script src="{{ "/assets/js/main.js" | prepend: site.baseurl }}"></script>
+<script src="{{ '/assets/js/main.js' | relative_url }}"></script>
 {% include google-analytics.html %}

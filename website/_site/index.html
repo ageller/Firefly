@@ -2,244 +2,280 @@
 <html lang="en">
   <head>
   <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>Firefly</title>
+  <title>Firefly &mdash; A WebGL tool to explore particle-based data</title>
   <meta name="description" content="A browser-based interactive particle visualization app">
 
   <link rel="shortcut icon" type="image/png" href="/assets/img/favicon.png">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Hanken+Grotesk:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap">
+
   <link rel="stylesheet" href="/assets/css/main.css">
-  <link rel="stylesheet" href="/assets/css/fa-icons.css">
-  <link rel="stylesheet" href="/assets/css/devicon-icons.css">
 </head>
 
   <body>
-      <div id="particles-js">
-  <div class="header">
-      <h1>
-      <img alt="logo" 
-        src="/assets/img/logo_banner.png" 
-        style="width:100%"/>
-        <!-- <span class="site-title">Firefly</span> -->
-        <span class="site-description">a browser-based interactive particle visualization app</span>
-      </h1>
-      <div class="header-icons">
-        <a aria-label="Contact us" href="http://github.com/ageller/Firefly/issues"><i class="icon fa fa-envelope"></i></a>
-        <a aria-label="Github" target="_blank" href="http://github.com/ageller/Firefly"><i class="icon fa fa-github-alt" aria-hidden="true"></i></a>
-      </div>
-      <div class="header-links">
-        <a class="link" href="#about" data-scroll>What is Firefly?</a> - 
-        <a class="link" target="_blank" href="/docs">Documentation</a>
-        <br>
-        <a class="link" target="_blank" href="https://ui.adsabs.harvard.edu/abs/2022arXiv220713706G/abstract">Read the paper</a> - 
-        <a class="link" href="#gallery" data-scroll>Gallery</a>
-      </div>
+    <nav class="nav">
+  <a class="brand" href="#top"><span class="brand-dot"></span><span class="brand-word">Firefly</span></a>
+  <div class="nav-links">
+    <a href="#about">About</a>
+    <a href="#gallery">Gallery</a>
+    <a href="/docs" target="_blank" rel="noopener">Docs</a>
+    <a href="https://ui.adsabs.harvard.edu/abs/2023ApJS..265...38G/abstract">Paper</a>
+    <a href="https://github.com/ageller/Firefly">GitHub</a>
   </div>
-  <a class="down" href="#about" data-scroll><i class="icon fa fa-chevron-down" aria-hidden="true"></i></a>
-</div>
+</nav>
 
-      <section id="about">
-         <div class="user-details">
-  <h1> What is Firefly? </h1>
-</div>
-  <div class="user">
-    <div class="tech" style="width:auto; margin-left:auto; margin-right:auto">
-      <i class="devicon-html5-plain-wordmark colored"></i>
-      <i class="devicon-css3-plain-wordmark colored"></i>
-      
-        <a style="text-decoration: none" target="_blank" href="https://www.javascript.com/">
-        <i class="devicon-javascript-plain colored"></i>
-      </a>
+    <section class="hero" id="top">
+  <div class="hero-glow"></div>
+  <div class="hero-inner">
 
-        <a style="text-decoration: none" target="_blank" href="https://d3js.org/">
-        <i class="devicon-d3js-plain colored"></i>
-      </a>
+    <div class="hero-grid">
+      <div>
+        <picture>
+          <source srcset="/assets/img/firefly-wordmark.webp" type="image/webp">
+          <img class="wordmark" src="/assets/img/firefly-wordmark.png"
+               width="1200" height="247" alt="Firefly">
+        </picture>
+        <h1>A WebGL tool to explore particle&#8209;based data</h1>
+        <div class="byline">Aaron Geller&nbsp; /&nbsp; Alex Gurvich&nbsp; /&nbsp; Northwestern</div>
+        <div class="cta-row">
+          <button class="btn" type="button" data-launch><span class="btn-dot"></span>Launch live demo</button>
+          <a class="btn-ghost" href="/docs" target="_blank" rel="noopener">Documentation</a>
+          <a class="btn-ghost" href="https://github.com/ageller/Firefly">GitHub</a>
+        </div>
+        <div class="hero-note">Demo runs live from the latest build.<br><b>Hint:</b> zoom way out to see the dark matter distribution in the pink points.</div>
+      </div>
 
-        <a style="text-decoration: none" target="_blank" href="https://www.python.org/">
-        <i class="devicon-python-plain colored"></i>
-      </a>
-
-      <br>
-        <a style="text-decoration: none" target="_blank" href="https://threejs.org/">
-        <img src="/assets/img/threejs_icon_wordmark.png" style="height:70px"> </img> 
-      </a>
-
-        <a style="text-decoration: none" target="_blank" href="https://get.webgl.org/">
-        <img src="/assets/img/WebGL_Logo.png" style="height:70px"> </img> 
-      </a>
-
-        <a style="text-decoration: none" target="_blank" href="https://flask.palletsprojects.com/">
-        <img src="/assets/img/flask-logo.png" style="height:70px"> </img> 
-      </a>
-      
-      <p>Firefly is a web application that allows users to interactively explore their 3D particle data.
-      At its core, it is a Javascript app that uses WebGL to efficiently render millions of particles in an interactive three.js scene.
-      In addition to traditional static html and css, the user interface is procedurally generated using d3.js according to a configuration file, allowing visualization creators to ship different versions of their visualization for different audiences without changing the underlying code or data.
-      On top of this framework, we provide a python frontend that allows users to generate their own Firefly visualizations and host virtual webservers using Flask, enabling users to control their visualization via a remote device (i.e. an iPad), livestream the output of their visualization from a remote server (like a supercomputing cluster), or load new data directly from a Python interpreter without having to read it in from disk.
-      </p>
+      <div class="poster" data-launch>
+        <picture>
+          <source srcset="/assets/img/hero-fire-lowres.webp" type="image/webp">
+          <img src="/assets/img/hero-fire-lowres.jpg"
+               width="1600" height="1062" alt="The Firefly viewer showing the low-res FIRE galaxy simulation">
+        </picture>
+        <div class="poster-scrim"></div>
+        <div class="poster-bar">
+          <div class="l">Live viewer<br><span>ageller.github.io/Firefly</span></div>
+          <div class="r">Click to run &#8594;</div>
+        </div>
+      </div>
     </div>
-</div>
 
-      </section>
-      <section id="gallery">
-        <div class='user-details'> 
-  <h1> Gallery </h1> 
-  <p>Hover over a thumbnail for a description of each Firefly instance and click the title to try it out yourself!</p>
-</div>
+    <div class="demo">
+      <div class="demo-bar">
+        <div class="demo-live"><span class="dot"></span>Live demo &#183; latest build</div>
+        <div class="demo-actions">
+          <a class="btn-ghost" href="https://ageller.github.io/Firefly/src/firefly/index.html" target="_blank" rel="noopener">Open in new tab</a>
+          <button class="btn-ghost" type="button" data-close>Close</button>
+        </div>
+      </div>
+      <div class="demo-frame">
+        <iframe id="demo-frame" title="Firefly live demo" allow="fullscreen"
+                src="about:blank" data-src="https://ageller.github.io/Firefly/src/firefly/index.html"></iframe>
+      </div>
+    </div>
 
-<div class='gallery'>
-<ul class="rig columns-3">
-  
-  <li > 
-    <a target="_blank" href="https://www.alexbgurvi.ch/FIRE_hires/index.html">
-      <img alt="viz" src="/assets/img/gallery/FIRE-hires-thumb.png ">
-    </a>
-      <div class="info"> 
-        <a target="_blank" href="https://www.alexbgurvi.ch/FIRE_hires/index.html" style="color:white">
-          <h3>High-res FIRE example</h3> 
-        </a>
-        <p> Alex Gurvich </p>
-        
-        <hr style="width:80%">
-        <div style="width:95%"> <p>In this example from the <a href="https://fire.northwestern.edu">FIRE galaxy formation simulations</a> we use the 2D histogram rendering mode to emphasize the surface density contrast of points making the spiral structure of the disk.</p>
-</div>
-        
+  </div>
+</section>
+
+    <section class="band" id="about">
+  <div class="about-grid">
+    <div>
+      <div class="eyebrow">What is Firefly?</div>
+      <div class="sublabel">Built with</div>
+      <div class="chips">
+        <a class="chip mono" href="https://www.javascript.com/" target="_blank" rel="noopener">JavaScript</a>
+        <a class="chip mono" href="https://threejs.org/" target="_blank" rel="noopener">three.js</a>
+        <a class="chip mono" href="https://get.webgl.org/" target="_blank" rel="noopener">WebGL</a>
+        <a class="chip mono" href="https://d3js.org/" target="_blank" rel="noopener">d3.js</a>
+        <a class="chip mono" href="https://www.python.org/" target="_blank" rel="noopener">Python</a>
+        <a class="chip mono" href="https://flask.palletsprojects.com/" target="_blank" rel="noopener">Flask</a>
       </div>
-  </li>
-  
-  <li > 
-    <a target="_blank" href="https://www.alexbgurvi.ch/Firefly/index.html">
-      <img alt="viz" src="/assets/img/gallery/FIRE-lowres-thumb.png ">
-    </a>
-      <div class="info"> 
-        <a target="_blank" href="https://www.alexbgurvi.ch/Firefly/index.html" style="color:white">
-          <h3>Low-res FIRE example</h3> 
-        </a>
-        <p> Alex Gurvich </p>
-        
-        <hr style="width:80%">
-        <div style="width:95%"> <p>In this example from the <a href="https://fire.northwestern.edu">FIRE galaxy formation simulations</a> we use velocity vectors and color by temperature to emphasize hot outflows from the center of the galaxy. This is our default dataset that we recommend trying first as it is the most stable!</p>
-</div>
-        
+    </div>
+    <div class="prose">
+      <p><span class="lead">Firefly is a web application that allows users to interactively explore their 3D particle data.</span> At its core, it is a Javascript app that uses WebGL to efficiently render millions of particles in an interactive three.js scene.</p>
+      <p>In addition to traditional static html and css, the user interface is procedurally generated using d3.js according to a configuration file, allowing visualization creators to ship different versions of their visualization for different audiences without changing the underlying code or data.</p>
+      <p>On top of this framework, we provide a python frontend that allows users to generate their own Firefly visualizations and host virtual webservers using Flask, enabling users to control their visualization via a remote device (i.e. an iPad), livestream the output of their visualization from a remote server (like a supercomputing cluster), or load new data directly from a Python interpreter without having to read it in from disk.</p>
+      <div class="prose-links">
+        <a href="https://ui.adsabs.harvard.edu/abs/2023ApJS..265...38G/abstract" target="_blank" rel="noopener">Read the paper &#8594;</a>
+        <a href="/docs" target="_blank" rel="noopener">Documentation &#8594;</a>
+        <a href="https://github.com/ageller/Firefly/issues" target="_blank" rel="noopener">Report an issue &#8594;</a>
       </div>
-  </li>
-  
-  <li > 
-    <a target="_blank" href="https://www.alexbgurvi.ch/Gaia_test/index.html">
-      <img alt="viz" src="/assets/img/gallery/Gaia-test-thumb.png ">
-    </a>
-      <div class="info"> 
-        <a target="_blank" href="https://www.alexbgurvi.ch/Gaia_test/index.html" style="color:white">
-          <h3>Gaia eDR3 example</h3> 
-        </a>
-        <p> Alex Gurvich </p>
-        
-        <hr style="width:80%">
-        <div style="width:95%"> <p>In this example, we use data from the Gaia space telescope collaboration to visualize the real-life positions and velocities of stars in the Milky Way.</p>
-</div>
-        
+    </div>
+  </div>
+</section>
+
+    <section class="band" id="gallery" style="padding-bottom:120px">
+  <div class="wrap">
+    <div class="gal-head">
+      <div>
+        <div class="eyebrow">Gallery</div>
+        <h2>Firefly in the wild</h2>
       </div>
-  </li>
-  
-  <li > 
-    <a target="_blank" href="https://www.alexbgurvi.ch/firefly_disk_settling/index.html">
-      <img alt="viz" src="/assets/img/gallery/disk-formation-thumb.png ">
-    </a>
-      <div class="info"> 
-        <a target="_blank" href="https://www.alexbgurvi.ch/firefly_disk_settling/index.html" style="color:white">
-          <h3>disk formation</h3> 
-        </a>
-        <p> Alex Gurvich </p>
-        
-        <hr style="width:80%">
-        <div style="width:95%"> <p>In this example, we demonstrate how to select between multiple datasets at different times. The data here shows the formation and growth of a galactic disk from an initial chaotic system.</p>
-</div>
-        
+      <div class="gal-hint">Hover a thumbnail for a description &#183; click a card to try it yourself &#183; opens in a new tab</div>
+    </div>
+    <div class="feature">
+      <a class="feature-link" href="/GaiaDR3" target="_blank" rel="noopener" aria-label="Gaia DR3 octree"></a>
+      <div class="feature-img">
+        <picture>
+          <source srcset="/assets/img/gallery/Gaia-dr3-thumb.webp" type="image/webp">
+          <img src="/assets/img/gallery/Gaia-dr3-thumb.png" alt="Gaia DR3 octree" loading="lazy" decoding="async">
+        </picture>
+        <div class="scrim"></div>
       </div>
-  </li>
-  
-  <li > 
-    <a target="_blank" href="https://www.alexbgurvi.ch/SDSS_test/index.html">
-      <img alt="viz" src="/assets/img/gallery/SDSS-test-thumb.png ">
-    </a>
-      <div class="info"> 
-        <a target="_blank" href="https://www.alexbgurvi.ch/SDSS_test/index.html" style="color:white">
-          <h3>SDSS example</h3> 
-        </a>
-        <p> Alex Gurvich </p>
-        
-        <hr style="width:80%">
-        <div style="width:95%"> <p>In this example using data from the Sloan telescope collaboration we visualize the real-life positions of galaxies colored by their classifications according to the citizen science project Galaxy Zoo.</p>
-</div>
-        
+      <div class="feature-body">
+        <div class="badge">Featured</div>
+        <h3>Gaia DR3 octree</h3>
+        <div class="feature-author">Alex Gurvich &amp; Aaron Geller</div>
+        <p>We showcase the powerful octree rendering engine, which progressively loads as the camera moves. To our knowledge, this is the only interactive visualization of the full 1.5 billion point dataset from the Gaia telescope DR3 data release.</p>
+
+        <div class="stat"><span class="n">1.5B</span><span class="u">points, streamed</span></div>
+        <div class="feature-cta">Explore it &#8594;</div>
       </div>
-  </li>
-  
-  <li > 
-    <a target="_blank" href="/GaiaDR3">
-      <img alt="viz" src="/assets/img/gallery/Gaia-dr3-thumb.png ">
-    </a>
-      <div class="info"> 
-        <a target="_blank" href="/GaiaDR3" style="color:white">
-          <h3>Gaia DR3 octree</h3> 
-        </a>
-        <p> Alex Gurvich & Aaron Geller </p>
-        
-        <hr style="width:80%">
-        <div style="width:95%"> <p>In this example, we showcase the powerful octree rendering engine which progressively loads as the camera moves. To our knowledge, this is the only interactive visualization of the full 1.5 billion point dataset from the Gaia telescope DR3 data release.</p>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <picture>
+          <source srcset="/assets/img/gallery/FIRE-lowres-thumb.webp" type="image/webp">
+          <img src="/assets/img/gallery/FIRE-lowres-thumb.png" alt="Low-res FIRE example" loading="lazy" decoding="async">
+        </picture>
+        <div class="card-scrim"></div>
+        <div class="card-label">
+          <div class="card-title">Low-res FIRE example</div>
+          <div class="mono card-author">Alex Gurvich</div>
+        </div>
+        <a class="card-link" href="https://www.alexbgurvi.ch/Firefly/index.html" target="_blank" rel="noopener" aria-label="Low-res FIRE example"></a>
+        <div class="card-hover">
+          <div class="card-blurb"><p>In this example from the <a href="https://fire.northwestern.edu">FIRE galaxy formation simulations</a> we use velocity vectors and color by temperature to emphasize hot outflows from the center of the galaxy. This is our default dataset and the most stable — try it first.</p>
 </div>
-        
+          <div class="mono card-cta">Low-res FIRE example &#8594;</div>
+        </div>
       </div>
-  </li>
-  
-  <li > 
-    <a target="_blank" href="https://zhafen.github.io/CGM-fates/">
-      <img alt="viz" src="/assets/img/gallery/CGM-fates-thumb.png ">
-    </a>
-      <div class="info"> 
-        <a target="_blank" href="https://zhafen.github.io/CGM-fates/" style="color:white">
-          <h3>CGM fates</h3> 
-        </a>
-        <p> Zach Hafen </p>
-        
-        <hr style="width:80%">
-        <div style="width:95%"> <p>In this example using an older version of Firefly, time series are visualized by including data from all the output times from the simulation. Data is classified and colored by where it will end up in the future.</p>
+      <div class="card">
+        <picture>
+          <source srcset="/assets/img/gallery/FIRE-hires-thumb.webp" type="image/webp">
+          <img src="/assets/img/gallery/FIRE-hires-thumb.png" alt="High-res FIRE example" loading="lazy" decoding="async">
+        </picture>
+        <div class="card-scrim"></div>
+        <div class="card-label">
+          <div class="card-title">High-res FIRE example</div>
+          <div class="mono card-author">Alex Gurvich</div>
+        </div>
+        <a class="card-link" href="https://www.alexbgurvi.ch/FIRE_hires/index.html" target="_blank" rel="noopener" aria-label="High-res FIRE example"></a>
+        <div class="card-hover">
+          <div class="card-blurb"><p>In this example from the <a href="https://fire.northwestern.edu">FIRE galaxy formation simulations</a> we use the 2D histogram rendering mode to emphasize the surface density contrast of points making the spiral structure of the disk.</p>
 </div>
-        
+          <div class="mono card-cta">High-res FIRE example &#8594;</div>
+        </div>
       </div>
-  </li>
-  
-  <li > 
-    <a target="_blank" href="https://zhafen.github.io/CGM-origins/">
-      <img alt="viz" src="/assets/img/gallery/CGM-origins-thumb.png ">
-    </a>
-      <div class="info"> 
-        <a target="_blank" href="https://zhafen.github.io/CGM-origins/" style="color:white">
-          <h3>CGM origins</h3> 
-        </a>
-        <p> Zach Hafen </p>
-        
-        <hr style="width:80%">
-        <div style="width:95%"> <p>In this example using an older version of Firefly, time series are visualized by including data from all the output times from the simulation. Data is classified and colored by where it came from in the past.</p>
+      <div class="card">
+        <picture>
+          <source srcset="/assets/img/gallery/Gaia-test-thumb.webp" type="image/webp">
+          <img src="/assets/img/gallery/Gaia-test-thumb.png" alt="Gaia eDR3 example" loading="lazy" decoding="async">
+        </picture>
+        <div class="card-scrim"></div>
+        <div class="card-label">
+          <div class="card-title">Gaia eDR3 example</div>
+          <div class="mono card-author">Alex Gurvich</div>
+        </div>
+        <a class="card-link" href="https://www.alexbgurvi.ch/Gaia_test/index.html" target="_blank" rel="noopener" aria-label="Gaia eDR3 example"></a>
+        <div class="card-hover">
+          <div class="card-blurb"><p>In this example, we use data from the Gaia space telescope collaboration to visualize the real-life positions and velocities of stars in the Milky Way.</p>
 </div>
-        
+          <div class="mono card-cta">Gaia eDR3 example &#8594;</div>
+        </div>
       </div>
-  </li>
-  
-</ul>
+      <div class="card">
+        <picture>
+          <source srcset="/assets/img/gallery/disk-formation-thumb.webp" type="image/webp">
+          <img src="/assets/img/gallery/disk-formation-thumb.png" alt="Disk formation" loading="lazy" decoding="async">
+        </picture>
+        <div class="card-scrim"></div>
+        <div class="card-label">
+          <div class="card-title">Disk formation</div>
+          <div class="mono card-author">Alex Gurvich</div>
+        </div>
+        <a class="card-link" href="https://www.alexbgurvi.ch/firefly_disk_settling/index.html" target="_blank" rel="noopener" aria-label="Disk formation"></a>
+        <div class="card-hover">
+          <div class="card-blurb"><p>In this example, we demonstrate how to select between multiple datasets at different times. The data here shows the formation and growth of a galactic disk from an initial chaotic system.</p>
 </div>
-      </section>
-        
-      <footer class="footer">
-    <p>&copy; Alex Gurvich and Aaron Geller, 2021 </p>
-    <p>Build with Jekyll and <span class="love">❤</span> using a template by <a href="https://github.com/nrandecker">Nathan Randecker</a></p>
+          <div class="mono card-cta">Disk formation &#8594;</div>
+        </div>
+      </div>
+      <div class="card">
+        <picture>
+          <source srcset="/assets/img/gallery/SDSS-test-thumb.webp" type="image/webp">
+          <img src="/assets/img/gallery/SDSS-test-thumb.png" alt="SDSS example" loading="lazy" decoding="async">
+        </picture>
+        <div class="card-scrim"></div>
+        <div class="card-label">
+          <div class="card-title">SDSS example</div>
+          <div class="mono card-author">Alex Gurvich</div>
+        </div>
+        <a class="card-link" href="https://www.alexbgurvi.ch/SDSS_test/index.html" target="_blank" rel="noopener" aria-label="SDSS example"></a>
+        <div class="card-hover">
+          <div class="card-blurb"><p>In this example using data from the Sloan telescope collaboration we visualize the real-life positions of galaxies colored by their classifications according to the citizen science project Galaxy Zoo.</p>
+</div>
+          <div class="mono card-cta">SDSS example &#8594;</div>
+        </div>
+      </div>
+      <div class="card">
+        <picture>
+          <source srcset="/assets/img/gallery/CGM-fates-thumb.webp" type="image/webp">
+          <img src="/assets/img/gallery/CGM-fates-thumb.png" alt="CGM fates" loading="lazy" decoding="async">
+        </picture>
+        <div class="card-scrim"></div>
+        <div class="card-label">
+          <div class="card-title">CGM fates</div>
+          <div class="mono card-author">Zach Hafen</div>
+        </div>
+        <a class="card-link" href="https://zhafen.github.io/CGM-fates/" target="_blank" rel="noopener" aria-label="CGM fates"></a>
+        <div class="card-hover">
+          <div class="card-blurb"><p>In this example using an older version of Firefly, time series are visualized by including data from all the output times from the simulation. Data is classified and colored by where it will end up in the future.</p>
+</div>
+          <div class="mono card-cta">CGM fates &#8594;</div>
+        </div>
+      </div>
+      <div class="card">
+        <picture>
+          <source srcset="/assets/img/gallery/CGM-origins-thumb.webp" type="image/webp">
+          <img src="/assets/img/gallery/CGM-origins-thumb.png" alt="CGM origins" loading="lazy" decoding="async">
+        </picture>
+        <div class="card-scrim"></div>
+        <div class="card-label">
+          <div class="card-title">CGM origins</div>
+          <div class="mono card-author">Zach Hafen</div>
+        </div>
+        <a class="card-link" href="https://zhafen.github.io/CGM-origins/" target="_blank" rel="noopener" aria-label="CGM origins"></a>
+        <div class="card-hover">
+          <div class="card-blurb"><p>In this example using an older version of Firefly, time series are visualized by including data from all the output times from the simulation. Data is classified and colored by where it came from in the past.</p>
+</div>
+          <div class="mono card-cta">CGM origins &#8594;</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+    
+    <footer>
+  <div class="foot">
+    <div>&#169; 2021&#8211;present Alex Gurvich and Aaron Geller</div>
+    <div class="foot-links">
+      <a href="https://github.com/ageller/Firefly" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://github.com/ageller/Firefly/issues" target="_blank" rel="noopener">Issues</a>
+      <a href="/docs" target="_blank" rel="noopener">Docs</a>
+    </div>
+    <div>Built with Jekyll</div>
+  </div>
 </footer>
-<script src="//cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
-<script src="/assets/js/sweet-scroll.min.js"></script>
 <script src="/assets/js/main.js"></script>
 <!-- Google Analytics -->
 
 
 
   </body>
+</html>

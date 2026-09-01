@@ -53,6 +53,10 @@ jekyll serve --livereload     # preview on http://127.0.0.1:4000
 Commit `website/_site` along with whatever source you changed. The server serves the
 built output, so a change that was never built is a change that never appears.
 
+`website/README.md` covers the rest: how the page is assembled, how to add a gallery
+entry (each thumbnail is committed as both a `.webp` and a `.png`), and the caveats
+around the hero's live-demo iframe.
+
 ### Publishing a change
 
 Changes flow one way: here → deployment repository → server. The server only pulls.

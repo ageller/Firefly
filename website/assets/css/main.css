@@ -1,387 +1,189 @@
-/*! normalize.css v7.0.0 | MIT License | github.com/necolas/normalize.css */
-@import url(https://fonts.googleapis.com/css?family=Montserrat);html{line-height:1.15;-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%}body{margin:0}article,aside,details,figcaption,figure,footer,header,main,menu,nav,section{display:block}h1{font-size:2em;margin:.67em 0}figure{margin:1em 40px}hr{box-sizing:content-box;height:0;overflow:visible}code,kbd,pre,samp{font-family:monospace,monospace;font-size:1em}a{background-color:transparent;-webkit-text-decoration-skip:objects}abbr[title]{border-bottom:none;text-decoration:underline dotted}b,strong{font-weight:bolder}dfn{font-style:italic}mark{background-color:#ff0;color:#000}small{font-size:80%}sub,sup{font-size:75%;line-height:0;position:relative;vertical-align:baseline}sub{bottom:-.25em}sup{top:-.5em}audio,canvas,video{display:inline-block}audio:not([controls]){display:none;height:0}img{border-style:none}svg:not(:root){overflow:hidden}button,input,optgroup,select,textarea{font-family:sans-serif;font-size:100%;line-height:1.15;margin:0}button,input{overflow:visible}button,select{text-transform:none}[type=reset],[type=submit],button,html [type=button]{-webkit-appearance:button}[type=button]::-moz-focus-inner,[type=reset]::-moz-focus-inner,[type=submit]::-moz-focus-inner,button::-moz-focus-inner{border-style:none;padding:0}[type=button]:-moz-focusring,[type=reset]:-moz-focusring,[type=submit]:-moz-focusring,button:-moz-focusring{outline:1px dotted ButtonText}fieldset{padding:.35em .75em .625em}legend{color:inherit;display:table;max-width:100%;white-space:normal}progress{display:inline-block;vertical-align:baseline}textarea{overflow:auto}[type=checkbox],[type=radio],legend{box-sizing:border-box;padding:0}[type=number]::-webkit-inner-spin-button,[type=number]::-webkit-outer-spin-button{height:auto}[type=search]{-webkit-appearance:textfield;outline-offset:-2px}[type=search]::-webkit-search-cancel-button,[type=search]::-webkit-search-decoration{-webkit-appearance:none}::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}summary{display:list-item}[hidden],template{display:none}
+/* Firefly landing page.
+   Ported from the 2026 redesign handoff.  Plain CSS on purpose: no build step,
+   no preprocessor, nothing to install before editing.  Jekyll copies this file
+   through verbatim.  Palette and type mirror the viewer's splash screen
+   (src/firefly/static/css/splashStyles.css). */
 
-body{
-	color: #555;
-	font-family: 'Montserrat',sans-serif;
-	font-size: 100%;
-	line-height: 1.5;
-	padding: 0;
+/* ---- tokens ---- */
+:root{
+  --bg:#050506; --panel:#0a0a0d; --panel-2:#0d0d11;
+  --text:#e9e9ec; --text-bright:#f4f4f6; --text-body:#b9b9c4; --text-dim:#8b8b95; --text-faint:#7c7c88;
+  --line:rgba(255,255,255,.07); --line-2:rgba(255,255,255,.10); --line-3:rgba(255,255,255,.16);
+  --purple:#9333ea; --magenta:#d6338f; --coral:#f2603c; --coral-hi:#ff8a63;
+  --grad:linear-gradient(90deg,#9333ea,#d6338f 52%,#f2603c);
+  --max:1240px;
+  --sans:'Hanken Grotesk',Helvetica,Arial,sans-serif;
+  --mono:'DM Mono',ui-monospace,monospace;
 }
-article,aside,figcaption,figure,footer,header,nav,section{
-	display: block;
-}
-h1,h2,h3,h4,stong{
-	color: #333;
-	line-height: 1.25;
-	margin-top: 1em;
-	padding-top: 1em;
-}
-h1{
-	font-size: 2.5rem;
-}
-h2{
-	font-size: 2rem;
-}
-h3{
-	font-size: 1.5rem;
-}
-h4{
-	font-size: 1rem;
-}
-ol,ul{
-	padding-left: 40px;
-}
-figure,ol,p,ul{
-	margin: 1em 0;
-}
-a img{
-	border: 0;
-}
-sub,sup{
-	line-height: 0;
-}
-#particles-js{
-	background: #1a222c;
-	background-attachment: fixed;
-	background-repeat: no-repeat;
-	background-size: cover;
-	display: flex;
-	min-height: 100vh;
-	vertical-align: bottom;
-	width: 100%;
-}
-#particles-js .particles-js-canvas-el{
-	height: 100vh!important;
-	width: 100%!important;
-}
-.header{
-	color: #fff;
-	left: 50%;
-	margin: 0 auto;
-	position: absolute;
-	text-align: center;
-	top: 50%;
-	transform: translate(-50%,-50%);
-	webkit-transform: translate(-50%,-50%);
-	z-index: 1;
-}
-.header .site-title{
-	color: #fff;
-	display: block;
-	font-size: 50px;
-	line-height: 1;
-}
-@media only screen and (min-width:550px){
-	.header .site-title{
-		font-size: 100px;
-		margin: 0;
-	}
-}
-.header .site-description{
-	color: #fff;
-	display: block;
-	font-size: 20px;
-	line-height: 1;
-	margin-top: 10px;
-}
-@media only screen and (min-width:550px){
-	.header .site-description{
-		font-size: 40px;
-	}
-}
-.header-links{
-	margin: 10px;
-}
-.header-links .link{
-	color: #fff;
-	font-size: 15px;
-	margin: 10px;
-	text-decoration: none;
-}
-@media only screen and (min-width:550px){
-	.header-links .link{
-		font-size: 20px;
-	}
-}
-.header-icons{
-	display: flex;
-	justify-content: center;
-	text-align: center;
-}
-.down,.header-icons .icon{
-	color: #fff;
-	text-align: center;
-}
-.header-icons .icon{
-	border: 2px solid #fff;
-	border-radius: 50%;
-	font-size: 20px;
-	height: 20px;
-	margin: 5px;
-	padding: 10px;
-	transition: all .7s;
-	width: 20px;
-}
-.header-icons .icon:active,.header-icons .icon:hover{
-	background: #fff;
-	color: #1a222c;
-}
-@media only screen and (min-width:550px){
-	.header-icons .icon{
-		font-size: 35px;
-		height: 35px;
-		width: 35px;
-	}
-}
-.down{
-	bottom: 25px;
-	cursor: pointer;
-	display: block;
-	font-size: 30px;
-	margin: 0 auto;
-	position: absolute;
-	width: 100%;
-}
-.down .icon{
-	animation: pulse 1.3s infinite;
-	fill: #fff;
-	height: 100px;
-	left: 50%;
-	position: absolute;
-	top: 50%;
-	transform: translate(-50%,-50%);
-	transform-style: preserve-3d;
-	webkit-animation: pulse 1.3s infinite;
-	webkit-transform: translate(-50%,-50%);
-	webkit-transform-style: preserve-3d;
-	width: 100px;
-}
-.down .icon:active,.down .icon:hover,.footer a:active,.footer a:hover{
-	color: #4b5664;
-}
-#about{
-	margin: 0 auto;
-	max-width: 960px;
-	width: 90%;
-}
-@media only screen and (min-width:550px){
-	#about{
-		width: 80%;
-	}
-}
-.tech{
-	margin: 10px;
-}
-.user{
-	display: flex;
-	flex-direction: row;
-	flex-wrap: wrap;
-	font-size: 60px;
-	justify-content: space-between;
-	text-align: center;
-}
-.user p{
-	font-size: 16px;
-}
-@media only screen and (min-width:550px){
-	.user{
-		flex-wrap: nowrap;
-		font-size: 75px;
-	}
-}
-.user-details{
-	margin: 5px auto;
-	text-align: center;
-}
-#gallery{
-	display: flex;
-	flex-direction: column;
-	justify-content: space-between;
-	margin: 0 auto;
-	max-width: 960px;
-	width: 90%;
-}
-@media only screen and (min-width:550px){
-	#gallery{
-		width: 80%;
-	}
-}
-.user-projects{
-	margin: 20px auto;
-}
-.user-projects img{
-	border-radius: 5px;
-	height: auto;
-	max-width: 100%;
-}
-.user-projects h5,body{
-	margin: 0;
-}
-.user-projects li{
-	color: #1a222c;
-	font-size: 1.1rem;
-}
-.user-projects p{
-	margin-right: 5px;
-}
-@media only screen and (min-width:550px){
-	.contents{
-		margin-left: 0;
-		width: 48%;
-	}
-	.contents-right{
-		margin-top: -5%;
-	}
-	.contents-right,.images-right{
-		float: right;
-		width: 48%;
-	}
-	.images-right img{
-		float: right;
-	}
-	.images-left{
-		float: left;
-		width: 48%;
-	}
-	.images-left img{
-		float: left;
-	}
-}
-.project-link{
-	background-color: transparent;
-	border: 1px solid #1a222c;
-	border-radius: 10px;
-	color: #1a222c;
-	cursor: pointer;
-	display: inline-block;
-	margin: 10px 0;
-	outline: 0;
-	padding: 5px;
-	text-align: center;
-	text-decoration: none;
-	transition: color .3s ease-out,background-color .3s ease-out,border-color .3s ease-out;
-}
-.project-link:active,.project-link:hover{
-	background-color: #54516a;
-	border-color: #54516a;
-	color: #fff;
-	transition: color .3s ease-in,background-color .3s ease-in,border-color .3s ease-in;
-}
-.footer{
-	background: #1a222c;
-	color: #fff;
-	margin-top: 100px;
-	padding: 10px 0;
-	text-align: center;
-}
-.footer .love{
-	color: red;
-}
-.footer a{
-	color: #fff;
-	margin: 0;
-	text-decoration: none;
-}
+*{box-sizing:border-box}
+/* scroll-padding keeps #about / #gallery from landing underneath the fixed nav */
+html{scroll-behavior:smooth;scroll-padding-top:84px}
+html,body{margin:0;padding:0;background:var(--bg)}
+body{color:var(--text);font-family:var(--sans);font-weight:300;overflow-x:hidden}
+a{color:var(--coral);text-decoration:none}
+a:hover{color:var(--coral-hi)}
+a:focus-visible,button:focus-visible{outline:2px solid var(--coral);outline-offset:3px}
+::selection{background:var(--magenta);color:#fff}
+img{display:block}
+/* <picture> is only a wrapper for the WebP <source>; display:contents lets every
+   rule below keep targeting the <img> directly, exactly as in the design. */
+picture{display:contents}
+.mono{font-family:var(--mono)}
+.wrap{max-width:var(--max);margin:0 auto}
 
-/* from : https://alijafarian.com/tutorial/responsive-image-grids-using-css/ */
+/* ---- nav ---- */
+.nav{position:fixed;inset:0 0 auto 0;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:24px;
+  padding:14px 28px;background:rgba(5,5,6,.72);backdrop-filter:blur(14px);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;color:var(--text)}
+.brand:hover{color:var(--text)}
+.brand-dot{width:9px;height:9px;border-radius:50%;background:linear-gradient(90deg,#9333ea,#f2603c);box-shadow:0 0 12px rgba(214,51,143,.9)}
+.brand-word{font-family:var(--mono);font-size:13px;letter-spacing:.34em;text-transform:uppercase}
+.nav-links{display:flex;align-items:center;flex-wrap:wrap;justify-content:flex-end;gap:10px 20px;
+  font-family:var(--mono);font-size:12px;letter-spacing:.18em;text-transform:uppercase}
+.nav-links a{color:var(--text-dim)}
+.nav-links a:hover{color:var(--text)}
 
-ul.rig {
-	list-style: none;
-	font-size: 0px;
-	margin-left: -1%; /* should match li left margin */
-}
-ul.rig li {
-	display: inline-block;
-	padding: 0px;
-	margin: 0 0 0 1%; /* 2.5% 2.5%;*/
-	background: #fff;
-	/* 
-	border: 1px solid #ddd;
-	box-shadow: 0 0 5px #ddd;
-	*/
-	font-size: 16px;
-	font-size: 1rem;
-	vertical-align: top;
-	box-sizing: border-box;
-	-moz-box-sizing: border-box;
-	-webkit-box-sizing: border-box;
-}
-ul.rig li img {
-	max-width: 100%;
-	height: auto;
-	margin: 0 0 5px 0;
-	margin-bottom:1px;
-}
-ul.rig li h3 {
-	margin: 0 0 5px;
-	text-align:center;
-	vertical-align: middle;
-	color:white;
-	padding:0;
-	margin:0;
-}
-ul.rig li p {
-	font-size: .9em;
-	line-height: 1.5em;
-	color: white;
-	text-align:center;
-	vertical-align: middle;
-	margin:0;
-}
+/* ---- hero ---- */
+.hero{position:relative;min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:120px 28px 56px;overflow:hidden}
+.hero-glow{position:absolute;inset:0;pointer-events:none;background-image:
+  radial-gradient(60% 55% at 22% 42%, rgba(147,51,234,.28) 0%, rgba(5,5,6,0) 70%),
+  radial-gradient(50% 45% at 78% 28%, rgba(242,96,60,.16) 0%, rgba(5,5,6,0) 72%)}
+.hero-inner{position:relative;width:100%;max-width:var(--max);margin:0 auto}
+.hero-grid{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:64px;align-items:center}
+/* height:auto is load-bearing: the <img> carries width/height attributes so the
+   browser can reserve space before the file arrives, but those are presentational
+   hints, and without this the height attribute wins and squashes the wordmark. */
+.wordmark{width:100%;height:auto;max-width:560px;margin-left:-6px}
+h1{font-size:clamp(28px,3.2vw,46px);font-weight:300;line-height:1.12;letter-spacing:-.02em;margin:26px 0 0;color:var(--text-bright);text-wrap:pretty}
+.byline{font-family:var(--mono);font-size:12.5px;letter-spacing:.22em;text-transform:uppercase;color:var(--text-faint);margin-top:18px}
+.cta-row{display:flex;flex-wrap:wrap;gap:14px;margin-top:38px}
+.btn,.btn-ghost{display:inline-flex;align-items:center;gap:12px;padding:15px 26px;border-radius:999px;
+  font-family:var(--mono);font-size:12.5px;letter-spacing:.2em;text-transform:uppercase;white-space:nowrap;cursor:pointer}
+.btn{border:0;background:var(--grad);color:#fff;box-shadow:0 8px 40px rgba(214,51,143,.32);transition:box-shadow .2s,transform .2s}
+.btn:hover{box-shadow:0 8px 54px rgba(214,51,143,.55);transform:translateY(-1px);color:#fff}
+.btn-dot{width:8px;height:8px;border-radius:50%;background:#fff}
+.btn-ghost{border:1px solid var(--line-3);color:#c9c9d2;background:transparent}
+.btn-ghost:hover{border-color:rgba(255,255,255,.4);color:#fff}
+.hero-note{font-family:var(--mono);font-size:11.5px;letter-spacing:.1em;color:var(--text-faint);margin-top:20px;line-height:1.9}
+.hero-note b{color:var(--magenta);font-weight:400}
+.poster{position:relative;border-radius:16px;overflow:hidden;border:1px solid var(--line-2);background:#000;aspect-ratio:4/3;cursor:pointer}
+.poster:hover{border-color:rgba(214,51,143,.55)}
+.poster img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.72}
+.poster-scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,5,6,.1),rgba(5,5,6,.85))}
+.poster-bar{position:absolute;left:0;right:0;bottom:0;padding:22px 24px;display:flex;align-items:flex-end;justify-content:space-between;gap:16px;
+  font-family:var(--mono);font-size:11.5px;letter-spacing:.2em;text-transform:uppercase;line-height:1.9}
+/* min-width:0 lets the long URL shrink instead of shoving "Click to run" out
+   of the poster, which it otherwise does below about 360px */
+.poster-bar .l{color:#a9a9b4;min-width:0;overflow-wrap:anywhere}
+.poster-bar .l span{color:#5e5e6a}
+.poster-bar .r{color:var(--coral);flex:0 0 auto}
 
-ul.rig li .info{
-	position:relative;
-	background: rgba(26, 55, 73, 0.72);
-	visibility: hidden;
-	opacity: 0;
-	top:-7px;
-	margin-top:-100%;
-	/* transition effect. not necessary */
-	transition: opacity .2s, visibility .2s;
-	aspect-ratio:1;
-	}
+/* ---- demo ---- */
+.demo{display:none}
+body.demo-open .hero-grid{display:none}
+body.demo-open .demo{display:block}
+.demo-bar{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:14px}
+.demo-live{display:flex;align-items:center;gap:12px;font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--text-dim)}
+.demo-live .dot{width:8px;height:8px;border-radius:50%;background:var(--coral);box-shadow:0 0 10px var(--coral)}
+.demo-actions{display:flex;gap:12px}
+.demo-actions .btn-ghost{padding:11px 20px;font-size:11.5px}
+.demo-frame{position:relative;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,.12);background:#000;height:72vh;min-height:460px}
+.demo-frame iframe{width:100%;height:100%;border:0;display:block}
 
-ul.rig li a{
-	color:red;
-}
+/* ---- about ---- */
+section.band{position:relative;padding:110px 28px;border-top:1px solid var(--line)}
+.about-grid{display:grid;grid-template-columns:minmax(0,320px) minmax(0,1fr);gap:72px;max-width:var(--max);margin:0 auto}
+.eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--coral)}
+.sublabel{font-family:var(--mono);font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;color:#5e5e6a;margin:44px 0 16px}
+.chips{display:flex;flex-wrap:wrap;gap:10px}
+.chip{display:inline-flex;align-items:center;padding:9px 14px;border-radius:8px;border:1px solid var(--line-2);
+  background:var(--panel-2);color:#a9a9b4;font-size:11.5px;letter-spacing:.12em}
+.chip:hover{border-color:rgba(242,96,60,.6);color:#fff}
+.prose{font-size:clamp(17px,1.32vw,20px);line-height:1.72;color:var(--text-body);max-width:70ch;text-wrap:pretty}
+.prose p{margin:0 0 22px}
+.prose p:last-of-type{margin:0}
+.prose .lead{color:var(--text-bright)}
+.prose-links{display:flex;flex-wrap:wrap;gap:26px;margin-top:38px;font-family:var(--mono);font-size:12px;letter-spacing:.16em;text-transform:uppercase}
 
-ul.rig li a:hover + .info{
-	visibility: visible;
-	opacity: 1;
-}
+/* ---- gallery ---- */
+.gal-head{display:flex;align-items:flex-end;justify-content:space-between;gap:32px;flex-wrap:wrap;margin-bottom:40px}
+.gal-head h2{font-size:clamp(26px,2.6vw,38px);font-weight:300;letter-spacing:-.02em;margin:14px 0 0;color:var(--text-bright)}
+.gal-hint{font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;color:var(--text-faint);max-width:38ch;line-height:1.9}
 
-ul.rig li .info:hover{
-	visibility: visible;
-	opacity: 1;
-	}
+/* Cards are <div>, not <a>, because the blurbs are authored in markdown and two
+   of them contain links -- nesting those inside a card-sized <a> is invalid and
+   browsers repair it by splitting the DOM.  Instead the title link is stretched
+   over the whole card with ::after, so the card is still clickable edge to edge
+   while links inside the blurb keep working.  See .card-link / .card-blurb a. */
+.feature{position:relative;display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);align-items:stretch;
+  border-radius:18px;overflow:hidden;border:1px solid rgba(255,255,255,.12);background:var(--panel);margin-bottom:22px}
+.feature:hover{border-color:rgba(214,51,143,.6)}
+.feature:has(.feature-link:focus-visible){border-color:rgba(214,51,143,.6)}
+.feature-img{position:relative;min-height:400px;background:#000}
+.feature-img img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.feature-img .scrim{position:absolute;inset:0;background:linear-gradient(90deg,rgba(5,5,6,0) 45%,rgba(10,10,13,.95) 100%)}
+.feature-body{padding:44px 44px 40px;display:flex;flex-direction:column;justify-content:center;gap:18px}
+.badge{align-self:flex-start;font-family:var(--mono);font-size:11px;letter-spacing:.24em;text-transform:uppercase;
+  color:var(--panel);background:linear-gradient(90deg,#d6338f,#f2603c);padding:7px 13px;border-radius:999px}
+.feature-body h3{font-size:clamp(26px,2.4vw,34px);font-weight:400;letter-spacing:-.02em;margin:0;color:#fff}
+.feature-author{font-family:var(--mono);font-size:11.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--text-faint)}
+.feature-body p{margin:0;font-size:17px;line-height:1.68;color:var(--text-body);max-width:46ch;text-wrap:pretty}
+/* a link in the blurb has to out-stack .feature-link to stay clickable */
+.feature-body p a{position:relative;z-index:3;text-decoration:underline;text-underline-offset:2px}
+.stat{display:flex;align-items:baseline;gap:14px;margin-top:6px}
+.stat .n{font-size:44px;font-weight:300;letter-spacing:-.03em;background:linear-gradient(90deg,#d6338f,#f2603c);
+  -webkit-background-clip:text;background-clip:text;color:transparent}
+.stat .u{font-family:var(--mono);font-size:11.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--text-faint)}
+.feature-cta{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--coral);margin-top:6px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:22px}
+.card{position:relative;display:block;border-radius:14px;overflow:hidden;border:1px solid var(--line-2);
+  background:var(--panel);aspect-ratio:4/3}
+.card:hover{border-color:rgba(214,51,143,.6)}
+.card:has(.card-link:focus-visible){border-color:rgba(214,51,143,.6)}
+.card img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.card-scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,5,6,0) 40%,rgba(5,5,6,.92) 100%)}
+.card-label{position:absolute;left:0;right:0;bottom:0;padding:18px 20px;z-index:1}
+.card-title{font-size:18px;font-weight:400;color:#fff;letter-spacing:-.01em}
+.card-author{font-size:10.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--text-dim);margin-top:6px}
+/* The whole-card hit area: an empty, absolutely positioned <a> that is a direct
+   child of the card, so inset:0 resolves against the card rather than against
+   .card-label.  It carries no text, hence the aria-label in the template. */
+.card-link,.feature-link{position:absolute;inset:0;z-index:2}
+.card-hover{position:absolute;inset:0;padding:24px 22px;display:flex;flex-direction:column;justify-content:flex-end;gap:12px;
+  background:rgba(6,6,9,.93);opacity:0;transition:opacity 180ms ease;z-index:3;pointer-events:none}
+/* :focus-visible rather than :focus-within.  Clicking a card opens a new tab,
+   and the link still holds DOM focus when the visitor comes back, so
+   :focus-within would pin the overlay open until they clicked elsewhere.
+   :focus-visible only matches keyboard focus, so the mouse case clears on
+   mouseout while keyboard users still get the blurb.  The sibling combinator
+   works because .card-link sits immediately before .card-hover. */
+.card:hover .card-hover{opacity:1}
+.card-link:focus-visible ~ .card-hover{opacity:1}
+.card-blurb{font-size:14.5px;line-height:1.6;color:#c9c9d2;text-wrap:pretty}
+.card-blurb p{margin:0}
+/* re-enable clicks only for real links inside the blurb, so they beat the
+   stretched card link rather than being swallowed by it */
+.card-blurb a{pointer-events:auto;position:relative;z-index:4;text-decoration:underline;text-underline-offset:2px}
+.card-cta{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--coral)}
 
-/* class for 2 columns */
-ul.rig.columns-2 li {
-	width: 47.5%; /* this value + 2.5 should = 50% */
+/* ---- footer ---- */
+footer{border-top:1px solid var(--line);padding:38px 28px 56px}
+.foot{display:flex;flex-wrap:wrap;gap:20px;align-items:center;justify-content:space-between;
+  max-width:var(--max);margin:0 auto;font-family:var(--mono);font-size:11.5px;letter-spacing:.14em;color:var(--text-faint)}
+.foot-links{display:flex;gap:26px;flex-wrap:wrap}
+.foot-links a{color:var(--text-dim)}
+.foot-links a:hover{color:#fff}
+
+/* ---- responsive ---- */
+@media (max-width:900px){
+  .hero-grid,.about-grid,.feature{grid-template-columns:1fr;gap:32px}
+  .hero,section.band,footer{padding-left:20px;padding-right:20px}
+  section.band{padding-top:72px;padding-bottom:72px}
+  .hero{min-height:0;padding-top:96px;padding-bottom:48px}
+  .feature-img{min-height:240px}
+  .feature-body{padding:28px 24px 32px}
 }
-/* class for 3 columns */
-ul.rig.columns-3 li {
-	width: 30.83%; /* this value + 2.5 should = 33% */
-}
-/* class for 4 columns */
-ul.rig.columns-4 li {
-	width: 22.5%; /* this value + 2.5 should = 25% */
-}
- 
-@media (max-width: 480px) {
-	ul.grid-nav li {
-		display: block;
-		margin: 0 0 5px;
-	}
-	ul.grid-nav li a {
-		display: block;
-	}
-	ul.rig {
-		margin-left: 0;
-	}
-	ul.rig li {
-		width: 100% !important; /* over-ride all li styles */
-		margin: 0 0 20px;
-	}
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  *,*::before,*::after{transition-duration:.01ms !important;animation-duration:.01ms !important}
 }

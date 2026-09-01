@@ -1,1 +1,39 @@
-document.addEventListener("DOMContentLoaded", function () { new SweetScroll({}); particlesJS("particles-js", { particles: { number: { value: 30, density: { enable: !0, value_area: 800 } }, color: { value: "#ffffff" }, shape: { type: "polygon", stroke: { width: 0, color: "#000000" }, polygon: { nb_sides: 5 }, image: { src: "img/github.svg", width: 100, height: 100 } }, opacity: { value: .5, random: !1, anim: { enable: !1, speed: 1, opacity_min: .1, sync: !1 } }, size: { value: 3, random: !0, anim: { enable: !1, speed: 19.18081918081918, size_min: .1, sync: !1 } }, line_linked: { enable: !0, distance: 150, color: "#ffffff", opacity: .4, width: 1 }, move: { enable: !0, speed: 4, direction: "none", random: !0, straight: !1, out_mode: "out", bounce: !1, attract: { enable: !1, rotateX: 600, rotateY: 1200 } }, nb: 80 }, interactivity: { detect_on: "canvas", events: { onhover: { enable: !1, mode: "grab" }, onclick: { enable: !0, mode: "push" }, resize: !0 }, modes: { grab: { distance: 400, line_linked: { opacity: 1 } }, bubble: { distance: 400, size: 40, duration: 2, opacity: 8, speed: 3 }, repulse: { distance: 200, duration: .4 }, push: { particles_nb: 4 }, remove: { particles_nb: 2 } } }, retina_detect: !0 }) }, !1);
+/* Firefly landing page.  Two behaviours, no dependencies:
+     - "Launch live demo" (and the poster) swaps the hero for an iframe of the
+       current GitHub Pages build.  Nothing is fetched until it is pressed.
+     - "Close" points the iframe back at about:blank, which releases the WebGL
+       context.  Without it a backgrounded Firefly keeps burning GPU. */
+(function () {
+  var frame = document.getElementById('demo-frame');
+  if (!frame) return;
+
+  var url = frame.getAttribute('data-src');
+
+  /* Below 700px the demo opens in its own tab instead of in the page: a
+     1.5-billion-point WebGL scene framed on a phone is a bad first impression,
+     and iOS reclaims backgrounded WebGL contexts anyway. */
+  var small = window.matchMedia('(max-width: 700px)');
+
+  function launch() {
+    if (small.matches) { window.open(url, '_blank', 'noopener'); return; }
+    if (frame.getAttribute('src') !== url) frame.setAttribute('src', url);
+    document.body.classList.add('demo-open');
+  }
+
+  function close() {
+    document.body.classList.remove('demo-open');
+    frame.setAttribute('src', 'about:blank');
+  }
+
+  document.querySelectorAll('[data-launch]').forEach(function (el) {
+    el.addEventListener('click', launch);
+  });
+  document.querySelectorAll('[data-close]').forEach(function (el) {
+    el.addEventListener('click', close);
+  });
+
+  /* narrowing the window while the demo is open drops back to the poster */
+  small.addEventListener('change', function (e) {
+    if (e.matches && document.body.classList.contains('demo-open')) close();
+  });
+})();

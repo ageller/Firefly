@@ -1,26 +1,58 @@
-<div class='user-details'> 
-  <h1> Gallery </h1> 
-  <p>Hover over a thumbnail for a description of each Firefly instance and click the title to try it out yourself!</p>
-</div>
-
-<div class='gallery'>
-<ul class="rig columns-3">
-  {% for entry in site.gallery %}
-  <li > 
-    <a target="_blank" href="{{ entry.source }}">
-      <img alt="viz" src="{{"/assets/img/gallery/" | prepend: site.baseurl | append: entry.img }} ">
-    </a>
-      <div class="info"> 
-        <a target="_blank" href="{{ entry.source }}" style="color:white">
-          <h3>{{ entry.title }}</h3> 
-        </a>
-        <p> {{ entry.author}} </p>
-        {% if entry.blurb %}
-        <hr style="width:80%">
-        <div style="width:95%"> {{ entry.content}}</div>
-        {% endif %}
+{%- assign featured = site.gallery | where: 'featured', true | first -%}
+<section class="band" id="gallery" style="padding-bottom:120px">
+  <div class="wrap">
+    <div class="gal-head">
+      <div>
+        <div class="eyebrow">Gallery</div>
+        <h2>Firefly in the wild</h2>
       </div>
-  </li>
-  {% endfor %}
-</ul>
-</div>
+      <div class="gal-hint">Hover a thumbnail for a description &#183; click a card to try it yourself &#183; opens in a new tab</div>
+    </div>
+
+    {%- if featured %}
+    {%- if featured.source contains '://' %}{% assign href = featured.source %}{% else %}{% assign href = featured.source | relative_url %}{% endif %}
+    <div class="feature">
+      <a class="feature-link" href="{{ href }}" target="_blank" rel="noopener" aria-label="{{ featured.title | escape }}"></a>
+      <div class="feature-img">
+        <picture>
+          <source srcset="{{ '/assets/img/gallery/' | append: featured.img | replace: '.png', '.webp' | relative_url }}" type="image/webp">
+          <img src="{{ '/assets/img/gallery/' | append: featured.img | relative_url }}" alt="{{ featured.title | escape }}" loading="lazy" decoding="async">
+        </picture>
+        <div class="scrim"></div>
+      </div>
+      <div class="feature-body">
+        <div class="badge">Featured</div>
+        <h3>{{ featured.title }}</h3>
+        <div class="feature-author">{{ featured.author | escape }}</div>
+        {{ featured.content }}
+        {%- if featured.stat %}
+        <div class="stat"><span class="n">{{ featured.stat }}</span><span class="u">{{ featured.stat_label | escape }}</span></div>
+        {%- endif %}
+        <div class="feature-cta">Explore it &#8594;</div>
+      </div>
+    </div>
+    {%- endif %}
+
+    <div class="grid">
+      {%- for entry in site.gallery %}{% unless entry.featured %}
+      {%- if entry.source contains '://' %}{% assign href = entry.source %}{% else %}{% assign href = entry.source | relative_url %}{% endif %}
+      <div class="card">
+        <picture>
+          <source srcset="{{ '/assets/img/gallery/' | append: entry.img | replace: '.png', '.webp' | relative_url }}" type="image/webp">
+          <img src="{{ '/assets/img/gallery/' | append: entry.img | relative_url }}" alt="{{ entry.title | escape }}" loading="lazy" decoding="async">
+        </picture>
+        <div class="card-scrim"></div>
+        <div class="card-label">
+          <div class="card-title">{{ entry.title }}</div>
+          <div class="mono card-author">{{ entry.author | escape }}</div>
+        </div>
+        <a class="card-link" href="{{ href }}" target="_blank" rel="noopener" aria-label="{{ entry.title | escape }}"></a>
+        <div class="card-hover">
+          <div class="card-blurb">{{ entry.content }}</div>
+          <div class="mono card-cta">{{ entry.title }} &#8594;</div>
+        </div>
+      </div>
+      {%- endunless %}{% endfor %}
+    </div>
+  </div>
+</section>

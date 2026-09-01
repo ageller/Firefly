@@ -1,25 +1,34 @@
 # Site settings
 title: Firefly
+tagline: A WebGL tool to explore particle-based data
 description: A browser-based interactive particle visualization app
 
-url: http://firefly.rcs.northwestern.edu  # the base hostname and protocol for your site, e.g. http://example.com
-domain: firefly.rcs.northwestern.edu      # if you want to force HTTPS, specify the domain without the http at the start, e.g. example.com
-#baseurl: "/Firefly/website/_site" # the subpath of your site, e.g. /blog
-baseurl: "" # the subpath of your site, e.g. /blog
+url: https://firefly.rcs.northwestern.edu   # base hostname and protocol
+domain: firefly.rcs.northwestern.edu
+baseurl: ""                                 # subpath of the site, e.g. /blog
 
 # User settings
 username: Firefly
 user_title: a browser-based interactive particle visualization app
 email: agurvich@u.northwestern.edu
-#twitter_username: lorem_ipsum
-github_username:  ageller/Firefly
-#gplus_username:  lorem_ipsum
+github_username: ageller/Firefly
+
+# Off-site links, kept here so they are changed in one place rather than in
+#  five templates.  Local links (/docs, /GaiaDR3) are served by nginx off the
+#  same host and are written as relative_url in the templates.
+links:
+  github: https://github.com/ageller/Firefly
+  issues: https://github.com/ageller/Firefly/issues
+  paper:  https://ui.adsabs.harvard.edu/abs/2023ApJS..265...38G/abstract
+  # The hero "Launch live demo" iframe.  GitHub Pages serves the repo root of
+  #  main, so this really is the latest build, and it ships FIRESampleData.
+  demo:   https://ageller.github.io/Firefly/src/firefly/index.html
 
 # Google-analytics
 #google-analytics:
   #id: ""
 
-exclude: ['package.json', 'src' , 'node_modules']
+exclude: ['README.md', 'LICENSE.txt', 'package.json', 'node_modules', 'Gemfile', 'Gemfile.lock']
 
 collections:
-  - gallery 
+  - gallery

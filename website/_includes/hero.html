@@ -1,0 +1,51 @@
+<section class="hero" id="top">
+  <div class="hero-glow"></div>
+  <div class="hero-inner">
+
+    <div class="hero-grid">
+      <div>
+        <picture>
+          <source srcset="{{ '/assets/img/firefly-wordmark.webp' | relative_url }}" type="image/webp">
+          <img class="wordmark" src="{{ '/assets/img/firefly-wordmark.png' | relative_url }}"
+               width="1200" height="247" alt="Firefly">
+        </picture>
+        <h1>A WebGL tool to explore particle&#8209;based data</h1>
+        <div class="byline">Aaron Geller&nbsp; /&nbsp; Alex Gurvich&nbsp; /&nbsp; Northwestern</div>
+        <div class="cta-row">
+          <button class="btn" type="button" data-launch><span class="btn-dot"></span>Launch live demo</button>
+          <a class="btn-ghost" href="{{ '/docs' | relative_url }}" target="_blank" rel="noopener">Documentation</a>
+          <a class="btn-ghost" href="{{ site.links.github }}">GitHub</a>
+        </div>
+        <div class="hero-note">Demo runs live from the latest build.<br><b>Hint:</b> zoom way out to see the dark matter distribution in the pink points.</div>
+      </div>
+
+      <div class="poster" data-launch>
+        <picture>
+          <source srcset="{{ '/assets/img/hero-fire-lowres.webp' | relative_url }}" type="image/webp">
+          <img src="{{ '/assets/img/hero-fire-lowres.jpg' | relative_url }}"
+               width="1600" height="1062" alt="The Firefly viewer showing the low-res FIRE galaxy simulation">
+        </picture>
+        <div class="poster-scrim"></div>
+        <div class="poster-bar">
+          <div class="l">Live viewer<br><span>ageller.github.io/Firefly</span></div>
+          <div class="r">Click to run &#8594;</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="demo">
+      <div class="demo-bar">
+        <div class="demo-live"><span class="dot"></span>Live demo &#183; latest build</div>
+        <div class="demo-actions">
+          <a class="btn-ghost" href="{{ site.links.demo }}" target="_blank" rel="noopener">Open in new tab</a>
+          <button class="btn-ghost" type="button" data-close>Close</button>
+        </div>
+      </div>
+      <div class="demo-frame">
+        <iframe id="demo-frame" title="Firefly live demo" allow="fullscreen"
+                src="about:blank" data-src="{{ site.links.demo }}"></iframe>
+      </div>
+    </div>
+
+  </div>
+</section>
