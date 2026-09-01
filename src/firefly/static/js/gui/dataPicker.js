@@ -264,6 +264,14 @@ function buildDataBrowser(picker){
 
 	browser.append('div').attr('id', 'dataBrowserPath').attr('class', 'ff-browser__path');
 	browser.append('div').attr('id', 'dataBrowserList').attr('class', 'ff-browser__list');
+	// its own element, outside #dataBrowserList: anything sharing that container's
+	//  .ff-browser__item class gets picked up by the data join in renderBrowse(),
+	//  which would then call the key function on an element with no bound data
+	browser.append('div')
+		.attr('id', 'dataBrowserEmpty')
+		.attr('class', 'ff-browser__empty')
+		.style('display', 'none')
+		.text('(no subdirectories)');
 
 	var foot = browser.append('div').attr('class', 'ff-browser__foot');
 	foot.append('button')
@@ -344,7 +352,10 @@ function renderBrowse(data){
 	}));
 
 	var list = d3.select('#dataBrowserList');
-	var rows = list.selectAll('div.ff-browser__item').data(entries, function(d){ return d.name; });
+	// key on the kind as well as the name, so a directory and a file that happen
+	//  to share a name in different listings can't reuse the same row
+	var rows = list.selectAll('div.ff-browser__item')
+		.data(entries, function(d){ return d ? (d.isdir ? 'd:' : 'f:') + d.name : ''; });
 	rows.exit().remove();
 	var incoming = rows.enter().append('div').attr('class', 'ff-browser__item');
 	incoming.append('span').attr('class', 'ff-browser__name');
@@ -367,9 +378,7 @@ function renderBrowse(data){
 		return '';
 	});
 
-	if (!entries.length) list.append('div')
-		.attr('class', 'ff-browser__item ff-browser__item--empty')
-		.text('(no subdirectories)');
+	d3.select('#dataBrowserEmpty').style('display', entries.length ? 'none' : null);
 }
 
 // the server may be on any OS, so keep whichever separator its paths already use

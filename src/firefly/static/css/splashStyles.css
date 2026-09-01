@@ -455,8 +455,12 @@
 .ff-browser__item:hover { background: var(--ff-glass); color: var(--ff-fg); }
 .ff-browser__item--data { color: var(--ff-fg); }
 .ff-browser__item--file { font-style: italic; }
-.ff-browser__item--empty { color: var(--ff-fg-40); cursor: default; }
-.ff-browser__item--empty:hover { background: none; }
+.ff-browser__empty {
+  padding: 0.4em 0.6em;
+  font-family: var(--ff-mono);
+  font-size: var(--ff-fs-mono-sm);
+  color: var(--ff-fg-40);
+}
 .ff-browser__name { word-break: break-all; }
 .ff-browser__tag {
   flex-shrink: 0;
