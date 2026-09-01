@@ -301,8 +301,8 @@
 
         <span class="c1">## start with the default</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">settings_default</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="s1">&#39;color&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="mi">3</span><span class="p">),[</span><span class="mi">1</span><span class="p">]),</span>
-            <span class="s1">&#39;sizeMult&#39;</span><span class="p">:</span><span class="mf">.1</span><span class="p">,</span>
+            <span class="s1">&#39;partsColors&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="mi">3</span><span class="p">),[</span><span class="mi">1</span><span class="p">]),</span>
+            <span class="s1">&#39;partsSizeMultipliers&#39;</span><span class="p">:</span><span class="mf">.1</span><span class="p">,</span>
             <span class="s1">&#39;showParts&#39;</span><span class="p">:</span><span class="kc">True</span><span class="p">,</span>
             <span class="s1">&#39;filterVals&#39;</span><span class="p">:</span><span class="nb">dict</span><span class="p">(),</span>
             <span class="s1">&#39;filterLims&#39;</span><span class="p">:</span><span class="nb">dict</span><span class="p">(),</span>
@@ -439,6 +439,41 @@
 
             <span class="bp">self</span><span class="o">.</span><span class="n">attached_settings</span><span class="p">[</span><span class="s1">&#39;colormapLims&#39;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">UIname</span><span class="p">][</span><span class="n">field_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">colormapLims</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">attached_settings</span><span class="p">[</span><span class="s1">&#39;colormapVals&#39;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">UIname</span><span class="p">][</span><span class="n">field_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">colormapVals</span></div>
+    
+<div class="viewcode-block" id="ParticleGroup.untrackArray"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.ParticleGroup.html#firefly.data_reader.ParticleGroup.untrackArray">[docs]</a>    <span class="k">def</span> <span class="nf">untrackArray</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">field_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; remove a field array that was previously added/tracked</span>
+
+<span class="sd">        :param field_name: name of the field to remove </span>
+<span class="sd">        :type field_name: str</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1">## don&#39;t attempt to remove a field that isn&#39;t tracked</span>
+        <span class="k">if</span> <span class="n">field_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">field_names</span><span class="p">:</span> <span class="k">return</span>
+
+        <span class="c1">## remove from the default settings</span>
+        <span class="n">dictionaries</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">settings_default</span><span class="p">[</span><span class="s1">&#39;filterLims&#39;</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">settings_default</span><span class="p">[</span><span class="s1">&#39;filterVals&#39;</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">settings_default</span><span class="p">[</span><span class="s1">&#39;colormapLims&#39;</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">settings_default</span><span class="p">[</span><span class="s1">&#39;colormapVals&#39;</span><span class="p">]</span>
+        <span class="p">]</span>
+
+        <span class="c1">## remove from the attached settings if they&#39;re already there</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">attached_settings</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">dictionaries</span> <span class="o">+=</span> <span class="p">[</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">attached_settings</span><span class="p">[</span><span class="s1">&#39;filterLims&#39;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">UIname</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">attached_settings</span><span class="p">[</span><span class="s1">&#39;filterVals&#39;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">UIname</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">attached_settings</span><span class="p">[</span><span class="s1">&#39;colormapLims&#39;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">UIname</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">attached_settings</span><span class="p">[</span><span class="s1">&#39;colormapVals&#39;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">UIname</span><span class="p">]</span>
+            <span class="p">]</span>
+
+        <span class="c1">## do the removing from the dictionaries</span>
+        <span class="k">for</span> <span class="n">dictionary</span> <span class="ow">in</span> <span class="n">dictionaries</span><span class="p">:</span> 
+            <span class="k">if</span> <span class="n">field_name</span> <span class="ow">in</span> <span class="n">dictionary</span><span class="p">:</span> <span class="n">dictionary</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">field_name</span><span class="p">)</span>
+
+        <span class="c1">## remove the actual field data</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">field_arrays</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">field_arrays</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">field_names</span><span class="o">!=</span><span class="n">field_name</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">field_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">field_names</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">field_names</span><span class="o">!=</span><span class="n">field_name</span><span class="p">]</span></div>
 
 <div class="viewcode-block" id="ParticleGroup.getDecimationIndexArray"><a class="viewcode-back" href="../../../reference/api/classes/firefly.data_reader.ParticleGroup.html#firefly.data_reader.ParticleGroup.getDecimationIndexArray">[docs]</a>    <span class="k">def</span> <span class="nf">getDecimationIndexArray</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -559,6 +594,11 @@
                 <span class="s1">&#39;vy&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">velocities</span><span class="p">[:,</span><span class="mi">1</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">dec_inds</span><span class="p">],</span>
                 <span class="s1">&#39;vz&#39;</span><span class="p">:</span><span class="bp">self</span><span class="o">.</span><span class="n">velocities</span><span class="p">[:,</span><span class="mi">2</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">dec_inds</span><span class="p">]</span>
             <span class="p">})</span>
+        
+            <span class="c1">## remove Velocity as a tracked field, we don&#39;t want to </span>
+            <span class="c1">##  accumulate speed (norm of velocity). </span>
+            <span class="c1">##  It&#39;ll get added back in at the end</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">untrackArray</span><span class="p">(</span><span class="s1">&#39;Velocity&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rgba_colors</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">dictionary</span><span class="o">.</span><span class="n">update</span><span class="p">({</span>
@@ -812,6 +852,9 @@
 
         <span class="k">if</span> <span class="n">octree_format</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">octree_formats</span><span class="p">:</span> <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
             <span class="sa">f</span><span class="s2">&quot;Invalid extension </span><span class="si">{</span><span class="n">octree_format</span><span class="si">}</span><span class="s2"> must be one of </span><span class="si">{</span><span class="n">octree_formats</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1">## ignore this because we&#39;re an octree, we need a special file format</span>
+        <span class="k">if</span> <span class="s1">&#39;file_extension&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;file_extension&#39;</span><span class="p">)</span>
 
         <span class="c1">## call super to write &quot;normal&quot; particle data</span>
         <span class="n">file_list</span><span class="p">,</span><span class="n">filenames_and_nparts</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">writeToDisk</span><span class="p">(</span>

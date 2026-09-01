@@ -1,0 +1,56 @@
+{
+    "loaded": false,
+        
+    "startFly": false,
+    "startVR": false,
+    "startColumnDensity": false,
+    "startTween": false,
+
+    "sleepTimeout": 1.5,
+    "showSplashAtStartup": false,
+
+    "annotation": null,
+    "controlsExplainerDelay_sec":5,
+    "title": "Firefly",
+
+    "center": null,
+    "camera": null,
+    "cameraRotation": null,
+    "cameraUp": [1,0,0] ,
+    "quaternion": [0,0,0,1] ,
+
+    "friction": 0.1,
+    "flyffac": 1.0,
+    "useStereo": false,
+    "stereoSep": 0.06,
+	"stereoSepMax" : 1.0,
+
+    "decimate": 1,
+
+    "zmin": 1e-2,
+    "zmax": 5e10,
+    "minPointScale": 0.01,
+    "maxPointScale": 10,
+
+    "maxVrange": 2000.0,
+
+    "showFPS": true,
+    "showMemoryUsage": true,
+    "memoryLimit": 2000000000.0,
+    "streamQuality": 1.0,
+
+    "GUIExcludeList": [],
+    "collapseGUIAtStart": true,
+
+    "CDckey":"ColumnDensity",
+    "CDlognorm": false,
+    "CDmin": 1,
+    "CDmax": 10,
+    "scaleCD" : 0.01,
+
+    "VideoCapture_duration": 5,
+    "VideoCapture_FPS": 30,
+    "VideoCapture_filename": "firefly_capture",
+    "VideoCapture_format": 0,
+    "VideoCapture_formats": [".gif",".png",".jpg"]
+}

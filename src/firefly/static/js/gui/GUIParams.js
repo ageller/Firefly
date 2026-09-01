@@ -6,6 +6,11 @@ function defineGUIParams(){
 
 		//for the cube
 		this.cube = null;
+		this.cubeWorldSize = null; //fixed once, see cubeWorldSize()
+		// how much of the view width the cube fills when it is first placed
+		//  (see cubeWorldSize()/flyCubeAnchor() in GUIsocket.js)
+		this.cubeViewportFraction = 0.25;
+		this.cubeFlyAnchor = null; //world point the cube sits at in fly controls
 		this.scene = null;
 		this.renderer = null;
 		this.container = null;
@@ -24,7 +29,11 @@ function defineGUIParams(){
 		//when ready the GUI will be created
 		this.waitForInit = null;
 		this.GUIready = true;
+		this.GUItries = 0;
+        this.allowAutoReload = false;
+        this.autoReloadCount = 10;
 		this.GUIbuilt = false;
+		this.loopErrorLogged = false; //so a repeating render loop error is reported once
 		this.GUIWidth = 0; //will hold the width of the GUI as a check if it is completely built
 
 		//will hold the GUI width as a check if it's done building
@@ -68,6 +77,23 @@ function defineGUIParams(){
 		this.startup = "data/startup.json";
 		this.filenames = null;
 		this.dir = {};
+		// path prefix the startup.json entries in this.dir are relative to
+		// ("static/"), sent by the viewer along with dir itself
+		this.startupPrefix = "";
+
+		// the splash's data picker (static/js/gui/dataPicker.js). Nothing here
+		// needs to outlive a dataset switch: the startup entries come from
+		// this.dir above, and the rest is re-established when the panel is next
+		// built or the directory browser next opened.
+		this.dataPicker = {
+			stage: 'menu',          //'menu', 'browse' or 'manual' -- which face of the picker
+			newDataRequested: false,//did the GUI's "Load New Data" button ask for it?
+			startupFailed: false,   //the dataset startup.json named would not load
+			browsePath: null,       //directory the browser panel is showing
+			lastPath: '',           //what was typed, kept across panel rebuilds
+			lastListing: null,      //the browser's last listing, to rebuild the panel from
+			nativeAvailable: false, //can the server open its own folder dialog?
+		};
 
 
 		//for setting the width
@@ -104,13 +130,13 @@ function defineGUIParams(){
 		this.reset = false;
 
 		this.partsKeys = null;
-		this.PsizeMult = null;
+		this.partsSizeMultipliers = null;
 		this.plotNmax = null;
 		this.decimate = null;
 		this.stereoSepMax = null;
 		this.friction = null;
 
-		this.Pcolors = null;
+		this.partsColors = null;
 		this.showParts = null;
 		this.showVel = null;
 		this.velopts = null; 
@@ -123,9 +149,11 @@ function defineGUIParams(){
 
 		this.blendingOpts = null; 
 		this.blendingMode = null; 
+		this.brightCenterFraction = null;
 
 		this.ckeys = null;
 		this.colormapVals = null;
+		this.colormapReversed = null;
 		this.colormapLims = null;
 		this.colormapVariable = null;
 		this.colormap = null;
@@ -168,6 +196,8 @@ function defineGUIParams(){
 		this.haveOctree = {}; //will be initialized to false for each of the parts keys in loadData
 		this.haveAnyOctree = false;
 		this.octreeMemoryLimit = 0;
+		this.octreeMemoryLimitReached = false; //viewer has stopped streaming new nodes
+		this.octreeLoadingPaused = {}; //per particle key; set by the pause/clear buttons
 		this.octreeNormCameraDistance = {};
 
 		//only need to pass the controls target?
@@ -178,7 +208,19 @@ function defineGUIParams(){
 
 		this.FPS = 0;
 		this.memoryUsage = 0;
+
+		this.VideoCapture_duration = 5; // seconds
+		this.VideoCapture_FPS = 30; // 30 frames per second
+		this.VideoCapture_filename = 'firefly_capture';
+		this.VideoCapture_format = 0; // index of format
+		this.VideoCapture_formats = ['.gif','.png','.jpg']//,'.webm'] // webm doesn't seem to be working :\
 		
+        // I could change this to match how this is defined in viewerParams...
+        this.selector = new function() {
+			this.radius = 10.;
+            this.distance = 100.;
+			this.active = false;
+		}
 
 		this.GUIState_variables = [
 			'built','current','id','name','builder','parent','children','url','button','segments','d3Element'
@@ -214,6 +256,10 @@ function defineGUIParams(){
 						'loadNewData':{
 							'id':'loadNewData',
 							'builder':createLoadNewDataSegment
+						},
+                        'dataSelector':{
+							'id':'dataSelector',
+							'builder':createDataSelectorSegment
 						}
 					},
 					'camera':{
@@ -238,11 +284,7 @@ function defineGUIParams(){
 						'fullScreen':{
 							'id':'fullScreen',
 							'builder':createFullScreenSegment
-						},
-						'snapshot':{
-							'id':'snapshot',
-							'builder':createSnapshotSegment
-						},
+						},	
 						'cameraFriction':{
 							'id':'cameraFriction',
 							'builder':createCameraFrictionSegment
@@ -250,6 +292,26 @@ function defineGUIParams(){
 						'stereoSep':{
 							'id':'stereoSep',
 							'builder':createStereoSepSegment
+						}
+					},
+					'capture':{
+						'id':'capture',
+						'builder':createControlsBox,
+						'captureButtons':{
+							'id':'captureButtons',
+							'builder':createCaptureButtonsSegment
+						},
+						'captureResolution':{
+							'id':'captureResolution',
+							'builder':createCaptureResolutionSegment
+						},
+						'videoDuration':{
+							'id':'videoDuration',
+							'builder':createVideoDurationSegment
+						},
+						'videoFormat':{
+							'id':'videoDuration',
+							'builder':createVideoFormatSegment
 						}
 					},
 					'projection':{

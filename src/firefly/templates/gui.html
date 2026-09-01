@@ -3,8 +3,55 @@
 	<head>
 		<meta charset="utf-8">
 		<title>Firefly GUI</title>		
-		<link rel="icon" href="static/docs/icon.png">  
+		<link rel="icon" href="static/docs/icon.png">
 
+		<!-- this small, minimal splash frame is unique to the separated GUI window,
+		     so its own layout lives here rather than in the shared splashStyles.css
+		     used by the other templates' full splash screen. splashStyles.css is
+		     still loaded below though, so the data picker (built by
+		     dataPicker.js) looks the same here as it does there. -->
+		<style>
+			#splash{
+				position:absolute;
+				top:0;
+				left:0;
+				right:0;
+				bottom:0;
+				z-index:3;
+				margin:0;
+				padding:0;
+				color:white;
+				background-color:black;
+				font-family: Sans-Serif;
+				text-align: center;
+				font-size:20px;
+				font-size:10vw;
+				opacity: 1;
+				cursor: pointer;
+			}
+			#splashdiv1 {
+				font-size:50px;
+				font-size:10vmin;
+				padding:0;
+				margin:0;
+				padding-top:5vmin;
+			}
+			#splashdivLoader {
+				margin:0;
+				padding:1em;
+				box-sizing:border-box;
+				position:absolute;
+				left:0;
+				right:0;
+				bottom:0;
+				font-size:16px;
+				text-align:left;
+				cursor:default;
+			}
+		</style>
+
+			{# optional deployment-local additions (analytics, meta tags, ...); ignored when absent #}
+		{% include "_extra_head.html" ignore missing %}
 	</head>
 
 	<body>
@@ -15,17 +62,16 @@
 			<div id="splash" style="z-index: 5;">
 				<div id="splashdiv1">Waiting for Viewer... </div>
 
-				<div id="splashdivLoader">
-					<button id='loadDataButton' class='button' style='display:none; font-size:24px; width:415px; height:50px'>
-						<span>Click here to select a data directory</span>
-					</button>
-					<button id='selectStartupButton' class='button' style='display:none; font-size:24px; width:600px; height:50px'>
-						<span>Click here to select a directory from your startup file</span>
-					</button>
-				</div>
+				<!-- #dataPicker is built in here by dataPicker.js -->
+				<div id="splashdivLoader"></div>
 			</div>
 
 			<div id="UIcontainer" class="hidden" style="height:0; width:0"></div>
+			
+			<div id="flyExplainerHider"><div id=flyExplainerHiderContent>&#9660;</div></div>
+			<div id="flyExplainer"> 
+				<b>You are currently in "fly" controls.</b>  To move the camera in [direction] use the following "key" : [left] "a", [right]  "d", [forward] "w", [backward] "s", [down] "f", [up] "r".  Hold "shift" with any of these to reduce the speed.  Increase or decrease the default speed by pressing "+" or "-".  You can also use the mouse left-click + drag to control the camera pitch and yaw.  To exit fly controls, hit the "space" bar.
+			</div>
 			
 			<div id="WebGLContainer" ></div>
 
@@ -62,6 +108,8 @@
 		<!-- the main attraction -->
 		<link rel="stylesheet" type="text/css" href="static/css/UIStyles.css" />
 		<link rel="stylesheet" type="text/css" href="static/css/mainStyles.css" />
+		<link rel="stylesheet" type="text/css" href="static/css/splashStyles.css" />
+		<script src="static/js/misc/persistentParams.js"></script>
 		<script src="static/js/misc/socketParams.js"></script>
 		<script src="static/js/gui/GUIconstructors.js"></script>
 		<script src="static/js/gui/GUIParams.js"></script>
@@ -69,13 +117,13 @@
 			//called upon loading
 			defineSocketParams();			
 			defineGUIParams();
-			socketParams.socket.emit('separate_GUI');
 		</script>
 
 		<script src="static/js/misc/utils.js"></script>
 		<script src="static/js/misc/windowEvents.js"></script>
 		<script src="static/js/gui/GUIsocket.js"></script>
 		<script src="static/js/gui/initGUI.js"></script>
+		<script src="static/js/gui/dataPicker.js"></script>
 		<script src="static/js/gui/sliders.js"></script>
 		<script src="static/js/gui/colormap.js"></script>
 		<script src="static/js/gui/particles.js"></script>
@@ -83,7 +131,11 @@
 
 		<script>
 			//called upon loading
+			// this GUI is on its own, so announce ourselves to the viewer once we've
+			// joined the room -- it may already have data loaded (see onGUIConnected)
+			socketParams.isSeparateGUI = true;
 			connectGUISocket();
+			socketParams.socket.emit('separate_GUI');
 			makeUI();
 		</script>
 	</body>

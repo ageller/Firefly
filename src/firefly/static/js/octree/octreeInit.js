@@ -17,6 +17,10 @@ function initOctree(pkey,data){
 	//for loading bar
 	viewerParams.octree.loadingCount[pkey] = [0,0];
 
+	//memory accounting and the clear/pause/resume state for this group
+	viewerParams.octree.bytesInMemory[pkey] = 0;
+	viewerParams.octree.loadingPaused[pkey] = false;
+
 	//this will be used as a percentage value in the GUI
 	viewerParams.plotNmax[pkey] = 100;
 
@@ -66,44 +70,15 @@ function initOctree(pkey,data){
 		data.octree);
 }
 
-function loadFFRAW(node,callback){
-	// TODO: doesn't actually work. gave up and converted
-	//  ffraw to fftree instead.
-	var this_file;
-	var offset;
-	var binary_reader = new FileReader;
-	var Coordinates_flat = new Float32Array(node.buffer_size*3);
-	var Velocities_flat = new Float32Array(node.buffer_size*3);
-
-	viewerParams.parts[node.pkey].prefixes.forEach(function (prefix,index){
-		offset=0;
-		node.files.forEach(function (ftuple){
-			this_file = ftuple[0].replace('<prefix>',prefix);
-			console.log(this_file)
-			fetch('static/data/gaia/'+this_file).then(res => {
-				res.blob().then(blob =>{ 
-					blob = blob.slice(
-						ftuple[1],
-						ftuple[1]+ftuple[2]*4)
-					binary_reader.readAsArrayBuffer(blob)
-					binary_reader.onloadend = function () {
-						// convert ArrayBuffer to FireflyFormat
-						// call compileFFLYData as a callback
-						console.log(binary_reader.result)
-						debugger;
-					}
-				});
-			});
-		});
-	});
-}
-
 function loadFFTREEKaitai(node,callback){
 
 	// initialize a FileReader object
 	var binary_reader = new FileReader;
 	// get local file
-	fetch('static/data/'+node.buffer_filename).then(res => {
+	// node.buffer_filename is relative to firefly/static/data, and the dataset
+	//  may be served from elsewhere (a directory the user picked); see
+	//  viewerParams.prefix
+	fetch(viewerParams.prefix+'data/'+node.buffer_filename).then(res => {
 		res.blob().then(blob =>{ 
 			blob = blob.slice(
 				node.byte_offset,
@@ -201,10 +176,24 @@ function createOctBox(node){
 	return obj;
 }
 
-function updateOctreeDecimationSpan(){
-	var num = (1./viewerParams.octree.NParticleMemoryModifier).toFixed(2);
-	if (num > 10000) num = '> 10,000'
-	d3.select('#decimationOctreeSpan').text(num)
+// push the current memory accounting to the GUI. call this whenever memory
+//  changes discontinuously (clear, pause, resume, moving the limit slider) so the
+//  readout responds immediately rather than waiting for the throttled update in
+//  update_framerate.
+function sendOctreeMemoryToGUI(){
+	if (!viewerParams.haveUI) return;
+
+	update_memory_usage();
+
+	var forGUI = [];
+	forGUI.push({'setGUIParamByKey':[viewerParams.memoryUsage, 'memoryUsage']});
+	forGUI.push({'setGUIParamByKey':[viewerParams.memoryLimit, 'octreeMemoryLimit']});
+	forGUI.push({'setGUIParamByKey':[viewerParams.octree.memoryLimitReached, 'octreeMemoryLimitReached']});
+	forGUI.push({'setGUIParamByKey':[viewerParams.octree.loadingPaused, 'octreeLoadingPaused']});
+	forGUI.push({'updateFPSContainer':[]});
+	forGUI.push({'updateOctreeMemoryStatusUI':[]});
+	forGUI.push({'updateOctreeMemoryButtonsUI':[]});
+	sendToGUI(forGUI);
 }
 
 function evaluateFunctionOnOctreeNodes(node_function,node,octree,max_refinement=null){

@@ -5,90 +5,193 @@
 
 //https://github.com/miguelgrinberg/Flask-SocketIO
 function connectViewerSocket(){
-	//$(document).ready(function() {
-	document.addEventListener("DOMContentLoaded", function(event) { 
-		// Event handler for new connections.
-		// The callback function is invoked when a connection with the
-		// server is established.
-		socketParams.socket.on('connect', function() {
-			socketParams.socket.emit('connection_test', {data: 'Viewer connected!'});
-		});
-		socketParams.socket.on('connection_response', function(msg) {
-			console.log('connection response', msg);
-		});     
-		// Event handler for server sent data.
-		// The callback function is invoked whenever the server emits data
-		// to the client. The data is then displayed in the "Received"
-		// section of the page.
-		//updates from GUI
-		socketParams.socket.on('update_viewerParams', function(msg) {
-			setParams(msg);
-		});
+	// registered as soon as this is called (from the inline script at the end
+	//  of each template's body, so the DOM is already parsed). NOT deferred to
+	//  DOMContentLoaded: the socket is created and starts connecting when
+	//  socketParams.js is parsed, so on a slow-loading page 'connect' and
+	//  'room_check' can both fire before that event -- and socket.io does not
+	//  replay them, leaving the window connected but never joined to a room.
 
-		socketParams.socket.on('show_loader', function(msg) {
-			d3.select("#splashdivLoader").selectAll('svg').remove();
-			d3.select("#splashdiv5").text("Loading particle data...");
-			d3.select("#loader").style("display","visible");
-			viewerParams.loaded = false;
-			viewerParams.pauseAnimation = true;
+	// this happens when the server connects.
+	// all other functions below here are executed when the server emits to that name.
+	socketParams.socket.on('connect', function() {
+		console.log("sending connection from viewer")
+		socketParams.socket.emit('connection_test', {data: 'Viewer connected!'});
+	});
+	socketParams.socket.on('disconnect', function(message) {
+		console.log("viewer is disconnected", message)
+	});
+	// socketParams.socket.on('connection_response', function(msg) {
+	// 	console.log('connection response', msg);
+	// });     
 
-			viewerParams.loadfrac = 0.;
-			drawLoadingBar();
+	// get the room from the server if the user specified on the command line.  Otherwise prompt the user here for a room.  Then join.
+	socketParams.socket.on('room_check', function(msg) {
+		console.log('!!!!!!!!! received message about rooms', msg)
+		if (!socketParams.room) socketParams.room = msg.room;
+		
+		// get the room name
+		while (!socketParams.room) socketParams.room = prompt("Please enter a session name.  This should be a unique string that you will use for all connections to this session.  Do not include any spaces.");
+		console.log('joining room', socketParams.room)
+		socketParams.socket.emit('join', {room: socketParams.room});
+		flushPendingSocketMessages();
+	});
 
-			showSplash();
-		});
+	// a separate GUI window connected or reloaded; bring it up to date
+	socketParams.socket.on('gui_connected', function(msg) {
+		console.log('======== a GUI window connected, resending our state');
+		onGUIConnected();
+	});
 
-		socketParams.socket.on('input_data', function(msg) {
-			//only tested for local (GUI + viewer in one window)
-			console.log("======== have new data : ", Object.keys(msg));
+	//updates from GUI
+	socketParams.socket.on('update_viewerParams', function(msg) {
+		setParams(msg);
+	});
+
+	socketParams.socket.on('show_loader', function(msg) {
+		d3.select("#loader").style("display","visible");
+		viewerParams.loaded = false;
+		viewerParams.pauseAnimation = true;
+
+		// no directory/dataset name is known for data pushed over the socket
+		viewerParams.datasetName = null;
+		resetSplashProgress();
+
+		showSplash();
+	});
+
+	socketParams.socket.on('input_data', function(msg) {
+		console.log("======== have new data : ", Object.keys(msg));
 
 
-			//first compile the data from multiple calls
-			if ('status' in msg){
-				if (msg.status == 'start') {
-					var socketCheck = viewerParams.usingSocket;
-					var localCheck = viewerParams.local;
-					//in case it's already waiting, which will happen if loading an hdf5 file from the gui
-					clearInterval(viewerParams.waitForInit);
-					defineViewerParams();
-					viewerParams.pauseAnimation = true;
-					viewerParams.usingSocket = socketCheck; 
-					viewerParams.local = localCheck; 
+		//first compile the data from multiple calls
+		if ('status' in msg){
+			if (msg.status == 'start') {
+				var socketCheck = viewerParams.usingSocket;
+				var localCheck = viewerParams.local;
+				// startup.json's entries, and where they are read from. This is
+				//  what the splash comes back to (see pickerMode() in
+				//  gui/dataPicker.js), so losing it to defineViewerParams() below
+				//  would leave no way back to them once data arrived this way --
+				//  which is every csv/hdf5 load, and sendDataViaFlask.
+				var dirSave = viewerParams.dir;
+				var startupChooserActiveSave = viewerParams.startupChooserActive;
+				var startupPrefixSave = viewerParams.startupPrefix;
+				//in case it's already waiting, which will happen if loading an hdf5 file from the gui
+				clearInterval(viewerParams.waitForInit);
+				// retire the old render loop before replacing viewerParams
+				stopAnimation();
+				defineViewerParams();
+				viewerParams.pauseAnimation = true;
+				viewerParams.usingSocket = socketCheck; 
+				viewerParams.local = localCheck; 
+				viewerParams.dir = dirSave;
+				viewerParams.startupChooserActive = startupChooserActiveSave;
+				viewerParams.startupPrefix = startupPrefixSave;
+				// a dataset has been chosen, so whatever the picker was offering
+				//  is done with (callLoadData does the same for the other routes)
+				dataPickerClosed();
 
-					viewerParams.newInternalData.data = {};
-					viewerParams.newInternalData.len = msg.length;
-					viewerParams.newInternalData.count = 0;
-				}
-				if (msg.status == 'data') {
-					viewerParams.newInternalData.count += 1;
-					//I will update the loading bar here, but I'm not sure what fraction of the time this should take (using 0.8 for now)
-					viewerParams.loadfrac = (viewerParams.newInternalData.count/viewerParams.newInternalData.len)*0.8; 
-					updateLoadingBar();
-					Object.keys(msg).forEach(function(key,i){
-						if (key != 'status'){
-							viewerParams.newInternalData.data[key] = JSON.parse(msg[key]);
-							if (key.includes('filenames.json')){
-								viewerParams.filenames = JSON.parse(msg[key]);
-							}
-						}
-					})
-				}
-				if (msg.status == 'done'){
-					console.log('======== have all data', viewerParams.newInternalData, viewerParams.filenames);
-					loadData(initInputData, prefix='', internalData=viewerParams.newInternalData.data, initialLoadFrac=viewerParams.loadfrac)
-				}
+				viewerParams.newInternalData.data = {};
+				viewerParams.newInternalData.len = msg.length;
+				viewerParams.newInternalData.count = 0;
 			}
+			if (msg.status == 'data') {
+				viewerParams.newInternalData.count += 1;
+				//I will update the loading bar here, but I'm not sure what fraction of the time this should take (using 0.8 for now)
+				updateSplashProgress((viewerParams.newInternalData.count/viewerParams.newInternalData.len)*0.8);
+				Object.keys(msg).forEach(function(key,i){
+					if (key != 'status'){
+						viewerParams.newInternalData.data[key] = JSON.parse(msg[key]);
+						if (key.includes('filenames.json')){
+							viewerParams.filenames = JSON.parse(msg[key]);
+						}
+					}
+				})
+			}
+			if (msg.status == 'done'){
+				console.log('======== have all data', viewerParams.newInternalData, viewerParams.filenames);
+				loadData(initInputData, prefix='', internalData=viewerParams.newInternalData.data, initialLoadFrac=viewerParams.loadfrac)
+			}
+		}
 
-		});
+	});
 
-		socketParams.socket.on('update_streamer', function(msg) {
-			viewerParams.streamReady = true;
-		});
-		socketParams.socket.on('reload_viewer', function(msg) {
-			console.log('!!! reloading viewer');
-			location.reload();
+	socketParams.socket.on('load_ffly_data', function(msg) {
+		var prefix = msg.prefix || "";
+		console.log("======== have new data : ", msg.filepath);
+
+		// a dataset is already showing: tear it down before the new one
+		//  arrives, or the two end up layered on top of each other
+		var replacing = viewerHasDataset();
+		if (replacing) resetViewerToInitialState(true);
+
+		function load(files){
+			callLoadData([files, prefix, msg.filepath]);
+			if (!replacing) sendToGUI([{'makeUI':viewerParams.local}]);
+		}
+
+		// the server builds the manifest itself for a directory that has no
+		//  filenames.json of its own
+		if (msg.filenames) return load(msg.filenames);
+
+		d3.json(msg.filepath + "/filenames.json",  function(files) {
+			if (files != null) load(files);
+			else dataLoadFailed("Could not read " + msg.filepath + "/filenames.json.");
 		});
 	});
+
+	// the server could not load what it was asked for. it puts the message on
+	//  the GUI's picker, so leave that alone here (resetSplashProgress() would
+	//  hide it, and showSplash() would rebuild it without the message) and
+	//  just stop showing a loading bar that is never going to fill.
+	socketParams.socket.on('data_error', function(msg) {
+		console.log('!!! data error:', msg && msg.message);
+		updateSplashProgress(0);
+		d3.select('#splashdiv5').text('Waiting for data...');
+		if (!viewerParams.loaded) showSplash(true);
+	});
+
+	socketParams.socket.on('output_settings', function(msg){
+		//only tested for combined endpoint
+		console.log("======== sending settings to server");
+		sendPreset();
+	});
+
+	socketParams.socket.on('input_settings', function(msg) {
+		//only tested for combined endpoint
+		console.log("======== have new settings : ", Object.keys(msg));
+		//for now, the user is required to pass the entire settings object (if we change that, this next line will probably break firefly)
+		viewerParams.parts.options = msg;
+		applyOptions();
+
+		// do something here to update the GUI.  For now I will just remake it!
+		var forGUIAppend = [];
+		// forGUIAppend.push({'setGUIParamByKey':[false,"collapseGUIAtStart"]});
+		forGUIAppend.push({'makeUI':viewerParams.local});
+		sendInitGUI(prepend=[], append=forGUIAppend)
+	});
+
+	socketParams.socket.on('output_selected_data', function(msg){
+		//only tested for combined endpoint
+            if (viewerParams.selector.active){
+		    console.log("======== sending selected data to server");
+		    sendSelectedData();
+            } else {
+                console.log("======== data selector not active, returning empty selection");
+                socketParams.socket.emit('send_selected_data', {'data':{'warning':'Data selector was not active; no data was selected.'}, 'room':socketParams.room, 'keyList':null, 'pass':'structure', 'done':true});
+            }
+	});
+
+	socketParams.socket.on('update_streamer', function(msg) {
+		viewerParams.streamReady = true;
+	});
+	socketParams.socket.on('reload_viewer', function(msg) {
+		console.log('!!! reloading viewer');
+		location.reload();
+	});
+
+	connectFireflySocket();
 }
 
 function initInputData(){
@@ -100,19 +203,22 @@ function initInputData(){
 	var forGUIappend = [];
 	forGUIappend.push({'setGUIParamByKey':[viewerParams.usingSocket, "usingSocket"]});
 	forGUIappend.push({'setGUIParamByKey':[viewerParams.local, "local"]});
+	// startup.json's entries: defineGUIParams above wipes the GUI's copy, and
+	//  this route has no callLoadData to put it back
+	forGUIappend.push({'setGUIParamByKey':[viewerParams.dir, "dir"]});
+	forGUIappend.push({'setGUIParamByKey':[viewerParams.startupPrefix, "startupPrefix"]});
 	forGUIappend.push({'makeUI':viewerParams.local});
 
 	//I think I need to wait a moment because sometimes this doesn't fire (?)
 	setTimeout(function(){
-		makeViewer(null, forGUIprepend, forGUIappend);
+		makeViewer(forGUIprepend, forGUIappend);
 		WebGLStart();
 	}, 1000);
 }
 
 //so that it can run locally also without using Flask
 // note that if allowVRControls == true, then you do not want to start in stereo (the VR button will do the work)
-function runLocal(useSockets=true, showGUI=true, allowVRControls=false, startStereo=false, pSize=null){
-	d3.select("#splashdiv5").text("Loading particle data...");
+function runLocal(useSockets=true, showGUI=true, allowVRControls=false, startStereo=false){
 	viewerParams.local = true;
 	viewerParams.usingSocket = useSockets;
 	forGUI = [];
@@ -129,7 +235,7 @@ function runLocal(useSockets=true, showGUI=true, allowVRControls=false, startSte
 	viewerParams.useStereo = false;
 
 	//both of these start setIntervals to wait for the proper variables to be set
-	makeViewer(pSize);
+	makeViewer();
 	if (showGUI) {
 		makeUI(local=true);
 	} else {
@@ -142,28 +248,35 @@ function runLocal(useSockets=true, showGUI=true, allowVRControls=false, startSte
 }
 
 //wait for all the input before loading
-function makeViewer(pSize=null, prepend=[], append=[]){
+function makeViewer(prepend=[], append=[]){
 	viewerParams.haveUI = false;
 	viewerParams.ready = false; 
 	console.log("Waiting for viewer init ...")
 	clearInterval(viewerParams.waitForInit);
-	viewerParams.waitForInit = setInterval(function(){ 
+	var initFailures = 0;
+	viewerParams.waitForInit = setInterval(function(){
 		var ready = confirmViewerInit();
-		if (ready){
-			console.log("Viewer ready.")
-			clearInterval(viewerParams.waitForInit);
-			viewerParams.ready = true;
-			viewerParams.pauseAnimation = false;
+		if (!ready) return;
+
+		// do the work *before* clearing the interval: if any of it throws we
+		//  retry on the next tick, rather than leaving the GUI waiting forever
+		//  on params that never get sent ("GUI missing partsKeys")
+		try {
 			viewerParams.parts.options_initial = createPreset(); //this might break things if the presets don't work...
 			//console.log("initial options", viewerParams.parts.options)
 
-			//to test
-			if (pSize) {
-				viewerParams.PsizeMult.Gas = pSize;
-				console.log('new Psize', pSize)
-			}
 			sendInitGUI(prepend=prepend, append=append);
+		} catch (err) {
+			// report the first failure, then throttle so a persistent one
+			//  doesn't bury the console
+			if (!(initFailures++ % 20)) console.error('Viewer init incomplete, retrying:', err);
+			return;
 		}
+
+		console.log("Viewer ready.")
+		clearInterval(viewerParams.waitForInit);
+		viewerParams.ready = true;
+		viewerParams.pauseAnimation = false;
 	}, 100);
 }
 
@@ -174,6 +287,10 @@ function getFilenames(prefix=""){
 		if (dir != null){
 			var i = 0;
 			viewerParams.dir = dir;
+			// the picker builds its dropdown's paths from this, and it needs it
+			//  whether or not we are the ones who put the picker up (?startup=N
+			//  skips the picker, but H can still bring it back afterwards)
+			viewerParams.startupPrefix = prefix;
 			if (Object.keys(viewerParams.dir).length > 1){
 				if (viewerParams.url.searchParams.has("startup") && 
 					viewerParams.url.searchParams.get("startup") < Object.keys(viewerParams.dir).length){
@@ -181,72 +298,187 @@ function getFilenames(prefix=""){
 				else i = null;
 				if (i == null){
 					console.log("multiple file options in startup:", Object.keys(viewerParams.dir).length, viewerParams.dir);
-					var forGUI = [];
-					forGUI.push({'setGUIParamByKey':[viewerParams.dir, "dir"]});
-					forGUI.push({'showLoadingButton':'#selectStartupButton'});
-					forGUI.push({'selectFromStartup':prefix});
-					sendToGUI(forGUI);
+					viewerParams.startupChooserActive = true;
+					viewerParams.dataPickerState = 'startupPicker';
+					sendToGUI(offerStartupPicker());
 				}
-			} 
+			}
 			if (i != null && i < Object.keys(viewerParams.dir).length){
 				d3.json(prefix+viewerParams.dir[i] + "/filenames.json",  function(files) {
 					if (files != null){
-						callLoadData([files, prefix]);
+						callLoadData([files, prefix, viewerParams.dir[i]]);
 					} else {
-						sendToGUI([{'showLoadingButton':'#loadDataButton'}]);
-						alert("Cannot load data. Please select another directory.");
+						dataLoadFailed("Could not read " + prefix + viewerParams.dir[i] + "/filenames.json.");
 					}
 				});
 			}
 		} else {
-			sendToGUI([{'showLoadingButton':'#loadDataButton'}]);
+			// no startup.json at all: the only way in is a path (or the python API)
+			viewerParams.dataPickerState = 'pathPicker';
+			sendToGUI(offerPathPicker());
 		}
 	});
 }
 
-//once a data directory is identified, this will define the parameters, draw the loading bar and, load in the data
+// something we were told to load turned out not to be loadable. the picker lives
+//  in the GUI, so send the message there rather than raising an alert here (the
+//  viewer window may not even be the one the user is looking at).
+function dataLoadFailed(message){
+	// 'newDataPicker' stays: the user asked for the path picker, and the failure
+	//  belongs on that rather than sending them back to startup.json's entries
+	if (viewerParams.dataPickerState != 'newDataPicker') dataPickerClosed();
+	resetSplashProgress();
+	sendToGUI([{'dataPickerError':message}]);
+}
+
+// the splash's picker is finished with -- dismissed, or having chosen something
+// to load. Forget that the GUI asked for the path picker, so the next splash
+// offers whatever startup.json holds again (see pickerMode() in dataPicker.js).
+// Called from the GUI when the splash goes down, and by callLoadData() below.
+function dataPickerClosed(){
+	viewerParams.dataPickerState = viewerParams.startupChooserActive ? 'startupPicker' : 'pathPicker';
+}
+
+// do we currently have a dataset loaded (as opposed to waiting for our first one)?
+function viewerHasDataset(){
+	return (viewerParams.parts != null &&
+		viewerParams.partsKeys != null &&
+		viewerParams.partsKeys.length > 0);
+}
+
+// the GUI commands that put up the data picker, so they can be sent again if a
+//  GUI window appears after we first sent them
+function offerStartupPicker(){
+	return [
+		{'setGUIParamByKey':[viewerParams.dir, "dir"]},
+		{'selectFromStartup':viewerParams.startupPrefix}];
+}
+
+// same, for a viewer with no startup.json to offer: only a path will do
+function offerPathPicker(){
+	return [{'showDataPicker':null}];
+}
+
+// a separate GUI window connected or reloaded. anything we sent before it was
+//  listening went nowhere (socket.io has no replay for late joiners), so bring
+//  it up to date from whatever state we're in now.
+function onGUIConnected(){
+	if (typeof viewerParams === 'undefined' || !viewerParams) return;
+
+	// note: not viewerParams.loaded -- that only becomes true once a GUI has
+	//  finished building, which is exactly what hasn't happened yet here.
+	//  .ready means we have a dataset and have already sent init once.
+	if (viewerParams.ready){
+		var append = [{'makeUI':viewerParams.local}];
+		// the user was sitting on the picker asking for new data when this window
+		//  appeared, so put that back once the GUI has rebuilt
+		if (viewerParams.dataPickerState == 'newDataPicker') append.push({'openDataPickerForNewData':null});
+		// rebuild the GUI from scratch against the dataset we already have
+		sendInitGUI([{'clearGUIinterval':null},{'defineGUIParams':null}], append);
+	} else if (viewerParams.dataPickerState == 'startupPicker'){
+		sendToGUI(offerStartupPicker());
+	} else if (viewerParams.dataPickerState == 'pathPicker'){
+		sendToGUI(offerPathPicker());
+	}
+	// mid-load with nothing to offer: the normal sendInitGUI will reach the GUI
+	//  once the load finishes
+}
+
+//once a data directory is identified, this will define the parameters, reset the splash loading bar and, load in the data
 function callLoadData(args){
 	var files = args[0];
 	var prefix = "";
 	if (args.length > 0) prefix = args[1];
+	var datasetPath = args.length > 2 ? args[2] : null;
 
 	var dir = {};
 	if (viewerParams.hasOwnProperty('dir')){
 		dir = viewerParams.dir;
 	}
 	viewerParams.dir = dir;
-	sendToGUI([{'setGUIParamByKey':[viewerParams.dir, "dir"]}]);
+	sendToGUI([
+		{'setGUIParamByKey':[viewerParams.dir, "dir"]},
+		{'setGUIParamByKey':[viewerParams.startupPrefix, "startupPrefix"]}]);
 
-	drawLoadingBar();
+	// a dataset has been chosen, so whatever the picker was offering is done with
+	dataPickerClosed();
+
+	viewerParams.datasetName = datasetNameFromPath(datasetPath);
+	// octree nodes are fetched later, outside loadData(), and need to know where
+	//  this dataset is being served from ("static/", or userdata/<room>/)
+	viewerParams.prefix = prefix;
+	resetSplashProgress();
+
 	viewerParams.filenames = files;
 	//console.log("loading new data", files)
 	loadData(WebGLStart, prefix);
 }
 
-// launch the app control flow, >> ends in animate <<
-function WebGLStart(){
+function getInputDataAttributes(){
+	// get the attributes that the user supplied with the data (before Firefly adds)
+	viewerParams.partsKeys.forEach(function(p){
+		viewerParams.inputDataAttributes[p] = [];
+		Object.keys(viewerParams.parts[p]).forEach(function(key){
+			if (!key.includes('Key')){
+				viewerParams.inputDataAttributes[p].push(key);
+			}
+		})
+	})
+	console.log('input data keys ... ', viewerParams.inputDataAttributes);
+}
 
-	//reset the window title
-	if (viewerParams.parts.hasOwnProperty('options')){
-		if (viewerParams.parts.options.hasOwnProperty('title')){
-			window.document.title = viewerParams.parts.options.title
-		}
+// launch the app control flow, >> ends in animate <<
+function WebGLStart(attempt = 0){
+	// on the very first load the defaults files are still in flight (see
+	//  setDefaultViewerParams); initPVals and applyOptions below both index into
+	//  them, so wait instead of throwing on an undefined lookup
+	if (!viewerParams.defaultSettings || !viewerParams.defaultParticleSettings){
+		// shouldn't take more than a moment; say so if it does rather than
+		//  spinning here silently
+		if (attempt && !(attempt % 100)) console.warn('Still waiting on defaultSettings.json / defaultParticleSettings.json after ' + (attempt*50/1000) + 's.');
+		setTimeout(function(){ WebGLStart(attempt + 1) }, 50);
+		return;
 	}
 
-	document.addEventListener('mousedown', handleMouseDown);
+	// checkDone can fire this more than once, and the wait above re-enters it
+	if (viewerParams.webGLStarted) return;
+	viewerParams.webGLStarted = true;
 
-	//initialize various values for the parts dict from the input data file, 
-	initPVals();
+	try {
+		getInputDataAttributes();
 
-	initScene();
-	
-	initColumnDensity();
+		//reset the window title
+		if (viewerParams.parts.hasOwnProperty('options')){
+			if (viewerParams.parts.options.hasOwnProperty('title')){
+				window.document.title = viewerParams.parts.options.title
+				viewerParams.title = viewerParams.parts.options.title;
+			}
+		}
+
+		document.addEventListener('mousedown', handleMouseDown);
+
+		//initialize various values for the parts dict from the input data file,
+		initPVals();
+
+		initScene();
+
+		initColumnDensity();
+	} catch (err) {
+		// never fail silently here: if this throws, initScene never finishes, so
+		//  confirmViewerInit never passes and the GUI waits forever on params
+		//  that are never sent ("GUI missing partsKeys")
+		console.error('Firefly could not start the viewer:', err);
+		viewerParams.webGLStarted = false;
+		return;
+	}
 
 	//draw everything
 	Promise.all([
 		createPartsMesh(),
 	]).then(function(){
-		
+
+        toggleDataSelector(viewerParams.selector.active);
+
 		//begin the animation
 		// keep track of runtime for crashing the app rather than the computer
 		var currentTime = new Date();
@@ -254,8 +486,10 @@ function WebGLStart(){
 		viewerParams.currentTime = seconds;
 
 		viewerParams.pauseAnimation = false;
-		animate();
+		startAnimation();
 
+	}).catch(function(err){
+		console.error('Firefly could not draw the particles:', err);
 	})
 
 
@@ -271,81 +505,53 @@ function initPVals(){
 			viewerParams.partsMesh[p] = [];
 		}
 
+		// copy the value from the default settings
+		//  into viewerParams using the same key. If the particle group
+		//  has other settings these will be overwritten in a later step.
+		Object.keys(viewerParams.defaultParticleSettings).forEach(function (key){
+			viewerParams[key][p] = copyValue(viewerParams.defaultParticleSettings[key]); 
+		});
+
 		// store the name inside the dictionary
 		viewerParams.parts[p].pkey = p;
 
-		//misc
+		// the loop above has just overwritten whatever initOctree() set with the
+		//  default (null), and a null in the settings file won't restore it
+		//  (applyOptions skips nulls) -- so put the octree's percentage back, or
+		//  the GUI builds a slider on NaN and gives up partway through
 		if (!viewerParams.haveOctree[p]) viewerParams.plotNmax[p] = viewerParams.parts.count[p];
-		viewerParams.PsizeMult[p] = 1.;
-		viewerParams.showParts[p] = true;
-		viewerParams.updateOnOff[p] = false;
+		else viewerParams.plotNmax[p] = 100; //a percentage for octree groups, see initOctree()
 
-		//filter
-		viewerParams.updateFilter[p] = false;
-		viewerParams.filterLims[p] = {};
-		viewerParams.filterVals[p] = {};
-		viewerParams.invertFilter[p] = {};
-		viewerParams.fkeys[p] = [];
-
-		//colormap
-		viewerParams.ckeys[p] = [];
-		viewerParams.colormapVariable[p] = 0;
-		viewerParams.colormap[p] = 4/256;
-		viewerParams.showColormap[p] = false;
-		viewerParams.updateColormapVariable[p] = false;
-		viewerParams.colormapVals[p] = {};
-		viewerParams.colormapLims[p] = {};
-
-		// radius scaling
-		viewerParams.radiusVariable[p] = 0; // corresponds to "None"
-		viewerParams.updateRadiusVariable[p] = false;
-		viewerParams.rkeys[p] = [];
-
-		//blending
-		viewerParams.blendingMode[p] = 'additive';
-		viewerParams.depthWrite[p] = false;
-		viewerParams.depthTest[p] = false;
+		// initialize all update variables to true for the first pass
+		viewerParams.updateOnOff[p] = true;
+		viewerParams.updateFilter[p] = true;
+		viewerParams.updateColormapVariable[p] = true;
+		viewerParams.updateRadiusVariable[p] = true;
 
 		//velocities
-		viewerParams.showVel[p] = false;
-		viewerParams.velVectorWidth[p] = 1.;
-		viewerParams.velGradient[p] = 0.; //0 == false, 1 == true
-		viewerParams.animateVel[p] = false;
-		viewerParams.animateVelDt[p] = 0.;
-		viewerParams.animateVelTmax[p] = 0.;
 		if (viewerParams.parts[p].Velocities_flat != null){
 			if (!viewerParams.reset){
 				calcVelVals(viewerParams.parts[p]);
 				if(!viewerParams.parts[p].hasOwnProperty("filterKeys")){
 					viewerParams.parts[p].filterKeys = [];
 				}
-			 
 			}
-			viewerParams.velType[p] = 'line';
 		}
 		
 		//filters
 		//in case there are no filter possibilities (but will be overwritten below)
-		viewerParams.fkeys[p] = ["None"];
-		viewerParams.filterLims[p]["None"] = [0,1];
-		viewerParams.filterVals[p]["None"] = [0,1]; 
 		var haveCurrentFilter = true;
 		if (viewerParams.parts[p].currentlyShownFilter == undefined) {
 			viewerParams.parts[p].currentlyShownFilter = ["None"];
 			haveCurrentFilter = false;
 		}
+
+		viewerParams.parts[p]['playbackTicks'] = 0;
+		viewerParams.parts[p]['playbackTickRate'] = 10;   
+
 		if (viewerParams.parts[p].hasOwnProperty("filterKeys")){
 			viewerParams.fkeys[p] = viewerParams.parts[p].filterKeys;
-			viewerParams.parts[p]['playbackTicks'] = 0;
-			viewerParams.parts[p]['playbackTickRate'] = 10;   
 			for (var k=0; k<viewerParams.fkeys[p].length; k++){
-				// TODO we should consider removing this "feature"
-				//  and just require users to pass in the mag velocity
-				//  as its own field-- or also radius and do radius/speed
-				//  flags or something
-				//if (viewerParams.fkeys[p][k] == "Velocities"){
-					//viewerParams.fkeys[p][k] = "magVelocities";
-				//}
 				var fkey = viewerParams.fkeys[p][k];
 				//calculate limits for the filters
 				if (viewerParams.parts[p][fkey] != null){
@@ -364,20 +570,10 @@ function initPVals(){
 		}
 		//colormap
 		//in case there are no colormap possibilities (but will be overwritten below)
-		viewerParams.ckeys[p] = ["None"];
-		viewerParams.colormapLims[p]["None"] = [0,1];
-		viewerParams.colormapVals[p]["None"] = [0,1];
 		if (viewerParams.parts[p].hasOwnProperty("colormapKeys")){
 			if (viewerParams.parts[p].colormapKeys.length > 0){
 				viewerParams.ckeys[p] = viewerParams.parts[p].colormapKeys;
 				for (var k=0; k<viewerParams.ckeys[p].length; k++){
-						// TODO we should consider removing this "feature"
-						//  and just require users to pass in the mag velocity
-						//  as its own field-- or also radius and do radius/speed
-						//  flags or something
-					//if (viewerParams.ckeys[p][k] == "Velocities"){
-						//viewerParams.ckeys[p][k] = "magVelocities";
-					//}
 					var ckey = viewerParams.ckeys[p][k];
 					viewerParams.colormapLims[p][ckey] = [0,1];
 					viewerParams.colormapVals[p][ckey] = [0,1];
@@ -398,7 +594,6 @@ function initPVals(){
 		}
 		// radius scaling
 		// None for no radius scaling radius possibilities
-		viewerParams.rkeys[p] = ["None"];
 		if (viewerParams.parts[p].hasOwnProperty("radiusKeys") &&
 			viewerParams.parts[p].radiusKeys.length > 0){
 				viewerParams.rkeys[p] = viewerParams.rkeys[p].concat(viewerParams.parts[p].radiusKeys);
@@ -480,8 +675,11 @@ function initScene() {
 
 	viewerParams.frustum = new THREE.Frustum();
 
-	// events
-	THREEx.WindowResize(viewerParams.renderer, viewerParams.camera);
+	// events -- keep the handle so the listener can be released when the viewer
+	//  is torn down, otherwise each dataset switch leaves one behind pointing at
+	//  a renderer we've disposed
+	if (viewerParams.windowResize) viewerParams.windowResize.stop();
+	viewerParams.windowResize = THREEx.WindowResize(viewerParams.renderer, viewerParams.camera);
 	//THREEx.FullScreen.bindKey({ charCode : 'm'.charCodeAt(0) });
 
 	//viewerParams.useTrackball = true;
@@ -497,6 +695,10 @@ function initScene() {
 	// controls
 	initControls();
 
+	// now that startFly has been applied, the splash can say which controls we
+	//  actually started in
+	updateSplashControls();
+
 	// add button to enable VR
 	if (viewerParams.allowVRControls) {
 		document.body.appendChild( VRButton.createButton( viewerParams.renderer ) );
@@ -510,6 +712,9 @@ function initScene() {
 	// var canvas = d3.select('canvas').node();
 	// var gl = canvas.getContext('webgl');
 	// console.log(gl.getParameter(gl.ALIASED_POINT_SIZE_RANGE), gl.getParameter(gl.POINT_SMOOTH));
+
+	// selector (temporary)
+	createSelector();
 }
 
 // apply any settings from options file
@@ -517,13 +722,36 @@ function applyOptions(){
 
 	var options = viewerParams.parts.options;
 
+	// TODO compatability key matching, "color" and "sizeMult" are deprecated
+	if (options['partsColors'] == undefined && options['color'] != undefined) options['partsColors'] = options['color'];
+	if (options['partsSizeMultipliers'] == undefined && options['sizeMult'] != undefined) options['partsSizeMultipliers'] = options['sizeMult'];
+
 	var forGUI = [];
 
-	//modify the minimum z to show particles at (avoid having particles up in your face)
-	if (options.hasOwnProperty('zmin') && options.zmin != null) viewerParams.zmin = options.zmin;
+	var keys_to_avoid = [
+		"loaded",
+		"center", // values copied into a named array below
+		"camera", // values copied into a named array below
+		"cameraRotation", // values copied a named into array below
+		"cameraUp", // values copied into a named array below
+		"quaternion", // not used for input, only output as a preset
+		"useStereo", // changes the renderer and needs to update an element in the gui
+		// TODO: do we actually need to do this?
+		//  GUI creation initializes correctly from the values in GUIParams
+		//  can't we just send the values and then make a call to build the GUI?
+		"showVel", // needs to update an element in the gui
+		"velType", // needs to update an element in the gui
+		"animateVel" // needs to update an element in the gui
+	]
 
-	//modify the maximum z to show particles at (avoid having particles up way in the background)
-	if (options.hasOwnProperty('zmax') && options.zmax != null) viewerParams.zmax = options.zmax;
+	Object.keys(viewerParams.defaultSettings).forEach(function (key){
+		if (options.hasOwnProperty(key) && options[key] != null){
+			value = options[key];
+			if (key.includes("start")) return;
+			else if (keys_to_avoid.includes(key)) return;
+			else viewerParams[key] = options[key]; // copy the value into the same key
+		}
+	});
 
 	//initialize center
 	if (options.hasOwnProperty('center')){
@@ -569,18 +797,14 @@ function applyOptions(){
 		setTweenviewerParams();
 	}
 
-	//modify the initial friction
-	if (options.hasOwnProperty('friction') && options.friction != null) viewerParams.friction = options.friction;
-
 	//check if we are starting in Stereo
-	if (options.hasOwnProperty('stereo') && options.stereo){
-		viewerParams.normalRenderer = viewerParams.renderer;
-		viewerParams.renderer = viewerParams.effect;
-		viewerParams.useStereo = true;
+	if (options.hasOwnProperty('useStereo')){
+		checkStereoLock(options.useStereo)
 		if (viewerParams.haveUI){
-			var evalString = 'elm = document.getElementById("StereoCheckBox"); elm.checked = true; elm.value = true;'
+			var evalString = 'elm = document.getElementById("StereoCheckBox"); elm.checked = ' + options.useStereo + '; elm.value = ' + options.useStereo + ';'
 			forGUI.push({'evalCommand':[evalString]})
-	} 	}
+		} 
+	} 
 
 	//modify the initial stereo separation
 	if (options.hasOwnProperty('stereoSep') && options.stereoSep != null){
@@ -588,9 +812,6 @@ function applyOptions(){
 			viewerParams.effect.setEyeSeparation(viewerParams.stereoSep);
 	}
 
-	//modify the initial decimation
-	if (options.hasOwnProperty('decimate') && options.decimate != null) viewerParams.decimate = options.decimate;
-	
 	//maximum range in calculating the length the velocity vectors
 	if (options.hasOwnProperty("maxVrange") && options.maxVrange != null){
 		viewerParams.maxVrange = options.maxVrange; //maximum dynamic range for length of velocity vectors
@@ -600,80 +821,18 @@ function applyOptions(){
 				calcVelVals(viewerParams.parts[p]);     
 	} 	} 	}
 
-	//modify the minimum point scale factor
-	if (options.hasOwnProperty('minPointScale') && options.minPointScale != null) viewerParams.minPointScale = options.minPointScale;
-
-	//modify the maximum point scale factor
-	if (options.hasOwnProperty('maxPointScale') && options.maxPointScale != null) viewerParams.maxPointScale = options.maxPointScale;
-
     // add an annotation to the top if necessary
 	if (options.hasOwnProperty('annotation') && options.annotation != null){
 		elm = document.getElementById('annotate_container');
 		elm.innerHTML=options.annotation;
 		elm.style.display='block';
+		viewerParams.annotation = options.annotation;
     }
-
-	// flag to show fps in top right corner
-	if (options.hasOwnProperty('showFPS') && options.showFPS != null) viewerParams.showFPS = options.showFPS;
-
-	// flag to show memory usage in top right corner
-	if (options.hasOwnProperty('showMemoryUsage') && options.showMemoryUsage != null) viewerParams.showMemoryUsage = options.showMemoryUsage;
-
-	// change the memory limit for octrees, in bytes
-	if (options.hasOwnProperty('memoryLimit') && options.memoryLimit != null) viewerParams.memoryLimit = options.memoryLimit;
-	// flag to launch the app in a tween loop
-	if (viewerParams.parts.options.hasOwnProperty('start_tween')){
-		if (viewerParams.parts.options.start_tween){
-			viewerParams.updateTween = true	
-			setTweenviewerParams();
-		}
-	}
 
 	//  --------- column density options ----------- 
 
-	// flag to launch the app with the column density projection mode enabled
-	if (viewerParams.parts.options.hasOwnProperty(viewerParams.CDkey)){
-		if (viewerParams.parts.options.columnDensity != null){
-			viewerParams.columnDensity = viewerParams.parts.options.columnDensity;
-		}
-	}
-
-	// flag to renormalize column densities in logspace
-	if (viewerParams.parts.options.hasOwnProperty('CDlognorm')){
-		if (viewerParams.parts.options.CDlognorm != null){
-			viewerParams.CDlognorm = viewerParams.parts.options.CDlognorm;
-		}
-	}
-
-	// bottom of the column density renormalization
-	if (viewerParams.parts.options.hasOwnProperty('CDmin')){
-		if (viewerParams.parts.options.CDmin != null){
-			viewerParams.CDmin = viewerParams.parts.options.CDmin;
-		}
-	}
-
-	// top of the column density renormalization
-	if (viewerParams.parts.options.hasOwnProperty('CDmax')){
-		if (viewerParams.parts.options.CDmax != null){
-			viewerParams.CDmax = viewerParams.parts.options.CDmax;
-		}
-	}	
-
-	// disable GUI elements
-	if (viewerParams.parts.options.hasOwnProperty('GUIExcludeList')){
-		if (viewerParams.parts.options.GUIExcludeList != null){
-			viewerParams.GUIExcludeList = viewerParams.parts.options.GUIExcludeList;
-		}
-	}
-
-	if (viewerParams.parts.options.hasOwnProperty('collapseGUIAtStart')){
-		if (viewerParams.parts.options.collapseGUIAtStart != null){
-			viewerParams.collapseGUIAtStart = viewerParams.parts.options.collapseGUIAtStart;
-		}
-	}
-
-	//particle specific options
 	var options_keys = Object.keys(viewerParams.parts.options.showParts);
+	var xkeys; // x = c (color), f (filter), maybe r (radius) ?. field names.
 	for (var i=0; i<viewerParams.partsKeys.length; i++){
 		var viewer_p = viewerParams.partsKeys[i];
 		var p;
@@ -684,29 +843,35 @@ function applyOptions(){
 			}
 		}
 
-		//on/off
-		if (options.hasOwnProperty("showParts") && 
-			options.showParts != null && 
-			options.showParts.hasOwnProperty(p) && 
-			options.showParts[p] != null) viewerParams.showParts[viewer_p] = options.showParts[p];
+		// overwrite the default settings with what's in the passed settings dictionary
+		Object.keys(viewerParams.defaultParticleSettings).forEach(function (key){
+			if (
+				!keys_to_avoid.includes(key) && // some keys require extra attention, let's skip them
+				options.hasOwnProperty(key) &&  // some settings dictionaries don't have all keys
+				options[key] != null && // sometimes the dictionary might have a "use the default" value
+				options[key].hasOwnProperty(p) &&  // sometimes only some particle groups will be specified
+				options[key][p] != null){ // sometimes the dictionary might have a "use the default" value
 
-		//size
-		if (options.hasOwnProperty("sizeMult") && 
-			options.sizeMult != null && 
-			options.sizeMult.hasOwnProperty(p) && 
-			options.sizeMult[p] != null) viewerParams.PsizeMult[viewer_p] = options.sizeMult[p];
-
-		//color
-		if (options.hasOwnProperty("color") &&
-			options.color != null &&
-			options.color.hasOwnProperty(p) && 
-			options.color[p] != null) viewerParams.Pcolors[viewer_p] = options.color[p];
-
-		//maximum number of particles to plot
-		if (options.hasOwnProperty("plotNmax") &&
-			options.plotNmax != null &&
-			options.plotNmax.hasOwnProperty(p) &&
-			options.plotNmax[p] != null) viewerParams.plotNmax[viewer_p] = options.plotNmax[p];
+				value = options[key][p];
+				// passed a simple value we want to copy
+				if (value.constructor != Object) viewerParams[key][viewer_p] = copyValue(value); 
+				// passed an xkey dictionary (x=f or x=c most likely)
+				else { 
+					xkeys = Object.keys(value);
+					xkeys.forEach(function(xkey){
+						if (value[xkey] != null){ // check each xkey for null values
+							if (Array.isArray(value[xkey])){ // check each element of the array for null values
+								value[xkey].forEach(function(arr_value,index){
+									if (arr_value != null) viewerParams[key][viewer_p][xkey][index] = copyValue(arr_value);
+								});
+							}
+							// just a single value, e.g. invertFilter = fkey -> boolean
+							else viewerParams[key][viewer_p][xkey] = copyValue(value[xkey]);
+						} 
+					});
+				}
+			}
+		});
 
 		//start plotting the velocity vectors
 		if (options.hasOwnProperty("showVel") && 
@@ -730,18 +895,6 @@ function applyOptions(){
 				viewerParams.velType[viewer_p] = options.velType[p];
 		} 	}
 
-		//velocity vector width
-		if (options.hasOwnProperty("velVectorWidth") &&
-			options.velVectorWidth != null &&
-			options.velVectorWidth.hasOwnProperty(p) &&
-			options.velVectorWidth[p] != null) viewerParams.velVectorWidth[viewer_p] = options.velVectorWidth[p]; 
-
-		//velocity vector gradient
-		if (options.hasOwnProperty("velGradient") && 
-			options.velGradient != null && 
-			options.velGradient.hasOwnProperty(p) &&
-			options.velGradient[p] != null) viewerParams.velGradient[viewer_p] = +options.velGradient[p]; //convert from bool to int
-
 		//start showing the velocity animation
 		if (options.hasOwnProperty("animateVel") && 
 			options.animateVel != null &&
@@ -753,91 +906,6 @@ function applyOptions(){
 				var evalString = 'elm = document.getElementById("'+p+'velAnimateCheckBox"); elm.checked = true; elm.value = true;'
 				forGUI.push({'evalCommand':[evalString]})
 		} 	}
-
-		//animate velocity dt
-		if (options.hasOwnProperty("animateVelDt") &&
-			options.animateVelDt != null &&
-			options.animateVelDt.hasOwnProperty(p) &&
-			options.animateVelDt[p] != null) viewerParams.animateVelDt[viewer_p] = options.animateVelDt[p];
-
-		//animate velocity tmax
-		if (options.hasOwnProperty("animateVelTmax") &&
-			options.animateVelTmax != null &&
-			options.animateVelTmax.hasOwnProperty(p) &&
-			options.animateVelTmax[p] != null) viewerParams.animateVelTmax[viewer_p] = options.animateVelTmax[p];
-
-		//filter limits
-		if (options.hasOwnProperty("filterLims") &&
-			options.filterLims != null &&
-			options.filterLims.hasOwnProperty(p) &&
-			options.filterLims[p] != null){
-			viewerParams.updateFilter[viewer_p] = true
-
-			for (k=0; k<viewerParams.fkeys[viewer_p].length; k++){
-				var fkey = viewerParams.fkeys[viewer_p][k]
-				if (options.filterLims[p].hasOwnProperty(fkey)){
-					if (options.filterLims[p][fkey] != null){
-						viewerParams.filterLims[viewer_p][fkey] = []
-						viewerParams.filterLims[viewer_p][fkey].push(options.filterLims[p][fkey][0]);
-						viewerParams.filterLims[viewer_p][fkey].push(options.filterLims[p][fkey][1]);
-		} 	} 	} 	}
-
-		//filter values
-		if (options.hasOwnProperty("filterVals") &&
-			options.filterVals != null &&
-			options.filterVals.hasOwnProperty(p) &&
-			options.filterVals[p] != null){
-			viewerParams.updateFilter[viewer_p] = true
-
-			for (k=0; k<viewerParams.fkeys[viewer_p].length; k++){
-				var fkey = viewerParams.fkeys[viewer_p][k]
-				if (options.filterVals[p].hasOwnProperty(fkey)){
-					if (options.filterVals[p][fkey] != null){
-						viewerParams.filterVals[viewer_p][fkey] = []
-						viewerParams.filterVals[viewer_p][fkey].push(options.filterVals[p][fkey][0]);
-						viewerParams.filterVals[viewer_p][fkey].push(options.filterVals[p][fkey][1]);
-		} 	} 	} 	}
-
-		//filter invert
-		if (options.hasOwnProperty("invertFilter") &&
-			options.invertFilter != null &&
-			options.invertFilter.hasOwnProperty(p) &&
-			options.invertFilter[p] != null){
-			for (k=0; k<viewerParams.fkeys[viewer_p].length; k++){
-				var fkey = viewerParams.fkeys[viewer_p][k]
-				if (options.invertFilter[p].hasOwnProperty(fkey)){
-					if (options.invertFilter[p][fkey] != null){
-						viewerParams.invertFilter[viewer_p][fkey] = options.invertFilter[p][fkey];
-		} 	}	 } 	}
-
-		//colormap limits
-		if (options.hasOwnProperty("colormapLims") &&
-			options.colormapLims != null && 
-			options.colormapLims.hasOwnProperty(p) && 
-			options.colormapLims[p] != null){
-			for (k=0; k<viewerParams.ckeys[viewer_p].length; k++){
-				var ckey = viewerParams.ckeys[viewer_p][k]
-				if (options.colormapLims[p].hasOwnProperty(ckey)){
-					if (options.colormapLims[p][ckey] != null){
-						viewerParams.colormapLims[viewer_p][ckey] = []
-						viewerParams.colormapLims[viewer_p][ckey].push(options.colormapLims[p][ckey][0]);
-						viewerParams.colormapLims[viewer_p][ckey].push(options.colormapLims[p][ckey][1]);
-		} 	} 	} 	}
-
-		//colormap values
-		if (options.hasOwnProperty("colormapVals") &&
-			options.colormapVals != null &&
-			options.colormapVals.hasOwnProperty(p) &&
-			options.colormapVals[p] != null){
-
-			for (k=0; k<viewerParams.ckeys[viewer_p].length; k++){
-				var ckey = viewerParams.ckeys[viewer_p][k]
-				if (options.colormapVals[p].hasOwnProperty(ckey)){
-					if (options.colormapVals[p][ckey] != null){
-						viewerParams.colormapVals[viewer_p][ckey] = []
-						viewerParams.colormapVals[viewer_p][ckey].push(options.colormapVals[p][ckey][0]);
-						viewerParams.colormapVals[viewer_p][ckey].push(options.colormapVals[p][ckey][1]);
-		} 	} 	} 	}
 
 		//start plotting with a colormap
 		if (options.hasOwnProperty("showColormap") &&
@@ -851,42 +919,18 @@ function applyOptions(){
 				forGUI.push({'evalCommand':[evalString]})
 		} 	}
 
-		//choose which colormap to use
-		if (options.hasOwnProperty("colormap") && 
-			options.colormap != null &&
-			options.colormap.hasOwnProperty(p) && 
-			options.colormap[p] != null) viewerParams.colormap[viewer_p] = copyValue(options.colormap[p]);
-
-		//select the colormap variable to color by
-		if (options.hasOwnProperty("colormapVariable") && 
-			options.colormapVariable != null &&
-			options.colormapVariable.hasOwnProperty(p) && 
-			options.colormapVariable[p] != null) viewerParams.colormapVariable[viewer_p] = copyValue(options.colormapVariable[p]);
-
-		//select the radius variable to scale by
-		if (options.hasOwnProperty("radiusVariable") && 
-			options.radiusVariable != null &&
-			options.radiusVariable.hasOwnProperty(p) && 
-			options.radiusVariable[p] != null) viewerParams.radiusVariable[viewer_p] = copyValue(options.radiusVariable[p]);
-
-		if (options.hasOwnProperty("blendingMode") && 
-			options.blendingMode != null &&
-			options.blendingMode.hasOwnProperty(p) && 
-			options.blendingMode[p] != null) viewerParams.blendingMode[viewer_p] = copyValue(options.blendingMode[p]);
-			
 		if (options.hasOwnProperty("depthTest") && 
 			options.depthTest != null &&
 			options.depthTest.hasOwnProperty(p) && 
 			options.depthTest[p] != null){
+			if (viewerParams.haveUI){
 				viewerParams.depthTest[viewer_p] = copyValue(options.depthTest[p]);
-				viewerParams.depthWrite[viewer_p] = copyValue(options.depthTest[p]);
-				/*
-				var evalString =( 'elm = document.getElementById(' + p + '_depthCheckBox);'+
+				var evalString =( 'elm = document.getElementById("' + p + '_depthCheckBox");'+
 					'elm.checked = ' + options.depthTest[p] + ';'+
 					'elm.value = ' + options.depthTest[p]+';')
 				forGUI.push({'evalCommand':evalString});
-				*/
 			}
+		}
 			
 	}// particle specific options
 
@@ -895,15 +939,42 @@ function applyOptions(){
 	//  do it here so it happens in the presets too and load settings, etc...
 	viewerParams.showParts[viewerParams.CDkey] = viewerParams.partsKeys.some(
 		function (key){return viewerParams.showParts[key]});
-	viewerParams.colormap[viewerParams.CDkey] = 4/256
 	viewerParams.ckeys[viewerParams.CDkey] = [viewerParams.CDckey]
-	viewerParams.colormapLims[viewerParams.CDkey] = {}
-	viewerParams.colormapLims[viewerParams.CDkey][viewerParams.ckeys[viewerParams.CDkey][0]] = [viewerParams.CDmin,viewerParams.CDmax]
-	viewerParams.colormapVals[viewerParams.CDkey] = {}
-	viewerParams.colormapVals[viewerParams.CDkey][viewerParams.ckeys[viewerParams.CDkey][0]] = [viewerParams.CDmin,viewerParams.CDmax]
-	viewerParams.colormapVariable[viewerParams.CDkey] = 0;
-	viewerParams.showColormap[viewerParams.CDkey] = false;
-	viewerParams.updateColormapVariable[viewerParams.CDkey] = false;
+	viewerParams.updateColormapVariable[viewerParams.CDkey] = true;
+
+	if (Object.keys(options.colormap).includes(viewerParams.CDkey)){
+		viewerParams.colormap[viewerParams.CDkey] = options["colormap"][viewerParams.CDkey]
+	}
+	else viewerParams.colormap[viewerParams.CDkey] = 4/256;
+
+	if (Object.keys(options.colormapLims).includes(viewerParams.CDkey)){
+		viewerParams.colormapLims[viewerParams.CDkey] = options["colormapLims"][viewerParams.CDkey]
+	}
+	else{
+		viewerParams.colormapLims[viewerParams.CDkey] = {}
+		viewerParams.colormapLims[viewerParams.CDkey][viewerParams.CDckey] = [viewerParams.CDmin,viewerParams.CDmax]
+	}
+	if (Object.keys(options.colormapVals).includes(viewerParams.CDkey)){
+		viewerParams.colormapVals[viewerParams.CDkey] = options["colormapVals"][viewerParams.CDkey]
+	}
+	else{
+		viewerParams.colormapVals[viewerParams.CDkey] = {}
+		viewerParams.colormapVals[viewerParams.CDkey][viewerParams.CDckey] = [viewerParams.CDmin,viewerParams.CDmax]
+	}
+	if (Object.keys(options.colormapVariable).includes(viewerParams.CDkey)){
+		viewerParams.colormapVariable[viewerParams.CDkey] = options["colormapVariable"][viewerParams.CDkey]
+	}
+	else viewerParams.colormapVariable[viewerParams.CDkey] = 0;
+	if (Object.keys(options.showColormap).includes(viewerParams.CDkey)){
+		viewerParams.showColormap[viewerParams.CDkey] = options["showColormap"][viewerParams.CDkey]
+	}
+	else viewerParams.showColormap[viewerParams.CDkey] = false;
+
+	if (Object.keys(options).includes('colormapReversed') &&
+		Object.keys(options.colormapReversed).includes(viewerParams.CDkey)){
+		viewerParams.colormapReversed[viewerParams.CDkey] = options["colormapReversed"][viewerParams.CDkey]
+	}
+	else viewerParams.colormapReversed[viewerParams.CDkey] = false;
 
 	sendToGUI(forGUI);
 }
@@ -952,7 +1023,15 @@ function initControls(updateGUI = true,force_fly=false){
 		viewerParams.controlsTarget = viewerParams.controls.target;
 		viewerParams.controls.dynamicDampingFactor = viewerParams.friction;
 		viewerParams.controls.addEventListener('change', sendCameraInfoToGUI);
-		if (!viewerParams.useTrackball) return initControls(updateGUI,true); 
+		if (!viewerParams.useTrackball) {
+			// we only built these to satisfy the "always initialize in trackball"
+			//  kluge above and are about to replace them with fly controls. let
+			//  them go properly: otherwise their pointer listeners stay on the
+			//  canvas and compete with the fly controls' mouse handling.
+			viewerParams.controls.removeEventListener('change', sendCameraInfoToGUI);
+			viewerParams.controls.dispose();
+			return initControls(updateGUI,true);
+		}
 	} else {
 		console.log('initializing FlyControls')
 		viewerParams.controlsName = 'FlyControls';
@@ -965,52 +1044,84 @@ function initControls(updateGUI = true,force_fly=false){
 		forGUI.push({'evalCommand':evalString});
 	}
 
+	// the fly explainer
+	if (viewerParams.controlsExplainerDelay_sec>0){
+		showFlyExplainer();
+	} else {
+		removeFlyExplainer();
+	}
+
 	viewerParams.switchControls = false;
 	if (updateGUI) sendToGUI(forGUI);
 
 }
 
-// create CD texture buffers and parameters
+// create (or, on a later call, recreate) the CD texture buffer and parameters.
+//  the render target and plane geometry are fixed-resolution at creation time, so
+//  this needs to be called again on window resize or the column density image
+//  stays pinned at whatever size the window happened to be at startup and gets
+//  stretched (and pixelated) to fill a larger window (see GitHub issue #170)
 function initColumnDensity(){
 	//following this example: https://threejs.org/examples/webgl_rtt.html
 	var screenWidth = window.innerWidth;
 	var screenHeight = window.innerHeight;
-	var aspect = screenWidth / screenHeight;
+
+	// dispose of the previous render target/geometry (if any) so repeated calls
+	//  (e.g. on every resize) don't leak GPU memory
+	if (viewerParams.textureCD) viewerParams.textureCD.dispose();
+	if (viewerParams.quadCD) viewerParams.quadCD.geometry.dispose();
 
 	//render texture
 	viewerParams.textureCD = new THREE.WebGLRenderTarget( screenWidth, screenHeight, {
-		minFilter: THREE.LinearFilter, 
-		magFilter: THREE.NearestFilter, 
-		format: THREE.RGBAFormat 
+		minFilter: THREE.LinearFilter,
+		magFilter: THREE.NearestFilter,
+		format: THREE.RGBAFormat
 	} );
 
-	//for now, just use the first colormap
-	viewerParams.materialCD = new THREE.ShaderMaterial( {
-		uniforms: { 
-			tex: { value: viewerParams.textureCD.texture }, 
-			cmap: { type:'t', value: viewerParams.cmap },
-			colormap: {value: viewerParams.colormap[viewerParams.CDkey]},
-			CDmin: {value: viewerParams.colormapVals[viewerParams.CDkey][viewerParams.ckeys[viewerParams.CDkey][0]][0]}, // bottom of CD renormalization
-			CDmax: {value: viewerParams.colormapVals[viewerParams.CDkey][viewerParams.ckeys[viewerParams.CDkey][0]][1]}, // top of CD renormalization
-			lognorm: {value: viewerParams.CDlognorm}, // flag to normalize column densities in log space
-			scaleCD: {value: viewerParams.scaleCD},
-		},
-		vertexShader: myVertexShader,
-		fragmentShader: myFragmentShader_pass2,
-		depthWrite: false
-	} );
 	var plane = new THREE.PlaneBufferGeometry( screenWidth, screenHeight );
-	viewerParams.quadCD = new THREE.Mesh( plane, viewerParams.materialCD );
-	viewerParams.quadCD.position.z = -100;
-	viewerParams.sceneCD = new THREE.Scene();
-	viewerParams.sceneCD.add( viewerParams.quadCD );
 
-	// camera
-	viewerParams.cameraCD = new THREE.OrthographicCamera( screenWidth/-2, screenWidth/2, screenHeight/2, screenHeight/-2, -10000, 10000 );
-	//viewerParams.cameraCD = new THREE.PerspectiveCamera( viewerParams.fov, aspect, viewerParams.zmin, viewerParams.zmax);
-	viewerParams.cameraCD.position.z = 100;
-	viewerParams.cameraCD.up.set(0, -1, 0);
-	viewerParams.sceneCD.add(viewerParams.cameraCD);  
+	if (viewerParams.materialCD){
+		// already created on a previous call -- just repoint it at the new
+		//  render target's texture and swap in the newly sized plane
+		viewerParams.materialCD.uniforms.tex.value = viewerParams.textureCD.texture;
+		viewerParams.quadCD.geometry = plane;
+	} else {
+		//for now, just use the first colormap
+		viewerParams.materialCD = new THREE.ShaderMaterial( {
+			uniforms: {
+				tex: { value: viewerParams.textureCD.texture },
+				cmap: { type:'t', value: viewerParams.cmap },
+				colormap: {value: viewerParams.colormap[viewerParams.CDkey]},
+				colormapReversed: {value: viewerParams.colormapReversed[viewerParams.CDkey]},
+				CDmin: {value: viewerParams.colormapVals[viewerParams.CDkey][viewerParams.ckeys[viewerParams.CDkey][0]][0]}, // bottom of CD renormalization
+				CDmax: {value: viewerParams.colormapVals[viewerParams.CDkey][viewerParams.ckeys[viewerParams.CDkey][0]][1]}, // top of CD renormalization
+				lognorm: {value: viewerParams.CDlognorm}, // flag to normalize column densities in log space
+				scaleCD: {value: viewerParams.scaleCD},
+			},
+			vertexShader: myVertexShader,
+			fragmentShader: myFragmentShader_pass2,
+			depthWrite: false
+		} );
+		viewerParams.quadCD = new THREE.Mesh( plane, viewerParams.materialCD );
+		viewerParams.quadCD.position.z = -100;
+		viewerParams.sceneCD = new THREE.Scene();
+		viewerParams.sceneCD.add( viewerParams.quadCD );
+	}
+
+	// camera -- update the existing one in place if we already have one so we
+	//  don't need to re-add it (or the quad) to sceneCD
+	if (viewerParams.cameraCD){
+		viewerParams.cameraCD.left = screenWidth/-2;
+		viewerParams.cameraCD.right = screenWidth/2;
+		viewerParams.cameraCD.top = screenHeight/2;
+		viewerParams.cameraCD.bottom = screenHeight/-2;
+		viewerParams.cameraCD.updateProjectionMatrix();
+	} else {
+		viewerParams.cameraCD = new THREE.OrthographicCamera( screenWidth/-2, screenWidth/2, screenHeight/2, screenHeight/-2, -10000, 10000 );
+		viewerParams.cameraCD.position.z = 100;
+		viewerParams.cameraCD.up.set(0, -1, 0);
+		viewerParams.sceneCD.add(viewerParams.cameraCD);
+	}
 }
 
 /* HELPER FUNCTIONS */
@@ -1018,7 +1129,19 @@ function initColumnDensity(){
 // continuously check if viewerParams attributes that
 // should be initialized here are null, if so, keep waiting
 function confirmViewerInit(){
-	var keys = ["partsKeys", "PsizeMult", "plotNmax", "decimate", "stereoSepMax", "friction", "Pcolors", "showParts", "showVel", "animateVel", "velopts", "velType", "ckeys", "colormapVals", "colormapLims", "colormapVariable", "colormap", "showColormap", "fkeys", "filterVals", "filterLims", "renderer", "scene", "controls","camera","parts"];
+	// TODO should loop through one or both of 
+	//  the default settings keys instead
+	var keys = [
+		"partsKeys", "partsSizeMultipliers", "plotNmax",
+		"decimate", "stereoSepMax", "friction", "partsColors",
+		"showParts", "showVel", "animateVel", "velopts",
+		"velType", "ckeys", "colormapVals", "colormapLims",
+		"colormapVariable", "colormap", "showColormap",
+		"colormapReversed", "fkeys", "filterVals", "filterLims",
+		"renderer", "scene", "controls","camera",
+		"parts",
+		// createPreset() and sendInitGUI() both iterate these
+		"defaultSettings", "defaultParticleSettings"];
 
 	var ready = true;
 	keys.forEach(function(k,i){
@@ -1048,26 +1171,54 @@ function sendInitGUI(prepend=[], append=[]){
 
 	var forGUI = prepend;
 	forGUI.push({'setGUIParamByKey':[false,"GUIready"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.partsKeys, "partsKeys"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.PsizeMult, "PsizeMult"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.plotNmax, "plotNmax"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.decimate, "decimate"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.Pcolors, "Pcolors"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.showParts, "showParts"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.boxSize, "boxSize"]});
 
-	//for velocities
-	forGUI.push({'setGUIParamByKey':[viewerParams.showVel, "showVel"]});
+	// copy GUI settings
+	forGUI.push({'setGUIParamByKey':[viewerParams.GUIExcludeList,"GUIExcludeList"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.collapseGUIAtStart,"collapseGUIAtStart"]});
+
+	var keys_to_avoid = [
+		"camera", // values copied into a named array below
+	];
+
+	// copy any viewer settings the user is able to change to the GUIParams
+	Object.keys(viewerParams.defaultSettings).forEach(function (key){
+		if (viewerParams[key] != undefined && !keys_to_avoid.includes(key)) forGUI.push({'setGUIParamByKey':[viewerParams[key],key]});
+	});
+	Object.keys(viewerParams.defaultParticleSettings).forEach(function (key){
+		if (viewerParams[key] != undefined) forGUI.push({'setGUIParamByKey':[viewerParams[key],key]});
+	});
+
+	// copy viewer settings which the user can't change
+	forGUI.push({'setGUIParamByKey':[viewerParams.partsKeys, "partsKeys"]});
+	// TODO do we use boxSize anymore?
+	forGUI.push({'setGUIParamByKey':[viewerParams.boxSize, "boxSize"]}); 
+
 	forGUI.push({'setGUIParamByKey':[viewerParams.velopts, "velopts"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.velType, "velType"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.velVectorWidth, "velVectorWidth"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.velGradient, "velGradient"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.animateVel, "animateVel"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.animateVelDt, "animateVelDt"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.animateVelTmax, "animateVelTmax"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.blendingOpts, "blendingOpts"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.blendingMode, "blendingMode"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.depthTest, "depthTest"]});
+
+	// copy viewer settings related to the camera
+	forGUI.push({'setGUIParamByKey':[viewerParams.useTrackball, "useTrackball"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.renderWidth,"renderWidth"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.renderHeight,"renderHeight"]});
+
+	forGUI.push({'setGUIParamByKey':[viewerParams.reset,"reset"]});
+
+	var xx = new THREE.Vector3(0,0,0);
+	viewerParams.camera.getWorldDirection(xx);
+	forGUI.push({'setGUIParamByKey':[xx, "cameraDirection"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.camera.position,"cameraPosition"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.camera.rotation,"cameraRotation"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.camera.up,"cameraUp"]});
+	if (viewerParams.useTrackball) forGUI.push({'setGUIParamByKey':[viewerParams.controls.target, "controlsTarget"]});
+
+	forGUI.push({'updateUICenterText':null});
+	forGUI.push({'updateUICameraText':null});
+	forGUI.push({'updateUIRotText':null});
+
+	//if (viewerParams.usingSocket && !viewerParams.local) forGUI.push({'updateGUICamera':null});
+	if (viewerParams.usingSocket && !viewerParams.local) forGUI.push({'setGUIParamByKey':[true, "cameraNeedsUpdate"]});
+
+	// determine which particle groups have velocities and pass flags
 	var haveVelocities = {};
 	viewerParams.partsKeys.forEach(function(p){
 		haveVelocities[p] = false;
@@ -1077,34 +1228,8 @@ function sendInitGUI(prepend=[], append=[]){
 	});
 	forGUI.push({'setGUIParamByKey':[haveVelocities,"haveVelocities"]});
 
-	//for colormap
-	forGUI.push({'setGUIParamByKey':[viewerParams.ckeys,"ckeys"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.colormapVals, "colormapVals"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.colormapLims, "colormapLims"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.colormapVariable, "colormapVariable"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.colormap, "colormap"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.showColormap, "showColormap"]});
-	var haveColormap = {};
-	var haveColormapSlider = {};
-	viewerParams.partsKeys.forEach(function(p){
-		haveColormap[p] = false;
-		haveColormapSlider[p] = {};
-		viewerParams.ckeys[p].forEach(function(ck){
-			haveColormapSlider[p][ck] = false;
-			if (viewerParams.parts[p][ck] != null){
-				haveColormap[p] = true;
-				haveColormapSlider[p][ck] = true;
-			}
-		});
-	});
-	forGUI.push({'setGUIParamByKey':[haveColormap,"haveColormap"]});
-	forGUI.push({'setGUIParamByKey':[haveColormapSlider,"haveColormapSlider"]});
-
-	//for filters
-	forGUI.push({'setGUIParamByKey':[viewerParams.fkeys,"fkeys"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.filterVals,"filterVals"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.filterLims,"filterLims"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.invertFilter,"invertFilter"]});
+	// determine which particle groups have filters and pass flags 
+	//  TODO: why are there two flags (what is haveFilterSlider for?)
 	var haveFilter = {};
 	var haveFilterSlider = {};
 	viewerParams.partsKeys.forEach(function(p){
@@ -1122,52 +1247,34 @@ function sendInitGUI(prepend=[], append=[]){
 	forGUI.push({'setGUIParamByKey':[haveFilter,"haveFilter"]});
 	forGUI.push({'setGUIParamByKey':[haveFilterSlider,"haveFilterSlider"]});
 
+	// determine which particle groups have colormaps and pass flags 
+	//  TODO: why are there two flags (what is haveFilterSlider for?)
+	var haveColormap = {};
+	var haveColormapSlider = {};
+	viewerParams.partsKeys.forEach(function(p){
+		haveColormap[p] = false;
+		haveColormapSlider[p] = {};
+		viewerParams.ckeys[p].forEach(function(ck){
+			haveColormapSlider[p][ck] = false;
+			if (viewerParams.parts[p][ck] != null){
+				haveColormap[p] = true;
+				haveColormapSlider[p][ck] = true;
+			}
+		});
+	});
+	forGUI.push({'setGUIParamByKey':[haveColormap,"haveColormap"]});
+	forGUI.push({'setGUIParamByKey':[haveColormapSlider,"haveColormapSlider"]});
 
-	forGUI.push({'setGUIParamByKey':[viewerParams.rkeys,"rkeys"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.radiusVariable,"radiusVariable"]});
-
-
-	//for camera
-	forGUI.push({'setGUIParamByKey':[viewerParams.stereoSepMax, "stereoSepMax"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.friction, "friction"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.useTrackball, "useTrackball"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.useStereo, "useStereo"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.renderWidth,"renderWidth"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.renderHeight,"renderHeight"]});
-
-	forGUI.push({'setGUIParamByKey':[viewerParams.reset,"reset"]});
-
-	forGUI.push({'setGUIParamByKey':[viewerParams.camera.position, "cameraPosition"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.camera.rotation, "cameraRotation"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.camera.up, "cameraUp"]});
-	var xx = new THREE.Vector3(0,0,0);
-	viewerParams.camera.getWorldDirection(xx);
-	forGUI.push({'setGUIParamByKey':[xx, "cameraDirection"]});
-	if (viewerParams.useTrackball) forGUI.push({'setGUIParamByKey':[viewerParams.controls.target, "controlsTarget"]});
-
-	forGUI.push({'updateUICenterText':null});
-	forGUI.push({'updateUICameraText':null});
-	forGUI.push({'updateUIRotText':null});
-
-	//if (viewerParams.usingSocket && !viewerParams.local) forGUI.push({'updateGUICamera':null});
-	if (viewerParams.usingSocket && !viewerParams.local) forGUI.push({'setGUIParamByKey':[true, "cameraNeedsUpdate"]});
-
+	//octree
 	forGUI.push({'setGUIParamByKey':[viewerParams.haveOctree,"haveOctree"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.haveAnyOctree,"haveAnyOctree"]});
-	if (viewerParams.haveAnyOctree) {
-		forGUI.push({'setGUIParamByKey':[viewerParams.memoryLimit,"octreeMemoryLimit"]});
-		forGUI.push({'setGUIParamByKey':[viewerParams.octree.normCameraDistance,"octreeNormCameraDistance"]});
-		}
+	forGUI.push({'setGUIParamByKey':[viewerParams.memoryLimit,"octreeMemoryLimit"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.octree.loadingPaused,"octreeLoadingPaused"]});
+	forGUI.push({'setGUIParamByKey':[viewerParams.octree.memoryLimitReached,"octreeMemoryLimitReached"]});
 
-	forGUI.push({'setGUIParamByKey':[viewerParams.showFPS,"showFPS"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.showMemoryUsage,"showMemoryUsage"]});
 
 	forGUI.push({'setGUIParamByKey':[viewerParams.columnDensity,"columnDensity"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.CDmin,"CDmin"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.CDmax,"CDmax"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.CDkey,"CDkey"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.CDckey,"CDckey"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.CDlognorm,"CDlognorm"]});
 
 	//check if there is a tween file
 	viewerParams.haveTween = false;
@@ -1175,17 +1282,19 @@ function sendInitGUI(prepend=[], append=[]){
 	forGUI.push({'setGUIParamByKey':[viewerParams.haveTween,"haveTween"]});
 	forGUI.push({'setGUIParamByKey':[viewerParams.inTween,"inTween"]});
 
-	forGUI.push({'setGUIParamByKey':[viewerParams.GUIExcludeList,"GUIExcludeList"]});
-	forGUI.push({'setGUIParamByKey':[viewerParams.collapseGUIAtStart,"collapseGUIAtStart"]});
-
-	// add any extra commands
+	// add any extra commands we were passed in the function call
 	append.forEach(function(x,i){
 		forGUI.push(x);
 	})
 
+    // for the data selector
+    forGUI.push({'setGUIParamByKey':[viewerParams.selector.active,"selector","active"]});
+    forGUI.push({'setGUIParamByKey':[viewerParams.selector.radius,"selector","radius"]});
+    forGUI.push({'setGUIParamByKey':[viewerParams.selector.distance,"selector","distance"]});
+
 	forGUI.push({'setGUIParamByKey':[true,"GUIready"]});
 
-
+	//forGUI.forEach(function (value){console.log(value.setGUIParamByKey)});
 	sendToGUI(forGUI);
 
 	//ready to create GUI
@@ -1211,13 +1320,19 @@ function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
 	viewerParams.parts.totalSize = 0.;
 	viewerParams.parts.count = {};
 
-
-	viewerParams.partsKeys = Object.keys(viewerParams.filenames);
+	// the raw keys index viewerParams.filenames, but partsKeys itself holds only
+	//  the sanitized names, since that's how viewerParams.parts is keyed.
+	//  build it up front: checkDone below splices options/tweenParams out of
+	//  partsKeys while we're still looping, so it can't be written to by index here
+	var rawPartsKeys = Object.keys(viewerParams.filenames);
+	viewerParams.partsKeys = rawPartsKeys.map(function(p){ return removeSpecialChars(p); });
 	// count how many particles we need to load
-	viewerParams.partsKeys.forEach( function(p, i) {
+	rawPartsKeys.forEach( function(p, i) {
 		// replace any special characters
+		//  keyed by the sanitized name, since that's what partsKeys ends up
+		//  holding and what every reader of parts.count indexes with
 		var sanitary_p = removeSpecialChars(p);
-		viewerParams.parts.count[p] = 0;
+		viewerParams.parts.count[sanitary_p] = 0;
 		viewerParams.filenames[p].forEach( function(f, j) {
 			var amt = 0;
 			if (f.constructor == Array) amt = parseFloat(f[1]);
@@ -1225,12 +1340,12 @@ function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
 
 			if (amt > 0) {
 				viewerParams.parts.totalSize += amt;
-				viewerParams.parts.count[p] += amt;
-			} 
+				viewerParams.parts.count[sanitary_p] += amt;
+			}
 		});
 	});
 
-	viewerParams.partsKeys.forEach( function(p, i) {
+	rawPartsKeys.forEach( function(p, i) {
 		// replace any special characters
 		var sanitary_p = removeSpecialChars(p);
 		// initialize this particle dictionary
@@ -1249,7 +1364,7 @@ function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
 					// TODO should handle passing binary data
 					if (key.includes(f[0])) compileJSONData(internalData[key], sanitary_p, callback, initialLoadFrac)
 				})
-				if (internalData && i == viewerParams.partsKeys.length - 1 && j == viewerParams.filenames[p].length - 1) viewerParams.newInternalData = {};
+				if (internalData && i == rawPartsKeys.length - 1 && j == viewerParams.filenames[p].length - 1) viewerParams.newInternalData = {};
 
 			} 
 			// passed an actual file, let's read it
@@ -1267,7 +1382,6 @@ function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
 					//  which reference .fftree files. Those are loaded
 					//  separately on demand.)
 					if (readf.toLowerCase().includes('.json')){
-						//console.log(prefix+readf)
 						d3.json(prefix+readf, function(foo) {
 							compileJSONData(foo, sanitary_p, callback, initialLoadFrac);
 						});
@@ -1281,8 +1395,6 @@ function loadData(callback, prefix="", internalData=null, initialLoadFrac=0){
 				}
 			}
 		});
-		// replace the parts key with the sanitary_p
-		if (i < viewerParams.partsKeys.length-1) viewerParams.partsKeys[i] = sanitary_p;
 	});
 }
 
@@ -1343,8 +1455,7 @@ function countPartsForLoadingBar(initialLoadFrac=0){
 		var loadfrac = frac*(1. - initialLoadFrac) + initialLoadFrac;
 		//some if statment like this seems necessary.  Otherwise the loading bar doesn't update (I suppose from too many calls)
 		if (loadfrac - viewerParams.loadfrac > 0.1 || loadfrac == 1){
-			viewerParams.loadfrac = loadfrac;
-			updateLoadingBar();
+			updateSplashProgress(loadfrac);
 		}
 	}
 }
@@ -1408,7 +1519,6 @@ function compileFFLYData(data, p, callback, initialLoadFrac=0){
 			if (hasRgbaColors) this_parts.rgbaColors_flat = [];
 			this_parts.filterKeys = [];
 			this_parts.colormapKeys = [];
-			// TODO hook this up for choosing which variable to scale points by
 			this_parts.radiusKeys = [];
 			//this_parts.doSPHrad = Array(false);
 
@@ -1459,25 +1569,28 @@ function countParts(){
 }
 
 // callLoadData -> , connectViewerSocket ->
-function drawLoadingBar(){
-	d3.select('#loadDataButton').style('display','none');
-	d3.select('#selectStartupButton').style('display','none');
+function drawLoadingBar(containerID = 'splashdivLoader', styles = '', textContent = null){
+	d3.select('#dataPicker').style('display','none');
 
 	var screenWidth = parseFloat(window.innerWidth);
 
 	//Make an SVG Container
-	var splash = d3.select("#splashdivLoader")
+    var parent = document.getElementById(containerID);
+    d3.select(parent).selectAll('#loaderContainer').remove();
+    var elem = document.createElement('div');
+    elem.style.cssText = 'width:100%;' + styles;
+    elem.id = 'loaderContainer';
+    parent.appendChild(elem);
 
-	splash.selectAll('svg').remove();
-
-	var svg = splash.append("svg")
+	var svg = d3.select(elem).append("svg")
+        .attr('id','loadingBar')
 		.attr("width", screenWidth)
 		.attr("height", viewerParams.loadingSizeY);
 
-	viewerParams.svgContainer = svg.append("g")
+	var svgContainer = svg.append("g")
 
 
-	viewerParams.svgContainer.append("rect")
+	svgContainer.append("rect")
 		.attr('id','loadingRectOutline')
 		.attr("x", (screenWidth - viewerParams.loadingSizeX)/2)
 		.attr("y", 0)
@@ -1487,7 +1600,7 @@ function drawLoadingBar(){
 		.attr('stroke','var(--logo-color1)')
 		.attr('stroke-width', '3')
 
-	viewerParams.svgContainer.append("rect")
+	svgContainer.append("rect")
 		.attr('id','loadingRect')
 		.attr("x", (screenWidth - viewerParams.loadingSizeX)/2)
 		.attr("y", 0)//(screenHeight - sizeY)/2)
@@ -1495,6 +1608,8 @@ function drawLoadingBar(){
 		.attr('fill','var(--logo-color1)')
 		.attr("width",viewerParams.loadingSizeX*viewerParams.loadfrac);
 
+    if (textContent) d3.select(elem).append('div').attr('class','loaderText').text(textContent);
+    
 
 	window.addEventListener('resize', moveLoadingBar);
 
@@ -1503,8 +1618,13 @@ function drawLoadingBar(){
 // drawLoadingBar ->
 function moveLoadingBar(){
 	var screenWidth = parseFloat(window.innerWidth);
-	d3.selectAll('#loadingRectOutline').attr('x', (screenWidth - viewerParams.loadingSizeX)/2);
-	d3.selectAll('#loadingRect').attr('x', (screenWidth - viewerParams.loadingSizeX)/2);
+    viewerParams.loadingSizeX = 0.9*screenWidth;
+	d3.selectAll('#loadingRectOutline')
+        .attr('width', viewerParams.loadingSizeX)
+        .attr('x', (screenWidth - viewerParams.loadingSizeX)/2);
+	d3.selectAll('#loadingRect')
+        .attr("width",viewerParams.loadingSizeX*viewerParams.loadfrac)
+        .attr('x', (screenWidth - viewerParams.loadingSizeX)/2);
 }
 
 // compileJSONData ->
@@ -1514,14 +1634,58 @@ function updateLoadingBar(){
 
 }
 
+// the splash screen's loading bar (#splashProgressFill/#splashProgressPct) is plain
+// CSS-width markup, always present in the DOM -- unlike drawLoadingBar()/updateLoadingBar()
+// above (which build an SVG bar on demand, still used for the "sending data to Python"
+// progress bar in selector.js), it just needs its width/text set directly.
+function updateSplashProgress(frac){
+	viewerParams.loadfrac = frac;
+	var pct = Math.round(frac*100);
+	d3.select('#splashProgressFill').style('width', pct + '%');
+	d3.select('#splashProgressPct').text(pct + '%');
+}
+
+// called whenever a new load begins, once any known dataset name (viewerParams.datasetName)
+// has been set by the caller
+function resetSplashProgress(){
+	d3.select('#dataPicker').style('display','none');
+	d3.select('.ff-loader__bar').style('display', null); // undo the data picker's hide, now that a directory is chosen
+
+	var label = 'Loading...';
+	if (viewerParams.datasetName) label = 'LOADING · ' + viewerParams.datasetName;
+	d3.select('#splashdiv5').text(label);
+
+	updateSplashProgress(0);
+}
+
+// derive a short display name for the splash screen from a data directory path
+// (e.g. "data/FIRESampleData" -> "FIRESampleData"); returns null if none is known
+function datasetNameFromPath(path){
+	if (!path) return null;
+	var parts = path.split('/').filter(function(s){ return s.length > 0; });
+	return parts.length ? parts[parts.length-1] : null;
+}
+
 // initPVals -> 
 function calcMinMax(p,key, addFac = true){
 	var i=0;
-	min = viewerParams.parts[p][key][i];
-	max = viewerParams.parts[p][key][i];
-	for (i=0; i< viewerParams.parts[p][key].length; i++){
-		min = Math.min(min, viewerParams.parts[p][key][i]);
-		max = Math.max(max, viewerParams.parts[p][key][i]);
+	// lookup the octree min/max over the entire dataset
+	//  rather than calculate it from just the octree nodes
+	//  which will be a weird weighted average.
+	if (viewerParams.parts[p].hasOwnProperty('octree_mins') && 
+		viewerParams.parts[p].hasOwnProperty('octree_maxs') && 
+		viewerParams.parts[p]['octree_mins'].hasOwnProperty(key) && 
+		viewerParams.parts[p]['octree_maxs'].hasOwnProperty(key)){
+		min = viewerParams.parts[p]['octree_mins'][key];
+		max = viewerParams.parts[p]['octree_maxs'][key];
+	}
+	else{
+		min = viewerParams.parts[p][key][i];
+		max = viewerParams.parts[p][key][i];
+		for (i=0; i< viewerParams.parts[p][key].length; i++){
+			min = Math.min(min, viewerParams.parts[p][key][i]);
+			max = Math.max(max, viewerParams.parts[p][key][i]);
+		}
 	}
 	if (addFac){
 		//need to add a small factor here because of the precision of noUIslider
@@ -1559,7 +1723,7 @@ function setBoxSize(coords_flat){
 	var fee, foo;
 	var nparts = coords_flat.length/3;
 	for( var i = 0; i < nparts; i++ ){
-		foo = new THREE.Vector3(coords_flat.slice(3*i,3*(i+1)))
+		foo = new THREE.Vector3(coords_flat.slice(3*i,3*(i+1))[0])
 		fee = viewerParams.center.distanceTo(foo);
 		if (fee > viewerParams.boxSize){
 			viewerParams.boxSize = fee;
@@ -1616,8 +1780,20 @@ function sendCameraInfoToGUI(foo, updateCam=false){
 	sendToGUI(forGUI);
 }
 
-//for fly controls
-document.addEventListener("keydown", sendCameraInfoToGUI);
+//for fly controls. holding a movement key auto-repeats keydown ~30x/second, and
+// each of these is a socket round trip (plus three DOM text updates in the GUI)
+// when the GUI has its own window, so throttle it. keyup sends once more so the
+// readout settles on the true camera position when the key is released.
+document.addEventListener("keydown", function(event){
+	var now = performance.now();
+	if ((now - viewerParams.lastCameraInfoToGUI) < viewerParams.cameraInfoToGUIInterval) return;
+	viewerParams.lastCameraInfoToGUI = now;
+	sendCameraInfoToGUI();
+});
+document.addEventListener("keyup", function(event){
+	viewerParams.lastCameraInfoToGUI = performance.now();
+	sendCameraInfoToGUI();
+});
 
 // called numerous times outside this file
 //check if the data is loaded
@@ -1660,7 +1836,25 @@ function blankCallback(){
 	console.log('blank callback')
 }
 
+// ask for a loading bar refresh. called on every node draw/remove, so the work
+//  itself is deferred to flushOctreeLoadingBar() below
+function requestOctreeLoadingBarUpdate(){
+	viewerParams.octree.loadingBarDirty = true;
+}
+
+// send at most one refresh per loadingBarInterval; called once per render pass
+//  from updateOctree(). time-based so it doesn't scale with the frame rate.
+function flushOctreeLoadingBar(){
+	if (!viewerParams.octree.loadingBarDirty) return;
+	if ((performance.now() - viewerParams.octree.loadingBarLastSent) < viewerParams.octree.loadingBarInterval) return;
+	updateOctreeLoadingBar();
+}
+
 function updateOctreeLoadingBar(){
+	// a direct call satisfies any pending request, and restarts the interval
+	viewerParams.octree.loadingBarDirty = false;
+	viewerParams.octree.loadingBarLastSent = performance.now();
+
 	var forGUI = [];
 	viewerParams.partsKeys.forEach(function(p){
 		if (viewerParams.haveOctree[p]) {

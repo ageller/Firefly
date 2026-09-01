@@ -38,6 +38,8 @@ extensions = ['sphinx.ext.autodoc','sphinx.ext.autosummary','sphinx.ext.viewcode
 
 autosummary_generate = True
 
+autodoc_mock_imports = ["eventlet"]
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 

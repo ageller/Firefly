@@ -7,7 +7,12 @@ import requests
 import numpy as np
 import time
 
-from .settings import Settings,valid_settings
+## numpy 1.X
+try: AxisError = np.AxisError
+## numpy 2.X
+except: from numpy.exceptions import AxisError
+
+from .settings import Settings,default_settings
 from .tween import TweenParams
 from .particlegroup import ParticleGroup
 from .json_utils import write_to_json,load_from_json
@@ -132,6 +137,7 @@ class Reader(object):
 
         settings_kwargs,self.particlegroup_kwargs = split_kwargs(kwargs)
 
+        
         if settings is not None:
             if settings.__class__.__name__ != 'Settings':
                 ## fun fact, assert isinstance(settings,Settings) won't work with jupyter notebooks
@@ -139,7 +145,6 @@ class Reader(object):
                 raise TypeError("Make sure you use a Settings instance to specify firefly settings.")
         ## we'll use the default ones then
         else: settings = Settings(**settings_kwargs)
-
         self.settings_path = os.path.join(
             self.static_data_dir,
             os.path.basename(datadir),
@@ -403,7 +408,7 @@ class Reader(object):
                         {"0":startup_path},
                         startup_file if write_to_disk else None))] ## None -> returns JSON string
 
-        if not write_to_disk and file_extension.lower() == '.json':
+        if not write_to_disk:# and file_extension.lower() == '.json':
             ## create a single "big JSON" with all the data in it in case
             ##  we want to send dataViaFlask
             JSON_dict = dict(file_array)
@@ -465,7 +470,7 @@ class Reader(object):
 
         return outputDict
 
-    def sendDataViaFlask(self,port=5500):
+    def sendDataViaFlask(self,port=5500,room=None):
         """ Exports the data as if it were being dumped to disk
             but instead stores it as a string. Then feeds this string
             to the js interpreter via Flask.
@@ -473,6 +478,10 @@ class Reader(object):
         :param port: port that the firefly Flask server is being hosted on,
             defaults to 5500
         :type port: int, optional
+        :param room: the name of the flask session to send 
+            data to on the specified port. defaults to None
+        :type room: str, optional
+        :raises ValueError: if `room`  is not specified.
         """
 
         ## retrieve a single "big JSON" of all the mini-JSON sub-files. 
@@ -481,9 +490,21 @@ class Reader(object):
             write_to_disk=False,
             file_extension='.json')
 
+        # we do not need to raise an error anymore, now that we have a default room 
+        # if room is None: raise ValueError(
+        #     f"Enter a valid room on port: {int(port):d} using the room (keyword) argument.")
+
+        if (room is not None): self.JSON_dict['room'] = room
+        ## None as the second argument (filename) -> converts dictionary 
+        ##  to JSON string rather than writing to a file
+        self.JSON = write_to_json(self.JSON_dict,None)
+
         ## post the json to the listening url data_input
         ##  defined in server.py
-        print(f"Posting to port {int(port):d}...",end='')
+        if (room is None):
+            print(f"Posting data on port {int(port):d}...",end='')
+        else:
+            print(f"Posting data to room {room} on port {int(port):d}...",end='')
         requests.post(
             f'http://localhost:{port:d}/data_input',
             json=self.JSON)
@@ -576,7 +597,7 @@ class Reader(object):
                 if not os.path.isdir(this_target): os.mkdir(this_target) 
             else:
                 ## copy the source files
-                shutil.rmtree(this_target)
+                if os.path.exists(this_target): shutil.rmtree(this_target)
                 shutil.copytree(os.path.join(src,'static',obj),this_target)
 
         if dump_data:
@@ -704,34 +725,39 @@ class ArrayReader(Reader):
         :type write_to_disk: bool, optional
         :param loud: flag to print status information to the console, defaults to False
         :type loud: bool, optional
-        :raises np.AxisError: if the coordinate data cannot be interpreted
+        :raises AxisError: if the coordinate data cannot be interpreted
         :raises ValueError: if the number of particle groups does not match the number of
             coordinate arrays
-        :raises np.AxisError: if the field data cannot be interpreted
-        :raises np.AxisError: if the field names cannot be interpreted
+        :raises AxisError: if the field data cannot be interpreted
+        :raises AxisError: if the field names cannot be interpreted
         """
 
         super().__init__(**kwargs)
 
         ## wrap coordinate array if necessary
-        if len(np.shape(coordinates))==2 and np.shape(coordinates)[-1]==3:
-            ## passed a single list of coordinates, prepend an axis for the single group
-            coordinates = [coordinates]
-            velocities = [velocities]
-            if UInames is not None: UInames = [UInames]
-            if fields is not None: fields = [fields]
-        elif len(np.shape(coordinates[0]))==2 and np.shape(coordinates[0])[-1]==3:
-            ## passed a jagged array of different coordinates
-            pass
+        shapes_check = []
+        for i, coords in enumerate(coordinates):
+            if len(np.shape(coords))==2 and np.shape(coords)[-1]==3:
+                shapes_check.append(True)
+            else:
+                shapes_check.append(False)
+        if (np.all(shapes_check)):
+            if (len(shapes_check) == 1):
+                if len(np.shape(coordinates))==2 and np.shape(coordinates)[-1]==3:
+                    ## passed a single list of coordinates, prepend an axis for the single group
+                    coordinates = [coordinates]
+                    velocities = [velocities]
+                    if UInames is not None: UInames = [UInames]
+                    if fields is not None: fields = [fields]
         else:
-            raise np.AxisError("Uninterpretable coordinate array, either pass a single (N,3) array"+ 
+            raise AxisError("Uninterpretable coordinate array, either pass a single (N,3) array"+ 
                 " or a jagged list of 'shape' (M,N_m,3)")
 
         ngroups = len(coordinates)
         npartss = np.array([len(coords) for coords in coordinates])
         
         ## check fields and wrap a single field for a single particle group
-        fielderror = np.AxisError("Uninterpretable field array, either pass a single N array"
+        fielderror = AxisError("Uninterpretable field array, either pass a single N array"
                         " or a jagged list of 'shape' (M,N_fm,N_pm)")
         if fields is not None:
             ## special case and want to allow convenient/inconsistent syntax,
@@ -768,7 +794,7 @@ class ArrayReader(Reader):
             nfieldss = [len(this_fields) for this_fields in fields]
 
         ## check field names and generate them if necessary
-        fieldnameerror = np.AxisError("Uninterpretable field array, either pass a single N array"+
+        fieldnameerror = AxisError("Uninterpretable field array, either pass a single N array"+
             " or a jagged list of 'shape' (M,N_fm,N_pm)")
 
         if field_names is not None: 
@@ -798,12 +824,11 @@ class ArrayReader(Reader):
 
         ## loop through each of the particle groups
         for i,(coords,UIname) in enumerate(zip(coordinates,UInames)):
-
             ## initialize a firefly particle group instance
             firefly_particleGroup = ParticleGroup(
                 UIname,
                 coords,
-                velocities[i],
+                None if velocities is None else velocities[i],
                 decimation_factor=decimation_factor,
                 field_arrays=None if fields is None else fields[i],
                 field_names=None if field_names is None else field_names[i],
@@ -817,6 +842,68 @@ class ArrayReader(Reader):
         self.writeToDisk(
             write_to_disk=write_to_disk,
             loud=loud and write_to_disk)
+
+## the same format, two conventional names
+HDF5_EXTENSIONS = ('.hdf5','.h5')
+
+## pass this as SimpleReader's field_names to take every scalar in the file
+ALL_FIELDS = 'all'
+
+## keys/columns that hold positions rather than a field to plot
+COORDINATE_KEYS = ('Coordinates','x','y','z')
+
+def hdf5_field_names(fnames,particle_groups):
+    """Every per-particle scalar in these particle groups that isn't a
+        coordinate, in the order the file lists them.
+
+    :param fnames: paths to the :code:`.hdf5` files to inspect
+    :type fnames: list of str
+    :param particle_groups: :code:`group_name`s within those files
+    :type particle_groups: list of str
+    :return: field names, suitable for :class:`firefly.data_reader.SimpleReader`
+    :rtype: list of str
+    """
+    field_names = []
+    for fname in fnames:
+        with h5py.File(fname,'r') as handle:
+            for particle_group in particle_groups:
+                if particle_group not in handle: continue
+                group = handle[particle_group]
+                for key in group.keys():
+                    if key in COORDINATE_KEYS or key in field_names: continue
+                    ## one value per particle only: a vector field like
+                    ##  Velocities (N,3) is not something we can colormap
+                    if getattr(group[key],'ndim',None) != 1: continue
+                    field_names.append(key)
+    return field_names
+
+def csv_field_names(fnames,csv_sep=','):
+    """Every numeric column in these files that isn't a coordinate.
+
+        Coordinates are the columns named x, y and z, or the first three columns
+        if they aren't named that -- matching how the coordinates themselves are
+        read (see SimpleReader.__getCSVCoordinates).
+
+    :param fnames: paths to the :code:`.csv` files to inspect
+    :type fnames: list of str
+    :param csv_sep: separator between values in the csv, defaults to ','
+    :type csv_sep: str, optional
+    :return: field names, suitable for :class:`firefly.data_reader.SimpleReader`
+    :rtype: list of str
+    """
+    field_names = []
+    for fname in fnames:
+        ## a single row is enough for the column names and their types
+        frame = pd.read_csv(fname,sep=csv_sep,nrows=1)
+        columns = list(frame.columns)
+        named_xyz = all(key in columns for key in ('x','y','z'))
+        for i,column in enumerate(columns):
+            if named_xyz and column in ('x','y','z'): continue
+            if not named_xyz and i < 3: continue
+            if column in field_names: continue
+            if not pd.api.types.is_numeric_dtype(frame[column]): continue
+            field_names.append(column)
+    return field_names
 
 class SimpleReader(ArrayReader):
     """ A wrapper to :class:`firefly.data_reader.ArrayReader` that attempts to 
@@ -841,10 +928,12 @@ class SimpleReader(ArrayReader):
 
         :param path_to_data: path to .hdf5/csv file(s; can be a directory)
         :type path_to_data: str 
-        :param field_names: strings to try and extract from .hdf5 file. If file format is .csv then there must be a header row
-        :type field_names: list of strs
+        :param field_names: strings to try and extract from .hdf5 file. If file format is .csv then there must be a header row.
+            Pass :code:`'all'` (:code:`firefly.data_reader.reader.ALL_FIELDS`) to take every per-particle scalar
+            in the file that isn't a coordinate, defaults to None (no fields)
+        :type field_names: list of strs or str
         :param extension: file extension to attempt to open. 
-            Accepts only :code:`'.hdf5'` or :code:`'.csv'`, defaults to '.hdf5'
+            Accepts only :code:`'.hdf5'`, :code:`'.h5'` or :code:`'.csv'`, defaults to '.hdf5'
         :type extension: str, optional
         :param loud: flag to print status information to the console, defaults to False
         :type loud: bool, optional
@@ -853,7 +942,7 @@ class SimpleReader(ArrayReader):
         :raises ValueError: if :code:`path_to_data` is not a directory or doesn't contain
             :code:`extension`
         :raises ValueError: if :code:`extension` is passed anything either 
-            than :code:`'.hdf5'` or :code:`'.csv'`
+            than :code:`'.hdf5'`, :code:`'.h5'` or :code:`'.csv'`
         :raises ValueError: if particle_groups is not None, extension = .csv, and 
             len(particle_groups) != len(detected filenames in path_to_data)
         """
@@ -875,7 +964,10 @@ class SimpleReader(ArrayReader):
                 "%s needs to point to an %s file or "%(path_to_data,extension)+
                 "a directory containing %s files."%extension)
 
-        if extension == '.hdf5':
+        ## .h5 and .hdf5 are the same format under two conventional names
+        is_hdf5 = extension in HDF5_EXTENSIONS
+
+        if is_hdf5:
             ## take the contents of the "first" file to define particle groups and keys
             with h5py.File(fnames[0],'r') as handle:
                 particle_groups = list(handle.keys())
@@ -887,7 +979,14 @@ class SimpleReader(ArrayReader):
         elif extension == '.csv':
             particle_groups = [fname.replace(extension,'').split(os.sep)[-1] for fname in fnames]
         else:
-            raise ValueError("Invalid extension %s, must be .hdf5 or .csv"%extension) 
+            raise ValueError("Invalid extension %s, must be one of %s or .csv"%(
+                extension,', '.join(HDF5_EXTENSIONS))) 
+
+        ## asked to work out the fields for ourselves
+        if isinstance(field_names,str) and field_names.lower() == ALL_FIELDS:
+            field_names = (hdf5_field_names(fnames,particle_groups) if is_hdf5
+                else csv_field_names(fnames,csv_sep))
+            print("Detected %d field(s): %s"%(len(field_names),', '.join(field_names)))
 
         print("Opening %d files and %d particle types..."%(len(fnames),len(particle_groups)))
 
@@ -899,7 +998,7 @@ class SimpleReader(ArrayReader):
         for i,particle_group in enumerate(particle_groups):
             coordinates = None
             fieldss = {}
-            if extension == '.hdf5':
+            if is_hdf5:
                 ## need to loop through each file and get the matching coordinates, 
                 ##  concatenating them.
                 for fname in fnames:
@@ -910,7 +1009,8 @@ class SimpleReader(ArrayReader):
                 coordinates = self.__getCSVCoordinates(fnames[i],csv_sep) 
                 fieldss = self.__getCSVFields(fnames[i],field_names,csv_sep) 
             else:
-                raise ValueError("Invalid extension %s, must be .hdf5 or .csv"%extension) 
+                raise ValueError("Invalid extension %s, must be one of %s or .csv"%(
+                    extension,', '.join(HDF5_EXTENSIONS))) 
             coordss.append(coordinates)
             if fieldsss is not None: fieldsss.append(fieldss)
 
@@ -922,7 +1022,7 @@ class SimpleReader(ArrayReader):
             write_to_disk=write_to_disk,
             loud=loud,
             **kwargs)
-
+        
     def __getCSVCoordinates(self,fname,csv_sep=','):
         """Simple parser for opening a CSV file and extracting
             its coordinates.
@@ -990,7 +1090,7 @@ class SimpleReader(ArrayReader):
         :param coordinates: existing coordinate array that should be appended to, defaults to None
         :type coordinates: np.ndarray, optional
         :raises TypeError: if :code:`coordinates` is not of type :code:`np.ndarray`
-        :raises np.AxisError: if :code:`coordinates` does not have shape (N,3)
+        :raises AxisError: if :code:`coordinates` does not have shape (N,3)
         :return: coordinates, the opened coordinate array from :code:`fname`
         :rtype: np.ndarray
         """
@@ -1002,7 +1102,7 @@ class SimpleReader(ArrayReader):
             elif type(coordinates)!= np.ndarray:
                 raise TypeError("Existing coordinate array must be of type np.ndarry")
             if np.shape(coordinates)[-1] != 3:
-                raise np.AxisError("Last axis of existing coordinate array must be of size 3")
+                raise AxisError("Last axis of existing coordinate array must be of size 3")
 
             ## open the hdf5 group
             if particle_group is not None:
@@ -1063,13 +1163,15 @@ class SimpleReader(ArrayReader):
                 if field_name in this_group.keys():
                     if field_name in fieldss:
                         ## if it's already there append it
-                        fieldss[field_name] = np.append(fieldss[field_name],this_group[field_name])
-                    ## initialize it otherwise
-                    else: fieldss[field_name] = this_group[field_name]
+                        fieldss[field_name] = np.append(fieldss[field_name],this_group[field_name][()])
+                    ## initialize it otherwise. read the values out ([()]) rather
+                    ##  than keeping the h5py Dataset: the file is closed below and
+                    ##  the dataset is unreadable after that
+                    else: fieldss[field_name] = this_group[field_name][()]
         return fieldss
 
 def split_kwargs(kwargs):
     kwargs_keys = kwargs.keys()
-    settings_keys = kwargs_keys & valid_settings
-    particlegroup_keys = kwargs_keys - valid_settings
+    settings_keys = kwargs_keys & set(default_settings.keys())
+    particlegroup_keys = kwargs_keys - set(default_settings.keys())
     return {key:kwargs[key] for key in settings_keys},{key:kwargs[key] for key in particlegroup_keys}

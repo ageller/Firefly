@@ -1,6 +1,6 @@
 from .reader import Reader,SimpleReader,ArrayReader
 
-from .settings import Settings,valid_settings
+from .settings import Settings,default_settings
 
 from .particlegroup import ParticleGroup
 

@@ -56,9 +56,27 @@ function setParamsFromURL(paramsObj){
 }
 
 /* FLASK HELPER FUNCTIONS USED A TON */
+
+// release everything queued while we weren't yet in a room. called from the
+//  room_check handlers in both windows, right after emitting 'join' -- emits on
+//  one socket stay ordered, so the join lands first.
+function flushPendingSocketMessages(){
+	socketParams.joined = true;
+
+	var gui = socketParams.pendingGUI;
+	var viewer = socketParams.pendingViewer;
+	socketParams.pendingGUI = [];
+	socketParams.pendingViewer = [];
+
+	gui.forEach(function(msg){ socketParams.socket.emit('gui_input',msg) });
+	viewer.forEach(function(msg){ socketParams.socket.emit('viewer_input',msg) });
+}
+
 //function to send events to the GUI
 function sendToGUI(GUIInput){
 	if (viewerParams.usingSocket){
+		// not in a room yet: the server would throw this away
+		if (!socketParams.joined) return socketParams.pendingGUI.push(GUIInput);
 		socketParams.socket.emit('gui_input',GUIInput);
 	} else {
 		setParams(GUIInput);
@@ -93,7 +111,9 @@ function setViewerParamByKey(args){
 
 // function to send events to the viewer
 function sendToViewer(viewerInput){
-	if (GUIParams.usingSocket){
+	if (GUIParams.usingSocket && socketParams.socket){
+		// not in a room yet: the server would throw this away
+		if (!socketParams.joined) return socketParams.pendingViewer.push(viewerInput);
 		socketParams.socket.emit('viewer_input',viewerInput);
 	} else {
 		setParams(viewerInput);
@@ -174,4 +194,50 @@ function parseTranslateStyle(elem){
 	
 	return out;
 
+}
+
+function downloadObjectAsJson(exportObj, exportName){
+	// to download an object as a json file
+	// https://stackoverflow.com/questions/19721439/download-json-object-as-a-file-from-browser
+    var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj));
+    var downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href",dataStr);
+    downloadAnchorNode.setAttribute("download", exportName + ".json");
+    document.body.appendChild(downloadAnchorNode); // required for firefox
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+  }
+
+  function roughSizeOfObject( object ) {
+    // https://stackoverflow.com/questions/1248302/how-to-get-the-size-of-a-javascript-object
+    var objectList = [];
+    var stack = [ object ];
+    var bytes = 0;
+
+    while ( stack.length ) {
+        var value = stack.pop();
+
+        if ( typeof value === 'boolean' ) {
+            bytes += 4;
+        }
+        else if ( typeof value === 'string' ) {
+            bytes += value.length * 2;
+        }
+        else if ( typeof value === 'number' ) {
+            bytes += 8;
+        }
+        else if
+        (
+            typeof value === 'object'
+            && objectList.indexOf( value ) === -1
+        )
+        {
+            objectList.push( value );
+
+            for( var i in value ) {
+                stack.push( value[ i ] );
+            }
+        }
+    }
+    return bytes;
 }

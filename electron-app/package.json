@@ -1,0 +1,67 @@
+{
+    "name": "firefly-electron",
+    "version": "1.0.0",
+    "main": "main.js",
+    "scripts": {
+        "start": "electron .",
+        "build": "electron-builder"
+    },
+    "build": {
+        "appId": "com.firefly",
+        "productName": "Firefly",
+        "files": [
+            "**/*",
+            "!resources/python/**",
+            "!resources/ntbks/**",
+            "!node_modules/.cache/**"
+        ],
+        "extraResources": [
+            {
+                "from": "resources/scripts/",
+                "to": "scripts",
+                "filter": [
+                    "**/*"
+                ]
+            }
+        ],
+        "win": {
+            "target": "nsis",
+            "icon": "src/images/firefly-icon.ico"
+        },
+        "nsis": {
+            "oneClick": false,
+            "allowToChangeInstallationDirectory": true,
+            "perMachine": false
+        },
+        "mac": {
+            "target": "pkg",
+            "category": "public.app-category.education",
+            "icon": "src/images/firefly-icon.icns",
+            "hardenedRuntime": true,
+            "gatekeeperAssess": false
+        },
+        "linux": {
+            "target": "AppImage",
+            "category": "Education",
+            "icon": "src/images/firefly-icon.png"
+        }
+    },
+    "keywords": [],
+    "author": {
+        "name": "Aaron M. Geller & Alex B. Gurvich",
+        "email": "a.geller@northwestern.edu"
+    },
+    "homepage": "https://firefly.rcs.northwestern.edu/",
+    "license": "GNU Affero General Public License v3.0",
+    "description": "An electron wrapper for the Firefly visualization app",
+    "devDependencies": {
+        "electron": "^39.8.10",
+        "electron-builder": "^26.15.3"
+    },
+    "dependencies": {
+        "detect-port": "^2.1.0",
+        "electron-is-dev": "^3.0.1",
+        "find-process": "^2.0.0",
+        "tree-kill": "^1.2.2"
+    }
+}

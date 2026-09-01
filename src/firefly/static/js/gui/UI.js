@@ -1,5 +1,6 @@
 //GLOBAL_arrow = '&#129044;';
-GLOBAL_arrow = '&#11104;';
+//GLOBAL_arrow = '&#11104;';
+GLOBAL_arrow = '&larr;';
 
 // while the window is resizing, I don't want transitions in the size of the GUI
 // execute a function after resize is finished
@@ -143,7 +144,8 @@ function createUI(){
 		.append('div')
 			.attr('class','pLabelDiv')
 			.style('font-size','30px')
-			.style('line-height','14px')
+			// .style('line-height','14px')
+			.style('line-height','0px')
 			.style('color',getComputedStyle(document.body).getPropertyValue('--UI-character-background-color'))
 			.html(GLOBAL_arrow)
 			//.text('Back')
@@ -205,6 +207,11 @@ function createUI(){
 
 	// bind the children here again so that we can look for them in GUI built
 	GUIParams.GUIState.children = Object.keys(GUIParams.GUIState).filter(function(key){return !GUIParams.GUIState_variables.includes(key)});
+
+	// warn if the settings file loaded us into a non-standard colormap/blending/depth
+	// combination for any particle group (see GitHub issue #123)
+	createBlendingWarningDiv();
+	checkBlendingConsistency();
 
 }
 
@@ -475,21 +482,32 @@ function createGeneralWindow(container,parent,name,this_UIcontainer=null){
 	}
 	else { // this is a branch leading to more buttons
 		var sub_url;
-		var singleWidth = GUIParams.containerWidth/keys.filter(function (val){
+		var button_count = keys.filter(function (val){
 			sub_url = this_pane.url+'/' + val;
 			return !excluded(sub_url);
-		}).length - 4;
+		}).length;
+		var denom = Math.min(button_count,2);
+		var singleWidth = GUIParams.containerWidth/denom - 14;
+
 		//console.log('hardcoded padding between',this_pane.url,'/',keys,'buttons');
 
-		this_pane.d3Element = this_UIcontainer.style('display','flex')
+		// each button has 36 pixels associated with it, 22 in height,
+		//  7 in buffer/padding that expands the width of the gray box, and then
+		//  an additional 8 of blank space
+		//  so we want the number of rows (button_count/2 + button_count%2)
+		//  which could change (right now between 1 and 2)
+		segment_height=36 * (Math.floor(button_count/2) + button_count%2);
+		this_pane.d3Element = this_UIcontainer.style('display','flex-wrap')
+			.style('height', segment_height + 'px')
+			.attr('trueHeight', segment_height + 'px');
 
 		// short-circuit once we've made the div for the particles above
 		if (this_pane.id != 'particles'){
-			this_pane.children.forEach(function(k){
+			this_pane.children.forEach(function(k,index){
 				var sub_url = this_pane[k].url = this_pane.url+'/' + k;
-				//console.log(sub_url)
+				//console.log(this_pane.id,sub_url,singleWidth)
 				if (excluded(sub_url)) return;
-				this_pane.d3Element.append('div')
+				last_button = this_pane.d3Element.append('div')
 					.attr('id',this_pane[k].id + 'button')
 					.attr('class','particleDiv')
 					.style('width', singleWidth + 'px')
@@ -497,9 +515,17 @@ function createGeneralWindow(container,parent,name,this_UIcontainer=null){
 					.style('margin','2px')
 					.style('cursor','pointer')
 					.on('click',function(){transitionUIWindows(sub_url)})
-					.append('div')
-						.attr('class','pLabelDiv')
-						.text(this_pane[k].id[0].toUpperCase()+this_pane[k].id.slice(1,))
+				
+				last_label = last_button.append('div')
+					.attr('class','pLabelDiv')
+					.text(this_pane[k].id[0].toUpperCase()+this_pane[k].id.slice(1,))
+
+				// if we have an odd number of buttons, make the last one wider
+				if (button_count%2 && index == (button_count-1)){
+					last_button.style('width',GUIParams.containerWidth-14)
+					last_label.style('width',GUIParams.containerWidth-14)
+				}
+
 				createGeneralWindow(container,this_pane,k);
 			})
 		}// this_pane.id != 'particles'
@@ -642,6 +668,8 @@ function selectBlendingMode() {
 
 	var p = this.id.slice(0,-19)
 	sendToViewer([{'setBlendingMode':[selectValue, p]}]);
+	GUIParams.blendingMode[p] = selectValue;
+	checkBlendingConsistency();
 }
 
 function selectRadiusVariable(){
@@ -975,6 +1003,62 @@ function updateUIBlending(args){
 		elm.checked = dTest;
 		elm.value = dTest;
 	}
+
+	// keep GUIParams in sync with what's now displayed/applied, so later
+	// consistency checks (checkBlendingConsistency) have accurate values to read
+	GUIParams.blendingMode[p] = mode;
+	GUIParams.depthTest[p] = dTest;
+}
+
+// one-time creation of the (initially hidden) banner warning about a non-standard
+// blending mode / depth test / colormap combination; fixed to the viewport rather
+// than nested in the UI panel so it doesn't disturb the panel's hand-tuned,
+// explicitly-summed segment heights (see GitHub issue #152 for why that matters here)
+function createBlendingWarningDiv(){
+	if (!d3.select('#blendingWarningContainer').empty()) return;
+
+	var warn = d3.select('body').append('div')
+		.attr('id','blendingWarningContainer')
+		.style('display','none')
+		.style('position','fixed')
+		.style('top','10px')
+		.style('right','10px')
+		.style('max-width','320px')
+		.style('background-color','#8a1f1f')
+		.style('color','white')
+		.style('font-size','12px')
+		.style('line-height','1.4')
+		.style('padding','8px 26px 8px 10px')
+		.style('z-index',1000)
+		.style('border-radius','4px')
+		.style('box-shadow','0px 0px 8px black');
+
+	warn.append('span')
+		.text('One or more particle groups have a non-standard combination of '+
+			'colormap, blending mode, and depth test, which can cause particles to '+
+			'render incorrectly. Consider resetting blending mode/depth to additive/off '+
+			'for particle groups without a colormap shown, and normal/on for those with one.');
+
+	warn.append('div')
+		.text('✕')
+		.style('position','absolute')
+		.style('top','4px')
+		.style('right','8px')
+		.style('cursor','pointer')
+		.on('click',function(){ d3.select('#blendingWarningContainer').style('display','none'); });
+}
+
+// show/hide the warning banner based on whether any particle group's blending mode
+// or depth test doesn't match what its own showColormap flag would normally imply
+function checkBlendingConsistency(){
+	var nonstandard = false;
+	GUIParams.partsKeys.forEach(function(p){
+		if (p == GUIParams.CDkey) return;
+		var expectedMode = GUIParams.showColormap[p] ? 'normal' : 'additive';
+		var expectedDepth = GUIParams.showColormap[p] ? true : false;
+		if (GUIParams.blendingMode[p] != expectedMode || GUIParams.depthTest[p] != expectedDepth) nonstandard = true;
+	});
+	d3.select('#blendingWarningContainer').style('display', nonstandard ? 'block' : 'none');
 }
 
 //////////////////////////////////////////
@@ -1076,12 +1160,18 @@ function getGUIIDs(){
 	// iterate through and grab all the id keys 
 	GUIParams.GUIIDs = ['UIcontainer'];
 
+	var obj;
 	function iterate(obj) {
+		var key;
 		Object.keys(obj).forEach(function(key){
-
 			if (key == 'id') GUIParams.GUIIDs.push(obj[key]);
 
-			if (typeof obj[key] === 'object' && obj[key] !== null) iterate(obj[key])
+			if (
+				typeof obj[key] == 'object' && 
+				obj[key] != null && 
+				!GUIParams.GUIState_variables.includes(key)){
+				iterate(obj[key])
+			}
 		})
 	}
 	iterate(GUIParams.GUIState);

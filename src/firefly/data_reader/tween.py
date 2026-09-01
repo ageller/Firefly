@@ -2,6 +2,11 @@ from __future__ import print_function
 
 import numpy as np
 
+## numpy 1.X
+try: AxisError = np.AxisError
+## numpy 2.X
+except: from numpy.exceptions import AxisError
+
 import os 
 
 from .json_utils import write_to_json
@@ -73,8 +78,8 @@ class TweenParams(object):
                 * [d1,d2,...] multiple durations (corresponding to number of keyframes or
                     raises an error)
         :type duration: float/list of float 
-        :raises np.AxisError: if len of coords is not divisible by 3
-        :raises np.AxisError: if len of durations does not match len of coords
+        :raises AxisError: if len of coords is not divisible by 3
+        :raises AxisError: if len of durations does not match len of coords
         """
 
         try:
@@ -82,7 +87,7 @@ class TweenParams(object):
             ##  convenient input
             coords = np.array(coords).reshape(-1,3)
         except:
-            raise np.AxisError("coords should either be a 2d Nx3 numpy array or"+
+            raise AxisError("coords should either be a 2d Nx3 numpy array or"+
                 "a 3N list/array.")
 
         ## convert duration to a 1d numpy array, however it was passed
@@ -92,7 +97,7 @@ class TweenParams(object):
         ## ensure there is a duration per keyframe transition
         ##  TODO: shouldn't durations be 1 less than coordss?
         if duration.shape[0]!=coords.shape[0]:
-            raise np.AxisError(
+            raise AxisError(
                 "Mismatching coords and duration shape (%d,%d)"%(
                     coords.shape[0],
                     duration.shape[0]))

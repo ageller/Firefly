@@ -22,10 +22,20 @@ function connectStreamerSocket(){
 		socketParams.socket.on('connect', function() {
 			socketParams.socket.emit('connection_test', {data: 'Streamer connected!'});
 		});
-		socketParams.socket.on('connection_response', function(msg) {
-			console.log("connection response", msg);
+		// socketParams.socket.on('connection_response', function(msg) {
+		// 	console.log("connection response", msg);
+		// });     
+
+		// get the room from the server if the user specified on the command line.  Otherwise prompt the user here for a room.  Then join.
+		socketParams.socket.on('room_check', function(msg) {
+			console.log('!!!!!!!!! received message about rooms', msg)
+			socketParams.room = msg.room;
+			// get the room name
+			while (!socketParams.room) socketParams.room = prompt("Please enter a session name.  This should be a unique string that you will use for all connections to this session.  Do not include any spaces.");
+			console.log('joining room', socketParams.room)
+			socketParams.socket.emit('join', {room: socketParams.room});
 			socketParams.socket.emit('viewer_input', {'setViewerParamByKey':[true, "streamerActive"]});
-		});     
+		});
 
 		socketParams.socket.on('update_streamer', function(msg) {
 			if (splashShowing){
@@ -47,6 +57,7 @@ function connectStreamerSocket(){
 		});
 	});
 }
+
 function arrayBufferToBase64( buffer ) {
 //https://stackoverflow.com/questions/38432611/converting-arraybuffer-to-string-maximum-call-stack-size-exceeded
 	var binary = '';

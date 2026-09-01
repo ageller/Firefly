@@ -1,0 +1,94 @@
+#!/usr/bin/env bash
+
+DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+cd "${DIR}"
+
+#check if the user has python and all the necessary libraries installed
+# an example checking if the pandas package is installed
+#flask
+if ! python -c 'import pkgutil; exit(not pkgutil.find_loader("flask"))'; then
+	echo "ERROR: Please install flask for python."
+	#exit 1
+fi
+#flask_socketio
+if ! python -c 'import pkgutil; exit(not pkgutil.find_loader("flask_socketio"))'; then
+	echo "ERROR: Please install flask_socketio for python."
+	#exit 1
+fi
+#any other necessary packages that aren't installed by default?
+
+#check if the firefly directory env variable (FIREFLY_DIR) is set
+if [ -z "${FIREFLY_DIR}" ]; then
+#	if command -v python run_server.py &> /dev/null; then
+	if [ -f ../run_server.py ]; then
+		export FIREFLY_DIR="$PWD/.."
+	else
+		LOC=$(pip show run_server | grep Location)
+		if [ ! -z "${LOC}" ]; then
+			export FIREFLY_DIR=$(cut -d " " -f2 <<< $LOC)
+		fi
+	fi
+fi
+if [ -z "${FIREFLY_DIR}" ]; then
+	echo "ERROR: Can't detect your firefly directory.  Please set the FIREFLY_DIR environmental variable or launch Firefly manually."
+	#exit 1
+fi
+#check if the browser env variable (FIREFLY_BROWSER) is set
+if [ -z "${FIREFLY_BROWSER}" ]; then
+	#https://stackoverflow.com/questions/3466166/how-to-check-if-running-in-cygwin-mac-or-linux
+	if [ "$(uname)" == "Darwin" ]; then
+		# Do something under Mac OS X platform     
+		export FIREFLY_BROWSER=open
+	elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+		# Do something under GNU/Linux platform
+		export FIREFLY_BROWSER=xdg-open
+	 elif [ "$(expr substr $(uname -s) 1 10)" == "MINGW32_NT" ]; then
+		# Do something under 32 bits Windows NT platform
+		export FIREFLY_BROWSER='start ""'
+	 elif [ "$(expr substr $(uname -s) 1 10)" == "MINGW64_NT" ]; then
+		# Do something under 64 bits Windows NT platform
+		export FIREFLY_BROWSER='start ""'
+	fi
+fi
+if [ -z "${FIREFLY_BROWSER}" ]; then
+	echo "ERROR: Can't detect your default browser.  Please set the FIREFLY_BROWSER environmental variable or launch Firefly manually."
+	#exit 1
+fi
+
+
+
+if [ ! -z "${FIREFLY_BROWSER}" ] && [ ! -z "${FIREFLY_DIR}" ]; then
+	echo ''
+	echo '--------------------'
+	echo 'Launching Firefly'
+	echo ''
+	echo '$FIREFLY_DIR = '$FIREFLY_DIR
+	echo '$FIREFLY_BROWSER = '$FIREFLY_BROWSER
+	echo 'arguments = '$@
+	echo '--------------------'
+	echo ''
+
+
+	# get arguments to pass to python
+	declare -a ARGS
+	for var in "$@"; do
+		# Ignore this argument (only meant for bash)
+		if [ "$var" = '--launch_browser' ]; then
+			#launch the browser (some browsers will automatically reload when flask is connected, but some won't... so wait to launch)
+			sleep 3 && \
+			$FIREFLY_BROWSER http://localhost:5500/ & 
+			continue
+		fi
+		# add all other arguments 
+		ARGS[${#ARGS[@]}]="$var"
+	done
+
+
+	#launch the server
+	python $FIREFLY_DIR/run_server.py "${ARGS[@]}"
+
+fi
+
+#
+# /bin/bash
+#

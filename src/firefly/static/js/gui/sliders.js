@@ -102,6 +102,12 @@ function createSlider(slider, text, sliderArgs, varArgs, resetEnd=[null, 2], typ
 			s.parent = slider;
 		})
 
+		if (isNaN(sliderArgs.range.min[0]) || 
+			isNaN(sliderArgs.range.max[0])){
+				console.log(text)
+				debugger
+			}
+
 		noUiSlider.create(slider, sliderArgs);
 
 		slider.noUiSlider.on('update', function(values, handle) {
@@ -127,7 +133,7 @@ function createSlider(slider, text, sliderArgs, varArgs, resetEnd=[null, 2], typ
 // create the individual sliders
 function createPsizeSlider(p){
 
-	var initialValue = parseFloat(GUIParams.PsizeMult[p]); //I don't *think* I need to update this in GUI; it's just the initial value that matters, right?
+	var initialValue = parseFloat(GUIParams.partsSizeMultipliers[p]); //I don't *think* I need to update this in GUI; it's just the initial value that matters, right?
 
 	var sliderArgs = {
 		start: [initialValue], 
@@ -145,7 +151,7 @@ function createPsizeSlider(p){
 
 	var slider = document.getElementById(p+'_PSlider');
 	var text = [document.getElementById(p+'_PMaxT')];
-	var varToSet = [initialValue, "PsizeMult",p];
+	var varToSet = [initialValue, "partsSizeMultipliers",p];
 	var varArgs = {'f':'setViewerParamByKey','v':varToSet};
 
 	createSlider(slider, text, sliderArgs, varArgs);
@@ -312,16 +318,25 @@ function createDecimationSlider(){
 
 function createMemorySlider(){
 
-	var initialValue = parseFloat(GUIParams.octreeMemoryLimit/1e9); 
+	var initialValue = parseFloat(GUIParams.octreeMemoryLimit/1e9);
+	// fall back to the viewer's default so the handle can't disagree with the
+	//  limit actually in force
+	if (!initialValue) initialValue = 2.;
+
+	// headroom above the default so the limit can be raised as well as lowered,
+	//  and a floor so it can't be dragged to 0 GB (which would stop the octree
+	//  loading anything at all)
+	var maxValue = Math.max(8, 4*initialValue);
+	var minValue = 0.25;
 
 	var sliderArgs = {
-		start: [initialValue], 
+		start: [Math.min(Math.max(initialValue, minValue), maxValue)],
 		connect: [true, false],
 		tooltips: false,
 		steps: [0.01],
-		range: { 
-			'min': [0],
-			'max': [initialValue]
+		range: {
+			'min': [minValue],
+			'max': [maxValue]
 		},
 		format: wNumb({
 			decimals: 2
@@ -503,4 +518,62 @@ function createFilterSliders(p){
 		}
 	});
 
+}
+
+function createDataSelectorRadiusSlider(){
+    var initialValue = parseFloat(GUIParams.selector.radius); 
+
+    var sliderArgs = {
+        start: [initialValue], 
+        connect: [true, false],
+        tooltips: false,
+        steps: [0.01],
+        range: { 
+            'min': [0],
+            'max': [initialValue]
+        },
+        format: wNumb({
+            decimals: 2
+        })
+    }
+
+    var slider = document.getElementById('DSRSlider');
+	var text = [document.getElementById('DSRMaxT')];
+	var varToSet = [initialValue, "selector", "radius"]
+	var varArgs = {'f':'setViewerParamByKey','v':varToSet};
+
+	createSlider(slider, text, sliderArgs, varArgs, [null, 1]);
+
+    //reformat
+    w = parseInt(d3.select("#DSRSlider").style("width").slice(0,-2));
+	d3.select("#DSRSlider").select('.noUi-base').style('width',w-10+"px");
+}
+
+function createDataSelectorDistanceSlider(){
+    var initialValue = parseFloat(GUIParams.selector.distance); 
+
+    var sliderArgs = {
+        start: [initialValue], 
+        connect: [true, false],
+        tooltips: false,
+        steps: [0.01],
+        range: { 
+            'min': [0],
+            'max': [initialValue]
+        },
+        format: wNumb({
+            decimals: 2
+        })
+    }
+
+    var slider = document.getElementById('DSZSlider');
+	var text = [document.getElementById('DSZMaxT')];
+	var varToSet = [initialValue, "selector", "distance"]
+	var varArgs = {'f':'setViewerParamByKey','v':varToSet};
+
+	createSlider(slider, text, sliderArgs, varArgs, [null, 1]);
+
+    //reformat
+    w = parseInt(d3.select("#DSZSlider").style("width").slice(0,-2));
+	d3.select("#DSZSlider").select('.noUi-base').style('width',w-10+"px");
 }

@@ -393,7 +393,7 @@ div.rendered_html tbody tr:hover {
 
 ></iframe></div>
 </div>
-<div class="nbinput docutils container">
+<div class="nbinput nblast docutils container">
 <div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[3]:
 </pre></div>
 </div>
@@ -412,15 +412,6 @@ div.rendered_html tbody tr:hover {
 </pre></div>
 </div>
 </div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-palettable colormaps are not installed
-don&#39;t have phil&#39;s colormaps
-</pre></div></div>
-</div>
 <section id="Tutorial-notebook:-Sending-data-to-a-local-Firefly-server-through-Flask">
 <h1>Tutorial notebook: Sending data to a local Firefly server through Flask<a class="headerlink" href="#Tutorial-notebook:-Sending-data-to-a-local-Firefly-server-through-Flask" title="Permalink to this headline"></a></h1>
 <p>A drawback of using <code class="docutils literal notranslate"><span class="pre">.json</span></code> files on disk to pass data between the Python frontend and the Firefly webapp is that these <code class="docutils literal notranslate"><span class="pre">.json</span></code> files can 1. take up a lot of unnecessary disk space 2. take a long time to read from disk</p>
@@ -436,20 +427,12 @@ don&#39;t have phil&#39;s colormaps
 </pre></div>
 </div>
 </div>
-<div class="nboutput docutils container">
+<div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-Waiting up to 10 seconds for background Firefly server to startdone! Your server is available at - http://localhost:5500
-</pre></div></div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area stderr docutils container">
-<div class="highlight"><pre>
- * Restarting with stat
+Waiting up to 10 seconds for background Firefly server to start....done! Your server is available at - http://localhost:5500
 </pre></div></div>
 </div>
 </section>
@@ -553,7 +536,7 @@ sending to Firefly 49
 </div>
 <div class="output_area docutils container">
 <div class="highlight"><pre>
-&lt;Response [500]&gt;
+&lt;Response [200]&gt;
 </pre></div></div>
 </div>
 <p>We’ve also wrapped this code in the <code class="docutils literal notranslate"><span class="pre">.sendDataViaFlask</span></code> method.</p>
@@ -572,7 +555,7 @@ sending to Firefly 49
 <div class="output_area docutils container">
 <div class="highlight"><pre>
 PGroup_0 - 8000/8000 particles - 1 tracked fields
-Posting to port 5500...data posted!
+Posting data on port 5500...data posted!
 </pre></div></div>
 </div>
 </section>
@@ -598,25 +581,12 @@ Server output:
 --------------
 </pre></div></div>
 </div>
-<div class="nboutput docutils container">
+<div class="nboutput nblast docutils container">
 <div class="prompt empty docutils container">
 </div>
 <div class="output_area stderr docutils container">
 <div class="highlight"><pre>
-kill: 69304: No such process
-</pre></div></div>
-</div>
-<div class="nboutput nblast docutils container">
-<div class="prompt empty docutils container">
-</div>
-<div class="output_area docutils container">
-<div class="highlight"><pre>
-palettable colormaps are not installed
-don&#39;t have phil&#39;s colormaps
-Launching Firefly at: http://localhost:5500
-palettable colormaps are not installed
-don&#39;t have phil&#39;s colormaps
-Launching Firefly at: http://localhost:5500
+kill: 35444: No such process
 </pre></div></div>
 </div>
 <div class="nbinput nblast docutils container">

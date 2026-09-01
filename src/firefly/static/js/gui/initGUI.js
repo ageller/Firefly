@@ -3,13 +3,23 @@
 ///////////////////////////
 function makeUI(local=false){
 	document.getElementById('UIcontainer').style.visibility = 'hidden';
+
+	// same function reference every time, so repeat calls don't stack listeners
+	document.addEventListener('keydown', GUIKeyDown);
+
 	if (!local){
 		initGUIScene();
 		if (!GUIParams.animating) animateGUI();
 	}
 	
 	console.log("waiting for GUI init...")
+	// both intervals, or the previous waitForBuild keeps running forever: only
+	//  the newest handle is stored, so an orphaned one can never clear itself
+	//  and would go on re-running finalizeGUIInitialization()
 	clearInterval(GUIParams.waitForInit);
+	clearInterval(GUIParams.waitForBuild);
+
+	GUIParams.GUItries = 0;
 
 	GUIParams.waitForInit = setInterval(function(){ 
 		var ready = confirmGUIInit();
@@ -20,8 +30,14 @@ function makeUI(local=false){
 			if (GUIParams.cameraNeedsUpdate) updateGUICamera();
 			createUI();
 		}
+		// attempt to fix the issue where the GUI and viewer don't connect to the socket
+		// this might result in some infinite loop of reloads...
+		if (GUIParams.GUItries > GUIParams.autoReloadCount && GUIParams.usingSocket && GUIParams.allowAutoReload){
+			console.log('ERROR IN CREATING GUI.  TRYING AGAIN.');
+			GUIParams.GUItries = 0;
+			location.reload();
+		}
 	}, 1000);
-
 
 	// check that all the expected DOM elements exist in the GUI
 	GUIParams.waitForBuild = setInterval(function(){
@@ -37,7 +53,14 @@ function makeUI(local=false){
 			document.getElementById('UIcontainer').style.visibility = 'visible'
 			// handle detached socket case, draw a cube
 			if (!local) {
-				createCube();
+				// the cube is decoration; don't let a failure here stop us from
+				//  telling the viewer we're done (it waits on that to drop its
+				//  splash and mark itself loaded)
+				try {
+					createCube();
+				} catch (err) {
+					console.error('Could not create the GUI cube:', err);
+				}
 				sendToViewer([{'clearloading':true}]);
 				showSplash(false);
 			}
@@ -46,12 +69,13 @@ function makeUI(local=false){
 	},1500);
 }
 
-function confirmGUIInit(keys = ["partsKeys", "PsizeMult", "plotNmax", "decimate", "stereoSepMax", "friction", "Pcolors", "showParts", "showVel", "velopts", "velType", "ckeys", "colormapVals", "colormapLims", "colormapVariable", "colormap", "showColormap", "fkeys", "filterVals", "filterLims"]){
+function confirmGUIInit(keys = ["partsKeys", "partsSizeMultipliers", "plotNmax", "decimate", "stereoSepMax", "friction", "partsColors", "showParts", "showVel", "velopts", "velType", "ckeys", "colormapVals", "colormapLims", "colormapVariable", "colormap", "showColormap", "fkeys", "filterVals", "filterLims"]){
 	if (!GUIParams.GUIready) return false;
 
 	var ready = keys.every(function(k,i){
 		if (GUIParams[k] == null) {
-			//console.log("GUI missing ", k)
+			GUIParams.GUItries += 1;
+			console.log(`Try ${GUIParams.GUItries}: GUI missing ${k}`);
 			return false;
 		}
 		return true;
@@ -151,149 +175,24 @@ function finalizeGUIInitialization(){
 	console.log('GUI built.')
 }
 
-// show the button on the splash screen
-function showLoadingButton(id){
-	var screenWidth = parseFloat(window.innerWidth);
-	var width = parseFloat(d3.select(id).style('width'));
-	d3.select(id)
-		.style('display','inline')
-		.style('margin-left',(screenWidth - width)/2);
+// in a GUI-only window nothing is watching the keyboard -- update_keypress lives
+//  in the viewer's render loop -- so handle "h" here to bring the data picker
+//  back. gated to that window: anywhere the viewer shares the page, its own
+//  handler already has this key.
+function GUIKeyDown(event){
+	if (typeof viewerParams !== 'undefined') return;
+	if (event.key != 'h' && event.key != 'H') return;
+	if (event.metaKey || event.ctrlKey || event.altKey) return;
+
+	// don't hijack the key while the user is typing into the GUI
+	var t = event.target;
+	if (t && (t.isContentEditable || ['INPUT','TEXTAREA','SELECT'].indexOf(t.tagName) >= 0)) return;
+
+	// toggle, so the same key takes the splash back down again. The viewer's
+	//  handler has viewerParams.helpMessage to track that; here the splash
+	//  itself is the only record of whether it is up (see showSplash()).
+	var splash = document.getElementById('splash');
+	var up = !!splash && !splash.classList.contains('hidden') && getComputedStyle(splash).opacity > 0.5;
+	showSplash(!up);
 }
 
-// for loading and reading a startup file with multiple entries
-function selectFromStartup(prefix=""){
-	var screenWidth = parseFloat(window.innerWidth);
-
-	var dirs = [];
-	Object.keys(GUIParams.dir).forEach(function(d, i) {
-		dirs.push(GUIParams.dir[i]);
-	});
-
-//https://developer.mozilla.org/en-US/docs/Web/HTML/Element/dialog
-//https://www.w3schools.com/howto/howto_css_modals.asp
-	var dialog = d3.select('#splashdivLoader').append('div');
-	dialog.attr('id','startupModal').attr('class','modal');
-
-	var form = dialog.append('div')
-		.attr('class','modal-content')
-
-	var section = form.append('div')
-	section.append('div')
-		.attr('class','modal-header')
-		.html('Select the startup directory : <br />');
-
-	var mid = section.append('div')
-		.attr('class','modal-body')
-		.style('height','20px')
-
-	var select = mid.append('select')
-		.attr('id','selectedStartup');
-
-	var options = select.selectAll('option')
-		.data(dirs).enter()
-			.append('option')
-				.text(function (d) { return d; });
-
-	var menu = form.append('div').attr('class','modal-footer');
-	menu.append('button')
-		.attr('id','cancelSelection')
-		.attr('class', 'button')
-		.style('width','100px')
-		.append('span')
-			.text('Cancel');
-	menu.append('button')
-		.attr('id','submitSelection')
-		.attr('class', 'button')
-		.style('width','100px')
-		.append('span')
-			.text('Confirm');
-
-	var updateButton = document.getElementById('selectStartupButton');
-	var cancelButton = document.getElementById('cancelSelection');
-	var submitButton = document.getElementById('submitSelection');
-	var startupModal = document.getElementById('startupModal');
-	var selection = document.getElementById('selectedStartup');
-
-	selection.value = dirs[0]
-	selection.defaultValue = dirs[0]
-
-	// Update button opens a modal dialog
-	updateButton.addEventListener('click', function() {
-		startupModal.style.display = "block";
-	});
-
-	// Form cancel button closes the modal box
-	cancelButton.addEventListener('click', function() {
-		startupModal.style.display = "none";
-	});
-
-	// submit fires the loader
-	submitButton.addEventListener('click', function() {
-		startupModal.style.display = "none";
-		var f = prefix + selection.value+'/filenames.json';
-		d3.json(f,  function(files) {
-			if (files != null){
-				console.log('==loading data', files, prefix)
-				sendToViewer([{'callLoadData':[files, prefix]}])
-			} else {
-				alert("Cannot load data. Please select another directory.");
-			}
-		});
-
-	});
-
-}
-/////////////////////
-//this is an input file that will fire if there is no startup.json in the data directory
-d3.select('#loadDataButton').on('click', function(){
-	document.getElementById("inputFilenames").click();
-});
-
-
-d3.select('body').append('input')
-	.attr('type','file')
-	.attr('id','inputFilenames')
-	.attr('webkitdirectory', true)
-	.attr('directory', true)
-	.attr('mozdirectory', true)
-	.attr('msdirectory', true)
-	.attr('odirectory', true)
-	.attr('multiple', true)
-	.on('change', function(e){
-		var foundFile = false;
-		// search for a filenames.json, if one exists then use it
-		for (i=0; i<this.files.length; i++){
-			if (this.files[i].name == "filenames.json" && !foundFile){
-				foundFile = true;
-				var file = this.files[i];
-				var reader = new FileReader();
-				reader.readAsText(file, 'UTF-8');
-				reader.onload = function(){
-					var foo = JSON.parse(this.result);
-					if (foo != null){
-						return sendToViewer([{'callLoadData':[foo, 'static/']}])
-					} else {
-						alert("Cannot load data. Please select another directory.");
-					}
-				}
-			}
-		}
-		// okay, no filenames.json, but maybe there are just csv or hdf5 files then? 
-		// NOTE: we don't need to support just .ffly files because those would only exist if 
-		// they had used a reader which would've made a filenames.json file. just JSON files
-		//  would be weird but they can do that with filenames.json so yeah they should make 1 more .json 
-		for (i=0; i<this.files.length; i++){
-			if ((this.files[i].name.includes('.hdf5') || this.files[i].name.includes('.csv')) && !foundFile){
-				if (GUIParams.usingSocket){
-					foundFile = true;
-					var dir = this.files[i].webkitRelativePath.replace(this.files[i].name,'');
-					console.log('have hdf5 or csv file', dir);
-					socketParams.socket.emit('input_otherType', dir);
-				}
-			}
-		}
-		if (i == this.files.length && !foundFile){
-			alert("Cannot load data. Please select another directory.");
-		}
-	})
-	.style('display','None');

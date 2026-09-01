@@ -1,6 +1,7 @@
 function fullscreen(){
 	THREEx.FullScreen.request()
-	document.getElementById("fullScreenButton").style.display = "none";//visibility = "hidden"
+	// ABG: Let's not hide the button because it breaks the height of the UI. It's fine the way it is.
+	//document.getElementById("fullScreenButton").style.display = "none";//visibility = "hidden"
 }
 
 if (document.addEventListener){
@@ -35,6 +36,30 @@ function handleMouseDown(event) {
 
 }
 
+// mark whichever camera controls the viewer starts in as the default on the
+//  splash screen, and label the other one with the key that switches to it.
+//  driven by the "startFly" setting, so this can only be resolved once the data's
+//  settings have been applied.
+function updateSplashControls(){
+	var trackball = d3.select('#splashTrackballBadge');
+	var fly = d3.select('#splashFlyBadge');
+	if (!trackball.node() || !fly.node()) return;
+
+	// trackball unless something tells us otherwise
+	var trackballIsDefault = true;
+	if (typeof viewerParams !== 'undefined' && viewerParams != null && viewerParams.useTrackball != null) trackballIsDefault = viewerParams.useTrackball;
+	else if (typeof GUIParams !== 'undefined' && GUIParams != null && GUIParams.useTrackball != null) trackballIsDefault = GUIParams.useTrackball;
+
+	// ff-controls__mode is the highlighted "default" badge, ff-controls__hint the
+	//  dimmer "press space" one
+	var setBadge = function(elm, isDefault){
+		elm.text(isDefault ? 'default' : 'press space')
+			.attr('class', isDefault ? 'ff-controls__mode' : 'ff-controls__hint');
+	}
+	setBadge(trackball, trackballIsDefault);
+	setBadge(fly, !trackballIsDefault);
+}
+
 //hide the splash screen
 function showSplash(show=true){
 
@@ -44,13 +69,31 @@ function showSplash(show=true){
 			var x = event.clientX;
 			var y = event.clientY;
 			var elementMouseIsOver = document.elementFromPoint(x, y);
-			if (!elementMouseIsOver.id.includes("splash")) show = true;		
+			// was the click anywhere inside the splash overlay itself? (not just an element
+			// whose own id happens to contain "splash" -- the splash markup has several
+			// unlabeled wrapper divs now, so check ancestry instead)
+			if (!elementMouseIsOver.closest('#splash')) show = true;
 		}
 	}
 
 
 	//only hide if the data is loaded
 	if (typeof viewerParams !== 'undefined') if (!viewerParams.loaded) show = true;
+
+	// keep the H toggle in step with what is actually on screen: dismissing the
+	// splash any other way (a click, the picker's Cancel) would otherwise leave
+	// helpMessage saying it is still up, and the next H would toggle it to false
+	// and do nothing (see update_keypress() in viewer/renderLoop.js)
+	if (typeof viewerParams !== 'undefined' && viewerParams != null) viewerParams.helpMessage = show;
+
+	// reopening the splash (e.g. pressing H) over a dataset that is already
+	// loaded: bring the data picker back (with its Cancel button) instead of
+	// leaving the long-finished loading bar sitting in its slot. And when the
+	// splash goes down, however it was dismissed, that visit to the picker is
+	// over. Neither is loaded in the standalone viewer window, which has no
+	// picker of its own.
+	if (show && typeof restoreDataPickerOnSplash === 'function') restoreDataPickerOnSplash();
+	if (!show && typeof endPickerVisit === 'function') endPickerVisit();
 
 	var fdur = 700.;
 
@@ -110,23 +153,122 @@ function hideSleep(){
 }
 
 function changeSnapSizes(){
-	if (viewerParams.haveUI){
-		//size of the snapshot (from text input)
-		var oldW = 0+viewerParams.renderWidth;
-		var oldH = 0+viewerParams.renderHeight;
+	if (typeof viewerParams !== 'undefined') {
+		if (viewerParams.haveUI){
+			//size of the snapshot (from text input)
+			var oldW = 0+viewerParams.renderWidth;
+			var oldH = 0+viewerParams.renderHeight;
 
-		viewerParams.renderWidth = window.innerWidth;
-		viewerParams.renderHeight = window.innerHeight;
+			viewerParams.renderWidth = window.innerWidth;
+			viewerParams.renderHeight = window.innerHeight;
 
-		if (oldW != viewerParams.renderWidth || oldH != viewerParams.renderHeight){
-			var forGUI = [];
-			forGUI.push({'setGUIParamByKey':[viewerParams.renderWidth, 'renderWidth']});
-			forGUI.push({'setGUIParamByKey':[viewerParams.renderHeight, 'renderHeight'] });
+			if (oldW != viewerParams.renderWidth || oldH != viewerParams.renderHeight){
+				var forGUI = [];
+				forGUI.push({'setGUIParamByKey':[viewerParams.renderWidth, 'renderWidth']});
+				forGUI.push({'setGUIParamByKey':[viewerParams.renderHeight, 'renderHeight'] });
 
-			forGUI.push({'changeUISnapSizes':null});
+				forGUI.push({'changeUISnapSizes':null});
 
-			sendToGUI(forGUI);
+				sendToGUI(forGUI);
+			}
 		}
 	}
 }
 window.addEventListener('resize', changeSnapSizes);
+
+// rebuild the column density render target to match the new window size --
+//  it's a fixed resolution at creation time otherwise, so the image stays
+//  pinned at the startup size and gets stretched (pixelated) after the window
+//  is resized larger (see GitHub issue #170). Guarded on textureCD already
+//  existing so this can't fire before initColumnDensity()'s first (startup) call.
+window.addEventListener('resize', function(){
+	if (typeof viewerParams !== 'undefined' && viewerParams.textureCD) initColumnDensity();
+});
+
+
+// for the fly controls explainer tab
+
+function showFlyExplainer(clicked=false){
+	var elem = d3.select('#flyExplainer');
+	if (elem.node()){
+		if (viewerParams.controlsName == 'FlyControls') elem.node().innerHTML = '<b>You are currently in "fly" controls.</b>  To move the camera in [direction] use the following "key" : [left] "a", [right]  "d", [forward] "w", [backward] "s", [down] "f", [up] "r".  Hold "shift" with any of these to reduce the speed.  Increase or decrease the default speed by pressing "+" or "-".  You can also use the mouse left-click + drag to control the camera pitch and yaw.  To switch to "trackball" controls and place the anchor rotation at the current camera location, hit the [space bar].';
+		else elem.node().innerHTML = '<b>You are currently in "trackball" controls.</b>  To rotate the camera, click and hold the [left mouse button] and drag the mouse.  To zoom in or out, [scroll up] or [scroll down] using the scroll wheel. To pan, click and hold the [right mouse button] and drag the mouse.  To switch to "fly" controls and change the rotation anchor point, hit the [space bar].'
+		var bbox = elem.node().getBoundingClientRect();
+		elem
+			.style('z-index', 3)
+			.classed('flyExplainerShown',true)
+			.transition().style('transform', 'translate(0px,0px)');
+
+		var elem2 = d3.select('#flyExplainerHider');
+		elem2
+			.style('z-index', 3)
+			.transition()
+				.style('transform', 'translate(0px,0px)')
+				.style('margin-bottom', parseFloat(bbox.height) + 'px');
+
+		// only auto-hide if the user didn't click to show
+		if (!clicked){
+			d3.select('#flyExplainerHiderContent').transition().style('transform', 'rotate(0deg)')
+				.transition().duration(viewerParams.controlsExplainerDelay_sec*1e3).on('end',hideFlyExplainer);
+		}
+		else d3.select('#flyExplainerHiderContent').transition().style('transform', 'rotate(0deg)');
+	}
+}
+
+function hideFlyExplainer(){
+	var elem = d3.select('#flyExplainer');
+	if (elem.node()){
+
+		var bbox = elem.node().getBoundingClientRect();
+		elem
+			.classed('flyExplainerShown',false)
+			.transition()
+				.style('transform', 'translate(0px,' + parseFloat(bbox.height) + 'px)')
+				.on('end', function(){
+					elem.style('z-index', 0)
+				});
+
+		d3.select('#flyExplainerHider').transition()
+			.style('transform', 'translate(0px,' + parseFloat(bbox.height) + 'px)')
+			.style('margin-bottom', parseFloat(bbox.height) + 'px');
+
+		d3.select('#flyExplainerHiderContent').transition().style('transform', 'rotate(180deg)');
+	}
+
+}
+
+function removeFlyExplainer(){
+	var elem = d3.select('#flyExplainer');
+	if (elem.node()){
+		var bbox = elem.node().getBoundingClientRect();
+
+		elem
+			.classed('flyExplainerShown',false)
+			.style('transform', 'translate(0px,' + parseFloat(bbox.height) + 'px)')
+			.style('z-index', 0);
+
+		d3.select('#flyExplainerHider')
+			.style('transform', 'translate(0px,' + parseFloat(bbox.height) + 'px)')
+			.style('margin-bottom', parseFloat(bbox.height) + 'px')
+			.style('z-index', 0);
+	}
+}
+
+d3.select('#flyExplainerHider').on('click', function(){
+	var elem = d3.select('#flyExplainer');
+	if (elem.node()){
+		if (elem.classed('flyExplainerShown')) {
+			hideFlyExplainer();
+		} else {
+			showFlyExplainer(true)
+		}
+	}
+	
+})
+window.addEventListener('resize', function(){
+	var elem = d3.select('#flyExplainer');
+	if (elem.node()){
+		var bbox = elem.node().getBoundingClientRect();
+		d3.select('#flyExplainerHider').style('margin-bottom', parseFloat(bbox.height) + 'px');
+	}
+});

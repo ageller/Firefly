@@ -5,6 +5,8 @@
 		<title>Firefly Viewer</title>		
 		<link rel="icon" href="static/docs/icon.png">  
 
+			{# optional deployment-local additions (analytics, meta tags, ...); ignored when absent #}
+		{% include "_extra_head.html" ignore missing %}
 	</head>
 
 	<body>
@@ -20,24 +22,7 @@
 					Hint: if this is happening frequently it might be because Firefly is being overtaxed!
 				</div>
 			</div>
-			<div id="splash" onclick="showSplash(false)" style="z-index: 5;">
-				<div id="splashdiv1"><img id="splashimg" width="80%" src='static/docs/FIREFLY-02_trimmed.png'> </div>
-				<div id="splashdiv2">A WebGL tool to explore particle-based data</div>
-				<div id="splashdiv3">Aaron Geller / Alex Gurvich / Northwestern</div>
-				<div id="splashdiv4">
-					<p><b>Instructions:</b></p>
-						<ul>
-							<li>Right-click and drag with the mouse to rotate your view. </li>
-							<li>Use the mouse wheel to zoom in and out. </li>
-							<li>Click the Controls bar on the top left to show/hide a user interface.</li>
-							<li>Detailed instructions can be found on <a href="https://github.com/ageller/Firefly" target="_blank">the Firefly GitHub page.</a> </li>
-							<li><b>h</b>: toggles this help screen on and off. </li>
-						</ul>
-				</div>
-				<div id="splashdivLoader"></div>
-
-				<div id="splashdiv5">Loading...</div>
-			</div>
+			{% include "_splash.html" %}
 
 			<div id="annotate_container" class="dropdown-content"></div>
 
@@ -66,6 +51,9 @@
 		<!-- web sockets -->
 	    <script src="static/lib/socket.io.min.js"></script>
 
+		<!-- for capturing video -->
+		<script src="static/lib/CCapture/CCapture.all.min.js"></script>
+
 		<!-- the main attraction -->
 
 		<!-- shaders -->
@@ -75,7 +63,9 @@
 
         <link rel="stylesheet" type="text/css" href="static/css/UIStyles.css" />
 		<link rel="stylesheet" type="text/css" href="static/css/mainStyles.css" />
+		<link rel="stylesheet" type="text/css" href="static/css/splashStyles.css" />
 
+		<script src="static/js/misc/persistentParams.js"></script>
 		<script src="static/js/misc/socketParams.js"></script>
 		<script src="static/js/viewer/viewerParams.js"></script>
 		<script>
@@ -86,6 +76,7 @@
 		
 		<script src="static/js/misc/utils.js"></script>
 		<script src="static/js/misc/windowEvents.js"></script>
+		<script src="static/js/misc/selector.js"></script>
 		<script src="static/js/viewer/applyUISelections.js"></script>
 		<script src="static/js/viewer/createPartsMesh.js"></script>
 		<script src="static/js/viewer/renderLoop.js"></script>

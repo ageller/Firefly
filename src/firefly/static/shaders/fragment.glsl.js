@@ -8,6 +8,9 @@ varying float vColormapMag;
 varying float vAlpha;
 varying float vPointSize;
 varying vec4 vColor;
+varying float vInsideSelector;
+varying float vDistFromSelectorCenter;
+varying vec3 vSelectorCenter;
 
 uniform bool showColormap;
 uniform float colormap;
@@ -15,12 +18,14 @@ uniform vec4 color;
 uniform int SPHrad;
 uniform float velType; //0 = line, 1 = arrow, 2 = triangle
 uniform sampler2D colormapTexture;
+uniform bool colormapReversed;
 uniform bool columnDensity;
 uniform float scaleCD;
 
 uniform float velVectorWidth;
 uniform float velGradient;
 uniform float useDepth;
+uniform float brightCenterFraction;
 
 //http://www.neilmendoza.com/glsl-rotation-about-an-arbitrary-axis/
 mat4 rotationMatrix(vec3 axis, float angle)
@@ -51,8 +56,8 @@ void main(void) {
 		// if colormap is requested, apply appropriate colormap to appropriate variable
 		//  this should have priority over everything else (so long)
 		else if (showColormap){
-			// if you want to reverse colormap: vec2 pos = vec2(1.-vColormapMag, colormap);
 			vec2 pos = vec2(vColormapMag, colormap);
+			if (colormapReversed) pos = vec2(1. - vColormapMag, colormap);
 			vec3 c = texture2D(colormapTexture, pos).rgb;
 			gl_FragColor.rgb = c;
 			gl_FragColor.a = 1.;
@@ -84,7 +89,10 @@ void main(void) {
 					gl_FragColor.a *= alpha_SPH;
 				} 
 				else {
-					if (vPointSize > 1.) gl_FragColor.a *= dMax - dist;
+					// hold the innermost brightCenterFraction of the point at full alpha and
+					//  only fade beyond it, which leaves a bright core (nice for stars).
+					//  at 0 the fade starts from the centre, i.e. a plain linear falloff.
+					if (vPointSize > 1. && dist >= brightCenterFraction*dMax) gl_FragColor.a *= dMax - dist;
 					//if (dist > dMax){ discard; }
 				}
 			}
@@ -143,6 +151,9 @@ void main(void) {
 
 		gl_FragColor.a *= vAlpha;
 
+		// gl_FragColor = vec4(10./vDistFromSelectorCenter, 0., 0., 1.);
+		if (vInsideSelector > 0.) gl_FragColor = vec4(vec3(1.) - gl_FragColor.rgb, 1.);
+		// if (vInsideSelector < 1.) discard;
 	}
 }
 `;

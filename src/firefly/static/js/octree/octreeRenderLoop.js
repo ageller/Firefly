@@ -6,6 +6,16 @@ function containsPoint(t){
 
 function updateOctree(treewalk=false){
 
+	// are we at the memory limit? once reached we stay reached until usage drops
+	//  back under memoryResumeFraction*limit. kept above the short circuit below so
+	//  it stays accurate on passes where this particle group is hidden.
+	if (viewerParams.memoryUsage >= viewerParams.memoryLimit) viewerParams.octree.memoryLimitReached = true;
+	else if (viewerParams.memoryUsage < viewerParams.octree.memoryResumeFraction*viewerParams.memoryLimit) viewerParams.octree.memoryLimitReached = false;
+
+	// push out any pending loading bar refresh. above the short circuit below so
+	//  it keeps ticking on passes where this particle group is hidden.
+	flushOctreeLoadingBar();
+
 	var pkey = viewerParams.partsKeys[viewerParams.octree.pIndex];
 
 	//rather than a for loop to go through the particles, I am going to manually iterate so that I can draw from one each draw pass
@@ -16,32 +26,24 @@ function updateOctree(treewalk=false){
 	//  or if it doesn't have an octree in the first place.
 	if (!octree || !viewerParams.showParts[pkey]) return updateOctreePindex();
 
-	// check if we're over the memory limit. if so, move the oldest mesh to the remove queue
+	// over the limit: free nodes until we're back under it, so that lowering the
+	//  limit actually reclaims memory rather than only stopping new loads.
+	//  Bounded per pass to keep any single frame cheap.
 	if (viewerParams.memoryUsage > viewerParams.memoryLimit){
-		var i = 0;
-		var prefix_length = (pkey + '-').length
-
-		var node_name,node,node_dist;
-		var max_node_dist = -1;
-		var max_node = null;
-
-		viewerParams.partsMesh[pkey].forEach(function (mesh){
-			node_name = mesh.name;
-			if (!(node_name.includes('root') || node_name.includes('Standard'))){
-				node = octree[node_name.slice(prefix_length)];
-				node_dist = viewerParams.camera.position.distanceTo(node.center);
-				if ((node_dist > max_node_dist ) || !checkOnScreen(node)){
-					max_node_dist = node_dist;
-					max_node = node;
-				}
-			};
-		})
-		// make sure we didn't end up at the root b.c. it was at the end or something weird
-		if (max_node) free_buffer(max_node,showCoM,skip_queue=true);
+		var candidates = collectOctreeEvictionCandidates(pkey,octree);
+		var evicted = 0;
+		while (viewerParams.memoryUsage > viewerParams.memoryLimit &&
+			evicted < viewerParams.octree.maxEvictionsPerPass &&
+			candidates.length){
+			free_buffer(candidates.pop(),showCoM,skip_queue=true);
+			//re-read after each removal, otherwise we'd evict against a stale total
+			update_memory_usage();
+			evicted += 1;
+		}
 	}
 
 	//  check if we can draw a new node
-	if (!viewerParams.octree.waitingToDraw && viewerParams.octree.toDraw[pkey].length > 0 ){
+	if (!viewerParams.octree.waitingToDraw && viewerParams.octree.toDraw[pkey].length > 0 && !octreeLoadingBlocked(pkey)){
 		/*
 		console.log('before',
 			viewerParams.octree.toDraw[pkey][0][0].name,
@@ -252,18 +254,55 @@ function showCoM(node){
 	viewerParams.parts[node.pkey].IsDrawn[node.node_index] = 1;
 }
 
+// should we be pulling in any more data for this particle group? false while the
+//  user has it paused (or cleared), and while we're at the memory limit, where we
+//  hold what's on screen and stop refining.
+function octreeLoadingBlocked(pkey){
+	return viewerParams.octree.loadingPaused[pkey] || viewerParams.octree.memoryLimitReached;
+}
+
+// the nodes we're holding for this particle group, ordered so the one we'd most
+//  like to free is last (pop() takes it). Nodes the tree walk has already marked
+//  for removal go first, then the farthest ones -- and we're willing to take a node
+//  that's still on screen. That can't thrash: loading stays blocked until usage
+//  falls back under the resume threshold, so nothing freed here comes straight back.
+function collectOctreeEvictionCandidates(pkey,octree){
+	var prefix_length = (pkey + '-').length;
+	var candidates = [];
+
+	viewerParams.partsMesh[pkey].forEach(function (mesh){
+		var node_name = mesh.name;
+		if (node_name.includes('root') || node_name.includes('Standard')) return;
+		var node = octree[node_name.slice(prefix_length)];
+		if (!node || !node.mesh) return;
+		candidates.push({
+			'node':node,
+			'marked':node.current_state == 'remove',
+			'dist':viewerParams.camera.position.distanceTo(node.center)
+		});
+	})
+
+	candidates.sort(function(a,b){
+		if (a.marked != b.marked) return a.marked ? 1 : -1;
+		return a.dist - b.dist;
+	});
+
+	return candidates.map(function(c){return c.node});
+}
+
 function load_buffer(node,callback,skip_queue=false){
-	if (skip_queue) return drawOctreeNode(node, callback);	
+	if (skip_queue) return drawOctreeNode(node, callback);
+
+	if (octreeLoadingBlocked(node.pkey)) return;
 
 	// add to the draw list, only when there are available slots in toDraw and when memory usage is low enough
 	if (
 		node.buffer_size > 0 &&// node has particles to be drawn
-		//viewerParams.memoryUsage < viewerParams.octree.memoryLimit && // we have enough memory
-		//toDrawIDs.length < viewerParams.octree.maxFilesToRead && 
+		//toDrawIDs.length < viewerParams.octree.maxFilesToRead &&
 		!node.mesh && // not already in the scene
 		!node.drawn && // not in the process of being drawn
 		!checkInQueue(node) // not already in the draw queue
-		) { 
+		) {
 			
 			// check if node is also in the remove queue, 
 			//  if so, let's remove it from there and
@@ -359,6 +398,11 @@ function drawNextOctreeNode(){
 
 	//work from the back of the array
 	var pkey = viewerParams.partsKeys[viewerParams.octree.pIndex];
+
+	// stop consuming the queue too, not just adding to it -- the backlog can be
+	//  thousands of nodes deep, so gating load_buffer alone doesn't visibly pause
+	if (octreeLoadingBlocked(pkey)) return;
+
 	var tuple = viewerParams.octree.toDraw[pkey].shift(); // shift takes the first element, pop does the last
 
 	// not sure why you might end up in here if the list is empty
@@ -372,17 +416,18 @@ function drawNextOctreeNode(){
 	// tell the node it was removed from the queue
 	node.queue = null; 
 
-	// if the node is already drawn but was somehow added to the list 
+	// if the node is already drawn but was somehow added to the list
 	//  we'll just skip it rather than move to the next element
-	while (node.mesh && viewerParams.octree.toDraw.length){
+	while (node.mesh && viewerParams.octree.toDraw[pkey].length){
 		// take the next in line to draw
-		tuple = viewerParams.octree.toDraw[pkey].pop(); // shift takes the first element, pop does the last
+		tuple = viewerParams.octree.toDraw[pkey].shift();
 		// unpack the tuple
 		node = tuple[0];
-		callback = tuple[1];}
+		callback = tuple[1];
 		// tell the node it was removed from the queue
-		node.queue = null; 
-	
+		node.queue = null;
+	}
+
 	// if the node is already drawn let's skip it
 	//  (should only happen if the list is now empty)
 	//  OR if it's also in the remove array (identified by "current_state")
@@ -417,7 +462,7 @@ function removeNextOctreeNode(){
 	//  OR if it's also in the draw array (identified by "current_state")
 	if (!node.mesh || node.current_state != 'remove') return callback(node);
 
-	viewerParams.octree.waitingtoRemove = true;
+	viewerParams.octree.waitingToRemove = true;
 	return removeOctreeNode(node,callback);
 }
 

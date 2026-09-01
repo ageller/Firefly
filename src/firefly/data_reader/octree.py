@@ -149,7 +149,9 @@ class OctNode(object):
             'has_velocities':self.has_velocities,
             'has_colors':self.has_colors,
             'weight_index':self.weight_index,
-            'nodes':{}}
+            'nodes':{},
+            'octree_mins':dict(zip(self.field_names,np.min(fieldss,axis=0))),
+            'octree_maxs':dict(zip(self.field_names,np.max(fieldss,axis=0)))}
         return root_dict
 
     def set_buffers_from_disk(self,files,nparts):

@@ -1,3 +1,36 @@
+// retire the current render loop; call before tearing the viewer down
+function stopAnimation(){
+	persistentParams.viewerLoopGeneration += 1;
+	if (typeof viewerParams !== 'undefined' && viewerParams) viewerParams.animating = false;
+}
+
+// start a fresh render loop, retiring any loop still running
+function startAnimation(){
+	persistentParams.viewerLoopGeneration += 1;
+	var myGeneration = persistentParams.viewerLoopGeneration;
+	viewerParams.animating = true;
+
+	function loop(time){
+		// a newer loop has taken over, or we were stopped
+		if (myGeneration != persistentParams.viewerLoopGeneration) return;
+
+		// queue the next frame before doing the work, so an exception in animate()
+		//  can't kill the render loop outright
+		if (viewerParams.allowVRControls) viewerParams.renderer.setAnimationLoop( loop );
+		else requestAnimationFrame( loop );
+
+		try {
+			animate(time);
+		} catch (err) {
+			if (!viewerParams.loopErrorLogged){
+				viewerParams.loopErrorLogged = true;
+				console.error('Error in the viewer render loop:', err);
+			}
+		}
+	}
+	loop();
+}
+
 function animate(time) {
 	viewerParams.animating = true;
 
@@ -10,8 +43,9 @@ function animate(time) {
 		update(time);
 
 		// render partsMesh to target
-		render();
+		if (viewerParams.captureCanvas) capture();
 
+		render();
 		// calculate framerate and optionally display it. 
 		// put the app to sleep if FPS < .66 by setting
 		// viewerParams.pauseAnimation = true
@@ -19,7 +53,7 @@ function animate(time) {
 
 		// get the memory usage
 		update_memory_usage();
-
+		
 		if (viewerParams.initialize_time){
 			//console.log(seconds-viewerParams.initialize_time + ' seconds to initialize');
 			//console.log(viewerParams.memoryUsage/1e9 + ' GB allocated');
@@ -59,7 +93,7 @@ function animate(time) {
 				viewerParams.mem_profile[0],
 				viewerParams.mem_profile[1],
 				viewerParams.mem_profile[2],
-				viewerParams.PsizeMult[viewerParams.partsKeys[0]],
+				viewerParams.partsSizeMultipliers[viewerParams.partsKeys[0]],
 				profiled_FPS)
 
 			viewerParams.profiled = true;
@@ -68,12 +102,7 @@ function animate(time) {
 
 	}
 
-	// recursively loop this function
-	if (viewerParams.allowVRControls){
-		viewerParams.renderer.setAnimationLoop( animate );
-	} else {
-		requestAnimationFrame( animate );
-	}
+	// the loop itself is re-queued by startAnimation()
 }
 
 function update(time){
@@ -115,7 +144,10 @@ function update(time){
 			initControls(false);
 		}
 
+		if (viewerParams.selector.active) updateSelector()
+
 	}
+
 }
 
 function update_keypress(time){
@@ -319,7 +351,7 @@ function update_particle_mesh_UI_values(p,m){
 	m.geometry.setDrawRange( 0, viewerParams.plotNmax[p]*Nfac);
 
 	// apply particle size scale factor to meshes that aren't octree CoM meshes
-	if (!m.geometry.userData.octree) m.material.uniforms.uVertexScale.value = viewerParams.PsizeMult[p];
+	if (!m.geometry.userData.octree) m.material.uniforms.uVertexScale.value = viewerParams.partsSizeMultipliers[p];
 	else m.material.uniforms.uVertexScale.value = 1;
 
 	// apply colormap limits and flag for colormapping at all
@@ -327,15 +359,16 @@ function update_particle_mesh_UI_values(p,m){
 	m.material.uniforms.colormapMax.value = viewerParams.colormapVals[p][viewerParams.ckeys[p][viewerParams.colormapVariable[p]]][1];
 	m.material.uniforms.colormap.value = viewerParams.colormap[p];
 	m.material.uniforms.showColormap.value = viewerParams.showColormap[p];
+	m.material.uniforms.colormapReversed.value = viewerParams.colormapReversed[p];
 
 
 	// update the material only if it doesn't match
 	if (m.material.blending != viewerParams.blendingOpts[viewerParams.blendingMode[p]] ||
-		m.material.depthWrite !=  viewerParams.depthWrite[p] || 
+		m.material.depthWrite !=  viewerParams.depthTest[p] || 
 		m.material.depthTest !=  viewerParams.depthTest[p]){
 
 		m.material.blending = viewerParams.blendingOpts[viewerParams.blendingMode[p]];
-		m.material.depthWrite =  viewerParams.depthWrite[p];
+		m.material.depthWrite =  viewerParams.depthTest[p];
 		m.material.depthTest =  viewerParams.depthTest[p];
 		m.material.uniforms.useDepth.value = +viewerParams.depthTest[p];
 		m.material.needsUpdate = true;
@@ -344,10 +377,10 @@ function update_particle_mesh_UI_values(p,m){
 	// apply static color
 	//if (m.name.includes('Standard')){
 	m.material.uniforms.color.value = new THREE.Vector4(
-		viewerParams.Pcolors[p][0],
-		viewerParams.Pcolors[p][1],
-		viewerParams.Pcolors[p][2],
-		viewerParams.Pcolors[p][3]);
+		viewerParams.partsColors[p][0],
+		viewerParams.partsColors[p][1],
+		viewerParams.partsColors[p][2],
+		viewerParams.partsColors[p][3]);
 	//}
 }
 
@@ -497,26 +530,32 @@ function render_column_density(){
 	//then back to the canvas
 	//for now, just use the colormap from the first particle group
 	viewerParams.quadCD.material.uniforms.colormap.value = viewerParams.colormap[viewerParams.CDkey];
+	viewerParams.quadCD.material.uniforms.colormapReversed.value = viewerParams.colormapReversed[viewerParams.CDkey];
 	viewerParams.quadCD.material.uniforms.CDmin.value = viewerParams.colormapVals[viewerParams.CDkey][viewerParams.ckeys[viewerParams.CDkey][0]][0];
 	viewerParams.quadCD.material.uniforms.CDmax.value = viewerParams.colormapVals[viewerParams.CDkey][viewerParams.ckeys[viewerParams.CDkey][0]][1];
 
 	viewerParams.renderer.setRenderTarget(null)
 	viewerParams.renderer.render( viewerParams.sceneCD, viewerParams.cameraCD );
+
 }
 
 function render_stream(){
 	viewerParams.usingSocket = true;
 	//send the image through flask to the stream webpage
-	if (viewerParams.streamReady){
+	if (viewerParams.streamReady && socketParams.room){
 		//https://developer.mozilla.org/en-US/docs/Web/API/HTMLCanvasElement/toBlob
 		viewerParams.renderer.domElement.toBlob(function(blob) {
+			var formdata = new FormData();
+			formdata.append("image", blob);
+			formdata.append("room", socketParams.room);
+			//console.log('checking room in stream',socketParams.room)
+
 			var url = URL.createObjectURL(blob);
 
 			var xhr = new XMLHttpRequest();
 			xhr.open('POST', '/stream_input', true);
 
-			var formdata = new FormData();
-			formdata.append("image", blob);
+
 			xhr.send(formdata);
 
 			//this is giving errors when not on the same localhost
@@ -526,31 +565,83 @@ function render_stream(){
 	}
 }
 
-function update_memory_usage(){
-	//get the actual memory usage
-	if (window.performance.memory) { //works for Chrome
-		viewerParams.memoryUsage = window.performance.memory.totalJSHeapSize;
+function capture(){
+
+	var screenWidth = window.innerWidth;
+	var screenHeight = window.innerHeight;
+	var aspect = screenWidth / screenHeight;
+	
+
+	viewerParams.renderer.setSize(viewerParams.renderWidth, viewerParams.renderHeight);
+	viewerParams.camera.aspect = viewerParams.renderWidth / viewerParams.renderHeight;
+	viewerParams.camera.updateProjectionMatrix();
+	if (viewerParams.columnDensity){
+		viewerParams.renderer.render( viewerParams.sceneCD, viewerParams.cameraCD );
 	} else {
-		//check the total number of particles rendered
-		if (viewerParams.drawPass % 100 == 0 && viewerParams.drawPass > viewerParams.partsKeys.length){
-			viewerParams.totalParticlesInMemory = 0.;
-			viewerParams.partsKeys.forEach(function(p){
-				if (viewerParams.haveOctree[p]){
-					viewerParams.partsMesh[p].forEach( function (m){
-						viewerParams.totalParticlesInMemory += m.geometry.userData['Coordinates_flat'].length/3
-					});
-				}
-				else viewerParams.totalParticlesInMemory += viewerParams.parts.count[p];
-			});
-		}
-		//calculated from a previous test using the octree mode
-		viewerParams.memoryUsage = 2.03964119e+02*viewerParams.totalParticlesInMemory + 1.64869925e+08; 
+		viewerParams.renderer.render( viewerParams.scene, viewerParams.camera );
 	}
+
+	viewerParams.capturer.capture( viewerParams.renderer.domElement );
+
+	viewerParams.renderer.setSize(screenWidth, screenHeight);
+	viewerParams.camera.aspect = aspect;
+	viewerParams.camera.updateProjectionMatrix();
+	
+	viewerParams.VideoCapture_frame += 1;
+
+	if (viewerParams.VideoCapture_duration > 1){
+		// update the capture progress bar
+		var frac_complete = viewerParams.VideoCapture_frame/(viewerParams.VideoCapture_FPS*viewerParams.VideoCapture_duration);
+		if (frac_complete < 0.5){
+			d3.select('#recordingCircle').style('background-image','linear-gradient(' + (90. + 360.*frac_complete) + 'deg, transparent 50%, white 50%), linear-gradient(90deg, white 50%, transparent 50%)');
+		} else {
+			d3.select('#recordingCircle').style('background-image','linear-gradient(' + (90. + 360.*(frac_complete - 0.5)) + 'deg, transparent 50%, ' + getComputedStyle(document.documentElement).getPropertyValue('--logo-color1') + ' 50%), linear-gradient(90deg, white 50%, transparent 50%)');
+		}
+	}
+
+	if (viewerParams.VideoCapture_frame >= viewerParams.VideoCapture_duration*viewerParams.VideoCapture_FPS || viewerParams.imageCaptureClicked){
+
+		if (viewerParams.VideoCapture_duration > 1){
+			// update the capture progress text
+			d3.select('#recordingText').text('Rendering...');
+
+			// animate the progress indicator (since I don't have a rendering percentage to work with)
+			d3.select('#recordingCircle').classed('shrinkGrow', true);
+		}
+
+		// stop and download
+		viewerParams.capturer.stop();
+		var ext = viewerParams.VideoCapture_formats[viewerParams.VideoCapture_format];
+		var fmt = ext.slice(1);
+		if (fmt != 'gif') ext = '.tar';
+		viewerParams.capturer.save(function(blob){ 
+			// this callback executes after the rendering is complete
+			download(blob, viewerParams.VideoCapture_filename + ext, fmt);
+
+			//remove the recording progress indicator
+			if (viewerParams.VideoCapture_duration > 1) d3.selectAll('#recordingProgress').remove();
+		});
+
+		// reset
+		viewerParams.captureCanvas = false;
+		viewerParams.VideoCapture_frame = 0;
+		viewerParams.imageCaptureClicked = false;
+
+
+	}
+}
+
+function update_memory_usage(){
+	// our own accounting of the buffers we've allocated: the baseline (non-octree)
+	//  meshes plus every octree node buffer currently loaded. unlike
+	//  performance.memory this drops as soon as a node is disposed, which is what
+	//  the memory limit is enforced against.
+	viewerParams.memoryUsage = viewerParams.baseMemoryUsage + viewerParams.octree.totalBytesInMemory;
 }
 
 function update_framerate(seconds,time){
 	// if we spent more than 1.5 seconds drawing the last frame, send the app to sleep
-	if ( viewerParams.sleepTimeout != null && (seconds-viewerParams.currentTime) > viewerParams.sleepTimeout){
+	if ( viewerParams.sleepTimeout != null && (seconds-viewerParams.currentTime) > viewerParams.sleepTimeout && (!viewerParams.selector.sendingData)){
 		console.log("Putting the app to sleep, taking too long!",(seconds-viewerParams.currentTime));
 		viewerParams.pauseAnimation=true;
 		showSleep();
@@ -566,13 +657,22 @@ function update_framerate(seconds,time){
 	//  and put in a weirdly high value (like >100 fps) that biases the mean high
 	viewerParams.FPS = viewerParams.fps_list.slice().sort(function(a, b){return a-b})[15]
 
-	if ((viewerParams.drawPass % Math.min(Math.round(viewerParams.FPS),60)) == 0){
-		// fill FPS container div with calculated FPS and memory usage
-		var forGUI = [];
-		forGUI.push({'setGUIParamByKey':[viewerParams.FPS, "FPS"]});
-		forGUI.push({'setGUIParamByKey':[viewerParams.memoryUsage, "memoryUsage"]});
-		forGUI.push({'updateFPSContainer':[]});
-		sendToGUI(forGUI);
+	if ((viewerParams.drawPass % Math.min(Math.round(viewerParams.FPS),60)) == 0 && viewerParams.haveUI){
+		// only send this if the parameters have changed (to avoid clogging the socket)
+		if (Math.abs(viewerParams.FPS - viewerParams.FPS0) > 0.1 || Math.abs(viewerParams.memoryUsage - viewerParams.memoryUsage0) > 1e7){
+			viewerParams.FPS0 = viewerParams.FPS;
+			viewerParams.memoryUsage0 = viewerParams.memoryUsage;
+			// fill FPS container div with calculated FPS and memory usage
+			var forGUI = [];
+			forGUI.push({'setGUIParamByKey':[viewerParams.FPS, "FPS"]});
+			forGUI.push({'setGUIParamByKey':[viewerParams.memoryUsage, "memoryUsage"]});
+			forGUI.push({'updateFPSContainer':[]});
+			if (viewerParams.haveAnyOctree){
+				forGUI.push({'setGUIParamByKey':[viewerParams.octree.memoryLimitReached, "octreeMemoryLimitReached"]});
+				forGUI.push({'updateOctreeMemoryStatusUI':[]});
+			}
+			sendToGUI(forGUI);
+		}
 	}
 
 

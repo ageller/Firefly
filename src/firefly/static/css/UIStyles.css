@@ -496,12 +496,6 @@ select{
 	position:absolute;
 }
 
-.selectCMapVar{
-	position:absolute;
-	left:185px;
-	width:100px;
-}
-
 .selectFilter{
 	position:absolute;
 	left:55px;

@@ -7,6 +7,8 @@
 
 
 
+			{# optional deployment-local additions (analytics, meta tags, ...); ignored when absent #}
+		{% include "_extra_head.html" ignore missing %}
 	</head>
 
 	<body>
@@ -22,36 +24,18 @@
 					Hint: if this is happening frequently it might be because Firefly is being overtaxed!
 				</div>
 			</div>
-			<div id="splash" onclick="showSplash(false)" style="z-index: 5;">
-				<div id="splashdiv1"><img id="splashimg" width="80%" src='static/docs/FIREFLY-02_trimmed.png'> </div>
-				<div id="splashdiv2">A WebGL tool to explore particle-based data</div>
-				<div id="splashdiv3">Aaron Geller / Alex Gurvich / Northwestern</div>
-				<div id="splashdiv4">
-					<p><b>Instructions:</b></p>
-						<ul>
-							<li>Right-click and drag with the mouse to rotate your view. </li>
-							<li>Use the mouse wheel to zoom in and out. </li>
-							<li>Click the Controls bar on the top left to show/hide a user interface.</li>
-							<li>Detailed instructions can be found on <a href="https://github.com/ageller/Firefly" target="_blank">the Firefly GitHub page.</a> </li>
-							<li><b>h</b>: toggles this help screen on and off. </li>
-						</ul>
-				</div>
-				<div id="splashdivLoader">
-					<button id='loadDataButton' class='button' style='display:none; font-size:24px; width:415px; height:50px'>
-						<span>Click here to select a data directory</span>
-					</button>
-					<button id='selectStartupButton' class='button' style='display:none; font-size:24px; width:600px; height:50px'>
-						<span>Click here to select a directory from your startup file</span>
-					</button>
-				</div>
-				<div id="splashdiv5">Loading...</div>
-			</div>
+			{% include "_splash.html" %}
 
 
 			<div id="UIcontainer" style="visibility:hidden; height:0; width:0"></div>
 			
 			<div id="annotate_container" class="dropdown-content"></div>
 
+			<div id="flyExplainerHider"><div id=flyExplainerHiderContent>&#9660;</div></div>
+			<div id="flyExplainer"> 
+				<b>You are currently in "fly" controls.</b>  To move the camera in [direction] use the following "key" : [left] "a", [right]  "d", [forward] "w", [backward] "s", [down] "f", [up] "r".  Hold "shift" with any of these to reduce the speed.  Increase or decrease the default speed by pressing "+" or "-".  You can also use the mouse left-click + drag to control the camera pitch and yaw.  To exit fly controls, hit the "space" bar.
+			</div>
+			
 			<div id="WebGLContainer" ></div>
 
 		</div>
@@ -89,6 +73,9 @@
 		<!-- web sockets -->
 	    <script src="static/lib/socket.io.min.js"></script>
 
+		<!-- for capturing video -->
+		<script src="static/lib/CCapture/CCapture.all.min.js"></script>
+
 		<!-- the main attraction -->
 
 		<!-- shaders -->
@@ -97,8 +84,10 @@
 		<script src="static/shaders/fragment_pass2.glsl.js"></script>
 
 		<link rel="stylesheet" type="text/css" href="static/css/mainStyles.css" />
+		<link rel="stylesheet" type="text/css" href="static/css/splashStyles.css" />
 		<link rel="stylesheet" type="text/css" href="static/css/UIStyles.css" />
 
+		<script src="static/js/misc/persistentParams.js"></script>
 		<script src="static/js/misc/socketParams.js"></script>
 		<script src="static/js/gui/GUIconstructors.js"></script>
 		<script src="static/js/gui/GUIParams.js"></script>
@@ -111,8 +100,10 @@
 		</script>
 		<script src="static/js/misc/utils.js"></script>
 		<script src="static/js/misc/windowEvents.js"></script>
+		<script src="static/js/misc/selector.js"></script>
 		<script src="static/js/gui/GUIsocket.js"></script>
 		<script src="static/js/gui/initGUI.js"></script>
+		<script src="static/js/gui/dataPicker.js"></script>
 		<script src="static/js/gui/sliders.js"></script>
 		<script src="static/js/gui/colormap.js"></script>
 		<script src="static/js/gui/particles.js"></script>
@@ -139,7 +130,8 @@
 			//called upon loading
 			connectGUISocket();
 			connectViewerSocket();
-			runLocal();
+			//function runLocal(useSockets=true, showGUI=true, allowVRControls=false, startStereo=false){
+			runLocal(true, true, false, false);
 		</script>
 
 	</body>

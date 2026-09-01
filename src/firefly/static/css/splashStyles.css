@@ -1,0 +1,539 @@
+/* ==========================================================================
+   Firefly splash / landing overlay
+   Loaded AFTER mainStyles.css so it wins over the old #splash* rules (those
+   have been removed from mainStyles.css; gui.html keeps its own small,
+   unrelated splash styling inline).
+
+   Everything is fluid: no breakpoints, no media queries. Each size is
+   clamp(floor, <viewport-relative>, ceiling), tuned against a 1280x720
+   reference. Floors keep tap targets >= 44px and mono type >= 11px.
+
+   Fonts are system stacks (no Google Fonts/webfont vendoring) and the three
+   link icons are inline SVG (no Font Awesome) -- Firefly is frequently run
+   offline or on a cluster with no outbound network, so this design avoids
+   any new external/binary asset dependency.
+   ========================================================================== */
+
+:root {
+  --ff-bg:            #000;
+  --ff-fg:            #f4f1ec;                 /* warm white */
+  --ff-fg-70:         rgba(244, 241, 236, 0.72);
+  --ff-fg-55:         rgba(244, 241, 236, 0.55);
+  --ff-fg-45:         rgba(244, 241, 236, 0.45);
+  --ff-fg-40:         rgba(244, 241, 236, 0.40);
+  --ff-fg-30:         rgba(244, 241, 236, 0.30);
+  --ff-glass:         rgba(244, 241, 236, 0.05);
+  --ff-hairline:      rgba(244, 241, 236, 0.12);
+  --ff-keycap-bg:     rgba(244, 241, 236, 0.10);
+  --ff-accent:        oklch(0.65 0.22 300);    /* violet, from the logo    */
+  --ff-accent-text:   oklch(0.72 0.19 300);
+  --ff-sans:          -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --ff-mono:          ui-monospace, 'SF Mono', 'Cascadia Code', 'Segoe UI Mono', 'Roboto Mono', Menlo, Consolas, monospace;
+
+  /* fluid scale */
+  --ff-pad-x:         clamp(24px, 5vw, 96px);
+  --ff-pad-top:       clamp(10px, 3vh, 60px);
+  --ff-pad-bottom:    clamp(12px, 4vh, 80px);
+  --ff-fs-mono-sm:    clamp(11px, 0.86vw, 13px);
+  --ff-fs-mono-md:    clamp(14px, 1.10vw, 20px);
+  --ff-fs-body:       clamp(12px, 1.10vw, 17px);
+  --ff-fs-note:       clamp(12px, 1.02vw, 16px);
+  --ff-fs-tagline:    clamp(19px, 2.70vw, 44px);
+  --ff-gap-lg:        clamp(8px, 2.4vh, 34px);
+  --ff-gap-md:        clamp(6px, 1.3vh, 20px);
+  --ff-gap-sm:        clamp(4px, 1vh, 16px);
+}
+
+/* ---------- root overlay ------------------------------------------------ */
+#splash.ff-splash {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  padding: var(--ff-pad-top) var(--ff-pad-x) var(--ff-pad-bottom);
+  background: var(--ff-bg);          /* solid black while loading */
+  color: var(--ff-fg);
+  font-family: var(--ff-sans);
+  font-weight: 400;
+  text-align: left;                  /* old rules centered everything */
+  cursor: pointer;                   /* click anywhere to dismiss */
+  overflow: hidden;
+}
+
+/* Once data is loaded, add class .ff-splash--overscene from JS (optional):
+   the WebGL scene shows through and text stays legible over it. */
+#splash.ff-splash--overscene {
+  background: linear-gradient(to right,
+              rgba(0,0,0,0.92) 0%, rgba(0,0,0,0.50) 58%, rgba(0,0,0,0.28) 100%);
+}
+
+/* showSplash() in windowEvents.js toggles the shared .hidden class (display:none)
+   to remove the splash after its opacity fade-out; needs to out-specificity the
+   #splash.ff-splash display:flex rule above, since that's an ID+class selector */
+#splash.ff-splash.hidden {
+  display: none;
+}
+
+/* ---------- top-right link rail ---------------------------------------- */
+.ff-splash__links {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: clamp(6px, 0.8vw, 12px);
+  margin-right: clamp(-12px, -0.9vw, -6px);   /* optical alignment of last icon */
+}
+
+.ff-version {
+  font-family: var(--ff-mono);
+  font-size: var(--ff-fs-mono-sm);
+  letter-spacing: 0.12em;
+  color: var(--ff-fg-30);
+  margin-right: 0.5em;
+}
+
+.ff-iconlink {
+  position: relative;
+  width: clamp(44px, 3.4vw, 54px);
+  height: clamp(44px, 3.4vw, 54px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  color: rgba(244, 241, 236, 0.62);
+  text-decoration: none;
+  transition: color 120ms ease, background-color 120ms ease;
+}
+.ff-iconlink:hover,
+.ff-iconlink:focus-visible {
+  color: var(--ff-fg);
+  background: rgba(244, 241, 236, 0.10);
+  outline: none;
+}
+.ff-iconlink svg {
+  width: clamp(15px, 1.5vw, 23px);
+  height: clamp(15px, 1.5vw, 23px);
+}
+
+/* hover tooltip, pure CSS, below the icon */
+.ff-iconlink::after {
+  content: attr(data-tip);
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 6px;
+  padding: 0.4em 0.7em;
+  border-radius: 4px;
+  background: oklch(0.92 0.02 300);
+  color: #0b0b0d;
+  font-family: var(--ff-mono);
+  font-size: var(--ff-fs-mono-sm);
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 120ms ease;
+}
+.ff-iconlink:hover::after,
+.ff-iconlink:focus-visible::after { opacity: 1; }
+
+/* ---------- main stack -------------------------------------------------- */
+.ff-splash__stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ff-gap-lg);
+  margin-top: clamp(10px, 2.4vh, 30px);
+  /* on a short viewport the logo/tagline/controls/buttons above the loading
+     bar don't shrink much (they're mostly sized by width, not height) -- so
+     rather than let them silently overflow past the bottom of the screen
+     (where the loading bar lives), this region scrolls on its own. min-height:0
+     is required for a flex child to actually be allowed to shrink for that
+     scrolling to kick in instead of just growing past its container. */
+  min-height: 0;
+  overflow-x: auto;
+  overflow-y: auto;
+
+  /* match the horizontal and vertical scrollbar thickness (browser defaults
+     otherwise often render the horizontal one noticeably taller than the
+     vertical one is wide), styled to sit quietly against the dark backdrop */
+  scrollbar-width: thin;                                 /* Firefox: same thin size both axes */
+  scrollbar-color: rgba(244, 241, 236, 0.25) transparent;
+}
+.ff-splash__stack::-webkit-scrollbar {
+  width: 8px;                                             /* Chrome/Safari: force both axes to match */
+  height: 8px;
+}
+.ff-splash__stack::-webkit-scrollbar-track {
+  background: transparent;
+}
+.ff-splash__stack::-webkit-scrollbar-thumb {
+  background: rgba(244, 241, 236, 0.25);
+  border-radius: 4px;
+}
+.ff-splash__stack::-webkit-scrollbar-thumb:hover {
+  background: rgba(244, 241, 236, 0.4);
+}
+
+.ff-splash__logo img {
+  width: max(400px, min(80vw, 100vh, 1100px));   /* also cap against viewport height, so it shrinks on short windows; floored above the tagline's max size so the logo's wordmark is always the largest text on the page */
+  height: auto;
+  display: block;
+}
+
+.ff-splash__intro {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(8px, 1.6vh, 18px);
+  max-width: 60vw;
+}
+
+.ff-tagline {
+  font-size: var(--ff-fs-tagline);
+  line-height: 1.22;
+  letter-spacing: -0.02em;
+  color: var(--ff-fg);
+  text-wrap: pretty;
+}
+
+.ff-authors {
+  font-family: var(--ff-mono);
+  font-size: var(--ff-fs-mono-md);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ff-fg-45);
+}
+
+/* ---------- controls ---------------------------------------------------- */
+.ff-controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--ff-gap-md);
+  align-items: flex-start;
+  margin-top: var(--ff-gap-lg);
+}
+
+/* the panel + notes are wrapped in a <details> so this whole block can be
+   collapsed to reclaim vertical space on a short window; open by default so
+   nothing about the normal, already-approved look changes. deliberately no
+   width set here -- as a flex item of .ff-controls (align-items: flex-start)
+   it shrink-wraps to its content, so the panel's glass background hugs the
+   text instead of stretching across the full splash width. */
+
+.ff-controls__details > summary.ff-controls__title {
+  display: flex;
+  align-items: center;
+  gap: 0.55em;
+  cursor: pointer;
+  list-style: none;                          /* hide the default marker (Firefox) */
+  font-family: var(--ff-mono);
+  font-size: var(--ff-fs-mono-sm);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ff-fg-40);
+}
+.ff-controls__details > summary.ff-controls__title::-webkit-details-marker {
+  display: none;                             /* hide the default marker (Chrome/Safari) */
+}
+.ff-controls__details > summary.ff-controls__title:focus-visible {
+  outline: 1px solid var(--ff-fg-40);
+  outline-offset: 3px;
+}
+.ff-controls__details > summary.ff-controls__title::before {
+  content: '';
+  width: 0.5em;
+  height: 0.5em;
+  flex-shrink: 0;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(-45deg);                 /* collapsed: chevron points right */
+  transition: transform 150ms ease;
+}
+.ff-controls__details[open] > summary.ff-controls__title::before {
+  transform: rotate(45deg);                  /* expanded: chevron points down */
+}
+
+.ff-controls__panel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
+  gap: clamp(14px, 2.4vw, 34px);
+  margin-top: var(--ff-gap-sm);
+  padding: clamp(13px, 1.7vh, 24px) clamp(15px, 2vw, 30px);
+  border-radius: 8px;
+  background: var(--ff-glass);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.ff-controls__group { display: flex; flex-direction: column; gap: var(--ff-gap-sm); }
+
+.ff-controls__head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.7em;
+  font-family: var(--ff-mono);
+  font-size: var(--ff-fs-mono-sm);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.ff-controls__name { color: var(--ff-fg-70); }
+.ff-controls__mode { color: var(--ff-accent-text); }
+.ff-controls__hint { color: var(--ff-fg-40); }
+
+.ff-controls__rule { width: 1px; background: var(--ff-hairline); }
+
+.ff-controls__keys {
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(12px, 1.8vw, 26px);
+}
+
+.ff-key { display: flex; align-items: center; gap: clamp(7px, 0.8vw, 12px); }
+.ff-key span { font-size: var(--ff-fs-body); color: var(--ff-fg-70); }
+
+.ff-key kbd,
+.ff-kbd-inline {
+  font-family: var(--ff-mono);
+  font-size: var(--ff-fs-mono-sm);
+  color: rgba(244, 241, 236, 0.9);
+  background: var(--ff-keycap-bg);
+  border: 0;
+  border-radius: 4px;
+  padding: 0.45em 0.7em;
+  white-space: nowrap;               /* keeps "w a s d" on one line */
+}
+.ff-kbd-inline { padding: 0.15em 0.4em; background: none; color: rgba(244,241,236,0.7); }
+
+.ff-notes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35em;
+  margin-top: var(--ff-gap-sm);
+  font-size: var(--ff-fs-note);
+  line-height: 1.5;
+  color: var(--ff-fg-40);
+}
+
+/* ---------- python / startup-file buttons ------------------------------- */
+/* lives in the same bottom-pinned slot as the loading bar (see .ff-loader
+   below) -- only one of the two is ever shown at a time */
+.ff-splash__loaderbtns { display: flex; flex-direction: column; gap: clamp(10px, 1vw, 16px); }
+
+/* `.ff-button` shares these buttons with the legacy `.button` class from
+   UIStyles.css (fixed size, square corners, the old pink accent), which is
+   loaded after splashStyles.css in some templates and would otherwise win
+   ties on the properties both classes set. #splash raises the specificity
+   enough to always win, and the properties `.ff-button` didn't previously
+   set (width/height/opacity) are reset explicitly here to fully neutralize it. */
+#splash .ff-button {
+  width: auto;
+  height: auto;
+  opacity: 1;
+  font-family: var(--ff-sans);
+  font-size: var(--ff-fs-mono-md);
+  font-weight: 500;
+  color: #0b0b0d;
+  background: var(--ff-accent);
+  border: 0;
+  border-radius: 5px;
+  padding: 0.9em 1.5em;
+  cursor: pointer;
+}
+#splash .ff-button:hover { background: oklch(0.72 0.19 300); opacity: 1; }
+
+/* outline variant, used for the picker's "Cancel" -- a way back to the
+   viewer, so it shouldn't compete visually with the primary action */
+#splash .ff-button--secondary {
+  background: transparent;
+  color: var(--ff-fg-70);
+  border: 1px solid var(--ff-hairline);
+}
+#splash .ff-button--secondary:hover { background: var(--ff-glass); color: var(--ff-fg); opacity: 1; }
+
+/* ---------- the data picker (static/js/gui/dataPicker.js) --------------
+   sits in the same slot the loading bar occupies until a choice is made */
+.ff-picker {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(8px, 1.2vh, 14px);
+  cursor: default;
+  text-align: left;
+}
+
+.ff-picker__row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: clamp(10px, 1vw, 16px);
+}
+
+.ff-picker__note,
+.ff-picker__msg {
+  font-family: var(--ff-sans);
+  font-size: var(--ff-fs-note);
+  color: var(--ff-fg-70);
+  max-width: 70ch;
+}
+.ff-picker__msg--error { color: oklch(0.72 0.17 25); }
+
+/* the path field grows to fill the row; the buttons beside it don't */
+.ff-input {
+  flex: 1 1 22ch;
+  min-width: 0;
+  font-family: var(--ff-mono);
+  font-size: var(--ff-fs-mono-md);
+  color: var(--ff-fg);
+  background: var(--ff-glass);
+  border: 1px solid var(--ff-hairline);
+  border-radius: 5px;
+  padding: 0.75em 1em;
+}
+.ff-input::placeholder { color: var(--ff-fg-40); }
+.ff-input:focus { outline: 1px solid var(--ff-accent); }
+
+/* ---------- the server-side directory browser --------------------------- */
+.ff-browser {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(5px, 0.8vh, 9px);
+  border: 1px solid var(--ff-hairline);
+  border-radius: 6px;
+  padding: clamp(8px, 1.2vh, 14px);
+  background: rgba(0, 0, 0, 0.35);
+}
+
+.ff-browser__bar,
+.ff-browser__shortcuts {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ff-browser__btn {
+  font-family: var(--ff-sans);
+  font-size: var(--ff-fs-mono-sm);
+  color: var(--ff-fg-70);
+  background: var(--ff-glass);
+  border: 1px solid var(--ff-hairline);
+  border-radius: 4px;
+  padding: 0.35em 0.7em;
+  cursor: pointer;
+}
+.ff-browser__btn:hover:enabled { color: var(--ff-fg); background: rgba(244, 241, 236, 0.12); }
+.ff-browser__btn:disabled { opacity: 0.35; cursor: default; }
+
+.ff-browser__path {
+  font-family: var(--ff-mono);
+  font-size: var(--ff-fs-mono-sm);
+  color: var(--ff-fg-55);
+  word-break: break-all;
+}
+
+/* the only scrolling region on the splash: long directories stay inside it
+   rather than pushing the loading bar off the bottom of the screen */
+.ff-browser__list {
+  max-height: min(34vh, 300px);
+  overflow-y: auto;
+  border-top: 1px solid var(--ff-hairline);
+  border-bottom: 1px solid var(--ff-hairline);
+}
+
+.ff-browser__item {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 0.4em 0.6em;
+  font-family: var(--ff-mono);
+  font-size: var(--ff-fs-mono-sm);
+  color: var(--ff-fg-70);
+  cursor: pointer;
+}
+.ff-browser__item:hover { background: var(--ff-glass); color: var(--ff-fg); }
+.ff-browser__item--data { color: var(--ff-fg); }
+.ff-browser__item--file { font-style: italic; }
+.ff-browser__empty {
+  padding: 0.4em 0.6em;
+  font-family: var(--ff-mono);
+  font-size: var(--ff-fs-mono-sm);
+  color: var(--ff-fg-40);
+}
+.ff-browser__name { word-break: break-all; }
+.ff-browser__tag {
+  flex-shrink: 0;
+  font-family: var(--ff-sans);
+  color: var(--ff-accent-text);
+  letter-spacing: 0.06em;
+}
+
+.ff-select {
+  font-family: var(--ff-sans);
+  font-size: var(--ff-fs-mono-md);
+  font-weight: 500;
+  color: var(--ff-fg);
+  background: var(--ff-glass);
+  border: 1px solid var(--ff-hairline);
+  border-radius: 5px;
+  padding: 0.75em 1em;
+  cursor: pointer;
+}
+.ff-select:focus { outline: 1px solid var(--ff-accent); }
+/* the popup option list ignores .ff-select's background (native chrome), so
+   without this it's the browser's default white -- which combined with the
+   white text color above is unreadable */
+.ff-select option {
+  background: #17171a;
+  color: var(--ff-fg);
+}
+
+/* ---------- bottom loading bar ----------------------------------------- */
+.ff-loader {
+  margin-top: auto;                  /* pins the bar (or the buttons above) to the bottom */
+  flex-shrink: 0;                    /* always keep its full height -- never hidden or squeezed */
+  padding-top: clamp(8px, 2vh, 48px);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(7px, 1.4vh, 14px);
+}
+
+/* wraps the row+track so JS can hide/show both together (display:none) while
+   a data directory hasn't been chosen yet, without needing to touch two
+   separate elements. display:contents makes it otherwise invisible to layout
+   -- its children act as direct flex items of .ff-loader, same as before. */
+.ff-loader__bar { display: contents; }
+
+.ff-loader__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 16px;
+  font-family: var(--ff-mono);
+  font-size: var(--ff-fs-mono-md);
+  letter-spacing: 0.11em;
+  color: var(--ff-fg-55);
+  text-transform: uppercase;
+}
+.ff-loader__pct { color: var(--ff-accent-text); }
+
+.ff-loader__track {
+  height: clamp(5px, 1.1vh, 11px);
+  width: 100%;
+  background: rgba(244, 241, 236, 0.09);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.ff-loader__fill {
+  height: 100%;
+  width: 0%;                         /* JS sets this */
+  background: var(--ff-accent);
+  box-shadow: 0 0 16px oklch(0.65 0.22 300 / 0.9);
+  transition: width 200ms linear;
+}
+
+/* ---------- keep the old sleep / fly-explainer panels consistent -------- */
+#sleep, #flyExplainer {
+  font-family: var(--ff-sans);
+  color: var(--ff-fg);
+}

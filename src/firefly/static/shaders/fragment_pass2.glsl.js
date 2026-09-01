@@ -9,6 +9,7 @@ uniform float CDmin;
 uniform float CDmax;
 uniform float lognorm;
 uniform float scaleCD;
+uniform bool colormapReversed;
 
 void main() {
 	vec4 color = texture2D(tex, vUv);
@@ -26,7 +27,9 @@ void main() {
 
 
 	// sample the colormap using the renormalized CD values
-	gl_FragColor.rgb = texture2D(cmap, vec2(density_clamp, colormap)).rgb;
+	vec2 pos = vec2(density_clamp, colormap);
+	if (colormapReversed) pos = vec2(1. - density_clamp, colormap);
+	gl_FragColor.rgb = texture2D(cmap, pos).rgb;
 
 	
 	if (density_clamp <= 0.){

@@ -10,6 +10,13 @@ function clearPartsMesh(pClear = viewerParams.partsKeys) {
 
 		viewerParams.partsMesh[p] = [];
 
+		// every mesh for this group is gone, so its memory accounting resets
+		if (viewerParams.octree.bytesInMemory.hasOwnProperty(p)){
+			viewerParams.octree.totalBytesInMemory = Math.max(0,
+				viewerParams.octree.totalBytesInMemory - viewerParams.octree.bytesInMemory[p]);
+			viewerParams.octree.bytesInMemory[p] = 0;
+		}
+
 	}
 }
 
@@ -65,17 +72,46 @@ function createParticleGeometry(p, parts, start, end){
 	return geo;
 }
 
+// bytes held by a set of particle arrays (Coordinates_flat, the scalar fields, ...).
+//  kaitai hands these back as plain Arrays of Numbers, so count 8 bytes an element
+//  unless we actually got a typed array.
+function computeParticleDataBytes(parts){
+	var bytes = 0;
+	Object.keys(parts).forEach(function(key){
+		var arr = parts[key];
+		if (!arr) return;
+		if (arr.byteLength) bytes += arr.byteLength;
+		else if (Array.isArray(arr)) bytes += arr.length*8;
+	});
+	return bytes;
+}
+
+// bytes held by a geometry: its attribute buffers plus the raw particle data
+//  hanging off of it in userData. the unit of our memory accounting.
+function computeGeometryBytes(geo){
+	var bytes = 0;
+	if (!geo) return bytes;
+
+	Object.keys(geo.attributes).forEach(function(key){
+		var arr = geo.attributes[key].array;
+		if (arr && arr.byteLength) bytes += arr.byteLength;
+	});
+
+	if (geo.userData) bytes += computeParticleDataBytes(geo.userData);
+
+	return bytes;
+}
+
 function createParticleMaterial(p, color=null,minPointScale=null,maxPointScale=null){
 	//change the blending mode when showing the colormap (so we don't get summing to white colors)
 	var blend = viewerParams.blendingOpts[viewerParams.blendingMode[p]];
-	var dWrite = viewerParams.depthWrite[p];
 	var dTest = viewerParams.depthTest[p];
 	var transp = true;
 	if (!color) color = [
-		viewerParams.Pcolors[p][0],
-		viewerParams.Pcolors[p][1],
-		viewerParams.Pcolors[p][2],
-		viewerParams.Pcolors[p][3]];
+		viewerParams.partsColors[p][0],
+		viewerParams.partsColors[p][1],
+		viewerParams.partsColors[p][2],
+		viewerParams.partsColors[p][3]];
 
 	if (minPointScale == null) 	minPointScale = viewerParams.minPointScale;
 	if (maxPointScale == null) 	maxPointScale = viewerParams.maxPointScale;
@@ -86,13 +122,14 @@ function createParticleMaterial(p, color=null,minPointScale=null,maxPointScale=n
 		uniforms: { //add uniform variable here
 			color: {value: new THREE.Vector4(color[0],color[1],color[2],color[3])},
 			vID: {value: 0},
-			uVertexScale: {value: viewerParams.PsizeMult[p]},
+			uVertexScale: {value: viewerParams.partsSizeMultipliers[p]},
 			cameraY: {value: [0.,1.,0.]},
 			cameraX: {value: [1.,0.,0.]},
 			velType: {value: 0.},
 			colormapTexture: {value: viewerParams.colormapTexture},
 			colormap: {value: viewerParams.colormap[p]},
 			showColormap: {value: viewerParams.showColormap[p]},
+			colormapReversed: {value: viewerParams.colormapReversed[p]},
 			colormapMin: {value: viewerParams.colormapVals[p][viewerParams.ckeys[p][viewerParams.colormapVariable[p]]][0]},
 			colormapMax: {value: viewerParams.colormapVals[p][viewerParams.ckeys[p][viewerParams.colormapVariable[p]]][1]},
 			columnDensity: {value: viewerParams.columnDensity},
@@ -103,12 +140,15 @@ function createParticleMaterial(p, color=null,minPointScale=null,maxPointScale=n
 			velVectorWidth: {value: viewerParams.velVectorWidth[p]},
 			velGradient: {value: viewerParams.velGradient[p]},
 			useDepth: {value: +viewerParams.depthTest[p]},
+			brightCenterFraction: {value: viewerParams.brightCenterFraction[p]},
+			selectorCenter: {value: [viewerParams.selector.center.x, viewerParams.selector.center.y, viewerParams.selector.center.z]},
+			selectorRadius: {value: viewerParams.selector.radius}
 
 		},
 
 		vertexShader: myVertexShader,
 		fragmentShader: myFragmentShader,
-		depthWrite:dWrite,
+		depthWrite:dTest,
 		depthTest: dTest,
 		transparent:transp,
 		alphaTest: false,
@@ -164,6 +204,15 @@ function createPartsMesh(pdraw = viewerParams.partsKeys, node=null){
 				octree);
 		}
 	}
+
+	// baseline for the memory readout. partsMesh[p][0] is the "Standard" mesh
+	//  created above and lives as long as the dataset does; octree node meshes are
+	//  appended after it and accounted in viewerParams.octree.bytesInMemory.
+	viewerParams.baseMemoryUsage = 0;
+	viewerParams.partsKeys.forEach(function(p){
+		if (!viewerParams.partsMesh[p] || !viewerParams.partsMesh[p][0]) return;
+		viewerParams.baseMemoryUsage += computeGeometryBytes(viewerParams.partsMesh[p][0].geometry);
+	});
 
 	//this will not be printed if you change the N value in the slider, and therefore only redraw one particle type
 	//because ndraw will not be large enough, but I don't think this will cause a problem

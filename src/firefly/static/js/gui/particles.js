@@ -39,10 +39,6 @@ function defineGUIParticleState(){
 							'id':'maxSlider',
 							'builder':createParticleMaxSliderSegment
 						},
-						'octreeCameraNorm':{
-							'id':'maxSlider',
-							'builder':createParticleOctreeCameraNormSliderSegment
-						},
 						'radiusVariableSelector':{
 							'id':'radiusVariableSelector',
 							'builder':createParticleRadiusVariableSelectorSegment
@@ -87,7 +83,6 @@ function defineGUIParticleState(){
 					'id':'colormapCheckBox',
 					'builder':createParticleColormapCheckBoxSegment
 				},
-				/*
 				'colormapSelector':{
 					'id':'colormapSelector',
 					'builder':createParticleColormapSelectorSegment
@@ -96,7 +91,6 @@ function defineGUIParticleState(){
 					'id':'colormapVariableSelector',
 					'builder':createParticleColormapVariableSelectorSegment
 				},
-				*/
 				'colormapSliders':{
 					'id':'colormapSliders',
 					'builder':createParticleColormapSlidersSegment
@@ -199,7 +193,10 @@ function createParticleOnOffSegment(container,parent,name,p){
 			GUIParams.showParts[GUIParams.CDkey] = any_shown;
 
 			if (!this.checked && GUIParams.showColormap[p]) removeColorbar(p);
-			else if (this.checked && GUIParams.showColormap[p]) checkColormapBox(p,this.checked);
+			// resetBlending=false: just re-show the colormap, don't reset blending/depth
+			// for this (or any other) particle group -- retain whatever custom state
+			// was set before this group was toggled off (see GitHub issue #123)
+			else if (this.checked && GUIParams.showColormap[p]) checkColormapBox(p,this.checked,false);
 
 			// need to determine if we should show/hide the colorbar container
 			//  for column density b.c. if we turn off all the particles it should disappear
@@ -310,7 +307,7 @@ function createParticleDropdown(container,this_pane,name,p){
 		.append('div')
 			.attr('class','pLabelDiv')
 			.style('font-size','30px')
-			.style('line-height','14px')
+			.style('line-height','0px')
 			.style('color',getComputedStyle(document.body).getPropertyValue('--UI-character-background-color'))
 			.html(GLOBAL_arrow);
 			//.text('Back')
@@ -453,7 +450,7 @@ function createColorPicker(p){
 	/* for color pickers*/
 	//can I write this in d3? I don't think so.  It needs a jquery object
 	$("#"+p+"ColorPicker").spectrum({
-		color: "rgba("+(GUIParams.Pcolors[p][0]*255)+","+(GUIParams.Pcolors[p][1]*255)+","+(GUIParams.Pcolors[p][2]*255)+","+GUIParams.Pcolors[p][3]+")",
+		color: "rgba("+(GUIParams.partsColors[p][0]*255)+","+(GUIParams.partsColors[p][1]*255)+","+(GUIParams.partsColors[p][2]*255)+","+GUIParams.partsColors[p][3]+")",
 		flat: false,
 		showInput: true,
 		showInitial: false,
@@ -472,7 +469,7 @@ function createColorPicker(p){
 	// special URL to disable the colorpicker
 	if (excluded(p+'/colorPicker/onclick')){
 		$("#"+p+"ColorPicker").spectrum({
-			color: "rgba("+(GUIParams.Pcolors[p][0]*255)+","+(GUIParams.Pcolors[p][1]*255)+","+(GUIParams.Pcolors[p][2]*255)+","+GUIParams.Pcolors[p][3]+")",
+			color: "rgba("+(GUIParams.partsColors[p][0]*255)+","+(GUIParams.partsColors[p][1]*255)+","+(GUIParams.partsColors[p][2]*255)+","+GUIParams.partsColors[p][3]+")",
 			disabled: true,
 		});		
 	}

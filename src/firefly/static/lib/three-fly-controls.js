@@ -292,36 +292,39 @@
 
         };
 
+        //ABG: bind once and keep the references. removeEventListener only matches
+        //  the exact function object that was added, and bind() returns a new
+        //  closure every call -- so the previous version of dispose() removed
+        //  nothing, and every switch in and out of fly controls left a full set
+        //  of listeners attached to the canvas.
+        var boundMousemove = bind( this, this.mousemove );
+        var boundMousedown = bind( this, this.mousedown );
+        var boundMouseup   = bind( this, this.mouseup );
+        var boundMouseout  = bind( this, this.mouseout );
+        var boundKeydown   = bind( this, this.keydown );
+        var boundKeyup     = bind( this, this.keyup );
+
         this.dispose = function() {
 
-            this.domElement.removeEventListener( 'contextmenu', function ( event ) { event.preventDefault(); }, false );
+            this.domElement.removeEventListener( 'mousemove', boundMousemove, false );
+            this.domElement.removeEventListener( 'mousedown', boundMousedown, false );
+            this.domElement.removeEventListener( 'mouseup',   boundMouseup, false );
+            this.domElement.removeEventListener( 'mouseout',  boundMouseout, false );
 
-            this.domElement.removeEventListener( 'mousemove', bind( this, this.mousemove ), false );
-            this.domElement.removeEventListener( 'mousedown', bind( this, this.mousedown ), false );
-            this.domElement.removeEventListener( 'mouseup',   bind( this, this.mouseup ), false );
-            this.domElement.removeEventListener( 'mouseout',   bind( this, this.mouseout ), false );
-
-            this.domElement.removeEventListener( 'keydown', bind( this, this.keydown ), false );
-            this.domElement.removeEventListener( 'keyup',   bind( this, this.keyup ), false );
-
-            document.removeEventListener( 'mousemove', bind( this, this.mousemove ), false );
-            document.removeEventListener( 'mouseup', bind( this, this.mouseup ), false );
-
-            window.removeEventListener( 'keydown', bind( this, this.keydown ), false );
-            window.removeEventListener( 'keyup', bind( this, this.keyup ), false );
-
+            this.domElement.removeEventListener( 'keydown', boundKeydown, false );
+            this.domElement.removeEventListener( 'keyup',   boundKeyup, false );
 
         }
 
         //this.domElement.addEventListener( 'contextmenu', function ( event ) { event.preventDefault(); }, false );
 
-        this.domElement.addEventListener( 'mousemove', bind( this, this.mousemove ), false );
-        this.domElement.addEventListener( 'mousedown', bind( this, this.mousedown ), false );
-        this.domElement.addEventListener( 'mouseup',   bind( this, this.mouseup ), false );
-        this.domElement.addEventListener( 'mouseout',   bind( this, this.mouseout ), false );
+        this.domElement.addEventListener( 'mousemove', boundMousemove, false );
+        this.domElement.addEventListener( 'mousedown', boundMousedown, false );
+        this.domElement.addEventListener( 'mouseup',   boundMouseup, false );
+        this.domElement.addEventListener( 'mouseout',  boundMouseout, false );
 
-        this.domElement.addEventListener( 'keydown', bind( this, this.keydown ), false );
-        this.domElement.addEventListener( 'keyup',   bind( this, this.keyup ), false );
+        this.domElement.addEventListener( 'keydown', boundKeydown, false );
+        this.domElement.addEventListener( 'keyup',   boundKeyup, false );
 
         this.updateMovementVector();
         this.updateRotationVector();

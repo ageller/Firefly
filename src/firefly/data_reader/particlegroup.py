@@ -229,8 +229,8 @@ class ParticleGroup(object):
 
         ## start with the default
         self.settings_default = {
-            'color': np.append(np.random.random(3),[1]),
-            'sizeMult':.1,
+            'partsColors': np.append(np.random.random(3),[1]),
+            'partsSizeMultipliers':.1,
             'showParts':True,
             'filterVals':dict(),
             'filterLims':dict(),
@@ -249,6 +249,7 @@ class ParticleGroup(object):
             'animateVelDt':None, ## use default set in javascript
             'animateVelTmax':None, ## use default set in javascript
             'radiusVariable':0, 
+            'brightCenterFraction':None, ## use default set in javascript
             'GUIExcludeList':None
         }
         
@@ -283,6 +284,20 @@ class ParticleGroup(object):
                 self.settings_default[settings_kwarg] = settings_kwargs[settings_kwarg]
             else:
                 raise KeyError("Invalid settings kwarg %s"%settings_kwarg)
+
+        ## blendingMode/depthTest are deliberately *not* accepted as settings_kwargs
+        ##  above (they're added to settings_default only now, after that loop) --
+        ##  they should always follow from showColormap rather than be set
+        ##  independently, so that a particle group with showColormap=True doesn't
+        ##  start out with a mismatched blending mode/depth test that renders
+        ##  incorrectly (see GitHub issue #123). Anyone who needs a non-standard
+        ##  combination can still set these directly through the Settings object.
+        if self.settings_default['showColormap']:
+            self.settings_default['blendingMode'] = 'normal'
+            self.settings_default['depthTest'] = True
+        else:
+            self.settings_default['blendingMode'] = None ## use default set in javascript
+            self.settings_default['depthTest'] = None ## use default set in javascript
 
         self.attached_settings = attached_settings
 
@@ -367,6 +382,41 @@ class ParticleGroup(object):
 
             self.attached_settings['colormapLims'][self.UIname][field_name] = colormapLims
             self.attached_settings['colormapVals'][self.UIname][field_name] = colormapVals
+    
+    def untrackArray(self,field_name):
+        """ remove a field array that was previously added/tracked
+
+        :param field_name: name of the field to remove 
+        :type field_name: str
+        """
+
+        ## don't attempt to remove a field that isn't tracked
+        if field_name not in self.field_names: return
+
+        ## remove from the default settings
+        dictionaries = [
+            self.settings_default['filterLims'],
+            self.settings_default['filterVals'],
+            self.settings_default['colormapLims'],
+            self.settings_default['colormapVals']
+        ]
+
+        ## remove from the attached settings if they're already there
+        if self.attached_settings is not None:
+            dictionaries += [
+                self.attached_settings['filterLims'][self.UIname],
+                self.attached_settings['filterVals'][self.UIname],
+                self.attached_settings['colormapLims'][self.UIname],
+                self.attached_settings['colormapVals'][self.UIname]
+            ]
+
+        ## do the removing from the dictionaries
+        for dictionary in dictionaries: 
+            if field_name in dictionary: dictionary.pop(field_name)
+
+        ## remove the actual field data
+        self.field_arrays = self.field_arrays[self.field_names!=field_name]
+        self.field_names = self.field_names[self.field_names!=field_name]
 
     def getDecimationIndexArray(self):
         """
@@ -487,6 +537,11 @@ class ParticleGroup(object):
                 'vy':self.velocities[:,1][self.dec_inds],
                 'vz':self.velocities[:,2][self.dec_inds]
             })
+        
+            ## remove Velocity as a tracked field, we don't want to 
+            ##  accumulate speed (norm of velocity). 
+            ##  It'll get added back in at the end
+            self.untrackArray('Velocity')
 
         if self.rgba_colors is not None:
             dictionary.update({
@@ -569,7 +624,11 @@ class ParticleGroup(object):
             print("Writing:",self,"files to %s"%target_directory)
 
         ## do we want to delete any existing files here?
-        if clean_datadir:
+        ##  only when we're actually writing: with write_to_disk=False the data is
+        ##  only converted to a string (SimpleReader's flask path does this), and
+        ##  target_directory then defaults to firefly/static/data/<file_prefix>,
+        ##  whose contents have nothing to do with what we were asked to read
+        if clean_datadir and write_to_disk:
             #print("Removing old ffly files from %s"%target_directory)
             for fname in os.listdir(target_directory):
                 if (".ffly" in fname or
@@ -740,6 +799,9 @@ class OctreeParticleGroup(Octree,ParticleGroup):
 
         if octree_format not in octree_formats: raise ValueError(
             f"Invalid extension {octree_format} must be one of {octree_formats}")
+
+        ## ignore this because we're an octree, we need a special file format
+        if 'file_extension' in kwargs: kwargs.pop('file_extension')
 
         ## call super to write "normal" particle data
         file_list,filenames_and_nparts = super().writeToDisk(
