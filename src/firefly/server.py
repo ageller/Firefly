@@ -60,8 +60,9 @@ default_room = 'default_Firefly_AMG_ABG'
 ## Public mode. A handful of endpoints below accept data or settings from whoever
 ##  can reach them and push it straight into a live viewer session, which is fine
 ##  for a local instance driven by the python API but not for a site on the open
-##  internet. Turning public mode on refuses those endpoints and keeps a single
-##  fixed room so visitors are never prompted for a session name.
+##  internet. Turning public mode on refuses those endpoints, and puts each
+##  connection in a room of its own (see on_join) so visitors are never
+##  prompted for a session name and never receive each other's messages.
 ##
 ##  Set FIREFLY_PUBLIC=1 in the environment (this is the one that works for a
 ##  gunicorn/wsgi deployment, where none of the start* helpers below ever run),
@@ -128,8 +129,12 @@ events = {}
 @socketio.on('join', namespace=namespace)
 def on_join(message):
     global rooms
-    # join the room
-    room = message['room']
+    # join the room. in public mode every visitor would otherwise share the one
+    #  fixed room, so anything one browser sent would be relayed to (and run in)
+    #  everyone else's; give each connection a room of its own instead. the
+    #  combined and VR pages run the GUI and viewer over a single connection, so
+    #  they still reach each other.
+    room = request.sid if public_mode else message['room']
     rooms[request.sid] = room
     print('======= in room', room)
     join_room(room)
