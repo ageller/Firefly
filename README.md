@@ -29,8 +29,21 @@ Run the merge on your own machine. The server only ever pulls.
 **One-time setup**, in your local clone of the deployment repository:
 
 ```bash
-git remote add upstream https://github.com/ageller/Firefly.git
+git remote add -t main --no-tags upstream https://github.com/ageller/Firefly.git
+git remote set-url --push upstream DISABLED   # never push to Firefly by accident
 git fetch upstream
+```
+
+`-t main --no-tags` makes `git fetch upstream` download only Firefly's `main` branch.
+Without it, every fetch also brings in all of Firefly's other branches (feature work,
+Dependabot bumps) as `upstream/*` references. Those are harmless, since fetching never
+changes your own branches, but they are noise. If you added the remote without these
+options, narrow it afterwards and drop the extra references:
+
+```bash
+git config remote.upstream.fetch '+refs/heads/main:refs/remotes/upstream/main'
+git config remote.upstream.tagOpt --no-tags
+git fetch upstream --prune
 ```
 
 If that repository was ever cloned on Windows it may have CRLF line endings committed,
@@ -58,6 +71,7 @@ Test locally, then merge the branch into your default branch and push it.
 git checkout main
 git merge --ff-only sync-upstream
 git push origin main
+git branch -d sync-upstream       # so the next sync can create it again
 ```
 
 **On the server**, in the deployment repository:
