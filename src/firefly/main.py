@@ -83,7 +83,7 @@ def define_parser():
     parser.add_argument('--multiple_rooms', action='store_true',
         help = 'flag to enable multiple rooms.  If set, the user will be prompted in the browser to enter a string to define the room for the given session, which would allow multiple users to interact with separate Firefly instances on a server. (If this flag is not supplied, the default behavior is to set multiple_rooms=False) ')     
     parser.add_argument('--public', action='store_true',
-        help = 'Flag to run the server in public mode, for an instance exposed on the open internet. Disables the endpoints that accept data or settings for a live viewer session, and keeps a single fixed room so that visitors are never prompted for a session name. Equivalent to setting FIREFLY_PUBLIC=1 in the environment. (If this flag is not supplied, the default behavior is to set public=False)')
+        help = 'Flag to run the server in public mode, for an instance exposed on the open internet. Disables the endpoints that accept data or settings for a live viewer session, and gives each browser a private room so that visitors are never prompted for a session name and never see each other's sessions. Equivalent to setting FIREFLY_PUBLIC=1 in the environment. (If this flag is not supplied, the default behavior is to set public=False)')
 
     return parser
 

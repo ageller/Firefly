@@ -96,8 +96,10 @@ never touches. Some ways to arrange that:
 - If the instance is exposed on the open internet, run it in **public mode**: set
   `FIREFLY_PUBLIC=1` in the server's environment (this is the one that works under
   gunicorn/wsgi) or pass `--public` to the `firefly` command. That refuses the
-  endpoints which accept data or settings for a live viewer session, and keeps a
-  single fixed room so visitors are never prompted for a session name.
+  endpoints which accept data or settings for a live viewer session, and gives
+  each browser a private room (held in a signed session cookie) so visitors are
+  never prompted for a session name and never see each other's sessions. Also set
+  `FIREFLY_SECRET_KEY` to a long random string so those rooms survive a restart.
 - Keep server-specific launch scripts in their own files.
 - Leave packaged files you don't need in place rather than deleting them; deletions
   become modify/delete conflicts every time upstream edits them.

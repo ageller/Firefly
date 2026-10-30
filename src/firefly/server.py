@@ -16,6 +16,7 @@ import signal
 import socket
 import shutil
 import requests
+import secrets
 import http.server
 import socketserver
 from importlib.metadata import version as _pkg_version, PackageNotFoundError
@@ -39,15 +40,16 @@ from firefly.data_reader.reader import ALL_FIELDS
 #in principle, we could read in the data here...
 
 
-app = Flask(__name__)
-
 # Set this variable to "threading", "eventlet" ,"gevent" or "gevent_uwsgi" to test the
 # different async modes, or leave it set to None for the application to choose
 # the best option based on installed packages.
 async_mode = "eventlet" #"eventlet" is WAY better than "threading"
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'secret!'
+## signs the session cookie that holds each browser's private room in public mode
+##  (see assign_public_room); set FIREFLY_SECRET_KEY to keep rooms stable across
+##  restarts (and identical across workers, if there is more than one)
+app.config['SECRET_KEY'] = os.environ.get('FIREFLY_SECRET_KEY') or secrets.token_hex(32)
 socketio = SocketIO(app, async_mode=async_mode)#, max_http_buffer_size=10**9)
 
 try: FIREFLY_VERSION = _pkg_version('firefly')
@@ -61,8 +63,8 @@ default_room = 'default_Firefly_AMG_ABG'
 ##  can reach them and push it straight into a live viewer session, which is fine
 ##  for a local instance driven by the python API but not for a site on the open
 ##  internet. Turning public mode on refuses those endpoints, and puts each
-##  connection in a room of its own (see on_join) so visitors are never
-##  prompted for a session name and never receive each other's messages.
+##  browser in a private room of its own (see assign_public_room) so visitors are
+##  never prompted for a session name and never receive each other's messages.
 ##
 ##  Set FIREFLY_PUBLIC=1 in the environment (this is the one that works for a
 ##  gunicorn/wsgi deployment, where none of the start* helpers below ever run),
@@ -71,6 +73,21 @@ def _env_flag(name):
     return os.environ.get(name,'').strip().lower() in ('1','true','yes','on')
 
 public_mode = _env_flag('FIREFLY_PUBLIC')
+
+def _configure_public_session_cookie():
+    """Locks down the session cookie that carries a browser's private room."""
+    app.config.update(SESSION_COOKIE_SECURE=True, SESSION_COOKIE_HTTPONLY=True,
+        SESSION_COOKIE_SAMESITE='Lax')
+
+if public_mode: _configure_public_session_cookie()
+
+@app.before_request
+def assign_public_room():
+    """In public mode, give each browser its own random room, kept in its signed
+        session cookie, so that the windows of one browser (e.g., /viewer and /gui)
+        find each other but nothing one visitor sends ever reaches another's viewer."""
+    if public_mode and 'room' not in session:
+        session['room'] = secrets.token_urlsafe(16)
 
 def private_endpoint(fn):
     """Refuses the wrapped endpoint while the server is in public mode."""
@@ -131,10 +148,10 @@ def on_join(message):
     global rooms
     # join the room. in public mode every visitor would otherwise share the one
     #  fixed room, so anything one browser sent would be relayed to (and run in)
-    #  everyone else's; give each connection a room of its own instead. the
-    #  combined and VR pages run the GUI and viewer over a single connection, so
-    #  they still reach each other.
-    room = request.sid if public_mode else message['room']
+    #  everyone else's; use the browser's own room (see assign_public_room) and
+    #  never one it names. if the cookie never came back (e.g., served over plain
+    #  http), fall back to a room for this connection alone.
+    room = (session.get('room') or request.sid) if public_mode else message['room']
     rooms[request.sid] = room
     print('======= in room', room)
     join_room(room)
@@ -999,8 +1016,9 @@ def startFlaskServer(
         separate Firefly instances on a server), defaults to False.
     :type multiple_rooms: bool, optional
     :param public: run in public mode, which disables the endpoints that accept
-        data or settings for a live session and keeps a single fixed room so that
-        visitors are never prompted for a session name. Equivalent to setting
+        data or settings for a live session and gives each browser a private room
+        so that visitors are never prompted for a session name and never see each
+        other's sessions. Equivalent to setting
         FIREFLY_PUBLIC=1 in the environment, defaults to False.
     :type public: bool, optional
     """
@@ -1009,11 +1027,13 @@ def startFlaskServer(
 
     _register_server_pid(port)
 
-    if public: public_mode = True
+    if public:
+        public_mode = True
+        _configure_public_session_cookie()
 
     if (public_mode and multiple_rooms):
-        print('======= ignoring multiple_rooms: public mode keeps one fixed room so '
-              'visitors are never prompted for a session name')
+        print('======= ignoring multiple_rooms: public mode assigns each browser a '
+              'private room so visitors are never prompted for a session name')
         multiple_rooms = False
 
     if (multiple_rooms): default_room = None
